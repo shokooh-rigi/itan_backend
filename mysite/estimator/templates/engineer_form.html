@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+	<h1>Engineer Information</h1>
+	<form method = 'POST' action= '' enctype = "multipart/form-data" id="engineer-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Company <span class="required">*</span></label>
+                    {{ form.company }}
+                    <div class="form-icon"><a href="{% url 'companyEngineerCreate' %}" id="add_company" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_company" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_name" class="control-label">Name <span class="required">*</span></label>
+                    {{ form.name }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_title" class="control-label">Title</label>
+                    {{ form.title }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_gender" class="control-label">Gender</label>
+                    {{ form.gender }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_tel" class="control-label">Tel.</label>
+                    {{ form.tel }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_fax" class="control-label">Fax</label>
+                    {{ form.fax }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_mail" class="control-label">Mail</label>
+                    {{ form.mail }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_web" class="control-label">Website</label>
+                    {{ form.web }}
+                </div>
+            </div>
+            {{ form.created_by }}
+            <div class="row">
+                <div class="col-lg-12">
+		            <input type="submit" class="btn btn-success" value="Add" />
+                </div>
+            </div>
+        </div>
+	</form>
+            <script>
+                $("#edit_company").click(function(){
+                    company_name = $("#id_company option:selected").text();
+                    var data = {"company_name":company_name};
+                    $.ajax({
+                        type : 'GET',
+                        url :  '/company/ajax/get_company_id',
+                        data : data,
+                        success : function(data){
+                            var url = "/company/engineer/" + data['company_id'] + "/edit/";
+                            showEditPopup(url);
+                        },
+                        error: function(data) {
+                          alert("Something Went Wrong");
+                        }
+                    });
+                });
+            </script>
+
+{% endblock %}

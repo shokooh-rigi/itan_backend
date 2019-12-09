@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load estimator_tags %}
+
+{% block content %}
+    {{ error_message }}
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <br />
+    {%if request.user.is_authenticated %}
+        <h2>Delete Proposal {% estimate_number_generator this_proposal.quote.estimate.id %}</h2>
+        <br />
+        <form method="POST" action="">
+            {% csrf_token %}
+            Are you sure you want to delete this proposal?<br /><br />
+            <input type="submit" class="btn btn-primary" value="Yes" name="confirm" />
+            <a href="{% url 'proposalHome' %}"><button class="btn btn-danger">Cancel</button></a>
+        </form>
+    {% endif %}
+
+{% endblock %}

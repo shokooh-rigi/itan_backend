@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Edit Invoice</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="invoiceEdit-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.order.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Date Started</label>
+                    {{ form.date_started }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Date Completed</label>
+                    {{ form.date_completed }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Terms</label>
+                    {{ form.terms }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Description</label>
+                    {{ form.description }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Percent of Performance Completed</label>
+                    {{ form.percent_of_performance_completed }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Total Payment Received To Date</label>
+                    {{ form.total_payment_received_to_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Past Due Amount</label>
+                    {{ form.past_due_amount }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_attention" class="control-label">Attention to: (if required)</label>
+                    {{ form.attention }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_order').on('change', function() {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#engineer").text($(this).find(':selected').data('engineer'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+
+{% endblock %}

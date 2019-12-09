@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Send a COI</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="coiAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_contractor" class="control-label">Select Contractor</label>
+                    <select name="contractor" class="form-control" required="" id="id_contractor">
+                        <option value="{{ contractor.id }}" data-companyname="" data-companyaddress="" data-contractorname="" data-contractoremail="">---------</option>
+                        {% for contractor in contractors %}
+                            <option value="{{ contractor.id }}" data-companyname="{{ contractor.company.name }}" data-companyaddress="{{ contractor.company.city }}, {{ contractor.company.state }}, {{ contractor.company.zip }}" data-contractorname="{{ contractor.name }}" data-contractoremail="{{ contractor.mail }}">{{ contractor }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-icon"><a href="{% url 'estimatorAdd' %}" id="add_customer"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="companyname" class="control-label">Contractor Name</label>
+                    <span class="form-control" id="companyname" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="companyaddress" class="control-label">Contractor Address</label>
+                    <span class="form-control" id="companyaddress" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_contract_person_name" class="control-label">Contract Person Name</label>
+                    {{ form.contract_person_name }}
+                </div>
+            </div>
+
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_email" class="control-label">Email</label>
+                    {{ form.email }}
+                </div>
+            </div>
+
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_subject" class="control-label">Subject</label>
+                    {{ form.subject }}
+                </div>
+            </div>
+
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_cc" class="control-label">CC</label>
+                    {{ form.cc }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Create" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_contractor').on('change', function() {
+            $("#companyname").text($(this).find(':selected').data('companyname'));
+            $("#companyaddress").text($(this).find(':selected').data('companyaddress'));
+            $("#id_contract_person_name").val($(this).find(':selected').data('contractorname'));
+            $("#id_email").val($(this).find(':selected').data('contractoremail'));
+            $("#id_subject").val($(this).find(':selected').data('contractoremail'));
+        });
+    </script>
+
+{% endblock %}

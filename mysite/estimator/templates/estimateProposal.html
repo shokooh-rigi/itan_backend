@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+{% load custom_tags %}
+
+{% block content %}
+    <h2>Estimate No. {% estimate_number_generator estimate_id %}</h2>
+    <div class="container text-left" style="padding: 30px 10px;">
+        <header class="proposal_header">
+            <img class="figure-img logo" src="{% media_url %}{{ owner_logo }}" />
+            <span style="float: right; margin-top: 40px;">Member AABC</span>
+        </header>
+<table id="printProposalPage">
+  <thead><tr><td>
+    <div class="header-space"></div>
+  </td></tr></thead>
+  <tbody><tr><td>
+    <div class="content">
+            <h3 style="text-align: center; padding: 20px 0px;">Proposal</h3>
+            <div class="row form-line">
+                <div class="col-sm-6"><b>To: </b>{{ estimate.customer }}<br />
+                    {{ estimate.customer.company.zip }}, {{ estimate.customer.company.state }},
+                    {{ estimate.customer.company.city }}, {{ estimate.customer.company.street }}
+                </div>
+                <div class="col-sm-6"><b>Project: </b>{{ estimate.project }}<br />
+                    {{ estimate.project.zip }}, {{ estimate.project.state }},
+                    {{ estimate.project.city }}, {{ estimate.project.street }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-sm-6 "><b>Date: </b>{{ estimate.confirm_date|date:'m/d/Y' }}</div>
+                <div class="col-sm-6"><b>Engineer: </b>{{ estimate.engineer }}</div>
+            </div>
+            <div class="row form-line">
+                We are pleased to submit herewith our quotation for the requested service for the above listed project.
+            </div>
+            <div class="row form-line">
+                <ul class="service_list">
+                    {% for service in estimate.service.all %}
+                    <li>{{ service }} Service
+                        ${% service_total_calculator service estimate_equipments_pricing %}
+                    </li>
+                    <br/>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="row form-line">
+                <div class="col-sm-4 text-left" style="margin: 0px 0px auto auto;">
+                    <b>Total Amount:</b> ${{ estimate_total|floatformat:2 }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <span style="padding: 12px;">The above quotation includes:</span>
+                <br />
+                <ol>
+                    <li>All Work to be performed in strict accordance with project specifications and mechanical drawings.</li>
+                    <li>All labor and certified instruments.</li>
+                    <li>Necessary insurance and compensation certificatedwhen required.</li>
+                    <li>Provide bound copies of final certified test report.</li>
+                    <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work performed after this date will be subject to incurred labor rate increases.</li>
+                </ol>
+            </div>
+            <div class="row form-line">
+                <span style="padding: 12px;">The above quotation does not include:</span>
+                <br />
+                <ol>
+                    <li>Any necessary changes in pulleys and/or the belts, or the addition of necessary dampers to affect proper air balance.</li>
+                    <li>Any necessary test cocks to affect proper water balance.</li>
+                </ol>
+            </div>
+            <div class="row form-line">
+                This proposal is firm for {{ estimate.estimatedetails.validity }} days from date of issuance.
+                <br />
+                {{ company_name }}
+            </div>
+            <div class="row form-line">
+                <div class="col-sm-4 text-left" style="margin: 0px 0px auto auto;">
+                    <span style="margin: 20px auto;"><b>By:</b><br /></span>
+                    <br />
+                    <span class="form-line"><b>Signature:</b><img class="img-fluid" src="{% media_url %}{{ owner_signature }}" /><br /></span>
+                    <span class="form-line"><b>Name:</b> {{ license_owner }}<br /></span>
+                    <span class="form-line"><b>Title:</b> {{ owner_title }}</span>
+                </div>
+            </div>
+            <br />
+            <div class="row form-line">
+                <div class="col-sm-4 text-left" style="margin: 0px 0px auto auto;">
+                    <span style="margin: 20px auto;"><b>Accepted by:</b><br /></span>
+                    <br />
+                    <span class="form-line"><b>Signature:</b><br /></span>
+                    <span class="form-line"><b>Name:</b><br /></span>
+                    <span class="form-line"><b>Title:</b></span>
+                </div>
+            </div>
+    </div>
+  </td></tr></tbody>
+  <tfoot><tr><td>
+    <div class="footer-space">&nbsp;</div>
+  </td></tr></tfoot>
+</table>
+        <footer class="proposal_footer">
+             <div class="row" style="padding: 10px 0px;">
+              <div class="onecol col-sm-4">
+                  <i class="fas fa-map-marker-alt"></i>{{ owner_address }}
+              </div>
+              <div class="onecol col-sm-4">
+                  <i class="fas fa-phone-volume"></i>{{ owner_tel }}<br />
+                  <i class="fas fa-fax"></i>{{ owner_fax }}
+              </div>
+              <div class="onecol col-sm-4">
+                  <i class="fas fa-globe"></i>{{ owner_web }}<br />
+                  <i class="fas fa-envelope"></i>{{ owner_mail }}
+              </div>
+            </div>
+        </footer>
+    </div>
+    <button class="btn btn-info" id="printEstimate"><a href="{{ proposal_pdf }}">Email Proposal</a></button>
+    <button class="btn btn-info" id="printProposal">Print Proposal</button>
+    <a href="{% url 'estimatorHome' %}"><button class="btn btn-danger">Done</button></a>
+    <script type="text/javascript" src="{% static "js/printThis.js" %}"></script>
+
+    <script>
+        $("#printEstimate").click(function(){
+            $('#printEstimatePage').printThis({
+                importCSS: true,
+                importStyle: true
+            });
+        });
+        $("#printProposal").click(function(){
+            $('#printProposalPage').printThis({
+                debug: true,
+                header: $('.proposal_header'),
+                footer: $('.proposal_footer'),
+                loadCSS: "{% static "css/print.css" %}",
+                importCSS: true,
+                printContainer: true,
+            });
+        });
+    </script>
+{% endblock %}

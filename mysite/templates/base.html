@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>{% block title %}iTAB • Automated Project Management System{% endblock %}</title>
+        {% load static %}
+        <link rel="icon" href="{% static "images/logo.svg" %}" />
+		<link rel="apple-touch-icon" href="{% static "images/logo.svg" %}" />
+        <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" crossorigin="anonymous" />
+        <link rel="stylesheet" href="{% static "css/style.css" %}" />
+        <link href="https://fonts.googleapis.com/css?family=Poppins:100,300,400,500,700&display=swap" rel="stylesheet" />
+        <script src="{% static "js/jquery-3.4.1.min.js" %}" crossorigin="anonymous"></script>
+        <script src="{% static "js/popper.min.js" %}" crossorigin="anonymous"></script>
+        <script src="{% static "js/bootstrap.min.js" %}" crossorigin="anonymous"></script>
+        <script src="{% static "js/printThis.js" %}" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/df68528451.js"></script>
+        <style>
+        body {
+        {% if user.profile.wallpaper %}
+            background-image: url('{{ user.profile.wallpaper.url }}');
+        {% endif %}
+        }
+        .profile_img {
+        {% if user.profile.pic %}
+            background-image: url('{{ user.profile.pic.url }}');
+        {% endif %}
+        }
+        </style>
+    </head>
+  <body class="text-center">
+    <header class="header">
+        <div class="logosection">
+            <a href="https://airtab.us" style="display: flex; position: relative;"><img class="sitelogo" src="{% static "images/logo.svg" %}"><span class="sitelogotext"><span class="textholder">TAB Technologies, INC.<br />Member AABC</span></span></a>
+        </div>
+        <nav class="nav" id="topnav">
+            <div class="menu-top-menu-container">
+                <ul id="menu-top-menu" class="menu">
+                    {% if user.is_authenticated %}
+                    <li class="menu-item">
+                        <a href="#">Pre Order</a>
+                        <ul>
+                            <li class="menu-item"><a href="{% url 'estimatorHome' %}">Estimate</a></li>
+                            <li class="menu-item"><a href="{% url 'quotationHome' %}">Quote</a></li>
+                            <li class="menu-item"><a href="{% url 'proposalHome' %}">Proposal</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item"><a href="{% url 'orderHome' %}">Order</a></li>
+                    <li class="menu-item"><a href="{% url 'invoiceHome' %}">GI</a></li>
+                    <li class="menu-item"><a href="{% url 'CoiHome' %}">COI</a></li>
+                    <li class="menu-item"><a href="{% url 'submittalHome' %}">CCS</a></li>
+                    <li class="menu-item">
+                        <a href="{% url 'MgmReport' %}">MGM Report</a>
+                        <ul>
+                            <li class="menu-item"><a href="{% url 'EquipmentsList' %}">Equipments</a></li>
+                            <li class="menu-item"><a href="{% url 'CompanyList' %}">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                     <div class="dropdown header-profile" style="display: inline-block;">
+                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown">
+                        <div class="img-thumbnail profile_img">
+                        </div>
+                      </button>
+                  <div class="dropdown-menu">
+                    <span class="dropdown-item-text">Welcome,
+                    {% if user.first_name|length > 0 %}
+                    {{ user.first_name }}
+                  {% else %}
+                    {{ user.email }}
+                  {% endif %}</span>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'ProfileEdit' %}"><i class="far fa-user-circle"></i>Profile</a>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}admin/logentry/"><i class="far fa-bell"></i>Activities</a>
+                    <a class="dropdown-item" href="{% url 'password_change' %}"><i class="fas fa-key"></i>Change Password</a>
+                    <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                  </div>
+                </div>
+                </li>
+                    {% else %}
+                    <li class="menu-item"><a href="{% url 'login' %}">login</a></li>
+                    <li class="menu-item"><a href="{% url 'signup' %}">signup</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <a href="javascript:void(0);" class="icon" onclick="MobileMenu()">&#9776;</a>
+        </nav>
+    </header>
+    <div class="headspace"></div>
+
+
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}{% if message.tags == 'error' %} alert-danger{% endif %}">{{ message|safe }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% if form.errors %}
+    <div class="alert alert-error">
+      <h4>Please fix the following errors</h4>
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}
+            {% for error in field.errors %}
+              <li><a href="#id_{{ field.name }}" class="error">{{ error|escape }}</a></li>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+      {% endif %}
+    </div>
+  {% endif %}
+
+
+
+  {% block script %}
+    <main class="main container">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+    <script>
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+            $(".headspace").height($(".header").innerHeight());
+        });
+    </script>
+
+        <script>
+            function MobileMenu() {
+                var x = document.getElementById("topnav");
+                if (x.className === "nav") {
+                    x.className += " responsive";
+                } else {
+                    x.className = "nav";
+                }
+            }
+        </script>
+
+<script type="text/javascript">
+function showEditPopup(url) {
+    var win = window.open(url, "Edit",
+        'height=500,width=800,resizable=yes,scrollbars=yes');
+    return false;
+}
+function showAddPopup(triggeringLink) {
+    var name = triggeringLink.id.replace(/^add_/, '');
+    href = triggeringLink.href;
+    var win = window.open(href, name, 'height=600,width=800,resizable=yes,scrollbars=yes');
+    win.focus();
+    return false;
+}
+function closePopup(win, newID, newRepr, id) {
+    $(id).append('<option value=' + newID + ' selected >' + newRepr + '</option>')
+    win.close();
+}
+
+</script>
+{% endblock %}
+  </body>
+</html>

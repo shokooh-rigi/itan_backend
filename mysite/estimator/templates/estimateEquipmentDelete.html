@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load estimator_tags %}
+
+{% block content %}
+    {{ error_message }}
+    <br />
+    {%if request.user.is_authenticated %}
+        <h2>Delete Estimate Equipment {{ this_estimate_equipment.equipment.name }} from Estimate No. {% estimate_number_generator this_estimate_equipment.estimate.id %}</h2>
+        <br />
+        <form method="POST" action="">
+            {% csrf_token %}
+            Are you sure you want to delete this equipment?<br /><br />
+            <input type="submit" class="btn btn-primary" value="Yes" name="confirm" />
+            <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" />
+        </form>
+    {% endif %}
+
+{% endblock %}

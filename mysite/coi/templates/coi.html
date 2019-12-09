@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+
+{% block content %}
+    <div class="text-center">
+        <a href="{% url 'CoiCreate' %}"><button type="button" class="btn btn-primary big">New COI</button></a>
+        <br /><br />
+        <div class="row" style="margin: 10px auto;">
+            <div class="pagination-select">
+                <header class="title">items per page</header>
+                <div class="btn-group">
+                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
+                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
+                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_all" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '' %}">all</a></button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Contractor</th>
+                    <th>Contract Person Name</th>
+                    <th>Contractor Email</th>
+                    <th>Subject</th>
+                    <th>CC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coi in cois %}
+                    <tr>
+                        <td>{{ coi.contractor.company.name }}</td>
+                        <td>{{ coi.contract_person_name }}</td>
+                        <td>{{ coi.email }}</td>
+                        <td>{{ coi.subject }}</td>
+                        <td>{{ coi.cc }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<div class="pagination">
+
+  {% if cois.has_previous %}
+    <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+     <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+    </a>
+    <a class="pagination-action" href="?{% url_replace request 'page' cois.previous_page_number %}">
+      <i class="fa fa-angle-left" aria-hidden="true"></i>
+    </a>
+  {% endif %}
+
+  {% for num in cois.paginator.page_range %}
+
+    {% if cois.number == num %}
+    <span class="pagination-number pagination-current">{{ num }}</span>
+    {% elif num > cois.number|add:'-3' and num < cois.number|add:'3' %}
+    <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+    {% endif %}
+
+  {% endfor %}
+
+  {% if cois.has_next %}
+    <a class="pagination-action" href="?{% url_replace request 'page' cois.next_page_number %}">
+      <i class="fa fa-angle-right" aria-hidden="true"></i>
+    </a>
+    <a class="pagination-action" href="?{% url_replace request 'page' cois.paginator.num_pages %}">
+      <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+    </a>
+  {% endif %}
+
+</div>
+<script>
+    $(document).ready(function() {
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=5') > 0) {
+            $(".pagination-select #paginate_5").addClass('selected');
+            $(".pagination-select #paginate_5 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+{% endblock %}

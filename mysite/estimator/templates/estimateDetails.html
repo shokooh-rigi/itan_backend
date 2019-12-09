@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Estimate Details No. {% estimate_number_generator estimate_id %}</h2>
+    <ul class="list-group">
+    {% for estimate_equipment_pricing in estimate_equipments_pricing %}
+        <li class="list-group-item">
+            Equipment Name: <b>{{ estimate_equipment_pricing.equipment.name }} </b>
+            - Quantity: <b>{{ estimate_equipment_pricing.quantity }} </b>
+            - Unit Price: <b>
+            {% if estimate_equipment_pricing.price_override %}
+            ${{ estimate_equipment_pricing.price_override }}
+            {% else %}
+            ${{ estimate_equipment_pricing.equipment.price }}
+            {% endif %}
+        </b>
+        </li>
+    {%  endfor %}
+    </ul>
+    <br />
+    <h4>Sub Total: ${{ estimate_sub|floatformat:2 }}</h4>
+    <br />
+    <form method = 'POST' action= '' enctype = "multipart/form-data" novalidate id = "details-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.estimate }}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Control System</label>
+                    {{ form.control_system }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Hours</label>
+                    {{ form.hours }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Pre Demo</label>
+                    {{ form.pre_demo }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Adjustment</label>
+                    {{ form.adjustment }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Remark</label>
+                    {{ form.remark }}
+                </div>
+            </div>
+            {{ form.saved_flag }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" />
+                </div>
+            </div>
+        </div>
+	</form>
+{% endblock %}

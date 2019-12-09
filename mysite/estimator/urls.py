@@ -1,0 +1,38 @@
+from django.urls import path
+from django.conf.urls import url
+from mysite.estimator import views
+
+urlpatterns = [
+    path('estimate/', views.estimate_list, name='estimatorHome'),
+    path('quotation/', views.quotation_list, name='quotationHome'),
+    path('proposal/', views.proposal_list, name='proposalHome'),
+    path('estimate/add/', views.estimator_add, name='estimatorAdd'),
+    path('quote/add/', views.quote_add, name='quoteAdd'),
+    path('proposal/add/', views.proposal_add, name='proposalAdd'),
+    path('estimator/archive/<int:estimate_id>/', views.estimate_archive, name='estimateArchive'),
+    path('quote/archive/<int:quote_id>/', views.quote_archive, name='quoteArchive'),
+    path('proposal/archive/<int:proposal_id>/', views.proposal_archive, name='proposalArchive'),
+    path('estimate/delete/<int:estimate_id>/', views.estimate_delete, name='estimateDelete'),
+    path('quote/delete/<int:quote_id>/', views.quote_delete, name='quoteDelete'),
+    path('proposal/delete/<int:proposal_id>/', views.proposal_delete, name='proposalDelete'),
+    url(r'^company/customer/create', views.company_customer_create_popup, name="companyCustomerCreate"),
+    url(r'^company/customer/(?P<pk>\d+)/edit', views.company_customer_edit_popup, name="companyCustomerEdit"),
+    url(r'^company/engineer/create', views.company_engineer_create_popup, name="companyEngineerCreate"),
+    url(r'^company/engineer/(?P<pk>\d+)/edit', views.company_engineer_edit_popup, name="companyEngineerEdit"),
+    url(r'^company/ajax/get_company_id', views.get_company_id, name="get_company_id"),
+    url(r'^person/create', views.person_create_popup, name="personCreate"),
+    url(r'^person/(?P<pk>\d+)/edit', views.person_edit_popup, name="personEdit"),
+    url(r'^person/ajax/get_person_id', views.get_person_id, name="get_person_id"),
+    url(r'^project/create', views.project_create_popup, name="projectCreate"),
+    url(r'^project/(?P<pk>\d+)/edit', views.project_edit_popup, name="projectEdit"),
+    url(r'^project/ajax/get_project_id', views.get_project_id, name="get_project_id"),
+    url(r'^engineer/create', views.engineer_create_popup, name="engineerCreate"),
+    url(r'^engineer/(?P<pk>\d+)/edit', views.engineer_edit_popup, name="engineerEdit"),
+    url(r'^engineer/ajax/get_person_id', views.get_engineer_id, name="get_engineer_id"),
+    path('estimator/equipment/<int:estimate_id>/<int:estimate_service_id>',
+         views.estimate_equipment, name='estimateEquipment'),
+    path('estimator/equipment/delete/<int:estimate_equipment_id>/<int:interval_id>', views.estimate_equipment_delete,
+         name='estimateEquipmentDelete'),
+    path('estimator/details/<int:estimate_id>/', views.estimate_details, name='estimateDetails'),
+    path('estimator/estimate/<int:estimate_id>/', views.estimate_bid, name='estimateBid'),
+]

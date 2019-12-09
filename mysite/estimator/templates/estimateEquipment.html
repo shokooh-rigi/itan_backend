@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+
+{% block content %}
+    <h2>Estimate Equipments No. {% estimate_number_generator estimate_id %}</h2>
+    <h3>Equipments for {{ interval_set.name }} Service</h3>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="alert alert-warning change-alert" style="display: none;">
+                <strong>Warning!</strong> You're about to change <span id="equipment_message"></span> Quantity which you have specified before...
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_equipment" class="control-label">Equipment</label>
+                    <select name="equipment" class="form-control" required="" id="id_equipment">
+                        <option value="" selected="">---------</option>
+
+                        {% for equipment in equipments %}
+                            <option value="{{ equipment.id }}" data-selectedbefore="{% if equipment.id in equipment_in %}1{% else %}0{% endif %}" data-price="{{ equipment.price }}">{{ equipment.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_quantity" class="control-label">Quantity</label>
+                    {{ form.quantity }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <div class="">
+                        <input type="checkbox" class="" name="price_overrider" id="price_overrider" value="price_overrider" style="display: inline-block; width: 18px;" />
+                        <label class="" style="padding-left: 5px; display: inline-block; width: 350px;" for="price_overrider">Confirm to provide price</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="price_override" class="control-label">Price Override</label>
+                    <input type="number" name="price_override" step="0.01" disabled="disabled" id="price_override" class="form-control" value="" />
+                </div>
+            </div>
+            {{ form.estimate }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Add/Update" />
+                </div>
+            </div>
+        </div>
+	</form>
+    <br />
+    <ul class="list-group">
+    {% for estimate_equipment_pricing in estimate_equipments_pricing %}
+        {% if estimate_equipment_pricing.equipment.service.id == interval_set.id %}
+        <li class="list-group-item">
+            Equipment Name: <b>{{ estimate_equipment_pricing.equipment.name }} </b>
+            - Quantity: <b>{{ estimate_equipment_pricing.quantity }} </b>
+            - Unit Price:
+            <b>
+            {% if not estimate_equipment_pricing.price_override %}
+                ${{ estimate_equipment_pricing.equipment.price|floatformat:2 }}
+            {% else %}
+                ${{ estimate_equipment_pricing.price_override|floatformat:2 }}
+            {% endif %}
+            </b>
+            - Total Price: <b>
+            ${% equipment_total_calculator estimate_equipment_pricing %}</b>
+            <a href="{% url 'estimateEquipmentDelete' estimate_equipment_id=estimate_equipment_pricing.id interval_id=estimate_service_id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+        </li>
+        {% endif %}
+    {%  endfor %}
+    </ul>
+    <br />
+    <h4>Sub Total: ${{ estimate_money|floatformat:2 }}</h4>
+    <br />
+    <a href="{{ next_url }}"><button class="btn btn-primary" >{{ next_url_text }}</button></a>
+    <script>
+        $("#price_overrider").attr('checked', !$("#price_override")[0].disabled);
+        $("#price_overrider").click(function(){
+            $("#price_override").attr('disabled', !this.checked)
+        });
+        $('#id_equipment').on('change', function() {
+            if ($(this).find(':selected').data('selectedbefore') === 1) {
+                $('#equipment_message').text($(this).find(':selected').text());
+                $('.change-alert').slideDown();
+            }
+            else {
+                $('.change-alert').slideUp();
+            }
+
+            $("#price_overrider").prop( "checked", false );
+            $("#price_override").attr('disabled', true);
+            $("#price_override").val($(this).find(':selected').data('price'));
+        });
+    </script>
+{% endblock %}

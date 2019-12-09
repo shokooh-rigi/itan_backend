@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="text-center">
+        <a href="{% url 'submittalAdd' %}"><button type="button" class="btn btn-primary">New Company Submittal</button></a>
+        <br /><br />
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Project</th>
+                    <th>Attached Forms</th>
+                    <th>Cover Letter</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submittal in object_list %}
+                    {% if submittal.archive == False %}
+                        <tr>
+                            <td>{{ submittal.id }}</td>
+                            <td>{{ submittal.customer }}</td>
+                            <td>{{ submittal.project }}</td>
+                            <td>{% for form in submittal.submittal_form.all %}{{ form }}{%if not forloop.last%}, {%endif%}{% endfor %}</td>
+                            <td><a href="{% url 'submittalView' submittal_id=submittal.id %}">View</a></td>
+                            <td><a href="{% url 'submittalDelete' submittal_id=submittal.id %}"><img src = "{% static '/admin/img/icon-deletelink.svg' %}" /></a></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+django-richtextfield
+weasyprint
+Pillow
+appdirs==1.4.0
+Django>=2.2.1
+packaging==16.8
+pyparsing==2.1.10
+six==1.10
+xhtml2pdf
+img2pdf
+PyPDF2

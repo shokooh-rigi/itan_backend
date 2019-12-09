@@ -1,0 +1,142 @@
+{% load staticfiles %}
+{% load estimator_tags %}
+{% load custom_tags %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Proposal</title>
+        <style type="text/css">
+            .signature { width: 160px; display: inline-block; float: left; }
+            @page {
+                size: a4 portrait;
+                @frame header_frame {
+                    -pdf-frame-content: header_content;
+                    width: 512pt; height: 150pt; left: 40pt; top: 20pt;
+                }
+                @frame content_frame {
+                    width: 512pt; left: 40pt; top: 95pt; height: 700pt;
+                }
+                @frame footer_frame {
+                    -pdf-frame-content: footer_content;
+                    width: 512pt; height: 40pt; left: 40pt; bottom: 10pt;
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        {% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+        {% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    <div class="content">
+        <div class="row form-line" style="text-align: center; padding: 20px 0; font-size: 18px;">
+            <div class="col-sm-6"><b>Quotation:</b> {% estimate_number_generator quote.estimate.id %}</div>
+        </div>
+        <div class="row form-line" style="font-size: 10pt;">
+            <table>
+               <tbody>
+                    <tr style="text-align: left; border: none; line-height: 18px;">
+                        <td style="padding: 2px; width: 100%; font-weight: bold;">To: </td>
+                        <td style="padding: 2px; width: 100%; font-weight: bold;">Project: </td>
+                    </tr>
+                    <tr style="text-align: left; font-size: 11pt;">
+                        <td style="padding: 5px 5px 0px 5px; border: 1px solid #000; width: 100%;">{{ quote.estimate.customer.company.name }}
+                        {% if quote.estimate.customer.company.address_line_1 %}<br />{{ quote.estimate.customer.company.address_line_1 }}{% endif %}
+                        {% if quote.estimate.customer.company.address_line_2 %}<br />{{ quote.estimate.customer.company.address_line_2 }}{% endif %}
+                        {% if quote.estimate.customer.company.city %}<br />{{ quote.estimate.customer.company.city }}{% endif %}
+                        {% if quote.estimate.customer.company.state %}, {{ quote.estimate.customer.company.state }}{% endif %}
+                        {% if quote.estimate.customer.company.zip %}, {{ quote.estimate.customer.company.zip }}{% endif %}</td>
+                        <td style="padding: 5px 5px 0px 5px; border: 1px solid #000; width: 100%;">{{ quote.estimate.project }}
+                        {% if quote.estimate.project.address_line_1 %}<br />{{ quote.estimate.project.address_line_1 }}{% endif %}
+                        {% if quote.estimate.project.address_line_2 %}<br />{{ quote.estimate.project.address_line_2 }}{% endif %}
+                        {% if quote.estimate.project.city %}<br />{{ quote.estimate.project.city }}{% endif %}
+                        {% if quote.estimate.project.state %}, {{ quote.estimate.project.state }}{% endif %}
+                        {% if quote.estimate.project.zip %}, {{ quote.estimate.project.zip }}{% endif %}</td>
+                    </tr>
+               </tbody>
+            </table>
+            <div style="height: 16px;"></div>
+            <table style="">
+               <tbody>
+                    <tr style="text-align: left; border: none;">
+                        <td style="padding: 5px; width: 100%; font-weight: bold;">Due Date: </td>
+                        <td style="padding: 5px; width: 100%;">{{ quote.estimate.due_date|date:'m/d/Y' }}</td>
+                        <td style="padding: 5px; width: 100%; font-weight: bold;">Engineer: </td>
+                        <td style="padding: 5px; width: 100%;">{{ quote.estimate.engineer.company.name }}</td>
+                    </tr>
+               </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="font-size: 14px; line-height: 19px;">
+        <div class="row form-line" style="padding: 10px 0 2px 0;">
+             We are pleased to submit our quotation for the requested service for the above listed project.
+        </div>
+        <div class="row form-line">
+            <table style="padding: 20px;">
+              <tbody>
+                <tr style="text-align: left;">
+                    <td style="padding: 5px; width: 300px;">TAB Services:<br />
+                        {% for estimate_service in quote.estimate.service.all %}
+                        {{ estimate_service }}{%if not forloop.last%}, {%endif%}
+                        {% endfor %}
+                    </td>
+                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator quote.estimate.id %}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;">Pre Demo:</td>
+                    <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_predemo_calculator quote.estimate.id %}</td>
+                </tr>
+                <tr style="font-size: 16px;">
+                    <td style="padding: 5px;">Total Amount:</td>
+                    <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator quote.estimate.id %}</td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+           <div style="height: 10px;"></div>
+        <div class="row form-line">
+            <div class="col-sm-12">
+                <p>The above quotation includes:</p>
+                <p>
+                    <ul>
+                        <li>All Work to be preformed in strict accordance with project specifications and mechanical drawings.</li>
+                        <li>All labor and certified instruments.</li>
+                        <li>Necessary insurance and compensation certificated when required.</li>
+                        <li>Provide bound copies of final certified test report.</li>
+                        <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work preformed after this date will be subject to incurred labor rate increases.</li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+        <br />
+        <div class="row form-line">
+            <div class="col-sm-12">
+                <p>The above quotation does not include:</p>
+                <p>
+                    <ul>
+                        <li>Any necessary changes in pulleys and/or the belts, or the addition of necessary dampers to affect proper air balance.</li>
+                        <li>Any necessary test cocks to affect proper water balance.</li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-sm-12">
+                <p>{{ quote.note }}</p>
+            </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-sm-12" style="vertical-align: text-top;">
+                <p>If you have any questions please feel free to contact me.</p>
+                <p>By:<br />{{ user_name }}<br />{{ user_title }}</p>
+                <p><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" class="signature" style="height: 50px;" /><br />Signature</p>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

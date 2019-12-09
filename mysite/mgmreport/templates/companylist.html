@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <div class="text-center">
+        <br />
+        <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
+        <table class="table table-striped" id="printThis">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Contact Persons</th>
+                    <th>Street</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Zip Code</th>
+                    <th>Phone #</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                        <tr>
+                            <td>{{ contact.company.company_type }}</td>
+                            <td>{{ contact.company.name }}</td>
+                            <td>{{ contact.name }}</td>
+                            <td>{{ contact.company.street }}</td>
+                            <td>{{ contact.company.city }}</td>
+                            <td>{{ contact.company.state }}</td>
+                            <td>{{ contact.company.zip }}</td>
+                            <td>{{ contact.company.tel }}</td>
+                        </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').hide();
+                    $('#printThis').css('margin-top','100px');
+                },
+                afterPrint: function(){
+                    $('#topnav').show();
+                    $('#printThis').css('margin-top','0px');
+                },
+            });
+        });
+    });
+    </script>
+{% endblock %}

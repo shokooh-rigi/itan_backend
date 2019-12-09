@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>MgM Report</h2>
+        <br />
+
+         <div class="btn-group">
+            <a class="btn btn-primary big" href="{% url 'EquipmentsList' %}">Equipments Report</a>
+            <a class="btn btn-primary big" href="{% url 'CompanyList' %}">Companies Report</a>
+        </div>
+
+    </div>
+{% endblock %}

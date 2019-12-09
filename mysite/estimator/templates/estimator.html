@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <div class="text-center">
+        <a href="{% url 'estimatorAdd' %}"><button type="button" class="btn btn-primary big">New Estimate</button></a>
+        <br /><br /><hr />
+
+
+        <form method="get" action="">
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <h5>Filter By Due Date</h5>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_fromDate" class="control-label">Due Date From:</label>
+                    <input type="text" name="fromDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_fromDate" value="{{ request.GET.fromDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_toDate" class="control-label">Due Date To:</label>
+                    <input type="text" name="toDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_toDate" value="{{ request.GET.toDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <button type="submit" class="btn btn-success">submit</button>
+                    <div id="date_filter_clear" class="btn btn-primary">clear filter</div>
+                </div>
+            </div>
+            <input type="hidden" name="paginate_by" value="{{ request.GET.paginate_by }}" />
+            <input type="hidden" name="ordering" value="{{ request.GET.ordering }}" />
+            <input type="hidden" name="customer_name" value="{{ request.GET.search }}" />
+        </form>
+    {% if request.GET.fromDate > request.GET.toDate %}
+        <div class="alert alert-danger">
+          <strong>Error!</strong> To Date must be greater or equal to Form Date.
+        </div>
+    {% endif %}
+
+        {% if request.GET.fromDate %}
+            <br />Estimates Due Date Filtered From <b>{{ request.GET.fromDate }}</b> To <b>{{ request.GET.toDate }}</b><br /><br />
+        {% endif %}
+
+
+
+        <div class="row" style="margin: 10px auto;">
+                <form action="?{% url_replace request 'search' '' %}">
+                    <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                        <label for="search"></label>
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Customer/Project..." value="{{ request.GET.search }}" />
+                        <input type="hidden" name="paginate_by" value="{{ request.GET.paginate_by }}" />
+                        <input type="hidden" name="ordering" value="{{ request.GET.ordering }}" />
+                        <input type="hidden" name="fromDate" value="{{ request.GET.fromDate }}" />
+                        <input type="hidden" name="toDate" value="{{ request.GET.toDate }}" />
+
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                </form>
+            <div class="pagination-select">
+                <header class="title">items per page</header>
+                <div class="btn-group">
+                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
+                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
+                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_all" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '' %}">all</a></button>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin: 10px auto; text-align: left;">
+            <div class="col-sm-4" style="text-align: left;">
+                Number of rows: {{ total_rows }}
+            </div>
+            <div class="col-sm-4" style="text-align: center; margin: -7px 0 7px 0;">
+                <button class="btn btn-primary" id="printbtn">Print This Table</button>
+            </div>
+            <div class="col-sm-4" style="text-align: right;">
+                Total Amount: ${{ total_amount }}
+            </div>
+        </div>
+
+
+        <table class="table table-striped thinpadding" id="printThis">
+            <thead>
+                <tr>
+                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th data-sortable="customer"><a href="{% if request.GET.ordering == 'customer' %}?{% url_replace request 'ordering' '-customer' %}{% else %}?{% url_replace request 'ordering' 'customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="project"><a href="{% if request.GET.ordering == 'project' %}?{% url_replace request 'ordering' '-project' %}{% else %}?{% url_replace request 'ordering' 'project' %}{% endif %}">Project</a></th>
+                    <th data-sortable="engineer"><a href="{% if request.GET.ordering == 'engineer' %}?{% url_replace request 'ordering' '-engineer' %}{% else %}?{% url_replace request 'ordering' 'engineer' %}{% endif %}">Engineer</a></th>
+                    <th>Service</th>
+                    <th data-sortable="due_date"><a href="{% if request.GET.ordering == 'due_date' %}?{% url_replace request 'ordering' '-due_date' %}{% else %}?{% url_replace request 'ordering' 'due_date' %}{% endif %}">Due Date</a></th>
+                    <th>Total</th>
+                    <th>Equipments</th>
+                    <th>Details</th>
+                    <th>Bid</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for estimate in estimates %}
+                        <tr>
+                            <td>{% estimate_number_generator estimate.id %}</td>
+                            <td>{{ estimate.customer.company.name }}</td>
+                            <td>{{ estimate.project }}</td>
+                            <td>{{ estimate.engineer.company.name }}</td>
+                            <td>{% for service in estimate.service.all %}{{ service }}{%if not forloop.last%}, {%endif%}{% endfor %}</td>
+                            <td>{{ estimate.due_date }}</td>
+                            <td>${% estimate_total_calculator estimate.id %}</td>
+                            <td><a href="{% url 'estimateEquipment' estimate_id=estimate.id estimate_service_id=0 %}" data-toggle="tooltip" data-placement="bottom" title="Edit"><div class="icon editicon"></div></a></td>
+                            <td><a href="{% url 'estimateDetails' estimate_id=estimate.id %}"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
+                            <td><a href="{% url 'estimateBid' estimate_id=estimate.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>
+                            <td>
+                                <a href="{% url 'estimateDelete' estimate_id=estimate.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+                                <a href="{% url 'estimateArchive' estimate_id=estimate.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
+                                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/estimate/{% pdf_filename_generator estimate.id 'E' %}.pdf" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% estimate_number_generator estimate.id %}" data-id="{{ estimate.id }}" data-project="{{ estimate.project.name }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                            </td>
+                        </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+          {% if estimates.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' estimates.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in estimates.paginator.page_range %}
+
+            {% if estimates.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > estimates.number|add:'-3' and num < estimates.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if estimates.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' estimates.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' estimates.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
+    </div>
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header" style="display: block;">
+                <button type="button" class="close" data-dismiss="modal" style="float: right;">&times;</button>
+                <h4 class="modal-title" style="float: left;">Email Estimate</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {{ field.help_text }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {{ form.email_id.as_hidden }}
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-success" value="Next" name="send">Send</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+
+
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
+
+
+
+    $(document).ready(function() {
+        $(".alert").css('display', 'none');
+        $(document).on("click", ".email_modal", function () {
+             $(".modal-body #id_email_id").val( $(this).data('id') );
+             $(".modal-body #id_subject").val( $(this).data('project') );
+             $(".modal-header .modal-title").text('Email Estimate #' + $(this).data('name'));
+        });
+        $('#date_filter_clear').click(function() {
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "fromDate", ""));
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
+            location.reload();
+        });
+        var sortables = ['id', 'customer', 'project', 'engineer', 'due_date'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+            }
+        }
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=5') > 0) {
+            $(".pagination-select #paginate_5").addClass('selected');
+            $(".pagination-select #paginate_5 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+    <script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').hide();
+                    $('#printThis').css('margin-top','100px');
+                    $('#printThis tr th:nth-last-child(1)' +
+                     ', #printThis tr th:nth-last-child(2)' +
+                      ', #printThis tr th:nth-last-child(3)' +
+                       ', #printThis tr th:nth-last-child(4)' +
+                        ', #printThis tr td:nth-last-child(1)' +
+                         ', #printThis tr td:nth-last-child(2)' +
+                          ', #printThis tr td:nth-last-child(3)' +
+                           ', #printThis tr td:nth-last-child(4)').css('display','none');
+                },
+                afterPrint: function(){
+                    $('#topnav').show();
+                    $('#printThis').css('margin-top','0px');
+                    $('#printThis tr th:nth-last-child(1)' +
+                     ', #printThis tr th:nth-last-child(2)' +
+                      ', #printThis tr th:nth-last-child(3)' +
+                       ', #printThis tr th:nth-last-child(4)' +
+                        ', #printThis tr td:nth-last-child(1)' +
+                         ', #printThis tr td:nth-last-child(2)' +
+                          ', #printThis tr td:nth-last-child(3)' +
+                           ', #printThis tr td:nth-last-child(4)').css('display','table-cell');
+                },
+            });
+        });
+    });
+    </script>
+{% endblock %}
