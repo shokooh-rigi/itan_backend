@@ -22,12 +22,6 @@
                     <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
                 </div>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 58px;">
-                    <label for="id_submittal_form" class="control-label">Choose Forms <span class="required">*</span></label>
-                    {{ form.submittal_form }}
-                </div>
-            </div>
             {{ form.created_by.as_hidden }}
             <div class="row">
                 <div class="col-lg-12">

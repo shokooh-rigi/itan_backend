@@ -9,58 +9,43 @@ from django.core.paginator import Paginator
 from django.core.mail import send_mail, BadHeaderError, EmailMessage
 from django.db.models import Q
 from ..core.forms import EmailForm
-
+from ..core.views import htmlbodytemplate_tag_converter
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
 
+@login_required
 def estimate_list(request):
     form = EmailForm(request.POST)
-    if request.user.last_name == '' or request.user.last_name is None:
-        user_name = 'TAB Technologies, INC. Operator'
-    else:
-        user_name = request.user.first_name + " " + request.user.last_name
-    if request.user.profile.title == '' or request.user.profile.title is None:
-        user_title = 'Estimator'
-    else:
-        user_title = request.user.profile.title
-    if request.user.profile.cell == '' or request.user.profile.cell is None:
-        user_cell = ''
-    else:
-        user_cell = request.user.profile.cell
-    if request.user.profile.tel == '' or request.user.profile.tel is None:
-        user_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    else:
-        user_tel = request.user.profile.tel
     if request.method == 'POST':
         if form.is_valid():
             to_email = form.cleaned_data['to_email']
-            to_email = to_email.replace(" ", "").split(',')
+            to_email = to_email.replace(" ", "").replace(";", ",").split(',')
             cc = form.cleaned_data['cc']
-            cc = cc.replace(" ", "").split(',')
+            cc = cc.replace(" ", "").replace(";", ",").split(',')
             email_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
+            this_estimate = get_object_or_404(Estimate, id=email_id)
+            customer = this_estimate.customer
             if ModulesToEmailTemplateRelation.objects.filter(module=1).exists():
                 body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=1).template.content
             else:
                 body_content = "There was no email template defined for 'Estimate'."
+            body_content = htmlbodytemplate_tag_converter(1, body_content, request, customer)
             if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
                 footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
             else:
                 footer_content = "There was no email template defined for 'Email Footer'."
-            footer_content = footer_content.__str__() \
-                .replace("[user_name]", user_name) \
-                .replace("[user_title]", user_title) \
-                .replace("[user_cel]", user_cell) \
-                .replace("[user_tel]", user_tel)
+            footer_content = htmlbodytemplate_tag_converter(1, footer_content, request, customer)
             message = body_content + '<br />' + footer_content
             try:
                 msg = EmailMessage(
                     subject,
                     message,
                     'estimator@tabtechinc.com',
-                    [to_email],
-                    cc=[cc],
+                    to_email,
+                    cc=cc,
                 )
                 msg.content_subtype = "html"
                 msg.attach_file('media/pdfs/estimate/' + pdf_filename_generator(email_id, 'E') + '.pdf')
@@ -85,20 +70,16 @@ def estimate_list(request):
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
 
-        object_list = Estimate.objects.filter(Q(project__name__contains=search)
-                                              | Q(customer__company__name__contains=search))\
+        object_list = Estimate.objects.filter(Q(project__name__icontains=search)
+                                              | Q(customer__company__name__icontains=search))\
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
-        object_list = Estimate.objects.filter(Q(project__name__contains=search)
-                                              | Q(customer__company__name__contains=search))\
+        object_list = Estimate.objects.filter(Q(project__name__icontains=search)
+                                              | Q(customer__company__name__icontains=search))\
             .filter(archive=False).order_by(ordering)
 
     total_rows = object_list.count()
-    total_amount = 0
-    for estimate in object_list:
-        total_amount += estimate_total_calculator(estimate.id)
-    total_amount = '{0:.2f}'.format(total_amount)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -109,58 +90,41 @@ def estimate_list(request):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   'total_rows': total_rows,
-                  'total_amount': total_amount,
                   }
     return render(request, "estimator.html", parameters)
 
 
+@login_required
 def quotation_list(request):
     form = EmailForm(request.POST)
-    if request.user.last_name == '' or request.user.last_name is None:
-        user_name = 'TAB Technologies, INC. Operator'
-    else:
-        user_name = request.user.first_name + " " + request.user.last_name
-    if request.user.profile.title == '' or request.user.profile.title is None:
-        user_title = 'Estimator'
-    else:
-        user_title = request.user.profile.title
-    if request.user.profile.cell == '' or request.user.profile.cell is None:
-        user_cell = ''
-    else:
-        user_cell = request.user.profile.cell
-    if request.user.profile.tel == '' or request.user.profile.tel is None:
-        user_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    else:
-        user_tel = request.user.profile.tel
     if request.method == 'POST':
         if form.is_valid():
             to_email = form.cleaned_data['to_email']
-            to_email = to_email.replace(" ", "").split(',')
+            to_email = to_email.replace(" ", "").replace(";", ",").split(',')
             cc = form.cleaned_data['cc']
-            cc = cc.replace(" ", "").split(',')
+            cc = cc.replace(" ", "").replace(";", ",").split(',')
             email_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
+            this_estimate = get_object_or_404(Estimate, id=email_id)
+            customer = this_estimate.customer
             if ModulesToEmailTemplateRelation.objects.filter(module=2).exists():
                 body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=2).template.content
             else:
                 body_content = "There was no email template defined for 'Quotation'."
+            body_content = htmlbodytemplate_tag_converter(1, body_content, request, customer)
             if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
                 footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
             else:
                 footer_content = "There was no email template defined for 'Email Footer'."
-            footer_content = footer_content.__str__() \
-                .replace("[user_name]", user_name) \
-                .replace("[user_title]", user_title) \
-                .replace("[user_cel]", user_cell) \
-                .replace("[user_tel]", user_tel)
+            footer_content = htmlbodytemplate_tag_converter(1, footer_content, request, customer)
             message = body_content + '<br />' + footer_content
             try:
                 msg = EmailMessage(
                     subject,
                     message,
                     'estimator@tabtechinc.com',
-                    [to_email],
-                    cc=[cc],
+                    to_email,
+                    cc=cc,
                 )
                 msg.content_subtype = "html"
                 msg.attach_file('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf')
@@ -185,13 +149,13 @@ def quotation_list(request):
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
 
-        object_list = Quote.objects.filter(Q(estimate__project__name__contains=search)
-                                              | Q(estimate__customer__company__name__contains=search))\
+        object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
+                                              | Q(estimate__customer__company__name__icontains=search))\
             .filter(estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
-        object_list = Quote.objects.filter(Q(estimate__project__name__contains=search)
-                                              | Q(estimate__customer__company__name__contains=search))\
+        object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
+                                              | Q(estimate__customer__company__name__icontains=search))\
             .filter(archive=False).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -206,53 +170,37 @@ def quotation_list(request):
     return render(request, "quotation.html", parameters)
 
 
+@login_required
 def proposal_list(request):
     form = EmailForm(request.POST)
-    if request.user.last_name == '' or request.user.last_name is None:
-        user_name = 'TAB Technologies, INC. Operator'
-    else:
-        user_name = request.user.first_name + " " + request.user.last_name
-    if request.user.profile.title == '' or request.user.profile.title is None:
-        user_title = 'Estimator'
-    else:
-        user_title = request.user.profile.title
-    if request.user.profile.cell == '' or request.user.profile.cell is None:
-        user_cell = ''
-    else:
-        user_cell = request.user.profile.cell
-    if request.user.profile.tel == '' or request.user.profile.tel is None:
-        user_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    else:
-        user_tel = request.user.profile.tel
     if request.method == 'POST':
         if form.is_valid():
             to_email = form.cleaned_data['to_email']
-            to_email = to_email.replace(" ", "").split(',')
+            to_email = to_email.replace(" ", "").replace(";", ",").split(',')
             cc = form.cleaned_data['cc']
-            cc = cc.replace(" ", "").split(',')
+            cc = cc.replace(" ", "").replace(";", ",").split(',')
             email_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
+            this_estimate = get_object_or_404(Estimate, id=email_id)
+            customer = this_estimate.customer
             if ModulesToEmailTemplateRelation.objects.filter(module=3).exists():
                 body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=3).template.content
             else:
                 body_content = "There was no email template defined for 'Proposal'."
+            body_content = htmlbodytemplate_tag_converter(1, body_content, request, customer)
             if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
                 footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
             else:
                 footer_content = "There was no email template defined for 'Email Footer'."
-            footer_content = footer_content.__str__()\
-                .replace("[user_name]", user_name)\
-                .replace("[user_title]", user_title)\
-                .replace("[user_cel]", user_cell)\
-                .replace("[user_tel]", user_tel)
+            footer_content = htmlbodytemplate_tag_converter(1, footer_content, request, customer)
             message = body_content + '<br />' + footer_content
             try:
                 msg = EmailMessage(
                     subject,
                     message,
                     'estimator@tabtechinc.com',
-                    [to_email],
-                    cc=[cc],
+                    to_email,
+                    cc=cc,
                 )
                 msg.content_subtype = "html"
                 msg.attach_file('media/pdfs/proposal/' + pdf_filename_generator(email_id, 'P') + '.pdf')
@@ -276,13 +224,13 @@ def proposal_list(request):
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
 
-        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__contains=search)
-                                              | Q(quote__estimate__customer__company__name__contains=search))\
+        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
+                                              | Q(quote__estimate__customer__company__name__icontains=search))\
             .filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
-        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__contains=search)
-                                              | Q(quote__estimate__customer__company__name__contains=search))\
+        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
+                                              | Q(quote__estimate__customer__company__name__icontains=search))\
             .filter(archive=False).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -296,6 +244,7 @@ def proposal_list(request):
     return render(request, "proposal.html", parameters)
 
 
+@login_required
 def estimator_add(request):
     form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
     if request.method == 'POST':
@@ -312,6 +261,7 @@ def estimator_add(request):
     return render(request, "estimatorAdd.html", parameters)
 
 
+@login_required
 def quote_add(request):
     form = QuoteForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
@@ -338,7 +288,7 @@ def quote_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    estimates = Estimate.objects.filter(archive=False).exclude(id__in=Quote.objects.all().values_list('estimate_id')).order_by('created_on')
+    estimates = Estimate.objects.filter(archive=False).exclude(id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('quotationHome')
@@ -379,6 +329,7 @@ def quote_add(request):
     return render(request, "quoteAdd.html", parameters)
 
 
+@login_required
 def proposal_add(request):
     form = ProposalForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
@@ -391,6 +342,19 @@ def proposal_add(request):
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
+    if request.user.last_name == '' or request.user.last_name is None:
+        user_name = 'TAB Technologies, INC. Operator'
+    else:
+        user_name = request.user.first_name + " " + request.user.last_name
+    if request.user.profile.title == '' or request.user.profile.title is None:
+        user_title = 'Estimator'
+    else:
+        user_title = request.user.profile.title
+    user_signature = request.user.profile.e_sign
+    if request.user.profile.cell == '' or request.user.profile.cell is None:
+        user_cell = ''
+    else:
+        user_cell = request.user.profile.cell
     quotes = Quote.objects.filter(archive=False).exclude(id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -413,6 +377,10 @@ def proposal_add(request):
                               'owner_mail': owner_mail,
                               'owner_signature': owner_signature,
                               'owner_logo': owner_logo,
+                              'user_name': user_name,
+                              'user_title': user_title,
+                              'user_signature': user_signature,
+                              'user_cell': user_cell,
                               'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                               'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                               'company_name': company_name,
@@ -429,6 +397,7 @@ def proposal_add(request):
     return render(request, "proposalAdd.html", parameters)
 
 
+@login_required
 def estimate_delete(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
     if request.method == "POST" and request.user.is_authenticated and this_estimate.created_by == request.user:
@@ -450,6 +419,7 @@ def estimate_delete(request, estimate_id):
     return render(request, "estimateDelete.html", parameters)
 
 
+@login_required
 def quote_delete(request, quote_id):
     this_quote = get_object_or_404(Quote, id=quote_id)
     if request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by == request.user:
@@ -471,6 +441,7 @@ def quote_delete(request, quote_id):
     return render(request, "quoteDelete.html", parameters)
 
 
+@login_required
 def proposal_delete(request, proposal_id):
     this_proposal = get_object_or_404(Proposal, id=proposal_id)
     if request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by == request.user:
@@ -492,6 +463,7 @@ def proposal_delete(request, proposal_id):
     return render(request, "proposalDelete.html", parameters)
 
 
+@login_required
 def estimate_archive(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
     if request.method == "POST" and request.user.is_authenticated and this_estimate.created_by == request.user:
@@ -513,6 +485,7 @@ def estimate_archive(request, estimate_id):
     return render(request, "estimateArchive.html", parameters)
 
 
+@login_required
 def quote_archive(request, quote_id):
     this_quote = get_object_or_404(Quote, id=quote_id)
     if request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by == request.user:
@@ -534,6 +507,7 @@ def quote_archive(request, quote_id):
     return render(request, "quoteArchive.html", parameters)
 
 
+@login_required
 def proposal_archive(request, proposal_id):
     this_proposal = get_object_or_404(Proposal, id=proposal_id)
     if request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by == request.user:
@@ -555,6 +529,7 @@ def proposal_archive(request, proposal_id):
     return render(request, "proposalArchive.html", parameters)
 
 
+@login_required
 def company_customer_create_popup(request):
     form = CompanyCustomerForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
@@ -566,6 +541,7 @@ def company_customer_create_popup(request):
     return render(request, "company_form.html", {"form": form})
 
 
+@login_required
 def company_customer_edit_popup(request, pk=None):
     instance = get_object_or_404(ContactInfo, pk=pk)
     form = CompanyCustomerForm(request.POST or None, instance=instance)
@@ -578,6 +554,7 @@ def company_customer_edit_popup(request, pk=None):
     return render(request, "company_form.html", {"form": form})
 
 
+@login_required
 def company_engineer_create_popup(request):
     form = CompanyEngineerForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
@@ -589,6 +566,7 @@ def company_engineer_create_popup(request):
     return render(request, "company_form.html", {"form": form})
 
 
+@login_required
 def company_engineer_edit_popup(request, pk=None):
     instance = get_object_or_404(ContactInfo, pk=pk)
     form = CompanyEngineerForm(request.POST or None, instance=instance)
@@ -601,6 +579,7 @@ def company_engineer_edit_popup(request, pk=None):
     return render(request, "company_form.html", {"form": form})
 
 
+@login_required
 @csrf_exempt
 def get_company_id(request):
     if request.is_ajax():
@@ -611,6 +590,7 @@ def get_company_id(request):
     return HttpResponse("/")
 
 
+@login_required
 def person_create_popup(request):
     form = CustomerForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
@@ -622,6 +602,7 @@ def person_create_popup(request):
     return render(request, "customer_form.html", {"form": form})
 
 
+@login_required
 def person_edit_popup(request, pk=None):
     instance = get_object_or_404(Person, pk=pk)
     form = CustomerForm(request.POST or None, instance=instance)
@@ -634,6 +615,7 @@ def person_edit_popup(request, pk=None):
     return render(request, "customer_form.html", {"form": form})
 
 
+@login_required
 @csrf_exempt
 def get_person_id(request):
     if request.is_ajax():
@@ -644,6 +626,7 @@ def get_person_id(request):
     return HttpResponse("/")
 
 
+@login_required
 def project_create_popup(request):
     form = ProjectForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
@@ -656,6 +639,7 @@ def project_create_popup(request):
     return render(request, "project_form.html", {"form": form})
 
 
+@login_required
 def project_edit_popup(request, pk=None):
     instance = get_object_or_404(Project, pk=pk)
     form = ProjectForm(request.POST or None, instance=instance)
@@ -667,6 +651,7 @@ def project_edit_popup(request, pk=None):
     return render(request, "project_form.html", {"form": form})
 
 
+@login_required
 def engineer_create_popup(request):
     form = EngineerForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
@@ -678,6 +663,7 @@ def engineer_create_popup(request):
     return render(request, "engineer_form.html", {"form": form})
 
 
+@login_required
 def engineer_edit_popup(request, pk=None):
     instance = get_object_or_404(Person, pk=pk)
     form = EngineerForm(request.POST or None, instance=instance)
@@ -690,6 +676,7 @@ def engineer_edit_popup(request, pk=None):
     return render(request, "engineer_form.html", {"form": form})
 
 
+@login_required
 @csrf_exempt
 def get_engineer_id(request):
     if request.is_ajax():
@@ -700,6 +687,7 @@ def get_engineer_id(request):
     return HttpResponse("/")
 
 
+@login_required
 @csrf_exempt
 def get_project_id(request):
     if request.is_ajax():
@@ -710,6 +698,7 @@ def get_project_id(request):
     return HttpResponse("/")
 
 
+@login_required
 def estimate_equipment(request, estimate_id, estimate_service_id):
     estimate = Estimate.objects.get(id=estimate_id)
     interval_count = estimate.service.count()
@@ -784,6 +773,7 @@ def estimate_equipment(request, estimate_id, estimate_service_id):
     return render(request, "estimateEquipment.html", parameters)
 
 
+@login_required
 def estimate_equipment_delete(request, estimate_equipment_id, interval_id):
     this_estimate_equipment = get_object_or_404(EstimateEquipment, id=estimate_equipment_id)
     if request.method == "POST" and request.user.is_authenticated:
@@ -795,6 +785,7 @@ def estimate_equipment_delete(request, estimate_equipment_id, interval_id):
     return render(request, "estimateEquipmentDelete.html", parameters)
 
 
+@login_required
 def estimate_details(request, estimate_id):
     estimate = Estimate.objects.get(id=estimate_id)
     instance = get_object_or_404(EstimateDetails, estimate=estimate_id)
@@ -828,6 +819,7 @@ def estimate_details(request, estimate_id):
     return render(request, "estimateDetails.html", parameters)
 
 
+@login_required
 def estimate_bid(request, estimate_id):
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value

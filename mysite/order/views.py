@@ -9,10 +9,12 @@ from ..settings import MEDIA_URL, MEDIA_URL_NOSLASH, WEB_URL, STATIC_URL
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
 
+@login_required
 def order_list(request):
     project_name = request.GET.get('project_name', '')
 
@@ -24,8 +26,8 @@ def order_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__contains=project_name) |
-                                       Q(project_number__contains=project_name)).order_by(ordering)
+    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
+                                       Q(project_number__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -37,6 +39,7 @@ def order_list(request):
     return render(request, "order.html", parameters)
 
 
+@login_required
 def order_add(request):
     form = OrderForm(request.POST or None, request.FILES or None)
     proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
@@ -53,6 +56,7 @@ def order_add(request):
     return render(request, "orderAdd.html", parameters)
 
 
+@login_required
 def order_edit(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
@@ -70,6 +74,7 @@ def order_edit(request, order_id):
     return render(request, "orderEdit.html", parameters)
 
 
+@login_required
 def order_delete(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:
@@ -90,6 +95,7 @@ def order_delete(request, order_id):
     return render(request, "orderDelete.html", parameters)
 
 
+@login_required
 def order_archive(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:

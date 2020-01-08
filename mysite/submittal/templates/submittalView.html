@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+submittal_number_generator{% extends 'base.html' %}
 {% load staticfiles %}
 {% load submittal_tags %}
 {% load custom_tags %}
@@ -112,9 +112,7 @@
         </footer>
     </div>
     <br />
-    <button class="btn btn-info" id="emailSubmittal">Email Company Submittal</button>
-    <a href="{{ submittal_url }}"><button class="btn btn-info" id="printSubmittal">Generate Company Submittal</button></a>
-    <button class="btn btn-info" id="printCover">Print Cover Letter</button>
+    <a href="{{ submittal_url }}"><button class="btn btn-info" id="printSubmittal">Download Submittal</button></a>
     <a href="{% url 'submittalHome' %}"><button class="btn btn-danger">Done</button></a>
     <script type="text/javascript" src="{% static "js/printThis.js" %}"></script>
     <script>

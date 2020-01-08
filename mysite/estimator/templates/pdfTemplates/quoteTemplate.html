@@ -6,23 +6,7 @@
     <head>
         <meta charset="utf-8">
         <title>Proposal</title>
-        <style type="text/css">
-            .signature { width: 160px; display: inline-block; float: left; }
-            @page {
-                size: a4 portrait;
-                @frame header_frame {
-                    -pdf-frame-content: header_content;
-                    width: 512pt; height: 150pt; left: 40pt; top: 20pt;
-                }
-                @frame content_frame {
-                    width: 512pt; left: 40pt; top: 95pt; height: 700pt;
-                }
-                @frame footer_frame {
-                    -pdf-frame-content: footer_content;
-                    width: 512pt; height: 40pt; left: 40pt; bottom: 10pt;
-                }
-            }
-        </style>
+        {% include "pdfTemplates/headStyle.html" %}
     </head>
     <body>
 
@@ -33,7 +17,7 @@
 
 <div id="content_frame">
     <div class="content">
-        <div class="row form-line" style="text-align: center; padding: 20px 0; font-size: 18px;">
+        <div class="row form-line" style="text-align: center; padding: 10px 0; font-size: 18px;">
             <div class="col-sm-6"><b>Quotation:</b> {% estimate_number_generator quote.estimate.id %}</div>
         </div>
         <div class="row form-line" style="font-size: 10pt;">
@@ -133,7 +117,7 @@
         <div class="row form-line">
             <div class="col-sm-12" style="vertical-align: text-top;">
                 <p>If you have any questions please feel free to contact me.</p>
-                <p>By:<br />{{ user_name }}<br />{{ user_title }}</p>
+                <p>By:<br />{{ user_name }}, {{ user_title }}</p>
                 <p><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" class="signature" style="height: 50px;" /><br />Signature</p>
             </div>
         </div>

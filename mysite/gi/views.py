@@ -7,10 +7,13 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.db.models import Q
 from ..core.forms import EmailForm
+from django.contrib.auth.decorators import login_required
+
 
 # Create your views here.
 
 
+@login_required
 def invoice_list(request):
     form = EmailForm(request.POST)
     if request.user.last_name == '' or request.user.last_name is None:
@@ -83,13 +86,13 @@ def invoice_list(request):
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
 
-        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__contains=search)
-                                              | Q(order__project_number__contains=search)) \
+        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+                                              | Q(order__project_number__icontains=search)) \
             .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__contains=search)
-                                              | Q(order__project_number__contains=search)) \
+        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+                                              | Q(order__project_number__icontains=search)) \
             .order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -104,6 +107,7 @@ def invoice_list(request):
     return render(request, "invoice.html", parameters)
 
 
+@login_required
 def invoice_add(request):
     if request.user.last_name == '' or request.user.last_name is None:
         user_name = 'TAB Technologies, INC. Operator'
@@ -151,13 +155,29 @@ def invoice_add(request):
                               }
                 invoice_pdf = Invoice.create_invoice_pdf(parameters)
                 parameters['invoice_pdf'] = invoice_pdf[1]
-                return redirect('invoiceHome')
+                return redirect('invoiceView', invoice.id)
     parameters = {'form': form,
                   'orders': orders
                   }
     return render(request, "invoiceAdd.html", parameters)
 
 
+@login_required
+def invoice_view(request, invoice_id):
+    invoice = Invoice.objects.get(id=invoice_id)
+    total_amount_due = calculate_total_amount_due(invoice)
+    parameters = {
+        'invoice': invoice,
+        'total_amount_due': total_amount_due,
+        'estimate': invoice.order.proposal.quote.estimate,
+        'WEB_URL': WEB_URL,
+        'MEDIA_URL': MEDIA_URL,
+        'STATIC_URL': STATIC_URL,
+    }
+    return render(request, "invoiceView.html", parameters)
+
+
+@login_required
 def invoice_edit(request, invoice_id):
     if request.user.last_name == '' or request.user.last_name is None:
         user_name = 'TAB Technologies, INC. Operator'
@@ -210,6 +230,7 @@ def invoice_edit(request, invoice_id):
     return render(request, "invoiceEdit.html", parameters)
 
 
+@login_required
 def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
@@ -233,6 +254,7 @@ def invoice_delete(request, invoice_id):
     return render(request, "invoiceDelete.html", parameters)
 
 
+@login_required
 def invoice_archive(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:

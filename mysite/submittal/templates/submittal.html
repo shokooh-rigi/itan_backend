@@ -1,35 +1,201 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load submittal_tags %}
+{% load estimator_tags %}
 
 {% block content %}
     <div class="text-center">
         <a href="{% url 'submittalAdd' %}"><button type="button" class="btn btn-primary">New Company Submittal</button></a>
         <br /><br />
+         <div class="row" style="margin: 10px auto;">
+            <div class="pagination-select">
+                <header class="title">items per page</header>
+                <div class="btn-group">
+                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
+                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
+                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_all" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '' %}">all</a></button>
+                </div>
+            </div>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Project</th>
-                    <th>Attached Forms</th>
-                    <th>Cover Letter</th>
+                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th data-sortable="customer"><a href="{% if request.GET.ordering == 'customer' %}?{% url_replace request 'ordering' '-customer' %}{% else %}?{% url_replace request 'ordering' 'customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="project"><a href="{% if request.GET.ordering == 'project' %}?{% url_replace request 'ordering' '-project' %}{% else %}?{% url_replace request 'ordering' 'project' %}{% endif %}">Project</a></th>
+                    <th>Regenerate PDF</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for submittal in object_list %}
+                {% for submittal in submittals %}
                     {% if submittal.archive == False %}
                         <tr>
                             <td>{{ submittal.id }}</td>
                             <td>{{ submittal.customer }}</td>
                             <td>{{ submittal.project }}</td>
-                            <td>{% for form in submittal.submittal_form.all %}{{ form }}{%if not forloop.last%}, {%endif%}{% endfor %}</td>
-                            <td><a href="{% url 'submittalView' submittal_id=submittal.id %}">View</a></td>
-                            <td><a href="{% url 'submittalDelete' submittal_id=submittal.id %}"><img src = "{% static '/admin/img/icon-deletelink.svg' %}" /></a></td>
+                            <td><a href="{% url 'submittalPages' submittal_id=submittal.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit PDF"></div></a></td>
+                            <td>
+                                <a href="{% url 'submittalDelete' submittal_id=submittal.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+                                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/submittal/submittal-{% submittal_number_generator submittal.id %}.pdf" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% submittal_number_generator submittal.id %}" data-id="{{ submittal.id }}" data-project="{{ submittal.project }} - Submittal"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                            </td>
                         </tr>
                     {% endif %}
                 {% endfor %}
             </tbody>
         </table>
+        <div class="pagination">
+          {% if submittals.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' submittals.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in submittals.paginator.page_range %}
+
+            {% if submittals.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > submittals.number|add:'-3' and num < submittals.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if submittals.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' submittals.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' submittals.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
     </div>
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header" style="display: block;">
+                <button type="button" class="close" data-dismiss="modal" style="float: right;">&times;</button>
+                <h4 class="modal-title" style="float: left;">Email Estimate</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {{ field.help_text }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {{ form.email_id.as_hidden }}
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-success" value="Next" name="send">Send</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+    <script>
+
+
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
+
+
+
+    $(document).ready(function() {
+        $(".alert").css('display', 'none');
+        $(document).on("click", ".email_modal", function () {
+             $(".modal-body #id_email_id").val( $(this).data('id') );
+             $(".modal-body #id_subject").val( $(this).data('project') );
+             $(".modal-header .modal-title").text('Email Submittal #' + $(this).data('name'));
+        });
+        var sortables = ['id', 'customer', 'project'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+            }
+        }
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=5') > 0) {
+            $(".pagination-select #paginate_5").addClass('selected');
+            $(".pagination-select #paginate_5 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
 {% endblock %}

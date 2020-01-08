@@ -52,13 +52,14 @@ INSTALLED_APPS = [
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'custom_user.apps.CustomUserConfig',
     'djrichtextfield',
+    'import_export',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
     'mysite.mgmreport',
     'mysite.order',
     'mysite.coi',
-    'mysite.gi'
+    'mysite.gi',
 ]
 
 MIDDLEWARE = [

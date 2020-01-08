@@ -10,7 +10,7 @@ class Estimate(models.Model):
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='cu_person')
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=False, null=True)
     engineer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='en_person')
-    service = models.ManyToManyField(Service, related_name='estimates', blank=False, null=True)
+    service = models.ManyToManyField(Service, related_name='estimates', blank=False)
     due_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
     confirm_date = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)

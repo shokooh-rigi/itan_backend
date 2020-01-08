@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+{% load custom_tags %}
+
+{% block content %}
+    <h2>Invoice No. {{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</h2>
+    <div class="container text-left" style="padding: 30px 10px;">
+        <div class="content">
+            <h3 style="text-align: center; margin: 20px auto;">Invoice Statement</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Invoice No.: <b>{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</b></li>
+                <li class="list-group-item">Project No.: <b>{{ invoice.order.project_number }}</b></li>
+                <li class="list-group-item">Estimate No.: <b>{% estimate_number_generator estimate.id %}</b></li>
+                <li class="list-group-item">Customer: <b>{{ estimate.customer }}</b></li>
+                <li class="list-group-item">Project: <b>{{ estimate.project }}</b></li>
+                <li class="list-group-item">Date Started: <b>{{ invoice.date_started }}</b></li>
+                <li class="list-group-item">Date Completed: <b>{{ invoice.date_completed }}</b></li>
+                <li class="list-group-item">Terms: <b>{{ invoice.terms }}</b></li>
+                <li class="list-group-item">Description: <b>{{ invoice.description }} at {{ estimate.project.name }}</b></li>
+                <li class="list-group-item">Amount in USD: <b>${% estimate_total_calculator estimate.id %}</b></li>
+                <li class="list-group-item">Sub Total: <b>${% estimate_total_calculator estimate.id %}</b></li>
+                <li class="list-group-item">Percent of performance completed: <b>{{ invoice.percent_of_performance_completed }}%</b></li>
+                <li class="list-group-item">Total payment received to date: <b>${{ invoice.total_payment_received_to_date|floatformat:2 }}</b></li>
+                <li class="list-group-item">Past due amount: <b>${{ invoice.past_due_amount|floatformat:2 }}</b></li>
+                <li class="list-group-item">Total amount due: <b>${{ total_amount_due|floatformat:2 }}</b></li>
+            </ul>
+            <br />
+        </div>
+    <div class="text-center">
+        <div class="row form-line">
+            <div class="col-lg-12">
+                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/invoice-{{ invoice.order.project_number|slice:"3:" }}{{ invoice.id|stringformat:"03d" }}.pdf"><button name="print" class="btn btn-info" id="printStatement" formnovalidate>Download Invoice</button></a>
+                <a href="{% url 'invoiceHome' %}"><input type="submit" class="btn btn-primary" value="Go Back To Invoice List" name="done" /></a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

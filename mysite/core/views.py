@@ -1,5 +1,4 @@
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -10,10 +9,10 @@ from django.contrib import messages
 from django.contrib.admin.models import LogEntry, ADDITION
 from django.contrib.contenttypes.models import ContentType
 from ..coi.models import *
-
 from mysite.core.forms import SignUpForm
 from mysite.core.tokens import account_activation_token
 from .forms import *
+from django.contrib.auth.decorators import login_required
 
 
 @login_required
@@ -45,6 +44,7 @@ def signup(request):
     return render(request, 'signup.html', {'form': form})
 
 
+@login_required
 def change_password(request):
     if request.method == 'POST':
         form = ChangePassword(request.user, request.POST)

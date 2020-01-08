@@ -7,10 +7,12 @@ from django.core.mail import EmailMessage
 from ..core.views import htmlbodytemplate_tag_converter
 from .models import Coi
 from mysite.core.models import Person, ModulesToEmailTemplateRelation
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
 
+@login_required
 def coi_list(request):
     pagination = 20
     if request.GET.get('paginate_by'):
@@ -31,6 +33,7 @@ def coi_list(request):
     return render(request, "coi.html", parameters)
 
 
+@login_required
 def coi_create(request):
     form = CoiForm(request.POST or None, request.FILES or None)
     contractors = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
@@ -44,7 +47,9 @@ def coi_create(request):
             if request.POST.get("next"):
                 new_coi = form.save()
                 to_email = form.cleaned_data['email']
+                to_email = to_email.replace(" ", "").replace(";", ",").split(',')
                 cc = form.cleaned_data['cc']
+                cc = cc.replace(" ", "").replace(";", ",").split(',')
                 subject = form.cleaned_data['subject']
                 if ModulesToEmailTemplateRelation.objects.filter(module=6).exists():
                     body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=6).template.content

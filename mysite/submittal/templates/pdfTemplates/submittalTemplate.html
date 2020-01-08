@@ -6,23 +6,7 @@
     <head>
         <meta charset="utf-8">
         <title>Submittal Letterhead</title>
-        <style type="text/css">
-            .logo { width: 160px; display: inline-block; float: left; }
-            @page {
-                size: a4 portrait;
-                @frame header_frame {
-                    -pdf-frame-content: header_content;
-                    width: 512pt; height: 150pt; left: 40pt; top: 20pt;
-                }
-                @frame content_frame {
-                    width: 512pt; left: 40pt; top: 95pt; height: 700pt;
-                }
-                @frame footer_frame {
-                    -pdf-frame-content: footer_content;
-                    width: 512pt; height: 40pt; left: 40pt; bottom: 10pt;
-                }
-            }
-        </style>
+        {% include "pdfTemplates/headStyle.html" %}
     </head>
     <body>
 
@@ -33,34 +17,37 @@
 <div id="content_frame">
     <div class="content" style="font-size: 14px;">
         <div class="row form-line" style="padding: 20px 0 2px 0;">
-            <div class="col-sm-6 "><b>Date: </b>{{ submittal.created_on|date:'m-d-Y' }}</div>
+            <div class="col-sm-12" style="text-align: right;">{{ submittal.created_on|date:"SHORT_DATE_FORMAT" }}</div>
         </div>
         <div class="row form-line">
             <div class="col-sm-6">
-                <div style="padding: 3px;">{{ submittal.customer.company.name }}</div>
-                <div style="padding: 3px;">{{ submittal.customer.company.street }}<br />
-                    {{ submittal.customer.company.city }}, {{ submittal.customer.company.state }}, {{ submittal.customer.company.zip }}</div>
-                <div style="padding: 3px;">{{ submittal.customer.name }}</div>
+                <div style="padding: 5px; font-weight: bold;">{{ submittal.customer.company.name }}
+                    {% if submittal.customer.company.address_line_1 %}<br />{{ submittal.customer.company.address_line_1 }}{% endif %}
+                    {% if submittal.customer.company.address_line_2 %}<br />{{ submittal.customer.company.address_line_2 }}{% endif %}
+                    {% if submittal.customer.company.city %}<br />{{ submittal.customer.company.city }}{% endif %}
+                    {% if submittal.customer.company.state %}, {{ submittal.customer.company.state }}{% endif %}
+                    {% if submittal.customer.company.zip %}, {{ submittal.customer.company.zip }}{% endif %}
+                </div>
             </div>
         </div>
         <div class="row form-line">
-            <div class="col-sm-12" style="font-weight: bold;">
+            <div class="col-sm-12">
                 Re: TEST AND BALANCE SERVICES / 1001 PENN, Level 4 & 5, 1001 Penn Ave NW, Washington, DC
             </div>
         </div>
         <div class="row form-line">
             <div class="col-sm-12" style="">
-                Dear
+                <p>Dear
                 {% if submittal.customer.gender == 1 %}
                     Sir;
                 {% elif submittal.customer.gender == 2 %}
                     Mam;
                 {% else %}
                     One;
-                {% endif %}
-                <br />Per your request I am submitting the following information and attachments for your reference.
-                <br />Tab Technologies, Inc., is an independence agency, incorporated in the state of Virginia and is wholly owned by persons, who’s vested interests are solely balancing. TTI is a member of the Associated Air Balance Council (AABC).
-                <br />Presently, our immediate field personnel are listed below:
+                {% endif %}</p>
+                <p>Per your request I am submitting the following information and attachments for your reference.</p>
+                <p>{{ company_name }}, is an independence agency, incorporated in the state of Virginia and is wholly owned by persons, who’s vested interests are solely balancing. TTI is a member of the Associated Air Balance Council (AABC).</p>
+                <p>Presently, our immediate field personnel are listed below:</p>
             </div>
         </div>
 

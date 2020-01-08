@@ -86,53 +86,53 @@
          "key":"zip",
          "value":""
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":1,
       "fields":{
          "name":"MECHANICAL ENGINEER",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":2,
       "fields":{
          "name":"MECHANICAL CONTRACTOR",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":3,
       "fields":{
          "name":"ARCHITECT",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":4,
       "fields":{
          "name":"BUILDING OWNER",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":5,
       "fields":{
          "name":"Construction Company",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
-   }
+   },
   {
-      "model":"coi.CompanyType",
+      "model":"core.CompanyType",
       "pk":6,
       "fields":{
          "name":"General Contractor",
-         "value":""
+         "created_on":"2019-12-20 18:00:00.0"
       }
    }
 ]

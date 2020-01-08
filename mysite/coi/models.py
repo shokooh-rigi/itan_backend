@@ -7,9 +7,9 @@ from mysite.core.models import Person
 class Coi(models.Model):
     contractor = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True)
     contract_person_name = models.CharField(max_length=55, blank=False)
-    email = models.EmailField(max_length=55, blank=False)
+    email = models.CharField(max_length=55, blank=False)
     subject = models.CharField(max_length=100, blank=False)
-    cc = models.EmailField(max_length=55, blank=True)
+    cc = models.CharField(max_length=55, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

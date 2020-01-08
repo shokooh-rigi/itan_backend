@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+
+{% block content %}
+    <h2>Submittal Page Ordering for {{ submittal_id }}</h2>
+    <h3>Equipments for {{ interval_set.name }} Service</h3>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="alert alert-warning change-alert" style="display: none;">
+                <strong>Warning!</strong> You're about to change <span id="submittalform_message"></span> Ordering which you have specified before...
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_submittal_form" class="control-label">Select Form</label>
+                    <select name="submittal_form" class="form-control" required="" id="id_submittal_form">
+                        <option value="" selected="">---------</option>
+                        {% for submittal_form in submittal_forms %}
+                            <option value="{{ submittal_form.id }}" data-selectedbefore="{% if submittal_form.id in submittal_selected_in %}1{% else %}0{% endif %}">{{ submittal_form.form_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_ordering" class="control-label">Ordering in PDF File</label>
+                    {{ form.ordering }}
+                </div>
+            </div>
+            {{ form.submittal }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Add/Update Ordering" />
+                </div>
+            </div>
+        </div>
+	</form>
+    <br />
+    <ul class="list-group">
+    {% for submittal_form_selected in submittal_forms_selected %}
+        <li class="list-group-item">
+            Form Name: <b>{{ submittal_form_selected.submittal_form.form_name }} </b>
+            - Ordering: <b>{{ submittal_form_selected.ordering }} </b>
+            <a href="{% url 'submittalFormDelete' submittal_id=submittal_id submittal_form_id=submittal_form_selected.id %}" id="submittal_form_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+        </li>
+    {%  endfor %}
+    </ul>
+    <br />
+    <a href="{% url 'submittalView' submittal_id=submittal_id %}"><button class="btn btn-success big" >Generate PDF</button></a>
+    <script>
+        if ($('#id_submittal_form').find(':selected').data('selectedbefore') === 1) {
+            $('#submittalform_message').text($('#id_submittal_form').find(':selected').text());
+            $('.change-alert').slideDown();
+        }
+        else {
+            $('.change-alert').slideUp();
+        }
+        $('#id_submittal_form').on('change', function() {
+            if ($(this).find(':selected').data('selectedbefore') === 1) {
+                $('#submittalform_message').text($(this).find(':selected').text());
+                $('.change-alert').slideDown();
+            }
+            else {
+                $('.change-alert').slideUp();
+            }
+        });
+    </script>
+{% endblock %}

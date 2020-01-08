@@ -52,7 +52,7 @@ def service_total_calculator(service, estimate_equipments_pricing):
 
 
 @register.simple_tag
-def estimate_total_calculator(estimate_id):
+def estimate_sub_total_calculator(estimate_id):
     estimate = Estimate.objects.get(id=estimate_id)
     estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
     estimate_sub = 0
@@ -64,21 +64,10 @@ def estimate_total_calculator(estimate_id):
         (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2)
     hours_calculated = round(
         (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2)
-    predemo_calculated = estimate.estimatedetails.pre_demo * 1200
-    estimate_total = estimate_sub + control_system_calculated + hours_calculated + predemo_calculated \
+    estimate_total = estimate_sub + control_system_calculated + hours_calculated \
                      + float(estimate.estimatedetails.adjustment)
     estimate_total = round(estimate_total, 2)
     return '{0:.2f}'.format(estimate_total)
-
-
-@register.simple_tag
-def estimate_sub_total_calculator(estimate_id):
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
-    estimate_sub = 0
-    for estimate_equipment_pricing in estimate_equipments_pricing:
-        equipment_total = equipment_total_calculator(estimate_equipment_pricing)
-        estimate_sub += float(equipment_total)
-    return '{0:.2f}'.format(estimate_sub)
 
 
 @register.simple_tag
@@ -88,6 +77,20 @@ def estimate_predemo_calculator(estimate_id):
     return '{0:.2f}'.format(predemo_calculated)
 
 
+@register.simple_tag
+def estimate_total_calculator(estimate_id):
+    estimate_sub_total = estimate_sub_total_calculator(estimate_id)
+    predemo = estimate_predemo_calculator(estimate_id)
+    estimate_total = float(estimate_sub_total) + float(predemo)
+    estimate_total = round(estimate_total, 2)
+    return '{0:.2f}'.format(estimate_total)
+
+
 @register.filter
 def in_setting(things, key):
     return things.filter(key=key)
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

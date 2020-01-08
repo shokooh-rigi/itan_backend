@@ -106,7 +106,7 @@ class Person(models.Model):
         verbose_name_plural = 'Company Contact Person'
 
     def __str__(self):
-        return self.company.name + ', ' + self.name + ', ' + self.company.company_type.name
+        return self.company.name + ', ' + self.name
 
 
 class Project(models.Model):
@@ -209,7 +209,7 @@ class LicenseFiles(models.Model):
 class CompanySubmittalForm(models.Model):
     form_name = models.CharField(max_length=255, blank=True)
     form_file = models.FileField(upload_to='uploads/submittalforms')
-    related_services = models.ManyToManyField(Service, blank=False, null=True)
+    related_services = models.ManyToManyField(Service, blank=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -266,6 +266,7 @@ class ModulesToEmailTemplateRelation(models.Model):
         (4, 'Invoice'),
         (5, 'Email Footer'),
         (6, 'COI'),
+        (7, 'Submittal'),
     )
     module = models.PositiveSmallIntegerField(choices=modules_list, unique=True, blank=False)
 
