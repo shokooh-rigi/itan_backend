@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'custom_user.apps.CustomUserConfig',
     'djrichtextfield',
     'import_export',
+    'rest_framework',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
     'mysite.order',
     'mysite.coi',
     'mysite.gi',
+    'api',
 ]
 
 MIDDLEWARE = [
