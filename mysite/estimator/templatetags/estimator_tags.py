@@ -1,5 +1,6 @@
 from django import template
 from ..forms import *
+import os
 
 register = template.Library()
 
@@ -94,3 +95,11 @@ def in_setting(things, key):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def is_not_windows():
+    if os.name == 'nt':
+        return False
+    else:
+        return True

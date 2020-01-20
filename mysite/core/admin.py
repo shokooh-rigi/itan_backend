@@ -42,7 +42,7 @@ class LogEntryAdmin(admin.ModelAdmin):
 admin.site.register(LogEntry, LogEntryAdmin)
 
 
-class LicenseInfoAdmin(admin.ModelAdmin):
+class LicenseInfoAdmin(ImportExportModelAdmin):
 
     def has_add_permission(self, request):
         return True
@@ -54,7 +54,7 @@ class LicenseInfoAdmin(admin.ModelAdmin):
 admin.site.register(LicenseInfo, LicenseInfoAdmin)
 
 
-class LicenseFilesAdmin(admin.ModelAdmin):
+class LicenseFilesAdmin(ImportExportModelAdmin):
 
     def has_add_permission(self, request):
         return True
@@ -66,7 +66,7 @@ class LicenseFilesAdmin(admin.ModelAdmin):
 admin.site.register(LicenseFiles, LicenseFilesAdmin)
 
 
-class SettingAdmin(admin.ModelAdmin):
+class SettingAdmin(ImportExportModelAdmin):
     readonly_fields = ('key',
                        )
 

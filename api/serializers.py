@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
-from custom_user.models import User
+from mysite.estimator.models import Estimate
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class ProjectsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = [ 'username', 'email', 'date_joined']
+        model = Estimate
+        fields = ['customer', 'project', 'engineer', 'created_by', 'created_on']
+

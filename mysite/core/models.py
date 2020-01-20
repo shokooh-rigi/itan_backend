@@ -6,43 +6,6 @@ from django.dispatch import receiver
 from djrichtextfield.models import RichTextField
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=30, null=True, blank=True)
-    emp_id = models.CharField(max_length=10, null=True, blank=True)
-    tel = models.CharField(max_length=30, null=True, blank=True)
-    fax = models.CharField(max_length=30, null=True, blank=True)
-    cell = models.CharField(max_length=30, null=True, blank=True)
-    e_sign = models.FileField(upload_to='uploads/users/signs', null=True, blank=True)
-    pic = models.FileField(upload_to='uploads/users/profiles', null=True, blank=True)
-    wallpaper = models.FileField(upload_to='uploads/users/wallpapers', null=True, blank=True)
-    stamp = models.FileField(upload_to='uploads/users/stamps', null=True, blank=True)
-
-    bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=30, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
-    email_confirmed = models.BooleanField(default=False)
-    USER_TYPE_CHOICES = (
-        (1, 'User'),
-        (2, 'QAA'),
-        (3, 'Admin'),
-        (4, 'Project Manager'),
-        (5, 'Tech'),
-        (6, 'Super User'),
-    )
-    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
-
-    def __str__(self):
-        return self.user.email
-
-
-@receiver(post_save, sender=User)
-def update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-    instance.profile.save()
-
-
 class CompanyType(models.Model):
     name = models.CharField(max_length=255, blank=False)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -107,6 +70,44 @@ class Person(models.Model):
 
     def __str__(self):
         return self.company.name + ', ' + self.name
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=30, null=True, blank=True)
+    emp_id = models.CharField(max_length=10, null=True, blank=True)
+    tel = models.CharField(max_length=30, null=True, blank=True)
+    fax = models.CharField(max_length=30, null=True, blank=True)
+    cell = models.CharField(max_length=30, null=True, blank=True)
+    e_sign = models.FileField(upload_to='uploads/users/signs', null=True, blank=True)
+    pic = models.FileField(upload_to='uploads/users/profiles', null=True, blank=True)
+    wallpaper = models.FileField(upload_to='uploads/users/wallpapers', null=True, blank=True)
+    stamp = models.FileField(upload_to='uploads/users/stamps', null=True, blank=True)
+
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    email_confirmed = models.BooleanField(default=False)
+    USER_TYPE_CHOICES = (
+        (1, 'User'),
+        (2, 'QAA'),
+        (3, 'Admin'),
+        (4, 'Project Manager'),
+        (5, 'Tech'),
+        (6, 'Super User'),
+    )
+    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
+    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='profile_customer')
+
+    def __str__(self):
+        return self.user.email
+
+
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
 
 
 class Project(models.Model):
