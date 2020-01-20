@@ -3,14 +3,38 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from mysite.estimator.models import Estimate
-from api.serializers import ProjectsSerializer
+from .models import Project
+from .serializers import ProjectSerializer
 
 
-class MyProjectsList(APIView):
+class Projects(APIView):
     def get(self, request, format=None):
         if request.user.is_authenticated:
-            projects = Estimate.objects.filter(customer=request.user.profile.customer).order_by('-created_on')
-            serializer = ProjectsSerializer(projects, many=True)
+            estimates = Estimate.objects\
+                .filter(customer=request.user.profile.customer)\
+                .order_by('-created_on')
+
+            items = map((lambda estimate: (estimate.project,
+                                           estimate.customer,
+                                           estimate.engineer)),
+                        estimates)
+
+            projects = map((lambda item:
+                            Project(
+                                item[0].id,
+                                item[0].name,
+                                item[0].address_line_1,
+                                item[0].city,
+                                item[0].state,
+                                item[0].zip,
+                                item[0].created_on,
+                                item[1].name,
+                                item[2].name,
+                                0)
+                            ),
+                           items)
+
+            serializer = ProjectSerializer(projects, many=True)
             return Response(serializer.data)
         else:
-            return Response('Forbidden 403', status=status.HTTP_403_FORBIDDEN)
+            return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
