@@ -10,7 +10,7 @@ from ..serializers.project import ProjectSerializer
 
 class ProjectsAPIView(APIView):
 
-    # Fetch a list of projects
+    # Fetch a list of Projects
     def get(self, request, format=None):
         if request.user.is_authenticated:
             estimates = Estimate.objects\
