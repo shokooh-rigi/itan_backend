@@ -3,11 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from mysite.estimator.models import Estimate
-from .models import Project
-from .serializers import ProjectSerializer
+
+from ..models.project import ProjectModel
+from ..serializers.project import ProjectSerializer
 
 
-class Projects(APIView):
+class ProjectsAPIView(APIView):
+
+    # Fetch a list of projects
     def get(self, request, format=None):
         if request.user.is_authenticated:
             estimates = Estimate.objects\
@@ -20,7 +23,7 @@ class Projects(APIView):
                         estimates)
 
             projects = map((lambda item:
-                            Project(
+                            ProjectModel(
                                 item[0].id,
                                 item[0].name,
                                 item[0].address_line_1,

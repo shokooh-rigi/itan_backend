@@ -1,4 +1,4 @@
-class Project(object):
+class ProjectModel(object):
     def __init__(self, id, name, address_line_1, city, state, zip, created_on, estimator, tech, passedSteps):
         self.id = id
         self.name = name
