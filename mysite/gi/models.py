@@ -10,7 +10,7 @@ class Invoice(models.Model):
     date_started = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True)
     date_completed = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True)
     terms = models.CharField(max_length=255, blank=True)
-    description = models.TextField(max_length=255, blank=True)
+    description = models.TextField(max_length=255, blank=True, default='Testing and Balancing')
     percent_of_performance_completed = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100),
                                                                                           MinValueValidator(0)])
     total_payment_received_to_date = models.DecimalField(max_digits=6, decimal_places=2, default=0)

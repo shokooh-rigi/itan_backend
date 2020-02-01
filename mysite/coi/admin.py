@@ -1,10 +1,11 @@
 from django.contrib import admin
 from .models import Coi, InsuranceCompany
+from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 
 
-class InsuranceCompanyAdmin(admin.ModelAdmin):
+class InsuranceCompanyAdmin(ImportExportModelAdmin):
 
     readonly_fields = (
         'key',
@@ -20,7 +21,7 @@ class InsuranceCompanyAdmin(admin.ModelAdmin):
 admin.site.register(InsuranceCompany, InsuranceCompanyAdmin)
 
 
-class CoiAdmin(admin.ModelAdmin):
+class CoiAdmin(ImportExportModelAdmin):
 
     def has_add_permission(self, request):
         return False

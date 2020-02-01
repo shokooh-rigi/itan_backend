@@ -9,11 +9,11 @@
             {% csrf_token %}
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_order" class="control-label">Order #<span class="required">*</span></label>
+                    <label for="id_order" class="control-label">Project #<span class="required">*</span></label>
                     <select name="order" class="form-control" required="" id="id_order">
                         <option value="" selected="" data-customer="" data-engineer="" data-totalamount="">---------</option>
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-engineer="{{ order.proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator order.proposal.quote.estimate.id %}">{% estimate_number_generator order.proposal.quote.estimate.id %}</option>
+                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-engineer="{{ order.proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator order.proposal.quote.estimate.id %}">{{ order.project_number }}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'invoiceAdd' %}" id="add_invoice"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>

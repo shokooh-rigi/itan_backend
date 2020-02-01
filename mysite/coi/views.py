@@ -62,13 +62,21 @@ def coi_create(request):
                     footer_content = "There was no email template defined for 'Email Footer'."
                 footer_content = htmlbodytemplate_tag_converter(2, footer_content, request, new_coi)
                 message = body_content + '<br />' + footer_content
-                email = EmailMessage(
-                    subject,
-                    message,
-                    'estimator@tabtechinc.com',
-                    [to_email],
-                    cc=[cc],
-                )
+                if cc != '':
+                    email = EmailMessage(
+                        subject,
+                        message,
+                        'estimator@tabtechinc.com',
+                        [to_email],
+                        cc=[cc]
+                    )
+                else:
+                    email = EmailMessage(
+                        subject,
+                        message,
+                        'estimator@tabtechinc.com',
+                        [to_email]
+                    )
                 email.content_subtype = "html"
                 email.send()
                 return redirect('CoiHome')

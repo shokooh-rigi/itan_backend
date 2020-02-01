@@ -36,6 +36,7 @@
             <div class="menu-top-menu-container">
                 <ul id="menu-top-menu" class="menu">
                     {% if user.is_authenticated %}
+                    <li class="menu-item"><a href="{% url 'bidFilesHome' %}">BFM</a></li>
                     <li class="menu-item">
                         <a href="#">Pre Order</a>
                         <ul>

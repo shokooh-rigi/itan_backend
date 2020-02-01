@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include('mysite.order.urls')),
     path('', include('mysite.coi.urls')),
     path('', include('mysite.gi.urls')),
+    path('', include('mysite.bidfilemgm.urls')),
     path('api/', include('api.urls')),
 ]
 

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>Create a New Bid File</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
+                    {{ form.customer }}
+                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
+                    {{ form.project }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_service" class="control-label">Due Date <span class="required">*</span></label>
+                    {{ form.due_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_service" class="control-label">Files <span class="required">*</span></label>
+                    {{ form.uploaded_file }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Next" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+        <script>
+$("#edit_person").click(function(){
+	person_id = $("#id_customer option:selected").val();
+	if(person_id != '') {
+        var url = "/person/" + person_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+$("#edit_project").click(function(){
+	project_name = $("#id_project option:selected").text();
+	var data = {"project_name":project_name};
+    $.ajax({
+        type : 'GET',
+        url :  '/project/ajax/get_project_id',
+        data : data,
+        success : function(data){
+        	var url = "/project/" + data['project_id'] + "/edit/";
+        	showEditPopup(url);
+        },
+        error: function(data) {
+          alert("Something Went Wrong");
+        }
+  	});
+});
+        $("#edit_engineer").click(function(){
+	person_id = $("#id_engineer option:selected").val();
+	if(person_id != '') {
+        var url = "/person/" + person_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+    </script>
+
+{% endblock %}

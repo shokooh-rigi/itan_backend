@@ -199,7 +199,7 @@ def invoice_edit(request, invoice_id):
                 invoice = form.save()
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.po_number).zfill(3) + str(invoice.id).zfill(3),
+                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
                               'invoice': invoice,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
@@ -235,8 +235,9 @@ def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
-            parameters = {'file_name': 'invoice-' + str(invoice_id),
+            parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(this_invoice.id).zfill(3),
                           }
+            print(parameters)
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()
         return redirect('invoiceHome')

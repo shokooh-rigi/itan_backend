@@ -17,25 +17,25 @@
 
 <div id="content_frame">
     <div class="content">
-            <div class="row form-line" style="text-align: center; padding: 5px 0; font-size: 10pt;">
-                <table style="padding: 5px;">
+            <div class="row form-line" style="text-align: center; padding: 0; font-size: 9pt;">
+                <table style="padding: 0;">
                   <tbody>
                     <tr style="text-align: center;">
-                        <td style="font-weight: bold; text-align: left; vertical-align: bottom; width: 70%; color: #aaa; font-size: 36px; padding-top: 20px;">INVOICE</td>
-                        <td style="padding: 5px; font-weight: bold; width: 15%;">
+                        <td style="font-weight: bold; text-align: left; vertical-align: bottom; width: 70%; color: #aaa; font-size: 34px; padding-top: 12px;">INVOICE</td>
+                        <td style="padding: 2px; font-weight: bold; width: 15%;">
                             <div style="padding: 5px; font-weight: bold;">Date:</div>
-                            <div style="padding: 5px; font-weight: bold;">Invoice NO:</div>
+                            <div style="padding: 0px; font-weight: bold;">Invoice NO:</div>
                         </td>
                         <td style="font-weight: bold; width: 15%;">
                             <div style="padding: 5px; font-weight: bold;">{{ invoice.created_on|date:'m/d/Y' }}</div>
-                            <div style="padding: 5px; font-weight: bold;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</div>
+                            <div style="padding: 0px; font-weight: bold;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</div>
                         </td>
                     </tr>
                   </tbody>
                </table>
             </div>
-            <div class="row form-line" style="font-size: 10pt;">
-               <table style="padding: 10px;">
+            <div class="row form-line" style="font-size: 9pt;">
+               <table style="padding: 0 0 5px 0;">
                   <tbody>
                     <tr style="text-align: left; border: none;">
                         <td style="padding: 5px 0 0 0; font-weight: bold;">Bill To: </td>
@@ -59,7 +59,7 @@
                   </tbody>
                </table>
             </div>
-            <div class="row form-line" style="font-size: 10pt;">
+            <div class="row form-line" style="font-size: 9pt;">
                <table style="padding: 10px; border: 1px solid #000; text-align: center;">
                   <tbody>
                     <tr style="">
@@ -85,7 +85,7 @@
                         <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 20%;">AMOUNT in USD</td>
                     </tr>
                     <tr style="border: 1px solid #000;">
-                        <td style="padding: 5px 0 0 0;">{{ invoice.description }} at {{ estimate.project.name }}</td>
+                        <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
                         <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id %} </td>
                     </tr>
                     <tr style="text-align: right;">
@@ -105,7 +105,7 @@
                         <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.past_due_amount|floatformat:2 }} </td>
                     </tr>
                     <tr style="text-align: right;">
-                        <td style="padding: 5px 5px 0 5px; font-size: 12pt;">Total amount due: </td>
+                        <td style="padding: 5px 5px 0 5px; font-size: 11pt;">Total amount due: </td>
                         <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ total_amount_due|floatformat:2 }} </td>
                     </tr>
 
@@ -113,30 +113,30 @@
                </table>
                <br />
             </div>
-            <div class="row form-line text-center" style="font-size: 10pt; text-align: center;">
+            <div class="row form-line text-center" style="font-size: 9pt; text-align: center;">
                 If you have any questions concerning this invoice, feel free to contact us at any time.
-                <table style="padding: 20px; font-size: 9pt;">
+                <table style="padding: 20px; font-size: 8pt;">
                   <tbody>
                     <tr style="text-align: center;">
                         <td style="padding: 5px; font-weight: bold;">Signature:</td>
-                        <td style="padding: 5px;"><img alt="" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" class="signature" style="height: 50px;" /></td>
+                        <td style="padding: 5px;"><img alt="" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_signature }}" class="signature" style="height: 50px;" /></td>
                         <td style="padding: 5px; font-weight: bold;"> </td>
                         <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
-                        <td style="padding: 5px;"><span style="text-decoration: underline;">{{ user_name }}</span><br /><span style="text-decoration: underline;">{{ user_title }}</span></td>
+                        <td style="padding: 5px;"><span style="text-decoration: underline;">{{ license_owner }}</span>, <span style="text-decoration: underline;">{{ owner_title }}</span></td>
                     </tr>
                   </tbody>
                </table>
             </div>
-            <div class="row form-line text-center" style="text-align: center; font-size: 11pt;">
+            <div class="row form-line text-center" style="text-align: center; font-size: 10pt;">
                 THANK YOU FOR YOUR BUSINESS!
             </div>
             <hr />
-            <div class="row form-line text-center" style="font-size: 9pt;">
-                <h3 style="text-align: center; font-size: 11pt; padding: 5px 0px 2px 0px;">Endorsement</h3>
+            <div class="row form-line text-center" style="font-size: 8pt;">
+                <h3 style="text-align: center; font-size: 10pt; padding: 2px 0 0 0;">Endorsement</h3>
                 Payment is recommended as follows:
             </div>
-            <div class="row form-line" style="font-size: 9pt;">
-                <table style="padding: 20px; border: 1px solid #000;">
+            <div class="row form-line" style="font-size: 8pt;">
+                <table style="padding: 5px 0 10px 0; border: 1px solid #000;">
                   <tbody>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px; font-weight: bold;">Amount of work completed to due date:</td>
@@ -161,7 +161,7 @@
                   </tbody>
                </table>
             </div>
-            <div class="row form-line" style="font-size: 9pt;">
+            <div class="row form-line" style="font-size: 8pt;">
                 <table style="padding: 5px;">
                   <tbody>
                     <tr style="text-align: center;">
