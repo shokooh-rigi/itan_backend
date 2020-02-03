@@ -1,0 +1,27 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>CustomerDashboard</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,300,400,500,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'ang/styles.css' %}"></head>
+
+<body>
+  <app-root></app-root>
+<script src="{% static 'ang/runtime-es2015.js' %}" type="module"></script>
+<script src="{% static 'ang/runtime-es5.js' %}" nomodule defer></script>
+<script src="{% static 'ang/polyfills-es5.js' %}" nomodule defer></script>
+<script src="{% static 'ang/polyfills-es2015.js' %}" type="module"></script>
+<script src="{% static 'ang/main-es2015.js' %}" type="module"></script>
+<script src="{% static 'ang/main-es5.js' %}" nomodule defer></script>
+</body>
+
+</html>

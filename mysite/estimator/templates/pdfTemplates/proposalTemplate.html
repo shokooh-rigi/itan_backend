@@ -67,10 +67,12 @@
                         </td>
                         <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator proposal.quote.estimate.id %}</td>
                     </tr>
+                    {% if predemo_calculated > 0 %}
                     <tr>
-                        <td style="padding: 5px;">Pre Demo:</td>
+                        <td style="padding: 5px;">Pre Demo Test:</td>
                         <td style="padding: 5px; font-weight: bold; text-align: right;">${{ predemo_calculated|floatformat:2 }}</td>
                     </tr>
+                    {% endif %}
                     <tr style="font-size: 16px;">
                         <td style="padding: 5px;">Total Amount:</td>
                         <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator proposal.quote.estimate.id %}</td>
@@ -87,7 +89,7 @@
                             <li>All Work to be preformed in strict accordance with project specifications and mechanical drawings.</li>
                             <li>All labor and certified instruments.</li>
                             <li>Necessary insurance and compensation certificated when required.</li>
-                            <li>Provide bound copies of final certified test report.</li>
+                            <li>Provide electronic copies of final certified test report.</li>
                             <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work preformed after this date will be subject to incurred labor rate increases.</li>
                         </ul>
                     </p>
