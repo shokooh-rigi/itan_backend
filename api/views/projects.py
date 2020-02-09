@@ -26,7 +26,7 @@ class ProjectsAPIView(APIView):
             estimates = self.filter_estimates(request, estimates)
 
             def map_func(result_page):
-                items = map((lambda estimate: (estimate.project,
+                items = map((lambda estimate: (estimate,
                                                estimate.created_by.profile.user.email,
                                                estimate.engineer,
                                                project_step_tracer(estimate))),
@@ -34,12 +34,12 @@ class ProjectsAPIView(APIView):
                 projects = map((lambda item:
                                 ProjectModel(
                                     item[0].id,
-                                    item[0].name,
-                                    item[0].address_line_1,
-                                    item[0].city,
-                                    item[0].state,
-                                    item[0].zip,
-                                    item[0].created_on,
+                                    item[0].project.name,
+                                    item[0].project.address_line_1,
+                                    item[0].project.city,
+                                    item[0].project.state,
+                                    item[0].project.zip,
+                                    item[0].project.created_on,
                                     item[1],
                                     item[2].name,
                                     item[3])
