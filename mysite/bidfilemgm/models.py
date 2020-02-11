@@ -15,6 +15,7 @@ class BidFile(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
     archive = models.BooleanField(default=False)
+    hidden_for_customer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-due_date"]

@@ -1,4 +1,5 @@
 from mysite.core.models import *
+from mysite.bidfilemgm.models import *
 import datetime
 from .render import Render
 
@@ -7,6 +8,7 @@ from .render import Render
 
 
 class Estimate(models.Model):
+    bfm = models.ForeignKey(BidFile, on_delete=models.SET_NULL, blank=True, null=True)
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='cu_person')
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=False, null=True)
     engineer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='en_person')
@@ -18,6 +20,7 @@ class Estimate(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
     archive = models.BooleanField(default=False)
+    hidden_for_customer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-due_date"]

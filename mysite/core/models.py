@@ -4,7 +4,8 @@ from custom_user.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from djrichtextfield.models import RichTextField
-
+from creditcards.models import CardNumberField, CardExpiryField
+from django.core.validators import MinLengthValidator
 
 class CompanyType(models.Model):
     name = models.CharField(max_length=255, blank=False)
@@ -97,7 +98,18 @@ class Profile(models.Model):
         (6, 'Super User'),
     )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
-    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='profile_customer')
+    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True,
+                                 related_name='profile_customer')
+    physical_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
+    physical_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    physical_city = models.CharField(max_length=55, blank=True, null=True)
+    physical_state = models.CharField(max_length=55, blank=True, null=True)
+    physical_zip = models.CharField(max_length=10, blank=True, null=True)
+    billing_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
+    billing_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    billing_city = models.CharField(max_length=55, blank=True, null=True)
+    billing_state = models.CharField(max_length=55, blank=True, null=True)
+    billing_zip = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.user.email
@@ -108,6 +120,28 @@ def update_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     instance.profile.save()
+
+
+class CreditCard(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=False)
+    name_of_card = models.CharField(max_length=50, blank=False, null=False)
+    card_number = CardNumberField()
+    card_expiration_date = CardExpiryField()
+    default_card = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.user.user) + ' at ' + str(self.name_of_card)
+
+
+class BusinessCheckingAccount(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=False)
+    name_of_account = models.CharField(max_length=50, blank=False, null=False)
+    bank_routing_number = models.CharField(max_length=9, validators=[MinLengthValidator(9)])
+    account_number = models.CharField(max_length=17, validators=[MinLengthValidator(17)])
+    business_tax_id = models.CharField(max_length=9, validators=[MinLengthValidator(9)])
+
+    def __str__(self):
+        return str(self.user.user) + ' at ' + str(self.name_of_account)
 
 
 class Project(models.Model):
