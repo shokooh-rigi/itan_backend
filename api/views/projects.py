@@ -19,35 +19,33 @@ class ProjectsAPIView(APIView):
     # Fetch a list of Projects
     def get(self, request, format=None):
         if request.user.is_authenticated:
-            estimates = Estimate.objects\
-                .filter(customer=request.user.profile.customer)
+            projects = BidFile.objects.filter(customer=request.user.profile.customer)
 
-            estimates = self.filter_estimates(request, estimates)
+            projects = self.filter_estimates(request, projects)
 
             def map_func(result_page):
-                items = map((lambda estimate: (estimate,
-                                               estimate.created_by.profile.user.email,
-                                               estimate.engineer,
-                                               project_step_tracer(estimate))),
+                items = map((lambda project: (project,
+                                              project.created_by.profile.user.email,
+                                              project_step_tracer(project),
+                                              project_steps_date(project, project_step_tracer(project)),
+                                              )),
                             result_page)
                 projects = map((lambda item:
                                 ProjectModel(
                                     item[0].id,
-                                    item[0].project.name,
-                                    item[0].project.address_line_1,
-                                    item[0].project.city,
-                                    item[0].project.state,
-                                    item[0].project.zip,
-                                    item[0].project.created_on,
+                                    item[0].project,
+                                    item[0].created_on,
                                     item[1],
-                                    item[2].name,
-                                    item[3])
-                                ),
+                                    item[2],
+                                    item[3][0],
+                                    item[3][1],
+                                    item[3][2]
+                                )),
                                items)
                 return projects
 
             paginator = StandardResultsSetPagination()
-            return paginator.get_paginated_response(estimates, request, map_func, self.serializer_class)
+            return paginator.get_paginated_response(projects, request, map_func, self.serializer_class)
         else:
             return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
 
@@ -81,12 +79,19 @@ class ProjectsAPIView(APIView):
 
 
 def project_step_tracer(estimate):
-    if Invoice.objects.filter(order__proposal__quote__estimate__id=estimate.id).exists():
-        return 5
-    elif Order.objects.filter(proposal__quote__estimate__id=estimate.id).exists():
-        return 4
-    elif Proposal.objects.filter(quote__estimate__id=estimate.id).exists():
+    if Order.objects.filter(proposal__quote__estimate__id=estimate.id).exists():
         return 3
-    elif Quote.objects.filter(estimate__id=estimate.id).exists():
+    elif Proposal.objects.filter(quote__estimate__id=estimate.id).exists():
         return 2
     return 1
+
+
+def project_steps_date(project, project_steps):
+    steps_date = ['', '', '']
+    if project_steps > 0:
+        steps_date[0] = project.created_on
+        if project_steps > 1:
+            steps_date[1] = project.quote.proposal.created_on
+            if project_steps > 2:
+                steps_date[2] = project.quote.proposal.order.created_on
+    return steps_date

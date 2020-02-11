@@ -7,6 +7,7 @@ from djrichtextfield.models import RichTextField
 from creditcards.models import CardNumberField, CardExpiryField
 from django.core.validators import MinLengthValidator
 
+
 class CompanyType(models.Model):
     name = models.CharField(max_length=255, blank=False)
     created_on = models.DateTimeField(auto_now_add=True)

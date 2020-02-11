@@ -64,6 +64,21 @@ class ProfileForm(forms.ModelForm):
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
 
 
+class AddressesForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('physical_address_line_1', 'physical_address_line_2', 'physical_city', 'physical_state',
+                  'physical_zip', 'billing_address_line_1', 'billing_address_line_2', 'billing_city',
+                  'billing_state', 'billing_zip')
+
+    def __init__(self, *args, **kwargs):
+        super(AddressesForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+        for field in self.fields.values():
+            field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+
+
 class EmailForm(forms.Form):
     subject = forms.CharField(required=True, label='Subject')
     to_email = forms.CharField(required=True, label='To')
