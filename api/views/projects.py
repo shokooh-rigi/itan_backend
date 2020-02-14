@@ -8,7 +8,6 @@ from mysite.estimator.models import *
 from mysite.order.models import *
 from mysite.gi.models import *
 
-from ..models.project import ProjectModel
 from ..serializers.project import ProjectSerializer
 from ..pagination import StandardResultsSetPagination
 
@@ -21,36 +20,15 @@ class ProjectsAPIView(APIView):
         if request.user.is_authenticated:
             projects = BidFile.objects.filter(customer=request.user.profile.customer)
 
-            projects = self.filter_estimates(request, projects)
-
-            def map_func(result_page):
-                items = map((lambda project: (project,
-                                              project.created_by.profile.user.email,
-                                              project_step_tracer(project),
-                                              project_steps_date(project, project_step_tracer(project)),
-                                              )),
-                            result_page)
-                projects = map((lambda item:
-                                ProjectModel(
-                                    item[0].id,
-                                    item[0].project,
-                                    item[0].created_on,
-                                    item[1],
-                                    item[2],
-                                    item[3][0],
-                                    item[3][1],
-                                    item[3][2]
-                                )),
-                               items)
-                return projects
+            projects = self.filter_projects(request, projects)
 
             paginator = StandardResultsSetPagination()
-            return paginator.get_paginated_response(projects, request, map_func, self.serializer_class)
+            return paginator.get_paginated_response(projects, request, None, self.serializer_class)
         else:
             return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
 
     # Filter the estimates
-    def filter_estimates(self, request, estimates):
+    def filter_projects(self, request, estimates):
         filter = {
             'search': request.query_params.get('search', ''),
             'fromDate': request.query_params.get('fromDate', ''),
@@ -78,22 +56,3 @@ class ProjectsAPIView(APIView):
         return estimates
 
 
-def project_step(project):
-    steps_date = ['', '', '', '']
-    if Order.objects.filter(proposal__quote__estimate__id=project.id).exists():
-        steps_date[0] = 3
-    elif Proposal.objects.filter(quote__estimate__id=project.id).exists():
-        return 2
-    steps_date[0] = 1
-    steps_date[1] = project.created_on
-    return steps_date
-
-
-def project_steps_date(project, project_steps):
-    if project_steps > 0:
-        steps_date[0] = project.created_on
-        if project_steps > 1:
-            steps_date[1] = project.quote.proposal.created_on
-            if project_steps > 2:
-                steps_date[2] = project.quote.proposal.order.created_on
-    return steps_date

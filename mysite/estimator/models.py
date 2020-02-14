@@ -8,7 +8,7 @@ from .render import Render
 
 
 class Estimate(models.Model):
-    bfm = models.ForeignKey(BidFile, on_delete=models.SET_NULL, blank=True, null=True)
+    bfm = models.OneToOneField(BidFile, on_delete=models.CASCADE, blank=True, null=True)
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='cu_person')
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=False, null=True)
     engineer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='en_person')
