@@ -7,6 +7,7 @@ from mysite.gi.models import Invoice
 
 class ProjectSerializer(serializers.ModelSerializer):
     project_step = serializers.SerializerMethodField()
+    project_name = serializers.CharField(source='project.name')
     project_address_line_1 = serializers.CharField(source='project.address_line_1')
     project_address_line_2 = serializers.CharField(source='project.address_line_2')
     project_city = serializers.CharField(source='project.city')
