@@ -25,8 +25,9 @@ class StandardResultsSetPagination(PageNumberPagination):
 
     def get_paginated_response(self, queryset, request, map_func, serializer_class):
         self._backup_page_size()
-        if request.query_params.get(self.page_size_query_param, '0') == '0':
-            self._set_page_size(len(queryset), len(queryset))
+        len_queryset = len(queryset)
+        if request.query_params.get(self.page_size_query_param, '0') == '0' and len_queryset != 0:
+            self._set_page_size(len_queryset, len_queryset)
 
         result_page = self.paginate_queryset(queryset, request)
         results = result_page if map_func is None else map_func(result_page)
