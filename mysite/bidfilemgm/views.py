@@ -8,9 +8,7 @@ from django.core.paginator import Paginator
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from django import forms
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic.edit import FormView
-from zipfile import ZipFile
+from mysite.core.models import Project
 
 # Create your views here.
 
@@ -31,12 +29,12 @@ def bid_files_list(request):
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
 
-        object_list = BidFile.objects.filter(Q(project__icontains=search)
+        object_list = BidFile.objects.filter(Q(project__name__icontains=search)
                                              | Q(customer__company__name__icontains=search))\
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
-        object_list = BidFile.objects.filter(Q(project__icontains=search)
+        object_list = BidFile.objects.filter(Q(project__name__icontains=search)
                                              | Q(customer__company__name__icontains=search))\
             .filter(archive=False).order_by(ordering)
 
@@ -65,7 +63,11 @@ def bidfiles_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
-                form.save()
+                b = Project(name=form.cleaned_data['project_name'], created_by=request.user)
+                b.save()
+                entry = form.save(commit=False)
+                entry.project = Project.objects.get(id=b.pk)
+                entry.save()
                 return redirect('bidFilesHome')
     parameters = {'form': form,
                   }

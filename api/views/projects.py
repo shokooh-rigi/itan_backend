@@ -78,16 +78,18 @@ class ProjectsAPIView(APIView):
         return estimates
 
 
-def project_step_tracer(estimate):
-    if Order.objects.filter(proposal__quote__estimate__id=estimate.id).exists():
-        return 3
-    elif Proposal.objects.filter(quote__estimate__id=estimate.id).exists():
+def project_step(project):
+    steps_date = ['', '', '', '']
+    if Order.objects.filter(proposal__quote__estimate__id=project.id).exists():
+        steps_date[0] = 3
+    elif Proposal.objects.filter(quote__estimate__id=project.id).exists():
         return 2
-    return 1
+    steps_date[0] = 1
+    steps_date[1] = project.created_on
+    return steps_date
 
 
 def project_steps_date(project, project_steps):
-    steps_date = ['', '', '']
     if project_steps > 0:
         steps_date[0] = project.created_on
         if project_steps > 1:

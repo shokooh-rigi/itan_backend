@@ -6,18 +6,20 @@ from .models import *
 
 class BidFileForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
-    uploaded_file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    project_name = forms.CharField(max_length=255)
 
     class Meta:
         model = BidFile
         fields = [
             'customer',
-            'project',
+            'project_name',
             'uploaded_file',
             'due_date',
             'note',
             'created_by',
         ]
+        exclude = ('project',)
 
     def __init__(self, *args, **kwargs):
         super(BidFileForm, self).__init__(*args, **kwargs)
