@@ -9,28 +9,26 @@ from mysite.estimator.models import *
 from mysite.order.models import *
 from mysite.gi.models import *
 
+from ..authentication_mixin import AuthenticationMixin
 from ..serializers.project import ProjectSerializer
 from ..pagination import StandardResultsSetPagination
 
 
-class ProjectsAPIView(APIView):
+class ProjectsAPIView(AuthenticationMixin, APIView):
     serializer_class = ProjectSerializer
 
     # Fetch a list of Projects
     def get(self, request, project_id=None, format=None):
-        if request.user.is_authenticated:
-            if project_id != None:
-                project = get_object_or_404(BidFile, pk=project_id)
-                serializer = self.serializer_class(project, many=False)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                projects = BidFile.objects.filter(
-                    customer=request.user.profile.customer)
-                projects = self.filter_projects(request, projects)
-                paginator = StandardResultsSetPagination()
-                return paginator.get_paginated_response(projects, request, None, self.serializer_class)
+        if project_id != None:
+            project = get_object_or_404(BidFile, pk=project_id)
+            serializer = self.serializer_class(project, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+            projects = BidFile.objects.filter(
+                customer=request.user.profile.customer)
+            projects = self.filter_projects(request, projects)
+            paginator = StandardResultsSetPagination()
+            return paginator.get_paginated_response(projects, request, None, self.serializer_class)
 
     # Filter the estimates
     def filter_projects(self, request, estimates):

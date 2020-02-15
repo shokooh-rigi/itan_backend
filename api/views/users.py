@@ -3,10 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from ..authentication_mixin import AuthenticationMixin
 from ..serializers.user import UserSerializer
 
 
-class UsersAPIView(APIView):
+class UsersAPIView(AuthenticationMixin, APIView):
 
     def _change_password(self, user, request):
         data = request.data
@@ -22,17 +23,14 @@ class UsersAPIView(APIView):
 
     # Update a User
     def put(self, request, format=None):
-        if request.user.is_authenticated:
-            user = request.user
-            serializer = UserSerializer(user, data=request.data)
-            if serializer.is_valid():
-                try:
-                    self._change_password(user, request)
-                    serializer.save()
-                    return Response(serializer.data)
-                except ValueError as error:
-                    return Response(error.args[0], status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response('Input object is not an instance of User.', status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            try:
+                self._change_password(user, request)
+                serializer.save()
+                return Response(serializer.data)
+            except ValueError as error:
+                return Response(error.args[0], status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+            return Response('Input object is not an instance of User.', status=status.HTTP_400_BAD_REQUEST)
