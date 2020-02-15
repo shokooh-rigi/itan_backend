@@ -1,4 +1,5 @@
 import datetime
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,14 +17,18 @@ class ProjectsAPIView(APIView):
     serializer_class = ProjectSerializer
 
     # Fetch a list of Projects
-    def get(self, request, format=None):
+    def get(self, request, project_id=None, format=None):
         if request.user.is_authenticated:
-            projects = BidFile.objects.filter(customer=request.user.profile.customer)
-
-            projects = self.filter_projects(request, projects)
-
-            paginator = StandardResultsSetPagination()
-            return paginator.get_paginated_response(projects, request, None, self.serializer_class)
+            if project_id != None:
+                project = get_object_or_404(BidFile, pk=project_id)
+                serializer = self.serializer_class(project, many=False)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                projects = BidFile.objects.filter(
+                    customer=request.user.profile.customer)
+                projects = self.filter_projects(request, projects)
+                paginator = StandardResultsSetPagination()
+                return paginator.get_paginated_response(projects, request, None, self.serializer_class)
         else:
             return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
 
@@ -54,5 +59,3 @@ class ProjectsAPIView(APIView):
                 ('' if filter['asc'] else '-') + 'project__' + filter['ordering'])
 
         return estimates
-
-

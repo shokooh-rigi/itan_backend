@@ -35,18 +35,3 @@ class ProjectSerializer(serializers.ModelSerializer):
             steps_date[0] = 5
             steps_date[5] = project.estimate.quote.proposal.order.invoice.date_completed
         return steps_date
-
-
-class MyProjectSerializer(serializers.ModelSerializer):
-    project_name = serializers.CharField(source='project.name')
-    project_address_line_1 = serializers.CharField(source='project.address_line_1')
-    project_address_line_2 = serializers.CharField(source='project.address_line_2')
-    project_city = serializers.CharField(source='project.city')
-    project_state = serializers.CharField(source='project.state')
-    project_zip = serializers.CharField(source='project.zip')
-    estimator_fName = serializers.CharField(source='created_by.profile.user.first_name')
-    estimator_lName = serializers.CharField(source='created_by.profile.user.last_name')
-
-    class Meta:
-        model = Estimate
-        fields = "__all__"
