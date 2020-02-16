@@ -40,9 +40,10 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
                 return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
             card = CreditCard()
-            card.user = request.user.profile
 
-        serializer = self.serializer_class(card, data=request.data)
+        data = request.data.copy()
+        data['user'] = str(request.user.profile.pk)
+        serializer = self.serializer_class(card, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
