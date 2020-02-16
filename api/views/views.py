@@ -1,4 +1,5 @@
 from .addresses import AddressesAPIView
+from .credit_card import CreditCardAPIView
 from .profiles import ProfilesAPIView
 from .projects import ProjectsAPIView
 from .session import SessionAPIView
