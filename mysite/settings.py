@@ -218,3 +218,5 @@ DJRICHTEXTFIELD_CONFIG = {
         'width': 700
     }
 }
+
+FILE_UPLOAD_PERMISSIONS = 0o644
