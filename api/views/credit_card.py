@@ -46,6 +46,15 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
         serializer = self.serializer_class(card, data=data)
         if serializer.is_valid():
             serializer.save()
+
+            if card.default_card == True:
+                user_cards = CreditCard.objects.filter(
+                    user=request.user.profile)
+                for user_card in user_cards:
+                    if user_card.pk != card.pk:
+                        user_card.default_card = False
+                        user_card.save()
+
             return Response(serializer.data)
         else:
             # 'Something went wrong while saving changes.'
