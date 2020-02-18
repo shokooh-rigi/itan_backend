@@ -13,6 +13,9 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
     def _get_obj(self, request, pk):
         return CreditCard.objects.get(pk=pk, user=request.user.profile)
 
+    def _http_404_not_found(self):
+        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
     # Get the CreditCard object/list
     def get(self, request, pk=None, format=None):
         if pk != None:
@@ -21,7 +24,7 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
                 serializer = self.serializer_class(card, many=False)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except CreditCard.DoesNotExist:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+                return self._http_404_not_found()
         else:
             cards = CreditCard.objects.filter(user=request.user.profile)
             serializer = self.serializer_class(cards, many=True)
@@ -37,7 +40,7 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
             try:
                 card = self._get_obj(request, pk)
             except CreditCard.DoesNotExist:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+                return self._http_404_not_found()
         else:
             card = CreditCard()
 
@@ -68,5 +71,5 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
                 card.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except CreditCard.DoesNotExist:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+                return self._http_404_not_found()
+        return self._http_404_not_found()

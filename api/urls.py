@@ -8,6 +8,10 @@ from .views import views
 urlpatterns = [
     path('profiles/', views.ProfilesAPIView.as_view()),
     path('profiles/addresses/', views.AddressesAPIView.as_view()),
+    path('business-checking-accounts/',
+         views.BusinessCheckingAccountAPIView.as_view()),
+    path('business-checking-accounts/<int:pk>/',
+         views.BusinessCheckingAccountAPIView.as_view()),
     path('credit-cards/', views.CreditCardAPIView.as_view()),
     path('credit-cards/<int:pk>/', views.CreditCardAPIView.as_view()),
     path('projects/', views.ProjectsAPIView.as_view()),
