@@ -1,13 +1,12 @@
 import datetime
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from mysite.estimator.models import *
-from mysite.order.models import *
-from mysite.gi.models import *
+from mysite.bidfilemgm.models import BidFile
 
 from ..authentication_mixin import AuthenticationMixin
 from ..serializers.project import ProjectSerializer
@@ -20,18 +19,22 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
     # Fetch a list of Projects
     def get(self, request, project_id=None, format=None):
         if project_id != None:
-            project = get_object_or_404(BidFile, pk=project_id)
-            serializer = self.serializer_class(project, many=False)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            try:
+                project = BidFile.objects.get(
+                    pk=project_id, customer=request.user.profile.customer)
+                serializer = self.serializer_class(project, many=False)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except BidFile.DoesNotExist:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
             projects = BidFile.objects.filter(
                 customer=request.user.profile.customer)
-            projects = self.filter_projects(request, projects)
+            projects = self._filter_projects(request, projects)
             paginator = StandardResultsSetPagination()
             return paginator.get_paginated_response(projects, request, None, self.serializer_class)
 
     # Filter the estimates
-    def filter_projects(self, request, estimates):
+    def _filter_projects(self, request, estimates):
         filter = {
             'search': request.query_params.get('search', ''),
             'fromDate': request.query_params.get('fromDate', ''),
@@ -57,3 +60,20 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
                 ('' if filter['asc'] else '-') + 'project__' + filter['ordering'])
 
         return estimates
+
+
+# Hides a Project
+def hide_project(request, project_id=None):
+    if request.method != 'PUT':
+        return
+
+    if request.user.is_authenticated:
+        try:
+            project = BidFile.objects.get(
+                pk=project_id, customer=request.user.profile.customer)
+            project.hidden_for_customer = True
+            project.save()
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        except BidFile.DoesNotExist:
+            return HttpResponse('Not found.', status=status.HTTP_404_NOT_FOUND)
+    return HttpResponse('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)

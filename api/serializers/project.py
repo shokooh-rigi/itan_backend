@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from mysite.estimator.models import *
-from mysite.estimator.models import *
+from mysite.bidfilemgm.models import BidFile
+from mysite.estimator.models import Proposal
 from mysite.order.models import Order
 from mysite.gi.models import Invoice
 
@@ -8,13 +8,17 @@ from mysite.gi.models import Invoice
 class ProjectSerializer(serializers.ModelSerializer):
     project_step = serializers.SerializerMethodField()
     project_name = serializers.CharField(source='project.name')
-    project_address_line_1 = serializers.CharField(source='project.address_line_1')
-    project_address_line_2 = serializers.CharField(source='project.address_line_2')
+    project_address_line_1 = serializers.CharField(
+        source='project.address_line_1')
+    project_address_line_2 = serializers.CharField(
+        source='project.address_line_2')
     project_city = serializers.CharField(source='project.city')
     project_state = serializers.CharField(source='project.state')
     project_zip = serializers.CharField(source='project.zip')
-    estimator_fName = serializers.CharField(source='created_by.profile.user.first_name')
-    estimator_lName = serializers.CharField(source='created_by.profile.user.last_name')
+    estimator_fName = serializers.CharField(
+        source='created_by.profile.user.first_name')
+    estimator_lName = serializers.CharField(
+        source='created_by.profile.user.last_name')
 
     class Meta:
         model = BidFile

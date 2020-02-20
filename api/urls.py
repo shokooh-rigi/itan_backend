@@ -17,6 +17,7 @@ urlpatterns = [
     path('credit-cards/<int:pk>/', views.CreditCardAPIView.as_view()),
     path('projects/', views.ProjectsAPIView.as_view()),
     path('projects/<int:project_id>/', views.ProjectsAPIView.as_view()),
+    path('projects/hide/<int:project_id>/', views.hide_project),
     path('session/', views.SessionAPIView.as_view()),
     path('users/', views.UsersAPIView.as_view()),
 ]
