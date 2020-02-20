@@ -14,13 +14,13 @@ class Estimate(models.Model):
     engineer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True, related_name='en_person')
     service = models.ManyToManyField(Service, related_name='estimates', blank=False)
     due_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
+    drawing_date = models.DateField(blank=True, null=True)
     confirm_date = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     note = models.TextField(max_length=255, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
     archive = models.BooleanField(default=False)
-    hidden_for_customer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-due_date"]

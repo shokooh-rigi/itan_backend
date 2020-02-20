@@ -5,16 +5,19 @@ from .models import *
 
 class EstimateForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
+    drawing_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
 
     class Meta:
         model = Estimate
         fields = [
+            'bfm',
             'customer',
             'project',
             'engineer',
             'service',
             'note',
             'due_date',
+            'drawing_date',
             'created_by',
         ]
 
@@ -24,6 +27,8 @@ class EstimateForm(ModelForm):
         self.fields['engineer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical engineer')
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
+        self.fields['drawing_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

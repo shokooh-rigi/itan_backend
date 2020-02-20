@@ -7,6 +7,18 @@
         <div class="form-group">
             {% csrf_token %}
             <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 37px;">
+                    <label for="id_bfm" class="control-label">BFM <span class="required">*</span></label>
+                    <select name="bfm" class="form-control" id="id_bfm">
+                        <option value="" data-customer="" data-project="" data-duedate="" selected="">---------</option>
+                        {% for bfm in bfms %}
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}">{{ bfm }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
                     {{ form.customer }}
@@ -38,8 +50,14 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 58px;">
-                    <label for="id_service" class="control-label">Due Date <span class="required">*</span></label>
+                    <label for="id_due_date" class="control-label">Due Date <span class="required">*</span></label>
                     {{ form.due_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_drawing_date" class="control-label">Drawing Date</label>
+                    {{ form.drawing_date }}
                 </div>
             </div>
             {{ form.created_by.as_hidden }}
@@ -52,6 +70,29 @@
         </div>
 	</form>
         <script>
+        if($("#id_bfm").val() === '') {
+        $('#id_customer').prop('disabled', false).val('');
+        $('#id_project').prop('disabled', false).val('');
+        $('#id_due_date').prop('disabled', false).val('');
+        }
+        else {
+            $("#id_customer").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('customer'));
+            $("#id_project").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('project'));
+            $("#id_due_date").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('duedate'));
+        }
+        $('#id_bfm').on('change', function() {
+            if($(this).val() === '') {
+                $('#id_customer').prop('disabled', false).val('');
+                $('#id_project').prop('disabled', false).val('');
+                $('#id_due_date').prop('disabled', false).val('');
+            }
+            else {
+                $("#id_customer").prop('disabled', 'disabled').val($(this).find(':selected').data('customer'));
+                $("#id_project").prop('disabled', 'disabled').val($(this).find(':selected').data('project'));
+                $("#id_due_date").prop('disabled', 'disabled').val($(this).find(':selected').data('duedate'));
+            }
+
+        });
 $("#edit_person").click(function(){
 	person_id = $("#id_customer option:selected").val();
 	if(person_id != '') {
