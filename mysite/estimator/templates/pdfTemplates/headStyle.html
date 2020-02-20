@@ -8,14 +8,14 @@
                     width: 530pt; height: 150pt; left: 40pt; top: 12pt;
                 }
                 @frame content_frame {
-                    width: 530pt; left: 40pt; top: 84pt; height: 652pt;
+                    width: 530pt; left: 40pt; top: 90pt; height: 652pt;
                 }
                 @frame footer_frame {
                     -pdf-frame-content: footer_content;
                     width: 530pt; height: 40pt; left: 40pt; bottom: 10pt;
                 }
             }
-            {%if is_not_windows%}
+
             @font-face {
                 font-family: customfont;
                 src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
@@ -24,5 +24,7 @@
             body {
                 font-family: customfont;
             }
-            {%endif%}
+
+            div.together { -pdf-keep-with-next: true; }
+
         </style>

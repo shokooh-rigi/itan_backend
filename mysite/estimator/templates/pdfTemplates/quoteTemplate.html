@@ -3,9 +3,9 @@
 {% load custom_tags %}
 
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Proposal</title>
+    <head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+        <title>Quotation</title>
         {% include "pdfTemplates/headStyle.html" %}
     </head>
     <body>
@@ -17,7 +17,7 @@
 
 <div id="content_frame">
     <div class="content">
-        <div class="row form-line" style="text-align: center; padding: 10px 0; font-size: 18px;">
+        <div class="row form-line" style="text-align: center; padding: 5px 0 10px 0; font-size: 18px;">
             <div class="col-sm-6"><b>Quotation:</b> {% estimate_number_generator quote.estimate.id %}</div>
         </div>
         <div class="row form-line" style="font-size: 10pt;">
@@ -117,7 +117,7 @@
             </div>
         </div>
         <div class="row form-line">
-            <div class="col-sm-12" style="vertical-align: text-top;">
+            <div class="col-sm-12 together" style="vertical-align: text-top;">
                 <p>If you have any questions please feel free to contact me.</p>
                 <p>By:<br />{{ user_name }}, {{ user_title }}</p>
                 <p><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" class="signature" style="height: 50px;" /><br />Signature</p>
