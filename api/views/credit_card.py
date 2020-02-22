@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -32,6 +33,9 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
 
     # Create a CreditCard
     def post(self, request, pk=None, format=None):
+        all_cards = CreditCard.objects.filter(user=request.user.profile)
+        if not all_cards.exists():
+            request.data['default_card'] = True
         return self.put(request, None, format)
 
     # Update/Create the CreditCard
@@ -44,19 +48,17 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
         else:
             card = CreditCard()
 
-        data = request.data.copy()
-        data['user'] = str(request.user.profile.pk)
-        serializer = self.serializer_class(card, data=data)
+        request.data['user'] = str(request.user.profile.pk)
+        serializer = self.serializer_class(card, data=request.data)
         if serializer.is_valid():
             serializer.save()
 
             if card.default_card == True:
-                user_cards = CreditCard.objects.filter(
-                    user=request.user.profile)
-                for user_card in user_cards:
-                    if user_card.pk != card.pk:
-                        user_card.default_card = False
-                        user_card.save()
+                other_cards = CreditCard.objects.filter(
+                    ~Q(pk=card.pk), user=request.user.profile)
+                for user_card in other_cards:
+                    user_card.default_card = False
+                    user_card.save()
 
             return Response(serializer.data)
         else:
