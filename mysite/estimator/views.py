@@ -43,7 +43,7 @@ def estimate_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'estimator@tabtechinc.com',
+                    'Estimator @ TAB <estimator@tabtechinc.com>',
                     to_email,
                     cc=cc,
                 )
@@ -122,7 +122,7 @@ def quotation_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'estimator@tabtechinc.com',
+                    'Estimator @ TAB <estimator@tabtechinc.com>',
                     to_email,
                     cc=cc,
                 )
@@ -198,7 +198,7 @@ def proposal_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'estimator@tabtechinc.com',
+                    'Estimator @ TAB <estimator@tabtechinc.com>',
                     to_email,
                     cc=cc,
                 )
@@ -247,7 +247,7 @@ def proposal_list(request):
 @login_required
 def estimator_add(request):
     form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    bfms = BidFile.objects.filter(archive=False)
+    bfms = BidFile.objects.filter(archive=False).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):

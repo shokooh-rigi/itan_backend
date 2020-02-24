@@ -7,8 +7,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Invoice(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False)
-    date_started = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True)
-    date_completed = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True)
+    date_started = models.DateField(blank=True, null=True)
+    date_completed = models.DateField(blank=True, null=True)
     terms = models.CharField(max_length=255, blank=True)
     description = models.TextField(max_length=255, blank=True, default='Testing and Balancing')
     percent_of_performance_completed = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100),

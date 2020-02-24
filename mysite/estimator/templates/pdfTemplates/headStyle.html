@@ -15,7 +15,9 @@
                     width: 530pt; height: 40pt; left: 40pt; bottom: 10pt;
                 }
             }
+            div.together { -pdf-keep-with-next: true; }
 
+            {% if is_not_windows == True %}
             @font-face {
                 font-family: customfont;
                 src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
@@ -24,7 +26,7 @@
             body {
                 font-family: customfont;
             }
+            {% endif %}
 
-            div.together { -pdf-keep-with-next: true; }
 
         </style>

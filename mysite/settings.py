@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'mysite.gi',
     'mysite.bidfilemgm',
     'api',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

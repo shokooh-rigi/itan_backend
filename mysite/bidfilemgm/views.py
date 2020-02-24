@@ -9,6 +9,9 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from django import forms
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from mysite.core.models import Project
+import zipfile
+from io import BytesIO
+import os
 
 # Create your views here.
 
@@ -54,20 +57,46 @@ def bid_files_list(request):
 
 @login_required
 def bidfiles_add(request):
+    def handle_uploaded_file(f, file_path):
+        destination = open(file_path, 'wb+')
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+
+    def create_zip_file(filenames, path, project_name):
+        zip_filename = os.path.join(path, project_name)
+        zf = zipfile.ZipFile(zip_filename, "w")
+        for file in filenames:
+            fdir, fname = os.path.split(file)
+            zf.write(file, fname)
+            os.remove(file)
+        zf.close()
+        return zf
     form = BidFileForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
             return redirect('bidFilesHome')
-        files = request.FILES.getlist('uploaded_file')
         if form.is_valid():
             if request.POST.get("next"):
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+                if not os.path.exists(temp_path):
+                    os.makedirs(temp_path)
+                files_list = request.FILES.getlist('uploaded_file')
+                files = []
+                for f in files_list:
+                    files.append(os.path.join(temp_path, f.name))
+                    handle_uploaded_file(f, files[-1])
                 form.cleaned_data['created_by'] = request.user
                 b = Project(name=form.cleaned_data['project_name'], created_by=request.user)
                 b.save()
                 entry = form.save(commit=False)
                 entry.project = Project.objects.get(id=b.pk)
                 entry.save()
+                zip_file_name = str(entry.pk) + '. ' + form.cleaned_data['project_name'] + '.zip'
+                myzip = create_zip_file(files, temp_path, zip_file_name)
+                os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
+                BidFile.objects.filter(id=entry.pk).update(uploaded_file=myzip.filename)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
                   }

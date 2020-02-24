@@ -84,11 +84,12 @@
             <thead>
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Invoice Number</a></th>
-                    <th data-sortable="order__proposal__quote__estimate__id"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__id' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__id' %}{% endif %}">Estimate ID</a></th>
+                    <th data-sortable="order__project_number"><a href="{% if request.GET.ordering == 'order__project_number' %}?{% url_replace request 'ordering' '-order__project_number' %}{% else %}?{% url_replace request 'ordering' 'order__project_number' %}{% endif %}">Project Number</a></th>
                     <th data-sortable="order__date_po_received"><a href="{% if request.GET.ordering == 'order__date_po_received' %}?{% url_replace request 'ordering' '-order__date_po_received' %}{% else %}?{% url_replace request 'ordering' 'order__date_po_received' %}{% endif %}">PO Date</a></th>
                     <th data-sortable="order__proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
                     <th data-sortable="order__proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
-                    <th>Total</th>
+                    <th>Total Ordered</th>
+                    <th>Total Invoiced</th>
                     <th>Created on</th>
                     <th>View</th>
                     <th>Actions</th>
@@ -99,11 +100,12 @@
                     {% if invoice.mark_as_paid == False %}
                         <tr>
                             <td>{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
-                            <td>{% estimate_number_generator invoice.order.proposal.quote.estimate.id %}</td>
+                            <td>{{ invoice.order.project_number }}</td>
                             <td>{{ invoice.order.date_po_received }}</td>
                             <td>{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
                             <td>{{ invoice.order.proposal.quote.estimate.project }}</td>
                             <td>${% estimate_total_calculator invoice.order.proposal.quote.estimate.id %}</td>
+                            <td>${% calculate_total_amount_due invoice %}</td>
                             <td>{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
                             <td><a href="{% url 'invoiceView' invoice_id=invoice.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>
                             <td>
@@ -203,7 +205,7 @@
              $(".modal-header .modal-title").text('Email Invoice #' + invoiceId);
         });
 
-        var sortables = ['id', 'order__proposal__quote__estimate__id', 'order__date_po_received', 'order__proposal__quote__estimate__customer', 'order__proposal__quote__estimate__project'];
+        var sortables = ['id', 'order__project_number', 'order__date_po_received', 'order__proposal__quote__estimate__customer', 'order__proposal__quote__estimate__project'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

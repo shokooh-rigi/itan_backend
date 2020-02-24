@@ -59,7 +59,7 @@ def invoice_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'estimator@tabtechinc.com',
+                    'Estimator @ TAB <estimator@tabtechinc.com>',
                     [to_email],
                     cc=[cc],
                 )

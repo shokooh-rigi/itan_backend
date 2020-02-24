@@ -23,4 +23,12 @@ class BidFile(models.Model):
         verbose_name_plural = 'Bid Files Management'
 
     def __str__(self):
-        return self.customer.name + ': ' + str(self.project)
+        return str(self.id) + ' - ' + self.customer.company.name + ': ' + str(self.project)
+
+    def replace_uploaded_file(self):
+        video_path = convert_video()
+
+        old_path = self.uploaded_file.path
+        self.uploaded_file.save(os.path.basename(video_path), File(open(video_path ,"wb")), save=True)
+        os.remove(video_path)
+        os.remove(old_path)

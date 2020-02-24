@@ -8,7 +8,7 @@
             {% csrf_token %}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 37px;">
-                    <label for="id_bfm" class="control-label">BFM <span class="required">*</span></label>
+                    <label for="id_bfm" class="control-label">BFM</label>
                     <select name="bfm" class="form-control" id="id_bfm">
                         <option value="" data-customer="" data-project="" data-duedate="" selected="">---------</option>
                         {% for bfm in bfms %}
