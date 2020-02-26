@@ -10,12 +10,13 @@
                 <div class="col-lg-12" style="padding-right: 37px;">
                     <label for="id_bfm" class="control-label">BFM</label>
                     <select name="bfm" class="form-control" id="id_bfm">
-                        <option value="" data-customer="" data-project="" data-duedate="" selected="">---------</option>
+                        <option value="" data-customer="" data-project="" data-duedate="" data-dlink="" selected="">---------</option>
                         {% for bfm in bfms %}
-                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}">{{ bfm }}</option>
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{{ bfm.uploaded_file.url }}">{{ bfm }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a>
+                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></div>
                 </div>
             </div>
             <div class="row form-line">
@@ -71,25 +72,35 @@
 	</form>
         <script>
         if($("#id_bfm").val() === '') {
-        $('#id_customer').prop('disabled', false).val('');
-        $('#id_project').prop('disabled', false).val('');
-        $('#id_due_date').prop('disabled', false).val('');
+            $('#id_customer').prop('readonly', false).val('');
+            $('#id_project').prop('readonly', false).val('');
+            $('#id_due_date').attr('readonly', false).prop('readonly', false).val('');
+            $('#id_customer option, #id_project option').attr('disabled', false);
+            $("#dlink_href").attr("href", '').hide();
         }
         else {
-            $("#id_customer").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('customer'));
-            $("#id_project").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('project'));
-            $("#id_due_date").prop('disabled', 'disabled').val($("#id_bfm").find(':selected').data('duedate'));
+            $('#id_customer option, #id_project option').attr('disabled', false);
+            $("#id_customer").val($("#id_bfm").find(':selected').data('customer'));
+            $("#id_project").val($("#id_bfm").find(':selected').data('project'));
+            $("#id_due_date").attr('readonly', true).prop('readonly', 'readonly').val($("#id_bfm").find(':selected').data('duedate'));
+            $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+            $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
         }
         $('#id_bfm').on('change', function() {
             if($(this).val() === '') {
-                $('#id_customer').prop('disabled', false).val('');
-                $('#id_project').prop('disabled', false).val('');
-                $('#id_due_date').prop('disabled', false).val('');
+                $('#id_customer').val('');
+                $('#id_project').val('');
+                $('#id_due_date').attr('readonly', false).val('');
+                $('#id_customer option, #id_project option').attr('disabled', false);
+                $("#dlink_href").attr("href", '').hide();
             }
             else {
-                $("#id_customer").prop('disabled', 'disabled').val($(this).find(':selected').data('customer'));
-                $("#id_project").prop('disabled', 'disabled').val($(this).find(':selected').data('project'));
-                $("#id_due_date").prop('disabled', 'disabled').val($(this).find(':selected').data('duedate'));
+                $('#id_customer option, #id_project option').attr('disabled', false);
+                $("#id_customer").val($(this).find(':selected').data('customer'));
+                $("#id_project").val($(this).find(':selected').data('project'));
+                $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
+                $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
             }
 
         });

@@ -298,6 +298,10 @@ def quote_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 quote = form.save()
+                if quote.estimate.bfm != '':
+                    this_bfm = get_object_or_404(BidFile, id=quote.estimate.bfm_id)
+                    this_bfm.archive = True
+                    this_bfm.save()
                 predemo_calculated = quote.estimate.estimatedetails.pre_demo * 1200
                 parameters = {'form': form,
                               'file_name': pdf_filename_generator(quote.estimate.id, 'Q'),
@@ -405,6 +409,8 @@ def estimate_delete(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
     if request.method == "POST" and request.user.is_authenticated and this_estimate.created_by == request.user:
         if request.POST.get("confirm"):
+            this_estimate.bfm.archive = False
+            this_estimate.bfm.save()
             this_estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(this_estimate.id, 'E')})
             this_estimate.delete()
         return redirect('estimatorHome')
@@ -427,6 +433,8 @@ def quote_delete(request, quote_id):
     this_quote = get_object_or_404(Quote, id=quote_id)
     if request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
+            this_quote.estimate.bfm.archive = False
+            this_quote.estimate.bfm.save()
             this_quote.delete_quote_pdf({'file_name': pdf_filename_generator(this_quote.estimate.id, 'Q')})
             this_quote.delete()
         return redirect('quotationHome')

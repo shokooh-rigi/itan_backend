@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import datetime
-from .forms import BidFileForm
+from .forms import BidFileForm, BidFileEditForm
 from .models import BidFile
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -57,21 +57,6 @@ def bid_files_list(request):
 
 @login_required
 def bidfiles_add(request):
-    def handle_uploaded_file(f, file_path):
-        destination = open(file_path, 'wb+')
-        for chunk in f.chunks():
-            destination.write(chunk)
-        destination.close()
-
-    def create_zip_file(filenames, path, project_name):
-        zip_filename = os.path.join(path, project_name)
-        zf = zipfile.ZipFile(zip_filename, "w")
-        for file in filenames:
-            fdir, fname = os.path.split(file)
-            zf.write(file, fname)
-            os.remove(file)
-        zf.close()
-        return zf
     form = BidFileForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
@@ -101,6 +86,23 @@ def bidfiles_add(request):
     parameters = {'form': form,
                   }
     return render(request, "bfmAdd.html", parameters)
+
+
+@login_required
+def bidfiles_edit(request, bidfiles_id):
+    this_bfm = get_object_or_404(BidFile, id=bidfiles_id)
+    form = BidFileEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('bidFilesHome')
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.save()
+                return redirect('bidFilesHome')
+    parameters = {'form': form,
+
+                  }
+    return render(request, "bfmEdit.html", parameters)
 
 
 @login_required
@@ -145,3 +147,21 @@ def bidfiles_delete(request, bidfiles_id):
     parameters = {'this_bidfile': this_bidfile
                   }
     return render(request, "bfmDelete.html", parameters)
+
+
+def handle_uploaded_file(f, file_path):
+    destination = open(file_path, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
+
+
+def create_zip_file(filenames, path, project_name):
+    zip_filename = os.path.join(path, project_name)
+    zf = zipfile.ZipFile(zip_filename, "w")
+    for file in filenames:
+        fdir, fname = os.path.split(file)
+        zf.write(file, fname)
+        os.remove(file)
+    zf.close()
+    return zf

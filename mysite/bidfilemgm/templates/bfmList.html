@@ -99,6 +99,7 @@
                             <td>{{ bidfile.project.name }}</td>
                             <td>{{ bidfile.due_date }}</td>
                             <td>
+                                <a href="{% url 'bidFilesEdit' bidfiles_id=bidfile.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'bidFilesDelete' bidfiles_id=bidfile.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'bidFilesArchive' bidfiles_id=bidfile.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
                                 <a href="{% if bidfile.uploaded_file %}{{ bidfile.uploaded_file.url }}{% endif %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>

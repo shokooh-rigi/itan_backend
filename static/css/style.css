@@ -391,7 +391,7 @@ iframe {
     box-shadow: inset 0px 0px 5px rgba(0,0,0,.1);
 }
 
-.table .icon {
+.icon {
     width: 18px;
     height: 18px;
     background-color: transparent;
@@ -401,31 +401,31 @@ iframe {
     margin: 0 auto;
 }
 
-.table .icon.not_confirmed {
+.icon.not_confirmed {
     filter: grayscale(100%);
 }
 
-.table .icon.editicon {
+.icon.editicon {
     background-image: url("../images/icons/edit.svg");
 }
 
-.table .icon.archiveicon {
+.icon.archiveicon {
     background-image: url("../images/icons/archive.svg");
 }
 
-.table .icon.downloadicon {
+.icon.downloadicon {
     background-image: url("../images/icons/download.svg");
 }
 
-.table .icon.sendmailicon {
+.icon.sendmailicon {
     background-image: url("../images/icons/sendmail.svg");
 }
 
-.table .icon.viewicon {
+.icon.viewicon {
     background-image: url("../images/icons/view.svg");
 }
 
-.table .icon.deleteicon {
+.icon.deleteicon {
     background-image: url("../images/icons/delete.svg");
 }
 
