@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'mysite.order',
     'mysite.coi',
     'mysite.gi',
+    'mysite.report',
     'mysite.bidfilemgm',
     'api',
     'django.contrib.humanize',

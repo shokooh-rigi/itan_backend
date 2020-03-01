@@ -126,7 +126,8 @@ def update_user_profile(sender, instance, created, **kwargs):
 
 class CreditCard(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=False)
-    name_of_card = models.CharField(max_length=50, blank=False, null=False)
+    card_nickname = models.CharField(max_length=50, blank=False, null=False)
+    name_on_the_card = models.CharField(max_length=255, blank=False, null=False)
     card_number = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
     card_expiration_date = CardExpiryField()
     default_card = models.BooleanField(default=False)
@@ -137,7 +138,7 @@ class CreditCard(models.Model):
     billing_zip = models.CharField(max_length=10, blank=False, null=True)
 
     def __str__(self):
-        return str(self.user.user) + ' at ' + str(self.name_of_card)
+        return str(self.user.user) + ' at ' + str(self.card_nickname)
 
 
 class BusinessCheckingAccount(models.Model):

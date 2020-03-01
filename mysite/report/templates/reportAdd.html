@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Record Report</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="reportAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_order" class="control-label">Project # <span class="required">*</span></label>
+                    <select name="order" class="form-control" required="" id="id_order">
+                        <option value="" selected="" data-customer="" data-engineer="" data-totalamount="">---------</option>
+                        {% for order in orders %}
+                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-engineer="{{ order.proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator order.proposal.quote.estimate.id %}">{{ order.project_number }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-icon"><a href="{% url 'invoiceAdd' %}" id="add_invoice"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="customer" class="control-label">Customer</label>
+                    <span class="form-control" id="customer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="engineer" class="control-label">Engineer</label>
+                    <span class="form-control" id="engineer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="total_amount" class="control-label">Total Amount</label>
+                    <span class="form-control" id="total_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_report_date" class="control-label">Report Date <span class="required">*</span></label>
+                    {{ form.report_date }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Create" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_order').on('change', function() {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#engineer").text($(this).find(':selected').data('engineer'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+
+{% endblock %}
