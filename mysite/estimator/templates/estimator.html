@@ -107,7 +107,7 @@
                             <td>{{ estimate.engineer.company.name }}</td>
                             <td>{% for service in estimate.service.all %}{{ service }}{%if not forloop.last%}, {%endif%}{% endfor %}</td>
                             <td>{{ estimate.due_date }}</td>
-                            <td>${% estimate_total_calculator estimate.id|intcomma %}</td>
+                            <td>${% estimate_total_calculator estimate.id %}</td>
                             <td><a href="{% url 'estimateEquipment' estimate_id=estimate.id estimate_service_id=0 %}" data-toggle="tooltip" data-placement="bottom" title="Edit"><div class="icon editicon"></div></a></td>
                             <td><a href="{% url 'estimateDetails' estimate_id=estimate.id %}"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                             <td><a href="{% url 'estimateBid' estimate_id=estimate.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>

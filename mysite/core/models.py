@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from djrichtextfield.models import RichTextField
 from creditcards.models import CardNumberField, CardExpiryField
 from django.core.validators import MinLengthValidator
+from django.forms import TextInput
 
 
 class CompanyType(models.Model):
@@ -101,16 +102,16 @@ class Profile(models.Model):
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True,
                                  related_name='profile_customer')
-    physical_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
+    physical_address_line_1 = models.CharField(max_length=255, blank=False, null=True)
     physical_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    physical_city = models.CharField(max_length=55, blank=True, null=True)
-    physical_state = models.CharField(max_length=55, blank=True, null=True)
-    physical_zip = models.CharField(max_length=10, blank=True, null=True)
-    billing_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
+    physical_city = models.CharField(max_length=55, blank=False, null=True)
+    physical_state = models.CharField(max_length=55, blank=False, null=True)
+    physical_zip = models.CharField(max_length=10, blank=False, null=True)
+    billing_address_line_1 = models.CharField(max_length=255, blank=False, null=True)
     billing_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    billing_city = models.CharField(max_length=55, blank=True, null=True)
-    billing_state = models.CharField(max_length=55, blank=True, null=True)
-    billing_zip = models.CharField(max_length=10, blank=True, null=True)
+    billing_city = models.CharField(max_length=55, blank=False, null=True)
+    billing_state = models.CharField(max_length=55, blank=False, null=True)
+    billing_zip = models.CharField(max_length=10, blank=False, null=True)
 
     def __str__(self):
         return self.user.email
@@ -126,9 +127,14 @@ def update_user_profile(sender, instance, created, **kwargs):
 class CreditCard(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=False)
     name_of_card = models.CharField(max_length=50, blank=False, null=False)
-    card_number = CardNumberField()
+    card_number = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
     card_expiration_date = CardExpiryField()
     default_card = models.BooleanField(default=False)
+    billing_address_line_1 = models.CharField(max_length=255, blank=False, null=True)
+    billing_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    billing_city = models.CharField(max_length=55, blank=False, null=True)
+    billing_state = models.CharField(max_length=55, blank=False, null=True)
+    billing_zip = models.CharField(max_length=10, blank=False, null=True)
 
     def __str__(self):
         return str(self.user.user) + ' at ' + str(self.name_of_card)

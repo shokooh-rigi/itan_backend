@@ -12,7 +12,7 @@
                     <select name="bfm" class="form-control" id="id_bfm">
                         <option value="" data-customer="" data-project="" data-duedate="" data-dlink="" selected="">---------</option>
                         {% for bfm in bfms %}
-                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{{ bfm.uploaded_file.url }}">{{ bfm }}</option>
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}">{{ bfm }}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a>

@@ -174,6 +174,13 @@ if ENV == 'test':
 MEDIA_URL_NOSLASH = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+if ENV == 'local':
+    UPLOAD_URL = '/uploads/'
+if ENV == 'production':
+    UPLOAD_URL = '/uploads/'
+if ENV == 'test':
+    UPLOAD_URL = '/uploads/'
+
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'home'

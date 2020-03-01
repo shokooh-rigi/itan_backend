@@ -5,7 +5,7 @@ from .forms import BidFileForm, BidFileEditForm
 from .models import BidFile
 from django.db.models import Q
 from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL
 from django import forms
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from mysite.core.models import Project
@@ -81,7 +81,7 @@ def bidfiles_add(request):
                 zip_file_name = str(entry.pk) + '. ' + form.cleaned_data['project_name'] + '.zip'
                 myzip = create_zip_file(files, temp_path, zip_file_name)
                 os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
-                BidFile.objects.filter(id=entry.pk).update(uploaded_file=myzip.filename)
+                BidFile.objects.filter(id=entry.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
                   }

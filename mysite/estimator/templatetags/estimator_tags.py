@@ -68,7 +68,7 @@ def estimate_sub_total_calculator(estimate_id):
     estimate_total = estimate_sub + control_system_calculated + hours_calculated \
                      + float(estimate.estimatedetails.adjustment)
     estimate_total = round(estimate_total, 2)
-    return '{0:.2f}'.format(estimate_total)
+    return estimate_total
 
 
 @register.simple_tag
