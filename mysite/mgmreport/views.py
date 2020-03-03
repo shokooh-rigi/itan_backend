@@ -32,7 +32,9 @@ def company_list(request):
 @login_required
 def bids_list(request):
 
-    object_list = Estimate.objects.all().order_by('customer')
+    object_list = ''
+    if request.GET.get('type') == 'estimate':
+        object_list = Estimate.objects.all().order_by('customer')
     if request.GET.get('type') == 'quote':
         object_list = Quote.objects.all().order_by('estimate__customer')
     if request.GET.get('type') == 'proposal':
@@ -48,7 +50,7 @@ def bids_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
-        if request.GET.get('type') == 'estimate' or request.GET.get('type') == '':
+        if request.GET.get('type') == 'estimate':
             object_list = object_list.filter(due_date__range=(from_date_obj, to_date_obj))
         if request.GET.get('type') == 'quote':
             object_list = object_list.filter(estimate__due_date__range=(from_date_obj, to_date_obj))

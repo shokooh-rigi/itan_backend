@@ -3,6 +3,7 @@ from mysite.bidfilemgm.models import BidFile
 from mysite.estimator.models import Proposal
 from mysite.order.models import Order
 from mysite.gi.models import Invoice
+from mysite.report.models import Report
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -38,4 +39,10 @@ class ProjectSerializer(serializers.ModelSerializer):
         if Invoice.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
             steps_date[0] = 5
             steps_date[5] = project.estimate.quote.proposal.order.invoice.date_completed
+        if Report.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
+            steps_date[0] = 6
+            steps_date[6] = project.estimate.quote.proposal.order.report.report_date
+            if Invoice.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
+                steps_date[0] = 7
+                steps_date[7] = project.estimate.quote.proposal.order.invoice.created_on
         return steps_date
