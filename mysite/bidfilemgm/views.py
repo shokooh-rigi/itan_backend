@@ -5,7 +5,7 @@ from .forms import BidFileForm, BidFileEditForm
 from .models import BidFile
 from django.db.models import Q
 from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from django import forms
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from mysite.core.models import Project
@@ -69,6 +69,16 @@ def bidfiles_add(request):
                     os.makedirs(temp_path)
                 files_list = request.FILES.getlist('uploaded_file')
                 files = []
+                size_sum = 0
+                for f in files_list:
+                    size_sum = size_sum + f.size
+                if size_sum > MAX_UPLOAD_SIZE:
+                    error_msg = "Selected files exceeded maximum upload size!"
+                    parameters = {
+                        'form': form,
+                        'error_msg': error_msg
+                    }
+                    return render(request, "bfmAdd.html", parameters)
                 for f in files_list:
                     files.append(os.path.join(temp_path, f.name))
                     handle_uploaded_file(f, files[-1])

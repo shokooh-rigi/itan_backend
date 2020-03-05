@@ -11,6 +11,7 @@ from django.db.models import Q
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from django.contrib.auth.decorators import login_required
+from platform import system
 
 # Create your views here.
 
@@ -326,6 +327,7 @@ def quote_add(request):
                               'WEB_URL': WEB_URL,
                               'STATIC_URL': STATIC_URL,
                               'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
                               }
                 quote_pdf = Quote.create_quote_pdf(parameters)
                 parameters['quote_pdf'] = quote_pdf[1]
@@ -394,6 +396,7 @@ def proposal_add(request):
                               'WEB_URL': WEB_URL,
                               'STATIC_URL': STATIC_URL,
                               'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
                               }
                 proposal_pdf = Proposal.create_proposal_pdf(parameters)
                 parameters['proposal_pdf'] = proposal_pdf[1]
@@ -891,6 +894,7 @@ def estimate_bid(request, estimate_id):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   'STATIC_URL': STATIC_URL,
+                  'os': system(),
                   }
     estimate_pdf = Estimate.create_estimate_pdf(parameters)
     parameters['estimate_pdf'] = estimate_pdf[1]

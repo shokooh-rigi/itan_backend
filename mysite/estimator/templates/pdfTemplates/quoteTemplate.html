@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 {% load estimator_tags %}
 {% load custom_tags %}
 
@@ -18,7 +18,7 @@
 <div id="content_frame">
     <div class="content">
         <div class="row form-line" style="text-align: center; padding: 5px 0 10px 0; font-size: 18px;">
-            <div class="col-sm-6"><b>Quotation:</b> {% estimate_number_generator quote.estimate.id %}</div>
+            <div class="col-sm-6"><b>Quotation: </b> {% estimate_number_generator quote.estimate.id %}</div>
         </div>
         <div class="row form-line" style="font-size: 10pt;">
             <table>

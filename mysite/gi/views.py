@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.db.models import Q
 from ..core.forms import EmailForm
 from django.contrib.auth.decorators import login_required
+from platform import system
 
 
 # Create your views here.
@@ -152,6 +153,7 @@ def invoice_add(request):
                               'WEB_URL': WEB_URL,
                               'STATIC_URL': STATIC_URL,
                               'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
                               }
                 invoice_pdf = Invoice.create_invoice_pdf(parameters)
                 parameters['invoice_pdf'] = invoice_pdf[1]

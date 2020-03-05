@@ -17,7 +17,7 @@
             }
             div.together { -pdf-keep-with-next: true; }
 
-            {% if is_not_windows == True %}
+            {% if os != 'Windows' %}
             @font-face {
                 font-family: customfont;
                 src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);

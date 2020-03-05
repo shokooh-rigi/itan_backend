@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
     <h2>Create a New Bid File</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <div class="alert alert-success">
+        <strong>Attention!</strong> {{ form.customer.help_text }}
+    </div>
     <form method="POST" enctype="multipart/form-data">
         <div class="form-group">
             {% csrf_token %}
