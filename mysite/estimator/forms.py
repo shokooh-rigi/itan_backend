@@ -89,8 +89,6 @@ class CustomerForm(ModelForm):
         super(CustomerForm, self).__init__(*args, **kwargs)
         self.fields['company'].queryset = ContactInfo.objects.filter(company_type__name__iexact='mechanical contractor')
 
-        self.fields.keyOrder = ['company', 'name']
-
         self.fields['tel'].widget.attrs['placeholder'] = 'XXX-XXX-XXXX'
         self.fields['tel'].widget.attrs['pattern'] = '\d{3}[\-]\d{3}[\-]\d{4}'
 
@@ -126,8 +124,6 @@ class EngineerForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EngineerForm, self).__init__(*args, **kwargs)
         self.fields['company'].queryset = ContactInfo.objects.filter(company_type__name__iexact='mechanical engineer')
-
-        self.fields.keyOrder = ['company', 'name']
 
         self.fields['tel'].widget.attrs['placeholder'] = 'XXX-XXX-XXXX'
         self.fields['tel'].widget.attrs['pattern'] = '\d{3}[\-]\d{3}[\-]\d{4}'

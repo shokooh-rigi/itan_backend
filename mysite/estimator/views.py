@@ -12,6 +12,7 @@ from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from django.contrib.auth.decorators import login_required
 from platform import system
+from django.utils.text import slugify
 
 # Create your views here.
 
@@ -946,4 +947,4 @@ def estimate_number_generator(estimate_id):
 def pdf_filename_generator(estimate_id, pdf_type):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name.replace(' ', '_')
+    return slugify(pdf_type + longidname + '_' + estimate.project.name)

@@ -9,6 +9,7 @@ from django.db.models import Q
 from ..core.forms import EmailForm
 from django.contrib.auth.decorators import login_required
 from platform import system
+from django.utils.text import slugify
 
 
 # Create your views here.
@@ -131,7 +132,7 @@ def invoice_add(request):
                 invoice = form.save()
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
+                              'file_name': invoice_pdf_filename_generator(invoice),
                               'invoice': invoice,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
@@ -201,7 +202,7 @@ def invoice_edit(request, invoice_id):
                 invoice = form.save()
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
+                              'file_name': invoice_pdf_filename_generator(invoice),
                               'invoice': invoice,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
@@ -237,9 +238,8 @@ def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
-            parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(this_invoice.id).zfill(3),
+            parameters = {'file_name': invoice_pdf_filename_generator(this_invoice),
                           }
-            print(parameters)
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()
         return redirect('invoiceHome')
@@ -313,3 +313,8 @@ def calculate_total_amount_due(invoice):
     total = (sub_total * completed_percentage / 100)
     total = total - received_to_date + past_amount
     return total
+
+
+def invoice_pdf_filename_generator(invoice):
+    my_string = 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3)
+    return slugify(my_string)
