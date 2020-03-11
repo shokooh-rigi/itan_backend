@@ -13,6 +13,15 @@ from ..serializers.project import ProjectSerializer
 from ..pagination import CustomPageNumberPagination
 
 
+def _get_projects(request, pk=None):
+    """Retrieves a project or a list of projects."""
+
+    customer = request.user.profile.customer
+    if pk != None:
+        return get_object_or_404(BidFile, pk=pk, customer=customer)
+    return BidFile.objects.filter(customer=customer, hidden_for_customer=False)
+
+
 class ProjectsAPIView(AuthenticationMixin, APIView):
     serializer_class = ProjectSerializer
 
@@ -20,16 +29,11 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
         """Fetch a list of Projects"""
 
         if project_id != None:
-            try:
-                project = BidFile.objects.get(
-                    pk=project_id, customer=request.user.profile.customer)
-                serializer = self.serializer_class(project, many=False)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except BidFile.DoesNotExist:
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            project = _get_projects(request, project_id)
+            serializer = self.serializer_class(project, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            projects = BidFile.objects.filter(
-                customer=request.user.profile.customer)
+            projects = _get_projects(request)
             projects = self._filter_projects(request, projects)
             paginator = CustomPageNumberPagination()
             return paginator.get_paginated_response(projects, request, self.serializer_class)
@@ -67,16 +71,10 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
 def hide_project(request, project_id=None):
     """Hides a Project"""
 
-    if request.method != 'PUT':
-        return
-
-    if request.user.is_authenticated:
-        try:
-            project = BidFile.objects.get(
-                pk=project_id, customer=request.user.profile.customer)
+    if request.method == 'PUT':
+        if request.user.is_authenticated:
+            project = _get_projects(request, project_id)
             project.hidden_for_customer = True
             project.save()
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except BidFile.DoesNotExist:
-            return HttpResponse('Not found.', status=status.HTTP_404_NOT_FOUND)
-    return HttpResponse('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+        return HttpResponse('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)

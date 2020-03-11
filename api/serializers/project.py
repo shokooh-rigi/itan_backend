@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from mysite.bidfilemgm.models import BidFile
 from mysite.estimator.models import Proposal
 from mysite.order.models import Order
@@ -23,7 +24,22 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BidFile
-        fields = "__all__"
+        fields = [
+            'id',
+            'due_date',
+            'uploaded_file',
+            'created_on',
+            'hidden_for_customer',
+            'project_step',
+            'project_name',
+            'project_address_line_1',
+            'project_address_line_2',
+            'project_city',
+            'project_state',
+            'project_zip',
+            'estimator_fName',
+            'estimator_lName'
+        ]
 
     def get_project_step(self, project):
         steps_date = ['', '', '', '', '', '', '', '', '', '']
