@@ -1,24 +1,31 @@
-from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..authentication_mixin import AuthenticationMixin
 from ..serializers.user import UserSerializer
 
 
-class SessionAPIView(AuthenticationMixin, APIView):
+class SessionAPIView(APIView):
+    serializer_class = UserSerializer
 
     def get(self, request, format=None):
         """Fetch Session information"""
 
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        if request.user.is_authenticated:
+            serializer = self.serializer_class(request.user)
+            return Response(serializer.data)
+        return Response('401 Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, format=None):
         """Create a new Session"""
 
-        pass
+        email = request.data.get('email', '')
+        password = request.data.get('password', '')
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+        return self.get(request, format)
 
     def delete(self, request, format=None):
         """Close the Session"""

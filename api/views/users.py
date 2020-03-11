@@ -8,6 +8,7 @@ from ..serializers.user import UserSerializer
 
 
 class UsersAPIView(AuthenticationMixin, APIView):
+    serializer_class = UserSerializer
 
     def _change_password(self, user, request):
         data = request.data
@@ -25,7 +26,7 @@ class UsersAPIView(AuthenticationMixin, APIView):
         """Update a User"""
 
         user = request.user
-        serializer = UserSerializer(user, data=request.data)
+        serializer = self.serializer_class(user, data=request.data)
         if serializer.is_valid():
             try:
                 self._change_password(user, request)
