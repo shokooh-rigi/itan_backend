@@ -7,8 +7,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            'title',
-            'emp_id',
             'tel',
             'fax',
             'cell',
