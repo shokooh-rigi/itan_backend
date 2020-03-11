@@ -17,8 +17,9 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
     def _http_404_not_found(self):
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Get the CreditCard object/list
     def get(self, request, pk=None, format=None):
+        """Get the CreditCard object/list"""
+
         if pk != None:
             try:
                 card = self._get_obj(request, pk)
@@ -31,15 +32,17 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
             serializer = self.serializer_class(cards, many=True)
             return Response(serializer.data)
 
-    # Create a CreditCard
     def post(self, request, pk=None, format=None):
+        """Create a CreditCard"""
+
         all_cards = CreditCard.objects.filter(user=request.user.profile)
         if not all_cards.exists():
             request.data['default_card'] = True
         return self.put(request, None, format)
 
-    # Update/Create the CreditCard
     def put(self, request, pk=None, format=None):
+        """Update/Create the CreditCard"""
+
         if pk != None:
             try:
                 card = self._get_obj(request, pk)
@@ -65,8 +68,9 @@ class CreditCardAPIView(AuthenticationMixin, APIView):
             # 'Something went wrong while saving changes.'
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Delete the CreditCard
     def delete(self, request, pk=None, format=None):
+        """Delete the CreditCard"""
+
         if pk != None:
             try:
                 card = self._get_obj(request, pk)

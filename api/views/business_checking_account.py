@@ -16,8 +16,9 @@ class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
     def _http_404_not_found(self):
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Get the BusinessCheckingAccount object/list
     def get(self, request, pk=None, format=None):
+        """Get the BusinessCheckingAccount object/list"""
+
         if pk != None:
             try:
                 account = self._get_obj(request, pk)
@@ -31,12 +32,14 @@ class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
             serializer = self.serializer_class(accounts, many=True)
             return Response(serializer.data)
 
-    # Create a BusinessCheckingAccount
     def post(self, request, pk=None, format=None):
+        """Create a BusinessCheckingAccount"""
+
         return self.put(request, None, format)
 
-    # Update/Create the BusinessCheckingAccount
     def put(self, request, pk=None, format=None):
+        """Update/Create the BusinessCheckingAccount"""
+
         if pk != None:
             try:
                 account = self._get_obj(request, pk)
@@ -54,8 +57,9 @@ class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Delete the BusinessCheckingAccount
     def delete(self, request, pk=None, format=None):
+        """Delete the BusinessCheckingAccount"""
+
         if pk != None:
             try:
                 account = self._get_obj(request, pk)

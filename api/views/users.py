@@ -21,8 +21,9 @@ class UsersAPIView(AuthenticationMixin, APIView):
                 raise ValueError(
                     'Your old password was entered incorrectly. Please enter it again.')
 
-    # Update a User
     def put(self, request, format=None):
+        """Update a User"""
+
         user = request.user
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():

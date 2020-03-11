@@ -16,8 +16,9 @@ from ..pagination import CustomPageNumberPagination
 class ProjectsAPIView(AuthenticationMixin, APIView):
     serializer_class = ProjectSerializer
 
-    # Fetch a list of Projects
     def get(self, request, project_id=None, format=None):
+        """Fetch a list of Projects"""
+
         if project_id != None:
             try:
                 project = BidFile.objects.get(
@@ -33,8 +34,9 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
             paginator = CustomPageNumberPagination()
             return paginator.get_paginated_response(projects, request, self.serializer_class)
 
-    # Filter the estimates
     def _filter_projects(self, request, estimates):
+        """Filter the estimates"""
+
         filter = {
             'search': request.query_params.get('search', ''),
             'fromDate': request.query_params.get('fromDate', ''),
@@ -62,8 +64,9 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
         return estimates
 
 
-# Hides a Project
 def hide_project(request, project_id=None):
+    """Hides a Project"""
+
     if request.method != 'PUT':
         return
 

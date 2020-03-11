@@ -9,16 +9,19 @@ from ..serializers.user import UserSerializer
 
 class SessionAPIView(AuthenticationMixin, APIView):
 
-    # Fetch Session information
     def get(self, request, format=None):
+        """Fetch Session information"""
+
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
-    # Create a new Session
     def post(self, request, format=None):
+        """Create a new Session"""
+
         pass
 
-    # Close the Session
     def delete(self, request, format=None):
+        """Close the Session"""
+
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

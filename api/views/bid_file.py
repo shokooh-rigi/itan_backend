@@ -65,8 +65,9 @@ class BidFilesAPIView(AuthenticationMixin, APIView):
         except:
             return False
 
-    # Create a new BidFile (and a Project)
     def post(self, request, format=None):
+        """Create a new BidFile (and a Project)"""
+
         if self._save_bidfile(request):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:

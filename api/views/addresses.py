@@ -9,13 +9,15 @@ from ..serializers.profile import AddressesSerializer
 class AddressesAPIView(AuthenticationMixin, APIView):
     serializer_class = AddressesSerializer
 
-    # Get the Profile addresses fields
     def get(self, request, format=None):
+        """Get the Profile addresses fields"""
+
         serializer = self.serializer_class(request.user.profile)
         return Response(serializer.data)
 
-    # Update the Profile addresses fields
     def put(self, request, format=None):
+        """Update the Profile addresses fields"""
+
         profile = request.user.profile
         serializer = self.serializer_class(profile, data=request.data)
         if serializer.is_valid():

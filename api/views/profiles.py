@@ -22,8 +22,9 @@ class ProfilesAPIView(AuthenticationMixin, APIView):
         else:
             return False
 
-    # Update the Profile and the User(first_name, last_name)
     def put(self, request, format=None):
+        """Update the Profile and the User(first_name, last_name)"""
+
         if self.update_user_and_profile(request):
             user = User.objects.get(pk=request.user.pk)
             serializer = UserSerializer(user)
