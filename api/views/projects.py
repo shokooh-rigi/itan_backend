@@ -10,7 +10,7 @@ from mysite.bidfilemgm.models import BidFile
 
 from ..authentication_mixin import AuthenticationMixin
 from ..serializers.project import ProjectSerializer
-from ..pagination import StandardResultsSetPagination
+from ..pagination import CustomPageNumberPagination
 
 
 class ProjectsAPIView(AuthenticationMixin, APIView):
@@ -30,8 +30,8 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
             projects = BidFile.objects.filter(
                 customer=request.user.profile.customer)
             projects = self._filter_projects(request, projects)
-            paginator = StandardResultsSetPagination()
-            return paginator.get_paginated_response(projects, request, None, self.serializer_class)
+            paginator = CustomPageNumberPagination()
+            return paginator.get_paginated_response(projects, request, self.serializer_class)
 
     # Filter the estimates
     def _filter_projects(self, request, estimates):
