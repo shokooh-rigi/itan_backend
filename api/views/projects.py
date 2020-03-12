@@ -13,27 +13,27 @@ from ..serializers.project import ProjectSerializer
 from ..pagination import CustomPageNumberPagination
 
 
-def _get_projects(request, pk=None):
-    """Retrieves a project or a list of projects."""
+def _get_project(request, pk):
+    """Retrieves a project"""
 
-    customer = request.user.profile.customer
-    if pk != None:
-        return get_object_or_404(BidFile, pk=pk, customer=customer)
-    return BidFile.objects.filter(customer=customer, hidden_for_customer=False)
+    return get_object_or_404(BidFile, pk=pk, customer=request.user.profile.customer)
 
 
 class ProjectsAPIView(AuthenticationMixin, APIView):
     serializer_class = ProjectSerializer
 
+    def _get_all_projects(self, request):
+        return BidFile.objects.filter(customer=request.user.profile.customer, hidden_for_customer=False)
+
     def get(self, request, project_id=None, format=None):
         """Fetch a list of Projects"""
 
         if project_id != None:
-            project = _get_projects(request, project_id)
+            project = _get_project(request, project_id)
             serializer = self.serializer_class(project, many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            projects = _get_projects(request)
+            projects = self._get_all_projects(request)
             projects = self._filter_projects(request, projects)
             paginator = CustomPageNumberPagination()
             return paginator.get_paginated_response(projects, request, self.serializer_class)
@@ -73,7 +73,7 @@ def hide_project(request, project_id=None):
 
     if request.method == 'PUT':
         if request.user.is_authenticated:
-            project = _get_projects(request, project_id)
+            project = _get_project(request, project_id)
             project.hidden_for_customer = True
             project.save()
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
