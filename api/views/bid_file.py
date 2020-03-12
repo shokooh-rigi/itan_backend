@@ -12,13 +12,18 @@ from ..authentication_mixin import AuthenticationMixin
 
 
 class BidFilesAPIView(AuthenticationMixin, APIView):
-    def _handle_uploaded_file(self, f, file_path):
+
+    def _handle_uploaded_file(self, file, file_path):
+        """Saves uploaded `[file]` in `[file_path]` folder"""
+
         destination = open(file_path, 'wb+')
-        for chunk in f.chunks():
+        for chunk in file.chunks():
             destination.write(chunk)
         destination.close()
 
     def _create_zip_file(self, filenames, path, project_name):
+        """Creates a zip file in `[path]/[project_name].zip` and writes `[filenames]` in it, then removes `[filenames]`."""
+
         zip_filename = os.path.join(path, project_name)
         zf = zipfile.ZipFile(zip_filename, "w")
         for file in filenames:
@@ -29,6 +34,8 @@ class BidFilesAPIView(AuthenticationMixin, APIView):
         return zf
 
     def _save_bidfile(self, request):
+        """Creates a new bidfile (and a project) and saves its files."""
+
         data = request.POST.copy()
         data['created_by'] = request.user.pk
         data['customer'] = request.user.profile.customer.pk
@@ -42,9 +49,9 @@ class BidFilesAPIView(AuthenticationMixin, APIView):
                     os.makedirs(temp_path)
                 files_list = request.FILES.getlist('uploaded_file')
                 files = []
-                for f in files_list:
-                    files.append(os.path.join(temp_path, f.name))
-                    self._handle_uploaded_file(f, files[-1])
+                for file in files_list:
+                    files.append(os.path.join(temp_path, file.name))
+                    self._handle_uploaded_file(file, files[-1])
 
                 project = Project(
                     name=form.cleaned_data['project_name'], created_by=request.user)

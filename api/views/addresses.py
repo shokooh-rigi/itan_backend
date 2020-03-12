@@ -18,8 +18,7 @@ class AddressesAPIView(AuthenticationMixin, APIView):
     def put(self, request, format=None):
         """Update the Profile addresses fields"""
 
-        profile = request.user.profile
-        serializer = self.serializer_class(profile, data=request.data)
+        serializer = self.serializer_class(request.user.profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
