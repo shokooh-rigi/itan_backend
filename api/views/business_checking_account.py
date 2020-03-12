@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,25 +11,21 @@ from mysite.core.models import BusinessCheckingAccount
 class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
     serializer_class = BusinessCheckingAccountSerializer
 
-    def _get_obj(self, request, pk):
-        return BusinessCheckingAccount.objects.get(pk=pk, user=request.user.profile)
+    def _get_account(self, request, pk):
+        return get_object_or_404(BusinessCheckingAccount, pk=pk, user=request.user.profile)
 
-    def _http_404_not_found(self):
-        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+    def _get_all_accounts(self, request):
+        return BusinessCheckingAccount.objects.filter(user=request.user.profile)
 
     def get(self, request, pk=None, format=None):
         """Get the BusinessCheckingAccount object/list"""
 
         if pk != None:
-            try:
-                account = self._get_obj(request, pk)
-                serializer = self.serializer_class(account, many=False)
-                return Response(serializer.data)
-            except BusinessCheckingAccount.DoesNotExist:
-                return self._http_404_not_found()
+            account = self._get_account(request, pk)
+            serializer = self.serializer_class(account, many=False)
+            return Response(serializer.data)
         else:
-            accounts = BusinessCheckingAccount.objects.filter(
-                user=request.user.profile)
+            accounts = self._get_all_accounts(request)
             serializer = self.serializer_class(accounts, many=True)
             return Response(serializer.data)
 
@@ -41,16 +38,12 @@ class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
         """Update/Create the BusinessCheckingAccount"""
 
         if pk != None:
-            try:
-                account = self._get_obj(request, pk)
-            except BusinessCheckingAccount.DoesNotExist:
-                return self._http_404_not_found()
+            account = self._get_account(request, pk)
         else:
             account = BusinessCheckingAccount()
 
-        data = request.data.copy()
-        data['user'] = str(request.user.profile.pk)
-        serializer = self.serializer_class(account, data=data)
+        request.data['user'] = str(request.user.profile.pk)
+        serializer = self.serializer_class(account, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -60,11 +53,6 @@ class BusinessCheckingAccountAPIView(AuthenticationMixin, APIView):
     def delete(self, request, pk=None, format=None):
         """Delete the BusinessCheckingAccount"""
 
-        if pk != None:
-            try:
-                account = self._get_obj(request, pk)
-                account.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except BusinessCheckingAccount.DoesNotExist:
-                return self._http_404_not_found()
-        return self._http_404_not_found()
+        account = self._get_account(request, pk)
+        account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
