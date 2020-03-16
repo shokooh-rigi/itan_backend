@@ -58,6 +58,7 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
                 filter['fromDate'], '%m/%d/%Y')
             to_date_obj = datetime.datetime.strptime(
                 filter['toDate'], '%m/%d/%Y')
+            to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
             estimates = estimates.filter(
                 project__created_on__range=(from_date_obj, to_date_obj))
 

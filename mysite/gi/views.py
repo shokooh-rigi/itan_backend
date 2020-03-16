@@ -9,7 +9,6 @@ from django.db.models import Q
 from ..core.forms import EmailForm
 from django.contrib.auth.decorators import login_required
 from platform import system
-from django.utils.text import slugify
 
 
 # Create your views here.
@@ -61,7 +60,7 @@ def invoice_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'Estimator @ TAB <estimator@tabtechinc.com>',
+                    DEFAULT_FROM_EMAIL,
                     [to_email],
                     cc=[cc],
                 )
@@ -87,6 +86,7 @@ def invoice_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
                                               | Q(order__project_number__icontains=search)) \
@@ -132,7 +132,7 @@ def invoice_add(request):
                 invoice = form.save()
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': invoice_pdf_filename_generator(invoice),
+                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
                               'invoice': invoice,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
@@ -202,7 +202,7 @@ def invoice_edit(request, invoice_id):
                 invoice = form.save()
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': invoice_pdf_filename_generator(invoice),
+                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
                               'invoice': invoice,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
@@ -238,7 +238,7 @@ def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
-            parameters = {'file_name': invoice_pdf_filename_generator(this_invoice),
+            parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(this_invoice.id).zfill(3),
                           }
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()
@@ -313,8 +313,3 @@ def calculate_total_amount_due(invoice):
     total = (sub_total * completed_percentage / 100)
     total = total - received_to_date + past_amount
     return total
-
-
-def invoice_pdf_filename_generator(invoice):
-    my_string = 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3)
-    return slugify(my_string)

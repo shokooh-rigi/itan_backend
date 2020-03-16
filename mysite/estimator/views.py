@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 import json
 import datetime
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from django.core.paginator import Paginator
 from django.core.mail import send_mail, BadHeaderError, EmailMessage
 from django.db.models import Q
@@ -12,7 +12,6 @@ from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from django.contrib.auth.decorators import login_required
 from platform import system
-from django.utils.text import slugify
 
 # Create your views here.
 
@@ -45,7 +44,7 @@ def estimate_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'Estimator @ TAB <estimator@tabtechinc.com>',
+                    DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -71,6 +70,7 @@ def estimate_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Estimate.objects.filter(Q(project__name__icontains=search)
                                               | Q(customer__company__name__icontains=search))\
@@ -124,7 +124,7 @@ def quotation_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'Estimator @ TAB <estimator@tabtechinc.com>',
+                    DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -150,6 +150,7 @@ def quotation_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
                                               | Q(estimate__customer__company__name__icontains=search))\
@@ -200,7 +201,7 @@ def proposal_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    'Estimator @ TAB <estimator@tabtechinc.com>',
+                    DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -225,6 +226,7 @@ def proposal_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
                                               | Q(quote__estimate__customer__company__name__icontains=search))\
@@ -947,4 +949,14 @@ def estimate_number_generator(estimate_id):
 def pdf_filename_generator(estimate_id, pdf_type):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return slugify(pdf_type + longidname + '_' + estimate.project.name)
+    return pdf_type + longidname + '_' + estimate.project.name\
+        .replace(' ', '_')\
+        .replace('!', '')\
+        .replace('@', '')\
+        .replace('#', '')\
+        .replace('$', '')\
+        .replace('%', '')\
+        .replace('^', '')\
+        .replace('&', '')\
+        .replace('*', '')\
+        .replace("/", '')

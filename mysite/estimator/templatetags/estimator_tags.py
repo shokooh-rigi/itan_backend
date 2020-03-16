@@ -27,7 +27,17 @@ def estimate_number_generator(estimate_id):
 def pdf_filename_generator(estimate_id, pdf_type):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name.replace(' ', '_')
+    return pdf_type + longidname + '_' + estimate.project.name\
+        .replace(' ', '_')\
+        .replace('!', '')\
+        .replace('@', '')\
+        .replace('#', '')\
+        .replace('$', '')\
+        .replace('%', '')\
+        .replace('^', '')\
+        .replace('&', '')\
+        .replace('*', '')\
+        .replace("/", '')
 
 
 @register.simple_tag
@@ -70,6 +80,10 @@ def estimate_sub_total_calculator(estimate_id):
     estimate_total = round(estimate_total, 2)
     return estimate_total
 
+@register.simple_tag
+def estimate_sub_total_calculator_display(estimate_id):
+    subt = estimate_sub_total_calculator(estimate_id)
+    return '{0:.2f}'.format(subt)
 
 @register.simple_tag
 def estimate_predemo_calculator(estimate_id):

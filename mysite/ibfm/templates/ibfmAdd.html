@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-    <h2>Create a New Bid File</h2>
+    <h2>Create a New iBid File</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
@@ -70,7 +70,7 @@ $("#edit_project").click(function(){
 	    alert("Something Went Wrong");
     }
 });
-$("#edit_engineer").click(function(){
+        $("#edit_engineer").click(function(){
 	person_id = $("#id_engineer option:selected").val();
 	if(person_id != '') {
         var url = "/person/" + person_id + "/edit/";

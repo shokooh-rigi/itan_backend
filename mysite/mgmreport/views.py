@@ -33,31 +33,36 @@ def company_list(request):
 def bids_list(request):
 
     object_list = ''
-    if request.GET.get('type') == 'estimate':
-        object_list = Estimate.objects.all().order_by('customer')
-    if request.GET.get('type') == 'quote':
-        object_list = Quote.objects.all().order_by('estimate__customer')
-    if request.GET.get('type') == 'proposal':
-        object_list = Proposal.objects.all().order_by('quote__estimate__customer')
-    if request.GET.get('type') == 'order':
-        object_list = Order.objects.all().order_by('proposal__quote__estimate__customer')
-    if request.GET.get('type') == 'invoice':
-        object_list = Invoice.objects.all().order_by('order__proposal__quote__estimate__customer')
 
-    from_date = request.GET.get("fromDate", '01/01/2000')
-    to_date = request.GET.get("toDate", '01/01/2100')
+    from_date = request.GET.get("fromDate")
+    to_date = request.GET.get("toDate")
+
+    from_date_is_greater = False
 
     if from_date and to_date:
+        if request.GET.get('type') == 'estimate':
+            object_list = Estimate.objects.all().order_by('customer')
+        if request.GET.get('type') == 'quote':
+            object_list = Quote.objects.all().order_by('estimate__customer')
+        if request.GET.get('type') == 'proposal':
+            object_list = Proposal.objects.all().order_by('quote__estimate__customer')
+        if request.GET.get('type') == 'order':
+            object_list = Order.objects.all().order_by('proposal__quote__estimate__customer')
+        if request.GET.get('type') == 'invoice':
+            object_list = Invoice.objects.all().order_by('order__proposal__quote__estimate__customer')
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
+        if from_date_obj > to_date_obj:
+            from_date_is_greater = True
         if request.GET.get('type') == 'estimate':
             object_list = object_list.filter(due_date__range=(from_date_obj, to_date_obj))
         if request.GET.get('type') == 'quote':
-            object_list = object_list.filter(estimate__due_date__range=(from_date_obj, to_date_obj))
+            object_list = object_list.filter(created_on__range=(from_date_obj, to_date_obj))
         if request.GET.get('type') == 'proposal':
-            object_list = object_list.filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj))
+            object_list = object_list.filter(created_on__range=(from_date_obj, to_date_obj))
         if request.GET.get('type') == 'order':
-            object_list = object_list.filter(estimated_date_of_project__range=(from_date_obj, to_date_obj))
+            object_list = object_list.filter(created_on__range=(from_date_obj, to_date_obj))
         if request.GET.get('type') == 'invoice':
             object_list = object_list.filter(created_on__range=(from_date_obj, to_date_obj))
 
@@ -89,5 +94,6 @@ def bids_list(request):
                   'customer_rows': customer_rows,
                   'total_of_all': total_of_all,
                   'total_rows': total_rows,
+                  'from_date_is_greater': from_date_is_greater,
                   }
     return render(request, "bidslist.html", parameters)

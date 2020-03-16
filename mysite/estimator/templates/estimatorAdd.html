@@ -115,20 +115,14 @@ $("#edit_person").click(function(){
     }
   	});
 $("#edit_project").click(function(){
-	project_name = $("#id_project option:selected").text();
-	var data = {"project_name":project_name};
-    $.ajax({
-        type : 'GET',
-        url :  '/project/ajax/get_project_id',
-        data : data,
-        success : function(data){
-        	var url = "/project/" + data['project_id'] + "/edit/";
-        	showEditPopup(url);
-        },
-        error: function(data) {
-          alert("Something Went Wrong");
-        }
-  	});
+	project_id = $("#id_project option:selected").val();
+    if(project_id != '') {
+        var url = "/project/" + project_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
 });
         $("#edit_engineer").click(function(){
 	person_id = $("#id_engineer option:selected").val();

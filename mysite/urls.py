@@ -29,6 +29,7 @@ urlpatterns = [
     path('', include('mysite.gi.urls')),
     path('', include('mysite.report.urls')),
     path('', include('mysite.bidfilemgm.urls')),
+    path('', include('mysite.ibfm.urls')),
     path('api/', include('api.urls')),
 ]
 

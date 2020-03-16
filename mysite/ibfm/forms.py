@@ -9,7 +9,7 @@ class BidFileForm(ModelForm):
     uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
     class Meta:
-        model = BidFile
+        model = iBidFile
         fields = [
             'customer',
             'project',
@@ -35,7 +35,7 @@ class BidFileEditForm(ModelForm):
     uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
     class Meta:
-        model = BidFile
+        model = iBidFile
         fields = [
             'customer',
             'project',

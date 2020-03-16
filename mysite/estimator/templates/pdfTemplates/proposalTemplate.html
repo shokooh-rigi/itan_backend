@@ -1,6 +1,7 @@
 {% load static %}
 {% load estimator_tags %}
 {% load custom_tags %}
+{% load humanize %}
 
 <html>
     <head>
@@ -65,12 +66,12 @@
                             {{ estimate_service }}{%if not forloop.last%}, {%endif%}
                             {% endfor %}
                         </td>
-                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator proposal.quote.estimate.id %}</td>
+                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator_display proposal.quote.estimate.id %}</td>
                     </tr>
                     {% if predemo_calculated > 0 %}
                     <tr>
                         <td style="padding: 5px;">Pre Demo Test:</td>
-                        <td style="padding: 5px; font-weight: bold; text-align: right;">${{ predemo_calculated|floatformat:2 }}</td>
+                        <td style="padding: 5px; font-weight: bold; text-align: right;">${{ predemo_calculated|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
                     <tr style="font-size: 16px;">

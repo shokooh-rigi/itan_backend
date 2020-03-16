@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'mysite.gi',
     'mysite.report',
     'mysite.bidfilemgm',
+    'mysite.ibfm',
     'api',
     'django.contrib.humanize',
 ]
@@ -230,3 +231,4 @@ DJRICHTEXTFIELD_CONFIG = {
 
 FILE_UPLOAD_PERMISSIONS = 0o644
 MAX_UPLOAD_SIZE = 262144000
+DEFAULT_FROM_EMAIL = 'Estimator at TAB <estimator@tabtechinc.com>'

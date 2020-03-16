@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load estimator_tags %}
+{% load humanize %}
 
 {% block content %}
     <div class="text-center">
@@ -23,13 +24,13 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_fromDate" class="control-label">Due Date From:</label>
+                    <label for="id_fromDate" class="control-label">Date From:</label>
                     <input type="text" name="fromDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_fromDate" value="{{ request.GET.fromDate }}" />
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_toDate" class="control-label">Due Date To:</label>
+                    <label for="id_toDate" class="control-label">Date To:</label>
                     <input type="text" name="toDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_toDate" value="{{ request.GET.toDate }}" />
                 </div>
             </div>
@@ -41,7 +42,7 @@
             </div>
             <input type="hidden" name="type" value="{{ request.GET.type }}" />
         </form>
-    {% if request.GET.fromDate > request.GET.toDate %}
+    {% if from_date_is_greater %}
         <div class="alert alert-danger">
           <strong>Error!</strong> To Date must be greater or equal to Form Date.
         </div>
@@ -51,6 +52,7 @@
             <br />Estimates Due Date Filtered From <b>{{ request.GET.fromDate }}</b> To <b>{{ request.GET.toDate }}</b><br /><br />
         {% endif %}
 
+        {% if request.GET.fromDate %}
 
         <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
         <table class="table table-striped" id="printThis">
@@ -66,7 +68,7 @@
                         <tr>
                             <td>{{ values|get_item:'customer_name' }}</td>
                             <td>{{ values|get_item:'total_bids' }}</td>
-                            <td>${{ values|get_item:'total' }}</td>
+                            <td>${{ values|get_item:'total'|floatformat:2|intcomma }}</td>
                         </tr>
                 {% endfor %}
                 <tr style="font-weight: bold;">
@@ -77,11 +79,13 @@
                         {{ total_rows }}
                     </td>
                     <td>
-                        ${{ total_of_all }}
+                        ${{ total_of_all|floatformat:2|intcomma }}
                     </td>
                 </tr>
             </tbody>
         </table>
+
+        {% endif %}
 
         {% endif %}
 

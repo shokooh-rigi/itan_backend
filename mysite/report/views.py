@@ -30,6 +30,7 @@ def report_list(request):
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Report.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
                                             | Q(order__project_number__icontains=search)) \

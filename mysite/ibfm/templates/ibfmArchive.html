@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load estimator_tags %}
+
+{% block content %}
+    {{ error_message }}
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <br />
+    {%if request.user.is_authenticated %}
+        <h2>Archive Bid Files {{ this_bidfile.id }}</h2>
+        <br />
+        <form method="POST" action="">
+            {% csrf_token %}
+            Are you sure you want to archive this bid files?<br /><br />
+            <input type="submit" class="btn btn-primary" value="Yes" name="confirm" />
+            <a href="{% url 'bidFilesHome' %}"><button class="btn btn-danger">Cancel</button></a>
+        </form>
+    {% endif %}
+
+{% endblock %}
