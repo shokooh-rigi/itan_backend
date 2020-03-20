@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Edit BidFile</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="bidFileEdit-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
+                    {{ form.customer }}
+                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
+                    {{ form.project }}
+                    <div class="form-icon"><a href="{% url 'projectCreate' %}" id="add_project" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="">
+                    <label for="id_due_date" class="control-label">Due Date <span class="required">*</span></label>
+                    {{ form.due_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_note" class="control-label">Note</label>
+                    {{ form.note }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+
+
+    $("#edit_project").click(function(){
+        project_id = $("#id_project option:selected").val();
+        if(project_id != '') {
+            var url = "/project/" + project_id + "/edit/";
+            showEditPopup(url);
+        }
+        else {
+            alert("Something Went Wrong");
+        }
+    });
+
+    $("#edit_person").click(function(){
+	person_id = $("#id_customer option:selected").val();
+	if(person_id != '') {
+        var url = "/person/" + person_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+
+    </script>
+
+{% endblock %}
