@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'mysite.report',
     'mysite.bidfilemgm',
     'mysite.ibfm',
+    'mysite.administrative',
     'api',
     'django.contrib.humanize',
 ]
