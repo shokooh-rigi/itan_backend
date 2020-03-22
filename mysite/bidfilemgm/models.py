@@ -26,3 +26,15 @@ class BidFile(models.Model):
 
     def __str__(self):
         return str(self.id) + ' - ' + self.customer.company.name + ': ' + str(self.project)
+
+
+class EquipmentSubmittal(models.Model):
+    bidfile = models.OneToOneField(BidFile, on_delete=models.SET_NULL, blank=False, null=True)
+    uploaded_file = models.FileField(upload_to='uploads/equipmentsubmittal', blank=False, null=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_on"]
+
+    def __str__(self):
+        return self.bidfile
