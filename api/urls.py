@@ -15,6 +15,8 @@ urlpatterns = [
          views.BusinessCheckingAccountAPIView.as_view()),
     path('credit-cards/', views.CreditCardAPIView.as_view()),
     path('credit-cards/<int:pk>/', views.CreditCardAPIView.as_view()),
+    path('invoices/', views.InvoicesAPIView.as_view()),
+    path('invoices/<int:pk>/', views.InvoicesAPIView.as_view()),
     path('projects/', views.ProjectsAPIView.as_view()),
     path('projects/<int:project_id>/', views.ProjectsAPIView.as_view()),
     path('projects/hide/<int:project_id>/', views.hide_project),
