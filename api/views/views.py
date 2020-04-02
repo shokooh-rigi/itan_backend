@@ -2,6 +2,7 @@ from .addresses import AddressesAPIView
 from .bid_file import BidFilesAPIView
 from .business_checking_account import BusinessCheckingAccountAPIView
 from .credit_card import CreditCardAPIView
+from .documents import DocumentAPIView
 from .invoices import InvoicesAPIView
 from .profiles import ProfilesAPIView
 from .projects import ProjectsAPIView, hide_project
