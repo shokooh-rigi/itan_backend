@@ -251,7 +251,7 @@ def proposal_list(request):
 @login_required
 def estimator_add(request):
     form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    bfms = BidFile.objects.filter(archive=False).order_by('due_date')
+    bfms = BidFile.objects.filter(archive=False).exclude(id__in=Estimate.objects.all().values_list('bfm_id')).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -260,6 +260,8 @@ def estimator_add(request):
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
                 new_estimate = form.save()
+                EstimateDetails.objects.filter(estimate=new_estimate) \
+                    .update(pre_demo=form.cleaned_data['predemo'])
                 return HttpResponseRedirect(reverse('estimateEquipment', args=(new_estimate.pk, 0)))
     parameters = {
         'form': form,

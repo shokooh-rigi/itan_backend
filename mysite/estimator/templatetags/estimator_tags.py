@@ -101,20 +101,6 @@ def estimate_total_calculator(estimate_id):
     return '{0:,.2f}'.format(estimate_total)
 
 
-@register.simple_tag
-def calculate_total_amount_due(invoice):
-    estimate_sub_total = estimate_sub_total_calculator(invoice.order.proposal.quote.estimate.id)
-    predemo = estimate_predemo_calculator(invoice.order.proposal.quote.estimate.id)
-    estimate_total = float(estimate_sub_total) + float(predemo)
-    sub_total = round(estimate_total, 2)
-    completed_percentage = invoice.percent_of_performance_completed
-    received_to_date = float(invoice.total_payment_received_to_date)
-    past_amount = float(invoice.past_due_amount)
-    total = (sub_total * completed_percentage / 100)
-    total = total - received_to_date + past_amount
-    return '{0:,.2f}'.format(total)
-
-
 @register.filter
 def in_setting(things, key):
     return things.filter(key=key)

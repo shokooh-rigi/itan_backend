@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load order_tags %}
+
+
+{% block content %}
+    <h2>Select Projects to Settle with {{ this_settlement.contractor }}</h2>
+    <br />
+    <h3>Add Projects</h3>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="alert alert-warning change-alert" style="display: none;">
+                <strong>Warning!</strong> You're about to change <span id="equipment_message"></span> Quantity which you have specified before...
+            </div>
+            {{ form.settlement.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_order" class="control-label">Project</label>
+                    <select name="order" class="form-control" required="" id="id_order">
+                        <option value="" selected="">---------</option>
+
+                        {% for order in orders %}
+                            <option value="{{ order.id }}" data-selectedbefore="{% if order.id in order_in %}1{% else %}0{% endif %}" data-price="{% order_total_calculator order.proposal.quote.estimate.id order %}">{{ order.project_number }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <div class="">
+                        <input type="checkbox" class="" name="price_overrider" id="price_overrider" value="price_overrider" style="display: inline-block; width: 18px;" />
+                        <label class="" style="padding-left: 5px; display: inline-block; width: 350px;" for="price_overrider">Confirm to override settlement price</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="price_override" class="control-label">Price Override</label>
+                    {{ form.settled_value }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Add/Update" name="add" />
+                </div>
+            </div>
+        </div>
+	</form>
+    <br />
+    <ul class="list-group">
+    {% for settled_order in settled_orders %}
+        <li class="list-group-item">
+            Order: <b>{{ settled_order.order }} </b> -
+            Settled Value: <b>${{ settled_order.settled_value }} </b>
+            <a href="{% url 'settledOrderDelete' settlement_id=this_settlement.id settled_order_id=settled_order.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+        </li>
+    {%  endfor %}
+    </ul>
+    <br />
+    <h4>Settlement Total: ${{ estimate_money|floatformat:2 }}</h4>
+    <br />
+    <a href="{{ next_url }}"><button class="btn btn-primary" >Next</button></a>
+    <script>
+        $("#price_overrider").attr('checked', !$("#id_settled_value")[0].disabled);
+        $("#price_overrider").click(function(){
+            $("#price_override").attr('readonly', !this.checked)
+        });
+        $('#id_order').on('change', function() {
+            if ($(this).find(':selected').data('selectedbefore') === 1) {
+                $('#equipment_message').text($(this).find(':selected').text());
+                $('.change-alert').slideDown();
+            }
+            else {
+                $('.change-alert').slideUp();
+            }
+
+            $("#price_overrider").prop( "checked", false );
+            $("#id_settled_value").attr('readonly', true);
+            $("#id_settled_value").val($(this).find(':selected').data('price'));
+        });
+    </script>
+{% endblock %}

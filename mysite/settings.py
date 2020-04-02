@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'djrichtextfield',
     'import_export',
     'rest_framework',
+    'bootstrap_datepicker_plus',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
@@ -65,6 +66,8 @@ INSTALLED_APPS = [
     'mysite.bidfilemgm',
     'mysite.ibfm',
     'mysite.administrative',
+    'mysite.schedule',
+    'mysite.settlement',
     'api',
     'django.contrib.humanize',
 ]
@@ -233,3 +236,7 @@ DJRICHTEXTFIELD_CONFIG = {
 FILE_UPLOAD_PERMISSIONS = 0o644
 MAX_UPLOAD_SIZE = 262144000
 DEFAULT_FROM_EMAIL = 'Estimator at TAB <estimator@tabtechinc.com>'
+
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}

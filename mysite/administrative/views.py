@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from .forms import AdministrativeForm
 from .models import Document
 from django.core.paginator import Paginator
@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 # Create your views here.
 
 
+@permission_required('administrative.view_document')
 @login_required
 def documents_list(request):
     search = request.GET.get('search', '')
@@ -16,7 +17,7 @@ def documents_list(request):
     if request.GET.get('paginate_by'):
         pagination = request.GET.get('paginate_by')
 
-    object_list = Document.objects.filter(customer__company__name__icontains=search)
+    object_list = Document.objects.filter(customer__name__icontains=search)
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     documents = paginator.get_page(page)
@@ -28,6 +29,7 @@ def documents_list(request):
     return render(request, "documentList.html", parameters)
 
 
+@permission_required('administrative.add_document')
 @login_required
 def documents_add(request):
     form = AdministrativeForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
@@ -56,6 +58,7 @@ def documents_add(request):
     return render(request, "documentAdd.html", parameters)
 
 
+@permission_required('administrative.change_document')
 @login_required
 def document_edit(request, document_id):
     this_document = get_object_or_404(Document, id=document_id)
@@ -72,6 +75,7 @@ def document_edit(request, document_id):
     return render(request, "documentEdit.html", parameters)
 
 
+@permission_required('administrative.delete_document')
 @login_required
 def document_delete(request, document_id):
     this_document = get_object_or_404(Document, id=document_id)

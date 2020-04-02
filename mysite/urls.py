@@ -31,6 +31,8 @@ urlpatterns = [
     path('', include('mysite.bidfilemgm.urls')),
     path('', include('mysite.ibfm.urls')),
     path('', include('mysite.administrative.urls')),
+    path('', include('mysite.schedule.urls')),
+    path('', include('mysite.settlement.urls')),
     path('api/', include('api.urls')),
 ]
 

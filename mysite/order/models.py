@@ -22,7 +22,7 @@ class Order(models.Model):
         verbose_name_plural = 'Order List'
 
     def __str__(self):
-        return estimate_number_generator(self.proposal.quote.estimate.id) + "O"
+        return self.project_number
 
 
 @receiver(post_save, sender=Order)
@@ -34,3 +34,15 @@ def update_project_number(sender, instance, created, **kwargs):
         instance.project_number = Setting.objects.get(key='Project Number Pre Text').value +\
                                   Setting.objects.get(key='Project Number Last Digit').value.zfill(3)
         instance.save()
+
+
+class ChangeOrder(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=False, null=True)
+    co_number = models.CharField(max_length=30, blank=False, null=False)
+    date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0, blank=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(max_length=2000, blank=True, null=True)
+
+    def __str__(self):
+        return self.order.project_number + ": " + self.co_number

@@ -309,6 +309,7 @@ i {
     width: 150px;
     text-align: left;
     padding: 5px;
+    vertical-align: top;
 }
 
 .form-group input, .form-group select, .form-group button {

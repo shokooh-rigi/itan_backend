@@ -61,15 +61,20 @@ def order_edit(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
     proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id'))
+    change_orders = ChangeOrder.objects.filter(order=order_id)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderHome')
+        if request.POST.get("co"):
+            return redirect('changeOrder', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
                 return redirect('orderHome')
     parameters = {'form': form,
-                  'proposals': proposals
+                  'proposals': proposals,
+                  'change_orders': change_orders,
+                  'order_id': order_id,
                   }
     return render(request, "orderEdit.html", parameters)
 
@@ -115,3 +120,33 @@ def order_archive(request, order_id):
     parameters = {'this_order': this_order
                   }
     return render(request, "orderArchive.html", parameters)
+
+
+@login_required
+def change_order(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = ChangeOrderForm(request.POST or None, request.FILES or None, initial={'order': order_id})
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['order'] = order_id
+                form.save()
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  }
+    return render(request, "changeOrder.html", parameters)
+
+
+@login_required
+def change_order_delete(request, order_id, change_order_id):
+    this_change_order = get_object_or_404(ChangeOrder, id=change_order_id)
+    if request.method == "POST" and request.user.is_authenticated:
+        if request.POST.get("confirm"):
+            this_change_order.delete()
+        return redirect('orderEdit', order_id=order_id)
+    parameters = {'this_change_order': this_change_order
+                  }
+    return render(request, "changeOrderDelete.html", parameters)

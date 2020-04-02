@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Add Settlement</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="settlementAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-12">
+                    <label for="id_architect_name" class="control-label">Contractor <span class="required">*</span></label>
+                    {{ form.contractor }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Next" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_assigned_to_employee').on('change', function() {
+            $('#id_assigned_to_contractor').val("");
+        });
+        $('#id_assigned_to_contractor').on('change', function() {
+            $('#id_assigned_to_employee').val("");
+        });
+    </script>
+
+<script>
+  $(function () {
+    $("#id_scheduled_for").datetimepicker({
+      format: 'm/d/Y H:i',
+    });
+  });
+</script>
+
+{% endblock %}

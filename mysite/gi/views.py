@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail, BadHeaderError, EmailMessage
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -215,6 +215,8 @@ def invoice_edit(request, invoice_id):
                               'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
                               'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
                               'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                               'company_name': LicenseInfo.objects.get(key='CompanyName').value,
                               'user_name': user_name,
                               'user_title': user_title,
@@ -222,6 +224,7 @@ def invoice_edit(request, invoice_id):
                               'WEB_URL': WEB_URL,
                               'STATIC_URL': STATIC_URL,
                               'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
                               }
                 Invoice.delete_invoice_pdf(parameters)
                 invoice_pdf = Invoice.create_invoice_pdf(parameters)
@@ -305,8 +308,19 @@ def estimate_total_calculator(estimate_id):
     return estimate_total
 
 
+def order_total_calculator(estimate_id, order):
+    estimate_total = estimate_total_calculator(estimate_id)
+    change_orders = ChangeOrder.objects.filter(order=order)
+    co_total = 0
+    for change_order in change_orders:
+        co_total = co_total + change_order.amount
+    order_total = estimate_total + float(co_total)
+    order_total = round(order_total, 2)
+    return order_total
+
+
 def calculate_total_amount_due(invoice):
-    sub_total = estimate_total_calculator(invoice.order.proposal.quote.estimate.id)
+    sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
     completed_percentage = invoice.percent_of_performance_completed
     received_to_date = float(invoice.total_payment_received_to_date)
     past_amount = float(invoice.past_due_amount)

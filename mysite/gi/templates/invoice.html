@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
 
 {% block content %}
     <div class="text-center">
@@ -103,7 +105,7 @@
                             <td>{{ invoice.order.date_po_received }}</td>
                             <td>{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
                             <td>{{ invoice.order.proposal.quote.estimate.project }}</td>
-                            <td>${% estimate_total_calculator invoice.order.proposal.quote.estimate.id %}</td>
+                            <td>${% order_total_calculator invoice.order.proposal.quote.estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }}</td>
                             <td>${% calculate_total_amount_due invoice %}</td>
                             <td>{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
                             <td><a href="{% url 'invoiceView' invoice_id=invoice.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>

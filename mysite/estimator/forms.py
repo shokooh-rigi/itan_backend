@@ -6,6 +6,7 @@ from .models import *
 class EstimateForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
     drawing_date = forms.DateField(required=False, widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
+    predemo = forms.FloatField(initial=0)
 
     class Meta:
         model = Estimate
@@ -18,6 +19,7 @@ class EstimateForm(ModelForm):
             'note',
             'due_date',
             'drawing_date',
+            'predemo',
             'created_by',
         ]
 

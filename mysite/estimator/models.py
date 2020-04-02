@@ -93,7 +93,7 @@ class Proposal(models.Model):
 
 
 class EstimateEquipment(models.Model):
-    estimate = models.ForeignKey(Estimate, on_delete=models.SET_NULL, blank=False, null=True)
+    estimate = models.ForeignKey(Estimate, on_delete=models.CASCADE, blank=False, null=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False)
     quantity = models.IntegerField(blank=False)
     price_override = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)

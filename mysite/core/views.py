@@ -13,11 +13,15 @@ from mysite.core.forms import SignUpForm
 from mysite.core.tokens import account_activation_token
 from .forms import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Permission
 
 
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    if request.user.groups.filter(name='admin').exists():
+        return render(request, 'home.html')
+    else:
+        return redirect("/customer/")
 
 
 def signup(request):

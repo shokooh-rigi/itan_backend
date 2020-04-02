@@ -1,5 +1,6 @@
 {% load static %}
 {% load estimator_tags %}
+{% load order_tags %}
 {% load custom_tags %}
 
 <html>
@@ -86,11 +87,11 @@
                     </tr>
                     <tr style="border: 1px solid #000;">
                         <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
-                        <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id %} </td>
+                        <td style="padding: 5px 0 0 0;">${% order_total_calculator estimate.id invoice.order %} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Sub Total: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% estimate_total_calculator estimate.id %} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% order_total_calculator estimate.id invoice.order %} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Percent of performance completed: </td>

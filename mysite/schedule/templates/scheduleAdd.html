@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Add Schedule</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="scheduleAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_order" class="control-label">Project <span class="required">*</span></label>
+                    <select name="order" class="form-control" required="" id="id_order">
+                        <option value="" selected="">---------</option>
+                        {% for order in orders %}
+                            <option value="{{ order.id }}">{{ order }} - {{ order.proposal.quote.estimate.project }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-5">
+                    <label for="id_architect_name" class="control-label" style="margin-top: -10px;">Assigned to Employee</label>
+                    {{ form.assigned_to_employee }}
+                </div>
+                <div class="col-lg-2" style="margin-top: 10px;">
+                    OR
+                </div>
+                <div class="col-lg-5">
+                    <label for="id_validity" class="control-label" style="margin-top: -10px;">Assigned to Contractor</label>
+                    {{ form.assigned_to_contractor }}
+                </div>
+            </div>
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-12">
+                    <label for="id_architect_name" class="control-label">Scheduled Date <span class="required">*</span></label>
+                    {{ form.scheduled_for }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Create" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_assigned_to_employee').on('change', function() {
+            $('#id_assigned_to_contractor').val("");
+        });
+        $('#id_assigned_to_contractor').on('change', function() {
+            $('#id_assigned_to_employee').val("");
+        });
+    </script>
+
+<script>
+  $(function () {
+    $("#id_scheduled_for").datetimepicker({
+      format: 'm/d/Y H:i',
+    });
+  });
+</script>
+
+{% endblock %}
