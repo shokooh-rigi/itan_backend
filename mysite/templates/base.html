@@ -39,33 +39,44 @@
             <div class="menu-top-menu-container">
                 <ul id="menu-top-menu" class="menu">
                     {% if user.is_authenticated %}
-                    {% if request.user|has_group:"admin" %}
-                    <li class="menu-item"><a href="{% url 'ibidFilesHome' %}"><span style="text-transform: none;">iBFM</span></a></li>
-                    <li class="menu-item"><a href="{% url 'bidFilesHome' %}">BFM</a></li>
+                    {% if request.user|has_group:"super admin" %}
                     <li class="menu-item">
-                        <a href="#">Pre Order</a>
+                        <a href="#">Estimate</a>
                         <ul>
+                            <li class="menu-item"><a href="{% url 'ibidFilesHome' %}"><span style="text-transform: none;">iBFM</span></a></li>
+                            <li class="menu-item"><a href="{% url 'bidFilesHome' %}">BFM</a></li>
                             <li class="menu-item"><a href="{% url 'estimatorHome' %}">Estimate</a></li>
                             <li class="menu-item"><a href="{% url 'quotationHome' %}">Quote</a></li>
                             <li class="menu-item"><a href="{% url 'proposalHome' %}">Proposal</a></li>
+                            <li class="menu-item"><a href="{% url 'orderHome' %}">Order</a></li>
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="{% url 'orderHome' %}">Order</a></li>
-                    <li class="menu-item"><a href="{% url 'reportHome' %}">RR</a></li>
-                    <li class="menu-item"><a href="{% url 'scheduleHome' %}">Schedule</a></li>
-                    <li class="menu-item"><a href="{% url 'invoiceHome' %}">GI</a></li>
-                    <li class="menu-item"><a href="{% url 'CoiHome' %}">COI</a></li>
-                    <li class="menu-item"><a href="{% url 'submittalHome' %}">CCS</a></li>
                     <li class="menu-item">
-                        <a href="{% url 'MgmReport' %}">MGM Report</a>
+                        <a href="#">Accounting</a>
+                        <ul>
+                            <li class="menu-item"><a href="{% url 'reportHome' %}">Register Report</a></li>
+                            <li class="menu-item"><a href="{% url 'scheduleHome' %}">Tech Assignment</a></li>
+                            <li class="menu-item"><a href="{% url 'settlementHome' %}">Tech Settlement</a></li>
+                            <li class="menu-item"><a href="{% url 'invoiceHome' %}">Invoice</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#">Customer</a>
+                        <ul>
+                            <li class="menu-item"><a href="{% url 'administrativeHome' %}">Documents Administrative</a></li>
+                            <li class="menu-item"><a href="{% url 'CoiHome' %}">Certificate of Insurance</a></li>
+                            <li class="menu-item"><a href="{% url 'submittalHome' %}">Company Submittal</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'MgmReport' %}">Management Reports</a>
                         <ul>
                             <li class="menu-item"><a href="{% url 'EquipmentsList' %}">Equipments</a></li>
                             <li class="menu-item"><a href="{% url 'CompanyList' %}">Customers</a></li>
                             <li class="menu-item"><a href="{% url 'BidsList' %}">Bids Report</a></li>
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="{% url 'administrativeHome' %}">Administrative</a></li>
-                    <li class="menu-item"><a href="{% url 'settlementHome' %}">Settlement</a></li>
+
                     {% endif %}
                     <li class="menu-item">
                      <div class="dropdown header-profile" style="display: inline-block;">
@@ -90,7 +101,7 @@
                 </li>
                     {% else %}
                     <li class="menu-item"><a href="{% url 'login' %}">login</a></li>
-                    <li class="menu-item"><a href="{% url 'signup' %}">signup</a></li>
+                    <li class="menu-item"><a href="{% url 'signup' %}">Register</a></li>
                     {% endif %}
                 </ul>
             </div>

@@ -71,4 +71,14 @@
 
     </script>
 
+    <script>
+        $(function () {
+            $("#id_due_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
 {% endblock %}

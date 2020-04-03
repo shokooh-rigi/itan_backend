@@ -155,7 +155,7 @@ function updateURLParameter(url, param, paramVal)
             window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
             location.reload();
         });
-        var sortables = ['id', 'customer', 'project', 'engineer', 'due_date'];
+        var sortables = ['id', 'customer', 'type'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

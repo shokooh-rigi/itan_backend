@@ -62,6 +62,9 @@ def settlement_orders(request, settlement_id):
     orders = Order.objects.exclude(id__in=SettledOrders.objects.all().values_list('order_id')) \
         .order_by('-created_on')
     settled_orders = SettledOrders.objects.filter(settlement=this_settlement)
+    settled_total = 0
+    for settled_order in settled_orders:
+        settled_total = settled_total + settled_order.settled_value
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('settlementHome')
@@ -75,6 +78,7 @@ def settlement_orders(request, settlement_id):
                   'this_settlement': this_settlement,
                   'orders': orders,
                   'settled_orders': settled_orders,
+                  'settled_total': settled_total,
                   }
     return render(request, "settlementOrders.html", parameters)
 

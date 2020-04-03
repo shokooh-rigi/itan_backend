@@ -32,14 +32,13 @@ def schedule_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Schedule.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
-                                              | Q(order__project_number__icontains=search)) \
-            .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
+        object_list = Schedule.objects.filter(Q(order__project_number__icontains=search)
+                                              | Q(assigned_to_contractor__name__icontains=search)
+                                              | Q(assigned_to_contractor__company__name__icontains=search)) \
+            .filter(scheduled_for__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Schedule.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
-                                              | Q(order__project_number__icontains=search)
-                                              | Q(assigned_to_employee=search)
+        object_list = Schedule.objects.filter(Q(order__project_number__icontains=search)
                                               | Q(assigned_to_contractor__name__icontains=search)
                                               | Q(assigned_to_contractor__company__name__icontains=search)) \
             .order_by(ordering)

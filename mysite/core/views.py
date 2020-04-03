@@ -14,11 +14,12 @@ from mysite.core.tokens import account_activation_token
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission
+from django.db.models import Q
 
 
 @login_required
 def home(request):
-    if request.user.groups.filter(name='admin').exists():
+    if request.user.profile.user_type > 1:
         return render(request, 'home.html')
     else:
         return redirect("/customer/")

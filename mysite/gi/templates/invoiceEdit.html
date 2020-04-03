@@ -72,5 +72,14 @@
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
         });
     </script>
+    <script>
+        $(function () {
+            $("#id_date_started, #id_date_completed").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
 
 {% endblock %}

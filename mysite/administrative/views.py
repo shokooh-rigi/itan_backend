@@ -16,8 +16,11 @@ def documents_list(request):
     pagination = 20
     if request.GET.get('paginate_by'):
         pagination = request.GET.get('paginate_by')
+    ordering = '-created_on'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
 
-    object_list = Document.objects.filter(customer__name__icontains=search)
+    object_list = Document.objects.filter(customer__name__icontains=search).order_by(ordering)
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     documents = paginator.get_page(page)

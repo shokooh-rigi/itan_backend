@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load order_tags %}
-
+{% load humanize %}
 
 {% block content %}
     <h2>Select Projects to Settle with {{ this_settlement.contractor }}</h2>
@@ -58,13 +58,14 @@
     {%  endfor %}
     </ul>
     <br />
-    <h4>Settlement Total: ${{ estimate_money|floatformat:2 }}</h4>
+    <h4>Settlement Total: ${{ settled_total|floatformat:2|intcomma }}</h4>
     <br />
     <a href="{{ next_url }}"><button class="btn btn-primary" >Next</button></a>
     <script>
-        $("#price_overrider").attr('checked', !$("#id_settled_value")[0].disabled);
+        $("#price_overrider").attr('checked', false);
+        $("#id_settled_value").attr('readonly', true);
         $("#price_overrider").click(function(){
-            $("#price_override").attr('readonly', !this.checked)
+            $("#id_settled_value").attr('readonly', !this.checked);
         });
         $('#id_order').on('change', function() {
             if ($(this).find(':selected').data('selectedbefore') === 1) {

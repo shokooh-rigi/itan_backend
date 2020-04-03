@@ -24,10 +24,12 @@
         </div>
 	</form>
     <script>
-        $('#id_order').on('change', function() {
-            $("#customer").text($(this).find(':selected').data('customer'));
-            $("#engineer").text($(this).find(':selected').data('engineer'));
-            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        $(function () {
+            $("#id_report_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+		scrollInput: false,
+            });
         });
     </script>
 

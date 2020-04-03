@@ -17,7 +17,6 @@ class AdministrativeForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AdministrativeForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

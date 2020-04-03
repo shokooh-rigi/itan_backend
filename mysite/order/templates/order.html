@@ -2,6 +2,7 @@
 {% load static %}
 {% load estimator_tags %}
 {% load order_tags %}
+{% load humanize %}
 
 {% block content %}
     <div class="text-center">
@@ -49,7 +50,7 @@
                             <td>{{ order.proposal.quote.estimate.project }}</td>
                             <td>{{ order.proposal.quote.estimate.engineer.company.name }}</td>
                             <td>{{ order.project_number }}</td>
-                            <td>${% order_total_calculator order.proposal.quote.estimate.id order %}</td>
+                            <td>${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}</td>
                             <td>
                                 <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'orderDelete' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>

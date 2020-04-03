@@ -3,36 +3,32 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Edit BidFile</h2>
-    <form method = 'POST' action= '' enctype = "multipart/form-data" id="bidFileEdit-form">
+    <h2>Edit Administrative Document</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <div class="alert alert-success">
+        <strong>Attention!</strong> {{ form.customer.help_text }}
+    </div>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="administrativeDocumentEdit-form">
         <div class="form-group">
             {% csrf_token %}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
                     {{ form.customer }}
-                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                    <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
-                    {{ form.project }}
-                    <div class="form-icon"><a href="{% url 'projectCreate' %}" id="add_project" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                    <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                    <label for="id_project" class="control-label">Type of Document <span class="required">*</span></label>
+                    {{ form.type }}
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="">
-                    <label for="id_due_date" class="control-label">Due Date <span class="required">*</span></label>
-                    {{ form.due_date }}
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_note" class="control-label">Note</label>
-                    {{ form.note }}
+                    <label for="id_due_date" class="control-label">File <span class="required">*</span></label>
+                    {{ form.uploaded_file }}
                 </div>
             </div>
             {{ form.created_by.as_hidden }}

@@ -291,4 +291,13 @@ function updateURLParameter(url, param, paramVal)
         });
     });
     </script>
+    <script>
+        $(function () {
+            $("#id_fromDate, #id_toDate").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
 {% endblock %}

@@ -84,5 +84,14 @@
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
         });
     </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
 
 {% endblock %}

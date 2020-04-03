@@ -4,7 +4,7 @@
 {% load humanize %}
 
 {% block content %}
-    <h2>Edit Order</h2>
+    <h2>Edit Order {{ this_order }} - {{ this_order.proposal.quote.estimate.project }} - ${% estimate_total_calculator this_order.proposal.quote.estimate.id %}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="proposalAdd-form">
         <div class="form-group">
             {% csrf_token %}
@@ -23,13 +23,13 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Date PO Received <span class="required">*</span></label>
+                    <label for="id_validity" class="control-label">Date PO Received</label>
                     {{ form.date_po_received }}
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Estimated Date of Project <span class="required">*</span></label>
+                    <label for="id_validity" class="control-label">Estimated Date of Project</label>
                     {{ form.estimated_date_of_project }}
                 </div>
             </div>
@@ -83,6 +83,15 @@
             $("#tab_amount").text($(this).find(':selected').data('tabamount'));
             $("#pre_amount").text($(this).find(':selected').data('preamount'));
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
         });
     </script>
 

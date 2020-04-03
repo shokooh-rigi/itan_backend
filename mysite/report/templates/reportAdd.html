@@ -11,7 +11,7 @@
                 <div class="col-lg-12">
                     <label for="id_order" class="control-label">Project # <span class="required">*</span></label>
                     <select name="order" class="form-control" required="" id="id_order">
-                        <option value="" selected="" data-customer="" data-engineer="" data-totalamount="">---------</option>
+                        <option value="" selected="" data-customer="" data-project="" data-totalamount="">---------</option>
                         {% for order in orders %}
                             <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-project="{{ order.proposal.quote.estimate.project }}" data-totalamount="${% estimate_total_calculator order.proposal.quote.estimate.id %}">{{ order.project_number }}</option>
                         {% endfor %}
@@ -53,11 +53,22 @@
         </div>
 	</form>
     <script>
+        $("#customer").text($("#id_order").find(':selected').data('customer'));
+        $("#project").text($("#id_order").find(':selected').data('project'));
+        $("#total_amount").text($("#id_order").find(':selected').data('totalamount'));
         $('#id_order').on('change', function() {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#project").text($(this).find(':selected').data('project'));
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
         });
     </script>
-
+    <script>
+        $(function () {
+            $("#id_report_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+		scrollInput: false,
+            });
+        });
+    </script>
 {% endblock %}

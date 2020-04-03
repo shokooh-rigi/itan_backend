@@ -7,11 +7,55 @@
     <div class="text-center">
         <a href="{% url 'scheduleAdd' %}"><button type="button" class="btn btn-primary big">Add Schedule</button></a>
         <br /><br />
+
+
+
+        <form method="get" action="">
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <h5>Filter By Due Date</h5>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_fromDate" class="control-label">Assigned From:</label>
+                    <input type="text" name="fromDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_fromDate" value="{{ request.GET.fromDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_toDate" class="control-label">Assigned To:</label>
+                    <input type="text" name="toDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_toDate" value="{{ request.GET.toDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <button type="submit" class="btn btn-success">submit</button>
+                    <div id="date_filter_clear" class="btn btn-primary">clear filter</div>
+                </div>
+            </div>
+            <input type="hidden" name="paginate_by" value="{{ request.GET.paginate_by }}" />
+            <input type="hidden" name="ordering" value="{{ request.GET.ordering }}" />
+            <input type="hidden" name="search" value="{{ request.GET.search }}" />
+        </form>
+    {% if request.GET.fromDate > request.GET.toDate %}
+        <div class="alert alert-danger">
+          <strong>Error!</strong> To Date must be greater or equal to Form Date.
+        </div>
+    {% endif %}
+
+        {% if request.GET.fromDate %}
+            <br />Assignment Date Filtered From <b>{{ request.GET.fromDate }}</b> To <b>{{ request.GET.toDate }}</b><br /><br />
+        {% endif %}
+
+
+
+
         <div class="row" style="margin: 10px auto;">
-                <form action="?{% url_replace request 'project_name' '' %}">
+                <form action="?{% url_replace request 'search' '' %}">
                     <div class="form-group" style="display: inline-block; transform: translateY(2px);">
-                        <label for="project_name"></label>
-                        <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name| Project Number | Assigned for..." value="{{ request.GET.project_name }}" />
+                        <label for="search"></label>
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Project Number | Assigned for..." value="{{ request.GET.search }}" />
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
                 </form>
@@ -27,7 +71,8 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th data-sortable="order"><a href="{% if request.GET.ordering == 'order' %}?{% url_replace request 'ordering' '-order' %}{% else %}?{% url_replace request 'ordering' 'order' %}{% endif %}">Order</a></th>
+                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th>Project Number</th>
                     <th>Assigned To</th>
                     <th data-sortable="scheduled_for"><a href="{% if request.GET.ordering == 'scheduled_for' %}?{% url_replace request 'ordering' '-scheduled_for' %}{% else %}?{% url_replace request 'ordering' 'scheduled_for' %}{% endif %}">Scheduled For</a></th>
                     <th>Actions</th>
@@ -37,8 +82,9 @@
                 {% for schedule in schedules %}
                     {% if schedule.archive == False %}
                         <tr>
+                            <td>{{ schedule.id }}</td>
                             <td>{{ schedule.order }}</td>
-                            <td>{{ schedule.assigned_to_employee }}{{ schedule.assigned_to_contractor }}</td>
+                            <td>{% if schedule.assigned_to_employee %}{{ schedule.assigned_to_employee }}{% endif %}{% if schedule.assigned_to_contractor %}{{ schedule.assigned_to_contractor }}{% endif %}</td>
                             <td>{{ schedule.scheduled_for|date:"m/d/Y H:i" }}</td>
                             <td>
                                 <a href="{% url 'scheduleEdit' schedule_id=schedule.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
@@ -81,8 +127,58 @@
         </div>
     </div>
 <script>
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
     $(document).ready(function() {
-        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        $('#date_filter_clear').click(function() {
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "fromDate", ""));
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
+            location.reload();
+        });
+        var sortables = ['id', 'scheduled_for'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
@@ -115,4 +211,13 @@
         }
     });
 </script>
+    <script>
+        $(function () {
+            $("#id_fromDate, #id_toDate").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
 {% endblock %}

@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from djrichtextfield.models import RichTextField
 from creditcards.models import CardNumberField, CardExpiryField
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
 from django.forms import TextInput
 
 
@@ -36,6 +36,9 @@ class ContactInfo(models.Model):
     zip = models.CharField(max_length=10, blank=True, null=True)
     company_type = models.ForeignKey(CompanyType, on_delete=models.CASCADE,
                                      error_messages={'required': 'You have to specify Company Type.'})
+    interest_percentage = models.PositiveIntegerField(default=0,
+                                                      validators=[MaxValueValidator(100), MinValueValidator(0)],
+                                                      help_text="exclusive for sub contractors.")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -92,12 +95,12 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     email_confirmed = models.BooleanField(default=False)
     USER_TYPE_CHOICES = (
-        (1, 'User'),
-        (2, 'QAA'),
-        (3, 'Admin'),
-        (4, 'Project Manager'),
-        (5, 'Tech'),
-        (6, 'Super User'),
+        (1, 'customer'),
+        (2, 'super admin'),
+        (3, 'estimator'),
+        (4, 'accounting'),
+        (5, 'tech'),
+        (6, 'super tech'),
     )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True,

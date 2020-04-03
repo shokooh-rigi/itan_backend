@@ -75,6 +75,7 @@ def order_edit(request, order_id):
                   'proposals': proposals,
                   'change_orders': change_orders,
                   'order_id': order_id,
+                  'this_order': this_order,
                   }
     return render(request, "orderEdit.html", parameters)
 
