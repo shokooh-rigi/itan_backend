@@ -9,7 +9,7 @@ from rest_framework import status
 from mysite.bidfilemgm.models import BidFile
 
 from ..authentication_mixin import AuthenticationMixin
-from ..serializers.project import ProjectSerializer
+from ..serializers.project import ProjectSerializer, get_project_step
 from ..pagination import CustomPageNumberPagination
 
 
@@ -65,6 +65,20 @@ class ProjectsAPIView(AuthenticationMixin, APIView):
         if filter['ordering']:
             estimates = estimates.order_by(
                 ('' if filter['asc'] else '-') + 'project__' + filter['ordering'])
+        else:
+            steps = []
+            i = 0
+            for estimate in estimates:
+                steps.append({
+                    'index': i,
+                    'progress': get_project_step(estimate)[0],
+                })
+                i += 1
+            steps.sort(key=lambda s: s['progress'], reverse=True)
+            r = []
+            for step in steps:
+                r.append(estimates[step['index']])
+            estimates = r
 
         return estimates
 
