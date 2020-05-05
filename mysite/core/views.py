@@ -1,20 +1,16 @@
+from django.contrib import messages
+from django.contrib.admin.models import LogEntry
 from django.contrib.auth import login
-from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.auth import update_session_auth_hash
-from django.contrib import messages
-from django.contrib.admin.models import LogEntry, ADDITION
-from django.contrib.contenttypes.models import ContentType
-from ..coi.models import *
-from mysite.core.forms import SignUpForm
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
+
 from mysite.core.tokens import account_activation_token
 from .forms import *
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Permission
-from django.db.models import Q
+from ..coi.models import *
 
 
 @login_required
@@ -34,7 +30,7 @@ def signup(request):
             user.save()
 
             current_site = get_current_site(request)
-            subject = 'Activate Your MySite Account'
+            subject = 'Activate Your Account on Tab Technologies INC.'
             message = render_to_string('account_activation_email.html', {
                 'user': user,
                 'domain': current_site.domain,
@@ -83,7 +79,7 @@ def activate(request, uidb64, token):
         user.profile.email_confirmed = True
         user.save()
         login(request, user)
-        return redirect('home')
+        return render(request, 'account_activation_done.html')
     else:
         return render(request, 'account_activation_invalid.html')
 
@@ -121,7 +117,6 @@ def profile_edit(request):
 
 @login_required
 def activities(request):
-
     logs = LogEntry.objects.exclude(change_message="No fields changed.").order_by('-action_time')[:20]
     logCount = LogEntry.objects.exclude(change_message="No fields changed.").order_by('-action_time')[:20].count()
 
@@ -149,37 +144,37 @@ def htmlbodytemplate_tag_converter(form_type, content, request, customer):
     if form_type == 1:
         content.__str__() \
             .replace("[customer_contact_person]", customer.name) \
-            .replace("[customer_email]", customer.mail)\
-            .replace("[customer_company_name]", customer.company.name)\
-            .replace("[customer_address_line_1]", customer.company.address_line_1)\
-            .replace("[customer_address_line_2]", customer.company.address_line_2)\
-            .replace("[customer_city]", customer.company.city)\
-            .replace("[customer_state]", customer.company.state)\
-            .replace("[customer_zip]", customer.company.zip)
+            .replace("[customer_email]", customer.mail) \
+            .replace("[customer_company_name]", customer.company.name) \
+            .replace("[customer_address_line_1]", customer.company.address_line_1) \
+            .replace("[customer_address_line_2]", customer.company.address_line_2) \
+            .replace("[customer_city]", customer.company.city) \
+            .replace("[customer_state]", customer.company.state) \
+            .replace("[customer_zip]", str(customer.company.zip))
     elif form_type == 2:
-        content.__str__()\
-            .replace("[customer_contact_person]", customer.contract_person_name)\
-            .replace("[customer_email]", customer.email)\
-            .replace("[customer_company_name]", customer.contractor.company.name)\
-            .replace("[customer_address_line_1]", customer.contractor.company.address_line_1)\
-            .replace("[customer_address_line_2]", customer.contractor.company.address_line_2)\
-            .replace("[customer_city]", customer.contractor.company.city)\
-            .replace("[customer_state]", customer.contractor.company.state)\
-            .replace("[customer_zip]", customer.contractor.company.zip)
+        content.__str__() \
+            .replace("[customer_contact_person]", customer.contract_person_name) \
+            .replace("[customer_email]", customer.email) \
+            .replace("[customer_company_name]", customer.contractor.company.name) \
+            .replace("[customer_address_line_1]", customer.contractor.company.address_line_1) \
+            .replace("[customer_address_line_2]", customer.contractor.company.address_line_2) \
+            .replace("[customer_city]", customer.contractor.company.city) \
+            .replace("[customer_state]", customer.contractor.company.state) \
+            .replace("[customer_zip]", str(customer.contractor.company.zip))
 
     return content.__str__() \
-        .replace("[user_name]", user_name)\
-        .replace("[user_title]", user_title)\
-        .replace("[user_cel]", user_cell)\
-        .replace("[user_tel]", user_tel)\
-        .replace("[ic_company_name]", InsuranceCompany.objects.get(key='company_name').value.__str__())\
-        .replace("[ic_contact_name]", InsuranceCompany.objects.get(key='contact_name').value.__str__())\
-        .replace("[ic_mail]", InsuranceCompany.objects.get(key='mail').value.__str__())\
-        .replace("[ic_tel]", InsuranceCompany.objects.get(key='tel').value.__str__())\
-        .replace("[ic_fax]", InsuranceCompany.objects.get(key='fax').value.__str__())\
-        .replace("[ic_web]", InsuranceCompany.objects.get(key='web').value.__str__())\
-        .replace("[ic_address_line_1]", InsuranceCompany.objects.get(key='address_line_1').value.__str__())\
-        .replace("[ic_address_line_2]", InsuranceCompany.objects.get(key='address_line_2').value.__str__())\
-        .replace("[ic_city]", InsuranceCompany.objects.get(key='city').value.__str__())\
-        .replace("[ic_state]", InsuranceCompany.objects.get(key='state').value.__str__())\
+        .replace("[user_name]", user_name) \
+        .replace("[user_title]", user_title) \
+        .replace("[user_cel]", user_cell) \
+        .replace("[user_tel]", user_tel) \
+        .replace("[ic_company_name]", InsuranceCompany.objects.get(key='company_name').value.__str__()) \
+        .replace("[ic_contact_name]", InsuranceCompany.objects.get(key='contact_name').value.__str__()) \
+        .replace("[ic_mail]", InsuranceCompany.objects.get(key='mail').value.__str__()) \
+        .replace("[ic_tel]", InsuranceCompany.objects.get(key='tel').value.__str__()) \
+        .replace("[ic_fax]", InsuranceCompany.objects.get(key='fax').value.__str__()) \
+        .replace("[ic_web]", InsuranceCompany.objects.get(key='web').value.__str__()) \
+        .replace("[ic_address_line_1]", InsuranceCompany.objects.get(key='address_line_1').value.__str__()) \
+        .replace("[ic_address_line_2]", InsuranceCompany.objects.get(key='address_line_2').value.__str__()) \
+        .replace("[ic_city]", InsuranceCompany.objects.get(key='city').value.__str__()) \
+        .replace("[ic_state]", InsuranceCompany.objects.get(key='state').value.__str__()) \
         .replace("[ic_zip]", InsuranceCompany.objects.get(key='zip').value.__str__())

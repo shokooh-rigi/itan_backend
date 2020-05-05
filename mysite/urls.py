@@ -3,7 +3,6 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from django.views.generic.base import TemplateView
 
 from mysite.core import views as core_views
 
@@ -33,6 +32,7 @@ urlpatterns = [
     path('', include('mysite.administrative.urls')),
     path('', include('mysite.schedule.urls')),
     path('', include('mysite.settlement.urls')),
+    path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
 ]
 

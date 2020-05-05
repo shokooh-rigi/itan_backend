@@ -1,7 +1,7 @@
 from django.urls import path
-from django.conf.urls import url
-from mysite.mgmreport import views
 from django.views.generic import TemplateView
+
+from mysite.mgmreport import views
 
 urlpatterns = [
     path('mgmreport/', TemplateView.as_view(template_name="mgmreport.html"), name='MgmReport'),

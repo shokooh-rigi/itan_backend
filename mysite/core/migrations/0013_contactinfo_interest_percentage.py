@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0012_auto_20200403_1041'),
     ]
@@ -14,6 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contactinfo',
             name='interest_percentage',
-            field=models.PositiveIntegerField(default=0, help_text='exclusive for sub contractors.', validators=[django.core.validators.MaxValueValidator(100), django.core.validators.MinValueValidator(0)]),
+            field=models.PositiveIntegerField(default=0, help_text='exclusive for sub contractors.',
+                                              validators=[django.core.validators.MaxValueValidator(100),
+                                                          django.core.validators.MinValueValidator(0)]),
         ),
     ]

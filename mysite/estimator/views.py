@@ -1,17 +1,19 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from .forms import *
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
 import json
-import datetime
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from platform import system
+
+from django.contrib.auth.decorators import login_required
+from django.core.mail import BadHeaderError, EmailMessage
 from django.core.paginator import Paginator
-from django.core.mail import send_mail, BadHeaderError, EmailMessage
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404, reverse
+from django.views.decorators.csrf import csrf_exempt
+
+from .forms import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from django.contrib.auth.decorators import login_required
-from platform import system
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+
 
 # Create your views here.
 
@@ -73,12 +75,12 @@ def estimate_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Estimate.objects.filter(Q(project__name__icontains=search)
-                                              | Q(customer__company__name__icontains=search))\
+                                              | Q(customer__company__name__icontains=search)) \
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
         object_list = Estimate.objects.filter(Q(project__name__icontains=search)
-                                              | Q(customer__company__name__icontains=search))\
+                                              | Q(customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
     total_rows = object_list.count()
@@ -153,12 +155,12 @@ def quotation_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
-                                              | Q(estimate__customer__company__name__icontains=search))\
+                                           | Q(estimate__customer__company__name__icontains=search)) \
             .filter(estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
         object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
-                                              | Q(estimate__customer__company__name__icontains=search))\
+                                           | Q(estimate__customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -229,12 +231,13 @@ def proposal_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
-                                              | Q(quote__estimate__customer__company__name__icontains=search))\
-            .filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
+                                              | Q(quote__estimate__customer__company__name__icontains=search)) \
+            .filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(
+            ordering)
 
     else:
         object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
-                                              | Q(quote__estimate__customer__company__name__icontains=search))\
+                                              | Q(quote__estimate__customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -251,7 +254,8 @@ def proposal_list(request):
 @login_required
 def estimator_add(request):
     form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    bfms = BidFile.objects.filter(archive=False).exclude(id__in=Estimate.objects.all().values_list('bfm_id')).order_by('due_date')
+    bfms = BidFile.objects.filter(archive=False).exclude(
+        id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -266,7 +270,7 @@ def estimator_add(request):
     parameters = {
         'form': form,
         'bfms': bfms,
-                  }
+    }
     return render(request, "estimatorAdd.html", parameters)
 
 
@@ -297,7 +301,8 @@ def quote_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    estimates = Estimate.objects.filter(archive=False).exclude(id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
+    estimates = Estimate.objects.filter(archive=False).exclude(
+        id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('quotationHome')
@@ -369,7 +374,8 @@ def proposal_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    quotes = Quote.objects.filter(archive=False).exclude(id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
+    quotes = Quote.objects.filter(archive=False).exclude(
+        id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('proposalHome')
@@ -467,7 +473,8 @@ def proposal_delete(request, proposal_id):
     this_proposal = get_object_or_404(Proposal, id=proposal_id)
     if request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
-            this_proposal.delete_proposal_pdf({'file_name': pdf_filename_generator(this_proposal.quote.estimate.id, 'P')})
+            this_proposal.delete_proposal_pdf(
+                {'file_name': pdf_filename_generator(this_proposal.quote.estimate.id, 'P')})
             this_proposal.delete()
         return redirect('proposalHome')
     elif request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by != request.user:
@@ -951,14 +958,14 @@ def estimate_number_generator(estimate_id):
 def pdf_filename_generator(estimate_id, pdf_type):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name\
-        .replace(' ', '_')\
-        .replace('!', '')\
-        .replace('@', '')\
-        .replace('#', '')\
-        .replace('$', '')\
-        .replace('%', '')\
-        .replace('^', '')\
-        .replace('&', '')\
-        .replace('*', '')\
+    return pdf_type + longidname + '_' + estimate.project.name \
+        .replace(' ', '_') \
+        .replace('!', '') \
+        .replace('@', '') \
+        .replace('#', '') \
+        .replace('$', '') \
+        .replace('%', '') \
+        .replace('^', '') \
+        .replace('&', '') \
+        .replace('*', '') \
         .replace("/", '')

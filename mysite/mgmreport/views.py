@@ -1,14 +1,11 @@
-from .forms import *
-from django.shortcuts import render
-from django.views.generic import ListView
-from mysite.estimator.models import *
-from mysite.order.models import Order
-from mysite.gi.models import Invoice
-import datetime
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from mysite.estimator.views import estimate_total_calculator
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+from mysite.estimator.models import *
+from mysite.estimator.views import estimate_total_calculator
+from mysite.gi.models import Invoice
+from mysite.order.models import Order
+from ..settings import MEDIA_URL, WEB_URL
 
 
 @login_required
@@ -31,7 +28,6 @@ def company_list(request):
 
 @login_required
 def bids_list(request):
-
     object_list = ''
 
     from_date = request.GET.get("fromDate")

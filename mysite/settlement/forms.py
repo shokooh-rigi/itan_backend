@@ -1,6 +1,6 @@
-from django import forms
-from .models import Settlement, SettledOrders, Person
 from django.forms import ModelForm
+
+from .models import Settlement, SettledOrders, Person
 
 
 class SettlementForm(ModelForm):

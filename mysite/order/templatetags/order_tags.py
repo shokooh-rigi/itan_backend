@@ -1,4 +1,5 @@
 from django import template
+
 from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator
 from ..models import ChangeOrder
 

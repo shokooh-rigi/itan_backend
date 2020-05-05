@@ -55,6 +55,7 @@
                         <th>CO#</th>
                         <th>Date</th>
                         <th>Amount</th>
+                        <th>Description</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -64,6 +65,7 @@
                                 <td>{{ changeorder.co_number }}</td>
                                 <td>{{ changeorder.date }}</td>
                                 <td>${{ changeorder.amount|floatformat:2|intcomma }}</td>
+                                <td>{{ changeorder.description }}</td>
                                 <td>
                                     <a href="{% url 'deleteChangeOrder' order_id=order_id change_order_id=changeorder.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 </td>

@@ -13,10 +13,11 @@
                     <select name="proposal" class="form-control" required="" id="id_proposal">
                         <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
                         {% for proposal in proposals %}
-                            <option value="{{ proposal.id }}" data-customer="{{ proposal.quote.estimate.customer }}" data-engineer="{{ proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.quote.estimate.id %}">{% estimate_number_generator proposal.quote.estimate.id %}</option>
+                            <option value="{{ proposal.id }}" data-customer="{{ proposal.quote.estimate.customer }}" data-engineer="{{ proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.quote.estimate.id %}" data-dlink="{% if proposal.quote.estimate.bfm.uploaded_file %}{{ proposal.quote.estimate.bfm.uploaded_file.url }}{% endif %}">{% estimate_number_generator proposal.quote.estimate.id %}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></div>
                 </div>
             </div>
             <div class="row form-line">
@@ -77,11 +78,22 @@
 	</form>
     <script>
         $('#id_proposal').on('change', function() {
-            $("#customer").text($(this).find(':selected').data('customer'));
-            $("#engineer").text($(this).find(':selected').data('engineer'));
-            $("#tab_amount").text($(this).find(':selected').data('tabamount'));
-            $("#pre_amount").text($(this).find(':selected').data('preamount'));
-            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+            if($(this).val() === '') {
+                $("#customer").text('');
+                $("#engineer").text('');
+                $("#tab_amount").text('');
+                $("#pre_amount").text('');
+                $("#total_amount").text('');
+                $("#dlink_href").attr("href", '').hide();
+            }
+            else {
+                $("#customer").text($(this).find(':selected').data('customer'));
+                $("#engineer").text($(this).find(':selected').data('engineer'));
+                $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+                $("#pre_amount").text($(this).find(':selected').data('preamount'));
+                $("#total_amount").text($(this).find(':selected').data('totalamount'));
+                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
+            }
         });
     </script>
     <script>

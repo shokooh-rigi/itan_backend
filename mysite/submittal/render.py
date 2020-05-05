@@ -1,8 +1,9 @@
+import os
 from io import BytesIO
+
+import xhtml2pdf.pisa as pisa
 from django.http import HttpResponse
 from django.template.loader import get_template
-import xhtml2pdf.pisa as pisa
-import os
 
 
 class Render:
@@ -39,4 +40,3 @@ class Render:
             return 1
         else:
             return 0
-

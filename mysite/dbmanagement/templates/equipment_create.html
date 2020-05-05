@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>{{ page_title }} Equipment</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_architect_name" class="control-label">Select Equipment Type <span class="required">*</span></label>
+                    {{ form.equipment_type }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Manufacturer <span class="required">*</span></label>
+                    {{ form.manufacturer }}
+                    <div class="form-icon"><a href="{% url 'manufacturerCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_manufacturer" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Model # <span class="required">*</span></label>
+                    {{ form.model_number }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Serial # <span class="required">*</span></label>
+                    {{ form.serial_number }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="{{ page_title }}" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+	        <script>
+$("#edit_manufacturer").click(function(){
+	manufacturer_id = $("#id_manufacturer option:selected").val();
+	if(manufacturer_id != '') {
+        var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+    </script>
+
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

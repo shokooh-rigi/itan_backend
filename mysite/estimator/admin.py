@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import *
-from import_export.admin import ImportExportModelAdmin
 from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+
+from .models import *
 
 
 # Register your models here.
@@ -23,7 +24,6 @@ admin.site.register(Estimate, EstimateAdmin)
 
 
 class QuoteResource(resources.ModelResource):
-
     class Meta:
         model = Quote
 
@@ -36,7 +36,6 @@ admin.site.register(Quote, QuoteAdmin)
 
 
 class ProposalResource(resources.ModelResource):
-
     class Meta:
         model = Proposal
 
@@ -49,7 +48,6 @@ admin.site.register(Proposal, ProposalAdmin)
 
 
 class EstimateEquipmentResource(resources.ModelResource):
-
     class Meta:
         model = EstimateEquipment
 
@@ -62,7 +60,6 @@ admin.site.register(EstimateEquipment, EstimateEquipmentAdmin)
 
 
 class EstimateDetailsResource(resources.ModelResource):
-
     class Meta:
         model = EstimateDetails
 

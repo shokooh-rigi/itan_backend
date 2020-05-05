@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0011_auto_20200301_1915'),
     ]
@@ -13,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='user_type',
-            field=models.PositiveSmallIntegerField(choices=[(1, 'customer'), (2, 'super admin'), (3, 'estimator'), (4, 'accounting'), (5, 'tech'), (6, 'super tech')], default=1),
+            field=models.PositiveSmallIntegerField(
+                choices=[(1, 'customer'), (2, 'super admin'), (3, 'estimator'), (4, 'accounting'), (5, 'tech'),
+                         (6, 'super tech')], default=1),
         ),
     ]

@@ -1,14 +1,15 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import *
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
-from django.core.mail import send_mail, BadHeaderError, EmailMessage
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from django.db.models import Q
-from ..core.forms import EmailForm
-from django.contrib.auth.decorators import login_required
 from platform import system
+
+from django.contrib.auth.decorators import login_required
+from django.core.mail import BadHeaderError, EmailMessage
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+
+from .forms import *
+from ..core.forms import EmailForm
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
 
 # Create your views here.
@@ -50,10 +51,10 @@ def invoice_list(request):
                 footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
             else:
                 footer_content = "There was no email template defined for 'Email Footer'."
-            footer_content = footer_content.__str__()\
-                .replace("[user_name]", user_name)\
-                .replace("[user_title]", user_title)\
-                .replace("[user_cel]", user_cell)\
+            footer_content = footer_content.__str__() \
+                .replace("[user_name]", user_name) \
+                .replace("[user_title]", user_title) \
+                .replace("[user_cel]", user_cell) \
                 .replace("[user_tel]", user_tel)
             message = invoice_content + '<br />' + footer_content
             try:
@@ -89,12 +90,12 @@ def invoice_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
-                                              | Q(order__project_number__icontains=search)) \
+                                             | Q(order__project_number__icontains=search)) \
             .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
         object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
-                                              | Q(order__project_number__icontains=search)) \
+                                             | Q(order__project_number__icontains=search)) \
             .order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -121,7 +122,8 @@ def invoice_add(request):
         user_title = request.user.profile.title
     user_signature = request.user.profile.e_sign
     form = InvoiceForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by('-created_on')
+    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by(
+        '-created_on')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -130,10 +132,13 @@ def invoice_add(request):
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
                 invoice = form.save()
+                change_orders = ChangeOrder.objects.filter(order=invoice.order)
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
+                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(
+                                  invoice.id).zfill(3),
                               'invoice': invoice,
+                              'change_orders': change_orders,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
                               'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
@@ -168,9 +173,11 @@ def invoice_add(request):
 @login_required
 def invoice_view(request, invoice_id):
     invoice = Invoice.objects.get(id=invoice_id)
+    change_orders = ChangeOrder.objects.filter(order=invoice.order)
     total_amount_due = calculate_total_amount_due(invoice)
     parameters = {
         'invoice': invoice,
+        'change_orders': change_orders,
         'total_amount_due': total_amount_due,
         'estimate': invoice.order.proposal.quote.estimate,
         'WEB_URL': WEB_URL,
@@ -200,10 +207,13 @@ def invoice_edit(request, invoice_id):
         if form.is_valid():
             if request.POST.get("save"):
                 invoice = form.save()
+                change_orders = ChangeOrder.objects.filter(order=invoice.order)
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(invoice.id).zfill(3),
+                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(
+                                  invoice.id).zfill(3),
                               'invoice': invoice,
+                              'change_orders': change_orders,
                               'total_amount_due': total_amount_due,
                               'estimate': invoice.order.proposal.quote.estimate,
                               'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
@@ -229,7 +239,7 @@ def invoice_edit(request, invoice_id):
                 Invoice.delete_invoice_pdf(parameters)
                 invoice_pdf = Invoice.create_invoice_pdf(parameters)
                 parameters['invoice_pdf'] = invoice_pdf[1]
-                return redirect('invoiceHome')
+                return redirect('invoiceView', invoice.id)
     parameters = {'form': form,
                   'orders': orders
                   }
@@ -241,7 +251,8 @@ def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
         if request.POST.get("confirm"):
-            parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(this_invoice.id).zfill(3),
+            parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(
+                this_invoice.id).zfill(3),
                           }
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()

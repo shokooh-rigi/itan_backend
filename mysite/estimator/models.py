@@ -1,6 +1,5 @@
-from mysite.core.models import *
 from mysite.bidfilemgm.models import *
-import datetime
+from mysite.core.models import *
 from .render import Render
 
 

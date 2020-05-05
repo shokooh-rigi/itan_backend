@@ -1,17 +1,17 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 import datetime
+import os
+import zipfile
+
+from django import forms
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
+
 from .forms import BidFileForm, BidFileEditForm
 from .models import BidFile
-from django.db.models import Q
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
-from django import forms
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from mysite.core.models import Project
-import zipfile
-from io import BytesIO
-import os
+from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
+
 
 # Create your views here.
 
@@ -34,12 +34,12 @@ def bid_files_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = BidFile.objects.filter(Q(project__name__icontains=search)
-                                             | Q(customer__company__name__icontains=search))\
+                                             | Q(customer__company__name__icontains=search)) \
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
         object_list = BidFile.objects.filter(Q(project__name__icontains=search)
-                                             | Q(customer__company__name__icontains=search))\
+                                             | Q(customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
     total_rows = object_list.count()
@@ -87,7 +87,17 @@ def bidfiles_add(request):
                 # b = Project(name=form.cleaned_data['project_name'], created_by=request.user)
                 # b.save()
                 entry = form.save()
-                zip_file_name = str(entry.pk) + '. ' + form.cleaned_data['project_name'] + '.zip'
+                project_clean_name = form.cleaned_data['project'].name.replace(' ', '_') \
+                    .replace('!', '') \
+                    .replace('@', '') \
+                    .replace('#', '') \
+                    .replace('$', '') \
+                    .replace('%', '') \
+                    .replace('^', '') \
+                    .replace('&', '') \
+                    .replace('*', '') \
+                    .replace("/", '')
+                zip_file_name = str(entry.pk) + '. ' + project_clean_name + '.zip'
                 create_zip_file(files, temp_path, zip_file_name)
                 os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
                 BidFile.objects.filter(id=entry.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
@@ -141,7 +151,11 @@ def bidfiles_delete(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
     if request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by == request.user:
         if request.POST.get("confirm"):
-            this_bidfile.uploaded_file.delete()
+            file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")),
+                                     "media" + this_bidfile.uploaded_file.name)
+            print(file_path)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
             this_bidfile.delete()
         return redirect('bidFilesHome')
     elif request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by != request.user:

@@ -1,11 +1,9 @@
-from django import forms
-from django.contrib.auth.forms import *
 from django.forms import ModelForm
+
 from .models import *
 
 
 class AdministrativeForm(ModelForm):
-
     class Meta:
         model = Document
         fields = [

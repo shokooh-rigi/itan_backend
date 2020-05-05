@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from .forms import CoiForm
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, MEDIA_URL_NOSLASH, WEB_URL, STATIC_URL
-from django.core.mail import EmailMessage
-from ..core.views import htmlbodytemplate_tag_converter
-from .models import Coi
-from mysite.core.models import Person, ModulesToEmailTemplateRelation
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
+from django.core.paginator import Paginator
+from django.shortcuts import render, redirect, get_object_or_404
+
+from mysite.core.models import Person, ModulesToEmailTemplateRelation
+from .forms import CoiForm
+from .models import Coi
+from ..core.views import htmlbodytemplate_tag_converter
+from ..settings import MEDIA_URL, WEB_URL
+
 
 # Create your views here.
 

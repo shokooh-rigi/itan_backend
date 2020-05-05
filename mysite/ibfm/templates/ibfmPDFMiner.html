@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h3>Project Name:</h3> {{ pdfminer_result.project_name }}
+    <h3>Project Address:</h3> {{ pdfminer_result.project_address }}
+{% endblock %}

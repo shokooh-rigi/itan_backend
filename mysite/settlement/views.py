@@ -1,20 +1,65 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import SettlementForm, SettledOrderForm
-from .models import Settlement, SettledOrders
 import datetime
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required, permission_required
+from platform import system
+
 from django import forms
-from mysite.order.models import Order
+from django.contrib.auth.decorators import login_required
+from django.core.mail import BadHeaderError, EmailMessage
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+
 from mysite.core.models import LicenseInfo, LicenseFiles
+from mysite.order.models import Order
+from .forms import SettlementForm, SettledOrderForm
+from .models import Settlement, SettledOrders, ModulesToEmailTemplateRelation
+from ..core.forms import EmailForm
+from ..core.views import htmlbodytemplate_tag_converter
+from ..gi.views import order_total_calculator
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
 
 # Create your views here.
 
 @login_required
 def settlement_list(request):
+    form = EmailForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            to_email = form.cleaned_data['to_email']
+            to_email = to_email.replace(" ", "").replace(";", ",").split(',')
+            cc = form.cleaned_data['cc']
+            cc = cc.replace(" ", "").replace(";", ",").split(',')
+            email_id = form.cleaned_data['email_id']
+            subject = form.cleaned_data['subject']
+            this_settlement = get_object_or_404(Settlement, id=email_id)
+            customer = this_settlement.contractor
+            if ModulesToEmailTemplateRelation.objects.filter(module=8).exists():
+                body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=8).template.content
+            else:
+                body_content = "There was no email template defined for 'Settlement'."
+            body_content = htmlbodytemplate_tag_converter(1, body_content, request, customer)
+            if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
+                footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
+            else:
+                footer_content = "There was no email template defined for 'Email Footer'."
+            footer_content = htmlbodytemplate_tag_converter(1, footer_content, request, customer)
+            message = body_content + '<br />' + footer_content
+            try:
+                msg = EmailMessage(
+                    subject,
+                    message,
+                    DEFAULT_FROM_EMAIL,
+                    to_email,
+                    cc=cc,
+                )
+                msg.content_subtype = "html"
+                msg.attach_file('media/pdfs/settlement/settlement-' + str(email_id) + '.pdf')
+                msg.send()
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            return redirect('settlementHome')
+
     search = request.GET.get('search', '')
 
     pagination = 20
@@ -25,15 +70,21 @@ def settlement_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Settlement.objects.all()
+    object_list = Settlement.objects.filter(Q(contractor__name__icontains=search)
+                                            | Q(contractor__company__name__icontains=search)) \
+        .order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     settlements = paginator.get_page(page)
 
+    must_go = Settlement.objects.filter(settledorders__order__isnull=True)
+    must_go.delete()
+
     parameters = {'settlements': settlements,
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
+                  'form': form,
                   }
     return render(request, "settlement.html", parameters)
 
@@ -59,21 +110,33 @@ def settlement_add(request):
 def settlement_orders(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
     form = SettledOrderForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
-    orders = Order.objects.exclude(id__in=SettledOrders.objects.all().values_list('order_id')) \
+    orders = Order.objects.filter(schedule__assigned_to_contractor=this_settlement.contractor).exclude(
+        id__in=SettledOrders.objects.filter(Q(settlement__id=settlement_id) | Q(order__fully_settled=True)).values_list(
+            'order_id')) \
         .order_by('-created_on')
     settled_orders = SettledOrders.objects.filter(settlement=this_settlement)
     settled_total = 0
     for settled_order in settled_orders:
-        settled_total = settled_total + settled_order.settled_value
+        settled_total = settled_total + (
+                settled_order.settled_value * settled_order.settlement.contractor.company.interest_percentage / 100)
     if request.method == 'POST':
         if request.POST.get("cancel"):
+            if not this_settlement.settledorders_set.exists():
+                this_settlement.delete()
             return redirect('settlementHome')
+        if request.POST.get("next"):
+            return redirect('settlementView', this_settlement.id)
         if form.is_valid():
             if request.POST.get("add"):
+                old_settled_value = Order.objects.get(id=form.cleaned_data['order'].id).order_settled_value
+                new_settled_value = float(old_settled_value) + float(form.cleaned_data['settled_value'])
+                Order.objects.filter(id=form.cleaned_data['order'].id).update(order_settled_value=new_settled_value)
+                if float(new_settled_value) == float(
+                        order_total_calculator(form.cleaned_data['order'].proposal.quote.estimate.id,
+                                               form.cleaned_data['order'])):
+                    Order.objects.filter(id=form.cleaned_data['order'].id).update(fully_settled=True)
                 form.save()
                 return redirect('settlementOrders', this_settlement.pk)
-            if request.POST.get("next"):
-                return redirect('settlementView')
     parameters = {'form': form,
                   'this_settlement': this_settlement,
                   'orders': orders,
@@ -95,37 +158,12 @@ def settlement_view(request, settlement_id):
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
-    estimate = Estimate.objects.get(id=estimate_id)
-    instance = get_object_or_404(EstimateDetails, estimate=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
-    estimate_sub = 0
-    for estimate_equipment_pricing in estimate_equipments_pricing:
-        equipment_total = equipment_total_calculator(estimate_equipment_pricing)
-        estimate_sub += equipment_total
+    settlement = Settlement.objects.get(id=settlement_id)
+    settled_orders = SettledOrders.objects.filter(settlement=settlement)
 
-    control_system_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2)
-    hours_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2)
-    predemo_calculated = estimate.estimatedetails.pre_demo * 1200
-    estimate_total = estimate_sub + control_system_calculated + hours_calculated \
-                     + predemo_calculated \
-                     + float(estimate.estimatedetails.adjustment)
-    estimate_total = round(estimate_total, 2)
-    estimate_work = estimate_total_work(estimate_id)
-    estimate_work_in_hours = int(estimate_work / 60)
-    estimate_work_in_minutes = int(estimate_work % 60)
-
-    parameters = {'file_name': pdf_filename_generator(estimate.id, 'E'),
-                  'estimate': estimate,
-                  'estimate_equipments_pricing': estimate_equipments_pricing,
-                  'estimate_sub': estimate_sub,
-                  'estimate_total': estimate_total,
-                  'estimate_work_in_hours': estimate_work_in_hours,
-                  'estimate_work_in_minutes': estimate_work_in_minutes,
-                  'control_system_calculated': control_system_calculated,
-                  'hours_calculated': hours_calculated,
-                  'predemo_calculated': predemo_calculated,
+    parameters = {'file_name': 'settlement-' + str(settlement_id),
+                  'settlement': settlement,
+                  'settled_orders': settled_orders,
                   'datetime': datetime.datetime.now(),
                   'license_owner': license_owner,
                   'owner_title': owner_title,
@@ -144,9 +182,9 @@ def settlement_view(request, settlement_id):
                   'STATIC_URL': STATIC_URL,
                   'os': system(),
                   }
-    estimate_pdf = Estimate.create_estimate_pdf(parameters)
-    parameters['estimate_pdf'] = estimate_pdf[1]
-    return render(request, "estimateBid.html", parameters)
+    settlement_pdf = Settlement.create_settlement_pdf(parameters)
+    parameters['settlement_pdf'] = settlement_pdf[1]
+    return render(request, "settlementView.html", parameters)
 
 
 @login_required
@@ -154,6 +192,10 @@ def settlement_delete(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
     if request.method == "POST" and request.user.is_authenticated:
         if request.POST.get("confirm"):
+            for settled_order in this_settlement.settledorders_set.all():
+                settled_order.order.fully_settled = False
+                settled_order.order.order_settled_value = settled_order.order.order_settled_value - settled_order.settled_value
+                settled_order.order.save()
             this_settlement.delete()
         return redirect('settlementHome')
     parameters = {'this_settlement': this_settlement
@@ -166,10 +208,13 @@ def settled_order_delete(request, settlement_id, settled_order_id):
     this_settled_order = get_object_or_404(SettledOrders, id=settled_order_id)
     if request.method == "POST" and request.user.is_authenticated:
         if request.POST.get("confirm"):
+            this_settled_order.order.fully_settled = False
+            this_settled_order.order.order_settled_value = this_settled_order.order.order_settled_value - this_settled_order.settled_value
+            this_settled_order.order.save()
             this_settled_order.delete()
         return redirect('settlementOrders', settlement_id)
     parameters = {
         'this_settled_order': this_settled_order,
         'settlement_id': settlement_id,
-                  }
+    }
     return render(request, "settledOrderDelete.html", parameters)

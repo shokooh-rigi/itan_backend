@@ -1,4 +1,5 @@
 {% load custom_tags %}
+{% load recaptcha2 %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -29,6 +30,7 @@
         {% endif %}
         }
         </style>
+        {% recaptcha_init %}
     </head>
   <body class="text-center">
     <header class="header">
@@ -39,7 +41,7 @@
             <div class="menu-top-menu-container">
                 <ul id="menu-top-menu" class="menu">
                     {% if user.is_authenticated %}
-                    {% if request.user|has_group:"super admin" %}
+                    {% if request.user.profile.user_type > 1 %}
                     <li class="menu-item">
                         <a href="#">Estimate</a>
                         <ul>
@@ -69,11 +71,20 @@
                         </ul>
                     </li>
                     <li class="menu-item">
-                        <a href="{% url 'MgmReport' %}">Management Reports</a>
+                        <a href="#">Management</a>
                         <ul>
-                            <li class="menu-item"><a href="{% url 'EquipmentsList' %}">Equipments</a></li>
-                            <li class="menu-item"><a href="{% url 'CompanyList' %}">Customers</a></li>
-                            <li class="menu-item"><a href="{% url 'BidsList' %}">Bids Report</a></li>
+                            <li><a href="{% url 'MgmReport' %}">Reports</a>
+                                <ul>
+                                    <li class="menu-item"><a href="{% url 'EquipmentsList' %}">Equipments</a></li>
+                                    <li class="menu-item"><a href="{% url 'CompanyList' %}">Customers</a></li>
+                                    <li class="menu-item"><a href="{% url 'BidsList' %}">Bids Report</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="{% url 'MgmReport' %}">Database</a>
+                                <ul>
+                                    <li class="menu-item"><a href="{% url 'EquipmentsHome' %}">Equipment Database</a></li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
 

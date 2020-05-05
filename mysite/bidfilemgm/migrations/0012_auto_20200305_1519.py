@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('bidfilemgm', '0011_auto_20200303_2044'),
     ]
@@ -18,6 +17,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bidfile',
             name='uploaded_file',
-            field=models.FileField(blank=True, help_text='Maximum Upload Size: 2.5MB', null=True, upload_to='uploads/bidfiles'),
+            field=models.FileField(blank=True, help_text='Maximum Upload Size: 2.5MB', null=True,
+                                   upload_to='uploads/bidfiles'),
         ),
     ]

@@ -1,13 +1,12 @@
 from django import template
+
 from ..forms import *
-import platform
 
 register = template.Library()
 
 
 @register.simple_tag
 def url_replace(request, field, value):
-
     dict_ = request.GET.copy()
 
     dict_[field] = value
@@ -27,16 +26,16 @@ def estimate_number_generator(estimate_id):
 def pdf_filename_generator(estimate_id, pdf_type):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name\
-        .replace(' ', '_')\
-        .replace('!', '')\
-        .replace('@', '')\
-        .replace('#', '')\
-        .replace('$', '')\
-        .replace('%', '')\
-        .replace('^', '')\
-        .replace('&', '')\
-        .replace('*', '')\
+    return pdf_type + longidname + '_' + estimate.project.name \
+        .replace(' ', '_') \
+        .replace('!', '') \
+        .replace('@', '') \
+        .replace('#', '') \
+        .replace('$', '') \
+        .replace('%', '') \
+        .replace('^', '') \
+        .replace('&', '') \
+        .replace('*', '') \
         .replace("/", '')
 
 
@@ -55,7 +54,7 @@ def service_total_calculator(service, estimate_equipments_pricing):
         if estimate_equipment_pricing.equipment.service == service:
             if estimate_equipment_pricing.price_override:
                 service_total = service_total + float(estimate_equipment_pricing.price_override) \
-                            * float(estimate_equipment_pricing.quantity)
+                                * float(estimate_equipment_pricing.quantity)
             else:
                 service_total = service_total + float(estimate_equipment_pricing.equipment.price) \
                                 * float(estimate_equipment_pricing.quantity)
@@ -80,10 +79,12 @@ def estimate_sub_total_calculator(estimate_id):
     estimate_total = round(estimate_total, 2)
     return estimate_total
 
+
 @register.simple_tag
 def estimate_sub_total_calculator_display(estimate_id):
     subt = estimate_sub_total_calculator(estimate_id)
     return '{0:.2f}'.format(subt)
+
 
 @register.simple_tag
 def estimate_predemo_calculator(estimate_id):

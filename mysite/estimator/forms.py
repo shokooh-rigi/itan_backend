@@ -1,11 +1,13 @@
 from django import forms
 from django.forms import ModelForm
+
 from .models import *
 
 
 class EstimateForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
-    drawing_date = forms.DateField(required=False, widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
+    drawing_date = forms.DateField(required=False, widget=forms.DateInput(format='%m/%d/%Y'),
+                                   input_formats=('%m/%d/%Y',))
     predemo = forms.FloatField(initial=0)
 
     class Meta:
@@ -25,8 +27,10 @@ class EstimateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EstimateForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
-        self.fields['engineer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical engineer')
+        self.fields['customer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical contractor')
+        self.fields['engineer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical engineer')
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
@@ -38,7 +42,6 @@ class EstimateForm(ModelForm):
 
 
 class QuoteForm(ModelForm):
-
     class Meta:
         model = Quote
         fields = [
@@ -55,7 +58,6 @@ class QuoteForm(ModelForm):
 
 
 class ProposalForm(ModelForm):
-
     class Meta:
         model = Proposal
         fields = [
@@ -100,7 +102,8 @@ class CustomerForm(ModelForm):
         self.fields['mail'].widget.attrs['placeholder'] = 'email@example.com'
 
         self.fields['web'].widget.attrs['placeholder'] = 'example.com'
-        self.fields['web'].widget.attrs['pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
+        self.fields['web'].widget.attrs[
+            'pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
 
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
@@ -136,7 +139,8 @@ class EngineerForm(ModelForm):
         self.fields['mail'].widget.attrs['placeholder'] = 'email@example.com'
 
         self.fields['web'].widget.attrs['placeholder'] = 'example.com'
-        self.fields['web'].widget.attrs['pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
+        self.fields['web'].widget.attrs[
+            'pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
 
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
@@ -176,7 +180,8 @@ class CompanyCustomerForm(ModelForm):
         self.fields['mail'].widget.attrs['placeholder'] = 'email@example.com'
 
         self.fields['web'].widget.attrs['placeholder'] = 'example.com'
-        self.fields['web'].widget.attrs['pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
+        self.fields['web'].widget.attrs[
+            'pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
 
         self.fields['zip'].widget.attrs['placeholder'] = 'Only numbers allowed'
         self.fields['zip'].widget.attrs['pattern'] = '(\d{5}([\-]\d{4})?)'
@@ -219,7 +224,8 @@ class CompanyEngineerForm(ModelForm):
         self.fields['mail'].widget.attrs['placeholder'] = 'email@example.com'
 
         self.fields['web'].widget.attrs['placeholder'] = 'example.com'
-        self.fields['web'].widget.attrs['pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
+        self.fields['web'].widget.attrs[
+            'pattern'] = '^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
 
         self.fields['zip'].widget.attrs['placeholder'] = 'Only numbers allowed'
         self.fields['zip'].widget.attrs['pattern'] = '(\d{5}([\-]\d{4})?)'

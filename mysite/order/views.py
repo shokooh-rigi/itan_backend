@@ -1,15 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from .forms import *
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.views.generic import ListView
-from datetime import datetime
-from ..settings import MEDIA_URL, MEDIA_URL_NOSLASH, WEB_URL, STATIC_URL
-from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+
+from .forms import *
+from ..settings import MEDIA_URL, WEB_URL
+
 
 # Create your views here.
 
@@ -42,7 +38,8 @@ def order_list(request):
 @login_required
 def order_add(request):
     form = OrderForm(request.POST or None, request.FILES or None)
-    proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
+    proposals = Proposal.objects.filter(archive=False).exclude(
+        id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderHome')
