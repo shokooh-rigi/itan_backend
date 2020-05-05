@@ -14,14 +14,14 @@ i {
 }
 
 .main {
-    background: rgba(255,255,255,.8);
+    background: rgba(255, 255, 255, .8);
     border-radius: 5px;
     padding: 15px 10px 20px 10px;
     transition: all 0.3s;
 }
 
 .main:hover {
-    background: rgba(255,255,255,1);
+    background: rgba(255, 255, 255, 1);
 }
 
 .btn {
@@ -132,11 +132,11 @@ i {
 }
 
 .btn-default {
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid rgba(0, 0, 0, .1);
 }
 
 .btn-default:hover {
-    background-color: rgba(0,0,0,.1);
+    background-color: rgba(0, 0, 0, .1);
 }
 
 .header {
@@ -144,7 +144,7 @@ i {
     display: flex;
     width: 100%;
     align-items: stretch;
-    background: rgba(255,255,255,.9);
+    background: rgba(255, 255, 255, .9);
     padding: 1.25rem 2.5rem;
     position: fixed;
     top: 0;
@@ -154,7 +154,7 @@ i {
 }
 
 .header:hover {
-    background: rgba(255,255,255,1);
+    background: rgba(255, 255, 255, 1);
 }
 
 .header a {
@@ -182,12 +182,8 @@ i {
     justify-content: flex-end;
 }
 
-.header .nav ul li {
-    margin: 6px 25px auto;
-}
-
 .header .nav ul li a {
-    padding: 5px;
+    padding: 10px 25px;
 }
 
 .header ul li a {
@@ -203,7 +199,7 @@ i {
 }
 
 #topnav .icon {
-  display: none;
+    display: none;
 }
 
 #topnav .dropdown .dropdown-toggle {
@@ -233,7 +229,7 @@ i {
     right: 0;
     display: none;
     background: #fff;
-    border: 1px solid rgba(0,0,0,.15);
+    border: 1px solid rgba(0, 0, 0, .15);
     border-top: none;
     border-bottom-left-radius: .25rem;
     border-bottom-right-radius: .25rem;
@@ -243,8 +239,13 @@ i {
     font-size: 0.9rem;
 }
 
-#topnav ul li:hover>ul {
+#topnav ul li:hover > ul {
     display: block;
+}
+
+#topnav ul ul ul {
+    right: 100px;
+    top: 0px;
 }
 
 .logosection {
@@ -348,9 +349,8 @@ iframe {
 
 .proposal_footer .onecol {
     border-width: 3px;
-  border-style: solid;
-  border-image:
-    linear-gradient(to bottom, #009ada, rgba(0, 0, 0, 0)) 1 100%;
+    border-style: solid;
+    border-image: linear-gradient(to bottom, #009ada, rgba(0, 0, 0, 0)) 1 100%;
 }
 
 .proposal_footer .onecol:first-child {
@@ -388,8 +388,8 @@ iframe {
 }
 
 .pagination-select .btn.selected {
-    background-color: rgba(0,0,0,.05);
-    box-shadow: inset 0px 0px 5px rgba(0,0,0,.1);
+    background-color: rgba(0, 0, 0, .05);
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, .1);
 }
 
 .icon {
@@ -424,6 +424,10 @@ iframe {
 
 .icon.viewicon {
     background-image: url("../images/icons/view.svg");
+}
+
+.icon.pdficon {
+    background-image: url("../images/icons/pdf.svg");
 }
 
 .icon.deleteicon {
@@ -487,4 +491,8 @@ iframe {
 
 .table.thinpadding td, .table.thinpadding th {
     padding: .6rem;
+}
+
+.g-recaptcha > div {
+    margin: 0 auto;
 }

@@ -1,11 +1,14 @@
-@page { size: auto;  margin: 0mm; }
+@page {
+    size: auto;
+    margin: 0mm;
+}
 
 .header-space {
     height: 100px;
 }
 
 .footer-space {
-  height: 80px;
+    height: 80px;
 }
 
 #printProposalPage, #printStatementPage {
@@ -21,7 +24,7 @@
     display: block;
 }
 
-.proposal_footer{
+.proposal_footer {
     margin: 20px 5% 20px 5%;
     width: 90%;
     position: fixed;

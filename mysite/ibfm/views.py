@@ -1,14 +1,16 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 import datetime
+
+from django import forms
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
+
+from mysite.pdfminer import pdfminer
 from .forms import BidFileForm, BidFileEditForm
 from .models import iBidFile
-from django.db.models import Q
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
-from django import forms
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from mysite.core.models import Project
+from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
+
 
 # Create your views here.
 
@@ -31,12 +33,12 @@ def bid_files_list(request):
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
         object_list = iBidFile.objects.filter(Q(project__name__icontains=search)
-                                             | Q(customer__company__name__icontains=search))\
+                                              | Q(customer__company__name__icontains=search)) \
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
         object_list = iBidFile.objects.filter(Q(project__name__icontains=search)
-                                             | Q(customer__company__name__icontains=search))\
+                                              | Q(customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
     total_rows = object_list.count()
@@ -96,7 +98,6 @@ def bidfiles_edit(request, bidfiles_id):
                 form.save()
                 return redirect('ibidFilesHome')
     parameters = {'form': form,
-
                   }
     return render(request, "ibfmEdit.html", parameters)
 
@@ -143,3 +144,12 @@ def bidfiles_delete(request, bidfiles_id):
     parameters = {'this_bidfile': this_bidfile
                   }
     return render(request, "ibfmDelete.html", parameters)
+
+
+@login_required
+def pdfminer_result_page(request, bidfiles_id):
+    this_bfm = get_object_or_404(iBidFile, id=bidfiles_id)
+    pdfminer_result = pdfminer('/home/dtabtech/public_html' + this_bfm.uploaded_file.url, this_bfm.project.name)
+    parameters = {'pdfminer_result': pdfminer_result,
+                  }
+    return render(request, "ibfmPDFMiner.html", parameters)

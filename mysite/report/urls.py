@@ -1,4 +1,5 @@
 from django.urls import path
+
 from mysite.report import views
 
 urlpatterns = [

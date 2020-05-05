@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
+
+from creditcards.models import CardExpiryField
+from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
-from custom_user.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from djrichtextfield.models import RichTextField
-from creditcards.models import CardNumberField, CardExpiryField
-from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
-from django.forms import TextInput
+
+from custom_user.models import User
 
 
 class CompanyType(models.Model):
@@ -103,18 +104,18 @@ class Profile(models.Model):
         (6, 'super tech'),
     )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
-    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True,
+    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='profile_customer')
-    physical_address_line_1 = models.CharField(max_length=255, blank=False, null=True)
+    physical_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
     physical_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    physical_city = models.CharField(max_length=55, blank=False, null=True)
-    physical_state = models.CharField(max_length=55, blank=False, null=True)
-    physical_zip = models.CharField(max_length=10, blank=False, null=True)
-    billing_address_line_1 = models.CharField(max_length=255, blank=False, null=True)
+    physical_city = models.CharField(max_length=55, blank=True, null=True)
+    physical_state = models.CharField(max_length=55, blank=True, null=True)
+    physical_zip = models.CharField(max_length=10, blank=True, null=True)
+    billing_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
     billing_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    billing_city = models.CharField(max_length=55, blank=False, null=True)
-    billing_state = models.CharField(max_length=55, blank=False, null=True)
-    billing_zip = models.CharField(max_length=10, blank=False, null=True)
+    billing_city = models.CharField(max_length=55, blank=True, null=True)
+    billing_state = models.CharField(max_length=55, blank=True, null=True)
+    billing_zip = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.user.email
@@ -209,6 +210,24 @@ class TestSheet(models.Model):
         return self.name
 
 
+class EquipmentManufacturer(models.Model):
+    name = models.CharField(max_length=255, blank=False, unique=True)
+    tel = models.CharField(max_length=15, blank=True)
+    fax = models.CharField(max_length=15, blank=True)
+    mail = models.EmailField(max_length=55, blank=True)
+    web = models.CharField(max_length=55, blank=True)
+    address_line_1 = models.CharField(max_length=255, blank=True)
+    address_line_2 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=55, blank=True)
+    state = models.CharField(max_length=55, blank=True)
+    zip = models.CharField(max_length=10, blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    flag = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Equipment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True)
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True)
@@ -220,11 +239,76 @@ class Equipment(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = 'Equipment List'
-        verbose_name_plural = 'Equipment List'
+        verbose_name = 'Equipment Type'
+        verbose_name_plural = 'Equipment Type'
 
     def __str__(self):
         return self.name + ' (' + self.service.name + ')'
+
+
+class EquipmentTypeCustomField(models.Model):
+    field_name = models.CharField(max_length=255, blank=False, verbose_name='Field Name')
+    FIELD_TYPE_CHOICES = (
+        (1, 'Integer ex: 1, 2, 3, ...'),
+        (2, 'Float ex: 1.2, 52.75, ...'),
+        (3, 'Characters ex: mechanical, water based, ...'),
+    )
+    field_type = models.PositiveSmallIntegerField(choices=FIELD_TYPE_CHOICES, default=1, null=False)
+    FIELD_RANGE_OR_SELECTIVE_CHOICES = (
+        (1, 'Range ex: 150-720'),
+        (2, 'Selective ex: 1,2,3'),
+    )
+    field_range_or_selective = models.PositiveSmallIntegerField(choices=FIELD_RANGE_OR_SELECTIVE_CHOICES, default=1, null=False)
+    field_range = models.CharField(max_length=50, blank=False, verbose_name='Field Range if Integer or Float')
+    field_postfix = models.CharField(max_length=20, blank=True, verbose_name='Postfix ex: RPM, V, ...')
+    default_value = models.CharField(max_length=50, blank=True)
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+
+    def __str__(self):
+        return "[field-" + str(self.id) + "]: " + str(self.field_name)
+
+
+class EquipmentTypeCustomOperation(models.Model):
+    operation = models.CharField(max_length=255, blank=False)
+    OPERAND_CHOICES = (
+        (1, 'Equal to'),
+        (2, 'Greater than'),
+        (3, 'Greater or Equal to'),
+        (4, 'Smaller than'),
+        (5, 'Smaller or Equal to'),
+    )
+    operand_type = models.PositiveSmallIntegerField(choices=OPERAND_CHOICES, default=1, null=False)
+    result_field = models.CharField(max_length=50, blank=False)
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class EquipmentDb(models.Model):
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+    manufacturer = models.ForeignKey(EquipmentManufacturer, on_delete=models.SET_NULL, blank=False, null=True)
+    model_number = models.CharField(max_length=50, blank=False)
+    serial_number = models.CharField(max_length=50, blank=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    flag = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Equipment Database'
+        verbose_name_plural = 'Equipment Database'
+
+    def __str__(self):
+        return str(self.equipment_type.name) + ' - ' + str(self.manufacturer) + ' - ' + str(
+            self.model_number) + ' - ' + str(self.serial_number)
+
+
+class EquipmentCustomField(models.Model):
+    equipment_value_name = models.CharField(max_length=255, blank=False, verbose_name='Field Name')
+    company_value = models.CharField(max_length=50, blank=False, verbose_name='Design Value')
+    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=False, null=False)
+
+    def __str__(self):
+        return self.equipment_value_name
 
 
 class LicenseInfo(models.Model):
@@ -313,6 +397,7 @@ class ModulesToEmailTemplateRelation(models.Model):
         (5, 'Email Footer'),
         (6, 'COI'),
         (7, 'Submittal'),
+        (8, 'Settlement'),
     )
     module = models.PositiveSmallIntegerField(choices=modules_list, unique=True, blank=False)
 

@@ -1,23 +1,20 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.http import HttpResponseRedirect
-from django import forms
-from .forms import *
-from django.views.generic import ListView
-from PyPDF2 import PdfFileMerger
+import random
+
 import img2pdf
 from PIL import Image
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MEDIA_URL_NOSLASH
-from .render import Render
-import os
-import random
+from PyPDF2 import PdfFileMerger
+from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import BadHeaderError, EmailMessage
+from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404, reverse
+
+from .forms import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from django.core.mail import BadHeaderError, EmailMessage
-import datetime
-from django.db.models import Q
-from django.core.paginator import Paginator
-from django.contrib import messages
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MEDIA_URL_NOSLASH
 
 
 def submittal_list(request):
@@ -91,7 +88,7 @@ def submittal_add(request):
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
                 new_submittal = form.save()
-                return HttpResponseRedirect(reverse('submittalPages', args=(new_submittal.pk, )))
+                return HttpResponseRedirect(reverse('submittalPages', args=(new_submittal.pk,)))
         else:
             form = CompanySubmittalViewForm(initial={'created_by': request.user})
     else:
@@ -120,7 +117,8 @@ def submittal_pages_ordering(request, submittal_id):
                     form.save()
                     return redirect('submittalPages', submittal_id)
                 else:
-                    SubmittalForms.objects.filter(submittal=submittal_id, submittal_form=form.cleaned_data['submittal_form']) \
+                    SubmittalForms.objects.filter(submittal=submittal_id,
+                                                  submittal_form=form.cleaned_data['submittal_form']) \
                         .update(ordering=form.cleaned_data['ordering'])
                     return redirect('submittalPages', submittal_id)
             else:
@@ -202,9 +200,11 @@ def submittal_view(request, submittal_id):
             merger.append(fileobj=temp_file)
     if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal"))
-    output = open(MEDIA_URL_NOSLASH + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(submittal_id) + ".pdf", "wb")
+    output = open(MEDIA_URL_NOSLASH + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(submittal_id) + ".pdf",
+                  "wb")
     merger.write(output)
-    parameters['submittal_url'] = MEDIA_URL + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(submittal_id) + ".pdf"
+    parameters['submittal_url'] = MEDIA_URL + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(
+        submittal_id) + ".pdf"
     return render(request, "submittalView.html", parameters)
 
 
@@ -228,7 +228,6 @@ def submittal_delete(request, submittal_id):
     parameters = {'this_subbmital': this_submittal
                   }
     return render(request, "submittalDelete.html", parameters)
-
 
 
 def pdf_filename_generator(submittal_id):

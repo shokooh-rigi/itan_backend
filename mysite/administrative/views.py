@@ -1,10 +1,12 @@
+from django import forms
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.paginator import Paginator
+from django.shortcuts import render, redirect, get_object_or_404
+
 from .forms import AdministrativeForm
 from .models import Document
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
-from django import forms
-from django.shortcuts import render, redirect, get_object_or_404
+from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
+
 
 # Create your views here.
 

@@ -1,13 +1,15 @@
+import datetime
+
+from django import forms
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+
+from mysite.order.models import Order
 from .forms import ScheduleForm
 from .models import Schedule
-import datetime
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django import forms
-from mysite.order.models import Order
+from ..settings import MEDIA_URL, WEB_URL
 
 
 # Create your views here.
@@ -57,7 +59,7 @@ def schedule_list(request):
 @login_required
 def schedule_add(request):
     form = ScheduleForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    orders = Order.objects.filter(archive=False).exclude(id__in=Schedule.objects.all().values_list('order_id'))\
+    orders = Order.objects.filter(archive=False).exclude(id__in=Schedule.objects.all().values_list('order_id')) \
         .order_by('-created_on')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
@@ -78,7 +80,7 @@ def schedule_add(request):
 def schedule_edit(request, schedule_id):
     this_schedule = get_object_or_404(Schedule, id=schedule_id)
     form = ScheduleForm(request.POST or None, request.FILES or None, instance=this_schedule)
-    orders = Order.objects.filter(archive=False).exclude(id__in=Schedule.objects.all().values_list('order_id'))\
+    orders = Order.objects.filter(archive=False).exclude(id__in=Schedule.objects.all().values_list('order_id')) \
         .order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):

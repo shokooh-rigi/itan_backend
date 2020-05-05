@@ -1,14 +1,17 @@
-from django.db import models
-from mysite.core.models import Person, User, Project
 import datetime
+
+from django.db import models
+
+from mysite.core.models import Person, User, Project
 from ..settings import MAX_UPLOAD_SIZE
+
 
 # Create your models here.
 
 
 class iBidFile(models.Model):
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=False, null=True,
-                                 help_text="Maximum Upload Size: " + str(MAX_UPLOAD_SIZE/1048576) + "MB")
+                                 help_text="Maximum Upload Size: " + str(MAX_UPLOAD_SIZE / 1048576) + "MB")
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=True, null=True)
     due_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
     uploaded_file = models.FileField(upload_to='uploads/ibidfiles', blank=True, null=True)

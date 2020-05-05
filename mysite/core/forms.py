@@ -1,15 +1,17 @@
-from django import forms
 from django.contrib.auth.forms import *
+from snowpenguin.django.recaptcha2.fields import ReCaptchaField
+from snowpenguin.django.recaptcha2.widgets import ReCaptchaWidget
 
 from .models import *
 
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
+    captcha = ReCaptchaField(widget=ReCaptchaWidget())
 
     class Meta:
         model = User
-        fields = ('email', 'password1', 'password2', )
+        fields = ('email', 'password1', 'password2', 'captcha')
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
@@ -22,7 +24,7 @@ class SignUpForm(UserCreationForm):
 class ChangePassword(PasswordChangeForm):
     class Meta:
         model = User
-        fields = ('old_password', 'new_password1', 'new_password2', )
+        fields = ('old_password', 'new_password1', 'new_password2',)
 
     def __init__(self, *args, **kwargs):
         super(ChangePassword, self).__init__(*args, **kwargs)
@@ -35,13 +37,13 @@ class ChangePassword(PasswordChangeForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = LicenseFiles
-        fields = ('value', )
+        fields = ('value',)
 
 
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', )
+        fields = ('first_name', 'last_name',)
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
@@ -54,7 +56,7 @@ class UserForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('title', 'emp_id', 'tel', 'fax', 'cell', 'e_sign', 'pic', 'wallpaper', 'stamp', )
+        fields = ('title', 'emp_id', 'tel', 'fax', 'cell', 'e_sign', 'pic', 'wallpaper', 'stamp',)
 
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)

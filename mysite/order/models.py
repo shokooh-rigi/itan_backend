@@ -1,6 +1,5 @@
-from django.db import models
-from mysite.core.models import *
 from mysite.estimator.models import *
+
 
 # Create your models here.
 
@@ -14,6 +13,8 @@ class Order(models.Model):
     estimated_date_of_project = models.DateField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)
+    fully_settled = models.BooleanField(default=False)
+    order_settled_value = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     note = models.TextField(max_length=2000, blank=True, null=True)
 
     class Meta:
@@ -31,7 +32,7 @@ def update_project_number(sender, instance, created, **kwargs):
         new_number = Setting.objects.get(key='Project Number Last Digit')
         new_number.value = int(Setting.objects.get(key='Project Number Last Digit').value) + 1
         new_number.save()
-        instance.project_number = Setting.objects.get(key='Project Number Pre Text').value +\
+        instance.project_number = Setting.objects.get(key='Project Number Pre Text').value + \
                                   Setting.objects.get(key='Project Number Last Digit').value.zfill(3)
         instance.save()
 
@@ -45,4 +46,4 @@ class ChangeOrder(models.Model):
     description = models.TextField(max_length=2000, blank=True, null=True)
 
     def __str__(self):
-        return self.order.project_number + ": " + self.co_number
+        return "Change Order #" + str(self.co_number) + " - Amount $" + str(self.amount)

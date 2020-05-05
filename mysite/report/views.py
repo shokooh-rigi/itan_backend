@@ -1,13 +1,15 @@
+import datetime
+
+from django import forms
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+
+from mysite.order.models import Order
 from .forms import ReportForm
 from .models import Report
-import datetime
-from django.core.paginator import Paginator
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django import forms
-from mysite.order.models import Order
+from ..settings import MEDIA_URL, WEB_URL
 
 
 # Create your views here.
@@ -55,7 +57,7 @@ def report_list(request):
 @login_required
 def report_add(request):
     form = ReportForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    orders = Order.objects.filter(archive=False).exclude(id__in=Report.objects.all().values_list('order_id'))\
+    orders = Order.objects.filter(archive=False).exclude(id__in=Report.objects.all().values_list('order_id')) \
         .order_by('-created_on')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
@@ -76,7 +78,7 @@ def report_add(request):
 def report_edit(request, report_id):
     this_report = get_object_or_404(Report, id=report_id)
     form = ReportForm(request.POST or None, request.FILES or None, instance=this_report)
-    orders = Order.objects.filter(archive=False).exclude(id__in=Report.objects.all().values_list('order_id'))\
+    orders = Order.objects.filter(archive=False).exclude(id__in=Report.objects.all().values_list('order_id')) \
         .order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):

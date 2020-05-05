@@ -1,6 +1,5 @@
 from mysite.order.models import *
-import datetime
-from django.core.validators import MaxValueValidator, MinValueValidator
+
 
 # Create your models here.
 

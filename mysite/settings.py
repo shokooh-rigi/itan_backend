@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
@@ -35,10 +34,9 @@ if ENV == 'test':
 if ENV == 'local':
     ALLOWED_HOSTS = ['127.0.0.1']
 if ENV == 'production':
-    ALLOWED_HOSTS = ['airtab.us', 'www.airtab.us']
+    ALLOWED_HOSTS = ['airtab.us', 'www.airtab.us', 'dashboard.tabtechinc.com']
 if ENV == 'test':
     ALLOWED_HOSTS = ['airtab.tech', 'www.airtab.tech']
-
 
 # Application definition
 
@@ -54,7 +52,7 @@ INSTALLED_APPS = [
     'djrichtextfield',
     'import_export',
     'rest_framework',
-    'bootstrap_datepicker_plus',
+    'snowpenguin.django.recaptcha2',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
@@ -68,8 +66,10 @@ INSTALLED_APPS = [
     'mysite.administrative',
     'mysite.schedule',
     'mysite.settlement',
+    'mysite.dbmanagement',
     'api',
     'django.contrib.humanize',
+    'mysite.estimator.templatetags'
 ]
 
 MIDDLEWARE = [
@@ -102,7 +102,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
@@ -118,9 +117,9 @@ if ENV == 'production':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'airtab_dbnew',
-            'USER': 'airtab_usr',
-            'PASSWORD': 'GKY%ZZyd@p=v',
+            'NAME': 'dtabtech_maindb',
+            'USER': 'dtabtech_dtab',
+            'PASSWORD': 'UzP^e&9pXEK,',
             'HOST': 'localhost',
         }
     }
@@ -135,7 +134,6 @@ if ENV == 'test':
             'HOST': 'localhost',
         }
     }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -155,14 +153,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 if ENV == 'local':
     STATIC_URL = '/static/'
 if ENV == 'production':
-    STATIC_URL = '/python/static/'
+    STATIC_URL = '/dashboard/static/'
 if ENV == 'test':
     STATIC_URL = '/test/static/'
 
@@ -174,7 +171,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if ENV == 'local':
     MEDIA_URL = '/media/'
 if ENV == 'production':
-    MEDIA_URL = '/python/media/'
+    MEDIA_URL = '/dashboard/media/'
 if ENV == 'test':
     MEDIA_URL = '/test/media/'
 MEDIA_URL_NOSLASH = 'media/'
@@ -217,10 +214,9 @@ DATE_INPUT_FORMATS = ['%m/%d/%Y']
 if ENV == 'local':
     WEB_URL = 'http://127.0.0.1:8000'
 if ENV == 'production':
-    WEB_URL = 'https://airtab.us'
+    WEB_URL = 'https://dashboard.tabtechinc.com'
 if ENV == 'test':
     WEB_URL = 'https://airtab.tech'
-
 
 DJRICHTEXTFIELD_CONFIG = {
     'js': ['//tinymce.cachefly.net/4.1/tinymce.min.js'],
@@ -240,3 +236,6 @@ DEFAULT_FROM_EMAIL = 'Estimator at TAB <estimator@tabtechinc.com>'
 BOOTSTRAP4 = {
     'include_jquery': True,
 }
+
+RECAPTCHA_PRIVATE_KEY = '6Levt-YUAAAAAClOFMj-oIofEeszrY4CMcQERlZj'
+RECAPTCHA_PUBLIC_KEY = '6Levt-YUAAAAAEtQg-rc4Y9FqatZuPEdDeR4mDCk'

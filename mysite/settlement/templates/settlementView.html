@@ -2,9 +2,11 @@
 {% load static %}
 {% load estimator_tags %}
 {% load custom_tags %}
+{% load humanize %}
+{% load settlement_tags %}
 
 {% block content %}
-    <h2>Estimate No. {% estimate_number_generator estimate.id %}</h2>
+    <h2>Settlement #{{ settlement.id }}</h2>
     <div class="container text-left" style="padding: 30px 10px;">
         <header class="proposal_header" style="display: none;">
             <img class="figure-img logo" src="{% media_url %}{{ owner_logo }}" />
@@ -16,60 +18,39 @@
   </td></tr></thead>
   <tbody><tr><td>
     <div class="content">
-            <h3 style="text-align: center; margin: 20px auto;">Estimate Statement</h3>
+            <h3 style="text-align: center; margin: 20px auto;">Settlement Statement</h3>
             <ul class="list-group">
-                <li class="list-group-item">Estimate No.: <b>{% estimate_number_generator estimate.id %}</b></li>
-                <li class="list-group-item">Customer: <b>{{ estimate.customer }}</b></li>
-                <li class="list-group-item">Project: <b>{{ estimate.project }}</b></li>
-                <li class="list-group-item">Due Date: <b>{{ estimate.due_date }}</b></li>
-                <li class="list-group-item">Engineer: <b>{{ estimate.engineer }}</b></li>
-                <li class="list-group-item">Type of Service: <b>
-                    {% for estimate_service in estimate.service.all %}
-                        {{ estimate_service }}{%if not forloop.last%}, {%endif%}
-                    {% endfor %}
-                </b></li>
+                <li class="list-group-item">Settlement No.: <b>{{ settlement.id }}</b></li>
+                <li class="list-group-item">Contractor: <b>{{ settlement.contractor }}</b></li>
+                <li class="list-group-item">Settle Date: <b>{{ settlement.created_on }}</b></li>
             </ul>
             <br />
             Detailed list of item selected with price:
             <br /><br />
-            <table class="table table-striped">
-                <thead class="thead-dark">
+            <table class="table table-striped" id="servicetable">
+                <thead>
                       <tr>
-                            <th scope="col">Item</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Item Service</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Unit Price</th>
-                            <th scope="col">Total</th>
+                            <th scope="col" style="background-color: #333; color: #fff;">Item</th>
+                            <th scope="col" style="background-color: #333; color: #fff;">Project Number</th>
+                            <th scope="col" style="background-color: #333; color: #fff;">Project Name</th>
+                            <th scope="col" style="background-color: #333; color: #fff;">Settlement based on</th>
+                            <th scope="col" style="background-color: #333; color: #fff;">Settlement amount</th>
                       </tr>
                 </thead>
                 <tbody>
-                {% for estimate_equipment_pricing in estimate_equipments_pricing %}
-                      <tr>
-                          <th scope="row">{{forloop.counter}}</th>
-                          <td>{{ estimate_equipment_pricing.equipment.name }}</td>
-                          <td>{{ estimate_equipment_pricing.equipment.service }}</td>
-                          <td>{{ estimate_equipment_pricing.quantity }}</td>
-                          <td>
-                              {% if estimate_equipment_pricing.price_override %}
-                                  ${{ estimate_equipment_pricing.price_override }}
-                              {% else %}
-                                  ${{ estimate_equipment_pricing.equipment.price }}
-                              {% endif %}
-                          </td>
-                          <td>${% equipment_total_calculator estimate_equipment_pricing %}</td>
-                      </tr>
-                {% endfor %}
+                    {% for settled_order in settled_orders %}
+                    <tr>
+                        <td scope="row">{{forloop.counter}}</td>
+                        <td>{{ settled_order.order.project_number }}</td>
+                        <td>{{ settled_order.order.proposal.quote.estimate.project.name }}</td>
+                        <td>${{ settled_order.settled_value|floatformat:2|intcomma }}</td>
+                        <td>${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <div class="text-right">
-                <div class=""><div class="d-inline-block">Sub Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_sub|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Control System: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ control_system_calculated|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Hours: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ hours_calculated|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Pre Demo: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ predemo_calculated|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Adjustment: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate.estimatedetails.adjustment|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_total|floatformat:2 }}</span></div></div>
-                <div class=""><div class="d-inline-block">Total Work: <span style="display: inline-block; width: 180px; font-weight: bold; padding-top: 10px;">{% if estimate_work_in_hours %}{{ estimate_work_in_hours }} hour{% if estimate_work_in_hours != 1 %}s{% endif %}{% endif %} {% if estimate_work_in_hours and estimate_work_in_minutes %}and {% endif %}{% if estimate_work_in_minutes %}{{ estimate_work_in_minutes }} minute{% if estimate_work_in_minutes != 1 %}s{% endif %}{% endif %}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</span></div></div>
             </div>
     </div>
   </td></tr></tbody>
@@ -96,10 +77,10 @@
     <div class="form-group">
         <div class="row form-line">
             <div class="col-lg-12">
-                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/estimate/{% pdf_filename_generator estimate.id 'E' %}.pdf"><button name="print" class="btn btn-info" id="printStatement" formnovalidate>Print Statement</button></a>
+                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/settlement/settlement-{{ settlement.id }}.pdf"><button name="print" class="btn btn-info" id="printStatement" formnovalidate>Print Statement</button></a>
             </div>
         </div>
     </div>
-    <a href="{% url 'estimatorHome' %}"><input type="submit" class="btn btn-primary" value="Go Back To Estimate List" name="done" /></a>
+    <a href="{% url 'settlementHome' %}"><input type="submit" class="btn btn-primary" value="Go Back To Settlements List" name="done" /></a>
 
 {% endblock %}

@@ -1,6 +1,6 @@
-from django import forms
 from django.contrib.auth.forms import *
 from django.forms import ModelForm
+
 from .models import *
 
 
@@ -21,7 +21,8 @@ class BidFileForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BidFileForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
+        self.fields['customer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical contractor')
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         for visible in self.visible_fields():
@@ -48,7 +49,8 @@ class BidFileEditForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BidFileEditForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
+        self.fields['customer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical contractor')
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         for visible in self.visible_fields():

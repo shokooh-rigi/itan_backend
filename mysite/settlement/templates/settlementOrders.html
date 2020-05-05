@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load order_tags %}
+{% load settlement_tags %}
 {% load humanize %}
 
 {% block content %}
@@ -11,17 +12,17 @@
         <div class="form-group">
             {% csrf_token %}
             <div class="alert alert-warning change-alert" style="display: none;">
-                <strong>Warning!</strong> You're about to change <span id="equipment_message"></span> Quantity which you have specified before...
+                <strong>Warning!</strong> You already Settled based on $<span id="old_settled_amount"></span> on this project before...
             </div>
             {{ form.settlement.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_order" class="control-label">Project</label>
-                    <select name="order" class="form-control" required="" id="id_order">
-                        <option value="" selected="">---------</option>
+                    <select name="order" class="form-control" id="id_order">
+                        <option value="" selected="" data-oldsettled="0">---------</option>
 
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-selectedbefore="{% if order.id in order_in %}1{% else %}0{% endif %}" data-price="{% order_total_calculator order.proposal.quote.estimate.id order %}">{{ order.project_number }}</option>
+                            <option value="{{ order.id }}" data-oldsettled="{{ order.order_settled_value  }}" data-price="{% order_total_calculator order.proposal.quote.estimate.id order %}">{{ order.project_number }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -38,6 +39,7 @@
                 <div class="col-lg-12">
                     <label for="price_override" class="control-label">Price Override</label>
                     {{ form.settled_value }}
+                    {{ form.order_value.as_hidden }}
                 </div>
             </div>
             <div class="row">
@@ -46,36 +48,49 @@
                 </div>
             </div>
         </div>
-	</form>
-    <br />
-    <ul class="list-group">
-    {% for settled_order in settled_orders %}
-        <li class="list-group-item">
-            Order: <b>{{ settled_order.order }} </b> -
-            Settled Value: <b>${{ settled_order.settled_value }} </b>
-            <a href="{% url 'settledOrderDelete' settlement_id=this_settlement.id settled_order_id=settled_order.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
-        </li>
-    {%  endfor %}
-    </ul>
+        <ul class="list-group">
+        {% for settled_order in settled_orders %}
+            <li class="list-group-item">
+                Order: <b>#{{ settled_order.order }} </b> -
+                Settlement based on <b>${{ settled_order.settled_value|floatformat:2|intcomma }} </b>
+                Settlement amount <b>${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</b>
+                <a href="{% url 'settledOrderDelete' settlement_id=this_settlement.id settled_order_id=settled_order.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+            </li>
+        {%  endfor %}
+        </ul>
+            <br />
+
     <br />
     <h4>Settlement Total: ${{ settled_total|floatformat:2|intcomma }}</h4>
     <br />
-    <a href="{{ next_url }}"><button class="btn btn-primary" >Next</button></a>
+        <input type="submit" class="btn btn-primary" value="Next" name="next" formnovalidate />
+        <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+	</form>
+
     <script>
         $("#price_overrider").attr('checked', false);
         $("#id_settled_value").attr('readonly', true);
         $("#price_overrider").click(function(){
             $("#id_settled_value").attr('readonly', !this.checked);
         });
+
+        if ($('#id_order').find(':selected').data('oldsettled') != 0) {
+            $('#old_settled_amount').text($('#id_order').find(':selected').data('oldsettled'));
+            $('.change-alert').slideDown();
+        }
+        else {
+            $('.change-alert').slideUp();
+        }
+
+
         $('#id_order').on('change', function() {
-            if ($(this).find(':selected').data('selectedbefore') === 1) {
-                $('#equipment_message').text($(this).find(':selected').text());
+            if ($(this).find(':selected').data('oldsettled') != 0) {
+                $('#old_settled_amount').text($(this).find(':selected').data('oldsettled'));
                 $('.change-alert').slideDown();
             }
             else {
                 $('.change-alert').slideUp();
             }
-
             $("#price_overrider").prop( "checked", false );
             $("#id_settled_value").attr('readonly', true);
             $("#id_settled_value").val($(this).find(':selected').data('price'));

@@ -2,6 +2,7 @@
 {% load estimator_tags %}
 {% load order_tags %}
 {% load custom_tags %}
+{% load humanize %}
 
 <html>
     <head>
@@ -87,11 +88,15 @@
                     </tr>
                     <tr style="border: 1px solid #000;">
                         <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
-                        <td style="padding: 5px 0 0 0;">${% order_total_calculator estimate.id invoice.order %} </td>
+                        <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id %} </td>
                     </tr>
+                    {% if change_orders %}<tr style="border: 1px solid #000;">
+                        <td style="padding: 5px 0 0 0;">{% for change_order in change_orders %}Change Order #{{ change_order.co_number }}{%if not forloop.last%}<br />{%endif%}{% endfor %} </td>
+                        <td style="padding: 5px 0 0 0;">{% for change_order in change_orders %}${{ change_order.amount|floatformat:2|intcomma }}{%if not forloop.last%}<br />{%endif%}{% endfor %} </td>
+                    </tr>{% endif %}
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Sub Total: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% order_total_calculator estimate.id invoice.order %} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% order_total_calculator estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Percent of performance completed: </td>
@@ -99,15 +104,15 @@
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Total payment received to date: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.total_payment_received_to_date|floatformat:2 }} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.total_payment_received_to_date|floatformat:2|intcomma }} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Past due amount: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.past_due_amount|floatformat:2 }} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.past_due_amount|floatformat:2|intcomma }} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px; font-size: 11pt;">Total amount due: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ total_amount_due|floatformat:2 }} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ total_amount_due|floatformat:2|intcomma }} </td>
                     </tr>
 
                   </tbody>

@@ -1,5 +1,7 @@
 from django.db import models
+
 from mysite.core.models import Person
+
 
 # Create your models here.
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from django.conf.urls import url
+
 from mysite.ibfm import views
 
 urlpatterns = [
@@ -8,4 +8,5 @@ urlpatterns = [
     path('ibfm/edit/<int:bidfiles_id>', views.bidfiles_edit, name='ibidFilesEdit'),
     path('ibfm/archive/<int:bidfiles_id>/', views.bidfiles_archive, name='ibidFilesArchive'),
     path('ibfm/delete/<int:bidfiles_id>/', views.bidfiles_delete, name='ibidFilesDelete'),
+    path('ibfm/pdfminer/<int:bidfiles_id>/', views.pdfminer_result_page, name='ibidFilePDFMiner'),
 ]

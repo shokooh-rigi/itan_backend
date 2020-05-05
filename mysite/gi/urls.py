@@ -1,4 +1,5 @@
 from django.urls import path
+
 from mysite.gi import views
 
 urlpatterns = [

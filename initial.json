@@ -1,138 +1,138 @@
 [
-   {
-      "model":"coi.InsuranceCompany",
-      "pk":1,
-      "fields":{
-         "key":"company_name",
-         "value":""
-      }
-   },
-   {
-      "model":"coi.InsuranceCompany",
-      "pk":2,
-      "fields":{
-         "key":"contact_name",
-         "value":""
-      }
-   },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":3,
-      "fields":{
-         "key":"mail",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 1,
+    "fields": {
+      "key": "company_name",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":4,
-      "fields":{
-         "key":"tel",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 2,
+    "fields": {
+      "key": "contact_name",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":5,
-      "fields":{
-         "key":"fax",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 3,
+    "fields": {
+      "key": "mail",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":6,
-      "fields":{
-         "key":"web",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 4,
+    "fields": {
+      "key": "tel",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":7,
-      "fields":{
-         "key":"address_line_1",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 5,
+    "fields": {
+      "key": "fax",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":8,
-      "fields":{
-         "key":"address_line_2",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 6,
+    "fields": {
+      "key": "web",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":9,
-      "fields":{
-         "key":"city",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 7,
+    "fields": {
+      "key": "address_line_1",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":10,
-      "fields":{
-         "key":"state",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 8,
+    "fields": {
+      "key": "address_line_2",
+      "value": ""
+    }
+  },
   {
-      "model":"coi.InsuranceCompany",
-      "pk":11,
-      "fields":{
-         "key":"zip",
-         "value":""
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 9,
+    "fields": {
+      "key": "city",
+      "value": ""
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":1,
-      "fields":{
-         "name":"MECHANICAL ENGINEER",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 10,
+    "fields": {
+      "key": "state",
+      "value": ""
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":2,
-      "fields":{
-         "name":"MECHANICAL CONTRACTOR",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   },
+    "model": "coi.InsuranceCompany",
+    "pk": 11,
+    "fields": {
+      "key": "zip",
+      "value": ""
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":3,
-      "fields":{
-         "name":"ARCHITECT",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   },
+    "model": "core.CompanyType",
+    "pk": 1,
+    "fields": {
+      "name": "MECHANICAL ENGINEER",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":4,
-      "fields":{
-         "name":"BUILDING OWNER",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   },
+    "model": "core.CompanyType",
+    "pk": 2,
+    "fields": {
+      "name": "MECHANICAL CONTRACTOR",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":5,
-      "fields":{
-         "name":"Construction Company",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   },
+    "model": "core.CompanyType",
+    "pk": 3,
+    "fields": {
+      "name": "ARCHITECT",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  },
   {
-      "model":"core.CompanyType",
-      "pk":6,
-      "fields":{
-         "name":"General Contractor",
-         "created_on":"2019-12-20 18:00:00.0"
-      }
-   }
+    "model": "core.CompanyType",
+    "pk": 4,
+    "fields": {
+      "name": "BUILDING OWNER",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  },
+  {
+    "model": "core.CompanyType",
+    "pk": 5,
+    "fields": {
+      "name": "Construction Company",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  },
+  {
+    "model": "core.CompanyType",
+    "pk": 6,
+    "fields": {
+      "name": "General Contractor",
+      "created_on": "2019-12-20 18:00:00.0"
+    }
+  }
 ]

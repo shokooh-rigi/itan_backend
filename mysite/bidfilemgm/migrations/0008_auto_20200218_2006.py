@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('bidfilemgm', '0007_auto_20200214_1348'),
     ]

@@ -1,6 +1,6 @@
-from django.db import models
-from mysite.schedule.models import *
 from django.contrib.humanize.templatetags.humanize import intcomma
+
+from mysite.schedule.models import *
 
 
 # Create your models here.
@@ -16,10 +16,20 @@ class Settlement(models.Model):
     def __str__(self):
         return str(self.id) + ". " + str(self.contractor)
 
+    @classmethod
+    def create_settlement_pdf(cls, parameters):
+        settlement_pdf = Render.render_to_file('pdfTemplates/settlementTemplate.html', parameters, 'settlement')
+        return settlement_pdf
+
+    @classmethod
+    def delete_settlement_pdf(cls, parameters):
+        delete_pdf = Render.delete_file(parameters, 'settlement')
+        return delete_pdf
+
 
 class SettledOrders(models.Model):
     settlement = models.ForeignKey(Settlement, on_delete=models.CASCADE, blank=False, null=False)
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False, null=False)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=True)
     settled_value = models.DecimalField(max_digits=8, decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
 

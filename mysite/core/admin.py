@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
+from django import forms
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from import_export import resources
-from .models import *
 from import_export.admin import ImportExportModelAdmin
 
+from .models import *
 
 admin.site.register(CompanySubmittalForm)
 admin.site.register(EmailBodyTemplate)
@@ -80,21 +81,56 @@ class SettingAdmin(ImportExportModelAdmin):
 admin.site.register(Setting, SettingAdmin)
 
 
-class EquipmentResource(resources.ModelResource):
-
+class ManufacturerResource(resources.ModelResource):
     class Meta:
-        model = Equipment
+        model = EquipmentManufacturer
 
 
-class EquipmentAdmin(ImportExportModelAdmin):
-    resource_class = EquipmentResource
+class ManufacturerAdmin(ImportExportModelAdmin):
+    resource_class = ManufacturerResource
 
 
-admin.site.register(Equipment, EquipmentAdmin)
+admin.site.register(EquipmentManufacturer, ManufacturerAdmin)
+
+
+class EqCustomFieldAdmin(admin.TabularInline):
+    model = EquipmentCustomField
+
+
+class EquipmentDbAdmin(admin.ModelAdmin):
+    inlines = [EqCustomFieldAdmin, ]
+
+
+admin.site.register(EquipmentDb, EquipmentDbAdmin)
+
+
+class SupplierAdminForm(forms.ModelForm):
+    class Meta:
+        model = EquipmentTypeCustomOperation
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super(SupplierAdminForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['result_field'].queryset = EquipmentTypeCustomField.objects.filter(equipment_type=61)
+
+
+class EqTypeCustomFieldAdmin(admin.TabularInline):
+    model = EquipmentTypeCustomField
+
+
+class EqTypeCustomOperationAdmin(admin.TabularInline):
+    model = EquipmentTypeCustomOperation
+
+
+class EquipmentTypeAdmin(admin.ModelAdmin):
+    inlines = [EqTypeCustomFieldAdmin, EqTypeCustomOperationAdmin, ]
+
+
+admin.site.register(Equipment, EquipmentTypeAdmin)
 
 
 class TestSheetResource(resources.ModelResource):
-
     class Meta:
         model = TestSheet
 
@@ -107,7 +143,6 @@ admin.site.register(TestSheet, TestSheetAdmin)
 
 
 class ServiceResource(resources.ModelResource):
-
     class Meta:
         model = Service
 
@@ -120,7 +155,6 @@ admin.site.register(Service, ServiceAdmin)
 
 
 class CompanyTypeResource(resources.ModelResource):
-
     class Meta:
         model = CompanyType
 
@@ -157,7 +191,6 @@ admin.site.register(Person, PersonAdmin)
 
 
 class ProfileResource(resources.ModelResource):
-
     class Meta:
         model = Profile
 

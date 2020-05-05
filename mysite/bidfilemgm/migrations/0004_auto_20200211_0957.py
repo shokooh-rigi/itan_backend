@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('bidfilemgm', '0003_bidfile_hidden_for_customer'),
     ]

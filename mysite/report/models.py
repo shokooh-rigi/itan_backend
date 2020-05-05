@@ -1,5 +1,5 @@
 from mysite.order.models import *
-import datetime
+
 
 # Create your models here.
 
