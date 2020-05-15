@@ -54,14 +54,14 @@ class BidFilesAPIView(AuthenticationMixin, APIView):
                     self._handle_uploaded_file(file, files[-1])
 
                 project = Project(
-                    name=form.cleaned_data['project_name'], created_by=request.user)
+                    name=data['project_name'], created_by=request.user)
                 project.save()
                 new_bidfile = form.save(commit=False)
                 new_bidfile.project = project
                 new_bidfile.save()
 
                 zip_file_name = str(new_bidfile.pk) + '. ' + \
-                    form.cleaned_data['project_name'] + '.zip'
+                    data['project_name'] + '.zip'
                 myzip = self._create_zip_file(files, temp_path, zip_file_name)
                 os.remove(new_bidfile.uploaded_file.path)
                 new_bidfile.uploaded_file = myzip.filename
