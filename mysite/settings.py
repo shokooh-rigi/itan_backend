@@ -34,9 +34,9 @@ if ENV == 'test':
 if ENV == 'local':
     ALLOWED_HOSTS = ['127.0.0.1']
 if ENV == 'production':
-    ALLOWED_HOSTS = ['airtab.us', 'www.airtab.us', 'dashboard.tabtechinc.com']
+    ALLOWED_HOSTS = ['dashboard.tabtechinc.com']
 if ENV == 'test':
-    ALLOWED_HOSTS = ['airtab.tech', 'www.airtab.tech']
+    ALLOWED_HOSTS = ['airtab.us', 'www.airtab.us']
 
 # Application definition
 
@@ -128,9 +128,9 @@ if ENV == 'test':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'airtabte_test2',
-            'USER': 'airtabte_test',
-            'PASSWORD': 'ZfRHS~[Vyy$-',
+            'NAME': 'airtab_dbnew2',
+            'USER': 'airtab_usr',
+            'PASSWORD': 'GKY%ZZyd@p=v',
             'HOST': 'localhost',
         }
     }
@@ -161,7 +161,7 @@ if ENV == 'local':
 if ENV == 'production':
     STATIC_URL = '/dashboard/static/'
 if ENV == 'test':
-    STATIC_URL = '/test/static/'
+    STATIC_URL = '/python/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
@@ -173,7 +173,7 @@ if ENV == 'local':
 if ENV == 'production':
     MEDIA_URL = '/dashboard/media/'
 if ENV == 'test':
-    MEDIA_URL = '/test/media/'
+    MEDIA_URL = '/python/media/'
 MEDIA_URL_NOSLASH = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -216,7 +216,7 @@ if ENV == 'local':
 if ENV == 'production':
     WEB_URL = 'https://dashboard.tabtechinc.com'
 if ENV == 'test':
-    WEB_URL = 'https://airtab.tech'
+    WEB_URL = 'https://airtab.us'
 
 DJRICHTEXTFIELD_CONFIG = {
     'js': ['//tinymce.cachefly.net/4.1/tinymce.min.js'],
