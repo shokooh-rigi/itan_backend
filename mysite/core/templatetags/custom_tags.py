@@ -1,7 +1,7 @@
 from django import template
-from mysite.core.models import EquipmentDb, EquipmentTypeCustomField, EquipmentCustomField
+from mysite.dbmanagement.models import EquipmentTypeCustomField, EquipmentCustomField
 from ...settings import MEDIA_URL
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 
 
 register = template.Library()

@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from mysite.core.models import EquipmentDb, EquipmentManufacturer
+from mysite.dbmanagement.models import EquipmentDb, EquipmentManufacturer
 
 
 class EquipmentForm(ModelForm):

@@ -150,6 +150,7 @@ def bidfiles_delete(request, bidfiles_id):
 def pdfminer_result_page(request, bidfiles_id):
     this_bfm = get_object_or_404(iBidFile, id=bidfiles_id)
     pdfminer_result = pdfminer('/home/dtabtech/public_html' + this_bfm.uploaded_file.url, this_bfm.project.name)
-    parameters = {'pdfminer_result': pdfminer_result,
+    pdfminer_result[1] = pdfminer_result[1].replace('\n', ' ')
+    parameters = {'pdfminer_result': pdfminer_result[1],
                   }
     return render(request, "ibfmPDFMiner.html", parameters)

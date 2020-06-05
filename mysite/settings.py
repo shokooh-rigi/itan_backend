@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'mysite.schedule',
     'mysite.settlement',
     'mysite.dbmanagement',
+    'mysite.sheetcreator',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags'

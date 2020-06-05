@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('mysite.administrative.urls')),
     path('', include('mysite.schedule.urls')),
     path('', include('mysite.settlement.urls')),
+    path('', include('mysite.sheetcreator.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
 ]

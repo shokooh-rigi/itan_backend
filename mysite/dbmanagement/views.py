@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
 
-from mysite.core.models import EquipmentDb, EquipmentTypeCustomField, EquipmentCustomField
+from mysite.dbmanagement.models import EquipmentCustomField
 from .forms import *
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 
 
 @login_required
@@ -28,6 +27,7 @@ def equipment_create(request):
                 return redirect('EquipmentsValues', this_equipment.pk)
     parameters = {'form': form,
                   'page_title': 'Create',
+                  'page_button': 'Create',
                   }
     return render(request, "equipment_create.html", parameters)
 
@@ -46,6 +46,7 @@ def equipment_edit(request, equipment_id):
     parameters = {'form': form,
                   'this_equipment': this_equipment,
                   'page_title': 'Edit',
+                  'page_button': 'Save',
                   }
     return render(request, "equipment_create.html", parameters)
 
@@ -61,6 +62,8 @@ def equipment_values(request, equipment_id):
         if request.POST.get("next"):
             for custom_field in custom_fields:
                 if custom_field.field_range_or_selective == 1:
+                    if custom_field.field_type == 3:
+                        break
                     my_range = custom_field.field_range.split('-')
                     min_value = my_range[0]
                     max_value = my_range[1]
@@ -81,6 +84,8 @@ def equipment_values(request, equipment_id):
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_field.field_range_or_selective == 2:
+                    if custom_field.field_type == 3:
+                        break
                     my_range = custom_field.field_range.split(',')
                     sent_value = request.POST.get('company_value_' + str(custom_field.id))
                     is_in_my_range = 0

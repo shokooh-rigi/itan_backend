@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Edit Order {{ this_order }} - {{ this_order.proposal.quote.estimate.project }} - ${% estimate_total_calculator this_order.proposal.quote.estimate.id %}</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="proposalAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.proposal.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_architect_name" class="control-label">Architect Name</label>
+                    {{ form.architect_name }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">PO #<span class="required">*</span></label>
+                    {{ form.po_number }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Date PO Received</label>
+                    {{ form.date_po_received }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Estimated Date of Project</label>
+                    {{ form.estimated_date_of_project }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Note</label>
+                    {{ form.note }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-primary" value="Change Order" name="co" />
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+
+            {% if change_orders %}
+
+            <table class="table table-striped" style="margin: 30px;">
+                <thead>
+                    <tr>
+                        <th>CO#</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for changeorder in change_orders %}
+                            <tr>
+                                <td>{{ changeorder.co_number }}</td>
+                                <td>{{ changeorder.date }}</td>
+                                <td>${{ changeorder.amount|floatformat:2|intcomma }}</td>
+                                <td>{{ changeorder.description }}</td>
+                                <td>
+                                    <a href="{% url 'deleteChangeOrder' order_id=order_id change_order_id=changeorder.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+                                </td>
+                            </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% endif %}
+
+        </div>
+	</form>
+    <script>
+        $('#id_proposal').on('change', function() {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#engineer").text($(this).find(':selected').data('engineer'));
+            $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+            $("#pre_amount").text($(this).find(':selected').data('preamount'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

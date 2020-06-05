@@ -1,5 +1,6 @@
 from mysite.bidfilemgm.models import *
 from mysite.core.models import *
+from mysite.dbmanagement.models import *
 from .render import Render
 
 

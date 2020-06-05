@@ -43,9 +43,14 @@
                     {% if user.is_authenticated %}
                     {% if request.user.profile.user_type > 1 %}
                     <li class="menu-item">
-                        <a href="#">Estimate</a>
+                        <a href="#"><span style="text-transform: none;">iESTIMATE</span></a>
                         <ul>
                             <li class="menu-item"><a href="{% url 'ibidFilesHome' %}"><span style="text-transform: none;">iBFM</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#">Estimate</a>
+                        <ul>
                             <li class="menu-item"><a href="{% url 'bidFilesHome' %}">BFM</a></li>
                             <li class="menu-item"><a href="{% url 'estimatorHome' %}">Estimate</a></li>
                             <li class="menu-item"><a href="{% url 'quotationHome' %}">Quote</a></li>
@@ -71,6 +76,13 @@
                         </ul>
                     </li>
                     <li class="menu-item">
+                        <a href="#">Tech</a>
+                        <ul>
+                            <li class="menu-item"><a href="{% url 'EquipmentsHome' %}">Equipment Database</a></li>
+                            <li class="menu-item"><a href="#">Air Moving Equipment Sheet</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
                         <a href="#">Management</a>
                         <ul>
                             <li><a href="{% url 'MgmReport' %}">Reports</a>
@@ -78,11 +90,6 @@
                                     <li class="menu-item"><a href="{% url 'EquipmentsList' %}">Equipments</a></li>
                                     <li class="menu-item"><a href="{% url 'CompanyList' %}">Customers</a></li>
                                     <li class="menu-item"><a href="{% url 'BidsList' %}">Bids Report</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="{% url 'MgmReport' %}">Database</a>
-                                <ul>
-                                    <li class="menu-item"><a href="{% url 'EquipmentsHome' %}">Equipment Database</a></li>
                                 </ul>
                             </li>
                         </ul>
