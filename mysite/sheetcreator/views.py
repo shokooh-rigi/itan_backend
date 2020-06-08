@@ -64,118 +64,65 @@ def sheet_equipment(request, sheet_id):
     equipment_in = []
     sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
     for one_sheet_equipment in sheet_equipments:
-        equipment_in.append(one_sheet_equipment.equipment.id)
+        equipment_in.append(one_sheet_equipment.equipment_type.id)
+
+    equipments_count = {}
+    for one_sheet_equipment in sheet_equipments:
+        if one_sheet_equipment.equipment_type.name in equipments_count:
+            old_quantity = equipments_count[one_sheet_equipment.equipment_type.name]
+            new_quantity = old_quantity + 1
+            equipments_count[one_sheet_equipment.equipment_type.name] = new_quantity
+        else:
+            equipments_count[one_sheet_equipment.equipment_type.name] = 1
     if request.method == 'POST':
         if form.is_valid():
-            if SheetEquipment.objects.filter(sheet=sheet_id, equipment=form.cleaned_data['equipment']).count() == 0:
+            if SheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).count() == 0:
                 form.cleaned_data['sheet'] = sheet_id
-                form.save()
+                for i in range(0, form.cleaned_data['quantity']):
+                    item_sheet_equipment = SheetEquipment()
+                    item_sheet_equipment.sheet = Sheet.objects.get(id=sheet_id)
+                    item_sheet_equipment.equipment_type = Equipment.objects.get(id=form.cleaned_data['equipment_type'].id)
+                    item_sheet_equipment.save()
                 return redirect('sheetEquipment', sheet_id)
             else:
-                SheetEquipment.objects.filter(sheet=sheet_id, equipment=form.cleaned_data['equipment']) \
-                    .update(quantity=form.cleaned_data['quantity'])
+                SheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).delete()
+                for every_quantity in form.cleaned_data['quantity']:
+                    form.save()
                 return redirect('sheetEquipment', sheet_id)
+    first_equipment = sheet_equipments.first()
     parameters = {'sheet': sheet,
                   'form': form,
                   'sheet_equipments': sheet_equipments,
                   'equipment_in': equipment_in,
+                  'equipments_count': equipments_count,
                   'equipments': equipments,
                   }
     return render(request, "sheetEquipment.html", parameters)
 
 
 @login_required
-def order_edit(request, order_id):
-    this_order = get_object_or_404(Order, id=order_id)
-    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
-    proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id'))
-    change_orders = ChangeOrder.objects.filter(order=order_id)
+def sheet_equipment_common_data(request, sheet_equipment_id):
+    sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
+    manufacturers = EquipmentManufacturer.objects.all()
+    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov')
+
+    equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
+
     if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('orderHome')
-        if request.POST.get("co"):
-            return redirect('changeOrder', order_id=order_id)
-        if form.is_valid():
-            if request.POST.get("save"):
-                form.save()
-                return redirect('orderHome')
-    parameters = {'form': form,
-                  'proposals': proposals,
-                  'change_orders': change_orders,
-                  'order_id': order_id,
-                  'this_order': this_order,
+        for every_field in showing_fields:
+            key = every_field
+            field_value = request.POST.get('showing_field_value_'+str(every_field.id))
+            new_record = SheetEquipmentCommonData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
+            new_record.save()
+        new_update = SheetEquipment.objects.get(id=sheet_equipment_id)
+        new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+        new_update.save()
+
+    parameters = {'sheet_equipment': sheet_equipment,
+                  'showing_fields': showing_fields,
+                  'manufacturers': manufacturers,
+                  'Equipment_db': Equipment_db,
                   }
-    return render(request, "orderEdit.html", parameters)
 
-
-@login_required
-def order_delete(request, order_id):
-    this_order = get_object_or_404(Order, id=order_id)
-    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_order.delete()
-        return redirect('orderHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_order': this_order,
-                'error_msg': error_msg
-            }
-            return render(request, "orderDelete.html", parameters)
-        return redirect('orderHome')
-    parameters = {'this_order': this_order
-                  }
-    return render(request, "orderDelete.html", parameters)
-
-
-@login_required
-def order_archive(request, order_id):
-    this_order = get_object_or_404(Order, id=order_id)
-    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_order.archive = True
-            this_order.save()
-        return redirect('orderHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_order': this_order,
-                'error_msg': error_msg
-            }
-            return render(request, "orderArchive.html", parameters)
-        return redirect('orderHome')
-    parameters = {'this_order': this_order
-                  }
-    return render(request, "orderArchive.html", parameters)
-
-
-@login_required
-def change_order(request, order_id):
-    this_order = get_object_or_404(Order, id=order_id)
-    form = ChangeOrderForm(request.POST or None, request.FILES or None, initial={'order': order_id})
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('orderEdit', order_id=order_id)
-        if form.is_valid():
-            if request.POST.get("save"):
-                form.cleaned_data['order'] = order_id
-                form.save()
-                return redirect('orderEdit', order_id=order_id)
-    parameters = {'form': form,
-                  'this_order': this_order,
-                  }
-    return render(request, "changeOrder.html", parameters)
-
-
-@login_required
-def change_order_delete(request, order_id, change_order_id):
-    this_change_order = get_object_or_404(ChangeOrder, id=change_order_id)
-    if request.method == "POST" and request.user.is_authenticated:
-        if request.POST.get("confirm"):
-            this_change_order.delete()
-        return redirect('orderEdit', order_id=order_id)
-    parameters = {'this_change_order': this_change_order
-                  }
-    return render(request, "changeOrderDelete.html", parameters)
+    return render(request, "sheetEquipmentCommonData.html", parameters)

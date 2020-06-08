@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from django import forms
 
 from .models import *
 
@@ -22,11 +23,13 @@ class SheetForm(ModelForm):
 
 
 class SheetEquipmentForm(ModelForm):
+    quantity = forms.IntegerField(required=True)
+
     class Meta:
         model = SheetEquipment
         fields = [
             'sheet',
-            'equipment',
+            'equipment_type',
             'quantity',
         ]
 

@@ -13,8 +13,8 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_equipment" class="control-label">Equipment</label>
-                    <select name="equipment" class="form-control" required="" id="id_equipment">
+                    <label for="id_equipment_type" class="control-label">Equipment</label>
+                    <select name="equipment_type" class="form-control" required="" id="id_equipment_type">
                         <option value="" selected="">---------</option>
 
                         {% for equipment in equipments %}
@@ -39,19 +39,19 @@
 	</form>
     <br />
     <ul class="list-group">
-    {% for sheet_equipment in sheet_equipments %}
+    {% for sheet_equipment in equipments_count %}
         <li class="list-group-item">
-            Equipment Name: <b>{{ sheet_equipment.equipment.name }} </b>
-            - Quantity: <b>{{ sheet_equipment.quantity }} </b>
+            Equipment Name: <b>{{ sheet_equipment }} </b>
+            - Quantity: <b>{{ equipments_count|get_item:sheet_equipment }} </b>
 {#            <a href="{% url 'estimateEquipmentDelete' estimate_equipment_id=estimate_equipment_pricing.id interval_id=estimate_service_id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>#}
         </li>
     {%  endfor %}
     </ul>
     <br />
-    <input type="submit" class="btn btn-success" value="Next" name="next" />
-    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+    <a href="{% url "sheetHome" %}"><button class="btn btn-success">Begin Sheet Data Entry</button></a>
+    <a href="{% url "sheetHome" %}"><button class="btn btn-danger">Cancel</button></a>
     <script>
-        $('#id_equipment').on('change', function() {
+        $('#id_equipment_type').on('change', function() {
             if ($(this).find(':selected').data('selectedbefore') === 1) {
                 $('#equipment_message').text($(this).find(':selected').text());
                 $('.change-alert').slideDown();

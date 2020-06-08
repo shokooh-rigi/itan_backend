@@ -149,8 +149,11 @@ def bidfiles_delete(request, bidfiles_id):
 @login_required
 def pdfminer_result_page(request, bidfiles_id):
     this_bfm = get_object_or_404(iBidFile, id=bidfiles_id)
-    pdfminer_result = pdfminer('/home/dtabtech/public_html' + this_bfm.uploaded_file.url, this_bfm.project.name)
-    pdfminer_result[1] = pdfminer_result[1].replace('\n', ' ')
-    parameters = {'pdfminer_result': pdfminer_result[1],
+    pdfminer_result = pdfminer('/home/airtab/public_html' + this_bfm.uploaded_file.url, this_bfm.project.name)
+    my_result = pdfminer_result[0]
+    my_result = my_result[2].replace('\n', ' ')
+    parameters = {'pdfminer_result': pdfminer_result,
+                  'first_export': my_result,
+                  'project_name': this_bfm.project.name,
                   }
     return render(request, "ibfmPDFMiner.html", parameters)

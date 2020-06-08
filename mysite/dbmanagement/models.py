@@ -96,12 +96,12 @@ class EquipmentDb(models.Model):
     flag = models.BooleanField(default=True)
 
     class Meta:
+        unique_together = ('manufacturer', 'model_number',)
         verbose_name = 'Equipment Database'
         verbose_name_plural = 'Equipment Database'
 
     def __str__(self):
-        return str(self.equipment_type.name) + ' - ' + str(self.manufacturer) + ' - ' + str(
-            self.model_number) + ' - ' + str(self.serial_number)
+        return str(self.model_number)
 
 
 class EquipmentCustomField(models.Model):
