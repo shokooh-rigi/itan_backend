@@ -1,15 +1,11 @@
-import re
-from difflib import SequenceMatcher
-from io import StringIO
 from typing import List, Tuple
-
-from pdfminer.high_level import extract_text_to_fp
-from pdfminer.layout import LAParams
-
+import re
+from io import StringIO
+from difflib import SequenceMatcher
 from . import image_extractor
-
-
-# import tesserocr
+from pdfminer.layout import LAParams
+from pdfminer.high_level import extract_text_to_fp
+import tesserocr
 
 
 def extract_text_from_page_image(pdf_path: str, page_number: int) -> str:
