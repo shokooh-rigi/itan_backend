@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+    <h2>Edit Equipment Actual Values</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentValues-form">
+        <div class="form-group">
+            {% csrf_token %}
+            </div>
+            <div class="row form-line" style="font-weight: bold;">
+                <div class="col-lg-4">
+                    Field Title
+                </div>
+                <div class="col-lg-3">
+                    Actual Value
+                </div>
+            </div>
+            {% for custom_field in custom_fields %}
+            <div class="row form-line">
+                <div class="col-lg-4">
+                    <label for="id_architect_name" class="control-label">{{ custom_field.key }}</label>
+                </div>
+                <div class="col-lg-3">
+                    <input style="width: 100%;" type="text" value="{{ custom_field.value }}" name="actual_value_{{ custom_field.id }}" class="form-control" id="id_actual_value" />
+                </div>
+            </div>
+            {% endfor %}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-primary" value="Edit & Generate PDF" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_proposal').on('change', function() {
+            if($(this).val() === '') {
+                $("#customer").text('');
+                $("#engineer").text('');
+                $("#tab_amount").text('');
+                $("#pre_amount").text('');
+                $("#total_amount").text('');
+                $("#dlink_href").attr("href", '').hide();
+            }
+            else {
+                $("#customer").text($(this).find(':selected').data('customer'));
+                $("#engineer").text($(this).find(':selected').data('engineer'));
+                $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+                $("#pre_amount").text($(this).find(':selected').data('preamount'));
+                $("#total_amount").text($(this).find(':selected').data('totalamount'));
+                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

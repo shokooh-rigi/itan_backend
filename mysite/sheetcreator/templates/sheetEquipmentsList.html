@@ -6,47 +6,46 @@
 
 {% block content %}
     <div class="text-center">
-        <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary big">Generate Sheet</button></a>
-        <br /><br />
-        <div class="row" style="margin: 10px auto;">
-                <form action="?{% url_replace request 'project_name' '' %}">
-                    <div class="form-group" style="display: inline-block; transform: translateY(2px);">
-                        <label for="project_name"></label>
-                        <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name/Number..." value="{{ request.GET.project_name }}" />
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
-                </form>
-            <div class="pagination-select">
-                <header class="title">items per page</header>
-                <div class="btn-group">
-                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
-                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
-                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
-                </div>
-            </div>
-        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th data-sortable="proposal__quote__estimate__id"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__id' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__id' %}{% endif %}">Sheet ID</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Test Sheet Type</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Project</a></th>
-                    <th data-sortable="proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer' %}{% endif %}">Sheet Date</a></th>
-                    <th>Equipments List</th>
+                    <th>ID</th>
+                    <th>Equipment Type</th>
+                    <th>Location</th>
+                    <th>Manufacturer</th>
+                    <th>Model No.</th>
+                    <th>Serial No.</th>
+                    <th>Common Data Completed</th>
+                    <th>Actual Data Completed</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for sheet in sheets %}
+                {% for sheet_equipment in sheet_equipments %}
                     <tr>
-                        <td>{{ sheet.id }}</td>
-                        <td>{{ sheet.test_sheet_type }}</td>
-                        <td>{{ sheet.project.project_number }}</td>
-                        <td>{{ sheet.sheet_date }}</td>
-                        <td><a href="{% url 'sheetEquipmentsList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
+                        <td>{{ sheet_equipment.id }}</td>
+                        <td>{{ sheet_equipment.equipment_type }}</td>
+                        <td>{% for location in sheet_equipment.sheetequipmentcommondata_set.all %}
+                            {% if 'location' in location.key.column_title %}
+                                {{ location.value }}
+                            {% endif %}
+                        {% endfor %}</td>
+                        <td>{{ sheet_equipment.equipment.manufacturer }}</td>
+                        <td>{{ sheet_equipment.equipment.model_number }}</td>
+                        <td>{% for serial in sheet_equipment.sheetequipmentcommondata_set.all %}
+                            {% if 'serial' in serial.key.column_title %}
+                                {{ serial.value }}
+                            {% endif %}
+                        {% endfor %}</td>
+                        <td>{% if sheet_equipment.main_data_entry_completed == 0 %}<div class="icon notcompletedicon" data-toggle="tooltip" data-placement="bottom" title="Not Completed"></div>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div>
+                        <a href="{% url 'sheetEquipmentCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Common Data"></div></a>{% endif %}</td>
+                        <td>{% if sheet_equipment.actual_data_entry_completed == 0 %}<div class="icon notcompletedicon" data-toggle="tooltip" data-placement="bottom" title="Not Completed"></div>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'sheetEquipmentActualValueEdit' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
                         <td>
+                            {% if sheet_equipment.main_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Begin Data Entry"></div></a>
+                            {% elif sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentDesignValue' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Continue Data Entry"></div></a>
+                            {% elif sheet_equipment.actual_data_entry_completed == 1 and sheet_equipment.main_data_entry_completed == 1 %}<a href="{% url 'sheetEquipmentActualValueEdit' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
-                            <a href="{% url 'sheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+{#                            <a href="{% url 'orderDelete' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>#}
 {#                            <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
                         </td>
                     </tr>

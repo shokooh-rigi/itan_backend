@@ -49,14 +49,14 @@
                         <option value="" selected="">---------</option>
 
                         {% for equipment in Equipment_db %}
-                            <option value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}">{{ equipment }}</option>
+                            <option style="display: none;" value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}">{{ equipment }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Next" name="next" />
+                    <input type="submit" class="btn btn-success" value="Review Design Values" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>
             </div>
@@ -64,11 +64,13 @@
 	</form>
     <script>
         $('#id_manufacturer').on('change', function() {
-            $("#id_equipment option").each(function() { $(this).show(); });
+            $("#id_equipment option").each(function() { $(this).hide(); });
+            $("#id_equipment option[value='']").show();
+            $("#id_equipment").val('');
             if($(this).val() !== '') {
                 $("#id_equipment option").each(function() {
-                    if($(this).data('manufacturer') != $('#id_manufacturer').find(':selected').val()) {
-                        $(this).hide();
+                    if($(this).data('manufacturer') == $('#id_manufacturer').find(':selected').val()) {
+                        $(this).show();
                     }
                 });
             }

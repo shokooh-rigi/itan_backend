@@ -434,6 +434,22 @@ iframe {
     background-image: url("../images/icons/delete.svg");
 }
 
+.icon.completedicon {
+    background-image: url("../images/icons/completed.svg");
+}
+
+.icon.notcompletedicon {
+    background-image: url("../images/icons/notcompleted.svg");
+}
+
+.icon.continueicon {
+    background-image: url("../images/icons/continue.svg");
+}
+
+.icon.starticon {
+    background-image: url("../images/icons/start.svg");
+}
+
 .main .pagination {
     text-align: center;
     margin-top: 1em;

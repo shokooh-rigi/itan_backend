@@ -8,13 +8,13 @@
     </div>
     <br />
     {%if request.user.is_authenticated %}
-        <h2>Delete Order {% estimate_number_generator this_order.proposal.quote.estimate.id %}</h2>
+        <h2>Delete Equipments with type '{{ sheet_equipment_name }}'</h2>
         <br />
         <form method="POST" action="">
             {% csrf_token %}
-            Are you sure you want to delete this order?<br /><br />
+            Are you sure you want to delete these equipments?<br /><br />
             <input type="submit" class="btn btn-primary" value="Yes" name="confirm" />
-            <a href="{% url 'orderHome' %}"><button class="btn btn-danger">Cancel</button></a>
+            <a href="{% url 'sheetHome' %}"><button class="btn btn-danger">Cancel</button></a>
         </form>
     {% endif %}
 

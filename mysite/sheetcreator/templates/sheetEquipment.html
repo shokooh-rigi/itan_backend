@@ -43,12 +43,12 @@
         <li class="list-group-item">
             Equipment Name: <b>{{ sheet_equipment }} </b>
             - Quantity: <b>{{ equipments_count|get_item:sheet_equipment }} </b>
-{#            <a href="{% url 'estimateEquipmentDelete' estimate_equipment_id=estimate_equipment_pricing.id interval_id=estimate_service_id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>#}
+            <a href="{% url 'sheetEquipmentDelete' sheet.id sheet_equipment %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
         </li>
     {%  endfor %}
     </ul>
     <br />
-    <a href="{% url "sheetHome" %}"><button class="btn btn-success">Begin Sheet Data Entry</button></a>
+    {% if first_equipment_id != '' %}<a href="{% url "sheetEquipmentCommonData" first_equipment_id %}"><button class="btn btn-success">Begin Sheet Data Entry</button></a>{% endif %}
     <a href="{% url "sheetHome" %}"><button class="btn btn-danger">Cancel</button></a>
     <script>
         $('#id_equipment_type').on('change', function() {
