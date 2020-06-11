@@ -1,3 +1,6 @@
+import pickle
+import json
+import time
 import datetime
 
 from django import forms
@@ -5,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 
-from mysite.pdfminer import pdfminer
+from mysite.pdf_analyzer.pdf_analyzer import start_find_project_addresses
+from mysite.pdf_analyzer.models import AddressExtractionRun, AddressExtractionDebug
 from .forms import BidFileForm, BidFileEditForm
 from .models import iBidFile
 from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
@@ -146,14 +151,129 @@ def bidfiles_delete(request, bidfiles_id):
     return render(request, "ibfmDelete.html", parameters)
 
 
-@login_required
-def pdfminer_result_page(request, bidfiles_id):
-    this_bfm = get_object_or_404(iBidFile, id=bidfiles_id)
-    pdfminer_result = pdfminer('/home/airtab/public_html' + this_bfm.uploaded_file.url, this_bfm.project.name)
-    my_result = pdfminer_result[0]
-    my_result = my_result[2].replace('\n', ' ')
-    parameters = {'pdfminer_result': pdfminer_result,
-                  'first_export': my_result,
-                  'project_name': this_bfm.project.name,
-                  }
-    return render(request, "ibfmPDFMiner.html", parameters)
+########################################################################################################################
+# PDF Analyzer
+# find project address
+@login_required()
+def pdf_analyzer_project_address_run(request, bidfile_id):
+    bidfile = get_object_or_404(iBidFile, pk=bidfile_id)
+
+    active_runs = AddressExtractionRun.objects.filter(file=bidfile, is_finished=False)
+    if active_runs.exists():
+        return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', active_runs.first().pk)
+
+    run_id = start_find_project_addresses(bidfile, bidfile.project.name)
+    return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
+
+
+@login_required()
+def pdf_analyzer_project_address_progress_json(request, run_id):
+    run = get_object_or_404(AddressExtractionRun, pk=run_id)
+    parameters = {
+        'is_finished': run.is_finished,
+        'run_step': run.run_step,
+        'run_step_progress': run.run_step_progress,
+        'elapsed_time': int(time.time() - run.created_on.timestamp()),
+    }
+    return JsonResponse(parameters)
+
+
+@login_required()
+def pdf_analyzer_project_address_progress(request, run_id):
+    run = get_object_or_404(AddressExtractionRun, pk=run_id)
+    if run.is_finished:
+        return redirect('ibidFilesPDFAnalyzerProjectAddressDebug', run_id)
+
+    parameters = {
+        'run_id': run_id,
+        'pdf_file': run.file.uploaded_file.url,
+        'project_name': run.project_name,
+        'run_step': run.run_step,
+        'run_step_progress': run.run_step_progress,
+        'elapsed_time': int(time.time() - run.created_on.timestamp()),
+        'steps': [
+            'Converting PDF to image',
+            'Detecting text boxes in image',
+            'Converting to text',
+            'Calculating similarity of lines to the project name',
+            'Finding project address'
+        ],
+    }
+    return render(request, "ibfmPDFAnalyzerProjectAddressProgress.html", parameters)
+
+
+def save_address_extraction_debug(request, run: AddressExtractionRun):
+    data = [
+        {
+            'correct_address': request.POST.get('step_1_correct_address', ''),
+            'description': request.POST.get('step_1_description', ''),
+        },
+        {
+            'project_name_is_in_boxes': request.POST.get('step_2_project_name_is_in_boxes', 'true'),
+            'project_address_is_in_boxes': request.POST.get('step_2_project_address_is_in_boxes', 'true'),
+            'description': request.POST.get('step_2_description', ''),
+        },
+        {
+            'project_name_is_in_boxes': request.POST.get('step_3_project_name_is_in_boxes', 'true'),
+            'project_address_is_in_boxes': request.POST.get('step_3_project_address_is_in_boxes', 'true'),
+            'description': request.POST.get('step_3_description', ''),
+        },
+        {
+            'project_name_is_correct': request.POST.get('step_4_project_name_is_correct', 'true'),
+            'project_address_is_correct': request.POST.get('step_4_project_address_is_correct', 'true'),
+            'description': request.POST.get('step_4_description', ''),
+        },
+        {
+            'project_name_is_in_similar_lines': request.POST.get('step_5_project_name_is_in_similar_lines', 'true'),
+            'description': request.POST.get('step_5_description', ''),
+        },
+        {
+            'boxes_below_lines_are_correct': request.POST.get('step_6_boxes_below_lines_are_correct', 'true'),
+            'project_address_is_in_boxes': request.POST.get('step_6_project_address_is_in_boxes', 'true'),
+            'description': request.POST.get('step_6_description', ''),
+        },
+        {
+            'text_blocks_are_correct': request.POST.get('step_7_text_blocks_are_correct', 'true'),
+            'project_address_is_in_one_block': request.POST.get('step_7_project_address_is_in_one_block', 'true'),
+            'project_address_has_extra_text': request.POST.get('step_7_project_address_has_extra_text', 'false'),
+            'description': request.POST.get('step_7_description', ''),
+        },
+    ]
+
+    for i in range(7):
+        debug = AddressExtractionDebug(run=run, debug_step=i + 1, data=json.dumps(data[i]))
+        debug.save()
+
+
+@login_required()
+def pdf_analyzer_project_address_debug(request, run_id):
+    run = get_object_or_404(AddressExtractionRun, pk=run_id)
+    if not run.is_finished:
+        return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
+
+    # all_boxes, filtered_boxes, text_boxes, line_similarities, boxes_below_project_names, recognized_text_blocks
+    with open(run.process_variables, 'rb') as vars_file:
+        process_variables = pickle.load(vars_file)
+    parameters = {
+        'pdf_file': run.file.uploaded_file.url,
+        'project_name': run.project_name,
+        'processed_images': run.processed_images,
+        'process_variables': process_variables,
+        'addresses': run.addresses,
+        'execution_time': run.execution_time,
+        'created_on': run.created_on,
+        'debug_data': None,
+    }
+
+    if not run.addressextractiondebug_set.exists() and request.method == 'POST':
+        save_address_extraction_debug(request, run)
+
+    if run.addressextractiondebug_set.exists():
+        debug_data = {1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: ''}
+        debug_steps = run.addressextractiondebug_set.all()
+        for step in debug_steps:
+            debug_data[step.debug_step] = step.data
+        parameters['debug_data'] = debug_data
+
+    return render(request, "ibfmPDFAnalyzerProjectAddressDebug.html", parameters)
+########################################################################################################################

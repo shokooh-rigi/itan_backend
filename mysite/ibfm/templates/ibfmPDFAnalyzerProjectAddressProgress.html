@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div style="text-align: start; padding: 20px 20px 5px;">
+        <div>
+            <h6>
+                PDF Analyzer is running on
+                <a id="progress_download_btn" href="" style="margin-left: 5px;" download=""></a>
+            </h6>
+        </div>
+        <div>
+            <h6 style="display: inline-block;">Project Name:</h6>
+            <span id="progress_project_name_span"></span>
+        </div>
+        <div>
+            <h6 style="display: inline-block;">Elapsed Time:</h6>
+            <span id="progress_elapsed_time_span"></span>s
+        </div>
+        <div style="padding-top: 10px;">
+            <h6>
+                <span id="progress_run_step_title_span"></span>
+            </h6>
+            <div class="progress" style="height: 20px; margin: 10px 0;">
+                <div id="progress_run_step_progressbar" class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar">
+                </div>
+            </div>
+
+            <div id="progress_run_step_progress_progressbar_container" class="progress"
+                 style="height: 20px; margin: 10px 0;">
+                <div id="progress_run_step_progress_progressbar" class="progress-bar bg-info" role="progressbar"></div>
+            </div>
+        </div>
+
+        <div id="progress_result_btn_container" style="text-align: center; margin-top: 20px; display: none;">
+            <a class="btn btn-success" role="button"
+               href="{% url 'ibidFilesPDFAnalyzerProjectAddressDebug' run_id=run_id %}">
+                See Results
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+        let runStepTitleSpan = $('#progress_run_step_title_span');
+        let runStepProgressbar = $('#progress_run_step_progressbar');
+        let runStepProgressProgressbar = $('#progress_run_step_progress_progressbar');
+        let runStepProgressProgressbarContainer = $('#progress_run_step_progress_progressbar_container');
+        let elapsedTimeSpan = $('#progress_elapsed_time_span');
+        let resultBtnContainer = $('#progress_result_btn_container');
+
+        let elapsedTimeInterval = null;
+        let init_steps = [];
+        {% for step in steps %}
+            init_steps.push('{{ step }}');
+        {% endfor %}
+        let stepsCount = init_steps.length;
+        let progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
+
+        function initial() {
+            let initData = {
+                pdf_file_url: '{{ pdf_file }}',
+                project_name: '{{ project_name }}',
+                run_step: {{ run_step }},
+                run_step_progress: {{ run_step_progress }},
+                elapsed_time:{{ elapsed_time }},
+            };
+            let file_url_segments = initData.pdf_file_url.trim().split('/');
+            let pdf_file_name = file_url_segments[file_url_segments.length - 1];
+
+            let downloadBtn = $('#progress_download_btn');
+            let projectNameSpan = $('#progress_project_name_span');
+
+            downloadBtn.attr('href', initData.pdf_file_url);
+            downloadBtn.attr('download', pdf_file_name);
+            downloadBtn.text(pdf_file_name);
+            projectNameSpan.text(initData.project_name);
+            setValues(initData.run_step, initData.run_step_progress, initData.elapsed_time, false);
+        }
+
+        function getProgress() {
+            let isFinished = false;
+            $.get(progressJsonApi, (data) => {
+                    isFinished = data.is_finished;
+                    setValues(data.run_step, data.run_step_progress, data.elapsed_time, isFinished);
+                }
+            ).fail(() => {
+                }
+            ).always(() => {
+                if (!isFinished) {
+                    setTimeout(() => getProgress(), 500);
+                }
+            });
+        }
+
+        function setValues(runStep, runStepProgress, elapsedTime, isFinished) {
+            if (isFinished) {
+                runStepTitleSpan.text('Process completed');
+                runStepProgressbar.css('width', '100%');
+                runStepProgressbar.removeClass('progress-bar-animated');
+                runStepProgressbar.removeClass('progress-bar-striped');
+                runStepProgressbar.text('');
+                runStepProgressProgressbarContainer.css('display', 'none');
+                clearInterval(elapsedTimeInterval);
+                elapsedTimeSpan.text(elapsedTime);
+                resultBtnContainer.css('display', 'block');
+                return;
+            }
+
+            runStepTitleSpan.text(init_steps[runStep - 1]);
+            runStepProgressbar.css('width', (Math.floor(runStep * 100 / stepsCount)) + '%');
+            runStepProgressbar.text(`${runStep}/${stepsCount}`);
+
+            if (runStep === 3) {
+                runStepProgressProgressbarContainer.css('display', 'flex');
+                runStepProgressProgressbar.css('width', runStepProgress + '%');
+                runStepProgressProgressbar.text(runStepProgress + '%');
+            } else {
+                runStepProgressProgressbarContainer.css('display', 'none');
+            }
+
+            clearInterval(elapsedTimeInterval);
+            elapsedTimeSpan.text(elapsedTime);
+            elapsedTimeInterval = setInterval(() => {
+                elapsedTime++;
+                elapsedTimeSpan.text(elapsedTime);
+            }, 1000);
+        }
+
+        initial();
+        getProgress();
+    </script>
+
+{% endblock %}
