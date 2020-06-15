@@ -9,9 +9,12 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
+from django.utils.safestring import SafeString
 
-from mysite.pdf_analyzer.pdf_analyzer import start_find_project_addresses
+from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
 from mysite.pdf_analyzer.models import AddressExtractionRun, AddressExtractionDebug
+from mysite.pdf_analyzer.src.logger.logger_models import ADDRESS_RUN_STEPS
+
 from .forms import BidFileForm, BidFileEditForm
 from .models import iBidFile
 from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
@@ -162,7 +165,7 @@ def pdf_analyzer_project_address_run(request, bidfile_id):
     if active_runs.exists():
         return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', active_runs.first().pk)
 
-    run_id = start_find_project_addresses(bidfile, bidfile.project.name)
+    run_id = start_find_project_address(bidfile, bidfile.project.name)
     return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
 
 
@@ -191,13 +194,7 @@ def pdf_analyzer_project_address_progress(request, run_id):
         'run_step': run.run_step,
         'run_step_progress': run.run_step_progress,
         'elapsed_time': int(time.time() - run.created_on.timestamp()),
-        'steps': [
-            'Converting PDF to image',
-            'Detecting text boxes in image',
-            'Converting to text',
-            'Calculating similarity of lines to the project name',
-            'Finding project address'
-        ],
+        'steps': SafeString(json.dumps(ADDRESS_RUN_STEPS)),
     }
     return render(request, "ibfmPDFAnalyzerProjectAddressProgress.html", parameters)
 
@@ -205,38 +202,38 @@ def pdf_analyzer_project_address_progress(request, run_id):
 def save_address_extraction_debug(request, run: AddressExtractionRun):
     data = [
         {
-            'correct_address': request.POST.get('step_1_correct_address', ''),
-            'description': request.POST.get('step_1_description', ''),
+            'correct_address': request.POST.get('step_1_correct_address', '').strip(),
+            'description': request.POST.get('step_1_description', '').strip(),
         },
         {
             'project_name_is_in_boxes': request.POST.get('step_2_project_name_is_in_boxes', 'true'),
             'project_address_is_in_boxes': request.POST.get('step_2_project_address_is_in_boxes', 'true'),
-            'description': request.POST.get('step_2_description', ''),
+            'description': request.POST.get('step_2_description', '').strip(),
         },
         {
             'project_name_is_in_boxes': request.POST.get('step_3_project_name_is_in_boxes', 'true'),
             'project_address_is_in_boxes': request.POST.get('step_3_project_address_is_in_boxes', 'true'),
-            'description': request.POST.get('step_3_description', ''),
+            'description': request.POST.get('step_3_description', '').strip(),
         },
         {
             'project_name_is_correct': request.POST.get('step_4_project_name_is_correct', 'true'),
             'project_address_is_correct': request.POST.get('step_4_project_address_is_correct', 'true'),
-            'description': request.POST.get('step_4_description', ''),
+            'description': request.POST.get('step_4_description', '').strip(),
         },
         {
             'project_name_is_in_similar_lines': request.POST.get('step_5_project_name_is_in_similar_lines', 'true'),
-            'description': request.POST.get('step_5_description', ''),
+            'description': request.POST.get('step_5_description', '').strip(),
         },
         {
             'boxes_below_lines_are_correct': request.POST.get('step_6_boxes_below_lines_are_correct', 'true'),
             'project_address_is_in_boxes': request.POST.get('step_6_project_address_is_in_boxes', 'true'),
-            'description': request.POST.get('step_6_description', ''),
+            'description': request.POST.get('step_6_description', '').strip(),
         },
         {
             'text_blocks_are_correct': request.POST.get('step_7_text_blocks_are_correct', 'true'),
             'project_address_is_in_one_block': request.POST.get('step_7_project_address_is_in_one_block', 'true'),
             'project_address_has_extra_text': request.POST.get('step_7_project_address_has_extra_text', 'false'),
-            'description': request.POST.get('step_7_description', ''),
+            'description': request.POST.get('step_7_description', '').strip(),
         },
     ]
 
@@ -251,17 +248,18 @@ def pdf_analyzer_project_address_debug(request, run_id):
     if not run.is_finished:
         return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
 
-    # all_boxes, filtered_boxes, text_boxes, line_similarities, boxes_below_project_names, recognized_text_blocks
     with open(run.process_variables, 'rb') as vars_file:
         process_variables = pickle.load(vars_file)
+
     parameters = {
+        'run_id': run_id,
         'pdf_file': run.file.uploaded_file.url,
         'project_name': run.project_name,
-        'processed_images': run.processed_images,
-        'process_variables': process_variables,
-        'addresses': run.addresses,
+        'processed_images': SafeString(run.get_processed_images_url()),
+        'process_variables': SafeString(json.dumps(process_variables)),
+        'addresses': SafeString(run.addresses),
         'execution_time': run.execution_time,
-        'created_on': run.created_on,
+        'created_on': run.created_on.strftime("%b %d %Y %H:%M:%S"),
         'debug_data': None,
     }
 
@@ -269,10 +267,10 @@ def pdf_analyzer_project_address_debug(request, run_id):
         save_address_extraction_debug(request, run)
 
     if run.addressextractiondebug_set.exists():
-        debug_data = {1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: ''}
-        debug_steps = run.addressextractiondebug_set.all()
+        debug_data = []
+        debug_steps = run.addressextractiondebug_set.all().order_by('debug_step')
         for step in debug_steps:
-            debug_data[step.debug_step] = step.data
+            debug_data.append(SafeString(step.data))
         parameters['debug_data'] = debug_data
 
     return render(request, "ibfmPDFAnalyzerProjectAddressDebug.html", parameters)

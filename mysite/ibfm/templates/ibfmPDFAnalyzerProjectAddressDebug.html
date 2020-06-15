@@ -1,0 +1,804 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div style="text-align: start; padding: 20px 20px 5px;">
+        <div>
+            <h6>
+                PDF Analyzer processed
+                <a id="result_download_pdf_btn" href="" style="margin-left: 5px;margin-right: 5px;" download=""></a>
+                on <span id="result_run_date_span"></span>
+            </h6>
+        </div>
+        <div>
+            <h6 style="display: inline-block;">Project Name:</h6>
+            <span id="result_project_name_span"></span>
+        </div>
+        <div>
+            <h6 style="display: inline-block;">Execution Time:</h6>
+            <span id="result_execution_time_span"></span>s
+        </div>
+        <form action="{% url 'ibidFilesPDFAnalyzerProjectAddressDebug' run_id=run_id %}" method="post"
+              autocomplete="off">
+            {% csrf_token %}
+
+            <div class="accordion" style="margin-top: 20px;" id="debug_steps_accordion">
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_1">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left" style="text-transform: none;" type="button"
+                                    data-toggle="collapse" data-target="#accordion_collapse_1" aria-expanded="true"
+                                    aria-controls="accordion_collapse_1">
+                                Address Verification
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="accordion_collapse_1" class="collapse show" aria-labelledby="accordion_heading_1"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            <h6 style="display: inline-block;">Found Addresses:</h6>
+                            <span id="result_step_1_address_not_found_span" style="display: none;">nothing found</span>
+                            <table id="result_step_1_address_table" class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col" style="width: 50px; vertical-align: middle;">#</th>
+                                    <th scope="col" style="width: 200px; vertical-align: middle;">Similarity to the
+                                        project name
+                                    </th>
+                                    <th scope="col" style="width: 200px; vertical-align: middle;">Confidence of
+                                        tesserocr
+                                    </th>
+                                    <th scope="col" style="vertical-align: middle;">Address</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="step_1_correct_address">Enter the correct address</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_1_correct_address" name="step_1_correct_address">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="step_1_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_1_description" name="step_1_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_2" onclick="showResultStep2()">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_2"
+                                    aria-expanded="false" aria-controls="accordion_collapse_2">
+                                Detected Boxes
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_2" class="collapse" aria-labelledby="accordion_heading_2"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            <div id="result_step_2_img_container" style="position: relative;">
+                                <img id="result_step_2_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
+                                     src="#" alt="Detected Boxes">
+                                <div id="result_step_2_box_container"
+                                     style="position: absolute;top: 0;left: 0; width: 100%; height: 100%;"></div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Is the project name among the boxes?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_2_project_name_is_in_boxes"
+                                                   id="step_2_project_name_is_in_boxes_true" value="true" checked>
+                                            <label class="form-check-label" for="step_2_project_name_is_in_boxes_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_2_project_name_is_in_boxes"
+                                                   id="step_2_project_name_is_in_boxes_false" value="false">
+                                            <label class="form-check-label" for="step_2_project_name_is_in_boxes_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Is the project address among the boxes?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_2_project_address_is_in_boxes"
+                                                   id="step_2_project_address_is_in_boxes_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_2_project_address_is_in_boxes_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_2_project_address_is_in_boxes"
+                                                   id="step_2_project_address_is_in_boxes_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_2_project_address_is_in_boxes_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_2_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_2_description" name="step_2_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_3" onclick="showResultStep3()">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_3"
+                                    aria-expanded="false" aria-controls="accordion_collapse_3">
+                                Filtered Boxes
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_3" class="collapse" aria-labelledby="accordion_heading_3"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            <div id="result_step_3_img_container" style="position: relative;">
+                                <img id="result_step_3_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
+                                     src="#" alt="Filtered Boxes">
+                                <div id="result_step_3_box_container"
+                                     style="position: absolute;top: 0;left: 0; width: 100%; height: 100%;"></div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Is the project name among the boxes?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_3_project_name_is_in_boxes"
+                                                   id="step_3_project_name_is_in_boxes_true" value="true" checked>
+                                            <label class="form-check-label" for="step_3_project_name_is_in_boxes_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_3_project_name_is_in_boxes"
+                                                   id="step_3_project_name_is_in_boxes_false" value="false">
+                                            <label class="form-check-label" for="step_3_project_name_is_in_boxes_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Is the project address among the boxes?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_3_project_address_is_in_boxes"
+                                                   id="step_3_project_address_is_in_boxes_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_3_project_address_is_in_boxes_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_3_project_address_is_in_boxes"
+                                                   id="step_3_project_address_is_in_boxes_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_3_project_address_is_in_boxes_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_3_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_3_description" name="step_3_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_4" onclick="showResultStep4()">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_4"
+                                    aria-expanded="false" aria-controls="accordion_collapse_4">
+                                Convert to Text
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_4" class="collapse" aria-labelledby="accordion_heading_4"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            <div id="result_step_4_img_container" style="position: relative;">
+                                <img id="result_step_4_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
+                                     src="#" alt="Text Boxes">
+                                <div id="result_step_4_box_container"
+                                     style="position: absolute;top: 0;left: 0; width: 100%; height: 100%;"></div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Is the project name correctly converted to text?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_4_project_name_is_correct"
+                                                   id="step_4_project_name_is_correct_true" value="true" checked>
+                                            <label class="form-check-label" for="step_4_project_name_is_correct_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_4_project_name_is_correct"
+                                                   id="step_4_project_name_is_correct_false" value="false">
+                                            <label class="form-check-label" for="step_4_project_name_is_correct_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Is the project address correctly converted to text?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_4_project_address_is_correct"
+                                                   id="step_4_project_address_is_correct_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_4_project_address_is_correct_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_4_project_address_is_correct"
+                                                   id="step_4_project_address_is_correct_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_4_project_address_is_correct_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_4_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_4_description" name="step_4_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_5">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_5"
+                                    aria-expanded="false" aria-controls="accordion_collapse_5">
+                                Line Similarities to the Project Name
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_5" class="collapse" aria-labelledby="accordion_heading_5"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            <table id="result_step_5_lines_table" class="table table-hover">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col" style="width: 50px; vertical-align: middle;">#</th>
+                                    <th scope="col" style="width: 200px; vertical-align: middle;">Similarity ratio</th>
+                                    <th scope="col" style="vertical-align: middle;">Line(s)</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Is the project name exists among the most similar lines?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_5_project_name_is_in_similar_lines"
+                                                   id="step_5_project_name_is_in_similar_lines_true" value="true"
+                                                   checked>
+                                            <label class="form-check-label"
+                                                   for="step_5_project_name_is_in_similar_lines_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_5_project_name_is_in_similar_lines"
+                                                   id="step_5_project_name_is_in_similar_lines_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_5_project_name_is_in_similar_lines_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_5_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_5_description" name="step_5_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_6">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_6"
+                                    aria-expanded="false" aria-controls="accordion_collapse_6">
+                                Boxes Below Most Similar Lines to the Project Name
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_6" class="collapse" aria-labelledby="accordion_heading_6"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            BOXES BELOW LINES
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Are the boxes below each line correctly identified?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_6_boxes_below_lines_are_correct"
+                                                   id="step_6_boxes_below_lines_are_correct_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_6_boxes_below_lines_are_correct_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_6_boxes_below_lines_are_correct"
+                                                   id="step_6_boxes_below_lines_are_correct_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_6_boxes_below_lines_are_correct_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Is the project address among the boxes?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_6_project_address_is_in_boxes"
+                                                   id="step_6_project_address_is_in_boxes_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_6_project_address_is_in_boxes_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_6_project_address_is_in_boxes"
+                                                   id="step_6_project_address_is_in_boxes_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_6_project_address_is_in_boxes_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_6_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_6_description" name="step_6_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="accordion_heading_7">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
+                                    type="button" data-toggle="collapse" data-target="#accordion_collapse_7"
+                                    aria-expanded="false" aria-controls="accordion_collapse_7">
+                                Detected Text Blocks
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="accordion_collapse_7" class="collapse" aria-labelledby="accordion_heading_7"
+                         data-parent="#debug_steps_accordion">
+                        <div class="card-body">
+                            TEXT BLOCKS
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">Are the text blocks properly separated?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_text_blocks_are_correct"
+                                                   id="step_7_text_blocks_are_correct_true" value="true" checked>
+                                            <label class="form-check-label"
+                                                   for="step_7_text_blocks_are_correct_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_text_blocks_are_correct"
+                                                   id="step_7_text_blocks_are_correct_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_7_text_blocks_are_correct_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Is the project address completely in one text block?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_project_address_is_in_one_block"
+                                                   id="step_7_project_address_is_in_one_block_true" value="true"
+                                                   checked>
+                                            <label class="form-check-label"
+                                                   for="step_7_project_address_is_in_one_block_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_project_address_is_in_one_block"
+                                                   id="step_7_project_address_is_in_one_block_false" value="false">
+                                            <label class="form-check-label"
+                                                   for="step_7_project_address_is_in_one_block_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <h6 style="font-weight: normal;">
+                                            Does the project address block have additional text?
+                                        </h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_project_address_has_extra_text"
+                                                   id="step_7_project_address_has_extra_text_true" value="true">
+                                            <label class="form-check-label"
+                                                   for="step_7_project_address_has_extra_text_true">
+                                                Yes
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="step_7_project_address_has_extra_text"
+                                                   id="step_7_project_address_has_extra_text_false" value="false"
+                                                   checked>
+                                            <label class="form-check-label"
+                                                   for="step_7_project_address_has_extra_text_false">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="step_7_description">Additional Description</label>
+                                        <input type="text" class="form-control" style="display: block; width: 100%;"
+                                               id="step_7_description" name="step_7_description">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="debug_submit_container" style="text-align: center; margin-top: 30px;">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script>
+        let initData;
+
+
+        function fixSlashes(str) {
+            return str.replace(/\\/g, '\\\\').replace(/\n/g, '\\n');
+        }
+
+
+        function fixAndParse(str) {
+            return JSON.parse(fixSlashes(str));
+        }
+
+
+        function drawBoxesOnImage(boxes, boxBorder, texts, container, boxContainer, actualImageWidth) {
+            const containerWidth = container.width();
+            if (containerWidth) {
+                const transformRate = containerWidth / actualImageWidth;
+                boxContainer.empty();
+
+                let i = 0;
+                for (const box of boxes) {
+                    const xStart = box[0] * transformRate;
+                    const yStart = box[1] * transformRate;
+                    const bWidth = box[2] * transformRate;
+                    const bHeight = box[3] * transformRate;
+
+                    const element = $(`
+                            <div style="position: absolute; top: ${yStart}px; left: ${xStart}px;
+                                width: ${bWidth}px; height: ${bHeight}px; border: ${boxBorder};">
+                            </div>`
+                    );
+                    boxContainer.append(element);
+
+                    if (texts) {
+                        const text = texts[i].replace(/\n/g, '<br>');
+                        element.attr('data-toggle', 'tooltip');
+                        element.attr('data-html', 'true');
+                        element.attr('title', text);
+                        element.tooltip();
+                    }
+                    i++;
+                }
+            }
+        }
+
+
+        function initial() {
+            initData = {
+                pdf_file_url: '{{ pdf_file }}',
+                project_name: '{{ project_name }}',
+                execution_time: {{ execution_time }},
+                processed_images: JSON.parse('{{ processed_images }}'),
+                process_variables: fixAndParse('{{ process_variables }}'),
+                addresses: fixAndParse('{{ addresses }}'),
+                created_on: '{{ created_on }}',
+                debug_data: null,
+            };
+
+            {% if debug_data %}
+                initData.debug_data = [];
+                {% for debug_step in debug_data %}
+                    initData.debug_data.push(fixAndParse('{{ debug_step }}'));
+                {% endfor %}
+            {% endif %}
+
+            const file_url_segments = initData.pdf_file_url.trim().split('/');
+            const pdf_file_name = file_url_segments[file_url_segments.length - 1];
+
+            const downloadBtn = $('#result_download_pdf_btn');
+            const projectNameSpan = $('#result_project_name_span');
+            const runDateSpan = $('#result_run_date_span');
+            const executionTimeSpan = $('#result_execution_time_span');
+
+            downloadBtn.attr('href', initData.pdf_file_url);
+            downloadBtn.attr('download', pdf_file_name);
+            downloadBtn.text(pdf_file_name);
+            projectNameSpan.text(initData.project_name);
+            runDateSpan.text(initData.created_on);
+            executionTimeSpan.text(initData.execution_time);
+
+            showResultStep1();
+            showResultStep5();
+            showResultStep6();
+            showResultStep7();
+            setFormValues();
+
+            $('head style').append(`
+                .tooltip-inner {
+                    max-width: 500px;
+                    background-color: #fff;
+                    color: #000;
+                }
+                .tooltip.show {
+                    opacity: 1;
+                }`
+            );
+        }
+
+
+        function showResultStep1() {
+            if (initData.addresses.length === 0) {
+                $('#result_step_1_address_table').css('display', 'none');
+                $('#result_step_1_address_not_found_span').css('display', 'inline-block');
+            } else {
+                const tableBody = $('#result_step_1_address_table > tbody');
+                let i = 0;
+                for (const address of initData.addresses) {
+                    i++;
+                    tableBody.append(`
+                        <tr>
+                            <th scope="row" style="vertical-align: middle;">${i}</th>
+                            <td style="vertical-align: middle;">${address[0].toFixed(3)}</td>
+                            <td style="vertical-align: middle;">${address[1]}</td>
+                            <td style="vertical-align: middle;">${address[2].replace(/\n/g, '<br>')}</td>
+                        </tr>`
+                    );
+                }
+            }
+        }
+
+
+        function showResultStep2() {
+            const container = $('#result_step_2_img_container');
+            const img = $('#result_step_2_img');
+            const boxContainer = $('#result_step_2_box_container');
+            const page1Image = initData.processed_images[1];
+            const boxes = initData.process_variables[1].all_boxes;
+            img.attr('src', page1Image.url);
+
+            setTimeout(() => {
+                drawBoxesOnImage(boxes, '2px solid yellow', null, container, boxContainer, page1Image.width);
+            }, 500);
+        }
+
+
+        function showResultStep3() {
+            const container = $('#result_step_3_img_container');
+            const img = $('#result_step_3_img');
+            const boxContainer = $('#result_step_3_box_container');
+            const page1Image = initData.processed_images[1];
+            const boxes = initData.process_variables[1].filtered_boxes;
+            img.attr('src', page1Image.url);
+
+            setTimeout(() => {
+                drawBoxesOnImage(boxes, '2px solid yellow', null, container, boxContainer, page1Image.width);
+            }, 500);
+        }
+
+
+        function showResultStep4() {
+            const container = $('#result_step_4_img_container');
+            const img = $('#result_step_4_img');
+            const boxContainer = $('#result_step_4_box_container');
+            const page1Image = initData.processed_images[1];
+
+            img.attr('src', page1Image.url);
+
+            const textBoxes = initData.process_variables[1].text_boxes;
+            const boxes = [];
+            const texts = [];
+            for (const item of textBoxes) {
+                boxes.push(item.bbox);
+                texts.push(item.text);
+            }
+
+            setTimeout(() => {
+                drawBoxesOnImage(boxes, '2px solid yellow', texts, container, boxContainer, page1Image.width);
+            }, 500);
+        }
+
+
+        function showResultStep5() {
+            const similarities = initData.process_variables[1]['line_similarities'];
+            const tableBody = $('#result_step_5_lines_table > tbody');
+            let i = 0;
+            for (const similarity of similarities) {
+                i++;
+                const ratio = Number.parseFloat(similarity.ratio.substr(1));
+                const isMostSimilar = similarity.ratio[0] === '+';
+                const cls = isMostSimilar ? 'success' : 'danger';
+                tableBody.append(`
+                        <tr class="alert-${cls} border-bottom border-${cls}"
+                            style="border-bottom-width: 2px !important;">
+                            <th scope="row" style="vertical-align: middle;">${i}</th>
+                            <td style="vertical-align: middle;">${ratio.toFixed(3)}</td>
+                            <td style="vertical-align: middle;">
+                                ${similarity.line_1}${similarity.line_2 ? '<br>' + similarity.line_2 : ''}
+                            </td>
+                        </tr>`
+                );
+            }
+        }
+
+
+        function showResultStep6() {
+
+        }
+
+
+        function showResultStep7() {
+
+        }
+
+
+        function setFormValues() {
+            const form = initData.debug_data;
+
+            if (form) {
+                const inputs = [
+                    {step: 1, id: 'correct_address'},
+                    {step: 1, id: 'description'},
+                    {step: 2, id: 'description'},
+                    {step: 3, id: 'description'},
+                    {step: 4, id: 'description'},
+                    {step: 5, id: 'description'},
+                    {step: 6, id: 'description'},
+                    {step: 7, id: 'description'},
+                ];
+                for (const item of inputs) {
+                    const value = form[item.step - 1][item.id];
+                    const inputId = `step_${item.step}_${item.id}`;
+                    const input = $(`#${inputId}`);
+                    input.attr('value', value);
+                    input.attr('disabled', true);
+                }
+
+                const checkboxes = [
+                    {step: 2, id: 'project_name_is_in_boxes'},
+                    {step: 2, id: 'project_address_is_in_boxes'},
+                    {step: 3, id: 'project_name_is_in_boxes'},
+                    {step: 3, id: 'project_address_is_in_boxes'},
+                    {step: 4, id: 'project_name_is_correct'},
+                    {step: 4, id: 'project_address_is_correct'},
+                    {step: 5, id: 'project_name_is_in_similar_lines'},
+                    {step: 6, id: 'boxes_below_lines_are_correct'},
+                    {step: 6, id: 'project_address_is_in_boxes'},
+                    {step: 7, id: 'text_blocks_are_correct'},
+                    {step: 7, id: 'project_address_is_in_one_block'},
+                    {step: 7, id: 'project_address_has_extra_text'},
+                ];
+                const opposite = {'true': 'false', 'false': 'true'};
+                for (const item of checkboxes) {
+                    const value = form[item.step - 1][item.id];
+                    const checkboxId = `step_${item.step}_${item.id}_${value}`;
+                    const checkbox = $(`#${checkboxId}`);
+                    checkbox.attr('checked', true);
+                    checkbox.attr('disabled', true);
+                    const oppositeCheckboxId = `step_${item.step}_${item.id}_${opposite[value]}`;
+                    $(`#${oppositeCheckboxId}`).attr('disabled', true);
+                }
+
+                $('#debug_submit_container').css('display', 'none');
+            }
+        }
+
+
+        initial();
+    </script>
+
+{% endblock %}
+

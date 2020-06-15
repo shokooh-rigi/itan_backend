@@ -51,10 +51,7 @@
         let resultBtnContainer = $('#progress_result_btn_container');
 
         let elapsedTimeInterval = null;
-        let init_steps = [];
-        {% for step in steps %}
-            init_steps.push('{{ step }}');
-        {% endfor %}
+        let init_steps = JSON.parse('{{ steps }}');
         let stepsCount = init_steps.length;
         let progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
 
@@ -112,7 +109,7 @@
             runStepProgressbar.css('width', (Math.floor(runStep * 100 / stepsCount)) + '%');
             runStepProgressbar.text(`${runStep}/${stepsCount}`);
 
-            if (runStep === 3) {
+            if (0 <= runStepProgress) {
                 runStepProgressProgressbarContainer.css('display', 'flex');
                 runStepProgressProgressbar.css('width', runStepProgress + '%');
                 runStepProgressProgressbar.text(runStepProgress + '%');
