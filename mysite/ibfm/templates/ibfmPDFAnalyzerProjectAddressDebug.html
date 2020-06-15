@@ -233,11 +233,30 @@
                     <div id="accordion_collapse_4" class="collapse" aria-labelledby="accordion_heading_4"
                          data-parent="#debug_steps_accordion">
                         <div class="card-body">
+                            <div class="alert alert-info" role="alert">
+                                To display the text, move the mouse over the boxes or click on theme.
+                            </div>
+
                             <div id="result_step_4_img_container" style="position: relative;">
                                 <img id="result_step_4_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
                                      src="#" alt="Text Boxes">
                                 <div id="result_step_4_box_container"
                                      style="position: absolute;top: 0;left: 0; width: 100%; height: 100%;"></div>
+                            </div>
+
+                            <div class="modal fade" id="textBoxModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="textBoxModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="textBoxModalLabel">Converted to Text</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body"></div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="card">
@@ -560,6 +579,15 @@
                 const transformRate = containerWidth / actualImageWidth;
                 boxContainer.empty();
 
+                if (texts) {
+                    const textModal = $('#textBoxModal');
+                    const textModalBody = $('#textBoxModal .modal-body');
+                    boxContainer.on('click', 'div.my-text-box', (evnt) => {
+                        textModalBody.html($(evnt.target).attr('data-original-title'));
+                        textModal.modal();
+                    });
+                }
+
                 let i = 0;
                 for (const box of boxes) {
                     const xStart = box[0] * transformRate;
@@ -568,7 +596,7 @@
                     const bHeight = box[3] * transformRate;
 
                     const element = $(`
-                            <div style="position: absolute; top: ${yStart}px; left: ${xStart}px;
+                            <div class="my-text-box" style="position: absolute; top: ${yStart}px; left: ${xStart}px;
                                 width: ${bWidth}px; height: ${bHeight}px; border: ${boxBorder};">
                             </div>`
                     );
@@ -580,6 +608,7 @@
                         element.attr('data-html', 'true');
                         element.attr('title', text);
                         element.tooltip();
+                        element.css('cursor', 'pointer');
                     }
                     i++;
                 }
