@@ -9,7 +9,6 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.utils.safestring import SafeString
 
 from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
 from mysite.pdf_analyzer.models import AddressExtractionRun, AddressExtractionDebug
@@ -250,10 +249,8 @@ def save_address_extraction_debug(request, run: AddressExtractionRun):
 
 
 @login_required()
-def pdf_analyzer_project_address_debug(request, run_id):
+def pdf_analyzer_project_address_debug_json(request, run_id):
     run = get_object_or_404(AddressExtractionRun, pk=run_id)
-    if not run.is_finished:
-        return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
 
     with open(run.process_variables, 'rb') as vars_file:
         process_variables = pickle.load(vars_file)
@@ -262,23 +259,32 @@ def pdf_analyzer_project_address_debug(request, run_id):
         'run_id': run_id,
         'pdf_file': run.file.uploaded_file.url,
         'project_name': run.project_name,
-        'processed_images': SafeString(run.get_processed_images_url()),
-        'process_variables': SafeString(json.dumps(process_variables)),
-        'addresses': SafeString(run.addresses),
+        'processed_images': json.loads(run.get_processed_images_url()),
+        'process_variables': process_variables,
+        'addresses': json.loads(run.addresses),
         'execution_time': run.execution_time,
-        'created_on': run.created_on.strftime("%b %d %Y %H:%M:%S"),
+        'created_on': run.created_on,
         'debug_data': None,
     }
-
-    if not run.addressextractiondebug_set.exists() and request.method == 'POST':
-        save_address_extraction_debug(request, run)
 
     if run.addressextractiondebug_set.exists():
         debug_data = []
         debug_steps = run.addressextractiondebug_set.all().order_by('debug_step')
         for step in debug_steps:
-            debug_data.append(SafeString(step.data))
+            debug_data.append(json.loads(step.data))
         parameters['debug_data'] = debug_data
 
+    return JsonResponse(parameters)
+
+
+@login_required()
+def pdf_analyzer_project_address_debug(request, run_id):
+    run = get_object_or_404(AddressExtractionRun, pk=run_id)
+    if not run.is_finished:
+        return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
+
+    parameters = {'run_id': run_id}
+    if not run.addressextractiondebug_set.exists() and request.method == 'POST':
+        save_address_extraction_debug(request, run)
     return render(request, "ibfmPDFAnalyzerProjectAddressDebug.html", parameters)
 ########################################################################################################################
