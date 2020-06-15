@@ -43,38 +43,49 @@
 
 
     <script>
-        let runStepTitleSpan = $('#progress_run_step_title_span');
-        let runStepProgressbar = $('#progress_run_step_progressbar');
-        let runStepProgressProgressbar = $('#progress_run_step_progress_progressbar');
-        let runStepProgressProgressbarContainer = $('#progress_run_step_progress_progressbar_container');
-        let elapsedTimeSpan = $('#progress_elapsed_time_span');
-        let resultBtnContainer = $('#progress_result_btn_container');
+        const runStepTitleSpan = $('#progress_run_step_title_span');
+        const runStepProgressbar = $('#progress_run_step_progressbar');
+        const runStepProgressProgressbar = $('#progress_run_step_progress_progressbar');
+        const runStepProgressProgressbarContainer = $('#progress_run_step_progress_progressbar_container');
+        const elapsedTimeSpan = $('#progress_elapsed_time_span');
+        const resultBtnContainer = $('#progress_result_btn_container');
+
+        const progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
+        const progressJsonAllApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJsonAll" run_id=run_id %}';
 
         let elapsedTimeInterval = null;
-        let init_steps = JSON.parse('{{ steps }}');
-        let stepsCount = init_steps.length;
-        let progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
+        let initData;
+        let init_steps;
+        let stepsCount;
 
-        function initial() {
-            let initData = {
-                pdf_file_url: '{{ pdf_file }}',
-                project_name: '{{ project_name }}',
-                run_step: {{ run_step }},
-                run_step_progress: {{ run_step_progress }},
-                elapsed_time:{{ elapsed_time }},
-            };
-            let file_url_segments = initData.pdf_file_url.trim().split('/');
+
+        async function getProgressAll() {
+            try {
+                initData = await $.get(progressJsonAllApi);
+                init_steps = initData.steps;
+                stepsCount = init_steps.length;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+
+        async function initial() {
+            await getProgressAll();
+
+            let file_url_segments = initData.pdf_file.trim().split('/');
             let pdf_file_name = file_url_segments[file_url_segments.length - 1];
 
             let downloadBtn = $('#progress_download_btn');
             let projectNameSpan = $('#progress_project_name_span');
 
-            downloadBtn.attr('href', initData.pdf_file_url);
+            downloadBtn.attr('href', initData.pdf_file);
             downloadBtn.attr('download', pdf_file_name);
             downloadBtn.text(pdf_file_name);
             projectNameSpan.text(initData.project_name);
             setValues(initData.run_step, initData.run_step_progress, initData.elapsed_time, false);
         }
+
 
         function getProgress() {
             let isFinished = false;
@@ -90,6 +101,7 @@
                 }
             });
         }
+
 
         function setValues(runStep, runStepProgress, elapsedTime, isFinished) {
             if (isFinished) {
@@ -124,6 +136,7 @@
                 elapsedTimeSpan.text(elapsedTime);
             }, 1000);
         }
+
 
         initial();
         getProgress();

@@ -182,20 +182,27 @@ def pdf_analyzer_project_address_progress_json(request, run_id):
 
 
 @login_required()
+def pdf_analyzer_project_address_progress_json_all(request, run_id):
+    run = get_object_or_404(AddressExtractionRun, pk=run_id)
+    parameters = {
+        'pdf_file': run.file.uploaded_file.url,
+        'project_name': run.project_name,
+        'is_finished': run.is_finished,
+        'run_step': run.run_step,
+        'run_step_progress': run.run_step_progress,
+        'elapsed_time': int(time.time() - run.created_on.timestamp()),
+        'steps': ADDRESS_RUN_STEPS,
+    }
+    return JsonResponse(parameters)
+
+
+@login_required()
 def pdf_analyzer_project_address_progress(request, run_id):
     run = get_object_or_404(AddressExtractionRun, pk=run_id)
     if run.is_finished:
         return redirect('ibidFilesPDFAnalyzerProjectAddressDebug', run_id)
 
-    parameters = {
-        'run_id': run_id,
-        'pdf_file': run.file.uploaded_file.url,
-        'project_name': run.project_name,
-        'run_step': run.run_step,
-        'run_step_progress': run.run_step_progress,
-        'elapsed_time': int(time.time() - run.created_on.timestamp()),
-        'steps': SafeString(json.dumps(ADDRESS_RUN_STEPS)),
-    }
+    parameters = {'run_id': run_id}
     return render(request, "ibfmPDFAnalyzerProjectAddressProgress.html", parameters)
 
 

@@ -14,6 +14,9 @@ urlpatterns = [
          name='ibidFilesPDFAnalyzerProjectAddressProgress'),
     path('ibfm/pdf_analyzer/project_address/progress_json/<int:run_id>/',
          views.pdf_analyzer_project_address_progress_json, name='ibidFilesPDFAnalyzerProjectAddressProgressJson'),
+    path('ibfm/pdf_analyzer/project_address/progress_json_all/<int:run_id>/',
+         views.pdf_analyzer_project_address_progress_json_all,
+         name='ibidFilesPDFAnalyzerProjectAddressProgressJsonAll'),
     path('ibfm/pdf_analyzer/project_address/debug/<int:run_id>/', views.pdf_analyzer_project_address_debug,
          name='ibidFilesPDFAnalyzerProjectAddressDebug'),
 ]
