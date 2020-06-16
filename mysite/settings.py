@@ -70,7 +70,8 @@ INSTALLED_APPS = [
     'mysite.sheetcreator',
     'api',
     'django.contrib.humanize',
-    'mysite.estimator.templatetags'
+    'mysite.estimator.templatetags',
+    'mysite.pdf_analyzer'
 ]
 
 MIDDLEWARE = [
