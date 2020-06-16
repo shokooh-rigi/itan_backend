@@ -125,7 +125,7 @@ def equipments_list(request, sheet_id):
 def sheet_equipment_common_data(request, sheet_equipment_id):
     sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
-    manufacturers = EquipmentManufacturer.objects.all()
+    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type)
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=sheet_equipment.equipment_type)
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
