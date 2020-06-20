@@ -384,6 +384,8 @@
                                 To display the text, move the mouse over the boxes or click on theme.
                             </div>
 
+                            <div class="p-3" id="result_step_6_display_control"></div>
+
                             <div id="result_step_6_img_container" style="position: relative;">
                                 <img id="result_step_6_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
                                      src="#" alt="Text Boxes">
@@ -807,12 +809,14 @@
 
         function showResultStep6() {
             const container = $('#result_step_6_img_container');
+            const displayControl = $('#result_step_6_display_control');
             const img = $('#result_step_6_img');
             const boxContainer = $('#result_step_6_box_container');
             const page1Image = initData.processed_images[1];
             const page1Variables = initData.process_variables[1];
 
             img.attr('src', page1Image.url);
+            displayControl.empty();
 
             const textBoxes = page1Variables.text_boxes;
             const related_boxes = page1Variables.related_boxes_to_project_names;
@@ -820,7 +824,7 @@
             const boxes = [];
             const lineBoxes = [];
             const texts = [];
-            let i = 1;
+            let i = 0;
             for (const item of related_boxes) {
                 let xStart = page1Image.width + 1;
                 let yStart = page1Image.height + 1;
@@ -842,7 +846,7 @@
                 }
 
                 boxes.push([xStart, yStart, xEnd - xStart, yEnd - yStart]);
-                texts.push(`<strong>Most Similar Line #${i}</strong><div class="alert alert-success" role="alert">`
+                texts.push(`<strong>Most Similar Line #${i + 1}</strong><div class="alert alert-success" role="alert">`
                     + `${item.lines.map((line) => line.text).join('\n')}</div>`
                     + `${item.bottom_lines.map((line) => line.text).join('\n')}`);
 
@@ -858,12 +862,30 @@
                     yEnd = Math.max(yEnd, bbox[1] + bbox[3]);
                 }
                 lineBoxes.push([xStart - 20, yStart - 20, xEnd - xStart + 40, yEnd - yStart + 40]);
+
+                displayControl.append(`
+                    <div class="form-check pr-4" style="display: inline-block;">
+                        <input class="form-check-input" type="checkbox" id="result_step_6_display_control_${i}" checked>
+                        <label class="form-check-label" for="result_step_6_display_control_${i}">
+                            ${i + 1}. ${item.lines.map((line) => line.text).join(' ')}
+                        </label>
+                    </div>`
+                );
+
                 i++;
             }
 
+            displayControl.on('change', 'input.form-check-input', function () {
+                const splittedId = this.id.split('_');
+                const number = splittedId[splittedId.length - 1];
+                boxContainer.children(`div.my-text-box-step-6-${number}`).css('display', this.checked ? 'block' : 'none');
+            });
+
             setTimeout(() => {
-                drawBoxesOnImage(boxes, '2px solid yellow', texts, container, boxContainer, page1Image.width);
-                drawBoxesOnImage(lineBoxes, '2px solid magenta', texts, container, boxContainer, page1Image.width, false);
+                drawBoxesOnImage(boxes, '2px solid yellow', texts, container, boxContainer, page1Image.width, true,
+                    'step-6');
+                drawBoxesOnImage(lineBoxes, '2px solid magenta', texts, container, boxContainer, page1Image.width, false,
+                    'step-6');
             }, 500);
         }
 
@@ -877,6 +899,7 @@
             const page1Variables = initData.process_variables[1];
 
             img.attr('src', page1Image.url);
+            displayControl.empty();
 
             const related_boxes = page1Variables.related_boxes_to_project_names;
 
