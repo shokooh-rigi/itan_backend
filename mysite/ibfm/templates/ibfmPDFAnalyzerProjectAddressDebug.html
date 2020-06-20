@@ -453,7 +453,7 @@
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header" id="accordion_heading_7">
+                    <div class="card-header" id="accordion_heading_7" onclick="showResultStep7()">
                         <h2 class="mb-0">
                             <button class="btn btn-link btn-block text-left collapsed" style="text-transform: none;"
                                     type="button" data-toggle="collapse" data-target="#accordion_collapse_7"
@@ -465,7 +465,18 @@
                     <div id="accordion_collapse_7" class="collapse" aria-labelledby="accordion_heading_7"
                          data-parent="#debug_steps_accordion">
                         <div class="card-body">
-                            TEXT BLOCKS
+                            <div class="alert alert-info" role="alert">
+                                To display the text, move the mouse over the boxes or click on theme.
+                            </div>
+
+                            <div class="p-3" id="result_step_7_display_control"></div>
+
+                            <div id="result_step_7_img_container" style="position: relative;">
+                                <img id="result_step_7_img" style="width: 100%; filter: grayscale(100%) invert(100%);"
+                                     src="#" alt="Text Boxes">
+                                <div id="result_step_7_box_container"
+                                     style="position: absolute;top: 0;left: 0; width: 100%; height: 100%;"></div>
+                            </div>
 
                             <div class="card">
                                 <div class="card-body">
@@ -590,7 +601,8 @@
         }
 
 
-        function drawBoxesOnImage(boxes, boxBorder, texts, container, boxContainer, actualImageWidth, clear = true) {
+        function drawBoxesOnImage(boxes, boxBorder, texts, container, boxContainer, actualImageWidth, clear = true,
+                                  step = '', innerBoxes = null, innerBoxBorder = '') {
             const containerWidth = container.width();
             if (containerWidth) {
                 const transformRate = containerWidth / actualImageWidth;
@@ -609,26 +621,54 @@
 
                 let i = 0;
                 for (const box of boxes) {
+                    const cssClass = `my-text-box my-text-box-${step}-${i}`;
                     const xStart = box[0] * transformRate;
                     const yStart = box[1] * transformRate;
                     const bWidth = box[2] * transformRate;
                     const bHeight = box[3] * transformRate;
 
                     const element = $(`
-                            <div class="my-text-box" style="position: absolute; top: ${yStart}px; left: ${xStart}px;
-                                width: ${bWidth}px; height: ${bHeight}px; border: ${boxBorder};">
+                            <div class="${cssClass}" style="position: absolute; top: ${yStart}px; left: ${xStart}px;
+                                    width: ${bWidth}px; height: ${bHeight}px; border: ${boxBorder};">
                             </div>`
                     );
                     boxContainer.append(element);
+                    let text;
 
                     if (texts) {
-                        const text = texts[i].replace(/\n/g, '<br>');
+                        text = texts[i].replace(/\n/g, '<br>');
                         element.attr('data-toggle', 'tooltip');
                         element.attr('data-html', 'true');
                         element.attr('title', text);
                         element.tooltip();
                         element.css('cursor', 'pointer');
                     }
+
+                    if (innerBoxes) {
+                        const inners = innerBoxes[i];
+                        for (const innerBox of inners) {
+                            const xStart = innerBox[0] * transformRate;
+                            const yStart = innerBox[1] * transformRate;
+                            const bWidth = innerBox[2] * transformRate;
+                            const bHeight = innerBox[3] * transformRate;
+
+                            const element = $(`
+                                <div class="${cssClass}" style="position: absolute; top: ${yStart}px; left: ${xStart}px;
+                                    width: ${bWidth}px; height: ${bHeight}px; border: ${innerBoxBorder};">
+                                </div>`
+                            );
+                            boxContainer.append(element);
+
+                            if (texts) {
+                                element.attr('data-toggle', 'tooltip');
+                                element.attr('data-html', 'true');
+                                element.attr('title', text);
+                                element.tooltip();
+                                element.css('cursor', 'pointer');
+                            }
+                        }
+                    }
+
                     i++;
                 }
             }
@@ -829,7 +869,102 @@
 
 
         function showResultStep7() {
+            const container = $('#result_step_7_img_container');
+            const displayControl = $('#result_step_7_display_control');
+            const img = $('#result_step_7_img');
+            const boxContainer = $('#result_step_7_box_container');
+            const page1Image = initData.processed_images[1];
+            const page1Variables = initData.process_variables[1];
 
+            img.attr('src', page1Image.url);
+
+            const related_boxes = page1Variables.related_boxes_to_project_names;
+
+            const boxes = [];
+            const innerBoxes = [];
+            const lineBoxes = [];
+            const texts = [];
+            let i = 0;
+            for (const item of related_boxes) {
+                let xStart;
+                let yStart;
+                let xEnd;
+                let yEnd;
+                const inners = [];
+
+                for (const lineSet of item.recognized_text_blocks) {
+                    xStart = page1Image.width + 1;
+                    yStart = page1Image.height + 1;
+                    xEnd = -1;
+                    yEnd = -1;
+
+                    for (const line of lineSet) {
+                        const bbox = line.boundary_box;
+                        xStart = Math.min(xStart, bbox[0]);
+                        yStart = Math.min(yStart, bbox[1]);
+                        xEnd = Math.max(xEnd, bbox[0] + bbox[2]);
+                        yEnd = Math.max(yEnd, bbox[1] + bbox[3]);
+                    }
+                    inners.push([xStart, yStart, xEnd - xStart, yEnd - yStart]);
+                }
+                innerBoxes.push(inners);
+
+                xStart = page1Image.width + 1;
+                yStart = page1Image.height + 1;
+                xEnd = -1;
+                yEnd = -1;
+                for (const bbox of inners) {
+                    xStart = Math.min(xStart, bbox[0]);
+                    yStart = Math.min(yStart, bbox[1]);
+                    xEnd = Math.max(xEnd, bbox[0] + bbox[2]);
+                    yEnd = Math.max(yEnd, bbox[1] + bbox[3]);
+                }
+                boxes.push([xStart - 20, yStart - 20, xEnd - xStart + 40, yEnd - yStart + 40]);
+
+                texts.push(`<strong>Most Similar Line #${i + 1}</strong><div class="alert alert-success" role="alert">`
+                    + `${item.lines.map((line) => line.text).join('\n')}</div><hr>`
+                    + `${item.recognized_text_blocks.map(
+                        (lineSet) => (lineSet.map((line) => line.text).join('\n'))
+                    ).join('<hr>')}`
+                );
+
+
+                xStart = page1Image.width + 1;
+                yStart = page1Image.height + 1;
+                xEnd = -1;
+                yEnd = -1;
+                for (const bbox of item.lines.map((line) => line.boundary_box)) {
+                    xStart = Math.min(xStart, bbox[0]);
+                    yStart = Math.min(yStart, bbox[1]);
+                    xEnd = Math.max(xEnd, bbox[0] + bbox[2]);
+                    yEnd = Math.max(yEnd, bbox[1] + bbox[3]);
+                }
+                lineBoxes.push([xStart - 20, yStart - 20, xEnd - xStart + 40, yEnd - yStart + 40]);
+
+                displayControl.append(`
+                    <div class="form-check pr-4" style="display: inline-block;">
+                        <input class="form-check-input" type="checkbox" id="result_step_7_display_control_${i}" checked>
+                        <label class="form-check-label" for="result_step_7_display_control_${i}">
+                            ${i + 1}. ${item.lines.map((line) => line.text).join(' ')}
+                        </label>
+                    </div>`
+                );
+
+                i++;
+            }
+
+            displayControl.on('change', 'input.form-check-input', function () {
+                const splittedId = this.id.split('_');
+                const number = splittedId[splittedId.length - 1];
+                boxContainer.children(`div.my-text-box-step-7-${number}`).css('display', this.checked ? 'block' : 'none');
+            });
+
+            setTimeout(() => {
+                drawBoxesOnImage(boxes, '2px solid yellow', texts, container, boxContainer, page1Image.width, true,
+                    'step-7', innerBoxes, '2px solid blue');
+                drawBoxesOnImage(lineBoxes, '2px solid magenta', texts, container, boxContainer, page1Image.width, false,
+                    'step-7');
+            }, 500);
         }
 
 
@@ -885,7 +1020,9 @@
         }
 
 
-        initial();
+        $(document).ready(async function () {
+            await initial();
+        });
     </script>
 
 {% endblock %}
