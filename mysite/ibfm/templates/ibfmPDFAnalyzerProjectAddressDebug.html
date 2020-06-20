@@ -7,6 +7,10 @@
             An error occurred while loading the data. Please reload the page.
         </div>
 
+        <button type="button" class="btn btn-light" style="float: right;" onclick="toggleScreenSize()">
+            <i id="screenExpandButtonIcon" class="fas fa-expand-alt"></i>
+        </button>
+
         <div>
             <h6>
                 PDF Analyzer processed
@@ -1039,6 +1043,23 @@
                 }
 
                 $('#debug_submit_container').css('display', 'none');
+            }
+        }
+
+
+        function toggleScreenSize() {
+            const main = $('main.main');
+            const screenExpandButtonIcon = $('#screenExpandButtonIcon');
+            if (main.hasClass('container-fluid')) {
+                main.removeClass('container-fluid');
+                main.addClass('container');
+                screenExpandButtonIcon.removeClass('fa-compress-alt');
+                screenExpandButtonIcon.addClass('fa-expand-alt');
+            } else {
+                main.addClass('container-fluid');
+                main.removeClass('container');
+                screenExpandButtonIcon.addClass('fa-compress-alt');
+                screenExpandButtonIcon.removeClass('fa-expand-alt');
             }
         }
 
