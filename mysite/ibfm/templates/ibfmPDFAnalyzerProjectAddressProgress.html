@@ -3,6 +3,10 @@
 
 {% block content %}
     <div style="text-align: start; padding: 20px 20px 5px;">
+        <div id="loadingErrorMessage" style="display: none;" class="alert alert-danger" role="alert">
+            An error occurred while loading the data. Please reload the page.
+        </div>
+
         <div>
             <h6>
                 PDF Analyzer is running on
@@ -43,103 +47,106 @@
 
 
     <script>
-        const runStepTitleSpan = $('#progress_run_step_title_span');
-        const runStepProgressbar = $('#progress_run_step_progressbar');
-        const runStepProgressProgressbar = $('#progress_run_step_progress_progressbar');
-        const runStepProgressProgressbarContainer = $('#progress_run_step_progress_progressbar_container');
-        const elapsedTimeSpan = $('#progress_elapsed_time_span');
-        const resultBtnContainer = $('#progress_result_btn_container');
+        $(document).ready(async function () {
+            const runStepTitleSpan = $('#progress_run_step_title_span');
+            const runStepProgressbar = $('#progress_run_step_progressbar');
+            const runStepProgressProgressbar = $('#progress_run_step_progress_progressbar');
+            const runStepProgressProgressbarContainer = $('#progress_run_step_progress_progressbar_container');
+            const elapsedTimeSpan = $('#progress_elapsed_time_span');
+            const resultBtnContainer = $('#progress_result_btn_container');
 
-        const progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
-        const progressJsonAllApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJsonAll" run_id=run_id %}';
+            const progressJsonApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJson" run_id=run_id %}';
+            const progressJsonAllApi = '{% url "ibidFilesPDFAnalyzerProjectAddressProgressJsonAll" run_id=run_id %}';
 
-        let elapsedTimeInterval = null;
-        let initData;
-        let init_steps;
-        let stepsCount;
+            let elapsedTimeInterval = null;
+            let initData;
+            let init_steps;
+            let stepsCount;
 
 
-        async function getProgressAll() {
-            try {
-                initData = await $.get(progressJsonAllApi);
-                init_steps = initData.steps;
-                stepsCount = init_steps.length;
-            } catch (error) {
-                throw error;
+            async function getProgressAll() {
+                try {
+                    initData = await $.get(progressJsonAllApi);
+                    init_steps = initData.steps;
+                    stepsCount = init_steps.length;
+                } catch (error) {
+                    $('#loadingErrorMessage').css('display', 'block');
+                    throw error;
+                }
             }
-        }
 
 
-        async function initial() {
-            await getProgressAll();
+            async function initial() {
+                await getProgressAll();
 
-            let file_url_segments = initData.pdf_file.trim().split('/');
-            let pdf_file_name = file_url_segments[file_url_segments.length - 1];
+                let file_url_segments = initData.pdf_file.trim().split('/');
+                let pdf_file_name = file_url_segments[file_url_segments.length - 1];
 
-            let downloadBtn = $('#progress_download_btn');
-            let projectNameSpan = $('#progress_project_name_span');
+                let downloadBtn = $('#progress_download_btn');
+                let projectNameSpan = $('#progress_project_name_span');
 
-            downloadBtn.attr('href', initData.pdf_file);
-            downloadBtn.attr('download', pdf_file_name);
-            downloadBtn.text(pdf_file_name);
-            projectNameSpan.text(initData.project_name);
-            setValues(initData.run_step, initData.run_step_progress, initData.elapsed_time, false);
-        }
+                downloadBtn.attr('href', initData.pdf_file);
+                downloadBtn.attr('download', pdf_file_name);
+                downloadBtn.text(pdf_file_name);
+                projectNameSpan.text(initData.project_name);
+                setValues(initData.run_step, initData.run_step_progress, initData.elapsed_time, false);
+            }
 
 
-        function getProgress() {
-            let isFinished = false;
-            $.get(progressJsonApi, (data) => {
-                    isFinished = data.is_finished;
-                    setValues(data.run_step, data.run_step_progress, data.elapsed_time, isFinished);
+            function getProgress() {
+                let isFinished = false;
+                $.get(progressJsonApi, (data) => {
+                        isFinished = data.is_finished;
+                        setValues(data.run_step, data.run_step_progress, data.elapsed_time, isFinished);
+                    }
+                ).fail(() => {
+                    }
+                ).always(() => {
+                    if (!isFinished) {
+                        setTimeout(() => getProgress(), 500);
+                    }
+                });
+            }
+
+
+            function setValues(runStep, runStepProgress, elapsedTime, isFinished) {
+                if (isFinished) {
+                    runStepTitleSpan.text('Process completed');
+                    runStepProgressbar.css('width', '100%');
+                    runStepProgressbar.removeClass('progress-bar-animated');
+                    runStepProgressbar.removeClass('progress-bar-striped');
+                    runStepProgressbar.text('');
+                    runStepProgressProgressbarContainer.css('display', 'none');
+                    clearInterval(elapsedTimeInterval);
+                    elapsedTimeSpan.text(elapsedTime);
+                    resultBtnContainer.css('display', 'block');
+                    return;
                 }
-            ).fail(() => {
-                }
-            ).always(() => {
-                if (!isFinished) {
-                    setTimeout(() => getProgress(), 500);
-                }
-            });
-        }
 
+                runStepTitleSpan.text(init_steps[runStep - 1]);
+                runStepProgressbar.css('width', (Math.floor(runStep * 100 / stepsCount)) + '%');
+                runStepProgressbar.text(`${runStep}/${stepsCount}`);
 
-        function setValues(runStep, runStepProgress, elapsedTime, isFinished) {
-            if (isFinished) {
-                runStepTitleSpan.text('Process completed');
-                runStepProgressbar.css('width', '100%');
-                runStepProgressbar.removeClass('progress-bar-animated');
-                runStepProgressbar.removeClass('progress-bar-striped');
-                runStepProgressbar.text('');
-                runStepProgressProgressbarContainer.css('display', 'none');
+                if (0 <= runStepProgress) {
+                    runStepProgressProgressbarContainer.css('display', 'flex');
+                    runStepProgressProgressbar.css('width', runStepProgress + '%');
+                    runStepProgressProgressbar.text(runStepProgress + '%');
+                } else {
+                    runStepProgressProgressbarContainer.css('display', 'none');
+                }
+
                 clearInterval(elapsedTimeInterval);
                 elapsedTimeSpan.text(elapsedTime);
-                resultBtnContainer.css('display', 'block');
-                return;
+                elapsedTimeInterval = setInterval(() => {
+                    elapsedTime++;
+                    elapsedTimeSpan.text(elapsedTime);
+                }, 1000);
             }
 
-            runStepTitleSpan.text(init_steps[runStep - 1]);
-            runStepProgressbar.css('width', (Math.floor(runStep * 100 / stepsCount)) + '%');
-            runStepProgressbar.text(`${runStep}/${stepsCount}`);
 
-            if (0 <= runStepProgress) {
-                runStepProgressProgressbarContainer.css('display', 'flex');
-                runStepProgressProgressbar.css('width', runStepProgress + '%');
-                runStepProgressProgressbar.text(runStepProgress + '%');
-            } else {
-                runStepProgressProgressbarContainer.css('display', 'none');
-            }
-
-            clearInterval(elapsedTimeInterval);
-            elapsedTimeSpan.text(elapsedTime);
-            elapsedTimeInterval = setInterval(() => {
-                elapsedTime++;
-                elapsedTimeSpan.text(elapsedTime);
-            }, 1000);
-        }
-
-
-        initial();
-        getProgress();
+            await initial();
+            getProgress();
+        });
     </script>
 
 {% endblock %}
