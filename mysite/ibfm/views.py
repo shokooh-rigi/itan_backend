@@ -208,6 +208,7 @@ def pdf_analyzer_project_address_progress(request, run_id):
 def save_address_extraction_debug(request, run: AddressExtractionRun):
     data = [
         {
+            'address_is_correct': request.POST.get('step_1_address_is_correct') == 'on',
             'correct_address': request.POST.get('step_1_correct_address', '').strip(),
             'description': request.POST.get('step_1_description', '').strip(),
         },
@@ -242,6 +243,10 @@ def save_address_extraction_debug(request, run: AddressExtractionRun):
             'description': request.POST.get('step_7_description', '').strip(),
         },
     ]
+
+    if data[0]['address_is_correct'] and run.file.created_by == request.user:
+        run.file.archive = True
+        run.file.save()
 
     for i in range(7):
         debug = AddressExtractionDebug(run=run, debug_step=i + 1, data=json.dumps(data[i]))

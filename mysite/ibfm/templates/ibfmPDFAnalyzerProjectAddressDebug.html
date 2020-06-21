@@ -65,6 +65,15 @@
 
                             <div class="card">
                                 <div class="card-body">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="step_1_address_is_correct"
+                                               name="step_1_address_is_correct" checked>
+                                        <label class="form-check-label" for="step_1_address_is_correct">
+                                            The address in the <strong>first</strong> row is <strong>completely</strong>
+                                            correct.
+                                        </label>
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="step_1_correct_address">Enter the correct address</label>
                                         <input type="text" class="form-control" style="display: block; width: 100%;"
@@ -717,9 +726,15 @@
 
 
         function showResultStep1() {
+            const addressIsCorrectCheckbox = $('#step_1_address_is_correct');
+            addressIsCorrectCheckbox.change(function () {
+                $('#step_1_correct_address').attr('disabled', this.checked);
+            });
+
             if (initData.addresses.length === 0) {
                 $('#result_step_1_address_table').css('display', 'none');
                 $('#result_step_1_address_not_found_span').css('display', 'inline-block');
+                addressIsCorrectCheckbox.attr('checked', false);
             } else {
                 const tableBody = $('#result_step_1_address_table > tbody');
                 let i = 0;
@@ -735,6 +750,8 @@
                     );
                 }
             }
+
+            addressIsCorrectCheckbox.change();
         }
 
 
@@ -1017,7 +1034,7 @@
                     input.attr('disabled', true);
                 }
 
-                const checkboxes = [
+                const radioButtons = [
                     {step: 2, id: 'project_name_is_in_boxes'},
                     {step: 2, id: 'project_address_is_in_boxes'},
                     {step: 3, id: 'project_name_is_in_boxes'},
@@ -1032,14 +1049,23 @@
                     {step: 7, id: 'project_address_has_extra_text'},
                 ];
                 const opposite = {'true': 'false', 'false': 'true'};
+                for (const item of radioButtons) {
+                    const value = form[item.step - 1][item.id];
+                    const radioButton = $(`#step_${item.step}_${item.id}_${value}`);
+                    radioButton.attr('checked', true);
+                    radioButton.attr('disabled', true);
+                    const oppositeRadioButtonId = `step_${item.step}_${item.id}_${opposite[value]}`;
+                    $(`#${oppositeRadioButtonId}`).attr('disabled', true);
+                }
+
+                const checkboxes = [
+                    {step: 1, id: 'address_is_correct'},
+                ];
                 for (const item of checkboxes) {
                     const value = form[item.step - 1][item.id];
-                    const checkboxId = `step_${item.step}_${item.id}_${value}`;
-                    const checkbox = $(`#${checkboxId}`);
-                    checkbox.attr('checked', true);
+                    const checkbox = $(`#step_${item.step}_${item.id}`);
+                    checkbox.attr('checked', value);
                     checkbox.attr('disabled', true);
-                    const oppositeCheckboxId = `step_${item.step}_${item.id}_${opposite[value]}`;
-                    $(`#${oppositeCheckboxId}`).attr('disabled', true);
                 }
 
                 $('#debug_submit_container').css('display', 'none');
