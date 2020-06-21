@@ -74,6 +74,12 @@ class AddressExtractionRun(models.Model):
             }
         return json.dumps(images_url)
 
+    def file_name(self):
+        return os.path.basename(self.file.uploaded_file.file.name)
+
+    class Meta:
+        ordering = ['-created_on']
+
 
 class AddressExtractionDebug(models.Model):
     run = models.ForeignKey(AddressExtractionRun, on_delete=models.CASCADE)
@@ -81,4 +87,5 @@ class AddressExtractionDebug(models.Model):
     data = models.CharField(max_length=MAX_TEXT_LENGTH)
 
     class Meta:
+        ordering = ['run', 'debug_step']
         unique_together = ['run', 'debug_step']

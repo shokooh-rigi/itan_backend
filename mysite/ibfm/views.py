@@ -269,7 +269,7 @@ def pdf_analyzer_project_address_debug_json(request, run_id):
 
     if run.addressextractiondebug_set.exists():
         debug_data = []
-        debug_steps = run.addressextractiondebug_set.all().order_by('debug_step')
+        debug_steps = run.addressextractiondebug_set.all()
         for step in debug_steps:
             debug_data.append(json.loads(step.data))
         parameters['debug_data'] = debug_data
@@ -287,4 +287,28 @@ def pdf_analyzer_project_address_debug(request, run_id):
     if not run.addressextractiondebug_set.exists() and request.method == 'POST':
         save_address_extraction_debug(request, run)
     return render(request, "ibfmPDFAnalyzerProjectAddressDebug.html", parameters)
+
+
+@login_required
+def pdf_analyzer_project_address_report(request):
+    page = request.GET.get('page')
+    search = request.GET.get('search', '').strip()
+    pagination = request.GET.get('paginate_by') or 20
+    ordering = request.GET.get('ordering') or 'project_name'
+    from_date = request.GET.get('fromDate') or '01/01/2000'
+    to_date = request.GET.get('toDate') or '01/01/2100'
+
+    from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
+    to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(hours=23, minutes=59, seconds=59)
+
+    object_list = AddressExtractionRun.objects.filter(is_finished=True) \
+        .filter(Q(project_name__icontains=search) | Q(file__uploaded_file__icontains=search)) \
+        .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    parameters = {
+        'runs': paginator.get_page(page),
+        'total_rows': object_list.count(),
+    }
+    return render(request, 'ibfmPDFAnalyzerProjectAddressReport.html', parameters)
 ########################################################################################################################

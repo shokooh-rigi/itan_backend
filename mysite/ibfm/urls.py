@@ -21,4 +21,6 @@ urlpatterns = [
          name='ibidFilesPDFAnalyzerProjectAddressDebug'),
     path('ibfm/pdf_analyzer/project_address/debug_json/<int:run_id>/', views.pdf_analyzer_project_address_debug_json,
          name='ibidFilesPDFAnalyzerProjectAddressDebugJson'),
+    path('ibfm/pdf_analyzer/project_address/report/', views.pdf_analyzer_project_address_report,
+         name='ibidFilesPDFAnalyzerProjectAddressReport'),
 ]
