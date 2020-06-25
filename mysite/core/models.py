@@ -199,6 +199,7 @@ class TestSheet(models.Model):
     name = models.CharField(max_length=255, blank=False)
     priority = models.IntegerField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    sheet_generator = models.BooleanField(default=False)
     flag = models.BooleanField(default=True)
 
     class Meta:

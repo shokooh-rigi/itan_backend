@@ -4,11 +4,12 @@
 
 
 {% block content %}
-    <h2>Sheet Equipments for Project Number {{ sheet.project.project_number }}</h2>
+    <h2> Equipments for Project Number {{ sheet.project.project_number }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
         <div class="form-group">
             {% csrf_token %}
             <div class="alert alert-warning change-alert" style="display: none;">
+                <strong>Warning!</strong> You're about to change <span id="equipment_message"></span> Quantity which you have specified before...
                 <strong>Warning!</strong> You're about to change <span id="equipment_message"></span> Quantity which you have specified before...
             </div>
             <div class="row form-line">
@@ -48,7 +49,7 @@
     {%  endfor %}
     </ul>
     <br />
-    {% if first_equipment_id != '' %}<a href="{% url "sheetEquipmentCommonData" first_equipment_id %}"><button class="btn btn-success">Begin Sheet Data Entry</button></a>{% endif %}
+    {% if first_equipment_id != '' %}<a href="{% url "sheetEquipmentsList" sheet.id %}"><button class="btn btn-success">View Equipments List</button></a>{% endif %}
     <a href="{% url "sheetHome" %}"><button class="btn btn-danger">Cancel</button></a>
     <script>
         $('#id_equipment_type').on('change', function() {

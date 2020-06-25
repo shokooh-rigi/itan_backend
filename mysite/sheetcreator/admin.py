@@ -8,3 +8,4 @@ from .models import *
 
 admin.site.register(Sheet)
 admin.site.register(TestSheetColumn)
+admin.site.register(SheetActualDataCustomField)

@@ -3,7 +3,7 @@
 {% load custom_tags %}
 
 {% block content %}
-    <h2>Define Equipment {{ sheet_equipment.name }} Common Data</h2>
+    <h2>Define Equipment {{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
@@ -11,31 +11,31 @@
         <div class="form-group">
             {% csrf_token %}
             </div>
-            <div class="row form-line" style="font-weight: bold;">
-                <div class="col-lg-4">
+            <div class="row form-line text-left" style="font-weight: bold;">
+                <div class="col-lg-3">
                     Field Title
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                     Field Value
                 </div>
             </div>
             {% for showing_field in showing_fields %}
-            <div class="row form-line">
-                <div class="col-lg-4">
-                    <label for="id_architect_name" class="control-label">{{ showing_field.column_title }}</label>
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
+                    <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.column_title }}</label>
                 </div>
-                <div class="col-lg-2">
-                    <input style="width: 100%;" type="text" name="showing_field_value_{{ showing_field.id }}" maxlength="50" class="form-control" required="" id="showing_field_value_{{ showing_field.id }}" value="{{ custom_field.value }}">
+                <div class="col-lg-3">
+                    <input style="width: 100%;" type="text" name="showing_field_value_{{ showing_field.id }}" maxlength="50" class="form-control" required="" id="showing_field_value_{{ showing_field.id }}">
                 </div>
             </div>
             {% endfor %}
 
-            <div class="row form-line">
-                <div class="col-lg-4">
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
                     <label for="id_manufacturer" class="control-label">Manufacturer</label>
                 </div>
-                <div class="col-lg-2">
-                    <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer">
+                <div class="col-lg-4">
+                    <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer" style="max-width:206px;">
                         <option value="" selected="">---------</option>
 
                         {% for manufacturer in manufacturers %}
@@ -44,12 +44,12 @@
                     </select>
                 </div>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-4">
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
                     <label for="id_equipment" class="control-label">Model No.</label>
                 </div>
-                <div class="col-lg-2">
-                    <select name="id_equipment" class="form-control" required="" id="id_equipment">
+                <div class="col-lg-3">
+                    <select name="id_equipment" class="form-control" required="" id="id_equipment" style="max-width:206px;">
                         <option value="" selected="">---------</option>
 
                         {% for equipment in Equipment_db %}
@@ -66,6 +66,18 @@
             </div>
         </div>
 	</form>
+    	        <script>
+$("#edit_manufacturer").click(function(){
+	manufacturer_id = $("#id_manufacturer option:selected").val();
+	if(manufacturer_id != '') {
+        var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+    </script>
     <script>
         $('#id_manufacturer').on('change', function() {
             $("#id_equipment option").each(function() { $(this).hide(); });

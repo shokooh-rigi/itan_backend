@@ -14,7 +14,7 @@
             {% csrf_token %}
             Are you sure you want to delete these equipments?<br /><br />
             <input type="submit" class="btn btn-primary" value="Yes" name="confirm" />
-            <a href="{% url 'sheetHome' %}"><button class="btn btn-danger">Cancel</button></a>
+            <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" />
         </form>
     {% endif %}
 

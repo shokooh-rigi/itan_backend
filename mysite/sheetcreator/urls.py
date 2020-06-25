@@ -8,6 +8,7 @@ urlpatterns = [
     path('sheetcreator/add/', views.sheet_add, name='sheetAdd'),
     path('sheetcreator/equipments/<int:sheet_id>/', views.sheet_equipment, name='sheetEquipment'),
     path('sheetcreator/equipment_common_data/<int:sheet_equipment_id>/', views.sheet_equipment_common_data, name='sheetEquipmentCommonData'),
+    path('sheetcreator/equipment_common_data_edit/<int:sheet_equipment_id>/', views.sheet_equipment_common_data_edit, name='sheetEquipmentCommonDataEdit'),
     path('sheetcreator/equipment_design_value/<int:sheet_equipment_id>/', views.review_equipment_values, name='sheetEquipmentDesignValue'),
     path('sheetcreator/equipment_actual_value/<int:sheet_equipment_id>/', views.equipment_actual_values, name='sheetEquipmentActualValue'),
     path('sheetcreator/equipment_actual_values_edit/<int:sheet_equipment_id>/', views.equipment_actual_values_edit, name='sheetEquipmentActualValueEdit'),

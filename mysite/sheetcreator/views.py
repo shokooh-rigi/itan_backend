@@ -110,10 +110,11 @@ def sheet_equipment(request, sheet_id):
 
 @login_required
 def equipments_list(request, sheet_id):
-
+    my_sheet = Sheet.objects.get(id=sheet_id)
     sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
 
     parameters = {'sheet_equipments': sheet_equipments,
+                  'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
@@ -131,6 +132,8 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
     equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
 
     if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
         for every_field in showing_fields:
             key = every_field
             field_value = request.POST.get('showing_field_value_'+str(every_field.id))
@@ -142,7 +145,6 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update.save()
         return redirect('sheetEquipmentDesignValue', new_update.id)
 
-
     parameters = {'sheet_equipment': sheet_equipment,
                   'showing_fields': showing_fields,
                   'manufacturers': manufacturers,
@@ -151,6 +153,38 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
 
     return render(request, "sheetEquipmentCommonData.html", parameters)
 
+
+@login_required
+def sheet_equipment_common_data_edit(request, sheet_equipment_id):
+    this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
+    value_fields = SheetEquipmentCommonData.objects.filter(sheet_equipment_id=sheet_equipment_id)
+    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type)
+    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=this_sheet_equipment.equipment_type)
+    this_equipment = EquipmentDb.objects.get(id=this_sheet_equipment.equipment.id)
+
+    equipments = Equipment.objects.filter(test_sheet__name__icontains=this_sheet_equipment)
+
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
+        if request.POST.get("next"):
+            for value_field in value_fields:
+                SheetEquipmentCommonData.objects.filter(key=value_field.key,
+                                                        sheet_equipment=this_sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
+            this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            this_sheet_equipment.save()
+            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
+
+    parameters = {'this_sheet_equipment': this_sheet_equipment,
+                  'showing_fields': showing_fields,
+                  'manufacturers': manufacturers,
+                  'value_fields': value_fields,
+                  'Equipment_db': Equipment_db,
+                  'this_equipment': this_equipment,
+                  }
+
+    return render(request, "sheetEquipmentCommonDataEdit.html", parameters)
 
 @login_required
 def review_equipment_values(request, sheet_equipment_id):
@@ -277,11 +311,16 @@ def review_equipment_values(request, sheet_equipment_id):
 @login_required
 def equipment_actual_values(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    other_custom_fields = SheetActualDataCustomField.objects.filter(test_sheet__name__icontains='air mov')
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
+            for other_custom_field in other_custom_fields:
+                new_object = SheetEquipmentCustomData(key=other_custom_field, value=request.POST.get(
+                    'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
+                new_object.save()
             for custom_field in custom_fields:
                 num_results = SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
                                                                   sheet_equipment=this_sheet_equipment.id).count()
@@ -297,6 +336,7 @@ def equipment_actual_values(request, sheet_equipment_id):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
+                  'other_custom_fields': other_custom_fields,
                   }
     return render(request, "EquipmentActualValue.html", parameters)
 
@@ -304,17 +344,23 @@ def equipment_actual_values(request, sheet_equipment_id):
 @login_required
 def equipment_actual_values_edit(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
+            for other_custom_field in other_custom_fields:
+                SheetEquipmentCustomData.objects.filter(key=other_custom_field.key,
+                                                        sheet_equipment=this_sheet_equipment).update(
+                    value=request.POST.get('other_value_' + str(other_custom_field.id)))
             for custom_field in custom_fields:
                 SheetEquipmentActualData.objects.filter(key=custom_field.key,
                                                         sheet_equipment=this_sheet_equipment).update(value=request.POST.get('actual_value_' + str(custom_field.id)))
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
+                  'other_custom_fields': other_custom_fields,
                   }
     return render(request, "EquipmentActualValueEdit.html", parameters)
 
@@ -335,6 +381,8 @@ def sheet_equipment_delete(request, sheet_id, sheet_equipment_name):
     this_sheet = SheetEquipment.objects.filter(equipment_type__name__iexact=sheet_equipment_name, sheet=sheet_id)
     if request.POST.get("confirm"):
         this_sheet.delete()
+        return redirect('sheetEquipment', sheet_id)
+    if request.POST.get("cancel"):
         return redirect('sheetEquipment', sheet_id)
     parameters = {'this_sheet': this_sheet,
                   'sheet_equipment_name': sheet_equipment_name,

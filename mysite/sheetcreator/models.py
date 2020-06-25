@@ -14,6 +14,14 @@ class TestSheetColumn(models.Model):
         return self.test_sheet.name + " " + self.column_title
 
 
+class SheetActualDataCustomField(models.Model):
+    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    column_title = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return self.test_sheet.name + " " + self.column_title
+
+
 class Sheet(models.Model):
     test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
@@ -51,3 +59,12 @@ class SheetEquipmentActualData(models.Model):
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.equipment_value_name
+
+
+class SheetEquipmentCustomData(models.Model):
+    sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    key = models.ForeignKey(SheetActualDataCustomField, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return str(self.sheet_equipment) + " " + self.key.column_title
