@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+    <h2>Edit Equipment {{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentValues-form">
+        <div class="form-group">
+            {% csrf_token %}
+            </div>
+            <div class="row form-line text-left" style="font-weight: bold;">
+                <div class="col-lg-3">
+                    Field Title
+                </div>
+                <div class="col-lg-3">
+                    Field Value
+                </div>
+            </div>
+            {% for showing_field in value_fields %}
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
+                    <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.key.column_title }}</label>
+                </div>
+                <div class="col-lg-3">
+                    <input style="width: 100%;" type="text" value="{{ showing_field.value }}" name="showing_field_value_{{ showing_field.id }}" maxlength="50" class="form-control" required="" id="showing_field_value_{{ showing_field.id }}">
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
+                    <label for="id_manufacturer" class="control-label">Manufacturer</label>
+                </div>
+                <div class="col-lg-3">
+                    <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer">
+                        <option value="">---------</option>
+
+                        {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if this_equipment.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
+                    <label for="id_equipment" class="control-label">Model No.</label>
+                </div>
+                <div class="col-lg-3">
+                    <select name="id_equipment" class="form-control" required="" id="id_equipment">
+                        <option value="">---------</option>
+
+                        {% for equipment in Equipment_db %}
+                            <option style="display: none;" value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}" {% if this_equipment.id == equipment.id %}selected="selected"{% endif %}>{{ equipment }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Review Design Values" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    	        <script>
+$("#edit_manufacturer").click(function(){
+	manufacturer_id = $("#id_manufacturer option:selected").val();
+	if(manufacturer_id != '') {
+        var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
+	    showEditPopup(url);
+    }
+	else {
+	    alert("Something Went Wrong");
+    }
+  	});
+    </script>
+    <script>
+        $('#id_manufacturer').on('change', function() {
+            $("#id_equipment option").each(function() { $(this).hide(); });
+            $("#id_equipment option[value='']").show();
+            $("#id_equipment").val('');
+            if($(this).val() !== '') {
+                $("#id_equipment option").each(function() {
+                    if($(this).data('manufacturer') == $('#id_manufacturer').find(':selected').val()) {
+                        $(this).show();
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}
