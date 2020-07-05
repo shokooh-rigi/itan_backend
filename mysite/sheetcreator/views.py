@@ -215,6 +215,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if sent_value < min_value or sent_value > max_value:
                         error_msg = custom_field.field_name + " Value is not in Range!"
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -235,6 +236,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if is_in_my_range == 0:
                         error_msg = custom_field.field_name + " Value is not selected right!"
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -255,6 +257,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if eval(this_operation) != eval(this_result):
                         error_msg = operation_msg + " must be equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -263,6 +266,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if eval(this_operation) <= eval(this_result):
                         error_msg = operation_msg + " must be greater than " + result_msg
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -271,6 +275,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if eval(this_operation) < eval(this_result):
                         error_msg = operation_msg + " must be greater than or equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -279,6 +284,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if eval(this_operation) >= eval(this_result):
                         error_msg = operation_msg + " must be smaller than " + result_msg
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -287,6 +293,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     if eval(this_operation) > eval(this_result):
                         error_msg = operation_msg + " must be smaller than or equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
+                                      'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
                                       }
@@ -303,6 +310,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     new_object.save()
             return redirect('sheetEquipmentActualValue', sheet_equipment_id)
     parameters = {'this_equipment': this_equipment,
+                  'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
                   }
     return render(request, "EquipmentDesignValue.html", parameters)

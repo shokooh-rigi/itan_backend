@@ -6,9 +6,9 @@
 
 {% block content %}
     <div class="text-center">
-    <h2>SHEET LIST</h2>
+    <h2>AIR MOVING EQUIPMENT SHEET LIST</h2>
 
-        <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary">Generate Sheet</button></a>
+        <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary">Generate Equipment Sheet</button></a>
         <br /><br />
         <div class="row" style="margin: 10px auto;">
                 <form action="?{% url_replace request 'project_name' '' %}">

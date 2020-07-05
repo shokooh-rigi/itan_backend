@@ -3,7 +3,7 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Generate Sheet</h2>
+    <h2>Generate Equipment Sheet</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="sheetAdd-form">
         <div class="form-group">
             {% csrf_token %}
@@ -28,7 +28,7 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_sheet_date" class="control-label">Report Date <span class="required">*</span></label>
+                    <label for="id_sheet_date" class="control-label">Date <span class="required">*</span></label>
                     {{ form.sheet_date }}
                 </div>
             </div>
@@ -52,7 +52,7 @@
 
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Create" name="next" />
+                    <input type="submit" class="btn btn-success" value="Generate" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>
             </div>

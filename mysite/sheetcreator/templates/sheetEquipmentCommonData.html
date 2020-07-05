@@ -3,7 +3,7 @@
 {% load custom_tags %}
 
 {% block content %}
-    <h2>Define Equipment {{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION</h2>
+    <h2>{{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION FOR {{ sheet_equipment.sheet.project.project_number }} {{ sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
