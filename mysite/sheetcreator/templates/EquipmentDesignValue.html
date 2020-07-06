@@ -3,60 +3,65 @@
 {% load custom_tags %}
 
 {% block content %}
-    <h2>Confirm {{ this_equipment }} Design Values for {{ this_sheet_equipment.sheet.project.project_number }}
+    <h2>Confirm {{ this_sheet_equipment.equipment_type.name }} Design Values for
+        {{ this_sheet_equipment.sheet.project.project_number }}
         {{ this_sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
-    <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentValues-form">
+    <form method='POST' action='' enctype="multipart/form-data" id="equipmentValues-form">
         <div class="form-group">
             {% csrf_token %}
+        </div>
+        <div class="row form-line" style="font-weight: bold;">
+            <div class="col-lg-3">
+                Field Title
             </div>
-            <div class="row form-line" style="font-weight: bold;">
-                <div class="col-lg-3">
-                    Field Title
-                </div>
-                <div class="col-lg-3">
-                    Design Value
-                </div>
-                <div class="col-lg-3">
-                    Field Title
-                </div>
-                <div class="col-lg-3">
-                    Design Value
-                </div>
+            <div class="col-lg-3">
+                Design Value
             </div>
-            <div class="row form-line">
-            {% for custom_field in custom_fields %}
-                <div class="col-lg-3">
-                    <label for="id_architect_name" class="control-label">{{ custom_field.field_name }}</label>
-                </div>
-                <div class="col-lg-3">
-                    <label for="id_architect_name" class="control-label" style="width: 100%;"><input style="width: 100%;" type="text" name="company_value_{{ custom_field.id }}" maxlength="50" class="form-control" required="" id="id_company_value" value="{% get_post_variable request custom_field this_equipment %}"></label>
-                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                        <label style="width: 100%; text-align: right;" for="id_architect_name">{{ custom_field.field_postfix }}</label>
-                    </div>
-                </div>
-            {% endfor %} </div>
-            <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-primary" value="It's all good" name="next" />
-                    <input type="submit" class="btn btn-info" value="Back" name="cancel" formnovalidate />
-                </div>
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Design Value
             </div>
         </div>
-	</form>
+        <div class="row form-line">
+            {% for custom_field in custom_fields %}
+                <div class="col-lg-3">
+                    <label style="width: 100%;" for="id_architect_name"
+                           class="control-label">{{ custom_field.field_name }}</label>
+                </div>
+                <div class="col-lg-3">
+                    <label for="id_architect_name" class="control-label" style="width: 100%;"><input
+                            style="width: 100%;" type="text" name="company_value_{{ custom_field.id }}" maxlength="50"
+                            class="form-control" required="" id="id_company_value"
+                            value="{% get_post_variable request custom_field this_equipment %}"></label>
+                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                        <label style="width: 100%; text-align: right;"
+                               for="id_architect_name">{{ custom_field.field_postfix }}</label>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-primary" value="It's all good" name="next"/>
+                <input type="submit" class="btn btn-info" value="Back" name="cancel" formnovalidate/>
+            </div>
+        </div>
+    </form>
     <script>
-        $('#id_proposal').on('change', function() {
-            if($(this).val() === '') {
+        $('#id_proposal').on('change', function () {
+            if ($(this).val() === '') {
                 $("#customer").text('');
                 $("#engineer").text('');
                 $("#tab_amount").text('');
                 $("#pre_amount").text('');
                 $("#total_amount").text('');
                 $("#dlink_href").attr("href", '').hide();
-            }
-            else {
+            } else {
                 $("#customer").text($(this).find(':selected').data('customer'));
                 $("#engineer").text($(this).find(':selected').data('engineer'));
                 $("#tab_amount").text($(this).find(':selected').data('tabamount'));

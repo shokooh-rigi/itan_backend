@@ -3,7 +3,9 @@
 {% load custom_tags %}
 
 {% block content %}
-    <h2>{{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION FOR {{ sheet_equipment.sheet.project.project_number }} {{ sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <h2>{{ sheet_equipment.equipment_type.name }} GENERAL INFORMATION FOR
+        {{ sheet_equipment.sheet.project.project_number }}
+        {{ sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
@@ -25,7 +27,8 @@
                     <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.column_title }}</label>
                 </div>
                 <div class="col-lg-3">
-                    <input style="width: 100%;" type="text" name="showing_field_value_{{ showing_field.id }}" maxlength="50" class="form-control" required="" id="showing_field_value_{{ showing_field.id }}">
+                    <input style="width: 100%;" type="text" name="showing_field_value_{{ showing_field.id }}" maxlength="50" class="form-control"
+                            {% if showing_field.required %} required="" {% endif %} id="showing_field_value_{{ showing_field.id }}">
                 </div>
             </div>
             {% endfor %}

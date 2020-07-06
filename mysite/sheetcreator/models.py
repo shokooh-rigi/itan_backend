@@ -9,6 +9,7 @@ import datetime
 class TestSheetColumn(models.Model):
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
     column_title = models.CharField(max_length=50, blank=False)
+    required = models.BooleanField(default=False)
 
     def __str__(self):
         return self.test_sheet.name + " " + self.column_title
