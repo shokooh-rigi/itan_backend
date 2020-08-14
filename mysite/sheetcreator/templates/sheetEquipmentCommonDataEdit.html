@@ -24,19 +24,19 @@
             {% for showing_field in value_fields %}
             <div class="row form-line text-left">
                 <div class="col-lg-3">
-                    <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.key.column_title }}</label>
+                    <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.key.column_title }}{% if showing_field.required %} <span class="required">*</span>{% endif %}</label>
                 </div>
                 <div class="col-lg-3">
                     <input style="width: 100%;" type="text" value="{{ showing_field.value }}" name="showing_field_value_{{ showing_field.id }}"
                            maxlength="50" class="form-control" {% if showing_field.key.required %} required="" {% endif %}
-                           id="showing_field_value_{{ showing_field.id }}">
+                           {% if showing_field.required %} required="" {% endif %} id="showing_field_value_{{ showing_field.id }}">
                 </div>
             </div>
             {% endfor %}
 
             <div class="row form-line text-left">
                 <div class="col-lg-3">
-                    <label for="id_manufacturer" class="control-label">Manufacturer</label>
+                    <label for="id_manufacturer" class="control-label">Manufacturer <span class="required">*</span></label>
                 </div>
                 <div class="col-lg-3">
                     <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer">
@@ -50,7 +50,7 @@
             </div>
             <div class="row form-line text-left">
                 <div class="col-lg-3">
-                    <label for="id_equipment" class="control-label">Model No.</label>
+                    <label for="id_equipment" class="control-label">Model No. <span class="required">*</span></label>
                 </div>
                 <div class="col-lg-3">
                     <select name="id_equipment" class="form-control" required="" id="id_equipment">
@@ -64,7 +64,7 @@
             </div>
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Review Design Values" name="next" />
+                    <input type="submit" class="btn btn-success" value="Save General Information" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>
             </div>

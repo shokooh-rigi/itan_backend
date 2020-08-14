@@ -330,11 +330,6 @@ i {
     color: #ff0000;
 }
 
-iframe {
-    width: 100% !important;
-    height: 500px !important;
-}
-
 .proposal_header {
     width: 100%;
     padding: 10px auto;

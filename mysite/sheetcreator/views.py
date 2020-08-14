@@ -143,7 +143,7 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
         new_update.main_data_entry_completed = True
         new_update.save()
-        return redirect('sheetEquipmentDesignValue', new_update.id)
+        return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
 
     parameters = {'sheet_equipment': sheet_equipment,
                   'showing_fields': showing_fields,
@@ -308,7 +308,9 @@ def review_equipment_values(request, sheet_equipment_id):
                 else:
                     new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=request.POST.get('company_value_' + str(custom_field.id)), equipment=this_equipment)
                     new_object.save()
-            return redirect('sheetEquipmentActualValue', sheet_equipment_id)
+            this_sheet_equipment.design_data_entry_completed = True
+            this_sheet_equipment.save()
+            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_equipment': this_equipment,
                   'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,

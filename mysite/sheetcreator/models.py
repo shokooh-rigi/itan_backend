@@ -38,6 +38,7 @@ class SheetEquipment(models.Model):
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
     equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
     main_data_entry_completed = models.BooleanField(default=False)
+    design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
 
     def __str__(self):
