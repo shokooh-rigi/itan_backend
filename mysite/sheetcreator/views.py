@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from ..order.models import *
+from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices
 from .forms import *
 from ..settings import MEDIA_URL, WEB_URL
 from .models import *
@@ -197,18 +198,18 @@ def review_equipment_values(request, sheet_equipment_id):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
             for custom_field in custom_fields:
-                if custom_field.field_range_or_selective == 1:
-                    if custom_field.field_type == 3:
+                if custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+                    if custom_field.field_type == FieldTypeChoices.Characters.value:
                         break
                     my_range = custom_field.field_range.split('-')
                     min_value = my_range[0]
                     max_value = my_range[1]
                     sent_value = request.POST.get('company_value_' + str(custom_field.id))
-                    if custom_field.field_type == 1:
+                    if custom_field.field_type == FieldTypeChoices.Integer.value:
                         sent_value = int(sent_value)
                         min_value = int(min_value)
                         max_value = int(max_value)
-                    elif custom_field.field_type == 2:
+                    elif custom_field.field_type == FieldTypeChoices.Float.value:
                         sent_value = float(sent_value)
                         min_value = float(min_value)
                         max_value = float(max_value)
@@ -220,17 +221,17 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_field.field_range_or_selective == 2:
-                    if custom_field.field_type == 3:
+                elif custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+                    if custom_field.field_type == FieldTypeChoices.Characters.value:
                         break
                     my_range = custom_field.field_range.split(',')
                     sent_value = request.POST.get('company_value_' + str(custom_field.id))
                     is_in_my_range = 0
                     for number in my_range:
-                        if custom_field.field_type == 1:
+                        if custom_field.field_type == FieldTypeChoices.Integer.value:
                             if int(number) == int(sent_value):
                                 is_in_my_range = 1
-                        elif custom_field.field_type == 2:
+                        elif custom_field.field_type == FieldTypeChoices.Float.value:
                             if float(number) == float(sent_value):
                                 is_in_my_range = 1
                     if is_in_my_range == 0:
@@ -253,7 +254,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                                       request.POST.get('company_value_' + str(custom_field.id)))
                     operation_msg = operation_msg.replace('[field-' + str(custom_field.id) + ']', custom_field.field_name)
                     result_msg = result_msg.replace('[field-' + str(custom_field.id) + ']', custom_field.field_name)
-                if custom_operation.operand_type == 1:
+                if custom_operation.operand_type == OperandChoices.EqualTo.value:
                     if eval(this_operation) != eval(this_result):
                         error_msg = operation_msg + " must be equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
@@ -262,7 +263,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == 2:
+                elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
                     if eval(this_operation) <= eval(this_result):
                         error_msg = operation_msg + " must be greater than " + result_msg
                         parameters = {'this_equipment': this_equipment,
@@ -271,7 +272,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == 3:
+                elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
                     if eval(this_operation) < eval(this_result):
                         error_msg = operation_msg + " must be greater than or equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
@@ -280,7 +281,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == 4:
+                elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
                     if eval(this_operation) >= eval(this_result):
                         error_msg = operation_msg + " must be smaller than " + result_msg
                         parameters = {'this_equipment': this_equipment,
@@ -289,7 +290,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == 5:
+                elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
                     if eval(this_operation) > eval(this_result):
                         error_msg = operation_msg + " must be smaller than or equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
@@ -318,15 +319,95 @@ def review_equipment_values(request, sheet_equipment_id):
     return render(request, "EquipmentDesignValue.html", parameters)
 
 
+def check_actual_values(request, this_sheet_equipment, design_values):
+    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
+    actual_data_custom_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
+        .filter(~Q(operand_type=OperandChoices.AssignTo.value))
+    conv_to_num = None
+
+    for equipment_type_custom_field in equipment_type_custom_fields:
+        if equipment_type_custom_field.field_type == FieldTypeChoices.Characters.value:
+            continue
+        elif equipment_type_custom_field.field_type == FieldTypeChoices.Integer.value:
+            conv_to_num = int
+        elif equipment_type_custom_field.field_type == FieldTypeChoices.Float.value:
+            conv_to_num = float
+
+        design_value = design_values.get(equipment_value_name=equipment_type_custom_field.field_name)
+        sent_value = conv_to_num(request.POST.get('actual_value_' + str(design_value.id)))
+
+        if equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+            my_range = equipment_type_custom_field.field_range.split('-')
+            min_value = conv_to_num(my_range[0])
+            max_value = conv_to_num(my_range[1])
+            if sent_value < min_value or max_value < sent_value:
+                return equipment_type_custom_field.field_name + " Value is not in Range!"
+        elif equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+            my_range = equipment_type_custom_field.field_range.split(',')
+            if sent_value not in map(lambda x: conv_to_num(x), my_range):
+                return equipment_type_custom_field.field_name + " Value is not selected right!"
+
+    for custom_operation in actual_data_custom_operations:
+        left_side = left_side_msg = str(custom_operation.operation)
+        right_side = right_side_msg = str(custom_operation.result_field)
+
+        for equipment_type_custom_field in equipment_type_custom_fields:
+            field_name = equipment_type_custom_field.field_name
+            design_value = design_values.get(equipment_value_name=field_name)
+            fields = [
+                ('[field-{}-design]'.format(equipment_type_custom_field.id), design_value.company_value),
+                ('[field-{}-actual]'.format(equipment_type_custom_field.id),
+                 request.POST.get('actual_value_' + str(design_value.id))),
+            ]
+            for name, value in fields:
+                left_side = left_side.replace(name, value)
+                right_side = right_side.replace(name, value)
+                left_side_msg = left_side_msg.replace(name, field_name)
+                right_side_msg = right_side_msg.replace(name, field_name)
+
+        left_side = eval(left_side)
+        right_side = eval(right_side)
+        if custom_operation.operand_type == OperandChoices.EqualTo.value:
+            if left_side != right_side:
+                return left_side_msg + " must be equal to " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
+            if left_side <= right_side:
+                return left_side_msg + " must be greater than " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
+            if left_side < right_side:
+                return left_side_msg + " must be greater than or equal to " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
+            if left_side >= right_side:
+                return left_side_msg + " must be smaller than " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
+            if left_side > right_side:
+                return left_side_msg + " must be smaller than or equal to " + right_side_msg
+
+    return None
+
+
 @login_required
 def equipment_actual_values(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     other_custom_fields = SheetActualDataCustomField.objects.filter(test_sheet__name__icontains='air mov')
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
+    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
+        .filter(operand_type=OperandChoices.AssignTo.value)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
+            error_msg = check_actual_values(request, this_sheet_equipment, design_values=custom_fields)
+            if error_msg is not None:
+                parameters = {
+                    'this_sheet_equipment': this_sheet_equipment,
+                    'custom_fields': custom_fields,
+                    'other_custom_fields': other_custom_fields,
+                    'assignment_operations': assignment_operations,
+                    'error_msg': error_msg,
+                }
+                return render(request, "EquipmentActualValue.html", parameters)
+
             for other_custom_field in other_custom_fields:
                 new_object = SheetEquipmentCustomData(key=other_custom_field, value=request.POST.get(
                     'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
@@ -347,6 +428,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
                   'other_custom_fields': other_custom_fields,
+                  'assignment_operations': assignment_operations,
                   }
     return render(request, "EquipmentActualValue.html", parameters)
 
@@ -356,10 +438,23 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
+    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
+        .filter(operand_type=OperandChoices.AssignTo.value)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
+            error_msg = check_actual_values(request, this_sheet_equipment, design_values=custom_fields)
+            if error_msg is not None:
+                parameters = {
+                    'this_sheet_equipment': this_sheet_equipment,
+                    'custom_fields': custom_fields,
+                    'other_custom_fields': other_custom_fields,
+                    'assignment_operations': assignment_operations,
+                    'error_msg': error_msg,
+                }
+                return render(request, "EquipmentActualValueEdit.html", parameters)
+
             for other_custom_field in other_custom_fields:
                 SheetEquipmentCustomData.objects.filter(key=other_custom_field.key,
                                                         sheet_equipment=this_sheet_equipment).update(
@@ -371,6 +466,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
                   'other_custom_fields': other_custom_fields,
+                  'assignment_operations': assignment_operations,
                   }
     return render(request, "EquipmentActualValueEdit.html", parameters)
 

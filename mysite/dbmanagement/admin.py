@@ -48,8 +48,12 @@ class EqTypeCustomOperationAdmin(admin.TabularInline):
     model = EquipmentTypeCustomOperation
 
 
+class ActualDataCustomOperationAdmin(admin.TabularInline):
+    model = ActualDataCustomOperation
+
+
 class EquipmentTypeAdmin(admin.ModelAdmin):
-    inlines = [EqTypeCustomFieldAdmin, EqTypeCustomOperationAdmin, ]
+    inlines = [EqTypeCustomFieldAdmin, EqTypeCustomOperationAdmin, ActualDataCustomOperationAdmin, ]
 
 
 admin.site.register(Equipment, EquipmentTypeAdmin)
