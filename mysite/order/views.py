@@ -25,6 +25,15 @@ def order_list(request):
     object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
                                        Q(project_number__icontains=project_name)).order_by(ordering)
 
+    if request.GET.get('type') == 'all':
+        object_list = object_list
+    if request.GET.get('type') == 'inprogress':
+        object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=False)
+    if request.GET.get('type') == 'invoiced':
+        object_list = object_list.filter(invoice__isnull=False)
+    if request.GET.get('type') == 'reported':
+        object_list = object_list.filter(report__isnull=False)
+
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     orders = paginator.get_page(page)

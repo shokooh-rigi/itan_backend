@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from ..core.forms import EmailForm
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from django import forms
 
 
 # Create your views here.
