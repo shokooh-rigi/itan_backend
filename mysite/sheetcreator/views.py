@@ -319,7 +319,7 @@ def review_equipment_values(request, sheet_equipment_id):
     return render(request, "EquipmentDesignValue.html", parameters)
 
 
-def check_actual_values(request, this_sheet_equipment, design_values):
+def check_actual_values(request, this_sheet_equipment, design_or_actual_values, insert=True):
     equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     actual_data_custom_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(~Q(operand_type=OperandChoices.AssignTo.value))
@@ -333,19 +333,25 @@ def check_actual_values(request, this_sheet_equipment, design_values):
         elif equipment_type_custom_field.field_type == FieldTypeChoices.Float.value:
             conv_to_num = float
 
-        design_value = design_values.get(equipment_value_name=equipment_type_custom_field.field_name)
-        sent_value = conv_to_num(request.POST.get('actual_value_' + str(design_value.id)))
+        field_name = equipment_type_custom_field.field_name
+        if insert:
+            related_id = design_or_actual_values.get(equipment_value_name=field_name).id
+        else:
+            related_id = design_or_actual_values.get(key__equipment_value_name=field_name).id
+        sent_value = conv_to_num(request.POST.get('actual_value_' + str(related_id)))
 
         if equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
             my_range = equipment_type_custom_field.field_range.split('-')
             min_value = conv_to_num(my_range[0])
             max_value = conv_to_num(my_range[1])
             if sent_value < min_value or max_value < sent_value:
-                return equipment_type_custom_field.field_name + " Value is not in Range!"
+                return "{} value is not in range. Valid range is {}.".format(field_name,
+                                                                             equipment_type_custom_field.field_range)
         elif equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
             my_range = equipment_type_custom_field.field_range.split(',')
             if sent_value not in map(lambda x: conv_to_num(x), my_range):
-                return equipment_type_custom_field.field_name + " Value is not selected right!"
+                return "{} value is not selected right. Valid choices are {}.".format(
+                    field_name, equipment_type_custom_field.field_range)
 
     for custom_operation in actual_data_custom_operations:
         left_side = left_side_msg = str(custom_operation.operation)
@@ -353,11 +359,17 @@ def check_actual_values(request, this_sheet_equipment, design_values):
 
         for equipment_type_custom_field in equipment_type_custom_fields:
             field_name = equipment_type_custom_field.field_name
-            design_value = design_values.get(equipment_value_name=field_name)
+            if insert:
+                design_value = design_or_actual_values.get(equipment_value_name=field_name)
+                related_id = design_value.id
+            else:
+                actual_value = design_or_actual_values.get(key__equipment_value_name=field_name)
+                related_id = actual_value.id
+                design_value = actual_value.key
             fields = [
                 ('[field-{}-design]'.format(equipment_type_custom_field.id), design_value.company_value),
                 ('[field-{}-actual]'.format(equipment_type_custom_field.id),
-                 request.POST.get('actual_value_' + str(design_value.id))),
+                 request.POST.get('actual_value_' + str(related_id))),
             ]
             for name, value in fields:
                 left_side = left_side.replace(name, value)
@@ -397,7 +409,7 @@ def equipment_actual_values(request, sheet_equipment_id):
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, design_values=custom_fields)
+            error_msg = check_actual_values(request, this_sheet_equipment, custom_fields)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
@@ -444,7 +456,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, design_values=custom_fields)
+            error_msg = check_actual_values(request, this_sheet_equipment, custom_fields, False)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,

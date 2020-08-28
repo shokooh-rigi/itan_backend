@@ -40,3 +40,11 @@ def get_post_variable(request, cfi, equipment):
         else:
             this_equipment_type = get_object_or_404(EquipmentTypeCustomField, id=cfi.id)
             return this_equipment_type.default_value
+
+
+@register.simple_tag
+def get_value_from_post(request, default_value, *variable_name):
+    if request.POST:
+        return request.POST.get(''.join(map(lambda x: str(x), variable_name))) or default_value
+    else:
+        return default_value

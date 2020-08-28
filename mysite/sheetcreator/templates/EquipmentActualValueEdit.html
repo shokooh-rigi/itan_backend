@@ -35,7 +35,8 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;">
-                        <input style="width: 100%;" type="text" value="{{ other_custom_field.value }}"
+                        <input style="width: 100%;" type="text"
+                               value="{% get_value_from_post request other_custom_field.value 'other_value_' other_custom_field.id %}"
                                name="other_value_{{ other_custom_field.id }}" class="form-control"
                                id="id_actual_value"/>
                     </label>
@@ -48,7 +49,8 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;">
-                        <input style="width: 100%;" type="text" value="{{ custom_field.value }}"
+                        <input style="width: 100%;" type="text"
+                               value="{% get_value_from_post request custom_field.value 'actual_value_' custom_field.id %}"
                                name="actual_value_{{ custom_field.id }}" class="form-control" id="id_actual_value"/>
                     </label>
                 </div>
