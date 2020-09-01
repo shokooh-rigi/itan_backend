@@ -18,13 +18,13 @@
                 Field Title
             </div>
             <div class="col-lg-3">
-                Design Value
+                Actual Value
             </div>
             <div class="col-lg-3">
                 Field Title
             </div>
             <div class="col-lg-3">
-                Design Value
+                Actual Value
             </div>
         </div>
         <div class="row form-line">
@@ -90,6 +90,61 @@
                 scrollInput: false,
             });
         });
+    </script>
+    <script>
+        /*
+        * Set the parentheses for the fields that need parentheses.
+        * */
+
+        $(`<style>
+            .like-input {
+                font-family: monospace !important;
+                font-size: 16px !important;
+                box-sizing: content-box;
+                width: calc(100% - 2px - 1.5rem);
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                padding: 0 0.75rem;
+                cursor: text;
+            }
+
+            .like-input:focus, .like-input:focus-within {
+                color: #495057;
+                background-color: #fff;
+                border-color: #80bdff;
+                outline: 0;
+                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            }
+
+            .dynamic-input, .dynamic-input:active, .dynamic-input:hover,
+            .dynamic-input:focus, .dynamic-input:focus-within, .dynamic-input:visited {
+                font-family: monospace !important;
+                font-size: 16px !important;
+                border: none;
+                outline: none;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                text-align: center;
+            }
+        </style>`).appendTo('head');
+
+        const showParenthesesFields = {{ show_parentheses_fields | safe }};
+        for (const fieldName of showParenthesesFields) {
+            const input = $('[name=' + fieldName + ']');
+            const parent = input.parent();
+            input.remove().addClass('dynamic-input');
+            const div = $('<div>(</div>').append(input).append(')').addClass('like-input').on('click', () => input.focus());
+            parent.append(div);
+            let divInnerWidth = div.css('width').substr(0, div.css('width').length - 2) - 17.6;
+            const setInputWidth = () => {
+                const width = Math.min(divInnerWidth, input.val().length * 8.8 + 9)
+                input.css('width', width + 'px');
+            };
+            setInputWidth();
+            input.on('keyup', setInputWidth);
+            input.on('change', setInputWidth);
+        }
     </script>
 
 {% endblock %}

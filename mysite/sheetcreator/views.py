@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from ..order.models import *
-from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices
+from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices, ShowParenthesesChoices
 from .forms import *
 from ..settings import MEDIA_URL, WEB_URL
 from .models import *
@@ -398,6 +398,23 @@ def check_actual_values(request, this_sheet_equipment, design_or_actual_values, 
     return None
 
 
+def get_show_parentheses_fields(this_sheet_equipment, custom_fields, insert=True):
+    require_parentheses = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.filter(
+        Q(show_parentheses=ShowParenthesesChoices.Actual.value) | Q(show_parentheses=ShowParenthesesChoices.Both.value))
+    show_parentheses_fields = []
+    if insert:
+        for item in require_parentheses:
+            for custom_field in custom_fields:
+                if item.field_name == custom_field.equipment_value_name:
+                    show_parentheses_fields.append(f'actual_value_{custom_field.id}')
+    else:
+        for item in require_parentheses:
+            for custom_field in custom_fields:
+                if item.field_name == custom_field.key.equipment_value_name:
+                    show_parentheses_fields.append(f'actual_value_{custom_field.id}')
+    return show_parentheses_fields
+
+
 @login_required
 def equipment_actual_values(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
@@ -405,6 +422,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
+    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -416,6 +434,7 @@ def equipment_actual_values(request, sheet_equipment_id):
                     'custom_fields': custom_fields,
                     'other_custom_fields': other_custom_fields,
                     'assignment_operations': assignment_operations,
+                    'show_parentheses_fields': show_parentheses_fields,
                     'error_msg': error_msg,
                 }
                 return render(request, "EquipmentActualValue.html", parameters)
@@ -441,6 +460,7 @@ def equipment_actual_values(request, sheet_equipment_id):
                   'custom_fields': custom_fields,
                   'other_custom_fields': other_custom_fields,
                   'assignment_operations': assignment_operations,
+                  'show_parentheses_fields': show_parentheses_fields,
                   }
     return render(request, "EquipmentActualValue.html", parameters)
 
@@ -452,6 +472,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
+    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -463,6 +484,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                     'custom_fields': custom_fields,
                     'other_custom_fields': other_custom_fields,
                     'assignment_operations': assignment_operations,
+                    'show_parentheses_fields': show_parentheses_fields,
                     'error_msg': error_msg,
                 }
                 return render(request, "EquipmentActualValueEdit.html", parameters)
@@ -479,6 +501,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                   'custom_fields': custom_fields,
                   'other_custom_fields': other_custom_fields,
                   'assignment_operations': assignment_operations,
+                  'show_parentheses_fields': show_parentheses_fields,
                   }
     return render(request, "EquipmentActualValueEdit.html", parameters)
 
