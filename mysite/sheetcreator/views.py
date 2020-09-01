@@ -193,6 +193,9 @@ def review_equipment_values(request, sheet_equipment_id):
     this_equipment = this_sheet_equipment.equipment
     custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
     custom_operations = this_equipment.equipment_type.equipmenttypecustomoperation_set.all()
+    show_parentheses_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(
+        Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+        Q(show_parentheses=ShowParenthesesChoices.Both.value))))
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -218,6 +221,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -239,6 +243,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -260,6 +265,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -269,6 +275,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -278,6 +285,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -287,6 +295,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -296,6 +305,7 @@ def review_equipment_values(request, sheet_equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
+                                      'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
@@ -315,6 +325,7 @@ def review_equipment_values(request, sheet_equipment_id):
     parameters = {'this_equipment': this_equipment,
                   'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
+                  'show_parentheses_fields': show_parentheses_fields,
                   }
     return render(request, "EquipmentDesignValue.html", parameters)
 
@@ -398,21 +409,16 @@ def check_actual_values(request, this_sheet_equipment, design_or_actual_values, 
     return None
 
 
-def get_show_parentheses_fields(this_sheet_equipment, custom_fields, insert=True):
+def get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields, insert=True):
     require_parentheses = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.filter(
         Q(show_parentheses=ShowParenthesesChoices.Actual.value) | Q(show_parentheses=ShowParenthesesChoices.Both.value))
-    show_parentheses_fields = []
     if insert:
-        for item in require_parentheses:
-            for custom_field in custom_fields:
-                if item.field_name == custom_field.equipment_value_name:
-                    show_parentheses_fields.append(f'actual_value_{custom_field.id}')
+        fields = map(lambda item: f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
+                     require_parentheses)
     else:
-        for item in require_parentheses:
-            for custom_field in custom_fields:
-                if item.field_name == custom_field.key.equipment_value_name:
-                    show_parentheses_fields.append(f'actual_value_{custom_field.id}')
-    return show_parentheses_fields
+        fields = map(lambda item: f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
+                     require_parentheses)
+    return list(fields)
 
 
 @login_required
@@ -422,7 +428,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
-    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, custom_fields)
+    show_parentheses_fields = get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -472,7 +478,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
-    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, custom_fields, False)
+    show_parentheses_fields = get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
