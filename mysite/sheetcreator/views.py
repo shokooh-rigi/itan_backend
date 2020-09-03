@@ -330,8 +330,7 @@ def review_equipment_values(request, sheet_equipment_id):
     return render(request, "EquipmentDesignValue.html", parameters)
 
 
-def check_actual_values(request, this_sheet_equipment, design_or_actual_values, insert=True):
-    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
+def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields, insert=True):
     actual_data_custom_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(~Q(operand_type=OperandChoices.AssignTo.value))
     conv_to_num = None
@@ -346,9 +345,9 @@ def check_actual_values(request, this_sheet_equipment, design_or_actual_values, 
 
         field_name = equipment_type_custom_field.field_name
         if insert:
-            related_id = design_or_actual_values.get(equipment_value_name=field_name).id
+            related_id = custom_fields.get(equipment_value_name=field_name).id
         else:
-            related_id = design_or_actual_values.get(key__equipment_value_name=field_name).id
+            related_id = custom_fields.get(key__equipment_value_name=field_name).id
         sent_value = conv_to_num(request.POST.get('actual_value_' + str(related_id)))
 
         if equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
@@ -371,10 +370,10 @@ def check_actual_values(request, this_sheet_equipment, design_or_actual_values, 
         for equipment_type_custom_field in equipment_type_custom_fields:
             field_name = equipment_type_custom_field.field_name
             if insert:
-                design_value = design_or_actual_values.get(equipment_value_name=field_name)
+                design_value = custom_fields.get(equipment_value_name=field_name)
                 related_id = design_value.id
             else:
-                actual_value = design_or_actual_values.get(key__equipment_value_name=field_name)
+                actual_value = custom_fields.get(key__equipment_value_name=field_name)
                 related_id = actual_value.id
                 design_value = actual_value.key
             fields = [
@@ -409,9 +408,9 @@ def check_actual_values(request, this_sheet_equipment, design_or_actual_values, 
     return None
 
 
-def get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields, insert=True):
-    require_parentheses = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.filter(
-        Q(show_parentheses=ShowParenthesesChoices.Actual.value) | Q(show_parentheses=ShowParenthesesChoices.Both.value))
+def get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
+    require_parentheses = equipment_type_custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
+                                                              Q(show_parentheses=ShowParenthesesChoices.Both.value))
     if insert:
         fields = map(lambda item: f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
                      require_parentheses)
@@ -424,16 +423,17 @@ def get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields, inse
 @login_required
 def equipment_actual_values(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     other_custom_fields = SheetActualDataCustomField.objects.filter(test_sheet__name__icontains='air mov')
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
-    show_parentheses_fields = get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields)
+    show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, custom_fields)
+            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
@@ -474,16 +474,18 @@ def equipment_actual_values(request, sheet_equipment_id):
 @login_required
 def equipment_actual_values_edit(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
     assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
         .filter(operand_type=OperandChoices.AssignTo.value)
-    show_parentheses_fields = get_show_parentheses_fields_actual(this_sheet_equipment, custom_fields, False)
+    show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, custom_fields, False)
+            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields,
+                                            False)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
