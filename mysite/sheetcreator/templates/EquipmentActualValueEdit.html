@@ -146,5 +146,21 @@
             input.on('change', setInputWidth);
         }
     </script>
+    <script>
+        /*
+        * Evaluate assignment operations.
+        * */
+        const assignmentOperations = {{ assignment_operations | safe }};
+        for (const assignment of assignmentOperations) {
+            eval(assignment);
+            const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
+            readonlyField.attr('readonly', '');
+        }
+        $('form').on('change', () => {
+            for (const assignment of assignmentOperations) {
+                eval(assignment);
+            }
+        });
+    </script>
 
 {% endblock %}

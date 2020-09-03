@@ -1,3 +1,6 @@
+import re
+from typing import Dict
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -408,6 +411,69 @@ def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fie
     return None
 
 
+def parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields, custom_fields, insert=True):
+    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
+        .filter(operand_type=OperandChoices.AssignTo.value)
+    assignments = []
+    result_field_regex = re.compile(r'\[field-[\d]+-actual]', re.I)
+    expression_regex = re.compile(r'\[field-[\d]+-(actual|design)]', re.I)
+    actual_field_id_matches: Dict[int, int] = {}
+    design_values_matches: Dict[int, str] = {}
+
+    def get_related_id(equipment_type_custom_field_id: int) -> int:
+        """Finds and caches the actual value field id"""
+        related_id = actual_field_id_matches.get(equipment_type_custom_field_id)
+        if related_id is None:
+            equipment_type_custom_field = equipment_type_custom_fields.get(pk=equipment_type_custom_field_id)
+            if insert:
+                custom_field = custom_fields.get(equipment_value_name=equipment_type_custom_field.field_name)
+            else:
+                custom_field = custom_fields.get(key__equipment_value_name=equipment_type_custom_field.field_name)
+            related_id = custom_field.id
+            actual_field_id_matches[equipment_type_custom_field_id] = related_id
+        return related_id
+
+    def get_related_value(equipment_type_custom_field_id: int) -> str:
+        """Finds and caches the design value"""
+        related_value = design_values_matches.get(equipment_type_custom_field_id)
+        if related_value is None:
+            equipment_type_custom_field = equipment_type_custom_fields.get(pk=equipment_type_custom_field_id)
+            if insert:
+                custom_field = custom_fields.get(equipment_value_name=equipment_type_custom_field.field_name)
+            else:
+                custom_field = custom_fields.get(key__equipment_value_name=equipment_type_custom_field.field_name).key
+            related_value = custom_field.company_value
+            design_values_matches[equipment_type_custom_field_id] = related_value
+        return related_value
+
+    def replace(match):
+        """
+        Replaces `actual` matches with `$('[name="actual_value_[FIELD ID]"]').val()` and
+        `design` matches with design value.
+        """
+        group = match.group()
+        field_id = int(group[7:-8])
+        if group[-2] == 'l' or group[-2] == 'L':
+            # this group is like [field-[FIELD ID]-actual]
+            return '$(\'[name="actual_value_{}"]\').val()'.format(get_related_id(field_id))
+        else:
+            # this group is like [field-[FIELD ID]-design]
+            return get_related_value(field_id)
+
+    for assignment in assignment_operations:
+        if assignment.result_field and assignment.operation:
+            result_field = assignment.result_field.strip()
+            if re.fullmatch(result_field_regex, result_field):
+                result_field_id = int(result_field[result_field.find('-') + 1:result_field.rfind('-')])
+                result_field_id = get_related_id(result_field_id)
+                left_side_of_assignment = '$(\'[name="actual_value_{}"]\')'.format(result_field_id)
+                operation = assignment.operation.strip()
+                operation = re.sub(expression_regex, replace, operation)
+                final_expression = '{}.val({})'.format(left_side_of_assignment, operation)
+                assignments.append(final_expression)
+    return assignments
+
+
 def get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
     require_parentheses = equipment_type_custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
                                                               Q(show_parentheses=ShowParenthesesChoices.Both.value))
@@ -426,8 +492,8 @@ def equipment_actual_values(request, sheet_equipment_id):
     equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     other_custom_fields = SheetActualDataCustomField.objects.filter(test_sheet__name__icontains='air mov')
     custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
-    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
-        .filter(operand_type=OperandChoices.AssignTo.value)
+    assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
+                                                              custom_fields)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -477,8 +543,8 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
     custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
-    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
-        .filter(operand_type=OperandChoices.AssignTo.value)
+    assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
+                                                              custom_fields, False)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
