@@ -5,6 +5,17 @@ from snowpenguin.django.recaptcha2.widgets import ReCaptchaWidget
 from mysite.core.models import *
 
 
+class UserLoginForm(AuthenticationForm):
+    captcha = ReCaptchaField(widget=ReCaptchaWidget())
+
+    class Meta:
+        model = User
+        fields = ('username', 'password', 'captcha')
+
+    def __init__(self, *args, **kwargs):
+        super(UserLoginForm, self).__init__(*args, **kwargs)
+
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
     captcha = ReCaptchaField(widget=ReCaptchaWidget())

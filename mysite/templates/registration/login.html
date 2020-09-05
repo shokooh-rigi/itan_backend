@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
-
+{% load i18n %}
+{% load recaptcha2 %}
+{% block extra_head %}{% recaptcha_init %}{%  endblock %}
 {% block content %}
   <h2>Log in</h2>
   {% if form.errors %}
@@ -24,4 +26,5 @@
     <br /><br /><a href="{% url 'password_reset' %}">Forgot your Password? click here</a>
     <br /><br /><a href="{% url 'signup' %}">New to Site? Register</a>
   </form>
+
 {% endblock %}
