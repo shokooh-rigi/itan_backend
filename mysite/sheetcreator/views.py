@@ -1,6 +1,10 @@
+from platform import system
 import re
 from typing import Dict
+from datetime import datetime as st_datetime
+import math
 
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -8,8 +12,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from ..order.models import *
 from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices, ShowParenthesesChoices
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from .models import *
+from .render import Render as PDFRender
 
 
 # Create your views here.
@@ -124,6 +129,130 @@ def equipments_list(request, sheet_id):
                   'MEDIA_URL': MEDIA_URL,
                   }
     return render(request, "sheetEquipmentsList.html", parameters)
+
+
+def fetch_sheet_equipment_data(equipment: SheetEquipment):
+    def get_object_or_none(queryset, *args, **kwargs):
+        try:
+            return queryset.get(*args, **kwargs)
+        except queryset.model.DoesNotExist:
+            return None
+
+    def get_attribute_value(queryset, attribute_name, default_value, *args, **kwargs):
+        obj = get_object_or_none(queryset, *args, **kwargs)
+        if obj:
+            field_object = queryset.model._meta.get_field(attribute_name)
+            return field_object.value_from_object(obj)
+        else:
+            return default_value
+
+    equipment_data = {}
+    se_common_data_set = equipment.sheetequipmentcommondata_set
+    e_custom_field_set = equipment.equipment.equipmentcustomfield_set
+    se_actual_data_set = equipment.sheetequipmentactualdata_set
+    data_fields = [
+        (
+            "get_attribute_value(se_common_data_set, 'value', '', key__column_title__iexact='{}')",
+            [
+                ('fan_no', 'fan no.'),
+                ('location', 'location'),
+                ('area_served', 'area served'),
+            ]
+        ),
+        (
+            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
+            [('serial_no', 'Serial No.'), ]
+        ),
+        (
+            "equipment.equipment.manufacturer",
+            [('manufacturer', ''), ]
+        ),
+        (
+            "equipment.equipment.model_number",
+            [('model_no', ''), ]
+        ),
+        (
+            """{{'design': get_attribute_value(e_custom_field_set, 'company_value', '', equipment_value_name__iexact='{0}'),
+                'actual': get_attribute_value(se_actual_data_set, 'value', '', key__equipment_value_name__iexact='{0}')}}""",
+            [
+                ('total_cfm', 'Total C.F.M.'),
+                ('return_air_cfm', 'Return Air C.F.M.'),
+                ('outdoor_air_cfm', 'Outdoor Air C.F.M.'),
+                ('total_sp_ext_sp', 'Total SP (Ext. SP)'),
+                ('fan_unit_suction_pressure', 'Fan (Unit) Suction Pressure'),
+                ('discharge_pressure_fan_unit', 'Discharge Pressure, Fan/Unit'),
+                ('fan_rpm', 'Fan R.P.M.'),
+                ('hp', 'H.P.'),
+                ('voltage', 'Voltage'),
+                ('phase', 'Phase'),
+                ('amperage', 'Amperage'),
+                ('bhp_calc', 'B.H.P. (Calc.)'),
+                ('frame', 'Frame'),
+                ('sf_code', 'S.F. / Code'),
+                ('motor_rpm', 'Motor RPM'),
+            ]
+        ),
+    ]
+    for field_value_str, items in data_fields:
+        for key, name in items:
+            equipment_data[key] = eval(field_value_str.format(name))
+    return equipment_data
+
+
+@login_required
+def equipments_generate_report_pdf(request, sheet_id):
+    my_sheet = Sheet.objects.get(id=sheet_id)
+    sheet_equipments = SheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
+                                                     design_data_entry_completed=True, actual_data_entry_completed=True)
+
+    data = []
+    len_equipments = sheet_equipments.count()
+    for i in range(math.ceil(len_equipments / 3)):
+        page = []
+        for j in range(3):
+            index = i * 3 + j
+            if index < len_equipments:
+                page.append(fetch_sheet_equipment_data(sheet_equipments[index]))
+        data.append(page)
+
+    license_owner = LicenseInfo.objects.get(key='OwnerName').value
+    owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
+    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
+    owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
+    owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
+    owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
+    owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
+    owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
+    owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
+    company_name = LicenseInfo.objects.get(key='CompanyName').value
+
+    parameters = {
+        'form': {
+            'report_date': st_datetime.now(),
+            'my_sheet': my_sheet,
+            'data': data,
+        },
+        'file_name': 'EquipmentReport_{}'.format(sheet_id),
+        'license_owner': license_owner,
+        'owner_title': owner_title,
+        'owner_address': owner_address,
+        'owner_tel': owner_tel,
+        'owner_fax': owner_fax,
+        'owner_web': owner_web,
+        'owner_mail': owner_mail,
+        'owner_signature': owner_signature,
+        'owner_logo': owner_logo,
+        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+        'company_name': company_name,
+        'WEB_URL': WEB_URL,
+        'STATIC_URL': STATIC_URL,
+        'MEDIA_URL': MEDIA_URL,
+        'os': system(),
+    }
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTemplate.html', parameters,
+                                                  'airMovingEquipmentReport')
+    return HttpResponse(open(pdf_path, 'rb').read(), content_type='application/pdf')
 
 
 @login_required

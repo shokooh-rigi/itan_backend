@@ -1,0 +1,42 @@
+{% load estimator_tags %}
+<style type="text/css">
+    .logo {
+        width: 160px;
+        display: inline-block;
+        float: left;
+    }
+
+    @page {
+        size: letter portrait;
+        @frame header_frame {
+            -pdf-frame-content: header_content;
+            width: 530pt;
+            height: 150pt;
+            left: 40pt;
+            top: 12pt;
+        }
+        @frame content_frame {
+            width: 530pt; left: 40pt; top: 90pt; height: 652pt;
+        }
+        @frame footer_frame {
+            -pdf-frame-content:footer_content;
+            width: 530pt; height: 40pt; left: 40pt; bottom: 10pt;
+        }
+    }
+
+    div.together {
+        -pdf-keep-with-next: true;
+    }
+
+    {% if os != "Windows" %}
+        /* OS: {{ os }} */
+        @font-face {
+            font-family: customfont;
+            src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
+        }
+
+        body {
+            font-family: customfont;
+        }
+    {% endif %}
+</style>
