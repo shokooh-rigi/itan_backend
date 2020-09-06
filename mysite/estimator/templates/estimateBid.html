@@ -22,8 +22,8 @@
                 <li class="list-group-item">Customer: <b>{{ estimate.customer }}</b></li>
                 <li class="list-group-item">Project: <b>{{ estimate.project }}</b></li>
                 <li class="list-group-item">Project Address: <b>{% if estimate.project.address_line_1 %}{{ estimate.project.address_line_1 }}{% endif %}
-                        {% if estimate.project.address_line_2 %}<br />{{ estimate.project.address_line_2 }}{% endif %}
-                        {% if estimate.project.city %}<br />{{ estimate.project.city }}{% endif %}
+                        {% if estimate.project.address_line_2 %}, {{ estimate.project.address_line_2 }}{% endif %}
+                        {% if estimate.project.city %}, {{ estimate.project.city }}{% endif %}
                         {% if estimate.project.state %}, {{ estimate.project.state }}{% endif %}
                         {% if estimate.project.zip %}, {{ estimate.project.zip }}{% endif %}</b></li>
                 <li class="list-group-item">Due Date: <b>{{ estimate.due_date }}</b></li>

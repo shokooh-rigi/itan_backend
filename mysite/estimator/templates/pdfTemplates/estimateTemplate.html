@@ -28,8 +28,8 @@
         </div>
         <div class="row form-line" style="border-bottom: 1px solid #000; padding: 10px 0 2px 0;">
             <div class="col-sm-6 "><b>Project Address:</b> {% if estimate.project.address_line_1 %}{{ estimate.project.address_line_1 }}{% endif %}
-                        {% if estimate.project.address_line_2 %}<br />{{ estimate.project.address_line_2 }}{% endif %}
-                        {% if estimate.project.city %}<br />{{ estimate.project.city }}{% endif %}
+                        {% if estimate.project.address_line_2 %}, {{ estimate.project.address_line_2 }}{% endif %}
+                        {% if estimate.project.city %}, {{ estimate.project.city }}{% endif %}
                         {% if estimate.project.state %}, {{ estimate.project.state }}{% endif %}
                         {% if estimate.project.zip %}, {{ estimate.project.zip }}{% endif %}</div>
         </div>

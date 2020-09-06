@@ -199,14 +199,14 @@ if ENV == 'production':
     EMAIL_USE_SSL = True
     EMAIL_HOST = 'mail.tabtechinc.com'
     EMAIL_HOST_USER = 'estimator@tabtechinc.com'
-    EMAIL_HOST_PASSWORD = 'Welcome!'
+    EMAIL_HOST_PASSWORD = 'J8]FrgW#OY8b'
     EMAIL_PORT = 465
 if ENV == 'test':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_USE_SSL = True
     EMAIL_HOST = 'mail.tabtechinc.com'
-    EMAIL_HOST_USER = 'estimator@tabtechinc.com'
-    EMAIL_HOST_PASSWORD = 'Welcome!'
+    EMAIL_HOST_USER = 'estimator2@tabtechinc.com'
+    EMAIL_HOST_PASSWORD = '7V]{vni6+~&M'
     EMAIL_PORT = 465
 
 AUTH_USER_MODEL = 'custom_user.User'

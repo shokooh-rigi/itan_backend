@@ -5,6 +5,8 @@ from django.contrib import admin
 from django.urls import path
 
 from mysite.core import views as core_views
+from django.contrib.auth import views
+from .core.forms import UserLoginForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -12,6 +14,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     url(r'^$', core_views.home, name='home'),
     url(r'^accounts/signup/$', core_views.signup, name='signup'),
+    path('login/', views.LoginView.as_view(template_name="registration/login.html", authentication_form=UserLoginForm), name='login'),
     url(r'^account_activation_sent/$', core_views.account_activation_sent, name='account_activation_sent'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         core_views.activate, name='activate'),
