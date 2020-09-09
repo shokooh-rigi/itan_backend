@@ -215,6 +215,9 @@ def equipments_generate_report_pdf(request, sheet_id):
                 page.append(fetch_sheet_equipment_data(sheet_equipments[index]))
         data.append(page)
 
+    if len(data) == 0:
+        data.append([])
+
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
     owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
@@ -480,7 +483,12 @@ def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fie
             related_id = custom_fields.get(equipment_value_name=field_name).id
         else:
             related_id = custom_fields.get(key__equipment_value_name=field_name).id
-        sent_value = conv_to_num(request.POST.get('actual_value_' + str(related_id)))
+
+        try:
+            sent_value = conv_to_num(request.POST.get('actual_value_' + str(related_id)))
+        except ValueError:
+            return "{} value is not valid. The value must be {} number.".format(
+                field_name, 'integer' if conv_to_num == int else 'float')
 
         if equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
             my_range = equipment_type_custom_field.field_range.split('-')

@@ -45,6 +45,6 @@ def get_post_variable(request, cfi, equipment):
 @register.simple_tag
 def get_value_from_post(request, default_value, *variable_name):
     if request.POST:
-        return request.POST.get(''.join(map(lambda x: str(x), variable_name))) or default_value
+        return request.POST.get(''.join(map(lambda x: str(x), variable_name)))
     else:
         return default_value
