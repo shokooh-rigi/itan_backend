@@ -38,6 +38,7 @@ urlpatterns = [
     path('', include('mysite.sheetcreator.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
+    url(r'^tech/$', core_views.tech, name='Tech'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

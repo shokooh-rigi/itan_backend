@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>technician</h2>
+    <div id="techpanel">
+        <div class="container">
+            <div class="row pt-3">
+                <div class="col col-sm-6 mx-auto d-block">
+                    <div class="card pt-3"><a href="{% url 'EquipmentsHome' %}">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Equipment Database</h4>
+                        </div>
+                    </a></div>
+                </div>
+            </div>
+            <div class="row pt-1">
+                <hr style="height: 1px; width: 100%; background: rgba(0,0,0,.2)" />
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <div class="card pt-3"><a href="{% url 'sheetHome' %}">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Air moving equipment</h4>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">V.A.V Box</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Air Terminal</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Chiller</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Pump</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Sound Test</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Fume Hood Test</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Vibration Test</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">IAQ</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Cooling</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Velocity Travers</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Duct Heater</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Dalt</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Flow Measuring</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 mx-auto d-block">
+                    <div class="card pt-3">
+                        <div class="col-sm-8 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/edit.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-uppercase">Pitot Transverse</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

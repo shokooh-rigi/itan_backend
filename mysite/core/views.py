@@ -14,6 +14,11 @@ from ..coi.models import *
 
 
 @login_required
+def tech(request):
+    return render(request, 'tech.html')
+
+
+@login_required
 def home(request):
     if request.user.profile.user_type > 1:
         return render(request, 'home.html')

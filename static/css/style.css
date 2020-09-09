@@ -511,3 +511,37 @@ i {
 .g-recaptcha > div {
     margin: 0 auto;
 }
+
+#techpanel {
+}
+
+#techpanel .card {
+    background: #d7d7d7;
+    border-radius: 10px;
+}
+
+#techpanel .card a {
+    text-decoration: none;
+    color: #000;
+}
+
+#techpanel .card .col-sm-8 {
+    background: #01133b;
+    width: 200px;
+    height: 200px;
+    color: #fff;
+    padding: 50px;
+}
+
+#techpanel .card:hover {
+    background: #0dd5f9;
+    color: #fff;
+}
+
+#techpanel .card:hover a {
+    color: #fff;
+}
+
+#techpanel .card:hover .col-sm-8 {
+    background: #d7d7d7;
+}
