@@ -525,12 +525,17 @@ i {
     color: #000;
 }
 
+#techpanel .card .card-body {
+    height: 80px;
+}
+
 #techpanel .card .col-sm-8 {
     background: #01133b;
     width: 200px;
-    height: 200px;
+    max-height: 200px;
     color: #fff;
-    padding: 50px;
+    padding: 24px;
+    overflow: hidden;
 }
 
 #techpanel .card:hover {
@@ -544,4 +549,12 @@ i {
 
 #techpanel .card:hover .col-sm-8 {
     background: #d7d7d7;
+}
+
+.nobg {
+    background: transparent !important;
+}
+
+.nobg:hover {
+    background: transparent !important;
 }
