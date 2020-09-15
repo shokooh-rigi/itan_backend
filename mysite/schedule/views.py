@@ -118,3 +118,14 @@ def schedule_delete(request, schedule_id):
     parameters = {'this_schedule': this_schedule
                   }
     return render(request, "ScheduleDelete.html", parameters)
+
+
+@login_required
+def schedule_add_test(request):
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('scheduleHome')
+        elif request.POST.get("next"):
+            return redirect('scheduleHome')
+    parameters = {}
+    return render(request, "scheduleAdd_test.html", parameters)
