@@ -3,6 +3,27 @@ from mysite.estimator.models import *
 
 # Create your models here.
 
+class ControlSystemManufacturer(models.Model):
+    manufacturer_name = models.CharField(max_length=30, blank=False, null=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.manufacturer_name
+
+
+class ControlSystem(models.Model):
+    manufacturer = models.ForeignKey(ControlSystemManufacturer, on_delete=models.PROTECT, blank=False, null=False)
+    manufacturer_contact_info = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
+    version_number = models.CharField(max_length=30, blank=True, null=True)
+    os = models.CharField(max_length=20, blank=True, null=True)
+    release_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True, null=True)
+    control_file_url = models.URLField(max_length=255, blank=True, null=True)
+    documentation = models.FileField(upload_to='uploads/control_system_documentations', blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.manufacturer) + ", " + str(self.os) + ", " + str(self.version_number)
+
 
 class Order(models.Model):
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE, blank=False)
@@ -11,6 +32,7 @@ class Order(models.Model):
     po_number = models.CharField(max_length=30, blank=False)
     date_po_received = models.DateField(blank=True, null=True)
     estimated_date_of_project = models.DateField(blank=True, null=True)
+    control_system = models.ForeignKey(ControlSystem, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)
     fully_settled = models.BooleanField(default=False)

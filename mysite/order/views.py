@@ -73,6 +73,8 @@ def order_edit(request, order_id):
             return redirect('orderHome')
         if request.POST.get("co"):
             return redirect('changeOrder', order_id=order_id)
+        if request.POST.get("cs"):
+            return redirect('controlSystem', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -145,6 +147,25 @@ def change_order(request, order_id):
                   'this_order': this_order,
                   }
     return render(request, "changeOrder.html", parameters)
+
+
+@login_required
+def control_system(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['proposal'] = this_order.proposal
+                form.cleaned_data['po_number'] = this_order.po_number
+                form.save()
+                return redirect('controlSystem', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  }
+    return render(request, "controlSystem.html", parameters)
 
 
 @login_required

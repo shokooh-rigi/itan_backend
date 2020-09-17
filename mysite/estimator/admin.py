@@ -69,3 +69,4 @@ class EstimateDetailsAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(EstimateDetails, EstimateDetailsAdmin)
+

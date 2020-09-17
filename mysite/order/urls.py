@@ -9,6 +9,7 @@ urlpatterns = [
     path('order/archive/<int:order_id>/', views.order_archive, name='orderArchive'),
     path('order/delete/<int:order_id>/', views.order_delete, name='orderDelete'),
     path('order/change-order/<int:order_id>/', views.change_order, name='changeOrder'),
+    path('order/control-system/<int:order_id>/', views.control_system, name='controlSystem'),
     path('order/remove-change-order/<int:order_id>/<int:change_order_id>/', views.change_order_delete,
          name='deleteChangeOrder'),
 ]

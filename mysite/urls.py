@@ -7,8 +7,12 @@ from django.urls import path
 from mysite.core import views as core_views
 from django.contrib.auth import views
 from .core.forms import UserLoginForm
+from ajax_select import urls as ajax_select_urls
+
+admin.autodiscover()
 
 urlpatterns = [
+    url(r'^ajax_select/', include(ajax_select_urls)),
     path('admin/', admin.site.urls),
     url(r'^accounts/password_change/$', core_views.change_password, name='password_change'),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -39,6 +43,6 @@ urlpatterns = [
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^tech/$', core_views.tech, name='Tech'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

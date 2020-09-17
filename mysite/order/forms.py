@@ -1,4 +1,5 @@
 from django.forms import ModelForm
+from ajax_select.fields import AutoCompleteSelectField, AutoCompleteSelectMultipleField
 
 from .models import *
 
@@ -12,6 +13,7 @@ class OrderForm(ModelForm):
             'po_number',
             'date_po_received',
             'estimated_date_of_project',
+            'control_system',
             'note',
         ]
 

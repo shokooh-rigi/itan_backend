@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'import_export',
     'rest_framework',
     'snowpenguin.django.recaptcha2',
+    'ajax_select',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
