@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Upload Equipment Submittal for Project Number #{{ this_order.project_number }}</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentSubmittal-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.proposal.as_hidden }}
+            {{ form.po_number.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_amount" class="control-label">Upload Equipment Submittal</label>
+                    {{ form.equipment_submittal }}
+                </div>
+            </div>
+            {% if this_order.equipment_submittal %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    {{ this_order.equipment_submittal }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Back to Order" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_proposal').on('change', function() {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#engineer").text($(this).find(':selected').data('engineer'));
+            $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+            $("#pre_amount").text($(this).find(':selected').data('preamount'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

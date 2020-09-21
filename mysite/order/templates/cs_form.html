@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+	<h1>Control System</h1>
+	<form method = 'POST' action= '' enctype = "multipart/form-data" id="cs-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_manufacturer" class="control-label">Manufacturer <span class="required">*</span></label>
+                    {{ form.manufacturer }}
+                    <div class="form-icon"><a href="{% url 'csManufacturerCreate' %}" id="add_manufacturer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_manufacturer" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_manufacturer_contact_info" class="control-label">Manufacturer Contact info</label>
+                    {{ form.manufacturer_contact_info }}
+                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_manufacturer_contact_info" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_manufacturer_contact_info" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_version_number" class="control-label">Version Number</label>
+                    {{ form.version_number }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_os" class="control-label">Operation System</label>
+                    {{ form.os }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_release_date" class="control-label">Release Date</label>
+                    {{ form.release_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_control_file_url" class="control-label">Control System File URL</label>
+                    {{ form.control_file_url }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 58px;">
+                    <label for="id_documentation" class="control-label">Documentation</label>
+                    {{ form.documentation }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+		            <input type="submit" class="btn btn-success" value="Add" />
+                </div>
+            </div>
+        </div>
+	</form>
+            <script>
+
+            $("#edit_manufacturer_contact_info").click(function(){
+                person_id = $("#id_manufacturer_contact_info option:selected").val();
+                if(person_id != '') {
+                    var url = "/manufacturerPerson/" + person_id + "/edit/";
+                    showEditPopup(url);
+                }
+                else {
+                    alert("Something Went Wrong");
+                }
+            });
+
+
+                $("#edit_manufacturer").click(function(){
+                    manufacturer_id = $("#id_manufacturer option:selected").val();
+                    if(manufacturer_id != '') {
+                        var url = "/manufacturer/" + manufacturer_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                });
+            </script>
+
+{% endblock %}

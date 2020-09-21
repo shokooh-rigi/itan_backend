@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+	<h1>Control System Manufacturer</h1>
+	<form method = 'POST' action= '' enctype = "multipart/form-data" id="manufacturer-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_manufacturer_name" class="control-label">Manufacturer <span class="required">*</span></label>
+                    {{ form.manufacturer_name }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+		            <input type="submit" class="btn btn-success" value="Add" />
+                </div>
+            </div>
+        </div>
+	</form>
+            <script>
+
+            $("#edit_manufacturer_contact_info").click(function(){
+                person_id = $("#id_manufacturer_contact_info option:selected").val();
+                if(person_id != '') {
+                    var url = "/manufacturerPerson/" + person_id + "/edit/";
+                    showEditPopup(url);
+                }
+                else {
+                    alert("Something Went Wrong");
+                }
+            });
+
+
+                $("#edit_manufacturer").click(function(){
+                    manufacturer_id = $("#id_manufacturer option:selected").val();
+                    if(manufacturer_id != '') {
+                        var url = "/manufacturer/" + manufacturer_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                });
+            </script>
+
+{% endblock %}
