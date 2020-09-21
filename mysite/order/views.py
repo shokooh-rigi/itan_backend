@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect
+from django import forms
 
 from .forms import *
 from ..settings import MEDIA_URL, WEB_URL
@@ -27,8 +29,8 @@ def order_list(request):
 
     if request.GET.get('type') == 'all':
         object_list = object_list
-    if request.GET.get('type') == 'inprogress':
-        object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=False)
+    if request.GET.get('type') == 'inprogress' or request.GET.get('type') is None:
+        object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=True)
     if request.GET.get('type') == 'invoiced':
         object_list = object_list.filter(invoice__isnull=False)
     if request.GET.get('type') == 'reported':
@@ -75,6 +77,8 @@ def order_edit(request, order_id):
             return redirect('changeOrder', order_id=order_id)
         if request.POST.get("cs"):
             return redirect('controlSystem', order_id=order_id)
+        if request.POST.get("es"):
+            return redirect('equipmentSubmittal', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -169,6 +173,25 @@ def control_system(request, order_id):
 
 
 @login_required
+def order_equipment_submittal(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['proposal'] = this_order.proposal
+                form.cleaned_data['po_number'] = this_order.po_number
+                form.save()
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  }
+    return render(request, "EquipmentSubmittal.html", parameters)
+
+
+@login_required
 def change_order_delete(request, order_id, change_order_id):
     this_change_order = get_object_or_404(ChangeOrder, id=change_order_id)
     if request.method == "POST" and request.user.is_authenticated:
@@ -178,3 +201,49 @@ def change_order_delete(request, order_id, change_order_id):
     parameters = {'this_change_order': this_change_order
                   }
     return render(request, "changeOrderDelete.html", parameters)
+
+
+@login_required
+def cs_create_popup(request):
+    form = ControlSystemForm(request.POST or None)
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_cs");</script>' % (instance.pk, instance))
+
+    return render(request, "cs_form.html", {"form": form})
+
+
+@login_required
+def cs_edit_popup(request, pk=None):
+    instance = get_object_or_404(ControlSystem, pk=pk)
+    form = ControlSystemForm(request.POST or None, instance=instance)
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_control_system");</script>' % (instance.pk, instance))
+
+    return render(request, "cs_form.html", {"form": form})
+
+
+@login_required
+def cs_manufacturer_create_popup(request):
+    form = ControlSystemManufacturerForm(request.POST or None)
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+
+    return render(request, "cs_manufacturer_form.html", {"form": form})
+
+
+@login_required
+def manufacturer_edit_popup(request, pk=None):
+    instance = get_object_or_404(ControlSystemManufacturer, pk=pk)
+    form = ControlSystemManufacturerForm(request.POST or None, instance=instance)
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+
+    return render(request, "cs_manufacturer_form.html", {"form": form})

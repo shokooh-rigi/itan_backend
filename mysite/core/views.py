@@ -7,10 +7,13 @@ from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
+from django.core.mail import BadHeaderError, EmailMessage
+from django.http import HttpResponse, HttpResponseRedirect
 
 from mysite.core.tokens import account_activation_token
 from .forms import *
 from ..coi.models import *
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
 
 @login_required
@@ -84,6 +87,24 @@ def activate(request, uidb64, token):
         user.profile.email_confirmed = True
         user.save()
         login(request, user)
+        current_site = get_current_site(request)
+        subject = 'New Registration on Tab Technologies INC.'
+        message = render_to_string('send_alert_to_owner.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user),
+        })
+        try:
+            msg = EmailMessage(
+                subject,
+                message,
+                DEFAULT_FROM_EMAIL,
+                ['info@tabtechinc.com'],
+            )
+            msg.send()
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
         return render(request, 'account_activation_done.html')
     else:
         return render(request, 'account_activation_invalid.html')

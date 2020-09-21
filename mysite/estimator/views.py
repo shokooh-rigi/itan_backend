@@ -644,6 +644,31 @@ def person_edit_popup(request, pk=None):
 
 
 @login_required
+def manufacturer_person_create_popup(request):
+    form = ManufacturerForm(request.POST or None, initial={'created_by': request.user})
+    form.fields['created_by'].widget = forms.HiddenInput()
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info");</script>' % (instance.pk, instance))
+
+    return render(request, "customer_form.html", {"form": form})
+
+
+@login_required
+def manufacturer_person_edit_popup(request, pk=None):
+    instance = get_object_or_404(Person, pk=pk)
+    form = ManufacturerForm(request.POST or None, instance=instance)
+    form.fields['created_by'].widget = forms.HiddenInput()
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info");</script>' % (instance.pk, instance))
+
+    return render(request, "customer_form.html", {"form": form})
+
+
+@login_required
 @csrf_exempt
 def get_person_id(request):
     if request.is_ajax():

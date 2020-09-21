@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^company/ajax/get_company_id', views.get_company_id, name="get_company_id"),
     url(r'^person/create', views.person_create_popup, name="personCreate"),
     url(r'^person/(?P<pk>\d+)/edit', views.person_edit_popup, name="personEdit"),
+    url(r'^manufacturerPerson/(?P<pk>\d+)/edit', views.manufacturer_person_edit_popup, name="manufacturerPersonEdit"),
     url(r'^person/ajax/get_person_id', views.get_person_id, name="get_person_id"),
     url(r'^project/create', views.project_create_popup, name="projectCreate"),
     url(r'^project/(?P<pk>\d+)/edit', views.project_edit_popup, name="projectEdit"),

@@ -4,7 +4,7 @@
 
 {% block content %}
     <h2>Control System for Project Number #{{ this_order.project_number }}</h2>
-    <form method = 'POST' action= '' enctype = "multipart/form-data" id="changeOrder-form">
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="controlSystem-form">
         <div class="form-group">
             {% csrf_token %}
             {{ form.proposal.as_hidden }}
@@ -13,8 +13,11 @@
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_amount" class="control-label">Select Control System</label>
                     {{ form.control_system }}
+{#                    <div class="form-icon"><a href="{% url 'csCreate' %}" id="add_cs" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>#}
+{#                    <div class="form-icon"><a id="edit_cs" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>#}
                 </div>
             </div>
+            {% if this_order.control_system %}
             <div class="row form-line">
                 <div class="col-lg-12">
                     <table class="table" border="1">
@@ -38,27 +41,28 @@
                         </tr>
                         <tr>
                             <td>Version No.</td>
-                            <td style="font-weight: bold;">{{ this_order.control_system.version_number }}</td>
+                            <td style="font-weight: bold;">{% if this_order.control_system.version_number %}{{ this_order.control_system.version_number }}{% else %}{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Operating System</td>
-                            <td style="font-weight: bold;">{{ this_order.control_system.os }}</td>
+                            <td style="font-weight: bold;">{% if this_order.control_system.os %}{{ this_order.control_system.os }}{% else %}{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Release Date</td>
-                            <td style="font-weight: bold;">{{ this_order.control_system.release_date }}</td>
+                            <td style="font-weight: bold;">{% if this_order.control_system.release_date %}{{ this_order.control_system.release_date }}{% else %}{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Control Executive File</td>
-                            <td style="font-weight: bold;"><a href="{{ this_order.control_system.control_file_url }}" target="_blank">{{ this_order.control_system.control_file_url }}</a></td>
+                            <td style="font-weight: bold;">{% if this_order.control_system.control_file_url %}<a href="{{ this_order.control_system.control_file_url }}" target="_blank">{{ this_order.control_system.control_file_url }}</a>{% else %}{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Documentation</td>
-                            <td style="font-weight: bold;"><a href="{{ this_order.control_system.documentation.file }}" target="_blank">Download Documentation</a></td>
+                            <td style="font-weight: bold;">{% if this_order.control_system.documentation %}<a href="{{ this_order.control_system.documentation.file }}" target="_blank">Download Documentation</a>{% else %}{% endif %}</td>
                         </tr>
                     </table>
                 </div>
             </div>
+            {% endif %}
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <input type="submit" class="btn btn-success" value="Save" name="save" />
@@ -67,23 +71,31 @@
             </div>
         </div>
 	</form>
-    <script>
-        $('#id_proposal').on('change', function() {
-            $("#customer").text($(this).find(':selected').data('customer'));
-            $("#engineer").text($(this).find(':selected').data('engineer'));
-            $("#tab_amount").text($(this).find(':selected').data('tabamount'));
-            $("#pre_amount").text($(this).find(':selected').data('preamount'));
-            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+<script>
+    $("#edit_cs").click(function(){
+    cs_id = $("#id_control_system option:selected").val();
+    if(cs_id != '') {
+        var url = "/controlsystem/" + cs_id + "/edit/";
+        showEditPopup(url);
+    }
+    else {
+        alert("Something Went Wrong");
+    }
+    });
+</script>
+<script>
+    $('#id_control_system').on('change', function() {
+        $('#controlSystem-form').submit();
+    });
+</script>
+<script>
+    $(function () {
+        $("#id_date").datetimepicker({
+            format: 'm/d/Y',
+            timepicker: false,
+            scrollInput: false,
         });
-    </script>
-    <script>
-        $(function () {
-            $("#id_date").datetimepicker({
-                format: 'm/d/Y',
-                timepicker: false,
-                scrollInput: false,
-            });
-        });
-    </script>
+    });
+</script>
 
 {% endblock %}

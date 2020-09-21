@@ -10,10 +10,10 @@
         <br /><br />
         <h3>Select Order Filtered By:</h3>
         <div class="btn-group type-select" style="margin: 10px auto;">
-            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
             <a class="btn btn-primary inprogressselected" href="?{% url_replace request 'type' 'inprogress' %}">In Progress</a>
-            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'invoiced' %}">Invoiced</a>
             <a class="btn btn-primary reportedselected" href="?{% url_replace request 'type' 'reported' %}">Reported</a>
+            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'invoiced' %}">Invoiced</a>
+            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
         </div>
         <div class="row" style="margin: 10px auto;">
                 <form action="?{% url_replace request 'project_name' '' %}">
@@ -31,6 +31,35 @@
                     <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
                 </div>
             </div>
+        </div>
+        <div class="pagination" style="margin-bottom: 40px;">
+          {% if orders.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in orders.paginator.page_range %}
+
+            {% if orders.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if orders.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
         </div>
         <table class="table table-striped">
             <thead>
@@ -61,6 +90,7 @@
                             <td>
                                 <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'estimateBid' estimate_id=order.proposal.quote.estimate.id %}" style="display: inline-block;"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View Estimate"></div></a>
+                                {% if order.equipment_submittal %}<a href="{{ order.equipment_submittal.url }}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Equipment Submittal"></div></a>{% endif %}
                                 <a href="{% url 'orderDelete' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
                             </td>

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from ajax_select.admin import AjaxSelectAdmin
-from ajax_select import make_ajax_form
 
 from .models import *
 
@@ -22,13 +20,16 @@ class OrderAdmin(ImportExportModelAdmin):
 admin.site.register(Order, OrderAdmin)
 
 
-@admin.register(ControlSystem)
-class ControlSystemAdmin(AjaxSelectAdmin):
+class ControlSystemResource(resources.ModelResource):
+    class Meta:
+        model = ControlSystem
 
-    form = make_ajax_form(ControlSystem, {
-        # fieldname: channel_name
-        'manufacturer': 'controlsystem'
-    })
+
+class ControlSystemAdmin(ImportExportModelAdmin):
+    resource_class = ControlSystemResource
+
+
+admin.site.register(ControlSystem, ControlSystemAdmin)
 
 
 class ControlSystemManufacturerResource(resources.ModelResource):

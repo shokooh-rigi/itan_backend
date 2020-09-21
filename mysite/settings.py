@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'import_export',
     'rest_framework',
     'snowpenguin.django.recaptcha2',
-    'ajax_select',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
@@ -199,7 +198,7 @@ if ENV == 'production':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_USE_SSL = True
     EMAIL_HOST = 'mail.tabtechinc.com'
-    EMAIL_HOST_USER = 'estimator@tabtechinc.com'
+    EMAIL_HOST_USER = 'contactus@tabtechinc.com'
     EMAIL_HOST_PASSWORD = 'J8]FrgW#OY8b'
     EMAIL_PORT = 465
 if ENV == 'test':
