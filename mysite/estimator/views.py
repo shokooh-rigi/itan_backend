@@ -279,7 +279,8 @@ def quote_add(request):
     form = QuoteForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
+    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
+    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
     owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
     owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
     owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
@@ -320,7 +321,8 @@ def quote_add(request):
                               'predemo_calculated': predemo_calculated,
                               'license_owner': license_owner,
                               'owner_title': owner_title,
-                              'owner_address': owner_address,
+                              'owner_address_line1': owner_address_line1,
+                              'owner_address_line2': owner_address_line2,
                               'owner_tel': owner_tel,
                               'owner_fax': owner_fax,
                               'owner_web': owner_web,
@@ -353,7 +355,8 @@ def proposal_add(request):
     form = ProposalForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
+    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
+    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
     owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
     owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
     owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
@@ -390,7 +393,8 @@ def proposal_add(request):
                               'predemo_calculated': predemo_calculated,
                               'license_owner': license_owner,
                               'owner_title': owner_title,
-                              'owner_address': owner_address,
+                              'owner_address_line1': owner_address_line1,
+                              'owner_address_line2': owner_address_line2,
                               'owner_tel': owner_tel,
                               'owner_fax': owner_fax,
                               'owner_web': owner_web,
@@ -876,7 +880,8 @@ def estimate_details(request, estimate_id):
 def estimate_bid(request, estimate_id):
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
+    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
+    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
     owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
     owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
     owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
@@ -918,7 +923,8 @@ def estimate_bid(request, estimate_id):
                   'datetime': datetime.datetime.now(),
                   'license_owner': license_owner,
                   'owner_title': owner_title,
-                  'owner_address': owner_address,
+                  'owner_address_line1': owner_address_line1,
+                  'owner_address_line2': owner_address_line2,
                   'owner_tel': owner_tel,
                   'owner_fax': owner_fax,
                   'owner_web': owner_web,

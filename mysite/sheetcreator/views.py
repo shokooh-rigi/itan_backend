@@ -221,7 +221,6 @@ def equipments_generate_report_pdf(request, sheet_id):
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
     owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
     owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
     owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
@@ -239,7 +238,8 @@ def equipments_generate_report_pdf(request, sheet_id):
         'file_name': 'EquipmentReport_{}'.format(sheet_id),
         'license_owner': license_owner,
         'owner_title': owner_title,
-        'owner_address': owner_address,
+        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
         'owner_tel': owner_tel,
         'owner_fax': owner_fax,
         'owner_web': owner_web,

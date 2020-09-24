@@ -3,5 +3,8 @@ Hi {{ user.username }},
 
 Please click on the link below to confirm your registration:
 
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+https://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+Besides, You Can Watch our Instructional Videos on https://{{ main_website }}/instructional-videos/
+
 {% endautoescape %}

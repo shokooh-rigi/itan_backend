@@ -154,7 +154,8 @@ def submittal_view(request, submittal_id):
     owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
-    owner_address = LicenseInfo.objects.get(key='OwnerAddress').value
+    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
+    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
     submittal = CompanySubmittal.objects.get(id=submittal_id)
     submittal_forms = SubmittalForms.objects.filter(submittal=submittal_id).order_by('ordering')
@@ -167,7 +168,8 @@ def submittal_view(request, submittal_id):
                   'owner_fax': owner_fax,
                   'owner_web': owner_web,
                   'owner_mail': owner_mail,
-                  'owner_address': owner_address,
+                  'owner_address_line1': owner_address_line1,
+                  'owner_address_line2': owner_address_line2,
                   'owner_signature': owner_signature,
                   'company_name': company_name,
                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
