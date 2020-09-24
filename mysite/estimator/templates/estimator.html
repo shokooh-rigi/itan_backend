@@ -49,7 +49,7 @@
 
 
 
-        <div class="row" style="margin: 10px auto;">
+        <div class="row" style="margin: 10px auto; position: relative;">
                 <form action="?{% url_replace request 'search' '' %}">
                     <div class="form-group" style="display: inline-block; transform: translateY(2px);">
                         <label for="search"></label>
@@ -62,12 +62,41 @@
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
                 </form>
+            <div class="pagination" style="position: absolute; left: 50%; bottom: 50%; transform: translate(-50%, 50%);">
+              {% if estimates.has_previous %}
+                <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+                 <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' estimates.previous_page_number %}">
+                  <i class="fa fa-angle-left" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+
+              {% for num in estimates.paginator.page_range %}
+
+                {% if estimates.number == num %}
+                <span class="pagination-number pagination-current">{{ num }}</span>
+                {% elif num > estimates.number|add:'-3' and num < estimates.number|add:'3' %}
+                <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+                {% endif %}
+
+              {% endfor %}
+
+              {% if estimates.has_next %}
+                <a class="pagination-action" href="?{% url_replace request 'page' estimates.next_page_number %}">
+                  <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' estimates.paginator.num_pages %}">
+                  <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            </div>
             <div class="pagination-select">
                 <header class="title">items per page</header>
                 <div class="btn-group">
-                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
                     <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
                     <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_300" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '300' %}">300</a></button>
                 </div>
             </div>
         </div>
@@ -259,17 +288,17 @@ function updateURLParameter(url, param, paramVal)
             $(".pagination-select #paginate_20").addClass('selected');
             $(".pagination-select #paginate_20 a").removeAttr("href");
         }
-        if (window.location.href.indexOf('paginate_by=50') > 0) {
+        if (window.location.href.indexOf('paginate_by=300') > 0) {
+            $(".pagination-select #paginate_300").addClass('selected');
+            $(".pagination-select #paginate_300 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=50') > 0) {
             $(".pagination-select #paginate_50").addClass('selected');
             $(".pagination-select #paginate_50 a").removeAttr("href");
         }
         else if (window.location.href.indexOf('paginate_by=20') > 0) {
             $(".pagination-select #paginate_20").addClass('selected');
             $(".pagination-select #paginate_20 a").removeAttr("href");
-        }
-        else if (window.location.href.indexOf('paginate_by=5') > 0) {
-            $(".pagination-select #paginate_5").addClass('selected');
-            $(".pagination-select #paginate_5 a").removeAttr("href");
         }
         else if (window.location.href.indexOf('paginate_by=') > 0) {
             $(".pagination-select #paginate_all").addClass('selected');

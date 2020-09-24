@@ -14,6 +14,7 @@ class BidFileResource(resources.ModelResource):
 
 class BidFileAdmin(ImportExportModelAdmin):
     resource_class = BidFileResource
+    search_fields = ('project__name',)
 
 
 admin.site.register(BidFile, BidFileAdmin)
