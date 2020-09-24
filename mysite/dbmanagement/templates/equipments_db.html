@@ -43,7 +43,6 @@
                     <th data-sortable="equipment_type"><a href="{% if request.GET.ordering == 'equipment_type' %}?{% url_replace request 'ordering' '-equipment_type' %}{% else %}?{% url_replace request 'ordering' 'equipment_type' %}{% endif %}">Equipment Type</a></th>
                     <th data-sortable="manufacturer"><a href="{% if request.GET.ordering == 'manufacturer' %}?{% url_replace request 'ordering' '-manufacturer' %}{% else %}?{% url_replace request 'ordering' 'manufacturer' %}{% endif %}">Manufacturer</a></th>
                     <th data-sortable="model_number"><a href="{% if request.GET.ordering == 'model_number' %}?{% url_replace request 'ordering' '-model_number' %}{% else %}?{% url_replace request 'ordering' 'model_number' %}{% endif %}">Model Number</a></th>
-                    <th data-sortable="serial_number"><a href="{% if request.GET.ordering == 'serial_number' %}?{% url_replace request 'ordering' '-serial_number' %}{% else %}?{% url_replace request 'ordering' 'serial_number' %}{% endif %}">Serial Number</a></th>
                     <th>Design Values</th>
                     <th>Actions</th>
                 </tr>
@@ -55,7 +54,6 @@
                             <td>{{ equipment.equipment_type }}</td>
                             <td>{{ equipment.manufacturer }}</td>
                             <td>{{ equipment.model_number }}</td>
-                            <td>{{ equipment.serial_number }}</td>
                             <td>
                                 <a href="{% url 'EquipmentsValues' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>
                             </td>

@@ -10,7 +10,6 @@ class EquipmentForm(ModelForm):
             'equipment_type',
             'manufacturer',
             'model_number',
-            'serial_number',
         ]
 
     def __init__(self, *args, **kwargs):
