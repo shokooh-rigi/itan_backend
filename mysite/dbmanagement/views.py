@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
-
+from django.core.paginator import Paginator
+from django.db.models import Q
 from mysite.dbmanagement.models import EquipmentCustomField
 from .forms import *
 from django.shortcuts import render, redirect, get_object_or_404
@@ -8,7 +9,22 @@ from django.http import HttpResponse
 
 @login_required
 def equipment_db(request):
-    equipments = EquipmentDb.objects.all()
+    project_name = request.GET.get('search', '')
+
+    pagination = 20
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
+    ordering = '-created_on'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
+
+    object_list = EquipmentDb.objects.filter(Q(model_number__icontains=project_name) |
+                                             Q(equipment_type__name__icontains=project_name)).order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    equipments = paginator.get_page(page)
 
     parameters = {'equipments': equipments,
                   }
