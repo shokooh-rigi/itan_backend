@@ -10,30 +10,58 @@
 
         <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary">Generate Equipment Sheet</button></a>
         <br /><br />
-        <div class="row" style="margin: 10px auto;">
-                <form action="?{% url_replace request 'project_name' '' %}">
-                    <div class="form-group" style="display: inline-block; transform: translateY(2px);">
-                        <label for="project_name"></label>
-                        <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name/Number..." value="{{ request.GET.project_name }}" />
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
-                </form>
+        <div class="row" style="margin: 10px auto; position: relative;">
+            <form action="?{% url_replace request 'project_name' '' %}">
+                <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                    <label for="project_name"></label>
+                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name/Number..." value="{{ request.GET.project_name }}" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="pagination" style="position: absolute; left: 50%; bottom: 50%; transform: translate(-50%, 50%);">
+              {% if sheets.has_previous %}
+                <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+                 <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' sheets.previous_page_number %}">
+                  <i class="fa fa-angle-left" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+
+              {% for num in sheets.paginator.page_range %}
+
+                {% if sheets.number == num %}
+                <span class="pagination-number pagination-current">{{ num }}</span>
+                {% elif num > sheets.number|add:'-3' and num < sheets.number|add:'3' %}
+                <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+                {% endif %}
+
+              {% endfor %}
+
+              {% if sheets.has_next %}
+                <a class="pagination-action" href="?{% url_replace request 'page' sheets.next_page_number %}">
+                  <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' sheets.paginator.num_pages %}">
+                  <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            </div>
             <div class="pagination-select">
                 <header class="title">items per page</header>
                 <div class="btn-group">
-                    <button id="paginate_5" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '5' %}">5</a></button>
                     <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
                     <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_300" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '300' %}">300</a></button>
                 </div>
             </div>
         </div>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th data-sortable="proposal__quote__estimate__id"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__id' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__id' %}{% endif %}">Sheet ID</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Type</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Project</a></th>
-                    <th data-sortable="proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer' %}{% endif %}">Date</a></th>
+                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Sheet ID</a></th>
+                    <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project</a></th>
+                    <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
                     <th>Equipments List</th>
                     <th>Actions</th>
                 </tr>
@@ -42,7 +70,6 @@
                 {% for sheet in sheets %}
                     <tr>
                         <td>{{ sheet.id }}</td>
-                        <td>{{ sheet.test_sheet_type }}</td>
                         <td>{{ sheet.project.project_number }}</td>
                         <td>{{ sheet.sheet_date }}</td>
                         <td><a href="{% url 'sheetEquipmentsList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
@@ -56,30 +83,30 @@
             </tbody>
         </table>
         <div class="pagination">
-          {% if orders.has_previous %}
+          {% if sheets.has_previous %}
             <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
              <i class="fa fa-angle-double-left" aria-hidden="true"></i>
             </a>
-            <a class="pagination-action" href="?{% url_replace request 'page' orders.previous_page_number %}">
+            <a class="pagination-action" href="?{% url_replace request 'page' sheets.previous_page_number %}">
               <i class="fa fa-angle-left" aria-hidden="true"></i>
             </a>
           {% endif %}
 
-          {% for num in orders.paginator.page_range %}
+          {% for num in sheets.paginator.page_range %}
 
-            {% if orders.number == num %}
+            {% if sheets.number == num %}
             <span class="pagination-number pagination-current">{{ num }}</span>
-            {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+            {% elif num > sheets.number|add:'-3' and num < sheets.number|add:'3' %}
             <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
             {% endif %}
 
           {% endfor %}
 
-          {% if orders.has_next %}
-            <a class="pagination-action" href="?{% url_replace request 'page' orders.next_page_number %}">
+          {% if sheets.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' sheets.next_page_number %}">
               <i class="fa fa-angle-right" aria-hidden="true"></i>
             </a>
-            <a class="pagination-action" href="?{% url_replace request 'page' orders.paginator.num_pages %}">
+            <a class="pagination-action" href="?{% url_replace request 'page' sheets.paginator.num_pages %}">
               <i class="fa fa-angle-double-right" aria-hidden="true"></i>
             </a>
           {% endif %}
@@ -87,7 +114,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        var sortables = ['id', 'project__project_number', 'sheet_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
@@ -102,17 +129,17 @@
             $(".pagination-select #paginate_20").addClass('selected');
             $(".pagination-select #paginate_20 a").removeAttr("href");
         }
-        if (window.location.href.indexOf('paginate_by=50') > 0) {
+        if (window.location.href.indexOf('paginate_by=300') > 0) {
+            $(".pagination-select #paginate_300").addClass('selected');
+            $(".pagination-select #paginate_300 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=50') > 0) {
             $(".pagination-select #paginate_50").addClass('selected');
             $(".pagination-select #paginate_50 a").removeAttr("href");
         }
         else if (window.location.href.indexOf('paginate_by=20') > 0) {
             $(".pagination-select #paginate_20").addClass('selected');
             $(".pagination-select #paginate_20 a").removeAttr("href");
-        }
-        else if (window.location.href.indexOf('paginate_by=5') > 0) {
-            $(".pagination-select #paginate_5").addClass('selected');
-            $(".pagination-select #paginate_5 a").removeAttr("href");
         }
         else if (window.location.href.indexOf('paginate_by=') > 0) {
             $(".pagination-select #paginate_all").addClass('selected');

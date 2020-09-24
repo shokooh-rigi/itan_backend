@@ -28,11 +28,12 @@ def sheet_list(request):
     if request.GET.get('paginate_by'):
         pagination = request.GET.get('paginate_by')
 
-    ordering = '-created_on'
+    ordering = '-sheet_date'
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Sheet.objects.all()
+    object_list = Sheet.objects.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
+                                       Q(project__project_number__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
