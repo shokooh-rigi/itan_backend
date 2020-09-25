@@ -24,7 +24,7 @@ class SheetForm(ModelForm):
 
 
 class SheetEquipmentForm(ModelForm):
-    quantity = forms.IntegerField(required=True)
+    quantity = forms.IntegerField(required=True, min_value=1)
 
     class Meta:
         model = SheetEquipment
