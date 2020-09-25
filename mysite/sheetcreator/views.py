@@ -333,6 +333,7 @@ def review_equipment_values(request, sheet_equipment_id):
     show_parentheses_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(
         Q(show_parentheses=ShowParenthesesChoices.Design.value) |
         Q(show_parentheses=ShowParenthesesChoices.Both.value))))
+    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'H.P.', 'Voltage', 'Amperage', ]
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -360,6 +361,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
                 elif custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
@@ -382,6 +384,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
             for custom_operation in custom_operations:
@@ -404,6 +407,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
                 elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
@@ -414,6 +418,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
                 elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
@@ -424,6 +429,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
                 elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
@@ -434,6 +440,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
                 elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
@@ -444,6 +451,7 @@ def review_equipment_values(request, sheet_equipment_id):
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
 
@@ -463,6 +471,7 @@ def review_equipment_values(request, sheet_equipment_id):
                   'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
                   'show_parentheses_fields': show_parentheses_fields,
+                  'required_fields': required_fields,
                   }
     return render(request, "EquipmentDesignValue.html", parameters)
 
@@ -634,6 +643,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
+    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -647,6 +657,7 @@ def equipment_actual_values(request, sheet_equipment_id):
                     'assignment_operations': assignment_operations,
                     'show_parentheses_fields': show_parentheses_fields,
                     'error_msg': error_msg,
+                    'required_fields': required_fields,
                 }
                 return render(request, "EquipmentActualValue.html", parameters)
 
@@ -672,6 +683,7 @@ def equipment_actual_values(request, sheet_equipment_id):
                   'other_custom_fields': other_custom_fields,
                   'assignment_operations': assignment_operations,
                   'show_parentheses_fields': show_parentheses_fields,
+                  'required_fields': required_fields,
                   }
     return render(request, "EquipmentActualValue.html", parameters)
 
@@ -685,6 +697,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields, False)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
+    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -699,6 +712,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                     'assignment_operations': assignment_operations,
                     'show_parentheses_fields': show_parentheses_fields,
                     'error_msg': error_msg,
+                    'required_fields': required_fields,
                 }
                 return render(request, "EquipmentActualValueEdit.html", parameters)
 
@@ -715,6 +729,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                   'other_custom_fields': other_custom_fields,
                   'assignment_operations': assignment_operations,
                   'show_parentheses_fields': show_parentheses_fields,
+                  'required_fields': required_fields,
                   }
     return render(request, "EquipmentActualValueEdit.html", parameters)
 

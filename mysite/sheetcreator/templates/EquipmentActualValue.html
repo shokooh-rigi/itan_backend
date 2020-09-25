@@ -30,8 +30,12 @@
         <div class="row form-line">
             {% for other_custom_field in other_custom_fields %}
                 <div class="col-lg-3">
-                    <label style="width: 100%;" for="id_architect_name"
-                           class="control-label">{{ other_custom_field.column_title }}</label>
+                    <label style="width: 100%;" for="id_architect_name" class="control-label">
+                        {{ other_custom_field.column_title }}
+                        {% if other_custom_field.column_title in required_fields %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;">
@@ -43,14 +47,18 @@
             {% endfor %}
             {% for custom_field in custom_fields %}
                 <div class="col-lg-3">
-                    <label style="width: 100%;" for="id_architect_name"
-                           class="control-label">{{ custom_field.equipment_value_name }}</label>
+                    <label style="width: 100%;" for="id_architect_name" class="control-label">
+                        {{ custom_field.equipment_value_name }}
+                        {% if custom_field.equipment_value_name in required_fields %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;">
                         <input style="width: 100%;" type="text" name="actual_value_{{ custom_field.id }}"
-                               class="form-control" id="id_actual_value"
-                               value="{% get_value_from_post request '' 'actual_value_' custom_field.id %}"/>
+                               class="form-control" required="" id="id_actual_value"
+                               value="{% get_value_from_post request custom_field 'actual_value_' custom_field.id %}"/>
                     </label>
                 </div>
             {% endfor %}

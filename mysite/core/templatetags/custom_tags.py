@@ -47,4 +47,7 @@ def get_value_from_post(request, default_value, *variable_name):
     if request.POST:
         return request.POST.get(''.join(map(lambda x: str(x), variable_name)))
     else:
+        if type(default_value) == EquipmentCustomField:
+            return default_value.equipment.equipment_type.equipmenttypecustomfield_set.get(
+                field_name=default_value.equipment_value_name).default_value
         return default_value

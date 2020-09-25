@@ -30,8 +30,12 @@
         <div class="row form-line">
             {% for custom_field in custom_fields %}
                 <div class="col-lg-3">
-                    <label style="width: 100%;" for="id_architect_name"
-                           class="control-label">{{ custom_field.field_name }}</label>
+                    <label style="width: 100%;" for="id_architect_name" class="control-label">
+                        {{ custom_field.field_name }}
+                        {% if custom_field.field_name in required_fields %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;"><input
