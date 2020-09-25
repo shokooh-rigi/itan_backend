@@ -55,8 +55,9 @@ def sheet_add(request):
             return redirect('sheetHome')
         if form.is_valid():
             if request.POST.get("next"):
-                form.cleaned_data['test_sheet_type'] = 1
-                sheet = form.save()
+                sheet = form.save(commit=False)
+                sheet.test_sheet_type = TestSheet.objects.get(pk=1)
+                sheet.save()
                 return redirect('sheetEquipment', sheet.id)
     parameters = {'form': form,
                   'orders': orders,

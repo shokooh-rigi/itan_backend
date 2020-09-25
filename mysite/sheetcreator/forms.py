@@ -16,6 +16,7 @@ class SheetForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SheetForm, self).__init__(*args, **kwargs)
+        self.fields['test_sheet_type'].required = False
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
