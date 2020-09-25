@@ -39,7 +39,7 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;"><input
-                            style="width: 100%;" type="text" name="company_value_{{ custom_field.id }}" maxlength="50"
+                            style="width: 100%;" type="{% get_field_type custom_field %}" name="company_value_{{ custom_field.id }}" maxlength="50"
                             class="form-control" required="" id="id_company_value"
                             value="{% get_post_variable request custom_field this_equipment %}"></label>
                     <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">

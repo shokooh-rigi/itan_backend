@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="id_architect_name" class="control-label" style="width: 100%;">
-                        <input style="width: 100%;" type="text" required=""
+                        <input style="width: 100%;" type="{% get_field_type custom_field %}" required=""
                                value="{% get_value_from_post request custom_field.value 'actual_value_' custom_field.id %}"
                                name="actual_value_{{ custom_field.id }}" class="form-control" id="id_actual_value"/>
                     </label>
