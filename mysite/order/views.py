@@ -2,11 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.conf import settings
 from django import forms
-
+from platform import system
+import os
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 
 
 # Create your views here.
@@ -79,6 +81,8 @@ def order_edit(request, order_id):
             return redirect('controlSystem', order_id=order_id)
         if request.POST.get("es"):
             return redirect('equipmentSubmittal', order_id=order_id)
+        if request.POST.get("tl"):
+            return redirect('techLabel', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -151,6 +155,50 @@ def change_order(request, order_id):
                   'this_order': this_order,
                   }
     return render(request, "changeOrder.html", parameters)
+
+
+def tech_label(request, order_id):
+    this_order = get_object_or_404(TechLabel, order__id=order_id)
+    form = TechLabelForm(request.POST or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['order'] = order_id
+                form.save()
+                return redirect('orderEdit', order_id=order_id)
+            if request.POST.get("savep"):
+                form.cleaned_data['order'] = order_id
+                this_tech_label = form.save()
+                parameters = {'form': form,
+                              'datenow': datetime.datetime.now().date(),
+                              'file_name': 'techlabel-' + str(this_order.order.project_number),
+                              'tech_label': this_tech_label,
+                              'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                              'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                              'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                              'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                              'WEB_URL': WEB_URL,
+                              'STATIC_URL': STATIC_URL,
+                              'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
+                              }
+                techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
+                parameters['techlabel_pdf'] = techlabel_pdf[1]
+                file_path = os.path.join(settings.MEDIA_ROOT, parameters['techlabel_pdf'])
+                if os.path.exists(file_path):
+                    with open(file_path, 'rb') as fh:
+                        response = HttpResponse(fh.read(), content_type="application/pdf")
+                        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                        return response
+                raise Http404
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  }
+    return render(request, "techLabel.html", parameters)
 
 
 @login_required

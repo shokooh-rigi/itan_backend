@@ -317,6 +317,10 @@ i {
     width: 230px;
 }
 
+.form-group input[type=checkbox] {
+    width: 80px;
+}
+
 .form-group input[type=submit], .form-group button {
     text-transform: uppercase;
 }
@@ -443,6 +447,10 @@ i {
 
 .icon.starticon {
     background-image: url("../images/icons/start.svg");
+}
+
+.icon.noteicon {
+    background-image: url("../images/icons/note.svg");
 }
 
 .main .pagination {

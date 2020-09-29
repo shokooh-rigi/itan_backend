@@ -166,3 +166,4 @@ admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(CreditCard)
 admin.site.register(BusinessCheckingAccount)
+admin.site.register(TechLabelModel)

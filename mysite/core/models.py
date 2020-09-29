@@ -319,3 +319,12 @@ class Setting(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class TechLabelModel(models.Model):
+    name = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    model_no = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    size = models.CharField(max_length=50, null=False, blank=False, unique=True, verbose_name='Size (in)')
+
+    def __str__(self):
+        return self.name

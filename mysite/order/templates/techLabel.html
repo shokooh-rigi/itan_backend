@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Tech Label for Project Number #{{ this_order.order.project_number }}</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="techLabel-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.order.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_detailed_drawing" class="control-label">Label Model <span class="required">*</span></label>
+                    {{ form.label_model }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_detailed_drawing" class="control-label" style="width: 200px;">Detailed Drawing <span class="required">*</span></label>
+                    {{ form.detailed_drawing }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_schedule_drawing" class="control-label" style="width: 200px;">Schedule Drawing <span class="required">*</span></label>
+                    {{ form.schedule_drawing }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_mechanical_drawing" class="control-label" style="width: 200px;">Mechanical Drawing <span class="required">*</span></label>
+                    {{ form.mechanical_drawing }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_tech_test_sheets" class="control-label" style="width: 200px;">Tech test Sheets <span class="required">*</span></label>
+                    {{ form.tech_test_sheets }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_point_of_contact_name" class="control-label">POC Name <span class="required">*</span></label>
+                    {{ form.point_of_contact_name }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_point_of_contact_cell_phone" class="control-label">POC Cell Phone <span class="required">*</span></label>
+                    {{ form.point_of_contact_cell_phone }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_point_of_contact_office_phone" class="control-label">POC Office Phone</label>
+                    {{ form.point_of_contact_office_phone }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_tech_notes" class="control-label">Tech Notes</label>
+                    {{ form.tech_notes }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-primary" value="Save & Print" name="savep" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+
+{% endblock %}

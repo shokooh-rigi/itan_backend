@@ -1,0 +1,84 @@
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load custom_tags %}
+{% load humanize %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tech Label PDF</title>
+        {% include "pdfTemplates/headStyleLand.html" %}
+        <style>
+
+        </style>
+    </head>
+    <body>
+
+
+<div id="col1_content_frame">
+    <div class="content" style="font-size: 19px;">
+        <div id="header_content">
+             <table class="proposal_header" style="padding: 0;">
+                <tbody style="padding: 0;">
+                    <tr>
+                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
+                    </tr>
+                </tbody>
+            </table>
+            <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+        </div>
+        <div><b>Project Name: </b>{{ tech_label.order.proposal.quote.estimate.project }}</div>
+        <div><b>Project #: </b>{{ tech_label.order.project_number }}</div>
+        <div><b>Project Address: </b>{{ tech_label.order.proposal.quote.estimate.project.address_line_1 }}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_2 }}</div>
+        <br /><br />
+        <div><b>Date: </b>{{ datenow }}</div>
+        <div><b>MC Info: </b>{{ tech_label.order.proposal.quote.estimate.customer }}</div>
+        <div><b>Arch Info: </b></div>
+        <div><b>Eng Info: </b>{{ tech_label.order.proposal.quote.estimate.engineer }}</div>
+        <br /><br />
+        <div><table><tbody><tr>
+            <td style="width: 25%;"><b>PRE-DEMO: </b></td>
+            <td style="width: 15%;"> </td>
+            <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo <= 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+            <td style="width: 5%;">YES</td>
+            <td style="width: 10%;"> </td>
+            <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+            <td style="width: 5%;">NO</td>
+        </tr></tbody></table></div>
+        <div><b>Drawing Date: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date }}{% endif %}</div>
+        <div><b>Drawing: </b>{% if tech_label.detailed_drawing %}Detail{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}Schedule{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}Mechanical{% endif %}</div>
+        <div><table><tbody><tr>
+            <td style="width: 30%;"><b>Test Sheets: </b></td>
+            <td style="width: 10%;"> </td>
+            <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+            <td style="width: 5%;">YES</td>
+            <td style="width: 10%;"> </td>
+            <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+            <td style="width: 5%;">NO</td>
+        </tr></tbody></table></div>
+
+    </div>
+</div>
+<div id="col2_content_frame">
+    <div class="content" style="font-size: 19px;">
+        <div id="header_content">
+             <table class="proposal_header">
+                <tbody>
+                    <tr>
+                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
+                    </tr>
+                </tbody>
+            </table>
+            <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+        </div>
+        <div><b>Start Date: </b>{% if tech_label.order.estimated_date_of_project %}{{ tech_label.order.estimated_date_of_project }}{% endif %}</div>
+        <div><b>Site POC Info: </b>{{ tech_label.point_of_contact_name }} {{ tech_label.point_of_contact_cell_phone }} {{ tech_label.point_of_contact_office_phone }}</div>
+        <div><b>Control System: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system }}{% endif %}</div>
+        <div><b>Tech Notes: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes }}{% endif %}</div></div>
+    </div>
+</div>
+    </body>
+</html>
