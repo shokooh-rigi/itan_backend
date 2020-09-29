@@ -79,6 +79,8 @@ def order_edit(request, order_id):
             return redirect('controlSystem', order_id=order_id)
         if request.POST.get("es"):
             return redirect('equipmentSubmittal', order_id=order_id)
+        if request.POST.get("tl"):
+            return redirect('techLabel', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -151,6 +153,23 @@ def change_order(request, order_id):
                   'this_order': this_order,
                   }
     return render(request, "changeOrder.html", parameters)
+
+
+def tech_label(request, order_id):
+    this_order = get_object_or_404(TechLabel, order__id=order_id)
+    form = TechLabelForm(request.POST or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['order'] = order_id
+                form.save()
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  }
+    return render(request, "techLabel.html", parameters)
 
 
 @login_required

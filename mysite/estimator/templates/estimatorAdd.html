@@ -12,11 +12,12 @@
                     <select name="bfm" class="form-control" id="id_bfm">
                         <option value="" data-customer="" data-project="" data-duedate="" data-dlink="" selected="">---------</option>
                         {% for bfm in bfms %}
-                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}">{{ bfm }}</option>
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}" data-bfmnote="{% if bfm.note %}{{ bfm.note }}{% endif %}">{{ bfm }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a>
-                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></div>
+                    <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                    <div id="bfm_note" class="icon noteicon" style="display: inline-block; margin-left: 5px; cursor: pointer;" data-toggle="popover" data-placement="bottom" title="BFM Note"></div>
                 </div>
             </div>
             <div class="row form-line">
@@ -77,69 +78,93 @@
         </div>
 	</form>
         <script>
-        if($("#id_bfm").val() === '') {
-            $('#id_customer').prop('readonly', false).val('');
-            $('#id_project').prop('readonly', false).val('');
-            $('#id_due_date').attr('readonly', false).prop('readonly', false).val('');
-            $('#id_customer option, #id_project option').attr('disabled', false);
-            $("#dlink_href").attr("href", '').hide();
-        }
-        else {
-            $('#id_customer option, #id_project option').attr('disabled', false);
-            $("#id_customer").val($("#id_bfm").find(':selected').data('customer'));
-            $("#id_project").val($("#id_bfm").find(':selected').data('project'));
-            $("#id_due_date").attr('readonly', true).prop('readonly', 'readonly').val($("#id_bfm").find(':selected').data('duedate'));
-            $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
-            $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
-        }
-        $('#id_bfm').on('change', function() {
-            if($(this).val() === '') {
-                $('#id_customer').val('');
-                $('#id_project').val('');
-                $('#id_due_date').attr('readonly', false).val('');
-                $('#id_customer option, #id_project option').attr('disabled', false);
-                $("#dlink_href").attr("href", '').hide();
-            }
-            else {
-                $('#id_customer option, #id_project option').attr('disabled', false);
-                $("#id_customer").val($(this).find(':selected').data('customer'));
-                $("#id_project").val($(this).find(':selected').data('project'));
-                $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
-                $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
-                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
-            }
+            $(document).ready(function() {
+                if($("#id_bfm").val() === '') {
+                    $('#id_customer').prop('readonly', false).val('');
+                    $('#id_project').prop('readonly', false).val('');
+                    $('#id_due_date').attr('readonly', false).prop('readonly', false).val('');
+                    $('#id_customer option, #id_project option').attr('disabled', false);
+                    $("#dlink_href").attr("href", '').hide();
+                    $("#bfm_note").hide();
+                }
+                else {
+                    $('#id_customer option, #id_project option').attr('disabled', false);
+                    $("#id_customer").val($("#id_bfm").find(':selected').data('customer'));
+                    $("#id_project").val($("#id_bfm").find(':selected').data('project'));
+                    $("#id_due_date").attr('readonly', true).prop('readonly', 'readonly').val($("#id_bfm").find(':selected').data('duedate'));
+                    $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                    if ($(this).find(':selected').data('dlink') != '') {
+                        $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
+                    }
+                    else {
+                        $("#dlink_href").hide();
+                    }
+                    if ($(this).find(':selected').data('bfmnote') != '') {
+                        $("#bfm_note").attr('data-content', $(this).find(':selected').data('bfmnote')).show();
+                    }
+                    else {
 
-        });
-$("#edit_person").click(function(){
-	person_id = $("#id_customer option:selected").val();
-	if(person_id != '') {
-        var url = "/person/" + person_id + "/edit/";
-	    showEditPopup(url);
-    }
-	else {
-	    alert("Something Went Wrong");
-    }
-  	});
-$("#edit_project").click(function(){
-	project_id = $("#id_project option:selected").val();
-    if(project_id != '') {
-        var url = "/project/" + project_id + "/edit/";
-	    showEditPopup(url);
-    }
-	else {
-	    alert("Something Went Wrong");
-    }
-});
-        $("#edit_engineer").click(function(){
-	person_id = $("#id_engineer option:selected").val();
-	if(person_id != '') {
-        var url = "/person/" + person_id + "/edit/";
-	    showEditPopup(url);
-    }
-	else {
-	    alert("Something Went Wrong");
-    }
-  	});
+                        $("#bfm_note").hide();
+                    }
+                }
+                $('#id_bfm').on('change', function() {
+                    if ($(this).val() === '') {
+                        $('#id_customer').val('');
+                        $('#id_project').val('');
+                        $('#id_due_date').attr('readonly', false).val('');
+                        $('#id_customer option, #id_project option').attr('disabled', false);
+                        $("#dlink_href").attr("href", '').hide();
+                        $("#bfm_note").hide();
+                    } else {
+                        $('#id_customer option, #id_project option').attr('disabled', false);
+                        $("#id_customer").val($(this).find(':selected').data('customer'));
+                        $("#id_project").val($(this).find(':selected').data('project'));
+                        $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
+                        $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                        if ($(this).find(':selected').data('dlink') != '') {
+                            $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
+                        }
+                        else {
+                            $("#dlink_href").hide();
+                        }
+                        if ($(this).find(':selected').data('bfmnote') != '') {
+                            $("#bfm_note").attr('data-content', $(this).find(':selected').data('bfmnote')).show();
+                        } else {
+                            $("#bfm_note").hide();
+                        }
+                    }
+                });
+                $("#edit_person").click(function(){
+                    person_id = $("#id_customer option:selected").val();
+                    if(person_id != '') {
+                        var url = "/person/" + person_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+                $("#edit_project").click(function(){
+                    project_id = $("#id_project option:selected").val();
+                    if(project_id != '') {
+                        var url = "/project/" + project_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+                $("#edit_engineer").click(function(){
+                    person_id = $("#id_engineer option:selected").val();
+                    if(person_id != '') {
+                        var url = "/person/" + person_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+            });
     </script>
 
     <script>

@@ -11,11 +11,11 @@
         <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" crossorigin="anonymous" />
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
         <link href="https://fonts.googleapis.com/css?family=Poppins:100,300,400,500,700&display=swap" rel="stylesheet" />
-        <script src="{% static "js/jquery-3.4.1.min.js" %}" crossorigin="anonymous"></script>
-        <script src="{% static "js/popper.min.js" %}" crossorigin="anonymous"></script>
-        <script src="{% static "js/bootstrap.min.js" %}" crossorigin="anonymous"></script>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
         <script src="{% static "js/printThis.js" %}" crossorigin="anonymous"></script>
         <script src="https://kit.fontawesome.com/df68528451.js"></script>
         <style>
@@ -161,6 +161,7 @@
 
     <script>
         $(document).ready(function() {
+            $('[data-toggle="popover"]').popover();
             $('[data-toggle="tooltip"]').tooltip();
             $(".headspace").height($(".header").innerHeight());
         });

@@ -78,3 +78,32 @@ class ControlSystemManufacturerForm(ModelForm):
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+
+
+class TechLabelForm(ModelForm):
+    class Meta:
+        model = TechLabel
+        fields = [
+            'order',
+            'detailed_drawing',
+            'schedule_drawing',
+            'mechanical_drawing',
+            'tech_test_sheets',
+            'point_of_contact_name',
+            'point_of_contact_cell_phone',
+            'point_of_contact_office_phone',
+            'tech_notes',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(TechLabelForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            if hasattr(visible.field.widget, 'input_type'):
+                if visible.field.widget.input_type != 'checkbox':
+                    visible.field.widget.attrs['class'] = 'form-control'
+                elif visible.field.widget.input_type == 'checkbox':
+                    visible.field.widget.attrs['class'] = 'form-check-input'
+            else:
+                visible.field.widget.attrs['class'] = 'form-control'
+        for field in self.fields.values():
+            field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}

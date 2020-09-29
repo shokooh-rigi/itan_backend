@@ -1,7 +1,7 @@
 from mysite.estimator.models import *
 
-
 # Create your models here.
+
 
 class ControlSystemManufacturer(models.Model):
     manufacturer_name = models.CharField(max_length=30, blank=False, null=False)
@@ -70,3 +70,18 @@ class ChangeOrder(models.Model):
 
     def __str__(self):
         return "Change Order #" + str(self.co_number) + " - Amount $" + str(self.amount)
+
+
+class TechLabel(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False, null=False)
+    detailed_drawing = models.BooleanField(default=False)
+    schedule_drawing = models.BooleanField(default=False)
+    mechanical_drawing = models.BooleanField(default=False)
+    tech_test_sheets = models.BooleanField(default=False)
+    point_of_contact_name = models.CharField(max_length=50, blank=False, null=False)
+    point_of_contact_cell_phone = models.CharField(max_length=15, blank=False)
+    point_of_contact_office_phone = models.CharField(max_length=15, blank=True)
+    tech_notes = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.id) + ": " + str(self.order)

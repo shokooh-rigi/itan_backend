@@ -42,3 +42,15 @@ class ControlSystemManufacturerAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(ControlSystemManufacturer, ControlSystemManufacturerAdmin)
+
+
+class TechLabelResource(resources.ModelResource):
+    class Meta:
+        model = TechLabel
+
+
+class TechLabelAdmin(ImportExportModelAdmin):
+    resource_class = TechLabelResource
+
+
+admin.site.register(TechLabel, TechLabelAdmin)

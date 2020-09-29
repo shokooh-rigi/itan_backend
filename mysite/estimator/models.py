@@ -119,6 +119,7 @@ class EstimateDetails(models.Model):
     control_system = models.PositiveSmallIntegerField(choices=cs_choices, default=0)
     hours_choices = (
         (0, 'Regular'),
+        (5, 'Regular/After Hour'),
         (10, 'Saturday/Holiday'),
         (15, 'Sunday'),
     )
