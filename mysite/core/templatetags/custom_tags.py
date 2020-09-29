@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 
 from mysite.sheetcreator.models import SheetEquipmentActualData
 
-
 register = template.Library()
 
 
@@ -35,9 +34,11 @@ def get_post_variable(request, cfi, equipment):
         answer = request.POST.get('company_value_' + str(cfi.id))
         return answer
     else:
-        num_results = EquipmentCustomField.objects.filter(equipment_value_name=cfi.field_name, equipment=equipment.id).count()
+        num_results = EquipmentCustomField.objects.filter(equipment_value_name=cfi.field_name,
+                                                          equipment=equipment.id).count()
         if num_results > 0:
-            this_equipment = get_object_or_404(EquipmentCustomField, equipment_value_name=cfi.field_name, equipment=equipment.id)
+            this_equipment = get_object_or_404(EquipmentCustomField, equipment_value_name=cfi.field_name,
+                                               equipment=equipment.id)
             return this_equipment.company_value
         else:
             this_equipment_type = get_object_or_404(EquipmentTypeCustomField, id=cfi.id)
@@ -70,3 +71,12 @@ def get_field_type(field):
     if field_type == FieldTypeChoices.Integer.value or field_type == FieldTypeChoices.Float.value:
         return 'number'
     return 'text'
+
+
+@register.filter()
+def concatenate(value, arg):
+    """concatenate the value and the arg."""
+    try:
+        return str(value) + str(arg)
+    except Exception:
+        return ''

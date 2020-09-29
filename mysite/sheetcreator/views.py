@@ -626,11 +626,26 @@ def get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fiel
     require_parentheses = equipment_type_custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
                                                               Q(show_parentheses=ShowParenthesesChoices.Both.value))
     if insert:
+        fields = map(lambda item: {
+            'id': f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
+            'defaultValue': item.default_value,
+        }, require_parentheses)
+    else:
+        fields = map(lambda item: {
+            'id': f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
+            'defaultValue': item.default_value,
+        }, require_parentheses)
+    return list(fields)
+
+
+def get_required_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
+    required_fields = equipment_type_custom_fields.filter(required_in_actual=True)
+    if insert:
         fields = map(lambda item: f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
-                     require_parentheses)
+                     required_fields)
     else:
         fields = map(lambda item: f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
-                     require_parentheses)
+                     required_fields)
     return list(fields)
 
 
@@ -643,7 +658,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
+    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -697,7 +712,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields, False)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
+    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -721,8 +736,14 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                                                         sheet_equipment=this_sheet_equipment).update(
                     value=request.POST.get('other_value_' + str(other_custom_field.id)))
             for custom_field in custom_fields:
-                SheetEquipmentActualData.objects.filter(key=custom_field.key,
-                                                        sheet_equipment=this_sheet_equipment).update(value=request.POST.get('actual_value_' + str(custom_field.id)))
+                actual_data = SheetEquipmentActualData.objects.get(key=custom_field.key,
+                                                                   sheet_equipment=this_sheet_equipment)
+                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = equipment_type_custom_fields.get(
+                        field_name=actual_data.key.equipment_value_name).default_value.strip()
+                actual_data.value = new_value
+                actual_data.save()
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
