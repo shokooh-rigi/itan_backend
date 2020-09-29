@@ -74,6 +74,7 @@ class ChangeOrder(models.Model):
 
 class TechLabel(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False, null=False)
+    label_model = models.ForeignKey(TechLabelModel, on_delete=models.PROTECT, blank=False, null=False)
     detailed_drawing = models.BooleanField(default=False)
     schedule_drawing = models.BooleanField(default=False)
     mechanical_drawing = models.BooleanField(default=False)
@@ -85,3 +86,13 @@ class TechLabel(models.Model):
 
     def __str__(self):
         return str(self.id) + ": " + str(self.order)
+
+    @classmethod
+    def create_techlabel_pdf(cls, parameters):
+        techlabel_pdf = Render.render_to_file('pdfTemplates/techLabelTemplate.html', parameters, 'techlabel')
+        return techlabel_pdf
+
+    # @classmethod
+    # def delete_techlabel_pdf(cls, parameters):
+    #     delete_pdf = Render.delete_file(parameters, 'techlabel')
+    #     return delete_pdf

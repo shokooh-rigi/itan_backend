@@ -1,0 +1,31 @@
+{% load estimator_tags %}
+        <style type="text/css">
+            .logo { width: 160px; display: inline-block; float: left; }
+            @page {
+                size: letter landscape;
+                @frame col1_frame {
+                    -pdf-frame-content: col1_content_frame;
+                    -pdf-frame-border: 1;
+                    left: 20pt; top: 15pt; width: 360pt; height: 530pt; padding: 20;
+                }
+                @frame col2_frame {
+                    -pdf-frame-content: col2_content_frame;
+                    -pdf-frame-border: 1;
+                    right: 20pt; top: 15pt; width: 360pt; height: 530pt; padding: 20;
+                }
+            }
+            div.together { -pdf-keep-with-next: true; }
+
+            {% if os != "Windows" %}
+            @font-face {
+                font-family: customfont;
+                src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
+            }
+
+            body {
+                font-family: customfont;
+            }
+            {% endif %}
+
+
+        </style>

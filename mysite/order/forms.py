@@ -85,6 +85,7 @@ class TechLabelForm(ModelForm):
         model = TechLabel
         fields = [
             'order',
+            'label_model',
             'detailed_drawing',
             'schedule_drawing',
             'mechanical_drawing',

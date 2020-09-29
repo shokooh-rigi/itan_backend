@@ -10,6 +10,12 @@
             {{ form.order.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12">
+                    <label for="id_detailed_drawing" class="control-label">Label Model <span class="required">*</span></label>
+                    {{ form.label_model }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
                     <label for="id_detailed_drawing" class="control-label" style="width: 200px;">Detailed Drawing <span class="required">*</span></label>
                     {{ form.detailed_drawing }}
                 </div>
