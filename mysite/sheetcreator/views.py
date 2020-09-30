@@ -330,10 +330,11 @@ def review_equipment_values(request, sheet_equipment_id):
     this_equipment = this_sheet_equipment.equipment
     custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
     custom_operations = this_equipment.equipment_type.equipmenttypecustomoperation_set.all()
-    show_parentheses_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(
-        Q(show_parentheses=ShowParenthesesChoices.Design.value) |
-        Q(show_parentheses=ShowParenthesesChoices.Both.value))))
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'H.P.', 'Voltage', 'Amperage', ]
+    show_parentheses_fields = list(map(lambda item:
+                                       {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
+                                       custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+                                                            Q(show_parentheses=ShowParenthesesChoices.Both.value))))
+    required_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(required_in_design=True)))
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -456,13 +457,17 @@ def review_equipment_values(request, sheet_equipment_id):
                         return render(request, "EquipmentDesignValue.html", parameters)
 
             for custom_field in custom_fields:
+                new_value = request.POST.get('company_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = custom_field.default_value.strip()
+
                 num_results = EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                                  equipment=this_equipment.id).count()
+                                                                  equipment=this_equipment).count()
                 if num_results > 0:
                     EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                        equipment=this_equipment.id).update(company_value=request.POST.get('company_value_' + str(custom_field.id)))
+                                                        equipment=this_equipment.id).update(company_value=new_value)
                 else:
-                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=request.POST.get('company_value_' + str(custom_field.id)), equipment=this_equipment)
+                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=new_value, equipment=this_equipment)
                     new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
             this_sheet_equipment.save()
