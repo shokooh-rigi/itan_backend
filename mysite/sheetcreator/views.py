@@ -681,14 +681,21 @@ def equipment_actual_values(request, sheet_equipment_id):
                     'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
                 new_object.save()
             for custom_field in custom_fields:
-                num_results = SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
-                                                                  sheet_equipment=this_sheet_equipment.id).count()
+                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = equipment_type_custom_fields.get(
+                        field_name=custom_field.equipment_value_name).default_value.strip()
+
+                num_results = SheetEquipmentActualData.objects.filter(
+                    key__equipment_value_name=custom_field.equipment_value_name,
+                    sheet_equipment=this_sheet_equipment).count()
+
                 if num_results > 0:
                     SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
-                                                                  sheet_equipment=this_sheet_equipment).update(value=request.POST.get('actual_value_' + str(custom_field.id)))
+                                                            sheet_equipment=this_sheet_equipment).update(value=new_value)
                 else:
                     new_object_key = EquipmentCustomField.objects.get(equipment=this_sheet_equipment.equipment, equipment_value_name=custom_field.equipment_value_name)
-                    new_object = SheetEquipmentActualData(key=new_object_key, value=request.POST.get('actual_value_' + str(custom_field.id)), sheet_equipment=this_sheet_equipment)
+                    new_object = SheetEquipmentActualData(key=new_object_key, value=new_value, sheet_equipment=this_sheet_equipment)
                     new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
             this_sheet_equipment.save()
@@ -736,14 +743,13 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                                                         sheet_equipment=this_sheet_equipment).update(
                     value=request.POST.get('other_value_' + str(other_custom_field.id)))
             for custom_field in custom_fields:
-                actual_data = SheetEquipmentActualData.objects.get(key=custom_field.key,
-                                                                   sheet_equipment=this_sheet_equipment)
                 new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
                 if not new_value:
                     new_value = equipment_type_custom_fields.get(
-                        field_name=actual_data.key.equipment_value_name).default_value.strip()
-                actual_data.value = new_value
-                actual_data.save()
+                        field_name=custom_field.key.equipment_value_name).default_value.strip()
+
+                SheetEquipmentActualData.objects.filter(key=custom_field.key,
+                                                        sheet_equipment=this_sheet_equipment).update(value=new_value)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
