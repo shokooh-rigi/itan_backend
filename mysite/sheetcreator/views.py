@@ -166,6 +166,14 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
             [('serial_no', 'Serial No.'), ]
         ),
         (
+            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
+            [('df_cooling', 'DF Cooling'), ]
+        ),
+        (
+            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
+            [('df_heating', 'DF Heating'), ]
+        ),
+        (
             "equipment.equipment.manufacturer",
             [('manufacturer', ''), ]
         ),
@@ -183,7 +191,7 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
                 ('total_sp_ext_sp', 'Total SP (Ext. SP)'),
                 ('fan_unit_suction_pressure', 'Fan (Unit) Suction Pressure'),
                 ('discharge_pressure_fan_unit', 'Discharge Pressure, Fan/Unit'),
-                ('fan_rpm', 'Fan R.P.M.'),
+                ('fan_rpm', 'Fan R.P.M'),
                 ('hp', 'H.P.'),
                 ('voltage', 'Voltage'),
                 ('phase', 'Phase'),
@@ -198,6 +206,12 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
     for field_value_str, items in data_fields:
         for key, name in items:
             equipment_data[key] = eval(field_value_str.format(name))
+
+    for key in equipment_data:
+        if key in ['df_cooling', 'df_heating']:
+            if equipment_data[key]:
+                equipment_data[key] = equipment_data[key] + '°'
+
     return equipment_data
 
 
@@ -209,10 +223,11 @@ def equipments_generate_report_pdf(request, sheet_id):
 
     data = []
     len_equipments = sheet_equipments.count()
-    for i in range(math.ceil(len_equipments / 3)):
+    equipment_in_page = 2
+    for i in range(math.ceil(len_equipments / equipment_in_page)):
         page = []
-        for j in range(3):
-            index = i * 3 + j
+        for j in range(equipment_in_page):
+            index = i * equipment_in_page + j
             if index < len_equipments:
                 page.append(fetch_sheet_equipment_data(sheet_equipments[index]))
         data.append(page)
@@ -323,6 +338,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                   }
 
     return render(request, "sheetEquipmentCommonDataEdit.html", parameters)
+
 
 @login_required
 def review_equipment_values(request, sheet_equipment_id):
