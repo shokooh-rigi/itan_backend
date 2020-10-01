@@ -109,6 +109,33 @@ def equipment_image(request, equipment_id):
 
 
 @login_required
+def get_equipment_values(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
+    design_values = EquipmentCustomField.objects.filter(equipment=this_equipment)
+
+    def get_design_value(field):
+        value = ''
+        q = design_values.filter(equipment_value_name=field.field_name, equipment=this_equipment)
+        if q.count():
+            value = q.first().company_value.strip()
+        return value or field.default_value.strip()
+
+    data = {
+        'id': this_equipment.id,
+        'equipment_type': str(this_equipment.equipment_type),
+        'manufacturer': str(this_equipment.manufacturer),
+        'model_number': str(this_equipment.model_number),
+        'design_values': list(map(lambda custom_field: {
+            'field_name': custom_field.field_name,
+            'value': get_design_value(custom_field),
+            'field_postfix': custom_field.field_postfix,
+        }, custom_fields)),
+    }
+    return JsonResponse(data)
+
+
+@login_required
 def equipment_values(request, equipment_id):
     this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
     custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()

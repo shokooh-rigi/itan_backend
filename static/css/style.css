@@ -453,6 +453,10 @@ i {
     background-image: url("../images/icons/note.svg");
 }
 
+.icon.printicon {
+    background-image: url("../images/icons/fax_blue.png");
+}
+
 .main .pagination {
     text-align: center;
     margin-top: 1em;
