@@ -157,6 +157,8 @@ class EquipmentDb(models.Model):
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
     manufacturer = models.ForeignKey(EquipmentManufacturer, on_delete=models.SET_NULL, blank=False, null=True)
     model_number = models.CharField(max_length=50, blank=False)
+    equipment_submittal = models.FileField(upload_to='uploads/equipmentDb/equipment_submittal', blank=True, null=True)
+    image = models.FileField(upload_to='uploads/equipmentDb/image', blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
 

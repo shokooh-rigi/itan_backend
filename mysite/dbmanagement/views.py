@@ -55,6 +55,10 @@ def equipment_edit(request, equipment_id):
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('EquipmentsHome')
+        elif request.POST.get("equipmentSubmittal"):
+            return redirect('EquipmentsEquipmentSubmittal', equipment_id=equipment_id)
+        elif request.POST.get("image"):
+            return redirect('EquipmentsImage', equipment_id=equipment_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -65,6 +69,42 @@ def equipment_edit(request, equipment_id):
                   'page_button': 'Save',
                   }
     return render(request, "equipment_create.html", parameters)
+
+
+@login_required
+def equipment_submittal(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    form = EquipmentForm(request.POST or None, request.FILES or None, instance=this_equipment)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('EquipmentsEdit', equipment_id=equipment_id)
+        elif request.POST.get("save"):
+            if form.is_valid():
+                form.save()
+                return redirect('EquipmentsEdit', equipment_id=equipment_id)
+    parameters = {
+        'form': form,
+        'this_equipment': this_equipment,
+    }
+    return render(request, "equipment_equipment_submittal.html", parameters)
+
+
+@login_required
+def equipment_image(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    form = EquipmentForm(request.POST or None, request.FILES or None, instance=this_equipment)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('EquipmentsEdit', equipment_id=equipment_id)
+        elif request.POST.get("save"):
+            if form.is_valid():
+                form.save()
+                return redirect('EquipmentsEdit', equipment_id=equipment_id)
+    parameters = {
+        'form': form,
+        'this_equipment': this_equipment,
+    }
+    return render(request, "equipment_image.html", parameters)
 
 
 @login_required

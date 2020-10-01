@@ -67,6 +67,7 @@
             <thead>
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th>Image</th>
                     <th data-sortable="equipment_type"><a href="{% if request.GET.ordering == 'equipment_type' %}?{% url_replace request 'ordering' '-equipment_type' %}{% else %}?{% url_replace request 'ordering' 'equipment_type' %}{% endif %}">Equipment Type</a></th>
                     <th data-sortable="manufacturer"><a href="{% if request.GET.ordering == 'manufacturer' %}?{% url_replace request 'ordering' '-manufacturer' %}{% else %}?{% url_replace request 'ordering' 'manufacturer' %}{% endif %}">Manufacturer</a></th>
                     <th data-sortable="model_number"><a href="{% if request.GET.ordering == 'model_number' %}?{% url_replace request 'ordering' '-model_number' %}{% else %}?{% url_replace request 'ordering' 'model_number' %}{% endif %}">Model Number</a></th>
@@ -78,6 +79,12 @@
                 {% for equipment in equipments %}
                         <tr>
                             <td>{{ equipment.id }}</td>
+                            <td style="padding-left: 1rem; padding-right: 1rem;">
+                                <a href="{% if equipment.image %}{{ equipment.image.url }}{% endif %}" target="_blank">
+                                    <img src="{% if equipment.image %}{{ equipment.image.url }}{% endif %}" alt=""
+                                         style="max-width: 100px; max-height: 70px;">
+                                </a>
+                            </td>
                             <td>{{ equipment.equipment_type }}</td>
                             <td>{{ equipment.manufacturer }}</td>
                             <td>{{ equipment.model_number }}</td>
@@ -86,6 +93,7 @@
                             </td>
                             <td>
                                 <a href="{% url 'EquipmentsEdit' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
+                                <a href="{% if equipment.equipment_submittal %}{{ equipment.equipment_submittal.url }}{% endif %}" style="display: inline-block;" {% if equipment.equipment_submittal %}download{% endif %}><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Equipment Submittal"></div></a>
                                 <a href="{% url 'EquipmentsDelete' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                             </td>
                         </tr>

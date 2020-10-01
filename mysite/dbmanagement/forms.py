@@ -10,6 +10,8 @@ class EquipmentForm(ModelForm):
             'equipment_type',
             'manufacturer',
             'model_number',
+            'equipment_submittal',
+            'image',
         ]
 
     def __init__(self, *args, **kwargs):
