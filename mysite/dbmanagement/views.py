@@ -21,7 +21,8 @@ def equipment_db(request):
         ordering = request.GET.get('ordering')
 
     object_list = EquipmentDb.objects.filter(Q(model_number__icontains=project_name) |
-                                             Q(equipment_type__name__icontains=project_name)).order_by(ordering)
+                                             Q(equipment_type__name__icontains=project_name) |
+                                             Q(manufacturer__name__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
