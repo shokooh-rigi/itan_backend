@@ -4,7 +4,8 @@ from django.db.models import Q
 from mysite.dbmanagement.models import EquipmentCustomField
 from .forms import *
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from ..dbmanagement.models import ShowParenthesesChoices
 
 
 @login_required
@@ -20,7 +21,8 @@ def equipment_db(request):
         ordering = request.GET.get('ordering')
 
     object_list = EquipmentDb.objects.filter(Q(model_number__icontains=project_name) |
-                                             Q(equipment_type__name__icontains=project_name)).order_by(ordering)
+                                             Q(equipment_type__name__icontains=project_name) |
+                                             Q(manufacturer__name__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -55,6 +57,10 @@ def equipment_edit(request, equipment_id):
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('EquipmentsHome')
+        elif request.POST.get("equipmentSubmittal"):
+            return redirect('EquipmentsEquipmentSubmittal', equipment_id=equipment_id)
+        elif request.POST.get("image"):
+            return redirect('EquipmentsImage', equipment_id=equipment_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -68,10 +74,78 @@ def equipment_edit(request, equipment_id):
 
 
 @login_required
+def equipment_submittal(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    form = EquipmentForm(request.POST or None, request.FILES or None, instance=this_equipment)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('EquipmentsEdit', equipment_id=equipment_id)
+        elif request.POST.get("save"):
+            if form.is_valid():
+                form.save()
+                return redirect('EquipmentsEdit', equipment_id=equipment_id)
+    parameters = {
+        'form': form,
+        'this_equipment': this_equipment,
+    }
+    return render(request, "equipment_equipment_submittal.html", parameters)
+
+
+@login_required
+def equipment_image(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    form = EquipmentForm(request.POST or None, request.FILES or None, instance=this_equipment)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('EquipmentsEdit', equipment_id=equipment_id)
+        elif request.POST.get("save"):
+            if form.is_valid():
+                form.save()
+                return redirect('EquipmentsEdit', equipment_id=equipment_id)
+    parameters = {
+        'form': form,
+        'this_equipment': this_equipment,
+    }
+    return render(request, "equipment_image.html", parameters)
+
+
+@login_required
+def get_equipment_values(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
+    design_values = EquipmentCustomField.objects.filter(equipment=this_equipment)
+
+    def get_design_value(field):
+        value = ''
+        q = design_values.filter(equipment_value_name=field.field_name, equipment=this_equipment)
+        if q.count():
+            value = q.first().company_value.strip()
+        return value or field.default_value.strip()
+
+    data = {
+        'id': this_equipment.id,
+        'equipment_type': str(this_equipment.equipment_type),
+        'manufacturer': str(this_equipment.manufacturer),
+        'model_number': str(this_equipment.model_number),
+        'design_values': list(map(lambda custom_field: {
+            'field_name': custom_field.field_name,
+            'value': get_design_value(custom_field),
+            'field_postfix': custom_field.field_postfix,
+        }, custom_fields)),
+    }
+    return JsonResponse(data)
+
+
+@login_required
 def equipment_values(request, equipment_id):
     this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
     custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
     custom_operations = this_equipment.equipment_type.equipmenttypecustomoperation_set.all()
+    show_parentheses_fields = list(map(lambda item:
+                                       {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
+                                       custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+                                                            Q(show_parentheses=ShowParenthesesChoices.Both.value))))
+    required_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(required_in_design=True)))
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('EquipmentsHome')
@@ -97,6 +171,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_field.field_range_or_selective == 2:
@@ -117,6 +193,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
             for custom_operation in custom_operations:
@@ -137,6 +215,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_operation.operand_type == 2:
@@ -145,6 +225,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_operation.operand_type == 3:
@@ -153,6 +235,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_operation.operand_type == 4:
@@ -161,6 +245,8 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
                 elif custom_operation.operand_type == 5:
@@ -169,21 +255,29 @@ def equipment_values(request, equipment_id):
                         parameters = {'this_equipment': this_equipment,
                                       'custom_fields': custom_fields,
                                       'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
                                       }
                         return render(request, "equipment_fields.html", parameters)
 
             for custom_field in custom_fields:
+                new_value = request.POST.get('company_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = custom_field.default_value.strip()
+
                 num_results = EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
                                                                   equipment=this_equipment.id).count()
                 if num_results > 0:
                     EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                        equipment=this_equipment.id).update(company_value=request.POST.get('company_value_' + str(custom_field.id)))
+                                                        equipment=this_equipment.id).update(company_value=new_value)
                 else:
-                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=request.POST.get('company_value_' + str(custom_field.id)), equipment=this_equipment)
+                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=new_value, equipment=this_equipment)
                     new_object.save()
             return redirect('EquipmentsHome')
     parameters = {'this_equipment': this_equipment,
                   'custom_fields': custom_fields,
+                  'show_parentheses_fields': show_parentheses_fields,
+                  'required_fields': required_fields,
                   }
     return render(request, "equipment_fields.html", parameters)
 

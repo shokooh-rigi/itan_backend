@@ -67,6 +67,7 @@
             <thead>
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th>Image</th>
                     <th data-sortable="equipment_type"><a href="{% if request.GET.ordering == 'equipment_type' %}?{% url_replace request 'ordering' '-equipment_type' %}{% else %}?{% url_replace request 'ordering' 'equipment_type' %}{% endif %}">Equipment Type</a></th>
                     <th data-sortable="manufacturer"><a href="{% if request.GET.ordering == 'manufacturer' %}?{% url_replace request 'ordering' '-manufacturer' %}{% else %}?{% url_replace request 'ordering' 'manufacturer' %}{% endif %}">Manufacturer</a></th>
                     <th data-sortable="model_number"><a href="{% if request.GET.ordering == 'model_number' %}?{% url_replace request 'ordering' '-model_number' %}{% else %}?{% url_replace request 'ordering' 'model_number' %}{% endif %}">Model Number</a></th>
@@ -78,14 +79,22 @@
                 {% for equipment in equipments %}
                         <tr>
                             <td>{{ equipment.id }}</td>
+                            <td style="padding-left: 1rem; padding-right: 1rem;">
+                                <a href="{% if equipment.image %}{{ equipment.image.url }}{% endif %}" target="_blank">
+                                    <img src="{% if equipment.image %}{{ equipment.image.url }}{% endif %}" alt=""
+                                         style="max-width: 100px; max-height: 70px;">
+                                </a>
+                            </td>
                             <td>{{ equipment.equipment_type }}</td>
                             <td>{{ equipment.manufacturer }}</td>
                             <td>{{ equipment.model_number }}</td>
                             <td>
                                 <a href="{% url 'EquipmentsValues' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>
+                                <a onclick="printDesignValues({{ equipment.id }})" style="display: inline-block;cursor: pointer;"><div class="icon printicon" data-toggle="tooltip" data-placement="bottom" title="Print Design Values"></div></a>
                             </td>
                             <td>
                                 <a href="{% url 'EquipmentsEdit' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
+                                <a href="{% if equipment.equipment_submittal %}{{ equipment.equipment_submittal.url }}{% endif %}" style="display: inline-block;" {% if equipment.equipment_submittal %}download{% endif %}><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Equipment Submittal"></div></a>
                                 <a href="{% url 'EquipmentsDelete' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                             </td>
                         </tr>
@@ -120,6 +129,42 @@
               <i class="fa fa-angle-double-right" aria-hidden="true"></i>
             </a>
           {% endif %}
+        </div>
+
+        <div style="display: none; height: 500px;" id="designValuesTableMargin"></div>
+        <div style="display: none; margin-top: 150px; text-align: left;" class="container" id="designValuesTable">
+            <div class="row" style="padding: 1rem 1rem 1rem 2rem;">
+                <div class="col-6" style="padding: 1rem;">
+                    <h5><strong>Id:</strong> <span id="dvId" style="font-weight: normal;"></span></h5>
+                </div>
+                <div class="col-6" style="padding: 1rem;">
+                    <h5><strong>Manufacturer:</strong> <span id="dvManufacturer" style="font-weight: normal;"></span>
+                    </h5>
+                </div>
+                <div class="col-6" style="padding: 1rem;">
+                    <h5><strong>Equipment Type:</strong> <span id="dvEquipmentType" style="font-weight: normal;"></span>
+                    </h5>
+                </div>
+                <div class="col-6" style="padding: 1rem;">
+                    <h5><strong>Model Number:</strong> <span id="dvModelNumber" style="font-weight: normal;"></span>
+                    </h5>
+                </div>
+            </div>
+            <hr>
+            <br>
+            <table style="width: 100%;">
+                <thead>
+                <tr>
+                    <th style="text-align: center; width: 20%; padding: 1rem;">Field Title</th>
+                    <th style="text-align: center; width: 27%; padding: 1rem;">Design Value</th>
+                    <th style="text-align: center; width: 6%; padding: 1rem;"></th>
+                    <th style="text-align: center; width: 20%; padding: 1rem;">Field Title</th>
+                    <th style="text-align: center; width: 27%; padding: 1rem;">Design Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
     </div>
 <div id="myModal" class="modal fade" role="dialog">
@@ -250,39 +295,39 @@ function updateURLParameter(url, param, paramVal)
     });
 </script>
     <script>
-    $(document).ready(function() {
-        $('#printbtn').click(function() {
-            $('#printThis').printThis({
-                importCSS: true,
-                importStyle: true,
-                header: $('.header'),
-                beforePrint: function(){
-                    $('#topnav').hide();
-                    $('#printThis').css('margin-top','100px');
-                    $('#printThis tr th:nth-last-child(1)' +
-                     ', #printThis tr th:nth-last-child(2)' +
-                      ', #printThis tr th:nth-last-child(3)' +
-                       ', #printThis tr th:nth-last-child(4)' +
-                        ', #printThis tr td:nth-last-child(1)' +
-                         ', #printThis tr td:nth-last-child(2)' +
-                          ', #printThis tr td:nth-last-child(3)' +
-                           ', #printThis tr td:nth-last-child(4)').css('display','none');
-                },
-                afterPrint: function(){
-                    $('#topnav').show();
-                    $('#printThis').css('margin-top','0px');
-                    $('#printThis tr th:nth-last-child(1)' +
-                     ', #printThis tr th:nth-last-child(2)' +
-                      ', #printThis tr th:nth-last-child(3)' +
-                       ', #printThis tr th:nth-last-child(4)' +
-                        ', #printThis tr td:nth-last-child(1)' +
-                         ', #printThis tr td:nth-last-child(2)' +
-                          ', #printThis tr td:nth-last-child(3)' +
-                           ', #printThis tr td:nth-last-child(4)').css('display','table-cell');
-                },
+        $(document).ready(function () {
+            $('#printbtn').click(function () {
+                $('#printThis').printThis({
+                    importCSS: true,
+                    importStyle: true,
+                    header: $('.header'),
+                    beforePrint: function () {
+                        $('#topnav').hide();
+                        $('#printThis').css('margin-top', '100px');
+                        $('#printThis tr th:nth-last-child(1)' +
+                            ', #printThis tr th:nth-last-child(2)' +
+                            ', #printThis tr th:nth-last-child(3)' +
+                            ', #printThis tr th:nth-last-child(4)' +
+                            ', #printThis tr td:nth-last-child(1)' +
+                            ', #printThis tr td:nth-last-child(2)' +
+                            ', #printThis tr td:nth-last-child(3)' +
+                            ', #printThis tr td:nth-last-child(4)').css('display', 'none');
+                    },
+                    afterPrint: function () {
+                        $('#topnav').show();
+                        $('#printThis').css('margin-top', '0px');
+                        $('#printThis tr th:nth-last-child(1)' +
+                            ', #printThis tr th:nth-last-child(2)' +
+                            ', #printThis tr th:nth-last-child(3)' +
+                            ', #printThis tr th:nth-last-child(4)' +
+                            ', #printThis tr td:nth-last-child(1)' +
+                            ', #printThis tr td:nth-last-child(2)' +
+                            ', #printThis tr td:nth-last-child(3)' +
+                            ', #printThis tr td:nth-last-child(4)').css('display', 'table-cell');
+                    },
+                });
             });
         });
-    });
     </script>
     <script>
         $(function () {
@@ -292,5 +337,74 @@ function updateURLParameter(url, param, paramVal)
                 scrollInput: false,
             });
         });
+    </script>
+    <script>
+        function getDesignValueColumn(designValues, index) {
+            let field_name = '';
+            let value = '';
+            let field_postfix = '';
+            if (index < designValues.length) {
+                const dv = designValues[index];
+                field_name = `<label style="width: 100%;" class="control-label">${dv.field_name}</label>`;
+
+                value = `<label class="control-label" style="width: 100%;">
+                        <input style="width: 100%;" type="text" class="form-control" value="${dv.value}"></label>`;
+
+                field_postfix = `<div style="position: absolute; opacity: 0.5; top: 22px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">${dv.field_postfix}</label></div>`;
+            }
+
+            return `<td style="padding: 1rem;">${field_name}</td>
+                    <td style="padding: 1rem; position: relative;">${value}${field_postfix}</td>`;
+        }
+
+        function printDesignValues(equipmentId) {
+            const url = '{% url "EquipmentsGetValues" equipment_id="___equipmentId___" %}';
+            $.get(url.replace('___equipmentId___', equipmentId),
+                function (data) {
+                    const topNav = $('#topnav');
+                    const designValuesTable = $('#designValuesTable');
+                    const designValuesTableBody = designValuesTable.find('tbody');
+                    const designValuesTableMargin = $('#designValuesTableMargin');
+
+                    $('#dvId').text(data.id);
+                    $('#dvEquipmentType').text(data.equipment_type);
+                    $('#dvManufacturer').text(data.manufacturer);
+                    $('#dvModelNumber').text(data.model_number);
+                    const designValues = data.design_values;
+                    const rows_num = Math.ceil(designValues.length / 2);
+                    designValuesTableBody.empty();
+
+                    for (let i = 0; i < rows_num; i++) {
+                        const row_1 = i * 2;
+                        const row_2 = row_1 + 1;
+                        designValuesTableBody.append('<tr>' +
+                            getDesignValueColumn(designValues, row_1) +
+                            '<td></td>' +
+                            getDesignValueColumn(designValues, row_2) +
+                            '</tr>');
+                    }
+
+                    designValuesTable.printThis({
+                        importCSS: true,
+                        importStyle: true,
+                        header: $('.header'),
+                        beforePrint: function () {
+                            topNav.hide();
+                            designValuesTableMargin.css('display', 'block');
+                            designValuesTable.css('display', 'block');
+                        },
+                        afterPrint: function () {
+                            topNav.show();
+                            designValuesTableMargin.css('display', 'none');
+                            designValuesTable.css('display', 'none');
+                        },
+                    });
+                }
+            ).fail(function () {
+                    alert(`An error occurred while fetching equipment design values.`);
+                }
+            );
+        }
     </script>
 {% endblock %}

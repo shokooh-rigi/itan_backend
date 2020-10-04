@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Upload Equipment Submittal</h2>
+    <form method='POST' action='' enctype="multipart/form-data" id="equipmentSubmittal-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.equipment_type.as_hidden }}
+            {{ form.manufacturer.as_hidden }}
+            {{ form.model_number.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label class="control-label">Upload Equipment Submittal</label>
+                    <span class="col-3">
+                    {{ form.equipment_submittal }}
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save"/>
+                    <input type="submit" class="btn btn-danger" value="Back to Equipment" name="cancel" formnovalidate/>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        {% if this_equipment.equipment_submittal %}
+            const fileUrl = '{{ this_equipment.equipment_submittal.url }}';
+            const currentFileLink = $('a[href="' + fileUrl + '"]');
+            let fileName = fileUrl.split('/');
+            fileName = fileName[fileName.length - 1];
+            currentFileLink.text(fileName);
+        {% endif %}
+    </script>
+{% endblock %}

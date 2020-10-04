@@ -5,6 +5,126 @@
     <meta charset="utf-8">
     <title>AIR MOVING EQUIPMENT TEST SHEET</title>
     {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 10%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 20%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table divider */
+        .pdf-table .pdf-table-section-divider {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-section-divider td {
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 5px;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            border: 1px solid black;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.long-title {
+            padding: 2px 2px 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell.project-second-row {
+            padding-left: 25px;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-note-section {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .pdf-note-section .pdf-note-content {
+            font-weight: normal;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,548 +134,485 @@
 
 
 <div id="content_frame">
-{% for page in form.data %}
-    <div class="content" style="page-break-after: always;">
-        <table class="table equipment-table" style="height: auto; border: none; font-size: 11px; text-align: center;">
-            <thead>
-            <tr style="padding: 0; margin: 0; border: none;">
-                <th scope="col" style="width: 20%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-                <th scope="col" style="width: 10%; padding: 0; margin: 0; border: none; height: 0;"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr style="font-size: 13px; font-weight: bold; text-decoration: underline;">
-                <td></td>
-                <td style="padding-bottom: 8px;" colspan="6">AIR MOVING EQUIPMENT TEST SHEET</td>
-                <td style="padding-bottom: 8px;" colspan="2">Page {{ forloop.counter }}</td>
-            </tr>
+    {% for page in form.data %}
+        <div class="content pdf-page-content">
+            <table class="table pdf-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th scope="col" class="wide-th"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td></td>
+                    <td class="pdf-table-title-td" colspan="6">AIR MOVING EQUIPMENT TEST SHEET</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
+                    <td class="pdf-table-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.project.project_number }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell project-second-row" colspan="2">DATE:</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ form.report_date | date }}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td class="pdf-table-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell project-second-row" colspan="2">SYSTEM:
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ form.my_sheet.system }}
+                    </td>
+                </tr>
 
 
-            <tr style="text-align: left;">
-                <td style="padding: 5px 2px 1px; font-weight: bold;">PROJECT NO:</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.project_number }}
-                </td>
-                <td style="padding: 5px 2px 1px; font-weight: bold;">DATE:</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="3">
-                    &nbsp;{{ form.report_date | date }}
-                </td>
-            </tr>
-            <tr style="text-align: left;">
-                <td style="padding: 5px 2px 1px; font-weight: bold;">PROJECT:</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name }}
-                </td>
-                <td style="padding: 5px 2px 1px; font-weight: bold;">SYSTEM:</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="3">&nbsp;</td>
-            </tr>
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Fan No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.fan_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.fan_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Location
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.location }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.location }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Area Served
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.area_served }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.area_served }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Manufacturer
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.manufacturer }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.manufacturer }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Model No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.model_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.model_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Serial No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.serial_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.serial_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
 
 
-            <tr style="border-top: 2px solid black; border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Fan No.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.fan_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.fan_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.fan_no }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Location
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.location }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.location }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.location }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Area Served
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.area_served }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.area_served }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.area_served }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Manufacturer
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.manufacturer }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.manufacturer }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.manufacturer }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Model No.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.model_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.model_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.model_no }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-bottom: 2px solid black; border-left: 2px solid black;">
-                <td style="font-weight: bold; padding: 5px 2px 1px; border: 1px solid black; text-align: left;">
-                    Serial No.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.0.serial_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.1.serial_no }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;" colspan="2">
-                    &nbsp;{{ page.2.serial_no }}
-                </td>
-            </tr>
+                <tr class="pdf-table-section-divider">
+                    <td></td>
+                </tr>
 
 
-            <tr style="padding: 0; margin: 0; border: none;">
-                <td style="padding: 0; margin: 0; border: none; height: 5px;"></td>
-            </tr>
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Supply Air Temp</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Supply Air Temp</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Total C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.df_cooling }} DF Cooling
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.df_cooling }} DF Cooling
+                    </td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Return Air C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.return_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.return_air_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.df_heating }} DF Heating
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.return_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.return_air_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.df_heating }} DF Heating
+                    </td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Outdoor Air C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.outdoor_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.outdoor_air_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.outdoor_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.outdoor_air_cfm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Total SP (Ext. SP)
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_sp_ext_sp.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_sp_ext_sp.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_sp_ext_sp.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_sp_ext_sp.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell long-title">
+                        Fan (Unit) Suction Pressure
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_unit_suction_pressure.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_unit_suction_pressure.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_unit_suction_pressure.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_unit_suction_pressure.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell long-title">
+                        Discharge Pressure, Fan/Unit
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.discharge_pressure_fan_unit.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.discharge_pressure_fan_unit.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.discharge_pressure_fan_unit.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.discharge_pressure_fan_unit.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Fan R.P.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_rpm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_rpm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
 
 
-            <tr style="border-top: 2px solid black; border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Design</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Design</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Design</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Total C.F.M.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.total_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.total_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.total_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.total_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.total_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.total_cfm.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Return Air C.F.M.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.return_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.return_air_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.return_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.return_air_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.return_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.return_air_cfm.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Outdoor Air C.F.M.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.outdoor_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.outdoor_air_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.outdoor_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.outdoor_air_cfm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.outdoor_air_cfm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.outdoor_air_cfm.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Total SP (Ext. SP)
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.total_sp_ext_sp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.total_sp_ext_sp.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.total_sp_ext_sp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.total_sp_ext_sp.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.total_sp_ext_sp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.total_sp_ext_sp.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 2px 2px 0; font-weight: bold; text-align: left;">
-                    Fan (Unit) Suction Pressure
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.fan_unit_suction_pressure.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.fan_unit_suction_pressure.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.fan_unit_suction_pressure.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.fan_unit_suction_pressure.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.fan_unit_suction_pressure.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.fan_unit_suction_pressure.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 2px 2px 0; font-weight: bold; text-align: left;">
-                    Discharge Pressure, Fan/Unit
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.discharge_pressure_fan_unit.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.discharge_pressure_fan_unit.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.discharge_pressure_fan_unit.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.discharge_pressure_fan_unit.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.discharge_pressure_fan_unit.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.discharge_pressure_fan_unit.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-bottom: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Fan R.P.M.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.fan_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.fan_rpm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.fan_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.fan_rpm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.fan_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.fan_rpm.actual }}
-                </td>
-            </tr>
+                <tr class="pdf-table-section-divider">
+                    <td></td>
+                </tr>
 
 
-            <tr style="padding: 0; margin: 0; border: none;">
-                <td style="padding: 0; margin: 0; border: none; height: 5px;"></td>
-            </tr>
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Motor
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        H.P.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.hp.design }}
+                    </td>
+                    <td class="pdf-table-cell">SEE BHP</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.hp.design }}
+                    </td>
+                    <td class="pdf-table-cell">SEE BHP</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Voltage
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.voltage.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.voltage.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.voltage.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.voltage.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Phase
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.phase.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.phase.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.phase.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.phase.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Amperage
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.amperage.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.amperage.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.amperage.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.amperage.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        B.H.P. (Calc.)
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.bhp_calc.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.bhp_calc.actual | floatformat:2 }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.bhp_calc.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.bhp_calc.actual | floatformat:2 }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Frame
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.frame.design }}
+                    </td>
+                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.frame.design }}
+                    </td>
+                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        S.F. / Code
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.sf_code.design }}
+                    </td>
+                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.sf_code.design }}
+                    </td>
+                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Motor RPM
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.motor_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.motor_rpm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.motor_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.motor_rpm.actual }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                </tbody>
+            </table>
 
-
-            <tr style="border-top: 2px solid black; border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Motor
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">RATED</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">RATED</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">RATED</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold;">Actual</td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    H.P.
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.hp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">SEE BHP</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.hp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">SEE BHP</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.hp.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">SEE BHP</td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Voltage
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.voltage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.voltage.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.voltage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.voltage.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.voltage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.voltage.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Phase
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.phase.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.phase.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.phase.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.phase.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.phase.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.phase.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Amperage
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.amperage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.amperage.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.amperage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.amperage.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.amperage.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.amperage.actual }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    B.H.P. (Calc.)
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.bhp_calc.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.bhp_calc.actual | floatformat:2 }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.bhp_calc.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.bhp_calc.actual | floatformat:2 }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.bhp_calc.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.bhp_calc.actual | floatformat:2 }}
-                </td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Frame
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.frame.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.frame.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.frame.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    S.F. / Code
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.sf_code.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.sf_code.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.sf_code.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">--------</td>
-            </tr>
-            <tr style="border-right: 2px solid black; border-bottom: 2px solid black; border-left: 2px solid black;">
-                <td style="border: 1px solid black; padding: 5px 2px 1px; font-weight: bold; text-align: left;">
-                    Motor RPM
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.motor_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.0.motor_rpm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.motor_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.1.motor_rpm.actual }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">&nbsp;</td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.motor_rpm.design }}
-                </td>
-                <td style="border: 1px solid black; padding: 5px 2px 1px;">
-                    &nbsp;{{ page.2.motor_rpm.actual }}
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <p style="font-size: 11px; font-weight: bold;">
-            Notes: <span style="font-weight: normal;"></span>
-        </p>
-    </div>
-{% endfor %}
+            <p class="pdf-note-section">
+                Notes: <span class="pdf-note-content"></span>
+            </p>
+        </div>
+    {% endfor %}
 </div>
 </body>
 </html>

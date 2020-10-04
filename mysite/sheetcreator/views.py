@@ -166,6 +166,14 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
             [('serial_no', 'Serial No.'), ]
         ),
         (
+            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
+            [('df_cooling', 'DF Cooling'), ]
+        ),
+        (
+            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
+            [('df_heating', 'DF Heating'), ]
+        ),
+        (
             "equipment.equipment.manufacturer",
             [('manufacturer', ''), ]
         ),
@@ -183,7 +191,7 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
                 ('total_sp_ext_sp', 'Total SP (Ext. SP)'),
                 ('fan_unit_suction_pressure', 'Fan (Unit) Suction Pressure'),
                 ('discharge_pressure_fan_unit', 'Discharge Pressure, Fan/Unit'),
-                ('fan_rpm', 'Fan R.P.M.'),
+                ('fan_rpm', 'Fan R.P.M'),
                 ('hp', 'H.P.'),
                 ('voltage', 'Voltage'),
                 ('phase', 'Phase'),
@@ -198,6 +206,12 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
     for field_value_str, items in data_fields:
         for key, name in items:
             equipment_data[key] = eval(field_value_str.format(name))
+
+    for key in equipment_data:
+        if key in ['df_cooling', 'df_heating']:
+            if equipment_data[key]:
+                equipment_data[key] = equipment_data[key] + '°'
+
     return equipment_data
 
 
@@ -209,10 +223,11 @@ def equipments_generate_report_pdf(request, sheet_id):
 
     data = []
     len_equipments = sheet_equipments.count()
-    for i in range(math.ceil(len_equipments / 3)):
+    equipment_in_page = 2
+    for i in range(math.ceil(len_equipments / equipment_in_page)):
         page = []
-        for j in range(3):
-            index = i * 3 + j
+        for j in range(equipment_in_page):
+            index = i * equipment_in_page + j
             if index < len_equipments:
                 page.append(fetch_sheet_equipment_data(sheet_equipments[index]))
         data.append(page)
@@ -324,16 +339,18 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
 
     return render(request, "sheetEquipmentCommonDataEdit.html", parameters)
 
+
 @login_required
 def review_equipment_values(request, sheet_equipment_id):
     this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
     this_equipment = this_sheet_equipment.equipment
     custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
     custom_operations = this_equipment.equipment_type.equipmenttypecustomoperation_set.all()
-    show_parentheses_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(
-        Q(show_parentheses=ShowParenthesesChoices.Design.value) |
-        Q(show_parentheses=ShowParenthesesChoices.Both.value))))
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'H.P.', 'Voltage', 'Amperage', ]
+    show_parentheses_fields = list(map(lambda item:
+                                       {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
+                                       custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+                                                            Q(show_parentheses=ShowParenthesesChoices.Both.value))))
+    required_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(required_in_design=True)))
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -456,13 +473,17 @@ def review_equipment_values(request, sheet_equipment_id):
                         return render(request, "EquipmentDesignValue.html", parameters)
 
             for custom_field in custom_fields:
+                new_value = request.POST.get('company_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = custom_field.default_value.strip()
+
                 num_results = EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                                  equipment=this_equipment.id).count()
+                                                                  equipment=this_equipment).count()
                 if num_results > 0:
                     EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                        equipment=this_equipment.id).update(company_value=request.POST.get('company_value_' + str(custom_field.id)))
+                                                        equipment=this_equipment.id).update(company_value=new_value)
                 else:
-                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=request.POST.get('company_value_' + str(custom_field.id)), equipment=this_equipment)
+                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=new_value, equipment=this_equipment)
                     new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
             this_sheet_equipment.save()
@@ -626,11 +647,26 @@ def get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fiel
     require_parentheses = equipment_type_custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
                                                               Q(show_parentheses=ShowParenthesesChoices.Both.value))
     if insert:
+        fields = map(lambda item: {
+            'id': f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
+            'defaultValue': item.default_value,
+        }, require_parentheses)
+    else:
+        fields = map(lambda item: {
+            'id': f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
+            'defaultValue': item.default_value,
+        }, require_parentheses)
+    return list(fields)
+
+
+def get_required_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
+    required_fields = equipment_type_custom_fields.filter(required_in_actual=True)
+    if insert:
         fields = map(lambda item: f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
-                     require_parentheses)
+                     required_fields)
     else:
         fields = map(lambda item: f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
-                     require_parentheses)
+                     required_fields)
     return list(fields)
 
 
@@ -643,7 +679,7 @@ def equipment_actual_values(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
+    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -666,14 +702,21 @@ def equipment_actual_values(request, sheet_equipment_id):
                     'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
                 new_object.save()
             for custom_field in custom_fields:
-                num_results = SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
-                                                                  sheet_equipment=this_sheet_equipment.id).count()
+                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = equipment_type_custom_fields.get(
+                        field_name=custom_field.equipment_value_name).default_value.strip()
+
+                num_results = SheetEquipmentActualData.objects.filter(
+                    key__equipment_value_name=custom_field.equipment_value_name,
+                    sheet_equipment=this_sheet_equipment).count()
+
                 if num_results > 0:
                     SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
-                                                                  sheet_equipment=this_sheet_equipment).update(value=request.POST.get('actual_value_' + str(custom_field.id)))
+                                                            sheet_equipment=this_sheet_equipment).update(value=new_value)
                 else:
                     new_object_key = EquipmentCustomField.objects.get(equipment=this_sheet_equipment.equipment, equipment_value_name=custom_field.equipment_value_name)
-                    new_object = SheetEquipmentActualData(key=new_object_key, value=request.POST.get('actual_value_' + str(custom_field.id)), sheet_equipment=this_sheet_equipment)
+                    new_object = SheetEquipmentActualData(key=new_object_key, value=new_value, sheet_equipment=this_sheet_equipment)
                     new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
             this_sheet_equipment.save()
@@ -697,7 +740,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields, False)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
-    required_fields = ['Total C.F.M.', 'Return Air C.F.M.', 'Outdoor Air C.F.M.', 'Voltage', 'Amperage', ]
+    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields, False)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
@@ -721,8 +764,13 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                                                         sheet_equipment=this_sheet_equipment).update(
                     value=request.POST.get('other_value_' + str(other_custom_field.id)))
             for custom_field in custom_fields:
+                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
+                if not new_value:
+                    new_value = equipment_type_custom_fields.get(
+                        field_name=custom_field.key.equipment_value_name).default_value.strip()
+
                 SheetEquipmentActualData.objects.filter(key=custom_field.key,
-                                                        sheet_equipment=this_sheet_equipment).update(value=request.POST.get('actual_value_' + str(custom_field.id)))
+                                                        sheet_equipment=this_sheet_equipment).update(value=new_value)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'custom_fields': custom_fields,
