@@ -49,10 +49,12 @@ def order_list(request):
 
 
 @login_required
-def order_add(request):
+def order_add(request, proposal_id=None):
     form = OrderForm(request.POST or None, request.FILES or None)
-    proposals = Proposal.objects.filter(archive=False).exclude(
-        id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
+    if proposal_id:
+        proposals = Proposal.objects.filter(id=proposal_id)
+    else:
+        proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderHome')

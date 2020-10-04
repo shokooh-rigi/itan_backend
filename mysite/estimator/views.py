@@ -354,7 +354,7 @@ def quote_add(request, estimate_id=None):
 
 
 @login_required
-def proposal_add(request):
+def proposal_add(request, quote_id=None):
     form = ProposalForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -380,7 +380,10 @@ def proposal_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    quotes = Quote.objects.filter(archive=False).exclude(
+    if quote_id:
+        quotes = Quote.objects.filter(id=quote_id)
+    else:
+        quotes = Quote.objects.filter(archive=False).exclude(
         id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):

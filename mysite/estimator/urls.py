@@ -12,6 +12,7 @@ urlpatterns = [
     path('quote/add/', views.quote_add, name='quoteAdd'),
     path('quote/add/<int:estimate_id>/', views.quote_add, name='quoteAddUsingEstimate'),
     path('proposal/add/', views.proposal_add, name='proposalAdd'),
+    path('proposal/add/<int:quote_id>/', views.proposal_add, name='proposalAddUsingQuote'),
     path('estimator/archive/<int:estimate_id>/', views.estimate_archive, name='estimateArchive'),
     path('quote/archive/<int:quote_id>/', views.quote_archive, name='quoteArchive'),
     path('proposal/archive/<int:proposal_id>/', views.proposal_archive, name='proposalArchive'),

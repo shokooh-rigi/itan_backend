@@ -32,6 +32,11 @@
         }
         </style>
         {% recaptcha_init %}
+          <script>
+              $(document).ready(function() {
+                  $('.django-select2').data('minimum-input-length', '1');
+              });
+        </script>
     </head>
   <body class="text-center">
     <header class="header">
@@ -200,13 +205,13 @@ function closePopup(win, newID, newRepr, id) {
 
 </script>
 {{ form.media.js }}
-      <script>
-        $(document).ready(function() {
-            $('select.select2').djangoSelect2({
-                minimumInputLength: 1
-            });
-        });
-        </script>
+<script>
+$(document).ready(function() {
+    $('select.select2').djangoSelect2({
+        minimumInputLength: 1
+    });
+});
+</script>
 {% endblock %}
   </body>
 </html>

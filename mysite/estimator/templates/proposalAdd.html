@@ -10,10 +10,10 @@
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_quote" class="control-label">Quote #<span class="required">*</span></label>
-                    <select name="quote" class="form-control" required="" id="id_quote">
+                    <select name="quote" class="form-control select2" required="" id="id_quote">
                         <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
                         {% for quote in quotes %}
-                            <option value="{{ quote.id }}" data-customer="{{ quote.estimate.customer }}" data-engineer="{{ quote.estimate.engineer }}" data-tabamount="${% estimate_sub_total_calculator quote.estimate.id %}" data-preamount="${% estimate_predemo_calculator quote.estimate.id %}" data-totalamount="${% estimate_total_calculator quote.estimate.id %}">{% estimate_number_generator quote.estimate.id %}</option>
+                            <option value="{{ quote.id }}" data-customer="{{ quote.estimate.customer }}" data-engineer="{{ quote.estimate.engineer }}" data-tabamount="${% estimate_sub_total_calculator quote.estimate.id %}" data-preamount="${% estimate_predemo_calculator quote.estimate.id %}" data-totalamount="${% estimate_total_calculator quote.estimate.id %}"{% if quotes.count == 1 %} selected="selected"{% endif %}>{% estimate_number_generator quote.estimate.id %}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'quoteAdd' %}" id="add_quote"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
@@ -70,6 +70,12 @@
         </div>
 	</form>
     <script>
+        $("#customer").text($('#id_quote').find(':selected').data('customer'));
+        $("#engineer").text($('#id_quote').find(':selected').data('engineer'));
+        $("#tab_amount").text($('#id_quote').find(':selected').data('tabamount'));
+        $("#pre_amount").text($('#id_quote').find(':selected').data('preamount'));
+        $("#total_amount").text($('#id_quote').find(':selected').data('totalamount'));
+
         $('#id_quote').on('change', function() {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#engineer").text($(this).find(':selected').data('engineer'));
