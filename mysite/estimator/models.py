@@ -2,6 +2,7 @@ from mysite.bidfilemgm.models import *
 from mysite.core.models import *
 from mysite.dbmanagement.models import *
 from .render import Render
+from django.conf import settings
 
 
 # Create your models here.
@@ -151,3 +152,7 @@ def estimate_number_generator(estimate_id):
     estimator_long_id = estimate.created_by.id + 100
     estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
+
+
+class Book(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

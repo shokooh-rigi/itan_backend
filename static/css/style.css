@@ -405,6 +405,10 @@ i {
     filter: grayscale(100%);
 }
 
+.icon.disableicon {
+    filter: grayscale(100%);
+}
+
 .icon.editicon {
     background-image: url("../images/icons/edit.svg");
 }
@@ -451,6 +455,10 @@ i {
 
 .icon.noteicon {
     background-image: url("../images/icons/note.svg");
+}
+
+.icon.linkicon {
+    background-image: url("../images/icons/link.svg");
 }
 
 .main .pagination {
@@ -565,4 +573,16 @@ i {
 
 .nobg:hover {
     background: transparent !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 34px;
 }
