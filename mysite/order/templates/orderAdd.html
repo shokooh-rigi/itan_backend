@@ -10,10 +10,10 @@
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_proposal" class="control-label">Proposal #<span class="required">*</span></label>
-                    <select name="proposal" class="form-control" required="" id="id_proposal">
+                    <select name="proposal" class="form-control select2" required="" id="id_proposal">
                         <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
                         {% for proposal in proposals %}
-                            <option value="{{ proposal.id }}" data-customer="{{ proposal.quote.estimate.customer }}" data-engineer="{{ proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.quote.estimate.id %}" data-dlink="{% if proposal.quote.estimate.bfm.uploaded_file %}{{ proposal.quote.estimate.bfm.uploaded_file.url }}{% endif %}">{% estimate_number_generator proposal.quote.estimate.id %}</option>
+                            <option value="{{ proposal.id }}" data-customer="{{ proposal.quote.estimate.customer }}" data-engineer="{{ proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.quote.estimate.id %}" data-dlink="{% if proposal.quote.estimate.bfm.uploaded_file %}{{ proposal.quote.estimate.bfm.uploaded_file.url }}{% endif %}"{% if proposals.count == 1 %} selected="selected"{% endif %}>{% estimate_number_generator proposal.quote.estimate.id %}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
@@ -77,6 +77,13 @@
         </div>
 	</form>
     <script>
+        $("#customer").text($('#id_proposal').find(':selected').data('customer'));
+        $("#engineer").text($('#id_proposal').find(':selected').data('engineer'));
+        $("#tab_amount").text($('#id_proposal').find(':selected').data('tabamount'));
+        $("#pre_amount").text($('#id_proposal').find(':selected').data('preamount'));
+        $("#total_amount").text($('#id_proposal').find(':selected').data('totalamount'));
+        $("#dlink_href").attr("href", $('#id_proposal').find(':selected').data('dlink')).show();
+
         $('#id_proposal').on('change', function() {
             if($(this).val() === '') {
                 $("#customer").text('');

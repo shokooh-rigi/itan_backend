@@ -2,6 +2,7 @@ from mysite.bidfilemgm.models import *
 from mysite.core.models import *
 from mysite.dbmanagement.models import *
 from .render import Render
+from django.conf import settings
 
 
 # Create your models here.

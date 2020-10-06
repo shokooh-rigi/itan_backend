@@ -10,8 +10,41 @@ html, body {
 }
 
 i {
-    margin: 0px 5px;
+    margin: 0 5px;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+input[type="number"] {
+-moz-appearance: textfield;
+}
+
+.readonly {
+    pointer-events: none;
+    background: #333333;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container {
+    pointer-events: none;
+    touch-action: none;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+    background: #eee;
+    box-shadow: none;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow, select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
+    display: none;
+}
+
+input[type=text][readonly] {
+    pointer-events: none;
+}
+
 
 .main {
     background: rgba(255, 255, 255, .8);
@@ -405,6 +438,10 @@ i {
     filter: grayscale(100%);
 }
 
+.icon.disableicon {
+    filter: grayscale(100%);
+}
+
 .icon.editicon {
     background-image: url("../images/icons/edit.svg");
 }
@@ -451,6 +488,10 @@ i {
 
 .icon.noteicon {
     background-image: url("../images/icons/note.svg");
+}
+
+.icon.linkicon {
+    background-image: url("../images/icons/link.svg");
 }
 
 .icon.printicon {
@@ -569,4 +610,16 @@ i {
 
 .nobg:hover {
     background: transparent !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 34px;
 }

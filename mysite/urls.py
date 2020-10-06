@@ -11,6 +11,7 @@ from .core.forms import UserLoginForm
 admin.autodiscover()
 
 urlpatterns = [
+    path('select2/', include("django_select2.urls")),
     path('admin/', admin.site.urls),
     url(r'^accounts/password_change/$', core_views.change_password, name='password_change'),
     path('accounts/', include('django.contrib.auth.urls')),

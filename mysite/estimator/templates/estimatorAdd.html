@@ -9,10 +9,10 @@
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 37px;">
                     <label for="id_bfm" class="control-label">BFM</label>
-                    <select name="bfm" class="form-control" id="id_bfm">
+                    <select name="bfm" class="form-control select2" id="id_bfm">
                         <option value="" data-customer="" data-project="" data-duedate="" data-dlink="" selected="">---------</option>
                         {% for bfm in bfms %}
-                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}" data-bfmnote="{% if bfm.note %}{{ bfm.note }}{% endif %}">{{ bfm }}</option>
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.id }}" data-project="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}" data-bfmnote="{% if bfm.note %}{{ bfm.note }}{% endif %}" {% if bfms.count == 1 %}selected="selected"{% endif %}>{{ bfm }}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
@@ -109,18 +109,56 @@
                 }
                 $('#id_bfm').on('change', function() {
                     if ($(this).val() === '') {
-                        $('#id_customer').val('');
-                        $('#id_project').val('');
+                        $('#id_customer, #id_project').val('').attr({'readonly': false}).trigger('change');
                         $('#id_due_date').attr('readonly', false).val('');
                         $('#id_customer option, #id_project option').attr('disabled', false);
                         $("#dlink_href").attr("href", '').hide();
                         $("#bfm_note").hide();
                     } else {
                         $('#id_customer option, #id_project option').attr('disabled', false);
-                        $("#id_customer").val($(this).find(':selected').data('customer'));
-                        $("#id_project").val($(this).find(':selected').data('project'));
+                        $.ajax({
+                            type: 'GET',
+                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_customer').append(option).trigger('change');
+
+                            $('#id_customer').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
+                        $.ajax({
+                            type: 'GET',
+                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_project').append(option).trigger('change');
+
+                            $('#id_project').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
                         $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
                         $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                        $('#id_customer, #id_project').attr({'readonly': 'readonly'}).trigger('change');
                         if ($(this).find(':selected').data('dlink') != '') {
                             $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
                         }
@@ -176,5 +214,4 @@
             });
         });
     </script>
-
 {% endblock %}

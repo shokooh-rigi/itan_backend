@@ -1,6 +1,14 @@
 from django.forms import ModelForm
+from django_select2 import forms as s2forms
 
 from .models import *
+
+
+class ProposalWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "id",
+        "quote__estimate__project__name__icontains"
+    ]
 
 
 class OrderForm(ModelForm):
@@ -16,6 +24,9 @@ class OrderForm(ModelForm):
             'equipment_submittal',
             'note',
         ]
+        widgets = {
+            'proposal': ProposalWidget,
+        }
 
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
@@ -23,6 +34,7 @@ class OrderForm(ModelForm):
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+        self.fields['proposal'].widget.attrs['class'] = 'select2'
 
 
 class ChangeOrderForm(ModelForm):

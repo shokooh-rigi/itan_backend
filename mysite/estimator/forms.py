@@ -1,7 +1,44 @@
 from django import forms
 from django.forms import ModelForm
+from django_select2 import forms as s2forms
 
 from .models import *
+
+
+class QuoteWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "id",
+        "estimate__project__name__icontains"
+    ]
+
+
+class EstimateWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "id",
+        "project__name__icontains"
+    ]
+
+
+class BFMWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "id",
+        "project__name__icontains"
+    ]
+
+
+class ProjectWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        'id',
+        'name__icontains'
+    ]
+
+
+class CustomerWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        'id',
+        'name__icontains',
+        'company__name__icontains'
+    ]
 
 
 class EstimateForm(ModelForm):
@@ -24,6 +61,12 @@ class EstimateForm(ModelForm):
             'predemo',
             'created_by',
         ]
+        widgets = {
+            'bfm': BFMWidget,
+            'customer': CustomerWidget,
+            'project': ProjectWidget,
+            'engineer': CustomerWidget,
+        }
 
     def __init__(self, *args, **kwargs):
         super(EstimateForm, self).__init__(*args, **kwargs)
@@ -39,6 +82,10 @@ class EstimateForm(ModelForm):
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+        self.fields['bfm'].widget.attrs['class'] = 'select2'
+        self.fields['customer'].widget.attrs['class'] = 'select2'
+        self.fields['project'].widget.attrs['class'] = 'select2'
+        self.fields['engineer'].widget.attrs['class'] = 'select2'
 
 
 class QuoteForm(ModelForm):
@@ -48,6 +95,9 @@ class QuoteForm(ModelForm):
             'estimate',
             'note',
         ]
+        widgets = {
+            "estimate": EstimateWidget,
+        }
 
     def __init__(self, *args, **kwargs):
         super(QuoteForm, self).__init__(*args, **kwargs)
@@ -55,6 +105,7 @@ class QuoteForm(ModelForm):
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+        self.fields['estimate'].widget.attrs['class'] = 'select2'
 
 
 class ProposalForm(ModelForm):
@@ -65,6 +116,9 @@ class ProposalForm(ModelForm):
             'note',
             'validity',
         ]
+        widgets = {
+            'quote': QuoteWidget,
+        }
 
     def __init__(self, *args, **kwargs):
         super(ProposalForm, self).__init__(*args, **kwargs)
@@ -72,6 +126,7 @@ class ProposalForm(ModelForm):
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+        self.fields['quote'].widget.attrs['class'] = 'select2'
 
 
 class CustomerForm(ModelForm):

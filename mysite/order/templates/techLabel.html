@@ -3,7 +3,7 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Tech Label for Project Number #{{ this_order.order.project_number }}</h2>
+    <h2>Tech Label for Project Number #{{ this_order }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="techLabel-form">
         <div class="form-group">
             {% csrf_token %}

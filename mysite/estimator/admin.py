@@ -10,6 +10,7 @@ from .models import *
 
 class EstimateAdmin(ImportExportModelAdmin):
     readonly_fields = ('created_by', 'created_on',)
+    search_fields = ('project__name', 'id')
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -30,6 +31,7 @@ class QuoteResource(resources.ModelResource):
 
 class QuoteAdmin(ImportExportModelAdmin):
     resource_class = QuoteResource
+    autocomplete_fields = ['estimate']
 
 
 admin.site.register(Quote, QuoteAdmin)

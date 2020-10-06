@@ -9,6 +9,7 @@
         <link rel="icon" href="{% static "images/logo.svg" %}" />
 		<link rel="apple-touch-icon" href="{% static "images/logo.svg" %}" />
         <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" crossorigin="anonymous" />
+        {{ form.media.css }}
         <link rel="stylesheet" href="{% static "css/style.css" %}" />
         <link href="https://fonts.googleapis.com/css?family=Poppins:100,300,400,500,700&display=swap" rel="stylesheet" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -31,6 +32,11 @@
         }
         </style>
         {% recaptcha_init %}
+          <script>
+              $(document).ready(function() {
+                  $('.django-select2').data('minimum-input-length', '1');
+              });
+        </script>
     </head>
   <body class="text-center">
     <header class="header">
@@ -197,6 +203,14 @@ function closePopup(win, newID, newRepr, id) {
     win.close();
 }
 
+</script>
+{{ form.media.js }}
+<script>
+$(document).ready(function() {
+    $('select.select2').djangoSelect2({
+        minimumInputLength: 1
+    });
+});
 </script>
 {% endblock %}
   </body>

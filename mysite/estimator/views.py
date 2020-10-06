@@ -14,7 +14,6 @@ from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
-
 # Create your views here.
 
 
@@ -252,10 +251,12 @@ def proposal_list(request):
 
 
 @login_required
-def estimator_add(request):
+def estimator_add(request, bfm_id=None):
     form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    bfms = BidFile.objects.filter(archive=False).exclude(
-        id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
+    if bfm_id:
+        bfms = BidFile.objects.filter(id=bfm_id)
+    else:
+        bfms = BidFile.objects.filter(archive=False).exclude(id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -275,7 +276,7 @@ def estimator_add(request):
 
 
 @login_required
-def quote_add(request):
+def quote_add(request, estimate_id=None):
     form = QuoteForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -302,8 +303,10 @@ def quote_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    estimates = Estimate.objects.filter(archive=False).exclude(
-        id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
+    if estimate_id:
+        estimates = Estimate.objects.filter(id=estimate_id)
+    else:
+        estimates = Estimate.objects.filter(archive=False).exclude(id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('quotationHome')
@@ -351,7 +354,7 @@ def quote_add(request):
 
 
 @login_required
-def proposal_add(request):
+def proposal_add(request, quote_id=None):
     form = ProposalForm(request.POST or None, request.FILES or None)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -377,7 +380,10 @@ def proposal_add(request):
         user_cell = ''
     else:
         user_cell = request.user.profile.cell
-    quotes = Quote.objects.filter(archive=False).exclude(
+    if quote_id:
+        quotes = Quote.objects.filter(id=quote_id)
+    else:
+        quotes = Quote.objects.filter(archive=False).exclude(
         id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
     if request.method == 'POST':
         if request.POST.get("cancel"):
