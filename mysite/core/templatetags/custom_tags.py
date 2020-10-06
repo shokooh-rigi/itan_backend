@@ -68,9 +68,11 @@ def get_field_type(field):
     elif type(field) == EquipmentTypeCustomField:
         field_type = field.field_type
 
-    if field_type == FieldTypeChoices.Integer.value or field_type == FieldTypeChoices.Float.value:
-        return 'number'
-    return 'text'
+    if field_type == FieldTypeChoices.Integer.value:
+        return 'type=number'
+    elif field_type == FieldTypeChoices.Float.value:
+        return 'type=number step=any'
+    return 'type=text'
 
 
 @register.filter()

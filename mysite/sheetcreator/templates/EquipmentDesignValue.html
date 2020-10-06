@@ -40,7 +40,7 @@
                     </div>
                     <div class="col-lg-3">
                         <label for="{{ field_name }}" class="control-label" style="width: 100%;">
-                            <input style="width: 100%;" type="{% get_field_type custom_field %}"
+                            <input style="width: 100%;" {% get_field_type custom_field %}
                                    {% if field_name in required_fields %}required=""{% endif %}
                                    name="{{ field_name }}" maxlength="50"
                                    class="form-control" id="{{ field_name }}"
