@@ -160,8 +160,12 @@ def change_order(request, order_id):
 
 
 def tech_label(request, order_id):
-    this_order = get_object_or_404(TechLabel, order__id=order_id)
-    form = TechLabelForm(request.POST or None, instance=this_order)
+    this_order = get_object_or_404(Order, id=order_id)
+    this_techlabel = TechLabel.objects.filter(order__id=order_id).first()
+    if this_techlabel:
+        form = TechLabelForm(request.POST or None, instance=this_techlabel)
+    else:
+        form = TechLabelForm(request.POST or None, initial={'order': order_id})
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderEdit', order_id=order_id)
@@ -175,7 +179,7 @@ def tech_label(request, order_id):
                 this_tech_label = form.save()
                 parameters = {'form': form,
                               'datenow': datetime.datetime.now().date(),
-                              'file_name': 'techlabel-' + str(this_order.order.project_number),
+                              'file_name': 'techlabel-' + str(this_order.project_number),
                               'tech_label': this_tech_label,
                               'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                               'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,

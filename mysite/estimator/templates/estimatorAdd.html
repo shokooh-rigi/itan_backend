@@ -109,22 +109,56 @@
                 }
                 $('#id_bfm').on('change', function() {
                     if ($(this).val() === '') {
-                        $('#id_customer').val('');
-                        $("#id_customer").trigger('change');
-                        $('#id_project').val('');
-                        $("#id_project").trigger('change');
+                        $('#id_customer, #id_project').val('').attr({'readonly': false}).trigger('change');
                         $('#id_due_date').attr('readonly', false).val('');
                         $('#id_customer option, #id_project option').attr('disabled', false);
                         $("#dlink_href").attr("href", '').hide();
                         $("#bfm_note").hide();
                     } else {
                         $('#id_customer option, #id_project option').attr('disabled', false);
-                        $("#id_customer").val($(this).find(':selected').data('customer'));
-                        $("#id_customer").trigger('change');
-                        $("#id_project").val($(this).find(':selected').data('project'));
-                        $("#id_project").trigger('change');
+                        $.ajax({
+                            type: 'GET',
+                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_customer').append(option).trigger('change');
+
+                            $('#id_customer').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
+                        $.ajax({
+                            type: 'GET',
+                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_project').append(option).trigger('change');
+
+                            $('#id_project').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
                         $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
                         $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                        $('#id_customer, #id_project').attr({'readonly': 'readonly'}).trigger('change');
                         if ($(this).find(':selected').data('dlink') != '') {
                             $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
                         }

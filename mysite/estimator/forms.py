@@ -26,6 +26,21 @@ class BFMWidget(s2forms.ModelSelect2Widget):
     ]
 
 
+class ProjectWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        'id',
+        'name__icontains'
+    ]
+
+
+class CustomerWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        'id',
+        'name__icontains',
+        'company__name__icontains'
+    ]
+
+
 class EstimateForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
     drawing_date = forms.DateField(required=False, widget=forms.DateInput(format='%m/%d/%Y'),
@@ -48,6 +63,9 @@ class EstimateForm(ModelForm):
         ]
         widgets = {
             'bfm': BFMWidget,
+            'customer': CustomerWidget,
+            'project': ProjectWidget,
+            'engineer': CustomerWidget,
         }
 
     def __init__(self, *args, **kwargs):

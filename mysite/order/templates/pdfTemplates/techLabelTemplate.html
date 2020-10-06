@@ -22,7 +22,7 @@
              <table class="proposal_header" style="padding: 0;">
                 <tbody style="padding: 0;">
                     <tr>
-                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
                         <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                     </tr>
                 </tbody>
@@ -34,9 +34,9 @@
         <div><b>Project Address: </b>{{ tech_label.order.proposal.quote.estimate.project.address_line_1 }}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_2 }}</div>
         <br /><br />
         <div><b>Date: </b>{{ datenow }}</div>
-        <div><b>MC Info: </b>{{ tech_label.order.proposal.quote.estimate.customer }}</div>
-        <div><b>Arch Info: </b></div>
-        <div><b>Eng Info: </b>{{ tech_label.order.proposal.quote.estimate.engineer }}</div>
+        <div><b>MC Info: </b>{{ tech_label.order.proposal.quote.estimate.customer.company.name }}</div>
+        <div><b>Arch Info: </b>{% if tech_label.order.architect_name %}{{ tech_label.order.architect_name }}{% endif %}</div>
+        <div><b>Eng Info: </b>{{ tech_label.order.proposal.quote.estimate.engineer.company.name }}</div>
         <br /><br />
         <div><table><tbody><tr>
             <td style="width: 25%;"><b>PRE-DEMO: </b></td>
@@ -67,7 +67,7 @@
              <table class="proposal_header">
                 <tbody>
                     <tr>
-                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
                         <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                     </tr>
                 </tbody>
