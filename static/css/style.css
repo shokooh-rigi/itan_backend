@@ -565,43 +565,47 @@ input[type=text][readonly] {
     margin: 0 auto;
 }
 
-#techpanel {
+#sectionpanel {
 }
 
-#techpanel .card {
-    background: #d7d7d7;
+#sectionpanel .card {
+    background: #e0e0e0;
     border-radius: 10px;
+    margin: 12px auto;
+    transition: all 0.3s;
 }
 
-#techpanel .card a {
+#sectionpanel .card a {
     text-decoration: none;
-    color: #000;
+    color: #111111;
 }
 
-#techpanel .card .card-body {
-    height: 80px;
+#sectionpanel .card .card-body {
+    height: 70px;
+    padding: 1rem 0.5rem;
 }
 
-#techpanel .card .col-sm-8 {
-    background: #01133b;
-    width: 200px;
-    max-height: 200px;
+#sectionpanel .card .card-body .card-title {
+    font-weight: 700;
+    transition: letter-spacing 0.8s;
+    margin-bottom: 0;
+}
+
+#sectionpanel .card .col-sm-12 {
     color: #fff;
-    padding: 24px;
+    padding: 12px;
     overflow: hidden;
 }
 
-#techpanel .card:hover {
-    background: #0dd5f9;
-    color: #fff;
+#sectionpanel .card:hover {
+    background: #ece2c1;
+    color: #000;
 }
 
-#techpanel .card:hover a {
-    color: #fff;
-}
-
-#techpanel .card:hover .col-sm-8 {
-    background: #d7d7d7;
+#sectionpanel .card:hover .card-body .card-title {
+    color: #000;
+    letter-spacing: 4px;
+    text-decoration: underline;
 }
 
 .nobg {

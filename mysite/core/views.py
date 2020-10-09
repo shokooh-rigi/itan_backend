@@ -18,7 +18,17 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
 @login_required
 def tech(request):
-    return render(request, 'tech.html')
+    return render(request, 'iconbase-tech.html')
+
+
+@login_required
+def estimate(request):
+    return render(request, 'iconbase-estimate.html')
+
+
+@login_required
+def accounting(request):
+    return render(request, 'iconbase-accounting.html')
 
 
 @login_required

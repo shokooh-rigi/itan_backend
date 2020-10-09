@@ -77,12 +77,27 @@
         </div>
 	</form>
     <script>
-        $("#customer").text($('#id_proposal').find(':selected').data('customer'));
-        $("#engineer").text($('#id_proposal').find(':selected').data('engineer'));
-        $("#tab_amount").text($('#id_proposal').find(':selected').data('tabamount'));
-        $("#pre_amount").text($('#id_proposal').find(':selected').data('preamount'));
-        $("#total_amount").text($('#id_proposal').find(':selected').data('totalamount'));
-        $("#dlink_href").attr("href", $('#id_proposal').find(':selected').data('dlink')).show();
+        if($('#id_proposal').val() === '') {
+            $("#customer").text('');
+            $("#engineer").text('');
+            $("#tab_amount").text('');
+            $("#pre_amount").text('');
+            $("#total_amount").text('');
+            $("#dlink_href").hide();
+        }
+        else {
+            $("#customer").text($('#id_proposal').find(':selected').data('customer'));
+            $("#engineer").text($('#id_proposal').find(':selected').data('engineer'));
+            $("#tab_amount").text($('#id_proposal').find(':selected').data('tabamount'));
+            $("#pre_amount").text($('#id_proposal').find(':selected').data('preamount'));
+            $("#total_amount").text($('#id_proposal').find(':selected').data('totalamount'));
+            if ($('#id_proposal').find(':selected').data('dlink') != '') {
+                    $("#dlink_href").attr("href", $('#id_proposal').find(':selected').data('dlink')).show();
+                }
+                else {
+                    $("#dlink_href").hide();
+                }
+        }
 
         $('#id_proposal').on('change', function() {
             if($(this).val() === '') {
@@ -91,7 +106,7 @@
                 $("#tab_amount").text('');
                 $("#pre_amount").text('');
                 $("#total_amount").text('');
-                $("#dlink_href").attr("href", '').hide();
+                $("#dlink_href").hide();
             }
             else {
                 $("#customer").text($(this).find(':selected').data('customer'));
@@ -99,7 +114,12 @@
                 $("#tab_amount").text($(this).find(':selected').data('tabamount'));
                 $("#pre_amount").text($(this).find(':selected').data('preamount'));
                 $("#total_amount").text($(this).find(':selected').data('totalamount'));
-                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
+                if ($(this).find(':selected').data('dlink') != '') {
+                    $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
+                }
+                else {
+                    $("#dlink_href").hide();
+                }
             }
         });
     </script>

@@ -40,7 +40,9 @@ urlpatterns = [
     path('', include('mysite.sheetcreator.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
-    url(r'^tech/$', core_views.tech, name='Tech'),
+    url(r'^section/tech/$', core_views.tech, name='Tech'),
+    url(r'^section/estimate/$', core_views.estimate, name='Estimate'),
+    url(r'^section/accounting/$', core_views.accounting, name='Accounting'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

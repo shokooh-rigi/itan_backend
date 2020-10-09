@@ -29,16 +29,17 @@
             </table>
             <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
         </div>
-        <div><b>Project Name: </b>{{ tech_label.order.proposal.quote.estimate.project }}</div>
-        <div><b>Project #: </b>{{ tech_label.order.project_number }}</div>
-        <div><b>Project Address: </b>{{ tech_label.order.proposal.quote.estimate.project.address_line_1 }}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_2 }}</div>
+        <div style="margin: 4px 0 auto;"><b>Project Name: </b>{{ tech_label.order.proposal.quote.estimate.project }}</div>
+        <div style="margin: 4px 0 auto;"><b>Project #: </b>{{ tech_label.order.project_number }}</div>
+        <div style="margin: 4px 0 auto;"><b>Project Address: </b>{{ tech_label.order.proposal.quote.estimate.project.address_line_1 }}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_2 }}</div>
         <br /><br />
-        <div><b>Date: </b>{{ datenow }}</div>
-        <div><b>MC Info: </b>{{ tech_label.order.proposal.quote.estimate.customer.company.name }}</div>
-        <div><b>Arch Info: </b>{% if tech_label.order.architect_name %}{{ tech_label.order.architect_name }}{% endif %}</div>
-        <div><b>Eng Info: </b>{{ tech_label.order.proposal.quote.estimate.engineer.company.name }}</div>
+        <div style="margin: 4px 0 auto;"><b>Date: </b>{{ datenow }}</div>
+        <br />
+        <div style="margin: 4px 0 auto;"><b>MC Info: </b>{{ tech_label.order.proposal.quote.estimate.customer.company.name }}</div>
+        <div style="margin: 4px 0 auto;"><b>Arch Info: </b>{% if tech_label.order.architect_name %}{{ tech_label.order.architect_name }}{% endif %}</div>
+        <div style="margin: 4px 0 auto;"><b>Eng Info: </b>{{ tech_label.order.proposal.quote.estimate.engineer.company.name }}</div>
         <br /><br />
-        <div><table><tbody><tr>
+        <div style="margin: 4px 0 auto;"><table><tbody><tr>
             <td style="width: 25%;"><b>PRE-DEMO: </b></td>
             <td style="width: 15%;"> </td>
             <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo <= 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
@@ -47,9 +48,10 @@
             <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
             <td style="width: 5%;">NO</td>
         </tr></tbody></table></div>
-        <div><b>Drawing Date: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date }}{% endif %}</div>
-        <div><b>Drawing: </b>{% if tech_label.detailed_drawing %}Detail{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}Schedule{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}Mechanical{% endif %}</div>
-        <div><table><tbody><tr>
+        <div style="margin: 4px 0 auto;"><b>Drawing Date: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date }}{% endif %}</div>
+        <br />
+        <div style="margin: 4px 0 auto;"><b>Drawing Included: </b>{% if tech_label.detailed_drawing %}Detail{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}Schedule{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}Mechanical{% endif %}</div>
+        <div style="margin: 4px 0 auto;"><table><tbody><tr>
             <td style="width: 30%;"><b>Test Sheets: </b></td>
             <td style="width: 10%;"> </td>
             <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
@@ -74,10 +76,10 @@
             </table>
             <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
         </div>
-        <div><b>Start Date: </b>{% if tech_label.order.estimated_date_of_project %}{{ tech_label.order.estimated_date_of_project }}{% endif %}</div>
-        <div><b>Site POC Info: </b>{{ tech_label.point_of_contact_name }} {{ tech_label.point_of_contact_cell_phone }} {{ tech_label.point_of_contact_office_phone }}</div>
-        <div><b>Control System: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system }}{% endif %}</div>
-        <div><b>Tech Notes: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes }}{% endif %}</div></div>
+        <div style="margin: 4px 0 auto;"><b>Start Date: </b>{% if tech_label.order.estimated_date_of_project %}{{ tech_label.order.estimated_date_of_project }}{% endif %}</div>
+        <div style="margin: 4px 0 auto;"><b>Site POC Info: </b>{{ tech_label.point_of_contact_name }} {{ tech_label.point_of_contact_cell_phone }} {{ tech_label.point_of_contact_office_phone }}</div>
+        <div style="margin: 4px 0 auto;"><b>Control System: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system }}{% endif %}</div>
+        <div style="margin: 4px 0 auto;"><b>Tech Notes: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes }}{% endif %}</div></div>
     </div>
 </div>
     </body>

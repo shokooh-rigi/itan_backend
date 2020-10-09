@@ -11,7 +11,7 @@
             <form action="?{% url_replace request 'search' '' %}">
                 <div class="form-group" style="display: inline-block; transform: translateY(2px);">
                     <label for="search"></label>
-                    <input type="text" class="form-control" id="search" name="search" placeholder="Type or Model No." value="{{ request.GET.search }}" />
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Search..." value="{{ request.GET.search }}" />
                     <input type="hidden" name="paginate_by" value="{{ request.GET.paginate_by }}" />
                     <input type="hidden" name="ordering" value="{{ request.GET.ordering }}" />
 
@@ -306,24 +306,16 @@ function updateURLParameter(url, param, paramVal)
                         $('#printThis').css('margin-top', '100px');
                         $('#printThis tr th:nth-last-child(1)' +
                             ', #printThis tr th:nth-last-child(2)' +
-                            ', #printThis tr th:nth-last-child(3)' +
-                            ', #printThis tr th:nth-last-child(4)' +
                             ', #printThis tr td:nth-last-child(1)' +
-                            ', #printThis tr td:nth-last-child(2)' +
-                            ', #printThis tr td:nth-last-child(3)' +
-                            ', #printThis tr td:nth-last-child(4)').css('display', 'none');
+                            ', #printThis tr td:nth-last-child(2)').css('display', 'none');
                     },
                     afterPrint: function () {
                         $('#topnav').show();
                         $('#printThis').css('margin-top', '0px');
                         $('#printThis tr th:nth-last-child(1)' +
                             ', #printThis tr th:nth-last-child(2)' +
-                            ', #printThis tr th:nth-last-child(3)' +
-                            ', #printThis tr th:nth-last-child(4)' +
                             ', #printThis tr td:nth-last-child(1)' +
-                            ', #printThis tr td:nth-last-child(2)' +
-                            ', #printThis tr td:nth-last-child(3)' +
-                            ', #printThis tr td:nth-last-child(4)').css('display', 'table-cell');
+                            ', #printThis tr td:nth-last-child(2)').css('display', 'table-cell');
                     },
                 });
             });
