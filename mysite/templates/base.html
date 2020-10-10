@@ -154,6 +154,13 @@
 
     <script>
         $(document).ready(function() {
+            $("input[type=number]").keypress(function(event){
+                if (event.which < 46 || event.which > 57)
+                {
+                    alert(event.which);
+                    event.preventDefault();
+                }
+            });
             $('[data-toggle="popover"]').popover();
             $('[data-toggle="tooltip"]').tooltip();
             $(".headspace").height($(".header").innerHeight());
