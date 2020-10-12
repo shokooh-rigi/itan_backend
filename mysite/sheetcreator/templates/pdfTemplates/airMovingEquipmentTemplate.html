@@ -67,6 +67,7 @@
 
         /* Table cell =============================================================================================== */
         .pdf-table .pdf-table-cell {
+            font-weight: normal;
             border: 1px solid black;
             padding: 5px 2px 1px;
         }
@@ -82,6 +83,14 @@
 
         .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
             text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.df-value-cell {
+            border-right: none;
+        }
+
+        .pdf-table .pdf-table-cell.df-title-cell {
+            border-left: none;
         }
 
         /* Table rows =============================================================================================== */
@@ -288,8 +297,11 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.total_cfm.actual }}
                     </td>
-                    <td class="pdf-table-cell" colspan="2">
-                        &nbsp;{{ page.0.df_cooling }} DF Cooling
+                    <td class="pdf-table-cell df-value-cell">
+                        &nbsp;{{ page.0.df_cooling }}
+                    </td>
+                    <td class="pdf-table-cell df-title-cell">
+                        &nbsp;{% if page.0.df_cooling %}DF Cooling{% endif %}
                     </td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.total_cfm.design }}
@@ -297,8 +309,11 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.total_cfm.actual }}
                     </td>
-                    <td class="pdf-table-cell" colspan="2">
-                        &nbsp;{{ page.1.df_cooling }} DF Cooling
+                    <td class="pdf-table-cell df-value-cell">
+                        &nbsp;{{ page.1.df_cooling }}
+                    </td>
+                    <td class="pdf-table-cell df-title-cell">
+                        &nbsp;{% if page.1.df_cooling %}DF Cooling{% endif %}
                     </td>
                 </tr>
                 <tr class="pdf-table-row section-middle-row">
@@ -311,8 +326,11 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.return_air_cfm.actual }}
                     </td>
-                    <td class="pdf-table-cell" colspan="2">
-                        &nbsp;{{ page.0.df_heating }} DF Heating
+                    <td class="pdf-table-cell df-value-cell">
+                        &nbsp;{{ page.0.df_heating }}
+                    </td>
+                    <td class="pdf-table-cell df-title-cell">
+                        &nbsp;{% if page.0.df_heating %}DF Heating{% endif %}
                     </td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.return_air_cfm.design }}
@@ -320,8 +338,11 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.return_air_cfm.actual }}
                     </td>
-                    <td class="pdf-table-cell" colspan="2">
-                        &nbsp;{{ page.1.df_heating }} DF Heating
+                    <td class="pdf-table-cell df-value-cell">
+                        &nbsp;{{ page.1.df_heating }}
+                    </td>
+                    <td class="pdf-table-cell df-title-cell">
+                        &nbsp;{% if page.1.df_heating %}DF Heating{% endif %}
                     </td>
                 </tr>
                 <tr class="pdf-table-row section-middle-row">
