@@ -9,7 +9,7 @@
         <div class="form-group">
             {% csrf_token %}
             {{ form.order.as_hidden }}
-                        <div class="row form-line" style="margin: 20px auto;">
+            <div class="row form-line" style="margin: 20px auto;">
                 <div class="col-lg-5">
                     <label for="id_architect_name" class="control-label" style="margin-top: -10px;">Assigned to Employee</label>
                     {{ form.assigned_to_employee }}
@@ -26,6 +26,12 @@
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label">Scheduled for <span class="required">*</span></label>
                     {{ form.scheduled_for }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Duration <span class="required">*</span></label>
+                    {{ form.duration }}
                 </div>
             </div>
             {{ form.created_by.as_hidden }}

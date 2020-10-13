@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
-
-from .models import Schedule, Person
+from django.db.models import Q
+from .models import Schedule, Person, User
 
 
 class ScheduleForm(ModelForm):
@@ -15,11 +15,14 @@ class ScheduleForm(ModelForm):
             'assigned_to_employee',
             'assigned_to_contractor',
             'scheduled_for',
+            'duration',
             'created_by',
         ]
 
     def __init__(self, *args, **kwargs):
         super(ScheduleForm, self).__init__(*args, **kwargs)
+        self.fields['assigned_to_employee'].queryset = User.objects.filter(
+            Q(profile__user_type=5) | Q(profile__user_type=6))
         self.fields['assigned_to_contractor'].queryset = Person.objects.filter(
             company__company_type__name__iexact='sub contractor')
         for visible in self.visible_fields():

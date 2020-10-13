@@ -14,28 +14,22 @@
         $('<link rel="stylesheet" type="text/css" href="{% static 'tui/css/default.css'%}" />').appendTo('head');
         $('<link rel="stylesheet" type="text/css" href="{% static 'tui/css/icons.css'%}" />').appendTo('head');
     </script>
-    <h2>Add Schedule</h2>
+    <h2>Schedule</h2>
 
     <div style="height: 700px; position: relative; background: white; text-align: initial;">
         <div id="lnb">
-            <div class="lnb-new-schedule">
-                <button id="btn-new-schedule" type="button" class="btn btn-default btn-block lnb-new-schedule-btn"
-                        data-toggle="modal">
-                    New schedule
-                </button>
-            </div>
             <div id="lnb-calendars" class="lnb-calendars">
                 <div>
                     <div class="lnb-calendars-item">
                         <label>
                             <input class="tui-full-calendar-checkbox-square" type="checkbox" value="all" checked>
                             <span></span>
-                            <strong>View all</strong>
+                            <strong>View all Techs</strong>
                         </label>
                     </div>
                 </div>
-                <div id="calendarList" class="lnb-calendars-d1">
-                </div>
+                <div id="calendarList" class="lnb-calendars-d1"></div>
+                <div id="orderList" class="lnb-calendars-d1"></div>
             </div>
 {#            <div class="lnb-footer">#}
 {#                © NHN Corp.#}
@@ -49,7 +43,6 @@
                         aria-haspopup="true" aria-expanded="true">
                     <i id="calendarTypeIcon" class="calendar-icon ic_view_month" style="margin-right: 4px;"></i>
                     <span id="calendarTypeName">Dropdown</span>&nbsp;
-                    <i class="calendar-icon tui-full-calendar-dropdown-arrow"></i>
                 </button>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu-calendarType">
                     <li role="presentation">
@@ -111,7 +104,7 @@
             </span>
                 <span id="renderRange" class="render-range"></span>
             </div>
-            <div id="calendar"></div>
+            <div id="calendar" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dropLeave(event)"></div>
         </div>
     </div>
 
@@ -119,16 +112,10 @@
     <form method='POST' action=''>
         <div class="form-group">
             {% csrf_token %}
-
-            <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Create" name="next"/>
-                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate/>
-                </div>
-            </div>
         </div>
     </form>
 
+    <script src="{% static 'js/cal-ajax-setup.js' %}"></script>
 
     <!-- load tui scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
@@ -143,47 +130,142 @@
     <script src="{% static 'tui/js/data/schedules.js' %}"></script>
     <script src="{% static 'tui/js/app.js' %}"></script>
 
+
     <script>
-        // initialize tui calendar (current version 1.12.13)
 
-        // const Calendar = tui.Calendar;
+        function allowDropTech(ev) {
+            if( ev.dataTransfer.getData("type") == "tech" )
+            {
+                ev.preventDefault();
+                ev.target.classList.add("assigned");
+            }
 
-        // jquery wrapper
-        {#const calendarElement = $('#calendar').tuiCalendar({#}
-        {#    defaultView: 'week',#}
-        {#    taskView: true,#}
-        {#    scheduleView: ['time'],#}
-        {#template: {#}
-        {#    monthDayname: function (dayname) {#}
-        {#        return '<span class="calendar-week-dayname-name">' + dayname.label + '</span>';#}
-        {#    }#}
-        {#    //}#}
-        //});
+        }
+
+        function dropLeaveTech(ev) {
+            if( ev.dataTransfer.getData("type") == "tech" ) {
+                ev.preventDefault();
+                var all_assignable = document.getElementsByClassName("assignable-schedule");
+                var len = all_assignable.length;
+                var i = 0;
+                for (i; i < len; i++) {
+                    all_assignable[i].classList.remove("assigned");
+                }
+            }
+        }
+
+        function dragTech(ev) {
+            ev.dataTransfer.setData("type", "tech");
+            ev.dataTransfer.setData("id", ev.target.dataset.id);
+        }
+
+
+        function dropTech(ev) {
+            if( ev.dataTransfer.getData("type") == "tech" ) {
+                ev.preventDefault();
+                ev.target.classList.remove("assigned");
+                var new_tech_id = ev.dataTransfer.getData("id");
+                var org_tech_id = ev.target.parentElement.parentElement.dataset.calendarId;
+                var org_order_id = ev.target.parentElement.parentElement.dataset.scheduleId;
+
+                $.ajax({
+                  type: "POST",
+                  url: "{% url 'update_schedule' %}",
+                  data: {
+                      'type': 'tech_update',
+                      'org_order_id': org_order_id,
+                      'new_tech_id': new_tech_id
+                  },
+                    success: function(result) {
+                      console.log(result);
+                    }
+                });
+
+                cal.updateSchedule(org_order_id, org_tech_id, {
+                    calendarId: new_tech_id
+                });
+            }
+        }
+
+
+
+        function allowDrop(ev) {
+            if( ev.dataTransfer.getData("type") == "order" ) {
+                ev.preventDefault();
+                document.getElementById("calendar").classList.add("dover");
+            }
+
+        }
+
+        function dropLeave(ev) {
+            if( ev.dataTransfer.getData("type") == "order" ) {
+                ev.preventDefault();
+                document.getElementById("calendar").classList.remove("dover");
+            }
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("type", "order");
+            ev.dataTransfer.setData("elementId", ev.target.id);
+            ev.dataTransfer.setData("text", ev.target.textContent);
+            ev.dataTransfer.setData("body", ev.target.dataset.body);
+            ev.dataTransfer.setData("id", ev.target.dataset.id);
+            ev.dataTransfer.setData("estimate", ev.target.dataset.estimate);
+            ev.dataTransfer.setData("location", ev.target.dataset.location);
+        }
+
+
+        function drop(ev) {
+            if( ev.dataTransfer.getData("type") == "order" ) {
+                ev.preventDefault();
+                document.getElementById("calendar").classList.remove("dover");
+                var el_id = ev.dataTransfer.getData("elementId");
+                var id = ev.dataTransfer.getData("id");
+                var body = ev.dataTransfer.getData("body");
+                var estimate = ev.dataTransfer.getData("estimate");
+                var location = ev.dataTransfer.getData("location");
+                var start = new Date();
+                var end = moment(start).add(estimate, 'm').toDate();
+
+                $.ajax({
+                  type: "POST",
+                  url: "{% url 'create_schedule' %}",
+                  data: {
+                      'order_id': id,
+                      'scheduled_for': formatDate(start),
+                      'duration': estimate
+                  },
+                    success: function(result) {
+                      console.log(result);
+                    }
+                });
+
+                cal.createSchedules([
+                    {
+                        id: id,
+                        calendarId: '0',
+                        title: body,
+                        body: body,
+                        location: location,
+                        category: 'time',
+                        start: start,
+                        end: end
+                    }
+                ]);
+
+                document.getElementById(el_id).parentElement.parentElement.remove();
+
+            }
+        }
         {##}
+        {#$(document).ready(function() {#}
+        {#    setTimeout(function(){#}
         {##}
-        {#// You can get calendar instance#}
-        {#const calendarInstance = calendarElement.data('tuiCalendar');#}
-        {#calendarInstance.createSchedules([#}
-        {#    {#}
-        {#        id: '1',#}
-        {#        calendarId: '1',#}
-        {#        title: 'my schedule',#}
-        {#        category: 'time',#}
-        {#        dueDateClass: '',#}
-        {#        start: '2020-09-15T10:00:00.000Z',#}
-        {#        end: '2020-09-15T13:00:00.000Z'#}
-        {#    },#}
-        {#    {#}
-        {#        id: '2',#}
-        {#        calendarId: '1',#}
-        {#        title: 'second schedule',#}
-        {#        category: 'time',#}
-        {#        dueDateClass: '',#}
-        {#        start: '2020-09-15T17:24:33.276Z',#}
-        {#        end: '2020-09-15T17:24:33.276Z',#}
-        {#        isReadOnly: true    // schedule is read-only#}
-        {#    }#}
-        {#]);#}
+        {#    }, 3000);#}
+        {# }); #}
+
+
     </script>
+
 
 {% endblock %}
