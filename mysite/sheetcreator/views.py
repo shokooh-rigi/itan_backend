@@ -215,11 +215,12 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
     return equipment_data
 
 
-@login_required
-def equipments_generate_report_pdf(request, sheet_id):
+def get_pdf_parameters(sheet_id, is_report_pdf):
     my_sheet = Sheet.objects.get(id=sheet_id)
     sheet_equipments = SheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
-                                                     design_data_entry_completed=True, actual_data_entry_completed=True)
+                                                     design_data_entry_completed=True)
+    if is_report_pdf:
+        sheet_equipments = sheet_equipments.filter(actual_data_entry_completed=True)
 
     data = []
     len_equipments = sheet_equipments.count()
@@ -245,7 +246,7 @@ def equipments_generate_report_pdf(request, sheet_id):
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
 
-    parameters = {
+    return {
         'form': {
             'report_date': st_datetime.now(),
             'my_sheet': my_sheet,
@@ -270,6 +271,19 @@ def equipments_generate_report_pdf(request, sheet_id):
         'MEDIA_URL': MEDIA_URL,
         'os': system(),
     }
+
+
+@login_required
+def equipments_generate_tech_pdf(request, sheet_id):
+    parameters = get_pdf_parameters(sheet_id, False)
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTechTemplate.html', parameters,
+                                                  'airMovingEquipmentReport')
+    return HttpResponse(open(pdf_path, 'rb').read(), content_type='application/pdf')
+
+
+@login_required
+def equipments_generate_report_pdf(request, sheet_id):
+    parameters = get_pdf_parameters(sheet_id, True)
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTemplate.html', parameters,
                                                   'airMovingEquipmentReport')
     return HttpResponse(open(pdf_path, 'rb').read(), content_type='application/pdf')

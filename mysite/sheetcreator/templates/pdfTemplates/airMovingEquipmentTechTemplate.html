@@ -85,14 +85,6 @@
             text-align: center;
         }
 
-        .pdf-table .pdf-table-cell.df-value-cell {
-            border-right: none;
-        }
-
-        .pdf-table .pdf-table-cell.df-title-cell {
-            border-left: none;
-        }
-
         /* Table rows =============================================================================================== */
         .pdf-table-row {
             border: 2px solid black;
@@ -281,11 +273,13 @@
                 <tr class="pdf-table-row section-first-row">
                     <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Supply Air Temp</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Supply Air Temp</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                 </tr>
                 <tr class="pdf-table-row section-middle-row">
                     <td class="pdf-table-cell pdf-table-title-cell">
@@ -294,27 +288,15 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.total_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.total_cfm.actual }}
-                    </td>
-                    <td class="pdf-table-cell df-value-cell">
-                        &nbsp;{{ page.0.df_cooling }}
-                    </td>
-                    <td class="pdf-table-cell df-title-cell">
-                        &nbsp;{% if page.0.df_cooling %}DF Cooling{% endif %}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.total_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.total_cfm.actual }}
-                    </td>
-                    <td class="pdf-table-cell df-value-cell">
-                        &nbsp;{{ page.1.df_cooling }}
-                    </td>
-                    <td class="pdf-table-cell df-title-cell">
-                        &nbsp;{% if page.1.df_cooling %}DF Cooling{% endif %}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
                 <tr class="pdf-table-row section-middle-row">
                     <td class="pdf-table-cell pdf-table-title-cell">
@@ -323,27 +305,15 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.return_air_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.return_air_cfm.actual }}
-                    </td>
-                    <td class="pdf-table-cell df-value-cell">
-                        &nbsp;{{ page.0.df_heating }}
-                    </td>
-                    <td class="pdf-table-cell df-title-cell">
-                        &nbsp;{% if page.0.df_heating %}DF Heating{% endif %}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.return_air_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.return_air_cfm.actual }}
-                    </td>
-                    <td class="pdf-table-cell df-value-cell">
-                        &nbsp;{{ page.1.df_heating }}
-                    </td>
-                    <td class="pdf-table-cell df-title-cell">
-                        &nbsp;{% if page.1.df_heating %}DF Heating{% endif %}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
                 <tr class="pdf-table-row section-middle-row">
                     <td class="pdf-table-cell pdf-table-title-cell">
@@ -352,17 +322,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.outdoor_air_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.outdoor_air_cfm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.outdoor_air_cfm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.outdoor_air_cfm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -373,17 +339,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.total_sp_ext_sp.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.total_sp_ext_sp.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.total_sp_ext_sp.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.total_sp_ext_sp.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -394,17 +356,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.fan_unit_suction_pressure.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.fan_unit_suction_pressure.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.fan_unit_suction_pressure.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.fan_unit_suction_pressure.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -415,17 +373,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.discharge_pressure_fan_unit.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.discharge_pressure_fan_unit.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.discharge_pressure_fan_unit.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.discharge_pressure_fan_unit.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -436,17 +390,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.fan_rpm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.fan_rpm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.fan_rpm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.fan_rpm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -462,11 +412,11 @@
                         Motor
                     </td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
-                    <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                     <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
                 </tr>
@@ -477,13 +427,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.hp.design }}
                     </td>
-                    <td class="pdf-table-cell">SEE BHP</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.hp.design }}
                     </td>
-                    <td class="pdf-table-cell">SEE BHP</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -494,17 +444,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.voltage.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.voltage.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.voltage.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.voltage.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -515,17 +461,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.phase.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.phase.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.phase.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.phase.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -536,17 +478,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.amperage.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.amperage.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.amperage.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.amperage.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -557,17 +495,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.bhp_calc.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.bhp_calc.actual | floatformat:2 }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.bhp_calc.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.bhp_calc.actual | floatformat:2 }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -578,13 +512,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.frame.design }}
                     </td>
-                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.frame.design }}
                     </td>
-                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -595,13 +529,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.sf_code.design }}
                     </td>
-                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.sf_code.design }}
                     </td>
-                    <td class="pdf-table-cell">--------</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
@@ -612,17 +546,13 @@
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.0.motor_rpm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.0.motor_rpm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">
                         &nbsp;{{ page.1.motor_rpm.design }}
                     </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ page.1.motor_rpm.actual }}
-                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>

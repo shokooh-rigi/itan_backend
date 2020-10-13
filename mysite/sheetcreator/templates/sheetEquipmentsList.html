@@ -8,7 +8,10 @@
     <div class="text-center">
         <h2>DEFINED AIR MOVING EQUIPMENT LIST FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
-        <a href=""><button type="button" class="btn btn-primary">Generate Tech PDF</button></a>
+        <a href="{% url 'sheetEquipmentsGenerateTechPDF' sheet_id %}" target="_blank"
+           download="{{ my_sheet.project.proposal.quote.estimate.project.name }}-{{ my_sheet.project.project_number }}-tech.pdf">
+            <button type="button" class="btn btn-primary">Generate Tech PDF</button>
+        </a>
         <a href="{% url 'sheetEquipmentsGenerateReportPDF' sheet_id %}" target="_blank"
            download="{{ my_sheet.project.proposal.quote.estimate.project.name }}-{{ my_sheet.project.project_number }}.pdf">
             <button type="button" class="btn btn-primary">Generate Report PDF</button>
