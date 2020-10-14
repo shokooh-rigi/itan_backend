@@ -224,21 +224,23 @@ def update_schedule(request):
         order_id = request.POST.get('org_order_id')
         schedule_update = Schedule.objects.get(order__id=order_id)
         new_tech_id = request.POST.get('new_tech_id')
-        print(new_tech_id)
-        if new_tech_id == '0':
-            schedule_update.assigned_to_employee = None
+        if update_type == 'calendar_delete':
+            schedule_update.delete()
+            return JsonResponse('Schedule Deleted from database successfully.', safe=False)
         else:
-            schedule_update.assigned_to_employee = User.objects.get(id=new_tech_id)
-        if update_type == 'tech_update':
-            schedule_update.save()
-        elif update_type == 'calendar_update':
-            print('yes')
-            new_date = request.POST.get('new_date')
-            new_duration = request.POST.get('new_duration')
-            schedule_update.scheduled_for = new_date
-            schedule_update.duration = new_duration
-            schedule_update.save()
-        return JsonResponse('Schedule updated on database successfully.', safe=False)
+            if new_tech_id == '0':
+                schedule_update.assigned_to_employee = None
+            else:
+                schedule_update.assigned_to_employee = User.objects.get(id=new_tech_id)
+            if update_type == 'tech_update':
+                schedule_update.save()
+            elif update_type == 'calendar_update':
+                new_date = request.POST.get('new_date')
+                new_duration = request.POST.get('new_duration')
+                schedule_update.scheduled_for = new_date
+                schedule_update.duration = new_duration
+                schedule_update.save()
+            return JsonResponse('Schedule updated on database successfully.', safe=False)
     else:
         status = "Bad"
         return JsonResponse(status, safe=False)

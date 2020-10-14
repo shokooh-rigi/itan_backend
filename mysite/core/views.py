@@ -32,6 +32,11 @@ def accounting(request):
 
 
 @login_required
+def customer(request):
+    return render(request, 'iconbase-customer.html')
+
+
+@login_required
 def home(request):
     if request.user.profile.user_type > 1:
         return render(request, 'home.html')

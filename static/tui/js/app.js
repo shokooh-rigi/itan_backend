@@ -113,6 +113,20 @@ $(document).ready(function () {
                 },
                 'beforeDeleteSchedule': function (e) {
                     console.log('beforeDeleteSchedule', e);
+
+                    $.ajax({
+                      type: "POST",
+                      url: "/schedule/update_schedule/",
+                      data: {
+                          'type': 'calendar_delete',
+                          'org_order_id': e.schedule.id
+                      },
+                        success: function(result) {
+                          console.log(result);
+                          location.reload();
+                        }
+                    });
+
                     cal.deleteSchedule(e.schedule.id, e.schedule.calendarId);
                 },
                 'afterRenderSchedule': function (e) {
