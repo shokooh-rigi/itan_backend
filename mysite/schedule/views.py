@@ -1,5 +1,6 @@
 import datetime
-
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from django import forms
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -10,11 +11,13 @@ import random
 from mysite.order.models import Order
 from .forms import ScheduleForm
 from .models import Schedule, User, Profile
-from ..settings import MEDIA_URL, WEB_URL
+from ..settings import MEDIA_URL, WEB_URL, TIME_ZONE
 from datetime import timedelta
-
+from django.utils.timezone import activate
+import mysite.settings
 from ..estimator.views import estimate_total_work
 
+# activate(TIME_ZONE)
 
 # Create your views here.
 
@@ -41,7 +44,7 @@ def schedule_list(request):
         object_list = Schedule.objects.filter(Q(order__project_number__icontains=search)
                                               | Q(assigned_to_contractor__name__icontains=search)
                                               | Q(assigned_to_contractor__company__name__icontains=search)) \
-            .filter(scheduled_for__range=(from_date_obj, to_date_obj)).order_by(ordering)
+            .filter(schedule_start__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
         object_list = Schedule.objects.filter(Q(order__project_number__icontains=search)
@@ -141,8 +144,19 @@ def schedule_orders_list(request, type):
         scheduled = Schedule.objects.all()
         response_data = []
         for schedule in scheduled:
-            endtime = schedule.scheduled_for + timedelta(minutes=schedule.duration)
-            full_address = schedule.order.proposal.quote.estimate.project.address_line_1 + ' ' + schedule.order.proposal.quote.estimate.project.address_line_2 + ' ' + schedule.order.proposal.quote.estimate.project.city + ' ' + schedule.order.proposal.quote.estimate.project.state + ' ' + schedule.order.proposal.quote.estimate.project.zip
+
+            full_address = ''
+            if schedule.order.proposal.quote.estimate.project.address_line_1:
+                full_address += schedule.order.proposal.quote.estimate.project.address_line_1
+            if schedule.order.proposal.quote.estimate.project.address_line_2:
+                full_address += ' ' + schedule.order.proposal.quote.estimate.project.address_line_2
+            if schedule.order.proposal.quote.estimate.project.city:
+                full_address += ' ' + schedule.order.proposal.quote.estimate.project.city
+            if schedule.order.proposal.quote.estimate.project.state:
+                full_address += ' ' + schedule.order.proposal.quote.estimate.project.state
+            if schedule.order.proposal.quote.estimate.project.zip:
+                full_address += ' ' + schedule.order.proposal.quote.estimate.project.zip
+
             if schedule.assigned_to_employee:
                 calendar_id = schedule.assigned_to_employee.id
             else:
@@ -153,8 +167,10 @@ def schedule_orders_list(request, type):
                 'title': schedule.order.project_number + ': ' + str(schedule.order.proposal.quote.estimate.project),
                 'location': full_address,
                 'category': 'time',
-                'start': schedule.scheduled_for,
-                'end': endtime
+                'start': schedule.schedule_start,
+                'end': schedule.schedule_end,
+                'goingDuration': str(30),
+                'comingDuration': str(30),
             })
 
         return JsonResponse(response_data, safe=False)
@@ -162,7 +178,17 @@ def schedule_orders_list(request, type):
         orders = Order.objects.filter(schedule__isnull=True)
         response_data = []
         for order in orders:
-            full_address = order.proposal.quote.estimate.project.address_line_1 + ' ' + order.proposal.quote.estimate.project.address_line_2 + ' ' + order.proposal.quote.estimate.project.city + ' ' + order.proposal.quote.estimate.project.state + ' ' + order.proposal.quote.estimate.project.zip
+            full_address = ''
+            if order.proposal.quote.estimate.project.address_line_1:
+                full_address += order.proposal.quote.estimate.project.address_line_1
+            if order.proposal.quote.estimate.project.address_line_2:
+                full_address += ' ' + order.proposal.quote.estimate.project.address_line_2
+            if order.proposal.quote.estimate.project.city:
+                full_address += ' ' + order.proposal.quote.estimate.project.city
+            if order.proposal.quote.estimate.project.state:
+                full_address += ' ' + order.proposal.quote.estimate.project.state
+            if order.proposal.quote.estimate.project.zip:
+                full_address += ' ' + order.proposal.quote.estimate.project.zip
             response_data.append({
                 'id': order.id,
                 'number': order.project_number,
@@ -206,10 +232,10 @@ def create_schedule(request):
     if request.method == "POST" and request.is_ajax():
         order_id = request.POST.get('order_id')
         order = Order.objects.get(id=order_id)
-        schedule_date = request.POST.get('scheduled_for')
-        duration = request.POST.get('duration')
+        schedule_date_start = request.POST.get('schedule_start')
+        schedule_date_end = request.POST.get('schedule_end')
         current_user = request.user
-        new_schedule = Schedule(order=order, scheduled_for=schedule_date, duration=int(duration), created_by=current_user)
+        new_schedule = Schedule(order=order, schedule_start=schedule_date_start, schedule_end=schedule_date_end, created_by=current_user)
         new_schedule.save()
         return JsonResponse('New Schedule created on database successfully.', safe=False)
     else:
@@ -232,13 +258,31 @@ def update_schedule(request):
                 schedule_update.assigned_to_employee = None
             else:
                 schedule_update.assigned_to_employee = User.objects.get(id=new_tech_id)
+                this_tech_schedules = Schedule.objects.filter(Q(assigned_to_employee__id=new_tech_id,
+                                                              schedule_start__lt=schedule_update.schedule_start,
+                                                              schedule_end__gt=schedule_update.schedule_start) |
+                                                              Q(assigned_to_employee__id=new_tech_id,
+                                                              schedule_start__gt=schedule_update.schedule_start,
+                                                              schedule_start__lt=schedule_update.schedule_end))
+                if this_tech_schedules:
+                    return JsonResponse('busy', safe=False)
             if update_type == 'tech_update':
                 schedule_update.save()
             elif update_type == 'calendar_update':
                 new_date = request.POST.get('new_date')
-                new_duration = request.POST.get('new_duration')
-                schedule_update.scheduled_for = new_date
-                schedule_update.duration = new_duration
+                new_date_end = request.POST.get('new_date_end')
+                start_check = parse_datetime(new_date) - timedelta(minutes=30)
+                end_check = parse_datetime(new_date_end) + timedelta(minutes=30)
+                this_tech_schedules = Schedule.objects.filter(Q(assigned_to_employee__id=new_tech_id,
+                                                              schedule_start__lt=start_check,
+                                                              schedule_end__gt=start_check) |
+                                                              Q(assigned_to_employee__id=new_tech_id,
+                                                              schedule_start__gt=start_check,
+                                                              schedule_start__lt=end_check)).exclude(order__id=order_id)
+                if this_tech_schedules:
+                    return JsonResponse('busy', safe=False)
+                schedule_update.schedule_start = new_date
+                schedule_update.schedule_end = new_date_end
                 schedule_update.save()
             return JsonResponse('Schedule updated on database successfully.', safe=False)
     else:

@@ -118,16 +118,15 @@
     <script src="{% static 'js/cal-ajax-setup.js' %}"></script>
 
     <!-- load tui scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.13/chance.min.js"></script>
+    <script src="{% static 'tui/js/moment.min.js' %}"></script>
+    <script src="{% static 'tui/js/chance.min.js' %}"></script>
 
-    <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.min.js"></script>
-    <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
-    <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
-    <script src="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.js"></script>
+    <script src="{% static 'tui/js/tui-code-snippet.min.js' %}"></script>
+    <script src="{% static 'tui/js/tui-time-picker.min.js' %}"></script>
+    <script src="{% static 'tui/js/tui-date-picker.min.js' %}"></script>
+    <script src="{% static 'tui/js/tui-calendar.js' %}"></script>
 
     <script src="{% static 'tui/js/data/calendars.js' %}"></script>
-    <script src="{% static 'tui/js/data/schedules.js' %}"></script>
     <script src="{% static 'tui/js/app.js' %}"></script>
 
 
@@ -177,12 +176,16 @@
                       'new_tech_id': new_tech_id
                   },
                     success: function(result) {
-                      console.log(result);
+                      if (result == 'busy') {
+                          alert('This Technician is busy!');
+                      }
+                      else {
+                          cal.updateSchedule(org_order_id, org_tech_id, {
+                              calendarId: new_tech_id
+                          });
+                          console.log(result);
+                      }
                     }
-                });
-
-                cal.updateSchedule(org_order_id, org_tech_id, {
-                    calendarId: new_tech_id
                 });
             }
         }
@@ -232,8 +235,8 @@
                   url: "{% url 'create_schedule' %}",
                   data: {
                       'order_id': id,
-                      'scheduled_for': formatDate(start),
-                      'duration': estimate
+                      'schedule_start': formatDate(start),
+                      'schedule_end': formatDate(end)
                   },
                     success: function(result) {
                       console.log(result);
@@ -249,20 +252,26 @@
                         location: location,
                         category: 'time',
                         start: start,
-                        end: end
+                        end: end,
+                        goingDuration: '30',
+                        comingDuration: '30'
                     }
                 ]);
+
+                cal.scrollToNow();
+                cal.today();
 
                 document.getElementById(el_id).parentElement.parentElement.remove();
 
             }
         }
-        {##}
-        {#$(document).ready(function() {#}
-        {#    setTimeout(function(){#}
-        {##}
-        {#    }, 3000);#}
-        {# }); #}
+
+        $(document).ready(function() {
+            setTimeout(function(){
+                var height_calc = $('#lnb-calendars').outerHeight() - 100 - $('#calendarList').outerHeight();
+                $('#orderList').height(height_calc);
+            }, 2000);
+         });
 
 
     </script>

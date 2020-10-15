@@ -46,8 +46,13 @@ function hexToRGBA(hex) {
     var id = 0;
 
 
-    $.getJSON("/schedule/get_tech_list/", function(data){
-        data.forEach(function(o) {
+    $.ajax({
+        url: "/schedule/get_tech_list/",
+        dataType: 'json',
+        async: false,
+        data: '',
+        success: function(data) {
+            data.forEach(function(o) {
             calendar = new CalendarInfo();
             id = o.calendar_id;
             calendar.id = String(id);
@@ -58,9 +63,13 @@ function hexToRGBA(hex) {
             calendar.borderColor = o.calendar_bg_color;
             addCalendar(calendar);
         });
-    }).fail(function(){
-        console.log("An error has occurred.");
+        }
     });
+    // $.getJSON("/schedule/get_tech_list/", function(data){
+    //
+    // }).fail(function(){
+    //     console.log("An error has occurred.");
+    // });
 
 
 

@@ -9,8 +9,8 @@ class Schedule(models.Model):
     assigned_to_employee = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True,
                                              related_name='assigned_to_employee')
     assigned_to_contractor = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True)
-    scheduled_for = models.DateTimeField(blank=False, null=False)
-    duration = models.IntegerField(blank=False, null=False)
+    schedule_start = models.DateTimeField(blank=False, null=False)
+    schedule_end = models.DateTimeField(blank=False, null=False)
     archive = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)

@@ -17,11 +17,13 @@ $(document).ready(function () {
             cal = new Calendar('#calendar', {
                 defaultView: 'week',
                 taskView: false,
-                scheduleView: ['time'],
+                scheduleView: ['time', 'allday'],
                 disableClick: true,
+                disableDblClick: true,
                 useCreationPopup: useCreationPopup,
                 useDetailPopup: useDetailPopup,
                 calendars: CalendarList,
+                usageStatistics: false,
                 template: {
                     milestone: function (model) {
                         return '<span class="calendar-font-icon ic-milestone-b"></span> <span style="background-color: ' + model.bgColor + '">' + model.title + '</span>';
@@ -63,52 +65,55 @@ $(document).ready(function () {
 
                     console.log('beforeUpdateSchedule', e);
 
-                    var new_diff = 0;
+                    var new_date_end = 0;
                     var new_date = 0;
                     var new_tech = 0;
-                    if(typeof changes.start === 'undefined' && typeof changes.end === 'undefined') {
-                        new_date = formatDate(schedule.start._date);
-                        new_diff = diff_minutes(schedule.start._date, schedule.end._date);
-                    }
-                    else if(typeof changes.start !== 'undefined' && typeof changes.end === 'undefined') {
-                        new_date = formatDate(changes.start._date);
-                        new_diff = diff_minutes(changes.start._date, schedule.end._date);
-                    }
-                    else if(typeof changes.start === 'undefined' && typeof changes.end !== 'undefined') {
-                        new_date = formatDate(schedule.start._date);
-                        new_diff = diff_minutes(schedule.start._date, changes.end._date);
-                    }
-                    else {
-                        new_date = formatDate(changes.start._date);
-                        new_diff = diff_minutes(changes.start._date, changes.end._date);
-                    }
-
-                    if(typeof changes.calendarId !== 'undefined') {
-                        new_tech = changes.calendarId;
-                    }
-                    else {
-                        new_tech = schedule.calendarId;
-                    }
-                    $.ajax({
-                      type: "POST",
-                      url: "/schedule/update_schedule/",
-                      data: {
-                          'type': 'calendar_update',
-                          'org_order_id': schedule.id,
-                          'new_tech_id': new_tech,
-                          'new_date': new_date,
-                          'new_duration': new_diff,
-                      },
-                        success: function(result) {
-                          console.log(result);
+                    if(typeof changes !== 'undefined') {
+                        if (typeof changes.start === 'undefined' && typeof changes.end === 'undefined') {
+                            new_date = formatDate(schedule.start._date);
+                            new_date_end = formatDate(schedule.end._date);
+                        } else if (typeof changes.start !== 'undefined' && typeof changes.end === 'undefined') {
+                            new_date = formatDate(changes.start._date);
+                            new_date_end = formatDate(schedule.end._date);
+                        } else if (typeof changes.start === 'undefined' && typeof changes.end !== 'undefined') {
+                            new_date = formatDate(schedule.start._date);
+                            new_date_end = formatDate(changes.end._date);
+                        } else {
+                            new_date = formatDate(changes.start._date);
+                            new_date_end = formatDate(changes.end._date);
                         }
-                    });
+
+                        if (typeof changes.calendarId !== 'undefined') {
+                            new_tech = changes.calendarId;
+                        } else {
+                            new_tech = schedule.calendarId;
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: "/schedule/update_schedule/",
+                            data: {
+                                'type': 'calendar_update',
+                                'org_order_id': schedule.id,
+                                'new_tech_id': new_tech,
+                                'new_date': new_date,
+                                'new_date_end': new_date_end,
+                            },
+                            success: function (result) {
+                                if (result == 'busy') {
+                                      alert('This Technician is busy!');
+                                }
+                                else {
+                                    console.log(result);
+                                    cal.updateSchedule(schedule.id, schedule.calendarId, changes);
+                                }
+                            }
+                        });
+                    }
 
                     if (changes && !changes.isAllDay && schedule.category === 'allday') {
                         changes.category = 'time';
                     }
 
-                    cal.updateSchedule(schedule.id, schedule.calendarId, changes);
                     refreshScheduleVisibility();
                 },
                 'beforeDeleteSchedule': function (e) {
@@ -541,7 +546,7 @@ $(document).ready(function () {
                     html.push('<div class="lnb-calendars-item"><label>' +
                         '<div id="order-' + order.id + '" data-id="' + order.id + '" data-location="' + order.location + '" data-body="' + order.body + '" data-estimate="' + order.estimated_work + '" class="draggable-order" draggable="true" ondragstart="drag(event)" value="' + order.id + '" checked>' +
                         '<span style="border-color: ' + order.borderColor + '; background-color: ' + order.borderColor + ';"></span>' +
-                        '<span>' + order.title + '</span>' +
+                        '<span>' + order.body + '</span>' +
                         '</div></label></div>'
                     );
                 });
@@ -553,7 +558,7 @@ $(document).ready(function () {
 
         })();
 
-    }, 500);
+    }, 2000);
 
 });
 

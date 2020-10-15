@@ -689,3 +689,7 @@ input[type=text][readonly] {
     text-align: center;
     z-index: 4;
 }
+
+#orderList {
+    overflow: auto;
+}

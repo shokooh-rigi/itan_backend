@@ -14,8 +14,8 @@ class ScheduleForm(ModelForm):
             'order',
             'assigned_to_employee',
             'assigned_to_contractor',
-            'scheduled_for',
-            'duration',
+            'schedule_start',
+            'schedule_end',
             'created_by',
         ]
 
