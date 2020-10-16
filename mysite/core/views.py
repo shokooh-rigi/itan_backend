@@ -27,6 +27,11 @@ def estimate(request):
 
 
 @login_required
+def data(request):
+    return render(request, 'iconbase-data.html')
+
+
+@login_required
 def accounting(request):
     return render(request, 'iconbase-accounting.html')
 

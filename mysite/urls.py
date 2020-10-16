@@ -42,6 +42,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),
     url(r'^section/estimate/$', core_views.estimate, name='Estimate'),
+    url(r'^section/data/$', core_views.data, name='Data'),
     url(r'^section/accounting/$', core_views.accounting, name='Accounting'),
     url(r'^section/customer/$', core_views.customer, name='Customer'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
