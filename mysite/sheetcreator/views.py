@@ -562,10 +562,14 @@ def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fie
                 actual_value = custom_fields.get(key__equipment_value_name=field_name)
                 related_id = actual_value.id
                 design_value = actual_value.key
+            if '-' in design_value.company_value:
+                spliced_design_values = design_value.company_value.replace(' ', '').split('-')
+                correct_design_value = min(spliced_design_values, key=lambda x: abs(float(x)-eval(request.POST.get('actual_value_' + str(related_id)))))
+            else:
+                correct_design_value = design_value.company_value
             fields = [
-                ('[field-{}-design]'.format(equipment_type_custom_field.id), design_value.company_value),
-                ('[field-{}-actual]'.format(equipment_type_custom_field.id),
-                 request.POST.get('actual_value_' + str(related_id))),
+                ('[field-{}-design]'.format(equipment_type_custom_field.id), correct_design_value),
+                ('[field-{}-actual]'.format(equipment_type_custom_field.id), request.POST.get('actual_value_' + str(related_id))),
             ]
             for name, value in fields:
                 left_side = left_side.replace(name, value)
@@ -626,6 +630,9 @@ def parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custo
             else:
                 custom_field = custom_fields.get(key__equipment_value_name=equipment_type_custom_field.field_name).key
             related_value = custom_field.company_value
+            if '-' in related_value:
+                related_value = related_value.replace(' ', '').replace('-', ',')
+                related_value = '{' + str(custom_field.id) + ',' + related_value + '}'
             design_values_matches[equipment_type_custom_field_id] = related_value
         return related_value
 

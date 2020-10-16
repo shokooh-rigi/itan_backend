@@ -161,9 +161,31 @@
         /*
         * Evaluate assignment operations.
         * */
-        const assignmentOperations = {{ assignment_operations | safe }};
+        var assignmentOperations = {{ assignment_operations | safe }};
+
         let BPHCalcInput = null;
-        for (const assignment of assignmentOperations) {
+        let i = 0;
+        for (var assignment of assignmentOperations) {
+            while (true) {
+                if (assignment.includes("{")) {
+                    var mySubString = assignment.substring(
+                        assignment.lastIndexOf("{") + 1,
+                        assignment.lastIndexOf("}")
+                    );
+                    mySubString = mySubString.split(',');
+                    const needle = $('#actual_value_' + mySubString[0]).val();
+                    mySubString.shift();
+                    const closest = mySubString.reduce((a, b) => {
+                        return Math.abs(b - needle) < Math.abs(a - needle) ? b : a;
+                    });
+                    sub_stinger = assignment.substring(assignment.lastIndexOf("{"), assignment.lastIndexOf("}") + 1);
+                    assignment = assignment.replace(sub_stinger, closest);
+                    assignmentOperations[i] = assignmentOperations[i].replace(sub_stinger, closest);
+                }
+                else {
+                    break;
+                }
+            }
             eval(assignment);
             const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
             readonlyField.attr('readonly', '');
@@ -171,6 +193,7 @@
             if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'b.h.p. (calc.)') {
                 BPHCalcInput = readonlyField;
             }
+            i += 1;
         }
 
         const evalAssignmentOperations = () => {
