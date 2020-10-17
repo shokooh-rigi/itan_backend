@@ -296,7 +296,7 @@ def equipments_generate_report_pdf(request, sheet_id):
 def sheet_equipment_common_data(request, sheet_equipment_id):
     sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
-    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type)
+    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=sheet_equipment.equipment_type)
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
@@ -329,7 +329,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
     value_fields = SheetEquipmentCommonData.objects.filter(sheet_equipment_id=sheet_equipment_id)
-    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type)
+    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=this_sheet_equipment.equipment_type)
     this_equipment = EquipmentDb.objects.get(id=this_sheet_equipment.equipment.id)
 
