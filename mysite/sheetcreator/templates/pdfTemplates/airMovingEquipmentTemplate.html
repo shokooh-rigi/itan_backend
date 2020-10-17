@@ -86,6 +86,7 @@
         }
 
         .pdf-table .pdf-table-cell.df-value-cell {
+            text-align: right;
             border-right: none;
         }
 
@@ -120,14 +121,20 @@
             border: none;
         }
 
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
         /* Note section ============================================================================================= */
         .pdf-note-section {
             font-size: 11px;
             font-weight: bold;
+            padding-top: 20px;
         }
 
         .pdf-note-section .pdf-note-content {
             font-weight: normal;
+            padding: 0;
         }
     </style>
 </head>
@@ -172,7 +179,7 @@
                         &nbsp;{{ form.my_sheet.project.project_number }}
                     </td>
                     <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
-                    <td class="pdf-table-cell" colspan="3">
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="3">
                         &nbsp;{{ form.report_date | date }}
                     </td>
                 </tr>
@@ -183,7 +190,7 @@
                     </td>
                     <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
                     </td>
-                    <td class="pdf-table-cell" colspan="3">
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="3">
                         &nbsp;{{ form.my_sheet.system }}
                     </td>
                 </tr>
@@ -625,9 +632,11 @@
                 </tbody>
             </table>
 
-            <p class="pdf-note-section">
-                Notes: <span class="pdf-note-content"></span>
-            </p>
+            <div class="pdf-note-section">
+                <div>Notes:</div>
+                <div class="pdf-note-content">{{ page.0.note }}</div>
+                <div class="pdf-note-content">{{ page.1.note }}</div>
+            </div>
         </div>
     {% endfor %}
 </div>

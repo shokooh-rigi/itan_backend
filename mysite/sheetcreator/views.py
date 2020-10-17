@@ -163,7 +163,10 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
         ),
         (
             "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
-            [('serial_no', 'Serial No.'), ]
+            [
+                ('serial_no', 'Serial No.'),
+                ('note', 'Note'),
+            ]
         ),
         (
             "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
