@@ -89,21 +89,60 @@
                 }
                 else {
                     $('#id_customer option, #id_project option').attr('disabled', false);
-                    $("#id_customer").val($("#id_bfm").find(':selected').data('customer'));
-                    $("#id_project").val($("#id_bfm").find(':selected').data('project'));
-                    $("#id_due_date").attr('readonly', true).prop('readonly', 'readonly').val($("#id_bfm").find(':selected').data('duedate'));
+                    $.ajax({
+                        type: 'GET',
+                        async: false,
+                        url: '/select2/fields/auto.json?term=' + $('#id_bfm').find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
+                    }).then(function (data) {
+                        for(x in data.results) {
+                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                break;
+                            }
+                        }
+                        var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                        $('#id_customer').append(option).trigger('change');
+
+                        $('#id_customer').trigger({
+                            type: 'select2:select',
+                            params: {
+                                data: data
+                            }
+                        });
+                    });
+                    {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
+                    $.ajax({
+                        type: 'GET',
+                        async: false,
+                        url: '/select2/fields/auto.json?term=' + $('#id_bfm').find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
+                    }).then(function (data) {
+                        for(x in data.results) {
+                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                break;
+                            }
+                        }
+                        var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                        $('#id_project').append(option).trigger('change');
+
+                        $('#id_project').trigger({
+                            type: 'select2:select',
+                            params: {
+                                data: data
+                            }
+                        });
+                    });
+                    {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
+                    $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
                     $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
-                    if ($(this).find(':selected').data('dlink') != '') {
+                    $('#id_customer, #id_project').attr({'readonly': 'readonly'}).trigger('change');
+                    if ($('#id_bfm').find(':selected').data('dlink') != '') {
                         $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
                     }
                     else {
                         $("#dlink_href").hide();
                     }
-                    if ($(this).find(':selected').data('bfmnote') != '') {
+                    if ($('#id_bfm').find(':selected').data('bfmnote') != '') {
                         $("#bfm_note").attr('data-content', $(this).find(':selected').data('bfmnote')).show();
-                    }
-                    else {
-
+                    } else {
                         $("#bfm_note").hide();
                     }
                 }
@@ -118,6 +157,7 @@
                         $('#id_customer option, #id_project option').attr('disabled', false);
                         $.ajax({
                             type: 'GET',
+                            async: false,
                             url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
                         }).then(function (data) {
                             for(x in data.results) {
@@ -138,6 +178,7 @@
                         {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
                         $.ajax({
                             type: 'GET',
+                            async: false,
                             url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
                         }).then(function (data) {
                             for(x in data.results) {
