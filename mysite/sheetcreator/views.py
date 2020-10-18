@@ -3,7 +3,7 @@ import re
 from typing import Dict
 from datetime import datetime as st_datetime
 import math
-
+import os
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -281,7 +281,13 @@ def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTechTemplate.html', parameters,
                                                   'airMovingEquipmentReport')
-    return HttpResponse(open(pdf_path, 'rb').read(), content_type='application/pdf')
+    if os.path.exists(pdf_path):
+        with open(pdf_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/pdf")
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            return response
+    else:
+        return 'error'
 
 
 @login_required
@@ -289,7 +295,14 @@ def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTemplate.html', parameters,
                                                   'airMovingEquipmentReport')
-    return HttpResponse(open(pdf_path, 'rb').read(), content_type='application/pdf')
+
+    if os.path.exists(pdf_path):
+        with open(pdf_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/pdf")
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            return response
+    else:
+        return 'error'
 
 
 @login_required
