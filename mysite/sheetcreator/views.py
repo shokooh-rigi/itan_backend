@@ -1,7 +1,6 @@
 from platform import system
 import re
 from typing import Dict
-from datetime import datetime as st_datetime
 import math
 
 from django.http import HttpResponse
@@ -251,7 +250,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
 
     return {
         'form': {
-            'report_date': st_datetime.now(),
             'my_sheet': my_sheet,
             'data': data,
         },
