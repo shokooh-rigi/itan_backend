@@ -12,6 +12,7 @@ dj-database-url==0.5.0
 numpy
 opencv-python
 pdf2image
+django-select2
 Django==2.2.3
 django-bootstrap-datepicker-plus==3.0.5
 django-cors-headers==3.2.1
