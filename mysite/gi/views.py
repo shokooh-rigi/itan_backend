@@ -136,7 +136,7 @@ def invoice_add(request):
                 change_orders = ChangeOrder.objects.filter(order=invoice.order)
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(
+                              'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                                   invoice.id).zfill(3),
                               'invoice': invoice,
                               'change_orders': change_orders,

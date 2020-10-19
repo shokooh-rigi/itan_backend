@@ -252,10 +252,11 @@ def proposal_list(request):
 
 @login_required
 def estimator_add(request, bfm_id=None):
-    form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
     if bfm_id:
+        form = EstimateFullForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
         bfms = BidFile.objects.filter(id=bfm_id)
     else:
+        form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
         bfms = BidFile.objects.filter(archive=False).exclude(id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()

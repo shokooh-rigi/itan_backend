@@ -8,37 +8,49 @@ from .models import *
 class QuoteWidget(s2forms.ModelSelect2Widget):
     search_fields = [
         "id",
-        "estimate__project__name__icontains"
+        "estimate__project__name__icontains",
     ]
 
 
 class EstimateWidget(s2forms.ModelSelect2Widget):
     search_fields = [
         "id",
-        "project__name__icontains"
+        "project__name__icontains",
     ]
 
 
 class BFMWidget(s2forms.ModelSelect2Widget):
     search_fields = [
         "id",
-        "project__name__icontains"
+        "project__name__icontains",
     ]
 
 
 class ProjectWidget(s2forms.ModelSelect2Widget):
     search_fields = [
-        'id',
-        'name__icontains'
+        "name__icontains",
     ]
 
 
 class CustomerWidget(s2forms.ModelSelect2Widget):
     search_fields = [
-        'id',
-        'name__icontains',
-        'company__name__icontains'
+        "company__name__icontains",
     ]
+
+
+class CustomerFullWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "company__name__icontains",
+    ]
+
+
+class EngineerWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "company__name__icontains",
+    ]
+
+    def label_from_instance(self, obj):
+        return str(obj.company.name)
 
 
 class EstimateForm(ModelForm):
@@ -65,11 +77,58 @@ class EstimateForm(ModelForm):
             'bfm': BFMWidget,
             'customer': CustomerWidget,
             'project': ProjectWidget,
-            'engineer': CustomerWidget,
+            'engineer': EngineerWidget,
         }
 
     def __init__(self, *args, **kwargs):
         super(EstimateForm, self).__init__(*args, **kwargs)
+        self.fields['customer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical contractor')
+        self.fields['engineer'].queryset = Person.objects.filter(
+            company__company_type__name__iexact='mechanical engineer')
+        self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
+        self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
+        self.fields['drawing_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+        for field in self.fields.values():
+            field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
+        self.fields['bfm'].widget.attrs['class'] = 'select2'
+        self.fields['customer'].widget.attrs['class'] = 'select2'
+        self.fields['project'].widget.attrs['class'] = 'select2'
+        self.fields['engineer'].widget.attrs['class'] = 'select2'
+
+
+class EstimateFullForm(ModelForm):
+    due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
+    drawing_date = forms.DateField(required=False, widget=forms.DateInput(format='%m/%d/%Y'),
+                                   input_formats=('%m/%d/%Y',))
+    predemo = forms.FloatField(initial=0)
+
+    class Meta:
+        model = Estimate
+        fields = [
+            'bfm',
+            'customer',
+            'project',
+            'engineer',
+            'service',
+            'note',
+            'due_date',
+            'drawing_date',
+            'predemo',
+            'created_by',
+        ]
+        widgets = {
+            'bfm': BFMWidget,
+            'customer': CustomerFullWidget,
+            'project': ProjectWidget,
+            'engineer': CustomerWidget,
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(EstimateFullForm, self).__init__(*args, **kwargs)
         self.fields['customer'].queryset = Person.objects.filter(
             company__company_type__name__iexact='mechanical contractor')
         self.fields['engineer'].queryset = Person.objects.filter(

@@ -1,5 +1,5 @@
 from django import template
-
+import random
 from ..forms import *
 
 register = template.Library()
@@ -110,3 +110,10 @@ def in_setting(things, key):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.simple_tag
+def random_int(a, b=None):
+    if b is None:
+        a, b = 0, a
+    return random.randint(a, b)
