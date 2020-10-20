@@ -31,8 +31,9 @@ def sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Sheet.objects.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
-                                       Q(project__project_number__icontains=project_name)).order_by(ordering)
+    object_list = Sheet.objects.filter(test_sheet_type_id=1)
+    object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
+                                     Q(project__project_number__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -253,7 +254,8 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
             'my_sheet': my_sheet,
             'data': data,
         },
-        'file_name': 'EquipmentReport_{}'.format(sheet_id),
+        'file_name': 'TEST SHEET {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+                                                 my_sheet.project.project_number, '' if is_report_pdf else '-tech'),
         'license_owner': license_owner,
         'owner_title': owner_title,
         'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -820,9 +822,12 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
 @login_required
 def sheet_delete(request, sheet_id):
     this_sheet = get_object_or_404(Sheet, id=sheet_id)
-    if request.POST.get("confirm"):
-        this_sheet.delete()
-        return redirect('sheetHome')
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('sheetHome')
+        if request.POST.get("confirm"):
+            this_sheet.delete()
+            return redirect('sheetHome')
     parameters = {'this_sheet': this_sheet,
                   }
     return render(request, "sheet_delete.html", parameters)

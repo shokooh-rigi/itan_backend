@@ -126,15 +126,19 @@
         }
 
         /* Note section ============================================================================================= */
-        .pdf-note-section {
-            font-size: 11px;
-            font-weight: bold;
-            padding-top: 20px;
+        .pdf-table .pdf-table-note-section {
+            border: none;
         }
 
-        .pdf-note-section .pdf-note-content {
-            font-weight: normal;
-            padding: 0;
+        .pdf-table .pdf-table-note-section td {
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
         }
     </style>
 </head>
@@ -629,14 +633,17 @@
                     <td class="pdf-table-cell">&nbsp;</td>
                     <td class="pdf-table-cell">&nbsp;</td>
                 </tr>
+                <tr class="pdf-table-note-section">
+                    <td class="note-title">
+                        Notes:
+                    </td>
+                    <td colspan="8" class="">
+                        <div class="">{{ page.0.note }}</div>
+                        <div class="">{{ page.1.note }}</div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
-
-            <div class="pdf-note-section">
-                <div>Notes:</div>
-                <div class="pdf-note-content">{{ page.0.note }}</div>
-                <div class="pdf-note-content">{{ page.1.note }}</div>
-            </div>
         </div>
     {% endfor %}
 </div>
