@@ -12,7 +12,7 @@
                     <select name="bfm" class="form-control select2" id="id_bfm">
                         <option value="" data-customer="" data-project="" data-duedate="" data-dlink="" selected="">---------</option>
                         {% for bfm in bfms %}
-                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.company.name }}" data-project="{{ bfm.project.name }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}" data-bfmnote="{% if bfm.note %}{{ bfm.note }}{% endif %}" {% if bfms.count == 1 %}selected="selected"{% endif %}>{{ bfm }}</option>
+                            <option value="{{ bfm.id }}" data-customer="{{ bfm.customer.company.name }}" data-customer-id="{{ bfm.customer.id }}" data-project="{{ bfm.project.name }}" data-project-id="{{ bfm.project.id }}" data-duedate="{{ bfm.due_date|date:"m/d/Y" }}" data-dlink="{% if bfm.uploaded_file %}{{ bfm.uploaded_file.url }}{% endif %}" data-bfmnote="{% if bfm.note %}{{ bfm.note }}{% endif %}" {% if bfms.count == 1 %}selected="selected"{% endif %}>{{ bfm }}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
@@ -92,10 +92,10 @@
                     $.ajax({
                         type: 'GET',
                         async: false,
-                        url: '/select2/fields/auto.json?term=' + $('#id_bfm').find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
+                        url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')
                     }).then(function (data) {
                         for(x in data.results) {
-                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {
                                 break;
                             }
                         }
@@ -113,10 +113,10 @@
                     $.ajax({
                         type: 'GET',
                         async: false,
-                        url: '/select2/fields/auto.json?term=' + $('#id_bfm').find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
+                        url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')
                     }).then(function (data) {
                         for(x in data.results) {
-                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                            if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {
                                 break;
                             }
                         }
@@ -158,10 +158,10 @@
                         $.ajax({
                             type: 'GET',
                             async: false,
-                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('customer') + '&field_id=' + $('#id_customer').data('field_id')
+                            url: '/select2/fields/auto.json?term=' + encodeURIComponent($(this).find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')
                         }).then(function (data) {
                             for(x in data.results) {
-                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {
                                     break;
                                 }
                             }
@@ -179,10 +179,10 @@
                         $.ajax({
                             type: 'GET',
                             async: false,
-                            url: '/select2/fields/auto.json?term=' + $(this).find(':selected').data('project') + '&field_id=' + $('#id_project').data('field_id')
+                            url: '/select2/fields/auto.json?term=' + encodeURIComponent($(this).find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')
                         }).then(function (data) {
                             for(x in data.results) {
-                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer')) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {
                                     break;
                                 }
                             }
