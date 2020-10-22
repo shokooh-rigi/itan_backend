@@ -10,53 +10,57 @@
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_estimate" class="control-label">Estimate #<span class="required">*</span></label>
-                    <select name="estimate" class="form-control select2" required="" id="id_estimate">
-                        <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
-                        {% for estimate in estimates %}
-                            <option value="{{ estimate.id }}" data-customer="{{ estimate.customer }}" data-engineer="{{ estimate.engineer }}" data-tabamount="${% estimate_sub_total_calculator estimate.id %}" data-preamount="${% estimate_predemo_calculator estimate.id %}" data-totalamount="${% estimate_total_calculator estimate.id %}" {% if estimates.count == 1 %}selected="selected"{% endif %}>{% estimate_number_generator estimate.id %}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="form-icon"><a href="{% url 'estimatorAdd' %}" id="add_customer"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="row-data">
+                        <select name="estimate" class="form-control select2" required="" id="id_estimate">
+                            <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
+                            {% for estimate in estimates %}
+                                <option value="{{ estimate.id }}" data-customer="{{ estimate.customer }}" data-engineer="{{ estimate.engineer }}" data-tabamount="${% estimate_sub_total_calculator estimate.id %}" data-preamount="${% estimate_predemo_calculator estimate.id %}" data-totalamount="${% estimate_total_calculator estimate.id %}" {% if estimates.count == 1 %}selected="selected"{% endif %}>{% estimate_number_generator estimate.id %}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="select-icons">
+                            <div class="form-icon"><a href="{% url 'estimatorAdd' %}" id="add_customer"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="customer" class="control-label">Customer</label>
                     <span class="form-control" id="customer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="engineer" class="control-label">Engineer</label>
                     <span class="form-control" id="engineer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="tab_amount" class="control-label">TAB Services Amount</label>
                     <span class="form-control" id="tab_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="pre_amount" class="control-label">Pre Demo Amount</label>
                     <span class="form-control" id="pre_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="total_amount" class="control-label">Total Amount</label>
                     <span class="form-control" id="total_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <label for="total_amount" class="control-label align-top">Note</label>
                     {{ form.note }}
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
+                <div class="col-lg-12">
                     <input type="submit" class="btn btn-success" value="Create" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>

@@ -21,7 +21,7 @@
                 <li class="list-group-item">Terms: <b>{{ invoice.terms }}</b></li>
                 <li class="list-group-item">Description: <b>{{ invoice.description }} at {{ estimate.project.name }}</b></li>
                 <li class="list-group-item">Original Amount: <b>${% estimate_total_calculator estimate.id %}</b></li>
-                {% if change_orders %}<li class="list-group-item">Change Orders: <br /><b>{% for change_order in change_orders %}{{ change_order }}{%if not forloop.last%}<br />{%endif%}{% endfor %}</b></li>{% endif %}
+                {% if change_orders %}<li class="list-group-item">Change Orders: <br /><b>{% for change_order in change_orders %}{{ change_order }}{% if change_order.description %} - {{ change_order.description }}{% endif %}{%if not forloop.last%}<br />{%endif%}{% endfor %}</b></li>{% endif %}
                 <li class="list-group-item">Sub Total: <b>${% order_total_calculator estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }}</b></li>
                 <li class="list-group-item">Percent of performance completed: <b>{{ invoice.percent_of_performance_completed }}%</b></li>
                 <li class="list-group-item">Total payment received to date: <b>${{ invoice.total_payment_received_to_date|floatformat:2|intcomma }}</b></li>

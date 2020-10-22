@@ -252,7 +252,7 @@ def invoice_edit(request, invoice_id):
 @login_required
 def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
-    if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_invoice.created_by == request.user:
         if request.POST.get("confirm"):
             parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(
                 this_invoice.id).zfill(3),
@@ -260,7 +260,7 @@ def invoice_delete(request, invoice_id):
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()
         return redirect('invoiceHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {
@@ -277,12 +277,12 @@ def invoice_delete(request, invoice_id):
 @login_required
 def invoice_archive(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
-    if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_invoice.created_by == request.user:
         if request.POST.get("confirm"):
             this_invoice.archive = True
             this_invoice.save()
         return redirect('invoiceHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {

@@ -332,7 +332,7 @@ input[type=text][readonly] {
 
 .form-control {
     display: inline-block;
-    width: 250px;
+    width: 230px;
 }
 
 .form-line {
@@ -340,13 +340,13 @@ input[type=text][readonly] {
 }
 
 .form-line label {
-    width: 150px;
+    width: 180px;
     text-align: left;
     padding: 5px;
     vertical-align: top;
 }
 
-.form-group input, .form-group select, .form-group button {
+.form-group input, .form-group textarea, .form-group select, .form-group button {
     width: 230px;
 }
 
@@ -692,4 +692,17 @@ input[type=text][readonly] {
 
 #orderList {
     overflow: auto;
+}
+
+.row-data {
+    display: inline-block;
+    position: relative;
+}
+
+.row-data .select-icons {
+    position: absolute;
+    display: inline-block;
+    top: 0;
+    right: -10px;
+    transform: translateX(100%);
 }

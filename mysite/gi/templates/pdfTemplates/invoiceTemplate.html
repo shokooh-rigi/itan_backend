@@ -91,7 +91,7 @@
                         <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id %} </td>
                     </tr>
                     {% if change_orders %}<tr style="border: 1px solid #000;">
-                        <td style="padding: 5px 0 0 0;">{% for change_order in change_orders %}Change Order #{{ change_order.co_number }}{%if not forloop.last%}<br />{%endif%}{% endfor %} </td>
+                        <td style="padding: 5px 0 0 0;">{% for change_order in change_orders %}Change Order #{{ change_order.co_number }}{% if change_order.description %} - {{ change_order.description }}{% endif %}{%if not forloop.last%}<br />{%endif%}{% endfor %} </td>
                         <td style="padding: 5px 0 0 0;">{% for change_order in change_orders %}${{ change_order.amount|floatformat:2|intcomma }}{%if not forloop.last%}<br />{%endif%}{% endfor %} </td>
                     </tr>{% endif %}
                     <tr style="text-align: right;">
