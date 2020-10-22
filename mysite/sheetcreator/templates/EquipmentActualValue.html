@@ -9,7 +9,7 @@
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
-    <form method='POST' action='' enctype="multipart/form-data" id="equipmentValues-form">
+    <form method='POST' action='' onsubmit="onFormSubmit()" enctype="multipart/form-data" id="equipmentValues-form">
         <div class="form-group">
             {% csrf_token %}
         </div>
@@ -103,6 +103,26 @@
         </div>
     </form>
     <script>
+        let hpInput = null;
+        const labels = $('label');
+        for (let label of labels) {
+            label = $(label);
+            if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'h.p.') {
+                hpInput = $('input[name="' + label.attr('for') + '"]');
+                hpInput.attr('readonly', '');
+                hpInput.attr('type', 'text');
+                hpInput.val('SEE BHP');
+                break;
+            }
+        }
+
+        function onFormSubmit() {
+            if (hpInput) {
+                hpInput.val('0');
+            }
+        }
+    </script>
+    <script>
         $('#id_proposal').on('change', function () {
             if ($(this).val() === '') {
                 $("#customer").text('');
@@ -181,8 +201,7 @@
                     sub_stinger = assignment.substring(assignment.lastIndexOf("{"), assignment.lastIndexOf("}") + 1);
                     assignment = assignment.replace(sub_stinger, closest);
                     assignmentOperations[i] = assignmentOperations[i].replace(sub_stinger, closest);
-                }
-                else {
+                } else {
                     break;
                 }
             }

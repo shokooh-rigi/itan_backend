@@ -118,7 +118,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['id', 'project__project_number', 'sheet_date'];
+        var sortables = ['id', 'project__project_number', 'sheet_date', 'project__proposal__quote__estimate__project__name', 'project__proposal__quote__estimate__project__address_line_1'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
