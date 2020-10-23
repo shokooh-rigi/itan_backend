@@ -29,9 +29,9 @@ def order_list(request):
     object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
                                        Q(project_number__icontains=project_name)).order_by(ordering)
 
-    if request.GET.get('type') == 'all':
+    if request.GET.get('type') == 'all' or request.GET.get('type') is None:
         object_list = object_list
-    if request.GET.get('type') == 'inprogress' or request.GET.get('type') is None:
+    if request.GET.get('type') == 'inprogress':
         object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=True)
     if request.GET.get('type') == 'invoiced':
         object_list = object_list.filter(invoice__isnull=False)

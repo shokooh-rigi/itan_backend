@@ -10,10 +10,10 @@
         <br /><br />
         <h3>Select Order Filtered By:</h3>
         <div class="btn-group type-select" style="margin: 10px auto;">
+            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
             <a class="btn btn-primary inprogressselected" href="?{% url_replace request 'type' 'inprogress' %}">In Progress</a>
             <a class="btn btn-primary reportedselected" href="?{% url_replace request 'type' 'reported' %}">Reported</a>
             <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'invoiced' %}">Invoiced</a>
-            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
         </div>
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">
@@ -88,6 +88,7 @@
                             <td>{{ order.project_number }}</td>
                             <td>${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}</td>
                             <td>
+                            <a {% if not order.invoice %}href="{% url 'invoiceAddUsingOrder' order_id=order.id %}"{% endif %} style="display: inline-block; margin-left: 5px;"><div class="icon linkicon{% if order.invoice %} disableicon{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if order.invoice %}Invoice Already Created!{% else %}Invoice Shortcut{% endif %}"></div></a>
                                 <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'estimateBid' estimate_id=order.proposal.quote.estimate.id %}" style="display: inline-block;"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View Estimate"></div></a>
                                 {% if order.equipment_submittal %}<a href="{{ order.equipment_submittal.url }}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Equipment Submittal"></div></a>{% endif %}

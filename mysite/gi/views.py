@@ -112,7 +112,12 @@ def invoice_list(request):
 
 
 @login_required
-def invoice_add(request):
+def invoice_add(request, order_id=None):
+    form = InvoiceForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
+    if order_id:
+        orders = Order.objects.filter(id=order_id)
+    else:
+        orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by('-created_on')
     if request.user.last_name == '' or request.user.last_name is None:
         user_name = 'TAB Technologies, INC. Operator'
     else:
@@ -122,9 +127,6 @@ def invoice_add(request):
     else:
         user_title = request.user.profile.title
     user_signature = request.user.profile.e_sign
-    form = InvoiceForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by(
-        '-created_on')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
