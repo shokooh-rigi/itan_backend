@@ -29,7 +29,7 @@ def vav_sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = DataSheet.objects.filter(test_sheet_type_id=2)
+    object_list = DataSheet.objects.filter(test_sheet_type__name__icontains='vav')
     object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=search) |
                                      Q(project__project_number__icontains=search)).order_by(ordering)
 
@@ -46,7 +46,7 @@ def vav_sheet_list(request):
 
 @login_required
 def vav_sheet_add(request):
-    form = VavSheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 2})
+    form = VavSheetForm(request.POST or None, request.FILES or None)
     orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type_id=2).values_list('project_id'))
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -54,7 +54,7 @@ def vav_sheet_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 sheet = form.save(commit=False)
-                sheet.test_sheet_type = TestSheet.objects.get(pk=2)
+                sheet.test_sheet_type = TestSheet.objects.get(name__icontains='vav')
                 sheet.save()
                 return redirect('vavSheetEquipment', sheet.id)
     parameters = {'form': form,
@@ -348,44 +348,12 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
 
 
 @login_required
-def sheet_equipment_common_data_edit(request, sheet_equipment_id):
-    this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
-    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
-    value_fields = SheetEquipmentCommonData.objects.filter(sheet_equipment_id=sheet_equipment_id)
-    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type).distinct()
-    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=this_sheet_equipment.equipment_type)
-    this_equipment = EquipmentDb.objects.get(id=this_sheet_equipment.equipment.id)
-
-    equipments = Equipment.objects.filter(test_sheet__name__icontains=this_sheet_equipment)
-
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
-        if request.POST.get("next"):
-            for value_field in value_fields:
-                SheetEquipmentCommonData.objects.filter(key=value_field.key,
-                                                        sheet_equipment=this_sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
-            this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
-            this_sheet_equipment.save()
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
-
-    parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'showing_fields': showing_fields,
-                  'manufacturers': manufacturers,
-                  'value_fields': value_fields,
-                  'Equipment_db': Equipment_db,
-                  'this_equipment': this_equipment,
-                  }
-
-    return render(request, "vavSheetEquipmentGeneralData.html", parameters)
-
-
-@login_required
-def review_equipment_values(request, sheet_equipment_id):
-    this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
+def vav_sheet_equipment_design_data(request, sheet_equipment_id):
+    this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
     this_equipment = this_sheet_equipment.equipment
-    custom_fields = this_equipment.equipment_type.equipmenttypecustomfield_set.all()
-    custom_operations = this_equipment.equipment_type.equipmenttypecustomoperation_set.all()
+    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
+    print(design_fields)
+    custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_design=True)
     show_parentheses_fields = list(map(lambda item:
                                        {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
                                        custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
@@ -830,17 +798,17 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
 
 
 @login_required
-def sheet_delete(request, sheet_id):
-    this_sheet = get_object_or_404(Sheet, id=sheet_id)
+def vav_sheet_delete(request, sheet_id):
+    this_sheet = get_object_or_404(DataSheet, id=sheet_id)
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('sheetHome')
+            return redirect('vavSheetHome')
         if request.POST.get("confirm"):
             this_sheet.delete()
-            return redirect('sheetHome')
+            return redirect('vavSheetHome')
     parameters = {'this_sheet': this_sheet,
                   }
-    return render(request, "sheet_delete.html", parameters)
+    return render(request, "vavSheetDelete.html", parameters)
 
 
 @login_required
