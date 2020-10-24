@@ -38,6 +38,7 @@ urlpatterns = [
     path('', include('mysite.schedule.urls')),
     path('', include('mysite.settlement.urls')),
     path('', include('mysite.sheetcreator.urls')),
+    path('', include('mysite.testsheetvav.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),

@@ -8,20 +8,18 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from ..order.models import *
-from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices, ShowParenthesesChoices
 from .forms import *
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from .models import *
 from .render import Render as PDFRender
+from ..sheetcreator.models import *
 
 
 # Create your views here.
 
 
 @login_required
-def sheet_list(request):
-    project_name = request.GET.get('project_name', '')
+def vav_sheet_list(request):
+    search = request.GET.get('search', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):
@@ -31,9 +29,9 @@ def sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Sheet.objects.filter(test_sheet_type_id=1)
-    object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
-                                     Q(project__project_number__icontains=project_name)).order_by(ordering)
+    object_list = DataSheet.objects.filter(test_sheet_type_id=2)
+    object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=search) |
+                                     Q(project__project_number__icontains=search)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -43,37 +41,37 @@ def sheet_list(request):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "sheetList.html", parameters)
+    return render(request, "vavList.html", parameters)
 
 
 @login_required
-def sheet_add(request):
-    form = SheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 1})
-    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id'))
+def vav_sheet_add(request):
+    form = VavSheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 2})
+    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type_id=2).values_list('project_id'))
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('sheetHome')
+            return redirect('vavSheetHome')
         if form.is_valid():
             if request.POST.get("next"):
                 sheet = form.save(commit=False)
-                sheet.test_sheet_type = TestSheet.objects.get(pk=1)
+                sheet.test_sheet_type = TestSheet.objects.get(pk=2)
                 sheet.save()
-                return redirect('sheetEquipment', sheet.id)
+                return redirect('vavSheetEquipment', sheet.id)
     parameters = {'form': form,
                   'orders': orders,
                   }
-    return render(request, "sheetAdd.html", parameters)
+    return render(request, "vavSheetAdd.html", parameters)
 
 
 @login_required
-def sheet_equipment(request, sheet_id):
-    sheet = Sheet.objects.get(id=sheet_id)
-    form = SheetEquipmentForm(request.POST or None, initial={'sheet': sheet_id})
+def vav_sheet_equipment(request, sheet_id):
+    sheet = DataSheet.objects.get(id=sheet_id)
+    form = VavSheetEquipmentForm(request.POST or None, initial={'sheet': sheet_id})
 
-    equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
+    equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
 
     equipment_in = []
-    sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
+    sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
     for one_sheet_equipment in sheet_equipments:
         equipment_in.append(one_sheet_equipment.equipment_type.id)
 
@@ -87,42 +85,37 @@ def sheet_equipment(request, sheet_id):
             equipments_count[one_sheet_equipment.equipment_type.name] = 1
     if request.method == 'POST':
         if form.is_valid():
-            if SheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).count() == 0:
-                form.cleaned_data['sheet'] = sheet_id
-                for i in range(0, form.cleaned_data['quantity']):
-                    item_sheet_equipment = SheetEquipment()
-                    item_sheet_equipment.sheet = Sheet.objects.get(id=sheet_id)
-                    item_sheet_equipment.equipment_type = Equipment.objects.get(id=form.cleaned_data['equipment_type'].id)
-                    item_sheet_equipment.save()
-                return redirect('sheetEquipment', sheet_id)
-            else:
-                SheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).delete()
-                for i in range(0, form.cleaned_data['quantity']):
-                    item_sheet_equipment = SheetEquipment()
-                    item_sheet_equipment.sheet = Sheet.objects.get(id=sheet_id)
-                    item_sheet_equipment.equipment_type = Equipment.objects.get(id=form.cleaned_data['equipment_type'].id)
-                    item_sheet_equipment.save()
-                return redirect('sheetEquipment', sheet_id)
+            form.cleaned_data['sheet'] = sheet_id
+            if DataSheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).count() != 0:
+                DataSheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).delete()
+            for i in range(0, form.cleaned_data['quantity']):
+                item_sheet_equipment = DataSheetEquipment()
+                item_sheet_equipment.sheet = DataSheet.objects.get(id=sheet_id)
+                item_sheet_equipment.equipment_type = Equipment.objects.get(id=form.cleaned_data['equipment_type'].id)
+                item_sheet_equipment.save()
+            return redirect('vavSheetEquipment', sheet_id)
+
     first_equipment = sheet_equipments.first()
     if first_equipment is None:
-        first_equipment_id = ''
+        any_equipment_id = False
     else:
-        first_equipment_id = first_equipment.id
+        any_equipment_id = True
+
     parameters = {'sheet': sheet,
                   'form': form,
                   'sheet_equipments': sheet_equipments,
                   'equipment_in': equipment_in,
                   'equipments_count': equipments_count,
                   'equipments': equipments,
-                  'first_equipment_id': first_equipment_id,
+                  'any_equipment_id': any_equipment_id,
                   }
-    return render(request, "sheetEquipment.html", parameters)
+    return render(request, "vavSheetEquipment.html", parameters)
 
 
 @login_required
-def equipments_list(request, sheet_id):
-    my_sheet = Sheet.objects.get(id=sheet_id)
-    sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
+def vav_sheet_equipment_list(request, sheet_id):
+    my_sheet = DataSheet.objects.get(id=sheet_id)
+    sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
 
     parameters = {'sheet_equipments': sheet_equipments,
                   'my_sheet': my_sheet,
@@ -130,7 +123,7 @@ def equipments_list(request, sheet_id):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "sheetEquipmentsList.html", parameters)
+    return render(request, "vavSheetEquipmentsList.html", parameters)
 
 
 def fetch_sheet_equipment_data(equipment: SheetEquipment):
@@ -306,35 +299,52 @@ def equipments_generate_report_pdf(request, sheet_id):
 
 
 @login_required
-def sheet_equipment_common_data(request, sheet_equipment_id):
-    sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
-    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
+def vav_sheet_equipment_general_data(request, sheet_equipment_id):
+    sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
+    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
     manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=sheet_equipment.equipment_type)
 
-    equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
+    equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
+
+    value_fields = TestSheetGeneralData.objects.filter(sheet_equipment_id=sheet_equipment_id)
+    edit_page = False
+    if value_fields.exists():
+        edit_page = True
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
-        for every_field in showing_fields:
-            key = every_field
-            field_value = request.POST.get('showing_field_value_'+str(every_field.id))
-            new_record = SheetEquipmentCommonData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
-            new_record.save()
-        new_update = SheetEquipment.objects.get(id=sheet_equipment_id)
-        new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
-        new_update.main_data_entry_completed = True
-        new_update.save()
-        return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
+            return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
+        if edit_page:
+            for value_field in value_fields:
+                TestSheetGeneralData.objects.filter(key=value_field.key,
+                                                        sheet_equipment=sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
+            if request.POST.get('id_equipment'):
+                sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            sheet_equipment.save()
+            return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
+        else:
+            for every_field in showing_fields:
+                key = every_field
+                field_value = request.POST.get('showing_field_value_'+str(every_field.id))
+                new_record = TestSheetGeneralData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
+                new_record.save()
+            new_update = DataSheetEquipment.objects.get(id=sheet_equipment_id)
+            if request.POST.get('id_equipment'):
+                new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            new_update.main_data_entry_completed = True
+            new_update.save()
+        return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
 
     parameters = {'sheet_equipment': sheet_equipment,
                   'showing_fields': showing_fields,
+                  'value_fields': value_fields,
                   'manufacturers': manufacturers,
                   'Equipment_db': Equipment_db,
+                  'edit_page': edit_page,
                   }
 
-    return render(request, "sheetEquipmentCommonData.html", parameters)
+    return render(request, "vavSheetEquipmentGeneralData.html", parameters)
 
 
 @login_required
@@ -367,7 +377,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                   'this_equipment': this_equipment,
                   }
 
-    return render(request, "sheetEquipmentCommonDataEdit.html", parameters)
+    return render(request, "vavSheetEquipmentGeneralData.html", parameters)
 
 
 @login_required
@@ -834,14 +844,14 @@ def sheet_delete(request, sheet_id):
 
 
 @login_required
-def sheet_equipment_delete(request, sheet_id, sheet_equipment_name):
-    this_sheet = SheetEquipment.objects.filter(equipment_type__name__iexact=sheet_equipment_name, sheet=sheet_id)
+def vav_sheet_equipment_delete(request, sheet_id, sheet_equipment_name):
+    this_sheet = DataSheetEquipment.objects.filter(equipment_type__name__iexact=sheet_equipment_name, sheet=sheet_id)
     if request.POST.get("confirm"):
         this_sheet.delete()
-        return redirect('sheetEquipment', sheet_id)
+        return redirect('vavSheetEquipment', sheet_id)
     if request.POST.get("cancel"):
-        return redirect('sheetEquipment', sheet_id)
+        return redirect('vavSheetEquipment', sheet_id)
     parameters = {'this_sheet': this_sheet,
                   'sheet_equipment_name': sheet_equipment_name,
                   }
-    return render(request, "sheet_delete.html", parameters)
+    return render(request, "vavSheetEquipmentDelete.html", parameters)

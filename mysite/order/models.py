@@ -1,4 +1,6 @@
 from mysite.estimator.models import *
+from ..core.models import *
+from ..dbmanagement.models import *
 
 # Create your models here.
 

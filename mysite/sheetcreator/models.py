@@ -1,9 +1,30 @@
-from mysite.core.models import *
-from mysite.estimator.models import *
-from mysite.order.models import *
+from mysite.dbmanagement.models import *
 import datetime
+from mysite.order.models import Order
 
 # Create your models here.
+
+
+class DataSheet(models.Model):
+    test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
+    sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
+    system = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return self.test_sheet_type.name + " " + self.project.project_number
+
+
+class DataSheetEquipment(models.Model):
+    sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
+    main_data_entry_completed = models.BooleanField(default=False)
+    design_data_entry_completed = models.BooleanField(default=False)
+    actual_data_entry_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.sheet) + ": " + self.equipment_type.name
 
 
 class TestSheetColumn(models.Model):
@@ -13,6 +34,24 @@ class TestSheetColumn(models.Model):
 
     def __str__(self):
         return self.test_sheet.name + " " + self.column_title
+
+
+class TestSheetGeneralData(models.Model):
+    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return str(self.sheet_equipment) + " " + self.key.column_title
+
+
+class TestSheetData(models.Model):
+    data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
+    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return str(self.data_type) + ' ' + str(self.sheet_equipment)
 
 
 class SheetActualDataCustomField(models.Model):

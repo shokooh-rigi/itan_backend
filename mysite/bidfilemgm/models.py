@@ -1,7 +1,5 @@
 import datetime
-
 from django.db import models
-
 from mysite.core.models import Person, User, Project
 from ..settings import MAX_UPLOAD_SIZE
 

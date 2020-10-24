@@ -81,18 +81,6 @@ class SettingAdmin(ImportExportModelAdmin):
 admin.site.register(Setting, SettingAdmin)
 
 
-class TestSheetResource(resources.ModelResource):
-    class Meta:
-        model = TestSheet
-
-
-class TestSheetAdmin(ImportExportModelAdmin):
-    resource_class = TestSheetResource
-
-
-admin.site.register(TestSheet, TestSheetAdmin)
-
-
 class ServiceResource(resources.ModelResource):
     class Meta:
         model = Service
