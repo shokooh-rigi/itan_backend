@@ -379,32 +379,30 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                         max_value = float(max_value)
                     if sent_value < min_value or sent_value > max_value:
                         error_msg = design_field.field_name + " Value is not in Range!"
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
                                       'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
                                       }
                         return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
-                    if custom_field.field_type == FieldTypeChoices.Characters.value:
+                elif design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+                    if design_field.field_type == FieldTypeChoices.Characters.value:
                         break
-                    my_range = custom_field.field_range.split(',')
-                    sent_value = request.POST.get('company_value_' + str(custom_field.id))
+                    my_range = design_field.field_range.split(',')
+                    sent_value = request.POST.get('company_value_' + str(design_field.id))
                     is_in_my_range = 0
                     for number in my_range:
-                        if custom_field.field_type == FieldTypeChoices.Integer.value:
+                        if design_field.field_type == FieldTypeChoices.Integer.value:
                             if int(number) == int(sent_value):
                                 is_in_my_range = 1
-                        elif custom_field.field_type == FieldTypeChoices.Float.value:
+                        elif design_field.field_type == FieldTypeChoices.Float.value:
                             if float(number) == float(sent_value):
                                 is_in_my_range = 1
                     if is_in_my_range == 0:
-                        error_msg = custom_field.field_name + " Value is not selected right!"
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                        error_msg = design_field.field_name + " Value is not selected right!"
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -415,18 +413,17 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                 this_result = str(custom_operation.result_field)
                 operation_msg = str(custom_operation.operation)
                 result_msg = str(custom_operation.result_field)
-                for custom_field in custom_fields:
-                    this_operation = this_operation.replace('[field-' + str(custom_field.id) + ']',
-                                                            request.POST.get('company_value_' + str(custom_field.id)))
-                    this_result = this_result.replace('[field-' + str(custom_field.id) + ']',
-                                                      request.POST.get('company_value_' + str(custom_field.id)))
-                    operation_msg = operation_msg.replace('[field-' + str(custom_field.id) + ']', custom_field.field_name)
-                    result_msg = result_msg.replace('[field-' + str(custom_field.id) + ']', custom_field.field_name)
+                for design_field in design_fields:
+                    this_operation = this_operation.replace('[field-' + str(design_field.id) + ']',
+                                                            request.POST.get('company_value_' + str(design_field.id)))
+                    this_result = this_result.replace('[field-' + str(design_field.id) + ']',
+                                                      request.POST.get('company_value_' + str(design_field.id)))
+                    operation_msg = operation_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
+                    result_msg = result_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
                 if custom_operation.operand_type == OperandChoices.EqualTo.value:
                     if eval(this_operation) != eval(this_result):
                         error_msg = operation_msg + " must be equal to " + result_msg
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
                                       'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
@@ -436,9 +433,8 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                 elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
                     if eval(this_operation) <= eval(this_result):
                         error_msg = operation_msg + " must be greater than " + result_msg
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -447,9 +443,8 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                 elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
                     if eval(this_operation) < eval(this_result):
                         error_msg = operation_msg + " must be greater than or equal to " + result_msg
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -458,9 +453,8 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                 elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
                     if eval(this_operation) >= eval(this_result):
                         error_msg = operation_msg + " must be smaller than " + result_msg
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -470,31 +464,38 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                     if eval(this_operation) > eval(this_result):
                         error_msg = operation_msg + " must be smaller than or equal to " + result_msg
                         parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
                                       }
                         return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
-            for custom_field in custom_fields:
-                new_value = request.POST.get('company_value_' + str(custom_field.id)).strip()
-                if not new_value:
-                    new_value = custom_field.default_value.strip()
+            for design_field in design_fields:
 
-                num_results = EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                                  equipment=this_equipment).count()
-                if num_results > 0:
-                    EquipmentCustomField.objects.filter(equipment_value_name=custom_field.field_name,
-                                                        equipment=this_equipment.id).update(company_value=new_value)
+                new_value = request.POST.get('company_value_' + str(design_field.id)).strip()
+
+                # if Manufacturer and Model Number selected, Update Design values in EquipmentDbDesignData Table
+                if this_sheet_equipment.equipment:
+                    equipment_db_design_value = EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field)
+                    if equipment_db_design_value.exists():
+                        EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field).update(value=new_value)
+                    else:
+                        new_object = EquipmentDbDesignData(equipment=this_sheet_equipment.equipment, key=design_field, value=new_value)
+                        new_object.save()
+
+                # else if Manufacturer and Model Number not selected, Create or Update Design values in TestSheetData
                 else:
-                    new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=new_value, equipment=this_equipment)
-                    new_object.save()
+                    num_results = TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).count()
+                    if num_results > 0:
+                        TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).update(value=new_value)
+                    else:
+                        new_object = TestSheetData(sheet_field=design_field, sheet_equipment=this_sheet_equipment, value=new_value)
+                        new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
             this_sheet_equipment.save()
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'this_sheet_equipment': this_sheet_equipment,
                   'design_fields': design_fields,
                   'show_parentheses_fields': show_parentheses_fields,
                   'required_fields': required_fields,

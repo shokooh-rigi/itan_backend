@@ -17,35 +17,23 @@ def get_design_value(request, design_field, equipment, request_page):
         else:
             return TestSheetField.objects.get(id=design_field.id).default_value
     elif request_page == 2:
-        if request.POST:
-            answer = request.POST.get('company_value_' + str(design_field.id))
-            return answer
+        num_results = TestSheetData.objects.filter(data_type=1, sheet_equipment=equipment, sheet_field=design_field).count()
+        if num_results > 0:
+            this_field_value = TestSheetData.objects.get(data_type=1, sheet_equipment=equipment, sheet_field=design_field)
+            return this_field_value.value
         else:
             if equipment.equipment:
                 return_value = EquipmentDbDesignData.objects.filter(equipment=equipment.equipment, key=design_field)
                 if return_value.exists():
                     return EquipmentDbDesignData.objects.get(equipment=equipment.equipment, key=design_field).value
             else:
-                num_results = TestSheetData.objects.filter(data_type=1, sheet_equipment=equipment, sheet_field=design_field).count()
-                if num_results > 0:
-                    this_field_value = TestSheetData.objects.filter(data_type=1, sheet_equipment=equipment, sheet_field=design_field)
-                    return this_field_value.value
-                else:
-                    this_sheet_field = get_object_or_404(TestSheetField, id=design_field.id)
-                    return this_sheet_field.default_value
+                this_sheet_field = get_object_or_404(TestSheetField, id=design_field.id)
+                return this_sheet_field.default_value
 
 
 @register.simple_tag
 def get_field_type(field):
-    field_type = 0
-    if type(field) == EquipmentCustomField:
-        field_type = field.equipment.equipment_type.equipmenttypecustomfield_set.get(
-            field_name=field.equipment_value_name).field_type
-    elif type(field) == SheetEquipmentActualData:
-        field_type = field.key.equipment.equipment_type.equipmenttypecustomfield_set.get(
-            field_name=field.key.equipment_value_name).field_type
-    elif type(field) == EquipmentTypeCustomField:
-        field_type = field.field_type
+    field_type = field.field_type
 
     if field_type == FieldTypeChoices.Integer.value:
         return 'type=number'
