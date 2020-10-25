@@ -575,7 +575,7 @@ def company_customer_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 0);</script>' % (instance.pk, instance))
 
     return render(request, "company_form.html", {"form": form})
 
@@ -588,7 +588,7 @@ def company_customer_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
 
     return render(request, "company_form.html", {"form": form})
 
@@ -600,7 +600,7 @@ def company_engineer_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 0);</script>' % (instance.pk, instance))
 
     return render(request, "company_form.html", {"form": form})
 
@@ -613,7 +613,7 @@ def company_engineer_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
 
     return render(request, "company_form.html", {"form": form})
 
@@ -636,7 +636,7 @@ def person_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 0);</script>' % (instance.pk, instance))
 
     return render(request, "customer_form.html", {"form": form})
 
@@ -649,7 +649,7 @@ def person_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "customer_form.html", {"form": form})
 
@@ -661,7 +661,7 @@ def manufacturer_person_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info", 0);</script>' % (instance.pk, instance))
 
     return render(request, "customer_form.html", {"form": form})
 
@@ -674,7 +674,7 @@ def manufacturer_person_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info", 1);</script>' % (instance.pk, instance))
 
     return render(request, "customer_form.html", {"form": form})
 
@@ -698,7 +698,7 @@ def project_create_popup(request):
         form.cleaned_data['created_by'] = request.user
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_project");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_project", 0);</script>' % (instance.pk, instance))
 
     return render(request, "project_form.html", {"form": form})
 
@@ -710,7 +710,7 @@ def project_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_project");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_project", 1);</script>' % (instance.pk, instance))
 
     return render(request, "project_form.html", {"form": form})
 
@@ -722,7 +722,7 @@ def engineer_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_engineer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_engineer", 0);</script>' % (instance.pk, instance))
 
     return render(request, "engineer_form.html", {"form": form})
 
@@ -735,7 +735,7 @@ def engineer_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_engineer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_engineer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "engineer_form.html", {"form": form})
 

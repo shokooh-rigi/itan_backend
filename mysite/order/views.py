@@ -8,7 +8,8 @@ from django import forms
 from platform import system
 import os
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MAX_UPLOAD_SIZE, UPLOAD_URL
+from ..bidfilemgm.views import handle_uploaded_file, create_zip_file
 
 
 # Create your views here.
@@ -216,10 +217,8 @@ def control_system(request, order_id):
             return redirect('orderEdit', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
-                form.cleaned_data['proposal'] = this_order.proposal
-                form.cleaned_data['po_number'] = this_order.po_number
-                form.save()
-                return redirect('controlSystem', order_id=order_id)
+                Order.objects.filter(id=order_id).update(control_system=form.cleaned_data['control_system'])
+                return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
                   }
@@ -235,9 +234,40 @@ def order_equipment_submittal(request, order_id):
             return redirect('orderEdit', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
-                form.cleaned_data['proposal'] = this_order.proposal
-                form.cleaned_data['po_number'] = this_order.po_number
-                form.save()
+
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_equipment_submittal")
+                if not os.path.exists(temp_path):
+                    os.makedirs(temp_path)
+                files_list = request.FILES.getlist('equipment_submittal')
+                files = []
+                size_sum = 0
+                for f in files_list:
+                    size_sum = size_sum + f.size
+                if size_sum > MAX_UPLOAD_SIZE:
+                    error_msg = "Selected files exceeded maximum upload size!"
+                    parameters = {
+                        'form': form,
+                        'error_msg': error_msg
+                    }
+                    return render(request, "EquipmentSubmittal.html", parameters)
+                for f in files_list:
+                    files.append(os.path.join(temp_path, f.name))
+                    handle_uploaded_file(f, files[-1])
+                project_clean_name = this_order.project_number.replace(' ', '_') \
+                    .replace('!', '') \
+                    .replace('@', '') \
+                    .replace('#', '') \
+                    .replace('$', '') \
+                    .replace('%', '') \
+                    .replace('^', '') \
+                    .replace('&', '') \
+                    .replace('*', '') \
+                    .replace("/", '')
+                zip_file_name = project_clean_name + '-Equipment-Submittal.zip'
+                create_zip_file(files, temp_path, zip_file_name)
+                # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                Order.objects.filter(id=order_id).update(equipment_submittal=UPLOAD_URL + 'order_equipment_submittal/' + zip_file_name)
+
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
@@ -263,7 +293,7 @@ def cs_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_cs");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_control_system", 0);</script>' % (instance.pk, instance))
 
     return render(request, "cs_form.html", {"form": form})
 
@@ -275,7 +305,7 @@ def cs_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_control_system");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_control_system", 1);</script>' % (instance.pk, instance))
 
     return render(request, "cs_form.html", {"form": form})
 
@@ -286,7 +316,7 @@ def cs_manufacturer_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 0);</script>' % (instance.pk, instance))
 
     return render(request, "cs_manufacturer_form.html", {"form": form})
 
@@ -298,6 +328,6 @@ def manufacturer_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "cs_manufacturer_form.html", {"form": form})

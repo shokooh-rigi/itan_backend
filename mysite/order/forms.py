@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import *
 from django.forms import ModelForm
 from django_select2 import forms as s2forms
 
@@ -12,6 +13,7 @@ class ProposalWidget(s2forms.ModelSelect2Widget):
 
 
 class OrderForm(ModelForm):
+    equipment_submittal = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     class Meta:
         model = Order
         fields = [
@@ -61,7 +63,6 @@ class ControlSystemForm(ModelForm):
         model = ControlSystem
         fields = [
             'manufacturer',
-            'manufacturer_contact_info',
             'version_number',
             'os',
             'release_date',
@@ -81,7 +82,12 @@ class ControlSystemManufacturerForm(ModelForm):
     class Meta:
         model = ControlSystemManufacturer
         fields = [
-            'manufacturer_name'
+            'manufacturer_name',
+            'contact_name',
+            'tel',
+            'fax',
+            'mail',
+            'web',
         ]
 
     def __init__(self, *args, **kwargs):

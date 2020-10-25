@@ -444,7 +444,7 @@ def manufacturer_create_popup(request):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 0);</script>' % (instance.pk, instance))
 
     return render(request, "manufacturer_form.html", {"form": form})
 
@@ -456,6 +456,6 @@ def manufacturer_edit_popup(request, pk=None):
     if form.is_valid():
         instance = form.save()
         return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer");</script>' % (instance.pk, instance))
+            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "manufacturer_form.html", {"form": form})

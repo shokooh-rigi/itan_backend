@@ -7,6 +7,11 @@ from ..dbmanagement.models import *
 
 class ControlSystemManufacturer(models.Model):
     manufacturer_name = models.CharField(max_length=30, blank=False, null=False)
+    contact_name = models.CharField(max_length=255, blank=True)
+    tel = models.CharField(max_length=15, blank=True)
+    fax = models.CharField(max_length=15, blank=True)
+    mail = models.EmailField(max_length=55, blank=True)
+    web = models.CharField(max_length=55, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -15,7 +20,6 @@ class ControlSystemManufacturer(models.Model):
 
 class ControlSystem(models.Model):
     manufacturer = models.ForeignKey(ControlSystemManufacturer, on_delete=models.PROTECT, blank=False, null=False)
-    manufacturer_contact_info = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
     version_number = models.CharField(max_length=30, blank=True, null=True)
     os = models.CharField(max_length=20, blank=True, null=True)
     release_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=True, null=True)

@@ -15,14 +15,6 @@
                 </div>
             </div>
             <div class="row form-line">
-                <div class="col-lg-12">
-                    <label for="id_manufacturer_contact_info" class="control-label">Manufacturer Contact info</label>
-                    {{ form.manufacturer_contact_info }}
-                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_manufacturer_contact_info" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                    <div class="form-icon"><a id="edit_manufacturer_contact_info" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
-                </div>
-            </div>
-            <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 58px;">
                     <label for="id_version_number" class="control-label">Version Number</label>
                     {{ form.version_number }}
