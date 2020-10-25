@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from mysite.dbmanagement.models import EquipmentCustomField
+from mysite.dbmanagement.models import EquipmentCustomField, EquipmentDbDesignData
 from .forms import *
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
@@ -134,6 +134,150 @@ def get_equipment_values(request, equipment_id):
         }, custom_fields)),
     }
     return JsonResponse(data)
+
+
+@login_required
+def vav_equipment_values(request, equipment_id):
+    this_equipment = get_object_or_404(EquipmentDb, id=equipment_id)
+    design_fields = this_equipment.equipment_type.test_sheet.testsheetfield_set.filter(show_in_design=True)
+    custom_operations = this_equipment.equipment_type.test_sheet.testsheetoperation_set.filter(apply_on_design=True)
+    show_parentheses_fields = list(map(lambda item:
+                                       {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
+                                       design_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+                                                            Q(show_parentheses=ShowParenthesesChoices.Both.value))))
+    required_fields = list(map(lambda item: f'company_value_{item.id}', design_fields.filter(required_in_design=True)))
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('EquipmentsHome')
+        if request.POST.get("next"):
+            for design_field in design_fields:
+                if design_field.field_range_or_selective == 1:
+                    if design_field.field_type == 3:
+                        break
+                    my_range = design_field.field_range.split('-')
+                    min_value = my_range[0]
+                    max_value = my_range[1]
+                    sent_value = request.POST.get('company_value_' + str(design_field.id))
+                    if design_field.field_type == 1:
+                        sent_value = int(sent_value)
+                        min_value = int(min_value)
+                        max_value = int(max_value)
+                    elif design_field.field_type == 2:
+                        sent_value = float(sent_value)
+                        min_value = float(min_value)
+                        max_value = float(max_value)
+                    if sent_value < min_value or sent_value > max_value:
+                        error_msg = design_field.field_name + " Value is not in Range!"
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+                elif design_field.field_range_or_selective == 2:
+                    if design_field.field_type == 3:
+                        break
+                    my_range = design_field.field_range.split(',')
+                    sent_value = request.POST.get('company_value_' + str(design_field.id))
+                    is_in_my_range = 0
+                    for number in my_range:
+                        if design_field.field_type == 1:
+                            if int(number) == int(sent_value):
+                                is_in_my_range = 1
+                        elif design_field.field_type == 2:
+                            if float(number) == float(sent_value):
+                                is_in_my_range = 1
+                    if is_in_my_range == 0:
+                        error_msg = design_field.field_name + " Value is not selected right!"
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+            for custom_operation in custom_operations:
+                this_operation = str(custom_operation.operation)
+                this_result = str(custom_operation.result_field)
+                operation_msg = str(custom_operation.operation)
+                result_msg = str(custom_operation.result_field)
+                for design_field in design_fields:
+                    this_operation = this_operation.replace('[field-' + str(design_field.id) + ']',
+                                                            request.POST.get('company_value_' + str(design_field.id)))
+                    this_result = this_result.replace('[field-' + str(design_field.id) + ']',
+                                                      request.POST.get('company_value_' + str(design_field.id)))
+                    operation_msg = operation_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
+                    result_msg = result_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
+                if custom_operation.operand_type == 1:
+                    if eval(this_operation) != eval(this_result):
+                        error_msg = operation_msg + " must be equal to " + result_msg
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+                elif custom_operation.operand_type == 2:
+                    if eval(this_operation) <= eval(this_result):
+                        error_msg = operation_msg + " must be greater than " + result_msg
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+                elif custom_operation.operand_type == 3:
+                    if eval(this_operation) < eval(this_result):
+                        error_msg = operation_msg + " must be greater than or equal to " + result_msg
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+                elif custom_operation.operand_type == 4:
+                    if eval(this_operation) >= eval(this_result):
+                        error_msg = operation_msg + " must be smaller than " + result_msg
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+                elif custom_operation.operand_type == 5:
+                    if eval(this_operation) > eval(this_result):
+                        error_msg = operation_msg + " must be smaller than or equal to " + result_msg
+                        parameters = {'this_equipment': this_equipment,
+                                      'design_fields': design_fields,
+                                      'error_msg': error_msg,
+                                      'show_parentheses_fields': show_parentheses_fields,
+                                      'required_fields': required_fields,
+                                      }
+                        return render(request, "vav_equipment_fields.html", parameters)
+
+            for design_field in design_fields:
+                new_value = request.POST.get('company_value_' + str(design_field.id)).strip()
+
+                num_results = EquipmentDbDesignData.objects.filter(key=design_field,
+                                                                  equipment=this_equipment).count()
+                if num_results > 0:
+                    EquipmentDbDesignData.objects.filter(key=design_field,
+                                                        equipment=this_equipment).update(value=new_value)
+                else:
+                    new_object = EquipmentDbDesignData(key=design_field, value=new_value, equipment=this_equipment)
+                    new_object.save()
+            return redirect('EquipmentsHome')
+    parameters = {'this_equipment': this_equipment,
+                  'design_fields': design_fields,
+                  'show_parentheses_fields': show_parentheses_fields,
+                  'required_fields': required_fields,
+                  }
+    return render(request, "vav_equipment_fields.html", parameters)
 
 
 @login_required

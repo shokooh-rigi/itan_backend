@@ -187,6 +187,23 @@ class EquipmentDb(models.Model):
         return str(self.model_number)
 
 
+class TestSheetColumn(models.Model):
+    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    column_title = models.CharField(max_length=50, blank=False)
+    required = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.test_sheet.name + " " + self.column_title
+
+
+class EquipmentDbDesignData(models.Model):
+    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=False, null=False)
+    key = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return str(self.equipment) + " " + self.key.field_name
+
 
 class EquipmentTypeCustomField(models.Model):
     field_name = models.CharField(max_length=255, blank=False, verbose_name='Field Name')

@@ -89,7 +89,7 @@
                             <td>{{ equipment.manufacturer }}</td>
                             <td>{{ equipment.model_number }}</td>
                             <td>
-                                <a href="{% url 'EquipmentsValues' equipment_id=equipment.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>
+                                <a href="{% if equipment.equipment_type.test_sheet.id == 1 %}{% url 'EquipmentsValues' equipment_id=equipment.id %}{% else %}{% url 'VavEquipmentsValues' equipment_id=equipment.id %}{% endif %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>
                                 <a onclick="printDesignValues({{ equipment.id }})" style="display: inline-block;cursor: pointer;"><div class="icon printicon" data-toggle="tooltip" data-placement="bottom" title="Print Design Values"></div></a>
                             </td>
                             <td>

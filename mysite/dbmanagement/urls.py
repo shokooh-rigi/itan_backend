@@ -10,6 +10,7 @@ urlpatterns = [
     path('equipments/equipment-submittal/<int:equipment_id>/', views.equipment_submittal, name='EquipmentsEquipmentSubmittal'),
     path('equipments/equipment-image/<int:equipment_id>/', views.equipment_image, name='EquipmentsImage'),
     path('equipments/values/<int:equipment_id>/', views.equipment_values, name='EquipmentsValues'),
+    path('vavequipments/values/<int:equipment_id>/', views.vav_equipment_values, name='VavEquipmentsValues'),
     path('equipments/get_values/<equipment_id>/', views.get_equipment_values, name='EquipmentsGetValues'),
     path('equipments/delete/<int:equipment_id>/', views.equipment_delete, name='EquipmentsDelete'),
     url(r'^manufacturer/create', views.manufacturer_create_popup, name="manufacturerCreate"),

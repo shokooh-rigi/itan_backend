@@ -58,7 +58,7 @@
                         <option value="" selected="">---------</option>
 
                         {% for manufacturer in manufacturers %}
-                            <option value="{{ manufacturer.id }}">{{ manufacturer }}</option>
+                            <option value="{{ manufacturer.id }}" {% if sheet_equipment.equipment.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -72,7 +72,7 @@
                         <option value="" selected="">---------</option>
 
                         {% for equipment in Equipment_db %}
-                            <option style="display: none;" value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}">{{ equipment }}</option>
+                            <option style="display: none;" value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}" {% if sheet_equipment.equipment.id == equipment.id %}selected="selected"{% endif %}>{{ equipment }}</option>
                         {% endfor %}
                     </select>
                 </div>

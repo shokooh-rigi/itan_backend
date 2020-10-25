@@ -27,15 +27,6 @@ class DataSheetEquipment(models.Model):
         return str(self.sheet) + ": " + self.equipment_type.name
 
 
-class TestSheetColumn(models.Model):
-    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
-    column_title = models.CharField(max_length=50, blank=False)
-    required = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.test_sheet.name + " " + self.column_title
-
-
 class TestSheetGeneralData(models.Model):
     sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
@@ -48,6 +39,7 @@ class TestSheetGeneralData(models.Model):
 class TestSheetData(models.Model):
     data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
     sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
     value = models.CharField(max_length=50, blank=False)
 
     def __str__(self):

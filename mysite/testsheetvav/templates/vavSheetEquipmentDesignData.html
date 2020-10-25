@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load custom_tags %}
+{% load sheet_tags %}
 
 {% block content %}
     <h2>Confirm {{ this_sheet_equipment.equipment_type.name }} Design Values for
@@ -28,11 +28,11 @@
             </div>
         </div>
         <div class="row form-line">
-            {% for custom_field in custom_fields %}
-                {% with 'company_value_'|concatenate:custom_field.id as field_name %}
+            {% for design_field in design_fields %}
+                {% with 'company_value_'|concatenate:design_field.id as field_name %}
                     <div class="col-lg-3">
                         <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                            {{ custom_field.field_name }}
+                            {{ design_field.field_name }}
                             {% if field_name in required_fields %}
                                 <span class="required">*</span>
                             {% endif %}
@@ -40,14 +40,14 @@
                     </div>
                     <div class="col-lg-3">
                         <label for="{{ field_name }}" class="control-label" style="width: 100%;">
-                            <input style="width: 100%;" {% get_field_type custom_field %}
+                            <input style="width: 100%;" {% get_field_type design_field %}
                                    {% if field_name in required_fields %}required=""{% endif %}
                                    name="{{ field_name }}" maxlength="50"
                                    class="form-control" id="{{ field_name }}"
-                                   value="{% get_post_variable request custom_field this_equipment %}">
+                                   value="{% get_design_value request design_field this_sheet_equipment 2 %}">
                         </label>
                         <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                            <label style="width: 100%; text-align: right;">{{ custom_field.field_postfix }}</label>
+                            <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                         </div>
                     </div>
                 {% endwith %}

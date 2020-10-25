@@ -303,7 +303,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
     manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
-    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=sheet_equipment.equipment_type)
+    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='vav', equipment_type=sheet_equipment.equipment_type)
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
 
@@ -350,40 +350,38 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
 @login_required
 def vav_sheet_equipment_design_data(request, sheet_equipment_id):
     this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
-    this_equipment = this_sheet_equipment.equipment
     design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
-    print(design_fields)
     custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_design=True)
     show_parentheses_fields = list(map(lambda item:
                                        {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
-                                       custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+                                       design_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
                                                             Q(show_parentheses=ShowParenthesesChoices.Both.value))))
-    required_fields = list(map(lambda item: f'company_value_{item.id}', custom_fields.filter(required_in_design=True)))
+    required_fields = list(map(lambda item: f'company_value_{item.id}', design_fields.filter(required_in_design=True)))
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            for custom_field in custom_fields:
-                if custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
-                    if custom_field.field_type == FieldTypeChoices.Characters.value:
+            for design_field in design_fields:
+                if design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+                    if design_field.field_type == FieldTypeChoices.Characters.value:
                         break
-                    my_range = custom_field.field_range.split('-')
+                    my_range = design_field.field_range.split('-')
                     min_value = my_range[0]
                     max_value = my_range[1]
-                    sent_value = request.POST.get('company_value_' + str(custom_field.id))
-                    if custom_field.field_type == FieldTypeChoices.Integer.value:
+                    sent_value = request.POST.get('company_value_' + str(design_field.id))
+                    if design_field.field_type == FieldTypeChoices.Integer.value:
                         sent_value = int(sent_value)
                         min_value = int(min_value)
                         max_value = int(max_value)
-                    elif custom_field.field_type == FieldTypeChoices.Float.value:
+                    elif design_field.field_type == FieldTypeChoices.Float.value:
                         sent_value = float(sent_value)
                         min_value = float(min_value)
                         max_value = float(max_value)
                     if sent_value < min_value or sent_value > max_value:
-                        error_msg = custom_field.field_name + " Value is not in Range!"
+                        error_msg = design_field.field_name + " Value is not in Range!"
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -411,7 +409,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
                                       }
-                        return render(request, "EquipmentDesignValue.html", parameters)
+                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
             for custom_operation in custom_operations:
                 this_operation = str(custom_operation.operation)
                 this_result = str(custom_operation.result_field)
@@ -429,7 +427,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                         error_msg = operation_msg + " must be equal to " + result_msg
                         parameters = {'this_equipment': this_equipment,
                                       'this_sheet_equipment': this_sheet_equipment,
-                                      'custom_fields': custom_fields,
+                                      'design_fields': design_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
@@ -471,14 +469,13 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                 elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
                     if eval(this_operation) > eval(this_result):
                         error_msg = operation_msg + " must be smaller than or equal to " + result_msg
-                        parameters = {'this_equipment': this_equipment,
-                                      'this_sheet_equipment': this_sheet_equipment,
+                        parameters = {'this_sheet_equipment': this_sheet_equipment,
                                       'custom_fields': custom_fields,
                                       'show_parentheses_fields': show_parentheses_fields,
                                       'error_msg': error_msg,
                                       'required_fields': required_fields,
                                       }
-                        return render(request, "EquipmentDesignValue.html", parameters)
+                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
             for custom_field in custom_fields:
                 new_value = request.POST.get('company_value_' + str(custom_field.id)).strip()
@@ -495,14 +492,14 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                     new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
             this_sheet_equipment.save()
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
-    parameters = {'this_equipment': this_equipment,
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
+    parameters = {'this_sheet_equipment': this_sheet_equipment,
                   'this_sheet_equipment': this_sheet_equipment,
-                  'custom_fields': custom_fields,
+                  'design_fields': design_fields,
                   'show_parentheses_fields': show_parentheses_fields,
                   'required_fields': required_fields,
                   }
-    return render(request, "EquipmentDesignValue.html", parameters)
+    return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
 
 def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields, insert=True):
