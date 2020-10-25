@@ -32,6 +32,17 @@ def get_design_value(request, design_field, equipment, request_page):
 
 
 @register.simple_tag
+def get_actual_value(request, actual_field, equipment):
+    num_results = TestSheetData.objects.filter(data_type=2, sheet_equipment=equipment, sheet_field=actual_field).count()
+    if num_results > 0:
+        this_field_value = TestSheetData.objects.get(data_type=2, sheet_equipment=equipment, sheet_field=actual_field)
+        return this_field_value.value
+    else:
+        this_sheet_field = get_object_or_404(TestSheetField, id=actual_field.id)
+        return this_sheet_field.default_value
+
+
+@register.simple_tag
 def get_field_type(field):
     field_type = field.field_type
 

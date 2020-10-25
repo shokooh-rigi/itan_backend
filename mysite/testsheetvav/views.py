@@ -684,115 +684,46 @@ def get_required_fields_actual(equipment_type_custom_fields, custom_fields, inse
 
 
 @login_required
-def equipment_actual_values(request, sheet_equipment_id):
-    this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
+def vav_sheet_equipment_actual_data(request, sheet_equipment_id):
+    this_sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
+    actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
+    custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_actual=True)
     equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
-    other_custom_fields = SheetActualDataCustomField.objects.filter(test_sheet__name__icontains='air mov')
-    custom_fields = EquipmentCustomField.objects.filter(equipment=this_sheet_equipment.equipment)
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
-                                                              custom_fields)
-    show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields)
-    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields)
+                                                              actual_fields)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields)
+            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, actual_fields)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
-                    'custom_fields': custom_fields,
-                    'other_custom_fields': other_custom_fields,
+                    'actual_fields': actual_fields,
                     'assignment_operations': assignment_operations,
-                    'show_parentheses_fields': show_parentheses_fields,
                     'error_msg': error_msg,
-                    'required_fields': required_fields,
                 }
-                return render(request, "EquipmentActualValue.html", parameters)
+                return render(request, "vavSheetEquipmentActualData.html", parameters)
 
-            for other_custom_field in other_custom_fields:
-                new_object = SheetEquipmentCustomData(key=other_custom_field, value=request.POST.get(
-                    'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
-                new_object.save()
-            for custom_field in custom_fields:
-                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
-                if not new_value:
-                    new_value = equipment_type_custom_fields.get(
-                        field_name=custom_field.equipment_value_name).default_value.strip()
+            for actual_field in actual_fields:
+                new_value = request.POST.get('actual_value_' + str(actual_field.id)).strip()
 
-                num_results = SheetEquipmentActualData.objects.filter(
-                    key__equipment_value_name=custom_field.equipment_value_name,
-                    sheet_equipment=this_sheet_equipment).count()
+                num_results = TestSheetData.objects.filter(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment).count()
 
                 if num_results > 0:
-                    SheetEquipmentActualData.objects.filter(key__equipment_value_name=custom_field.equipment_value_name,
-                                                            sheet_equipment=this_sheet_equipment).update(value=new_value)
+                    TestSheetData.objects.filter(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment).update(value=new_value)
                 else:
-                    new_object_key = EquipmentCustomField.objects.get(equipment=this_sheet_equipment.equipment, equipment_value_name=custom_field.equipment_value_name)
-                    new_object = SheetEquipmentActualData(key=new_object_key, value=new_value, sheet_equipment=this_sheet_equipment)
+                    new_object = TestSheetData(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment, value=new_value)
                     new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
             this_sheet_equipment.save()
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
+
     parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'custom_fields': custom_fields,
-                  'other_custom_fields': other_custom_fields,
+                  'actual_fields': actual_fields,
                   'assignment_operations': assignment_operations,
-                  'show_parentheses_fields': show_parentheses_fields,
-                  'required_fields': required_fields,
                   }
-    return render(request, "EquipmentActualValue.html", parameters)
-
-
-@login_required
-def equipment_actual_values_edit(request, sheet_equipment_id):
-    this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
-    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
-    other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
-    custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
-    assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
-                                                              custom_fields, False)
-    show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)
-    required_fields = get_required_fields_actual(equipment_type_custom_fields, custom_fields, False)
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
-        if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields,
-                                            False)
-            if error_msg is not None:
-                parameters = {
-                    'this_sheet_equipment': this_sheet_equipment,
-                    'custom_fields': custom_fields,
-                    'other_custom_fields': other_custom_fields,
-                    'assignment_operations': assignment_operations,
-                    'show_parentheses_fields': show_parentheses_fields,
-                    'error_msg': error_msg,
-                    'required_fields': required_fields,
-                }
-                return render(request, "EquipmentActualValueEdit.html", parameters)
-
-            for other_custom_field in other_custom_fields:
-                SheetEquipmentCustomData.objects.filter(key=other_custom_field.key,
-                                                        sheet_equipment=this_sheet_equipment).update(
-                    value=request.POST.get('other_value_' + str(other_custom_field.id)))
-            for custom_field in custom_fields:
-                new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
-                if not new_value:
-                    new_value = equipment_type_custom_fields.get(
-                        field_name=custom_field.key.equipment_value_name).default_value.strip()
-
-                SheetEquipmentActualData.objects.filter(key=custom_field.key,
-                                                        sheet_equipment=this_sheet_equipment).update(value=new_value)
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
-    parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'custom_fields': custom_fields,
-                  'other_custom_fields': other_custom_fields,
-                  'assignment_operations': assignment_operations,
-                  'show_parentheses_fields': show_parentheses_fields,
-                  'required_fields': required_fields,
-                  }
-    return render(request, "EquipmentActualValueEdit.html", parameters)
+    return render(request, "vavSheetEquipmentActualData.html", parameters)
 
 
 @login_required
