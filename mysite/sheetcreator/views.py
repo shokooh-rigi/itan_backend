@@ -49,7 +49,7 @@ def sheet_list(request):
 @login_required
 def sheet_add(request):
     form = SheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 1})
-    orders = Order.objects.all()
+    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id'))
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetHome')

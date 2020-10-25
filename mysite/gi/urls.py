@@ -5,6 +5,7 @@ from mysite.gi import views
 urlpatterns = [
     path('invoice/', views.invoice_list, name='invoiceHome'),
     path('invoice/add/', views.invoice_add, name='invoiceAdd'),
+    path('invoice/add/<int:order_id>/', views.invoice_add, name='invoiceAddUsingOrder'),
     path('invoice/view/<int:invoice_id>/', views.invoice_view, name='invoiceView'),
     path('invoice/edit/<int:invoice_id>/', views.invoice_edit, name='invoiceEdit'),
     path('invoice/archive/<int:invoice_id>/', views.invoice_archive, name='invoiceArchive'),

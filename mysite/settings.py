@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'mysite.settlement',
     'mysite.dbmanagement',
     'mysite.sheetcreator',
+    'mysite.testsheetvav',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags',

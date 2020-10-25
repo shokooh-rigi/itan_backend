@@ -195,22 +195,6 @@ class Service(models.Model):
         return self.name
 
 
-class TestSheet(models.Model):
-    name = models.CharField(max_length=255, blank=False)
-    priority = models.IntegerField(blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    sheet_generator = models.BooleanField(default=False)
-    flag = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ["priority"]
-        verbose_name = 'Test Sheet'
-        verbose_name_plural = 'Test Sheet'
-
-    def __str__(self):
-        return self.name
-
-
 class LicenseInfo(models.Model):
     key = models.CharField(max_length=255, blank=False, unique=True)
     value = models.CharField(max_length=255, null=True, blank=True)

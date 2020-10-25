@@ -58,3 +58,23 @@ class EquipmentTypeAdmin(admin.ModelAdmin):
 
 admin.site.register(Equipment, EquipmentTypeAdmin)
 
+
+class TestSheetFieldAdmin(admin.TabularInline):
+    model = TestSheetField
+
+
+class TestSheetOperationAdmin(admin.TabularInline):
+    model = TestSheetOperation
+
+
+class TestSheetAdmin(admin.ModelAdmin):
+    inlines = [TestSheetFieldAdmin, TestSheetOperationAdmin, ]
+
+    class Media:
+        js = (
+            '../static/js/jquery-3.5.1.min.js',  # jquery
+            '../static/js/admin.js',  # project static folder
+        )
+
+
+admin.site.register(TestSheet, TestSheetAdmin)

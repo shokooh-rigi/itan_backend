@@ -1,19 +1,25 @@
 from __future__ import unicode_literals
 import datetime
 from enum import Enum
-
-from creditcards.models import CardExpiryField
-from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from djrichtextfield.models import RichTextField
-
 from custom_user.models import User
 from ..core.models import *
 
-
 # Enums for `choices` ==================================================================================================
+
+
+class DataTypeChoices(Enum):
+    Design = 1
+    Actual = 2
+
+    @staticmethod
+    def get_items():
+        return (
+            (DataTypeChoices.Design.value, 'Design'),
+            (DataTypeChoices.Actual.value, 'Actual'),
+        )
+
+
 class FieldTypeChoices(Enum):
     Integer = 1
     Float = 2
@@ -79,6 +85,54 @@ class OperandChoices(Enum):
 # ======================================================================================================================
 
 
+class TestSheet(models.Model):
+    name = models.CharField(max_length=255, blank=False)
+    priority = models.IntegerField(blank=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    sheet_generator = models.BooleanField(default=False)
+    flag = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["priority"]
+        verbose_name = 'Test Sheet'
+        verbose_name_plural = 'Test Sheet'
+
+    def __str__(self):
+        return self.name
+
+
+class TestSheetField(models.Model):
+    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    field_name = models.CharField(max_length=255, blank=False, verbose_name='Field Name')
+    field_type = models.PositiveSmallIntegerField(choices=FieldTypeChoices.get_items(), default=1, null=False)
+    field_range_or_selective = models.PositiveSmallIntegerField(choices=FieldRangeOrSelectiveChoices.get_items(),
+                                                                default=1, null=False)
+    field_range = models.CharField(max_length=50, blank=True, verbose_name='Field Range or Field Selection')
+    field_postfix = models.CharField(max_length=20, blank=True, verbose_name='Postfix ex: RPM, V, ...')
+    default_value = models.CharField(max_length=50, blank=True)
+    show_parentheses = models.PositiveSmallIntegerField(choices=ShowParenthesesChoices.get_items(), default=1,
+                                                        null=False)
+    show_in_design = models.BooleanField(default=True)
+    required_in_design = models.BooleanField(default=False)
+    show_in_actual = models.BooleanField(default=True)
+    required_in_actual = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "[field-" + str(self.id) + "]: " + str(self.field_name)
+
+
+class TestSheetOperation(models.Model):
+    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    operation = models.CharField(max_length=255, blank=False, verbose_name='ex: [field-1-design] + [field-2-actual]')
+    operand_type = models.PositiveSmallIntegerField(choices=OperandChoices.get_items(), default=1, null=False)
+    result_field = models.CharField(max_length=50, blank=False, verbose_name='ex: [field-3-design]')
+    apply_on_design = models.BooleanField(default=True)
+    apply_on_actual = models.BooleanField(default=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
 class EquipmentManufacturer(models.Model):
     name = models.CharField(max_length=255, blank=False, unique=True)
     tel = models.CharField(max_length=15, blank=True)
@@ -113,6 +167,25 @@ class Equipment(models.Model):
 
     def __str__(self):
         return self.name + ' (' + self.service.name + ')'
+
+
+class EquipmentDb(models.Model):
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+    manufacturer = models.ForeignKey(EquipmentManufacturer, on_delete=models.SET_NULL, blank=True, null=True)
+    model_number = models.CharField(max_length=50, blank=True, null=True)
+    equipment_submittal = models.FileField(upload_to='uploads/equipmentDb/equipment_submittal', blank=True, null=True)
+    image = models.FileField(upload_to='uploads/equipmentDb/image', blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    flag = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('manufacturer', 'model_number',)
+        verbose_name = 'Equipment Database'
+        verbose_name_plural = 'Equipment Database'
+
+    def __str__(self):
+        return str(self.model_number)
+
 
 
 class EquipmentTypeCustomField(models.Model):
@@ -151,24 +224,6 @@ class ActualDataCustomOperation(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-
-class EquipmentDb(models.Model):
-    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
-    manufacturer = models.ForeignKey(EquipmentManufacturer, on_delete=models.SET_NULL, blank=False, null=True)
-    model_number = models.CharField(max_length=50, blank=False)
-    equipment_submittal = models.FileField(upload_to='uploads/equipmentDb/equipment_submittal', blank=True, null=True)
-    image = models.FileField(upload_to='uploads/equipmentDb/image', blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    flag = models.BooleanField(default=True)
-
-    class Meta:
-        unique_together = ('manufacturer', 'model_number',)
-        verbose_name = 'Equipment Database'
-        verbose_name_plural = 'Equipment Database'
-
-    def __str__(self):
-        return str(self.model_number)
 
 
 class EquipmentCustomField(models.Model):

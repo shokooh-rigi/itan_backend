@@ -1,0 +1,580 @@
+{% load static %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AIR MOVING EQUIPMENT TEST SHEET</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 10%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 20%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table divider */
+        .pdf-table .pdf-table-section-divider {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-section-divider td {
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 5px;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            border: 1px solid black;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.long-title {
+            padding: 2px 2px 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.data %}
+        <div class="content pdf-page-content">
+            <table class="table pdf-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th scope="col" class="wide-th"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td></td>
+                    <td class="pdf-table-title-td" colspan="6">AIR MOVING EQUIPMENT TEST SHEET</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
+                    <td class="pdf-table-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.project.project_number }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="3">
+                        &nbsp;{{ form.my_sheet.sheet_date | date }}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td class="pdf-table-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                    </td>
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="3">
+                        &nbsp;{{ form.my_sheet.system }}
+                    </td>
+                </tr>
+
+
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Fan No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.fan_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.fan_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Location
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.location }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.location }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Area Served
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.area_served }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.area_served }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Manufacturer
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.manufacturer }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.manufacturer }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Model No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.model_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.model_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Serial No.
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.0.serial_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                    <td class="pdf-table-cell" colspan="2">
+                        &nbsp;{{ page.1.serial_no }}
+                    </td>
+                    <td class="pdf-table-cell" colspan="2">&nbsp;</td>
+                </tr>
+
+
+                <tr class="pdf-table-section-divider">
+                    <td></td>
+                </tr>
+
+
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Total C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Return Air C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.return_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.return_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Outdoor Air C.F.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.outdoor_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.outdoor_air_cfm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Total SP (Ext. SP)
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.total_sp_ext_sp.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.total_sp_ext_sp.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell long-title">
+                        Fan (Unit) Suction Pressure
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_unit_suction_pressure.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_unit_suction_pressure.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell long-title">
+                        Discharge Pressure, Fan/Unit
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.discharge_pressure_fan_unit.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.discharge_pressure_fan_unit.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Fan R.P.M.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.fan_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.fan_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+
+
+                <tr class="pdf-table-section-divider">
+                    <td></td>
+                </tr>
+
+
+                <tr class="pdf-table-row section-first-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Motor
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">RATED</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        H.P.
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.hp.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.hp.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Voltage
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.voltage.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.voltage.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Phase
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.phase.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.phase.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Amperage
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.amperage.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.amperage.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        B.H.P. (Calc.)
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.bhp_calc.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.bhp_calc.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Frame
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.frame.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.frame.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        S.F. / Code
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.sf_code.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.sf_code.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-row section-last-row">
+                    <td class="pdf-table-cell pdf-table-title-cell">
+                        Motor RPM
+                    </td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.0.motor_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">
+                        &nbsp;{{ page.1.motor_rpm.design }}
+                    </td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                    <td class="pdf-table-cell">&nbsp;</td>
+                </tr>
+                <tr class="pdf-table-note-section">
+                    <td class="note-title">
+                        Notes:
+                    </td>
+                    <td colspan="8" class="">
+                        <div class="">{{ page.0.note }}</div>
+                        <div class="">{{ page.1.note }}</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>

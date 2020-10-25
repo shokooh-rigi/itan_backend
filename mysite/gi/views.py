@@ -112,7 +112,12 @@ def invoice_list(request):
 
 
 @login_required
-def invoice_add(request):
+def invoice_add(request, order_id=None):
+    form = InvoiceForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
+    if order_id:
+        orders = Order.objects.filter(id=order_id)
+    else:
+        orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by('-created_on')
     if request.user.last_name == '' or request.user.last_name is None:
         user_name = 'TAB Technologies, INC. Operator'
     else:
@@ -122,9 +127,6 @@ def invoice_add(request):
     else:
         user_title = request.user.profile.title
     user_signature = request.user.profile.e_sign
-    form = InvoiceForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id')).order_by(
-        '-created_on')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -252,7 +254,7 @@ def invoice_edit(request, invoice_id):
 @login_required
 def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
-    if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_invoice.created_by == request.user:
         if request.POST.get("confirm"):
             parameters = {'file_name': 'invoice-' + str(this_invoice.order.project_number[3:]).zfill(3) + str(
                 this_invoice.id).zfill(3),
@@ -260,7 +262,7 @@ def invoice_delete(request, invoice_id):
             Invoice.delete_invoice_pdf(parameters)
             this_invoice.delete()
         return redirect('invoiceHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {
@@ -277,12 +279,12 @@ def invoice_delete(request, invoice_id):
 @login_required
 def invoice_archive(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
-    if request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_invoice.created_by == request.user:
         if request.POST.get("confirm"):
             this_invoice.archive = True
             this_invoice.save()
         return redirect('invoiceHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_invoice.order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {

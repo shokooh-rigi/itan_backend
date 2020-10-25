@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>DEFINED VAV EQUIPMENT LIST FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
+        <br>
+        <a href="{% url 'sheetEquipmentsGenerateTechPDF' sheet_id %}" target="_blank"
+           download="TEST SHEET {{ my_sheet.project.proposal.quote.estimate.project.name }}-{{ my_sheet.project.project_number }}-tech.pdf">
+            <button type="button" class="btn btn-primary">Generate Tech PDF</button>
+        </a>
+        <a href="{% url 'sheetEquipmentsGenerateReportPDF' sheet_id %}" target="_blank"
+           download="TEST SHEET {{ my_sheet.project.proposal.quote.estimate.project.name }}-{{ my_sheet.project.project_number }}.pdf">
+            <button type="button" class="btn btn-primary">Generate Report PDF</button>
+        </a>
+        <br>
+
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Equipment Type</th>
+                    <th>Manufacturer</th>
+                    <th>Model No.</th>
+                    <th>Serial No.</th>
+                    <th>General Information</th>
+                    <th>Design Data</th>
+                    <th>Actual Data</th>
+{#                    <th>Actions</th>#}
+                </tr>
+            </thead>
+            <tbody>
+                {% for sheet_equipment in sheet_equipments %}
+                    <tr>
+                        <td>{{ sheet_equipment.id }}</td>
+                        <td>{{ sheet_equipment.equipment_type }}</td>
+                        <td>{{ sheet_equipment.equipment.manufacturer }}</td>
+                        <td>{{ sheet_equipment.equipment.model_number }}</td>
+                        <td>{% for sheet_eq_custom_data in sheet_equipment.sheetequipmentcustomdata_set.all %}{% if 'serial' in sheet_eq_custom_data.key.column_title|lower %}{{ sheet_eq_custom_data.value }}{% endif %}{% endfor %}</td>
+                        <td>{% if sheet_equipment.main_data_entry_completed == 0 %}<a href="{% url 'vavSheetEquipmentGeneralData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter General Information"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div>
+                        <a href="{% url 'vavSheetEquipmentGeneralData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit General Info"></div></a>{% endif %}</td>
+                        <td>{% if sheet_equipment.design_data_entry_completed == 0 %}<a href="{% url 'vavSheetEquipmentDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a></td>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'vavSheetEquipmentDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}
+                        <td>{% if sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentActualValue' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'sheetEquipmentActualValueEdit' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
+{#                        <td>#}
+{#                            {% if sheet_equipment.main_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Begin Data Entry"></div></a>#}
+{#                            {% elif sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentDesignValue' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Continue Data Entry"></div></a>#}
+{#                            {% elif sheet_equipment.actual_data_entry_completed == 1 and sheet_equipment.main_data_entry_completed == 1 %}<a href="{% url 'sheetEquipmentActualValueEdit' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}#}
+{#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
+{#                            <a href="{% url 'orderDelete' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>#}
+{#                            <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
+{#                        </td>#}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+          {% if orders.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in orders.paginator.page_range %}
+
+            {% if orders.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if orders.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
+    </div>
+<script>
+    $(document).ready(function() {
+        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test1);
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test2);
+            }
+        }
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=5') > 0) {
+            $(".pagination-select #paginate_5").addClass('selected');
+            $(".pagination-select #paginate_5 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+{% endblock %}

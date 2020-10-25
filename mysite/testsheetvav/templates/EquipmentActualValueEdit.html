@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+    <h2>Edit {{ this_sheet_equipment.equipment_type.name }} Actual Values for
+        {{ this_sheet_equipment.sheet.project.project_number }}
+        {{ this_sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method='POST' action='' onsubmit="onFormSubmit()" enctype="multipart/form-data" id="equipmentValues-form">
+        <div class="form-group">
+            {% csrf_token %}
+        </div>
+        <div class="row form-line" style="font-weight: bold;">
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Actual Value
+            </div>
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Actual Value
+            </div>
+        </div>
+        <div class="row form-line">
+            {% for other_custom_field in other_custom_fields %}
+                {% if other_custom_field.key.column_title|lower != 'note' %}
+                    {% with 'other_value_'|concatenate:other_custom_field.id as filed_name %}
+                        <div class="col-lg-3">
+                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                                {{ other_custom_field.key.column_title }}
+                                {% if filed_name in required_fields %}
+                                    <span class="required">*</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="{{ filed_name }}" class="control-label" style="width: 100%;">
+                                <input style="width: 100%;" type="text"
+                                       {% if filed_name in required_fields %}required=""{% endif %}
+                                       value="{% get_value_from_post request other_custom_field.value 'other_value_' other_custom_field.id %}"
+                                       name="{{ filed_name }}" class="form-control" id="{{ filed_name }}"/>
+                            </label>
+                        </div>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+            {% for custom_field in custom_fields %}
+                {% with 'actual_value_'|concatenate:custom_field.id as filed_name %}
+                    <div class="col-lg-3">
+                        <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                            {{ custom_field.key }}
+                            {% if filed_name in required_fields %}
+                                <span class="required">*</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="{{ filed_name }}" class="control-label" style="width: 100%;">
+                            <input style="width: 100%;" {% get_field_type custom_field %}
+                                   {% if filed_name in required_fields %}required=""{% endif %}
+                                   value="{% get_value_from_post request custom_field.value 'actual_value_' custom_field.id %}"
+                                   name="{{ filed_name }}" class="form-control" id="{{ filed_name }}"/>
+                        </label>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+        {% for other_custom_field in other_custom_fields %}
+            {% if other_custom_field.key.column_title|lower == 'note' %}
+                {% with 'other_value_'|concatenate:other_custom_field.id as filed_name %}
+                    <div class="row form-line">
+                        <div class="col-lg-3">
+                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                                {{ other_custom_field.key.column_title }}
+                                {% if filed_name in required_fields %}
+                                    <span class="required">*</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-lg-9">
+                            <label for="{{ filed_name }}" class="control-label" style="width: 100%;">
+                                <textarea name="{{ filed_name }}" id="{{ filed_name }}" rows="5"
+                                          style="resize: none; width: 100%" class="form-control"
+                                          {% if filed_name in required_fields %}required=""{% endif %}
+                                >{% get_value_from_post request other_custom_field.value 'other_value_' other_custom_field.id %}</textarea>
+                            </label>
+                        </div>
+                    </div>
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-primary" value="Edit & Save" name="next"/>
+                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate/>
+            </div>
+        </div>
+    </form>
+    <script>
+        let hpInput = null;
+        const labels = $('label');
+        for (let label of labels) {
+            label = $(label);
+            if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'h.p.') {
+                hpInput = $('input[name="' + label.attr('for') + '"]');
+                hpInput.attr('readonly', '');
+                hpInput.attr('type', 'text');
+                hpInput.val('SEE BHP');
+                break;
+            }
+        }
+
+        function onFormSubmit() {
+            if (hpInput) {
+                hpInput.val('0');
+            }
+        }
+    </script>
+    <script>
+        $('#id_proposal').on('change', function () {
+            if ($(this).val() === '') {
+                $("#customer").text('');
+                $("#engineer").text('');
+                $("#tab_amount").text('');
+                $("#pre_amount").text('');
+                $("#total_amount").text('');
+                $("#dlink_href").attr("href", '').hide();
+            } else {
+                $("#customer").text($(this).find(':selected').data('customer'));
+                $("#engineer").text($(this).find(':selected').data('engineer'));
+                $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+                $("#pre_amount").text($(this).find(':selected').data('preamount'));
+                $("#total_amount").text($(this).find(':selected').data('totalamount'));
+                $("#dlink_href").attr("href", $(this).find(':selected').data('dlink')).show();
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+    <script>
+        /*
+        * Set the parentheses for the fields that need parentheses.
+        * */
+
+        const showParenthesesFields = {{ show_parentheses_fields | safe }};
+        for (const field of showParenthesesFields) {
+            const input = $('[name=' + field.id + ']');
+            const defaultValue = field.defaultValue.trim();
+            const onInputChange = () => {
+                const value = input.val().trim();
+                let rawValue = '';
+                for (const ch of value) {
+                    if (ch !== '(' && ch !== ')') {
+                        rawValue += ch;
+                    }
+                }
+                if (!rawValue || rawValue.toLowerCase() === defaultValue.toLowerCase()) {
+                    input.val(defaultValue);
+                } else {
+                    input.val('(' + rawValue + ')');
+                }
+            };
+            onInputChange();
+            input.on('change', onInputChange);
+        }
+    </script>
+    <script>
+        /*
+        * Evaluate assignment operations.
+        * */
+        var assignmentOperations = {{ assignment_operations | safe }};
+
+        let BPHCalcInput = null;
+        let i = 0;
+        for (var assignment of assignmentOperations) {
+            while (true) {
+                if (assignment.includes("{")) {
+                    var mySubString = assignment.substring(
+                        assignment.lastIndexOf("{") + 1,
+                        assignment.lastIndexOf("}")
+                    );
+                    mySubString = mySubString.split(',');
+                    const needle = $('#actual_value_' + mySubString[0]).val();
+                    mySubString.shift();
+                    const closest = mySubString.reduce((a, b) => {
+                        return Math.abs(b - needle) < Math.abs(a - needle) ? b : a;
+                    });
+                    sub_stinger = assignment.substring(assignment.lastIndexOf("{"), assignment.lastIndexOf("}") + 1);
+                    assignment = assignment.replace(sub_stinger, closest);
+                    assignmentOperations[i] = assignmentOperations[i].replace(sub_stinger, closest);
+                } else {
+                    break;
+                }
+            }
+            eval(assignment);
+            const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
+            readonlyField.attr('readonly', '');
+            const label = $('label[for="' + readonlyField.attr('name') + '"]');
+            if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'b.h.p. (calc.)') {
+                BPHCalcInput = readonlyField;
+            }
+            i += 1;
+        }
+
+        const evalAssignmentOperations = () => {
+            for (const assignment of assignmentOperations) {
+                eval(assignment);
+            }
+            if (BPHCalcInput) {
+                const val = Number.parseFloat(BPHCalcInput.val())
+                if (!Number.isNaN(val)) {
+                    BPHCalcInput.val(val.toFixed(2));
+                }
+            }
+        };
+
+        evalAssignmentOperations();
+        $('form').on('change', evalAssignmentOperations);
+    </script>
+
+{% endblock %}
