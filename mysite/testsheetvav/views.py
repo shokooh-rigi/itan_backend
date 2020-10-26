@@ -347,6 +347,71 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     return render(request, "vavSheetEquipmentGeneralData.html", parameters)
 
 
+def check_design_values(request, design_fields, custom_operations):
+    conv_to_num = None
+    for design_field in design_fields:
+        if design_field.field_type == FieldTypeChoices.Characters.value:
+            continue
+        elif design_field.field_type == FieldTypeChoices.Integer.value:
+            conv_to_num = int
+        elif design_field.field_type == FieldTypeChoices.Float.value:
+            conv_to_num = float
+
+        try:
+            sent_value = conv_to_num(request.POST.get(f'company_value_{design_field.id}'))
+        except ValueError:
+            return f'{design_field.field_name} value is not valid. The value must be {"integer" if conv_to_num == int else "float"} number.'
+
+        if design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+            my_range = design_field.field_range.split('-')
+            min_value = conv_to_num(my_range[0])
+            max_value = conv_to_num(my_range[1])
+            if sent_value < min_value or max_value < sent_value:
+                return f'{design_field.field_name} value is not in range. Valid range is {design_field.field_range}.'
+        elif design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+            my_range = design_field.field_range.split(',')
+            if sent_value not in map(lambda x: conv_to_num(x), my_range):
+                return f'{design_field.field_name} value is not selected right. Valid choices are {design_field.field_range}.'
+
+    for custom_operation in custom_operations:
+        left_side = left_side_msg = str(custom_operation.operation).upper()
+        right_side = right_side_msg = str(custom_operation.result_field).upper()
+
+        if -1 != left_side.find('ACTUAL') or -1 != right_side.find('ACTUAL'):
+            continue
+
+        for design_field in design_fields:
+            sent_value = request.POST.get(f'company_value_{design_field.id}')
+            sub = f'[FIELD-' + str(design_field.id) + '-DESIGN]'
+            left_side = left_side.replace(sub, sent_value)
+            right_side = right_side.replace(sub, sent_value)
+            left_side_msg = left_side_msg.replace(sub, design_field.field_name)
+            right_side_msg = right_side_msg.replace(sub, design_field.field_name)
+
+        if -1 != left_side.find('FIELD') or -1 != right_side.find('FIELD'):
+            continue
+
+        left_side = eval(left_side)
+        right_side = eval(right_side)
+        if custom_operation.operand_type == OperandChoices.EqualTo.value:
+            if left_side != right_side:
+                return left_side_msg + " must be equal to " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
+            if left_side <= right_side:
+                return left_side_msg + " must be greater than " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
+            if left_side < right_side:
+                return left_side_msg + " must be greater than or equal to " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
+            if left_side >= right_side:
+                return left_side_msg + " must be smaller than " + right_side_msg
+        elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
+            if left_side > right_side:
+                return left_side_msg + " must be smaller than or equal to " + right_side_msg
+
+    return None
+
+
 @login_required
 def vav_sheet_equipment_design_data(request, sheet_equipment_id):
     this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
@@ -361,145 +426,54 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
         if request.POST.get("cancel"):
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            for design_field in design_fields:
-                if design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
-                    if design_field.field_type == FieldTypeChoices.Characters.value:
-                        break
-                    my_range = design_field.field_range.split('-')
-                    min_value = my_range[0]
-                    max_value = my_range[1]
-                    sent_value = request.POST.get('company_value_' + str(design_field.id))
-                    if design_field.field_type == FieldTypeChoices.Integer.value:
-                        sent_value = int(sent_value)
-                        min_value = int(min_value)
-                        max_value = int(max_value)
-                    elif design_field.field_type == FieldTypeChoices.Float.value:
-                        sent_value = float(sent_value)
-                        min_value = float(min_value)
-                        max_value = float(max_value)
-                    if sent_value < min_value or sent_value > max_value:
-                        error_msg = design_field.field_name + " Value is not in Range!"
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
-                    if design_field.field_type == FieldTypeChoices.Characters.value:
-                        break
-                    my_range = design_field.field_range.split(',')
-                    sent_value = request.POST.get('company_value_' + str(design_field.id))
-                    is_in_my_range = 0
-                    for number in my_range:
-                        if design_field.field_type == FieldTypeChoices.Integer.value:
-                            if int(number) == int(sent_value):
-                                is_in_my_range = 1
-                        elif design_field.field_type == FieldTypeChoices.Float.value:
-                            if float(number) == float(sent_value):
-                                is_in_my_range = 1
-                    if is_in_my_range == 0:
-                        error_msg = design_field.field_name + " Value is not selected right!"
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
-            for custom_operation in custom_operations:
-                this_operation = str(custom_operation.operation)
-                this_result = str(custom_operation.result_field)
-                operation_msg = str(custom_operation.operation)
-                result_msg = str(custom_operation.result_field)
-                for design_field in design_fields:
-                    this_operation = this_operation.replace('[field-' + str(design_field.id) + ']',
-                                                            request.POST.get('company_value_' + str(design_field.id)))
-                    this_result = this_result.replace('[field-' + str(design_field.id) + ']',
-                                                      request.POST.get('company_value_' + str(design_field.id)))
-                    operation_msg = operation_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
-                    result_msg = result_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
-                if custom_operation.operand_type == OperandChoices.EqualTo.value:
-                    if eval(this_operation) != eval(this_result):
-                        error_msg = operation_msg + " must be equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
-                    if eval(this_operation) <= eval(this_result):
-                        error_msg = operation_msg + " must be greater than " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
-                    if eval(this_operation) < eval(this_result):
-                        error_msg = operation_msg + " must be greater than or equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
-                    if eval(this_operation) >= eval(this_result):
-                        error_msg = operation_msg + " must be smaller than " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
-                    if eval(this_operation) > eval(this_result):
-                        error_msg = operation_msg + " must be smaller than or equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
+            error_msg = check_design_values(request, design_fields, custom_operations)
+            if error_msg is not None:
+                parameters = {
+                    'this_sheet_equipment': this_sheet_equipment,
+                    'design_fields': design_fields,
+                    'show_parentheses_fields': show_parentheses_fields,
+                    'required_fields': required_fields,
+                    'error_msg': error_msg,
+                }
+                return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
+            # if no error save design values
             for design_field in design_fields:
 
                 new_value = request.POST.get('company_value_' + str(design_field.id)).strip()
 
                 # if Manufacturer and Model Number selected, Update Design values in EquipmentDbDesignData Table
                 if this_sheet_equipment.equipment:
-                    equipment_db_design_value = EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field)
+                    equipment_db_design_value = EquipmentDbDesignData.objects.filter(
+                        equipment=this_sheet_equipment.equipment, key=design_field)
                     if equipment_db_design_value.exists():
-                        EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field).update(value=new_value)
+                        EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment,
+                                                             key=design_field).update(value=new_value)
                     else:
-                        new_object = EquipmentDbDesignData(equipment=this_sheet_equipment.equipment, key=design_field, value=new_value)
+                        new_object = EquipmentDbDesignData(equipment=this_sheet_equipment.equipment, key=design_field,
+                                                           value=new_value)
                         new_object.save()
 
                 # else if Manufacturer and Model Number not selected, Create or Update Design values in TestSheetData
                 else:
-                    num_results = TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).count()
+                    num_results = TestSheetData.objects.filter(data_type=1, sheet_field=design_field,
+                                                               sheet_equipment=this_sheet_equipment).count()
                     if num_results > 0:
-                        TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).update(value=new_value)
+                        TestSheetData.objects.filter(data_type=1, sheet_field=design_field,
+                                                     sheet_equipment=this_sheet_equipment).update(value=new_value)
                     else:
-                        new_object = TestSheetData(sheet_field=design_field, sheet_equipment=this_sheet_equipment, value=new_value)
+                        new_object = TestSheetData(sheet_field=design_field, sheet_equipment=this_sheet_equipment,
+                                                   value=new_value)
                         new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
             this_sheet_equipment.save()
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
-    parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'design_fields': design_fields,
-                  'show_parentheses_fields': show_parentheses_fields,
-                  'required_fields': required_fields,
-                  }
+    parameters = {
+        'this_sheet_equipment': this_sheet_equipment,
+        'design_fields': design_fields,
+        'show_parentheses_fields': show_parentheses_fields,
+        'required_fields': required_fields,
+    }
     return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
 
