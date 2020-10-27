@@ -373,22 +373,23 @@ def check_design_values(request, design_fields, custom_operations):
             if sent_value not in map(lambda x: conv_to_num(x), my_range):
                 return f'{design_field.field_name} value is not selected right. Valid choices are {design_field.field_range}.'
 
+    custom_operations = custom_operations.filter(~Q(operand_type=OperandChoices.AssignTo.value))
     for custom_operation in custom_operations:
-        left_side = left_side_msg = str(custom_operation.operation).upper()
-        right_side = right_side_msg = str(custom_operation.result_field).upper()
+        left_side = left_side_msg = str(custom_operation.operation).lower()
+        right_side = right_side_msg = str(custom_operation.result_field).lower()
 
-        if -1 != left_side.find('ACTUAL') or -1 != right_side.find('ACTUAL'):
+        if -1 != left_side.find('actual') or -1 != right_side.find('actual'):
             continue
 
         for design_field in design_fields:
             sent_value = request.POST.get(f'company_value_{design_field.id}')
-            sub = f'[FIELD-' + str(design_field.id) + '-DESIGN]'
+            sub = f'[field-' + str(design_field.id) + '-design]'
             left_side = left_side.replace(sub, sent_value)
             right_side = right_side.replace(sub, sent_value)
             left_side_msg = left_side_msg.replace(sub, design_field.field_name)
             right_side_msg = right_side_msg.replace(sub, design_field.field_name)
 
-        if -1 != left_side.find('FIELD') or -1 != right_side.find('FIELD'):
+        if -1 != left_side.find('field') or -1 != right_side.find('field'):
             continue
 
         left_side = eval(left_side)
@@ -412,27 +413,52 @@ def check_design_values(request, design_fields, custom_operations):
     return None
 
 
+def parse_assigment_operations_design(custom_operations):
+    assignment_operations = custom_operations.filter(operand_type=OperandChoices.AssignTo.value)
+    assignments = []
+    field_regex = re.compile(r'\[field-[\d]+-design]', re.I)
+
+    def get_jquery_selector(field_regex_matched):
+        name = f'company_value_{field_regex_matched[7:-8]}'
+        return f'$(\'[name="{name}"]\')'
+
+    def replace(match):
+        return f'parseFloat({get_jquery_selector(match.group())}.val())'
+
+    for assignment in assignment_operations:
+        if assignment.result_field and assignment.operation:
+            result_field = assignment.result_field.strip().lower()
+            operation = assignment.operation.strip().lower()
+            if -1 == operation.find('actual') and re.fullmatch(field_regex, result_field):
+                expression = re.sub(field_regex, replace, operation)
+                final_expression = f'{get_jquery_selector(result_field)}.val({expression})'
+                assignments.append(final_expression)
+    return assignments
+
+
 @login_required
 def vav_sheet_equipment_design_data(request, sheet_equipment_id):
     this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
     design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
-    custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_design=True)
+    design_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_design=True)
     show_parentheses_fields = list(map(lambda item:
                                        {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
                                        design_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
                                                             Q(show_parentheses=ShowParenthesesChoices.Both.value))))
     required_fields = list(map(lambda item: f'company_value_{item.id}', design_fields.filter(required_in_design=True)))
+    assignment_operations = parse_assigment_operations_design(design_operations)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_design_values(request, design_fields, custom_operations)
+            error_msg = check_design_values(request, design_fields, design_operations)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
                     'design_fields': design_fields,
                     'show_parentheses_fields': show_parentheses_fields,
                     'required_fields': required_fields,
+                    'assignment_operations': assignment_operations,
                     'error_msg': error_msg,
                 }
                 return render(request, "vavSheetEquipmentDesignData.html", parameters)
@@ -473,6 +499,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
         'design_fields': design_fields,
         'show_parentheses_fields': show_parentheses_fields,
         'required_fields': required_fields,
+        'assignment_operations': assignment_operations,
     }
     return render(request, "vavSheetEquipmentDesignData.html", parameters)
 

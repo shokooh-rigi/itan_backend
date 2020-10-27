@@ -25,12 +25,15 @@
                 {% for showing_field in value_fields %}
                 <div class="row form-line text-left">
                     <div class="col-lg-3">
-                        <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">{{ showing_field.key.column_title }}{% if showing_field.required %} <span class="required">*</span>{% endif %}</label>
+                        <label for="id_architect_name" class="control-label" style="text-transform: capitalize;">
+                            {{ showing_field.key.column_title }}
+                            {% if showing_field.key.required %} <span class="required">*</span>{% endif %}
+                        </label>
                     </div>
                     <div class="col-lg-3">
                         <input style="width: 100%;" type="text" value="{{ showing_field.value }}" name="showing_field_value_{{ showing_field.id }}"
                                maxlength="50" class="form-control" {% if showing_field.key.required %} required="" {% endif %}
-                               {% if showing_field.required %} required="" {% endif %} id="showing_field_value_{{ showing_field.id }}">
+                               id="showing_field_value_{{ showing_field.id }}">
                     </div>
                 </div>
                 {% endfor %}
@@ -51,7 +54,7 @@
 
             <div class="row form-line text-left">
                 <div class="col-lg-3">
-                    <label for="id_manufacturer" class="control-label">Manufacturer <span class="required">*</span></label>
+                    <label for="id_manufacturer" class="control-label">Manufacturer</label>
                 </div>
                 <div class="col-lg-4">
                     <select name="id_manufacturer" class="form-control" id="id_manufacturer" style="max-width:206px;">
@@ -65,7 +68,7 @@
             </div>
             <div class="row form-line text-left">
                 <div class="col-lg-3">
-                    <label for="id_equipment" class="control-label">Model No. <span class="required">*</span></label>
+                    <label for="id_equipment" class="control-label">Model No.</label>
                 </div>
                 <div class="col-lg-3">
                     <select name="id_equipment" class="form-control" id="id_equipment" style="max-width:206px;">
