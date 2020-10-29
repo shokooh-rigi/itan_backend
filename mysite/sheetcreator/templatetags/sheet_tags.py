@@ -35,6 +35,8 @@ def get_design_value(request, design_field, equipment, request_page):
 
 @register.simple_tag
 def get_actual_value(request, actual_field, equipment):
+    if request.method == 'POST':
+        return request.POST.get(f'actual_value_{actual_field.id}')
     return_value = TestSheetData.objects.filter(data_type=DataTypeChoices.Actual.value, sheet_equipment=equipment,
                                                 sheet_field=actual_field)
     if return_value.count() > 0:
