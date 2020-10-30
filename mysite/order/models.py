@@ -28,7 +28,7 @@ class ControlSystem(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.manufacturer) + ", " + str(self.os) + ", " + str(self.version_number)
+        return str(self.manufacturer) + ", " + str(self.version_number)
 
 
 class Order(models.Model):
