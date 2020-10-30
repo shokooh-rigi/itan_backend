@@ -11,6 +11,7 @@ class VavSheetForm(ModelForm):
             'project',
             'sheet_date',
             'system',
+            'number_of_equipment_groups',
         ]
 
     def __init__(self, *args, **kwargs):

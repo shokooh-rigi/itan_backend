@@ -2,6 +2,7 @@ from mysite.dbmanagement.models import *
 import datetime
 from mysite.order.models import Order
 
+
 # Create your models here.
 
 
@@ -10,6 +11,7 @@ class DataSheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
     sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
     system = models.CharField(max_length=50, blank=False)
+    number_of_equipment_groups = models.IntegerField(default=1, blank=False)
 
     def __str__(self):
         return self.test_sheet_type.name + " " + self.project.project_number
@@ -19,6 +21,7 @@ class DataSheetEquipment(models.Model):
     sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
     equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
+    equipment_group = models.CharField(max_length=50, default='A', blank=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
