@@ -42,7 +42,10 @@ def equipment_create(request):
         if form.is_valid():
             if request.POST.get("save"):
                 this_equipment = form.save()
-                return redirect('EquipmentsValues', this_equipment.pk)
+                if this_equipment.equipment_type.test_sheet == 1:
+                    return redirect('EquipmentsValues', this_equipment.pk)
+                else:
+                    return redirect('VavEquipmentsValues', this_equipment.pk)
     parameters = {'form': form,
                   'page_title': 'Create',
                   'page_button': 'Create',
