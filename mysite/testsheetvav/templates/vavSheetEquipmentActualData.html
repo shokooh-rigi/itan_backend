@@ -57,26 +57,6 @@
         </div>
     </form>
     <script>
-        let hpInput = null;
-        const labels = $('label');
-        for (let label of labels) {
-            label = $(label);
-            if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'h.p.') {
-                hpInput = $('input[name="' + label.attr('for') + '"]');
-                hpInput.attr('readonly', '');
-                hpInput.attr('type', 'text');
-                hpInput.val('SEE BHP');
-                break;
-            }
-        }
-
-        function onFormSubmit() {
-            if (hpInput) {
-                hpInput.val('0');
-            }
-        }
-    </script>
-    <script>
         $('#id_proposal').on('change', function () {
             if ($(this).val() === '') {
                 $("#customer").text('');
@@ -135,49 +115,31 @@
         /*
         * Evaluate assignment operations.
         * */
-        var assignmentOperations = {{ assignment_operations | safe }};
+        const assignmentOperations = {{ assignment_operations | safe }};
 
-        let BPHCalcInput = null;
-        let i = 0;
-        for (var assignment of assignmentOperations) {
-            while (true) {
-                if (assignment.includes("{")) {
-                    var mySubString = assignment.substring(
-                        assignment.lastIndexOf("{") + 1,
-                        assignment.lastIndexOf("}")
-                    );
-                    mySubString = mySubString.split(',');
-                    const needle = $('#actual_value_' + mySubString[0]).val();
-                    mySubString.shift();
-                    const closest = mySubString.reduce((a, b) => {
-                        return Math.abs(b - needle) < Math.abs(a - needle) ? b : a;
-                    });
-                    sub_stinger = assignment.substring(assignment.lastIndexOf("{"), assignment.lastIndexOf("}") + 1);
-                    assignment = assignment.replace(sub_stinger, closest);
-                    assignmentOperations[i] = assignmentOperations[i].replace(sub_stinger, closest);
-                } else {
-                    break;
-                }
+        function find_closest_design_value(actual_value, design_value) {
+            if (actual_value && actual_value.trim()) {
+                actual_value = parseFloat(actual_value.trim());
+                return design_value.reduce((a, b) => Math.abs(b - actual_value) < Math.abs(a - actual_value) ? b : a);
+            } else {
+                return design_value[0];
             }
-            eval(assignment);
+        }
+
+        for (const assignment of assignmentOperations) {
             const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
             readonlyField.attr('readonly', '');
-            const label = $('label[for="' + readonlyField.attr('name') + '"]');
-            if (label.text().replace(/\s+/g, ' ').trim().toLowerCase() === 'b.h.p. (calc.)') {
-                BPHCalcInput = readonlyField;
-            }
-            i += 1;
         }
 
         const evalAssignmentOperations = () => {
-            for (const assignment of assignmentOperations) {
+            for (let assignment of assignmentOperations) {
+                assignment = assignment.replace(/{[\d,]+\d}/gi, (match) => {
+                    const nums = match.substring(1, match.length - 1).split(',');
+                    const actual_value = $('[name="actual_value_' + nums[0] + '"]').val();
+                    nums.shift();
+                    return find_closest_design_value(actual_value, nums.map((v) => parseFloat(v)));
+                });
                 eval(assignment);
-            }
-            if (BPHCalcInput) {
-                const val = Number.parseFloat(BPHCalcInput.val())
-                if (!Number.isNaN(val)) {
-                    BPHCalcInput.val(val.toFixed(2));
-                }
             }
         };
 

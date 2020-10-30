@@ -33,7 +33,7 @@
                     <div class="col-lg-3">
                         <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                             {{ design_field.field_name }}
-                            {% if field_name in required_fields %}
+                            {% if design_field.required_in_design %}
                                 <span class="required">*</span>
                             {% endif %}
                         </label>
@@ -41,7 +41,7 @@
                     <div class="col-lg-3">
                         <label for="{{ field_name }}" class="control-label" style="width: 100%;">
                             <input style="width: 100%;" {% get_field_type design_field %}
-                                   {% if field_name in required_fields %}required=""{% endif %}
+                                   {% if design_field.required_in_design %}required=""{% endif %}
                                    name="{{ field_name }}" maxlength="50"
                                    class="form-control" id="{{ field_name }}"
                                    value="{% get_design_value request design_field this_sheet_equipment 2 %}">
@@ -114,6 +114,26 @@
             onInputChange();
             input.on('change', onInputChange);
         }
+    </script>
+    <script>
+        /*
+        * Evaluate assignment operations.
+        * */
+        const assignmentOperations = {{ assignment_operations | safe }};
+
+        for (const assignment of assignmentOperations) {
+            const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
+            readonlyField.attr('readonly', '');
+        }
+
+        const evalAssignmentOperations = () => {
+            for (const assignment of assignmentOperations) {
+                eval(assignment);
+            }
+        };
+
+        evalAssignmentOperations();
+        $('form').on('change', evalAssignmentOperations);
     </script>
 
 {% endblock %}

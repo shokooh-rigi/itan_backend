@@ -86,8 +86,10 @@ def vav_sheet_equipment(request, sheet_id):
     if request.method == 'POST':
         if form.is_valid():
             form.cleaned_data['sheet'] = sheet_id
-            if DataSheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).count() != 0:
-                DataSheetEquipment.objects.filter(sheet=sheet_id, equipment_type=form.cleaned_data['equipment_type']).delete()
+            if DataSheetEquipment.objects.filter(sheet=sheet_id,
+                                                 equipment_type=form.cleaned_data['equipment_type']).count() != 0:
+                DataSheetEquipment.objects.filter(sheet=sheet_id,
+                                                  equipment_type=form.cleaned_data['equipment_type']).delete()
             for i in range(0, form.cleaned_data['quantity']):
                 item_sheet_equipment = DataSheetEquipment()
                 item_sheet_equipment.sheet = DataSheet.objects.get(id=sheet_id)
@@ -302,8 +304,10 @@ def equipments_generate_report_pdf(request, sheet_id):
 def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
-    manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
-    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='vav', equipment_type=sheet_equipment.equipment_type)
+    manufacturers = EquipmentManufacturer.objects.filter(
+        equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
+    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='vav',
+                                              equipment_type=sheet_equipment.equipment_type)
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
 
@@ -318,7 +322,8 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
         if edit_page:
             for value_field in value_fields:
                 TestSheetGeneralData.objects.filter(key=value_field.key,
-                                                        sheet_equipment=sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
+                                                    sheet_equipment=sheet_equipment).update(
+                    value=request.POST.get('showing_field_value_' + str(value_field.id)))
             if request.POST.get('id_equipment'):
                 sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             sheet_equipment.save()
@@ -326,7 +331,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
         else:
             for every_field in showing_fields:
                 key = every_field
-                field_value = request.POST.get('showing_field_value_'+str(every_field.id))
+                field_value = request.POST.get('showing_field_value_' + str(every_field.id))
                 new_record = TestSheetGeneralData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
                 new_record.save()
             new_update = DataSheetEquipment.objects.get(id=sheet_equipment_id)
@@ -347,382 +352,353 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     return render(request, "vavSheetEquipmentGeneralData.html", parameters)
 
 
-@login_required
-def vav_sheet_equipment_design_data(request, sheet_equipment_id):
-    this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
-    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
-    custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_design=True)
-    show_parentheses_fields = list(map(lambda item:
-                                       {'id': f'company_value_{item.id}', 'defaultValue': item.default_value, },
-                                       design_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Design.value) |
-                                                            Q(show_parentheses=ShowParenthesesChoices.Both.value))))
-    required_fields = list(map(lambda item: f'company_value_{item.id}', design_fields.filter(required_in_design=True)))
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
-        if request.POST.get("next"):
-            for design_field in design_fields:
-                if design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
-                    if design_field.field_type == FieldTypeChoices.Characters.value:
-                        break
-                    my_range = design_field.field_range.split('-')
-                    min_value = my_range[0]
-                    max_value = my_range[1]
-                    sent_value = request.POST.get('company_value_' + str(design_field.id))
-                    if design_field.field_type == FieldTypeChoices.Integer.value:
-                        sent_value = int(sent_value)
-                        min_value = int(min_value)
-                        max_value = int(max_value)
-                    elif design_field.field_type == FieldTypeChoices.Float.value:
-                        sent_value = float(sent_value)
-                        min_value = float(min_value)
-                        max_value = float(max_value)
-                    if sent_value < min_value or sent_value > max_value:
-                        error_msg = design_field.field_name + " Value is not in Range!"
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif design_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
-                    if design_field.field_type == FieldTypeChoices.Characters.value:
-                        break
-                    my_range = design_field.field_range.split(',')
-                    sent_value = request.POST.get('company_value_' + str(design_field.id))
-                    is_in_my_range = 0
-                    for number in my_range:
-                        if design_field.field_type == FieldTypeChoices.Integer.value:
-                            if int(number) == int(sent_value):
-                                is_in_my_range = 1
-                        elif design_field.field_type == FieldTypeChoices.Float.value:
-                            if float(number) == float(sent_value):
-                                is_in_my_range = 1
-                    if is_in_my_range == 0:
-                        error_msg = design_field.field_name + " Value is not selected right!"
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
-            for custom_operation in custom_operations:
-                this_operation = str(custom_operation.operation)
-                this_result = str(custom_operation.result_field)
-                operation_msg = str(custom_operation.operation)
-                result_msg = str(custom_operation.result_field)
-                for design_field in design_fields:
-                    this_operation = this_operation.replace('[field-' + str(design_field.id) + ']',
-                                                            request.POST.get('company_value_' + str(design_field.id)))
-                    this_result = this_result.replace('[field-' + str(design_field.id) + ']',
-                                                      request.POST.get('company_value_' + str(design_field.id)))
-                    operation_msg = operation_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
-                    result_msg = result_msg.replace('[field-' + str(design_field.id) + ']', design_field.field_name)
-                if custom_operation.operand_type == OperandChoices.EqualTo.value:
-                    if eval(this_operation) != eval(this_result):
-                        error_msg = operation_msg + " must be equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
-                    if eval(this_operation) <= eval(this_result):
-                        error_msg = operation_msg + " must be greater than " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
-                    if eval(this_operation) < eval(this_result):
-                        error_msg = operation_msg + " must be greater than or equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
-                    if eval(this_operation) >= eval(this_result):
-                        error_msg = operation_msg + " must be smaller than " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "EquipmentDesignValue.html", parameters)
-                elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
-                    if eval(this_operation) > eval(this_result):
-                        error_msg = operation_msg + " must be smaller than or equal to " + result_msg
-                        parameters = {'this_sheet_equipment': this_sheet_equipment,
-                                      'design_fields': design_fields,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'error_msg': error_msg,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "vavSheetEquipmentDesignData.html", parameters)
-
-            for design_field in design_fields:
-
-                new_value = request.POST.get('company_value_' + str(design_field.id)).strip()
-
-                # if Manufacturer and Model Number selected, Update Design values in EquipmentDbDesignData Table
-                if this_sheet_equipment.equipment:
-                    equipment_db_design_value = EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field)
-                    if equipment_db_design_value.exists():
-                        EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment, key=design_field).update(value=new_value)
-                    else:
-                        new_object = EquipmentDbDesignData(equipment=this_sheet_equipment.equipment, key=design_field, value=new_value)
-                        new_object.save()
-
-                # else if Manufacturer and Model Number not selected, Create or Update Design values in TestSheetData
-                else:
-                    num_results = TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).count()
-                    if num_results > 0:
-                        TestSheetData.objects.filter(data_type=1, sheet_field=design_field, sheet_equipment=this_sheet_equipment).update(value=new_value)
-                    else:
-                        new_object = TestSheetData(sheet_field=design_field, sheet_equipment=this_sheet_equipment, value=new_value)
-                        new_object.save()
-            this_sheet_equipment.design_data_entry_completed = True
-            this_sheet_equipment.save()
-            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
-    parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'design_fields': design_fields,
-                  'show_parentheses_fields': show_parentheses_fields,
-                  'required_fields': required_fields,
-                  }
-    return render(request, "vavSheetEquipmentDesignData.html", parameters)
+def split(value: str, sep: str):
+    return value.replace(' ', '').split(sep)
 
 
-def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, custom_fields, insert=True):
-    actual_data_custom_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
-        .filter(~Q(operand_type=OperandChoices.AssignTo.value))
-    conv_to_num = None
+def contains(value: str, sub: str):
+    return value.find(sub) != -1
 
-    for equipment_type_custom_field in equipment_type_custom_fields:
-        if equipment_type_custom_field.field_type == FieldTypeChoices.Characters.value:
-            continue
-        elif equipment_type_custom_field.field_type == FieldTypeChoices.Integer.value:
-            conv_to_num = int
-        elif equipment_type_custom_field.field_type == FieldTypeChoices.Float.value:
-            conv_to_num = float
 
-        field_name = equipment_type_custom_field.field_name
-        if insert:
-            related_id = custom_fields.get(equipment_value_name=field_name).id
+def find_closest_design_value(actual_value: str, design_value: str, sep: str):
+    if contains(design_value, sep):
+        splitted = split(design_value, sep)
+        if actual_value and actual_value.strip():
+            actual_value = eval(actual_value.strip())
+            return min(splitted, key=lambda x: abs(float(x) - actual_value))
         else:
-            related_id = custom_fields.get(key__equipment_value_name=field_name).id
+            return splitted[0]
+    return design_value
+
+
+def get_show_parentheses_fields(this_sheet_equipment: DataSheetEquipment, is_design_form: bool):
+    fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set
+    if is_design_form:
+        field_name_prefix = 'company_value_'
+        fields = fields.filter(show_in_design=True).filter(
+            Q(show_parentheses=ShowParenthesesChoices.Design.value) |
+            Q(show_parentheses=ShowParenthesesChoices.Both.value)
+        )
+    else:
+        field_name_prefix = 'actual_value_'
+        fields = fields.filter(show_in_actual=True).filter(
+            Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
+            Q(show_parentheses=ShowParenthesesChoices.Both.value)
+        )
+    return list(map(lambda item: {'id': f'{field_name_prefix}{item.id}', 'defaultValue': item.default_value}, fields))
+
+
+def get_assigment_operations(this_sheet_equipment: DataSheetEquipment, is_design_form: bool):
+    is_actual_form = not is_design_form
+
+    design_field_regex = re.compile(r'\[field-[\d]+-design]', re.I)
+    actual_field_regex = re.compile(r'\[field-[\d]+-actual]', re.I)
+    design_field_name_prefix = 'company_value_'
+    actual_field_name_prefix = 'actual_value_'
+
+    test_sheet_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set
+    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
+
+    if is_design_form:
+        field_regex = design_field_regex
+        field_name_prefix = design_field_name_prefix
+        custom_operations = test_sheet_operations.filter(apply_on_design=True)
+    else:
+        field_regex = actual_field_regex
+        field_name_prefix = actual_field_name_prefix
+        custom_operations = test_sheet_operations.filter(apply_on_actual=True)
+
+    def replace_design_values(expression):
+        def get_design_value(m):
+            field_id = m.group()[7:-8]
+            design_field = design_fields.get(pk=field_id)
+            if this_sheet_equipment.equipment:
+                design_value = EquipmentDbDesignData.objects.get(equipment=this_sheet_equipment.equipment,
+                                                                 key=design_field).value
+            else:
+                design_value = TestSheetData.objects.get(data_type=DataTypeChoices.Design.value,
+                                                         sheet_field=design_field,
+                                                         sheet_equipment=this_sheet_equipment).value
+            if contains(design_value, '-'):
+                design_value = design_value.replace(' ', '').replace('-', ',')
+                design_value = '{' + field_id + ',' + design_value + '}'
+            return design_value
+
+        expression = re.sub(design_field_regex, get_design_value, expression)
+        return expression
+
+    def jquery_selector(field_regex_matched):
+        name = f'{field_name_prefix}{field_regex_matched[7:-8]}'
+        return f'$(\'[name="{name}"]\')'
+
+    assignment_operations = custom_operations.filter(operand_type=OperandChoices.AssignTo.value)
+    assignments = []
+    for assignment in assignment_operations:
+        left_side = assignment.operation.strip().lower()
+        right_side = assignment.result_field.strip().lower()
+
+        # ignore assignment when:
+        #
+        #                               | left_side has 'actual' word
+        #       | is_design_form and ---  OR
+        #       |                       | right_side does not matches [field-ID-design]
+        # if ---  OR
+        #       |
+        #       | is_actual_form and right_side does not matches [field-ID-actual]
+        #
+        if (is_design_form and (contains(left_side, 'actual') or not re.fullmatch(design_field_regex, right_side))) or \
+                (is_actual_form and not re.fullmatch(actual_field_regex, right_side)):
+            continue
 
         try:
-            sent_value = conv_to_num(request.POST.get('actual_value_' + str(related_id)))
+            left_side = re.sub(field_regex, lambda m: f'parseFloat({jquery_selector(m.group())}.val())', left_side)
+
+            # when is_actual_form and the formula has design fields
+            # replace design fields in the formula with design values previously saved in the database
+            if is_actual_form and contains(left_side, 'design'):
+                left_side = replace_design_values(left_side)
+
+            final_expression = f'{jquery_selector(right_side)}.val({left_side})'
+            assignments.append(final_expression)
+        except:
+            continue
+    return assignments
+
+
+def check_form_values(request, this_sheet_equipment: DataSheetEquipment, is_design_form: bool):
+    is_actual_form = not is_design_form
+
+    design_field_regex = re.compile(r'\[field-[\d]+-design]', re.I)
+    actual_field_regex = re.compile(r'\[field-[\d]+-actual]', re.I)
+    design_field_name_prefix = 'company_value_'
+    actual_field_name_prefix = 'actual_value_'
+
+    test_sheet_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set
+    test_sheet_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set
+    design_fields = test_sheet_fields.filter(show_in_design=True)
+
+    if is_design_form:
+        field_regex = design_field_regex
+        field_name_prefix = design_field_name_prefix
+        form_fields = test_sheet_fields.filter(show_in_design=True)
+        custom_operations = test_sheet_operations.filter(apply_on_design=True)
+    else:
+        field_regex = actual_field_regex
+        field_name_prefix = actual_field_name_prefix
+        form_fields = test_sheet_fields.filter(show_in_actual=True)
+        custom_operations = test_sheet_operations.filter(apply_on_actual=True)
+
+    def replace_design_values(expression, expression_msg):
+        def get_design_value(m):
+            field_id = m.group()[7:-8]
+            actual_value = request.POST.get(f'{actual_field_name_prefix}{field_id}')
+            design_field = design_fields.get(pk=field_id)
+            if this_sheet_equipment.equipment:
+                design_value = EquipmentDbDesignData.objects.get(equipment=this_sheet_equipment.equipment,
+                                                                 key=design_field).value
+            else:
+                design_value = TestSheetData.objects.get(data_type=DataTypeChoices.Design.value,
+                                                         sheet_field=design_field,
+                                                         sheet_equipment=this_sheet_equipment).value
+            return find_closest_design_value(actual_value, design_value, '-')
+
+        expression = re.sub(design_field_regex, get_design_value, expression)
+        expression_msg = re.sub(design_field_regex,
+                                lambda m: design_fields.get(pk=m.group()[7:-8]).field_name + ' (design)',
+                                expression_msg)
+        return expression, expression_msg
+
+    # validate field value range
+    conv_to_num = None
+    for field in form_fields:
+        if field.field_type == FieldTypeChoices.Characters.value:
+            continue
+        elif field.field_type == FieldTypeChoices.Integer.value:
+            conv_to_num = int
+        elif field.field_type == FieldTypeChoices.Float.value:
+            conv_to_num = float
+
+        try:
+            form_field_value = conv_to_num(request.POST.get(f'{field_name_prefix}{field.id}'))
         except ValueError:
-            return "{} value is not valid. The value must be {} number.".format(
-                field_name, 'integer' if conv_to_num == int else 'float')
+            return f'{field.field_name} value is not valid. The value must be ' \
+                   f'{"integer" if conv_to_num == int else "float"} number.'
 
-        if equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
-            my_range = equipment_type_custom_field.field_range.split('-')
-            min_value = conv_to_num(my_range[0])
-            max_value = conv_to_num(my_range[1])
-            if sent_value < min_value or max_value < sent_value:
-                return "{} value is not in range. Valid range is {}.".format(field_name,
-                                                                             equipment_type_custom_field.field_range)
-        elif equipment_type_custom_field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
-            my_range = equipment_type_custom_field.field_range.split(',')
-            if sent_value not in map(lambda x: conv_to_num(x), my_range):
-                return "{} value is not selected right. Valid choices are {}.".format(
-                    field_name, equipment_type_custom_field.field_range)
+        if field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+            field_range = split(field.field_range, '-')
+            min_value = conv_to_num(field_range[0])
+            max_value = conv_to_num(field_range[1])
+            if form_field_value < min_value or max_value < form_field_value:
+                return f'{field.field_name} value is not in range. Valid range is {field.field_range}.'
+        elif field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+            field_range = split(field.field_range, ',')
+            if form_field_value not in map(lambda x: conv_to_num(x), field_range):
+                return f'{field.field_name} value is not selected right. Valid choices are {field.field_range}.'
 
-    for custom_operation in actual_data_custom_operations:
-        left_side = left_side_msg = str(custom_operation.operation)
-        right_side = right_side_msg = str(custom_operation.result_field)
+    # check custom operations
+    custom_operations = custom_operations.filter(~Q(operand_type=OperandChoices.AssignTo.value))
+    for custom_operation in custom_operations:
+        left_side = left_side_msg = custom_operation.operation.strip().lower()
+        right_side = right_side_msg = custom_operation.result_field.strip().lower()
 
-        for equipment_type_custom_field in equipment_type_custom_fields:
-            field_name = equipment_type_custom_field.field_name
-            if insert:
-                design_value = custom_fields.get(equipment_value_name=field_name)
-                related_id = design_value.id
-            else:
-                actual_value = custom_fields.get(key__equipment_value_name=field_name)
-                related_id = actual_value.id
-                design_value = actual_value.key
-            if '-' in design_value.company_value:
-                spliced_design_values = design_value.company_value.replace(' ', '').split('-')
-                correct_design_value = min(spliced_design_values, key=lambda x: abs(float(x)-eval(request.POST.get('actual_value_' + str(related_id)))))
-            else:
-                correct_design_value = design_value.company_value
-            fields = [
-                ('[field-{}-design]'.format(equipment_type_custom_field.id), correct_design_value),
-                ('[field-{}-actual]'.format(equipment_type_custom_field.id), request.POST.get('actual_value_' + str(related_id))),
-            ]
-            for name, value in fields:
-                left_side = left_side.replace(name, value)
-                right_side = right_side.replace(name, value)
-                left_side_msg = left_side_msg.replace(name, field_name)
-                right_side_msg = right_side_msg.replace(name, field_name)
+        # ignore custom_operation when:
+        #
+        #                               | left_side has 'actual' word
+        #       | is_design_form and ---  OR
+        #       |                       | right_side does not matches [field-ID-design]
+        # if ---  OR
+        #       |
+        #       | is_actual_form and right_side does not matches [field-ID-actual]
+        #
+        if (is_design_form and (contains(left_side, 'actual') or not re.fullmatch(design_field_regex, right_side))) or \
+                (is_actual_form and not re.fullmatch(actual_field_regex, right_side)):
+            continue
 
-        left_side = eval(left_side)
-        right_side = eval(right_side)
-        if custom_operation.operand_type == OperandChoices.EqualTo.value:
-            if left_side != right_side:
-                return left_side_msg + " must be equal to " + right_side_msg
-        elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
-            if left_side <= right_side:
-                return left_side_msg + " must be greater than " + right_side_msg
-        elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
-            if left_side < right_side:
-                return left_side_msg + " must be greater than or equal to " + right_side_msg
-        elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
-            if left_side >= right_side:
-                return left_side_msg + " must be smaller than " + right_side_msg
-        elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
-            if left_side > right_side:
-                return left_side_msg + " must be smaller than or equal to " + right_side_msg
+        try:
+            # if is_design_form then replace design fields in formula with their form values
+            # else if is_actual_form then replace actual fields in formula with their form values
+            left_side = re.sub(field_regex, lambda m: request.POST.get(f'{field_name_prefix}{m.group()[7:-8]}'),
+                               left_side)
+            left_side_msg = re.sub(field_regex, lambda m: form_fields.get(pk=m.group()[7:-8]).field_name, left_side_msg)
+            right_side = request.POST.get(f'{field_name_prefix}{right_side[7:-8]}')
+            right_side_msg = form_fields.get(pk=right_side_msg[7:-8]).field_name
+
+            # when is_actual_form and the formula has design fields
+            # replace design fields in the formula with design values previously saved in the database
+            if is_actual_form and contains(left_side, 'design'):
+                left_side, left_side_msg = replace_design_values(left_side, left_side_msg)
+
+            left_side = eval(left_side)
+            right_side = eval(right_side)
+            if custom_operation.operand_type == OperandChoices.EqualTo.value:
+                if left_side != right_side:
+                    return f'{left_side_msg} must be equal to {right_side_msg}'
+            elif custom_operation.operand_type == OperandChoices.GreaterThan.value:
+                if left_side <= right_side:
+                    return f'{left_side_msg} must be greater than {right_side_msg}'
+            elif custom_operation.operand_type == OperandChoices.GreaterOrEqualTo.value:
+                if left_side < right_side:
+                    return f'{left_side_msg} must be greater than or equal to {right_side_msg}'
+            elif custom_operation.operand_type == OperandChoices.SmallerThan.value:
+                if left_side >= right_side:
+                    return f'{left_side_msg} must be smaller than {right_side_msg}'
+            elif custom_operation.operand_type == OperandChoices.SmallerOrEqualTo.value:
+                if left_side > right_side:
+                    return f'{left_side_msg} must be smaller than or equal to {right_side_msg}'
+        except:
+            continue
 
     return None
 
 
-def parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields, custom_fields, insert=True):
-    assignment_operations = this_sheet_equipment.equipment.equipment_type.actualdatacustomoperation_set \
-        .filter(operand_type=OperandChoices.AssignTo.value)
-    assignments = []
-    result_field_regex = re.compile(r'\[field-[\d]+-actual]', re.I)
-    expression_regex = re.compile(r'\[field-[\d]+-(actual|design)]', re.I)
-    actual_field_id_matches: Dict[int, int] = {}
-    design_values_matches: Dict[int, str] = {}
+@login_required
+def vav_sheet_equipment_design_data(request, sheet_equipment_id):
+    this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
+    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
+    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, True)
+    assignment_operations = get_assigment_operations(this_sheet_equipment, True)
 
-    def get_related_id(equipment_type_custom_field_id: int) -> int:
-        """Finds and caches the actual value field id"""
-        related_id = actual_field_id_matches.get(equipment_type_custom_field_id)
-        if related_id is None:
-            equipment_type_custom_field = equipment_type_custom_fields.get(pk=equipment_type_custom_field_id)
-            if insert:
-                custom_field = custom_fields.get(equipment_value_name=equipment_type_custom_field.field_name)
-            else:
-                custom_field = custom_fields.get(key__equipment_value_name=equipment_type_custom_field.field_name)
-            related_id = custom_field.id
-            actual_field_id_matches[equipment_type_custom_field_id] = related_id
-        return related_id
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
+        if request.POST.get("next"):
+            error_msg = check_form_values(request, this_sheet_equipment, True)
+            if error_msg is not None:
+                parameters = {
+                    'this_sheet_equipment': this_sheet_equipment,
+                    'design_fields': design_fields,
+                    'show_parentheses_fields': show_parentheses_fields,
+                    'assignment_operations': assignment_operations,
+                    'error_msg': error_msg,
+                }
+                return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
-    def get_related_value(equipment_type_custom_field_id: int) -> str:
-        """Finds and caches the design value"""
-        related_value = design_values_matches.get(equipment_type_custom_field_id)
-        if related_value is None:
-            equipment_type_custom_field = equipment_type_custom_fields.get(pk=equipment_type_custom_field_id)
-            if insert:
-                custom_field = custom_fields.get(equipment_value_name=equipment_type_custom_field.field_name)
-            else:
-                custom_field = custom_fields.get(key__equipment_value_name=equipment_type_custom_field.field_name).key
-            related_value = custom_field.company_value
-            if '-' in related_value:
-                related_value = related_value.replace(' ', '').replace('-', ',')
-                related_value = '{' + str(custom_field.id) + ',' + related_value + '}'
-            design_values_matches[equipment_type_custom_field_id] = related_value
-        return related_value
+            # if no error save design values
+            for design_field in design_fields:
+                new_value = request.POST.get(f'company_value_{design_field.id}').strip()
 
-    def replace(match):
-        """
-        Replaces `actual` matches with `$('[name="actual_value_[FIELD ID]"]').val()` and
-        `design` matches with design value.
-        """
-        group = match.group()
-        field_id = int(group[7:-8])
-        if group[-2] == 'l' or group[-2] == 'L':
-            # this group is like [field-[FIELD ID]-actual]
-            return '$(\'[name="actual_value_{}"]\').val()'.format(get_related_id(field_id))
-        else:
-            # this group is like [field-[FIELD ID]-design]
-            return get_related_value(field_id)
+                # if Manufacturer and Model Number selected, Update Design values in EquipmentDbDesignData Table
+                if this_sheet_equipment.equipment:
+                    equipment_db_design_value = EquipmentDbDesignData.objects.filter(
+                        equipment=this_sheet_equipment.equipment, key=design_field)
+                    if equipment_db_design_value.exists():
+                        EquipmentDbDesignData.objects.filter(equipment=this_sheet_equipment.equipment,
+                                                             key=design_field).update(value=new_value)
+                    else:
+                        new_object = EquipmentDbDesignData(equipment=this_sheet_equipment.equipment, key=design_field,
+                                                           value=new_value)
+                        new_object.save()
 
-    for assignment in assignment_operations:
-        if assignment.result_field and assignment.operation:
-            result_field = assignment.result_field.strip()
-            if re.fullmatch(result_field_regex, result_field):
-                result_field_id = int(result_field[result_field.find('-') + 1:result_field.rfind('-')])
-                result_field_id = get_related_id(result_field_id)
-                left_side_of_assignment = '$(\'[name="actual_value_{}"]\')'.format(result_field_id)
-                operation = assignment.operation.strip()
-                operation = re.sub(expression_regex, replace, operation)
-                final_expression = '{}.val({})'.format(left_side_of_assignment, operation)
-                assignments.append(final_expression)
-    return assignments
-
-
-def get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
-    require_parentheses = equipment_type_custom_fields.filter(Q(show_parentheses=ShowParenthesesChoices.Actual.value) |
-                                                              Q(show_parentheses=ShowParenthesesChoices.Both.value))
-    if insert:
-        fields = map(lambda item: {
-            'id': f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
-            'defaultValue': item.default_value,
-        }, require_parentheses)
-    else:
-        fields = map(lambda item: {
-            'id': f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
-            'defaultValue': item.default_value,
-        }, require_parentheses)
-    return list(fields)
-
-
-def get_required_fields_actual(equipment_type_custom_fields, custom_fields, insert=True):
-    required_fields = equipment_type_custom_fields.filter(required_in_actual=True)
-    if insert:
-        fields = map(lambda item: f'actual_value_{custom_fields.get(equipment_value_name=item.field_name).id}',
-                     required_fields)
-    else:
-        fields = map(lambda item: f'actual_value_{custom_fields.get(key__equipment_value_name=item.field_name).id}',
-                     required_fields)
-    return list(fields)
+                # else if Manufacturer and Model Number not selected, Create or Update Design values in TestSheetData
+                else:
+                    num_results = TestSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
+                                                               sheet_field=design_field,
+                                                               sheet_equipment=this_sheet_equipment).count()
+                    if num_results > 0:
+                        TestSheetData.objects.filter(data_type=DataTypeChoices.Design.value, sheet_field=design_field,
+                                                     sheet_equipment=this_sheet_equipment).update(value=new_value)
+                    else:
+                        new_object = TestSheetData(sheet_field=design_field, sheet_equipment=this_sheet_equipment,
+                                                   value=new_value)
+                        new_object.save()
+            this_sheet_equipment.design_data_entry_completed = True
+            this_sheet_equipment.save()
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
+    parameters = {
+        'this_sheet_equipment': this_sheet_equipment,
+        'design_fields': design_fields,
+        'show_parentheses_fields': show_parentheses_fields,
+        'assignment_operations': assignment_operations,
+    }
+    return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
 
 @login_required
 def vav_sheet_equipment_actual_data(request, sheet_equipment_id):
     this_sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
     actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
-    custom_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set.filter(apply_on_actual=True)
-    equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
-    assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
-                                                              actual_fields)
+    show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, False)
+    assignment_operations = get_assigment_operations(this_sheet_equipment, False)
+
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
+            return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
-            error_msg = check_actual_values(request, this_sheet_equipment, equipment_type_custom_fields, actual_fields)
+            error_msg = check_form_values(request, this_sheet_equipment, False)
             if error_msg is not None:
                 parameters = {
                     'this_sheet_equipment': this_sheet_equipment,
                     'actual_fields': actual_fields,
+                    'show_parentheses_fields': show_parentheses_fields,
                     'assignment_operations': assignment_operations,
                     'error_msg': error_msg,
                 }
                 return render(request, "vavSheetEquipmentActualData.html", parameters)
 
             for actual_field in actual_fields:
-                new_value = request.POST.get('actual_value_' + str(actual_field.id)).strip()
+                new_value = request.POST.get(f'actual_value_{actual_field.id}').strip()
 
-                num_results = TestSheetData.objects.filter(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment).count()
+                num_results = TestSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
+                                                           sheet_field=actual_field,
+                                                           sheet_equipment=this_sheet_equipment).count()
 
                 if num_results > 0:
-                    TestSheetData.objects.filter(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment).update(value=new_value)
+                    TestSheetData.objects.filter(data_type=DataTypeChoices.Actual.value, sheet_field=actual_field,
+                                                 sheet_equipment=this_sheet_equipment).update(value=new_value)
                 else:
-                    new_object = TestSheetData(data_type=2, sheet_field=actual_field, sheet_equipment=this_sheet_equipment, value=new_value)
+                    new_object = TestSheetData(data_type=DataTypeChoices.Actual.value, sheet_field=actual_field,
+                                               sheet_equipment=this_sheet_equipment, value=new_value)
                     new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
             this_sheet_equipment.save()
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
 
-    parameters = {'this_sheet_equipment': this_sheet_equipment,
-                  'actual_fields': actual_fields,
-                  'assignment_operations': assignment_operations,
-                  }
+    parameters = {
+        'this_sheet_equipment': this_sheet_equipment,
+        'actual_fields': actual_fields,
+        'show_parentheses_fields': show_parentheses_fields,
+        'assignment_operations': assignment_operations,
+    }
     return render(request, "vavSheetEquipmentActualData.html", parameters)
 
 
