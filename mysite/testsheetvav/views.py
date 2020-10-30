@@ -128,108 +128,93 @@ def vav_sheet_equipment_list(request, sheet_id):
     return render(request, "vavSheetEquipmentsList.html", parameters)
 
 
-def fetch_sheet_equipment_data(equipment: SheetEquipment):
-    def get_object_or_none(queryset, *args, **kwargs):
-        try:
-            return queryset.get(*args, **kwargs)
-        except queryset.model.DoesNotExist:
-            return None
+def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
+    general_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
+    general_data = TestSheetGeneralData.objects.filter(sheet_equipment=this_sheet_equipment)
 
-    def get_attribute_value(queryset, attribute_name, default_value, *args, **kwargs):
-        obj = get_object_or_none(queryset, *args, **kwargs)
-        if obj:
-            field_object = queryset.model._meta.get_field(attribute_name)
-            return field_object.value_from_object(obj)
-        else:
-            return default_value
+    equipment_data = {
+        'address': general_data.get(key=general_fields.get(column_title__iexact='address')).value,
+        'code': general_data.get(key=general_fields.get(column_title__iexact='code')).value,
+    }
 
-    equipment_data = {}
-    se_common_data_set = equipment.sheetequipmentcommondata_set
-    e_custom_field_set = equipment.equipment.equipmentcustomfield_set
-    se_actual_data_set = equipment.sheetequipmentactualdata_set
-    data_fields = [
-        (
-            "get_attribute_value(se_common_data_set, 'value', '', key__column_title__iexact='{}')",
-            [
-                ('fan_no', 'fan no.'),
-                ('location', 'location'),
-                ('area_served', 'area served'),
-            ]
-        ),
-        (
-            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
-            [
-                ('serial_no', 'Serial No.'),
-                ('note', 'Note'),
-            ]
-        ),
-        (
-            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
-            [('df_cooling', 'DF Cooling'), ]
-        ),
-        (
-            "get_attribute_value(equipment.sheetequipmentcustomdata_set, 'value', '', key__column_title__iexact='{}')",
-            [('df_heating', 'DF Heating'), ]
-        ),
-        (
-            "equipment.equipment.manufacturer",
-            [('manufacturer', ''), ]
-        ),
-        (
-            "equipment.equipment.model_number",
-            [('model_no', ''), ]
-        ),
-        (
-            """{{'design': get_attribute_value(e_custom_field_set, 'company_value', '', equipment_value_name__iexact='{0}'),
-                'actual': get_attribute_value(se_actual_data_set, 'value', '', key__equipment_value_name__iexact='{0}')}}""",
-            [
-                ('total_cfm', 'Total C.F.M.'),
-                ('return_air_cfm', 'Return Air C.F.M.'),
-                ('outdoor_air_cfm', 'Outdoor Air C.F.M.'),
-                ('total_sp_ext_sp', 'Total SP (Ext. SP)'),
-                ('fan_unit_suction_pressure', 'Fan (Unit) Suction Pressure'),
-                ('discharge_pressure_fan_unit', 'Discharge Pressure, Fan/Unit'),
-                ('fan_rpm', 'Fan R.P.M'),
-                ('hp', 'H.P.'),
-                ('voltage', 'Voltage'),
-                ('phase', 'Phase'),
-                ('amperage', 'Amperage'),
-                ('bhp_calc', 'B.H.P. (Calc.)'),
-                ('frame', 'Frame'),
-                ('sf_code', 'S.F. / Code'),
-                ('motor_rpm', 'Motor RPM'),
-            ]
-        ),
+    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
+    design_data = [
+        ('type', 'type'),
+        ('size_kw', 'size / kw'),
+        ('fan_cfm', 'fan cfm'),
+        ('min_cfm', 'min. cfm'),
+        ('max_cfm', 'max. cfm'),
     ]
-    for field_value_str, items in data_fields:
-        for key, name in items:
-            equipment_data[key] = eval(field_value_str.format(name))
+    equipment_data['design'] = {}
+    for key, val in design_data:
+        design_field = design_fields.get(field_name__iexact=val)
+        if this_sheet_equipment.equipment:
+            design_value = EquipmentDbDesignData.objects.get(equipment=this_sheet_equipment.equipment,
+                                                             key=design_field).value
+        else:
+            design_value = TestSheetData.objects.get(data_type=DataTypeChoices.Design.value, sheet_field=design_field,
+                                                     sheet_equipment=this_sheet_equipment).value
+        equipment_data['design'][key] = design_value
 
-    for key in equipment_data:
-        if key in ['df_cooling', 'df_heating']:
-            if equipment_data[key]:
-                equipment_data[key] = equipment_data[key] + '°'
+    if is_report_pdf:
+        actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
+        actual_data = [
+            ('kf', 'k.f.'),
+            ('min_fan_cfm', 'min./fan cfm'),
+            ('max_cfm', 'max. cfm'),
+        ]
+        equipment_data['actual'] = {}
+        for key, val in actual_data:
+            actual_field = actual_fields.get(field_name__iexact=val)
+            actual_value = TestSheetData.objects.get(data_type=DataTypeChoices.Actual.value, sheet_field=actual_field,
+                                                     sheet_equipment=this_sheet_equipment).value
+            equipment_data['actual'][key] = actual_value
 
     return equipment_data
 
 
-def get_pdf_parameters(sheet_id, is_report_pdf):
-    my_sheet = Sheet.objects.get(id=sheet_id)
-    sheet_equipments = SheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
-                                                     design_data_entry_completed=True)
+def get_pdf_empty_row():
+    return {
+        'address': '',
+        'code': '',
+        'design': {
+            'type': '',
+            'size_kw': '',
+            'fan_cfm': '',
+            'min_cfm': '',
+            'max_cfm': '',
+        },
+        'actual': {
+            'kf': '',
+            'min_fan_cfm': '',
+            'max_cfm': '',
+        },
+    }
+
+
+def get_pdf_parameters(sheet_id, is_report_pdf: bool):
+    my_sheet = DataSheet.objects.get(id=sheet_id)
+    sheet_equipments = DataSheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
+                                                         design_data_entry_completed=True)
     if is_report_pdf:
         sheet_equipments = sheet_equipments.filter(actual_data_entry_completed=True)
 
     data = []
-    len_equipments = sheet_equipments.count()
-    equipment_in_page = 2
-    for i in range(math.ceil(len_equipments / equipment_in_page)):
-        page = []
-        for j in range(equipment_in_page):
-            index = i * equipment_in_page + j
-            if index < len_equipments:
-                page.append(fetch_sheet_equipment_data(sheet_equipments[index]))
-        data.append(page)
+    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
+    equipment_in_page = 22
+    for group in equipment_groups:
+        group_equipments = sheet_equipments.filter(equipment_group=group)
+        len_equipments = group_equipments.count()
+        for i in range(math.ceil(len_equipments / equipment_in_page)):
+            page = {'rows': [], 'notes': []}
+            for j in range(equipment_in_page):
+                index = i * equipment_in_page + j
+                if index < len_equipments:
+                    page['rows'].append(fetch_sheet_equipment_data(group_equipments[index], is_report_pdf))
+                else:
+                    page['rows'].append(get_pdf_empty_row())
+            if page['rows']:
+                data.append(page)
 
     if len(data) == 0:
         data.append([])
@@ -249,8 +234,9 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
             'my_sheet': my_sheet,
             'data': data,
         },
-        'file_name': 'TEST SHEET {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
-                                                 my_sheet.project.project_number, '' if is_report_pdf else '-tech'),
+        'file_name': 'V.A.V. BOX SCHEDULE {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+                                                          my_sheet.project.project_number,
+                                                          '' if is_report_pdf else ' TECH').upper(),
         'license_owner': license_owner,
         'owner_title': owner_title,
         'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -274,8 +260,8 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
 @login_required
 def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTechTemplate.html', parameters,
-                                                  'airMovingEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTechTemplate.html', parameters,
+                                                  'vavEquipmentReport')
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/pdf")
@@ -288,8 +274,8 @@ def equipments_generate_tech_pdf(request, sheet_id):
 @login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/airMovingEquipmentTemplate.html', parameters,
-                                                  'airMovingEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTemplate.html', parameters,
+                                                  'vavEquipmentReport')
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
@@ -311,6 +297,8 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
 
+    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + sheet_equipment.sheet.number_of_equipment_groups)))
+
     value_fields = TestSheetGeneralData.objects.filter(sheet_equipment_id=sheet_equipment_id)
     edit_page = False
     if value_fields.exists():
@@ -326,6 +314,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
                     value=request.POST.get('showing_field_value_' + str(value_field.id)))
             if request.POST.get('id_equipment'):
                 sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            sheet_equipment.equipment_group = request.POST.get('equipment_group')
             sheet_equipment.save()
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         else:
@@ -337,17 +326,20 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             new_update = DataSheetEquipment.objects.get(id=sheet_equipment_id)
             if request.POST.get('id_equipment'):
                 new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            new_update.equipment_group = request.POST.get('equipment_group')
             new_update.main_data_entry_completed = True
             new_update.save()
         return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
 
-    parameters = {'sheet_equipment': sheet_equipment,
-                  'showing_fields': showing_fields,
-                  'value_fields': value_fields,
-                  'manufacturers': manufacturers,
-                  'Equipment_db': Equipment_db,
-                  'edit_page': edit_page,
-                  }
+    parameters = {
+        'sheet_equipment': sheet_equipment,
+        'showing_fields': showing_fields,
+        'value_fields': value_fields,
+        'equipment_groups': equipment_groups,
+        'manufacturers': manufacturers,
+        'Equipment_db': Equipment_db,
+        'edit_page': edit_page,
+    }
 
     return render(request, "vavSheetEquipmentGeneralData.html", parameters)
 
