@@ -2,6 +2,7 @@ from django.contrib import admin
 from django import forms
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from adminsortable2.admin import SortableInlineAdminMixin
 
 from .models import *
 
@@ -59,11 +60,11 @@ class EquipmentTypeAdmin(admin.ModelAdmin):
 admin.site.register(Equipment, EquipmentTypeAdmin)
 
 
-class TestSheetFieldAdmin(admin.TabularInline):
+class TestSheetFieldAdmin(SortableInlineAdminMixin, admin.TabularInline):
     model = TestSheetField
 
 
-class TestSheetOperationAdmin(admin.TabularInline):
+class TestSheetOperationAdmin(SortableInlineAdminMixin, admin.TabularInline):
     model = TestSheetOperation
 
 

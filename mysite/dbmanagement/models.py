@@ -87,6 +87,7 @@ class OperandChoices(Enum):
 
 class TestSheet(models.Model):
     name = models.CharField(max_length=255, blank=False)
+    inheritance = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     priority = models.IntegerField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     sheet_generator = models.BooleanField(default=False)
@@ -117,8 +118,13 @@ class TestSheetField(models.Model):
     show_in_actual = models.BooleanField(default=True)
     required_in_actual = models.BooleanField(default=False)
 
+    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     def __str__(self):
         return "[field-" + str(self.id) + "]: " + str(self.field_name)
+
+    class Meta(object):
+        ordering = ['field_order']
 
 
 class TestSheetOperation(models.Model):
@@ -129,8 +135,13 @@ class TestSheetOperation(models.Model):
     apply_on_design = models.BooleanField(default=True)
     apply_on_actual = models.BooleanField(default=True)
 
+    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     def __str__(self):
         return str(self.id)
+
+    class Meta(object):
+        ordering = ['field_order']
 
 
 class EquipmentManufacturer(models.Model):

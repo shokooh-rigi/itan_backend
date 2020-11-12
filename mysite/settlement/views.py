@@ -110,10 +110,7 @@ def settlement_add(request):
 def settlement_orders(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
     form = SettledOrderForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
-    orders = Order.objects.filter(schedule__assigned_to_contractor=this_settlement.contractor).exclude(
-        id__in=SettledOrders.objects.filter(Q(settlement__id=settlement_id) | Q(order__fully_settled=True)).values_list(
-            'order_id')) \
-        .order_by('-created_on')
+    orders = Order.objects.order_by('-created_on')
     settled_orders = SettledOrders.objects.filter(settlement=this_settlement)
     settled_total = 0
     for settled_order in settled_orders:

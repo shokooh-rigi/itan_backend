@@ -47,16 +47,14 @@
                         <td style="padding: 0px;"><b>{{ estimate.customer.company.name }}</b>
                         {% if estimate.customer.company.address_line_1 %}<br />{{ estimate.customer.company.address_line_1 }}{% endif %}
                         {% if estimate.customer.company.address_line_2 %}<br />{{ estimate.customer.company.address_line_2 }}{% endif %}
-                        {% if estimate.customer.company.city %}<br />{{ estimate.customer.company.city }}{% endif %}
-                        {% if estimate.customer.company.state %}, {{ estimate.customer.company.state }}{% endif %}
-                        {% if estimate.customer.company.zip %}, {{ estimate.customer.company.zip }}{% endif %}
+                        {% if estimate.customer.company.city %}<br />{{ estimate.customer.company.city }}{% endif %}{% if estimate.customer.company.state %}, {{ estimate.customer.company.state }}{% endif %}
+                        {% if estimate.customer.company.zip %} {{ estimate.customer.company.zip }}{% endif %}
                         {% if invoice.attention %}<br />Attention: {{ invoice.attention }}{% endif %}</td>
                         <td style="padding: 0px;"><b>{{ estimate.project }}</b>
                         {% if estimate.project.address_line_1 %}<br />{{ estimate.project.address_line_1 }}{% endif %}
                         {% if estimate.project.address_line_2 %}<br />{{ estimate.project.address_line_2 }}{% endif %}
-                        {% if estimate.project.city %}<br />{{ estimate.project.city }}{% endif %}
-                        {% if estimate.project.state %}, {{ estimate.project.state }}{% endif %}
-                        {% if estimate.project.zip %}, {{ estimate.project.zip }}{% endif %}</td>
+                        {% if estimate.project.city %}<br />{{ estimate.project.city }}{% endif %}{% if estimate.project.state %}, {{ estimate.project.state }}{% endif %}
+                        {% if estimate.project.zip %} {{ estimate.project.zip }}{% endif %}</td>
                     </tr>
                   </tbody>
                </table>
@@ -74,8 +72,8 @@
                     <tr style="">
                         <td style="padding: 5px 0 0 0;">{{ invoice.order.project_number }} </td>
                         <td style="padding: 5px 0 0 0;">{{ invoice.order.po_number }} </td>
-                        <td style="padding: 5px 0 0 0;">{{ invoice.date_started }} </td>
-                        <td style="padding: 5px 0 0 0;">{{ invoice.date_completed }} </td>
+                        <td style="padding: 5px 0 0 0;">{% if invoice.date_started %}{{ invoice.date_started }}{% endif %} </td>
+                        <td style="padding: 5px 0 0 0;">{% if invoice.date_completed %}{{ invoice.date_completed }}{% endif %} </td>
                         <td style="padding: 5px 0 0 0;">{{ invoice.terms }} </td>
                     </tr>
                   </tbody>

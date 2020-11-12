@@ -22,9 +22,12 @@ class DataSheetEquipment(models.Model):
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
     equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
     equipment_group = models.CharField(max_length=50, default='A', blank=False)
+    number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
+    terminal_design_data_entry_completed = models.BooleanField(default=False)
+    terminal_actual_data_entry_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.sheet) + ": " + self.equipment_type.name
@@ -71,6 +74,8 @@ class SheetEquipment(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, blank=False, null=False)
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
     equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
+    number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_return_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)

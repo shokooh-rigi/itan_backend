@@ -1,0 +1,33 @@
+@page {
+    size: auto;
+    margin: 0mm;
+}
+
+.header-space {
+    height: 100px;
+}
+
+.footer-space {
+    height: 80px;
+}
+
+#printProposalPage, #printStatementPage {
+    margin: 0 5% 0 5%;
+    width: 90% !important;
+}
+
+.proposal_header {
+    margin: 20px 5% 20px 5%;
+    width: 90%;
+    position: fixed;
+    top: 0;
+    display: block;
+}
+
+.proposal_footer {
+    margin: 20px 5% 20px 5%;
+    width: 90%;
+    position: fixed;
+    bottom: 0;
+    display: block;
+}

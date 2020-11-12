@@ -12,6 +12,7 @@ from .forms import *
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from .render import Render as PDFRender
 from ..sheetcreator.models import *
+from itertools import chain
 
 
 # Create your views here.
@@ -47,14 +48,14 @@ def vav_sheet_list(request):
 @login_required
 def vav_sheet_add(request):
     form = VavSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type_id=2).values_list('project_id'))
+    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='vav').values_list('project_id')).order_by('project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('vavSheetHome')
         if form.is_valid():
             if request.POST.get("next"):
                 sheet = form.save(commit=False)
-                sheet.test_sheet_type = TestSheet.objects.get(name__icontains='vav')
+                sheet.test_sheet_type = TestSheet.objects.get(name__iexact='vav')
                 sheet.save()
                 return redirect('vavSheetEquipment', sheet.id)
     parameters = {'form': form,
@@ -68,7 +69,7 @@ def vav_sheet_equipment(request, sheet_id):
     sheet = DataSheet.objects.get(id=sheet_id)
     form = VavSheetEquipmentForm(request.POST or None, initial={'sheet': sheet_id})
 
-    equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
+    equipments = Equipment.objects.filter(Q(test_sheet__name__icontains='vav') | Q(test_sheet__inheritance__name__icontains='vav'))
 
     equipment_in = []
     sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
@@ -131,16 +132,19 @@ def vav_sheet_equipment_list(request, sheet_id):
 def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
     general_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
     general_data = TestSheetGeneralData.objects.filter(sheet_equipment=this_sheet_equipment)
-
+    inherit = False
+    if this_sheet_equipment.equipment_type.test_sheet.inheritance:
+        inherit = True
     equipment_data = {
-        'address': general_data.get(key=general_fields.get(column_title__iexact='address')).value,
+        'inherit': inherit,
         'code': general_data.get(key=general_fields.get(column_title__iexact='code')).value,
     }
 
     design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
     design_data = [
         ('type', 'type'),
-        ('size_kw', 'size / kw'),
+        ('size', 'size'),
+        ('kw', 'kw'),
         ('fan_cfm', 'fan cfm'),
         ('min_cfm', 'min. cfm'),
         ('max_cfm', 'max. cfm'),
@@ -160,8 +164,11 @@ def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_repo
         actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
         actual_data = [
             ('kf', 'k.f.'),
-            ('min_fan_cfm', 'min./fan cfm'),
+            ('fan_cfm', 'fan cfm'),
+            ('min_cfm', 'min. cfm'),
             ('max_cfm', 'max. cfm'),
+            ('address', 'address'),
+            ('note', 'note'),
         ]
         equipment_data['actual'] = {}
         for key, val in actual_data:
@@ -170,12 +177,34 @@ def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_repo
                                                      sheet_equipment=this_sheet_equipment).value
             equipment_data['actual'][key] = actual_value
 
+        if this_sheet_equipment.equipment_type.test_sheet.inheritance:
+            if this_sheet_equipment.equipment_type.test_sheet.inheritance.name.lower() == 'vav':
+                actual_fields = this_sheet_equipment.equipment_type.test_sheet.testsheetfield_set.filter(
+                    show_in_actual=True)
+                actual_data = [
+                    ('nameplate_fan_volt', 'nameplate fan volt'),
+                    ('nameplate_fan_amp', 'nameplate fan amp'),
+                    ('nameplate_heat_va', 'nameplate heat v/a'),
+                    ('t_in', 't in'),
+                    ('fan_va', 'fan v/a'),
+                    ('heat_va', 'heat v/a'),
+                    ('t_out', 't out'),
+                    ('model', 'model'),
+                    ('note', 'note'),
+                ]
+                equipment_data['vavp'] = {}
+                for key, val in actual_data:
+                    actual_field = actual_fields.get(field_name__iexact=val)
+                    actual_value = TestSheetData.objects.get(data_type=DataTypeChoices.Actual.value,
+                                                             sheet_field=actual_field,
+                                                             sheet_equipment=this_sheet_equipment).value
+                    equipment_data['vavp'][key] = actual_value
+
     return equipment_data
 
 
 def get_pdf_empty_row():
     return {
-        'address': '',
         'code': '',
         'design': {
             'type': '',
@@ -185,9 +214,19 @@ def get_pdf_empty_row():
             'max_cfm': '',
         },
         'actual': {
+            'address': '',
             'kf': '',
             'min_fan_cfm': '',
             'max_cfm': '',
+            'nameplate_fan_volt': '',
+            'nameplate_fan_amp': '',
+            'nameplate_heat_va': '',
+            't_in': '',
+            'fan_va': '',
+            'a_heat_va': '',
+            't_out': '',
+            'model': '',
+            'note': '',
         },
     }
 
@@ -196,16 +235,24 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     my_sheet = DataSheet.objects.get(id=sheet_id)
     sheet_equipments = DataSheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
                                                          design_data_entry_completed=True)
+
+    vavp_available = False
+    for sheet_equipment in sheet_equipments:
+        if sheet_equipment.equipment_type.test_sheet.inheritance:
+            vavp_available = True
+
     if is_report_pdf:
         sheet_equipments = sheet_equipments.filter(actual_data_entry_completed=True)
 
     data = []
     equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
     equipment_in_page = 22
+    last_loop = 0
     for group in equipment_groups:
         group_equipments = sheet_equipments.filter(equipment_group=group)
         len_equipments = group_equipments.count()
         for i in range(math.ceil(len_equipments / equipment_in_page)):
+            last_loop += 1
             page = {'rows': [], 'notes': []}
             for j in range(equipment_in_page):
                 index = i * equipment_in_page + j
@@ -228,11 +275,12 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
-
     return {
         'form': {
             'my_sheet': my_sheet,
+            'vavp_available': vavp_available,
             'data': data,
+            'last_loop': last_loop,
         },
         'file_name': 'V.A.V. BOX SCHEDULE {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                           my_sheet.project.project_number,
@@ -265,7 +313,7 @@ def equipments_generate_tech_pdf(request, sheet_id):
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name + '.pdf'
             return response
     else:
         return 'error'
@@ -279,8 +327,10 @@ def equipments_generate_report_pdf(request, sheet_id):
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            my_file = fh.read()
+            response = HttpResponse(my_file, content_type="application/pdf")
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name + '.pdf'
+            response['Content-Length'] = len(my_file)
             return response
     else:
         return 'error'
@@ -294,6 +344,8 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
         equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='vav',
                                               equipment_type=sheet_equipment.equipment_type)
+
+    sat = sheet_equipment.number_of_supply_air_terminal
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
 
@@ -315,6 +367,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             if request.POST.get('id_equipment'):
                 sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             sheet_equipment.equipment_group = request.POST.get('equipment_group')
+            sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             sheet_equipment.save()
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         else:
@@ -327,11 +380,13 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             if request.POST.get('id_equipment'):
                 new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             new_update.equipment_group = request.POST.get('equipment_group')
+            new_update.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             new_update.main_data_entry_completed = True
             new_update.save()
         return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
 
     parameters = {
+        'sat': sat,
         'sheet_equipment': sheet_equipment,
         'showing_fields': showing_fields,
         'value_fields': value_fields,
@@ -510,22 +565,24 @@ def check_form_values(request, this_sheet_equipment: DataSheetEquipment, is_desi
         elif field.field_type == FieldTypeChoices.Float.value:
             conv_to_num = float
 
-        try:
-            form_field_value = conv_to_num(request.POST.get(f'{field_name_prefix}{field.id}'))
-        except ValueError:
-            return f'{field.field_name} value is not valid. The value must be ' \
-                   f'{"integer" if conv_to_num == int else "float"} number.'
+        if request.POST.get(f'{field_name_prefix}{field.id}'):
+            try:
+                form_field_value = conv_to_num(request.POST.get(f'{field_name_prefix}{field.id}'))
+            except ValueError:
+                print(ValueError)
+                return f'{field.field_name} value is not valid. The value must be ' \
+                       f'{"integer" if conv_to_num == int else "float"} number.'
 
-        if field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
-            field_range = split(field.field_range, '-')
-            min_value = conv_to_num(field_range[0])
-            max_value = conv_to_num(field_range[1])
-            if form_field_value < min_value or max_value < form_field_value:
-                return f'{field.field_name} value is not in range. Valid range is {field.field_range}.'
-        elif field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
-            field_range = split(field.field_range, ',')
-            if form_field_value not in map(lambda x: conv_to_num(x), field_range):
-                return f'{field.field_name} value is not selected right. Valid choices are {field.field_range}.'
+            if field.field_range_or_selective == FieldRangeOrSelectiveChoices.Range.value:
+                field_range = split(field.field_range, '-')
+                min_value = conv_to_num(field_range[0])
+                max_value = conv_to_num(field_range[1])
+                if form_field_value < min_value or max_value < form_field_value:
+                    return f'{field.field_name} value is not in range. Valid range is {field.field_range}.'
+            elif field.field_range_or_selective == FieldRangeOrSelectiveChoices.Selective.value:
+                field_range = split(field.field_range, ',')
+                if form_field_value not in map(lambda x: conv_to_num(x), field_range):
+                    return f'{field.field_name} value is not selected right. Valid choices are {field.field_range}.'
 
     # check custom operations
     custom_operations = custom_operations.filter(~Q(operand_type=OperandChoices.AssignTo.value))
@@ -590,6 +647,8 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
     show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, True)
     assignment_operations = get_assigment_operations(this_sheet_equipment, True)
 
+    sheet_code = this_sheet_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value
+
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
@@ -602,6 +661,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                     'show_parentheses_fields': show_parentheses_fields,
                     'assignment_operations': assignment_operations,
                     'error_msg': error_msg,
+                    'sheet_code': sheet_code,
                 }
                 return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
@@ -641,6 +701,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
         'design_fields': design_fields,
         'show_parentheses_fields': show_parentheses_fields,
         'assignment_operations': assignment_operations,
+        'sheet_code': sheet_code,
     }
     return render(request, "vavSheetEquipmentDesignData.html", parameters)
 
@@ -649,8 +710,14 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
 def vav_sheet_equipment_actual_data(request, sheet_equipment_id):
     this_sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
     actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
+    if this_sheet_equipment.equipment_type.test_sheet.inheritance:
+        if this_sheet_equipment.equipment_type.test_sheet.inheritance.name.lower() == 'vav':
+            actual_fields2 = this_sheet_equipment.equipment_type.test_sheet.testsheetfield_set.filter(show_in_actual=True)
+            actual_fields = list(chain(actual_fields, actual_fields2))
     show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, False)
     assignment_operations = get_assigment_operations(this_sheet_equipment, False)
+
+    sheet_code = this_sheet_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -690,6 +757,7 @@ def vav_sheet_equipment_actual_data(request, sheet_equipment_id):
         'actual_fields': actual_fields,
         'show_parentheses_fields': show_parentheses_fields,
         'assignment_operations': assignment_operations,
+        'sheet_code': sheet_code,
     }
     return render(request, "vavSheetEquipmentActualData.html", parameters)
 

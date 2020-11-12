@@ -9,6 +9,7 @@ from django.contrib.auth import views
 from .core.forms import UserLoginForm
 
 admin.autodiscover()
+admin.site.enable_nav_sidebar = False
 
 urlpatterns = [
     path('select2/', include("django_select2.urls")),
@@ -39,6 +40,7 @@ urlpatterns = [
     path('', include('mysite.settlement.urls')),
     path('', include('mysite.sheetcreator.urls')),
     path('', include('mysite.testsheetvav.urls')),
+    path('', include('mysite.testsheetterminal.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),

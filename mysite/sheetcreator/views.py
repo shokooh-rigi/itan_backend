@@ -49,7 +49,7 @@ def sheet_list(request):
 @login_required
 def sheet_add(request):
     form = SheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 1})
-    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id'))
+    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id')).order_by('project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetHome')
@@ -326,6 +326,8 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update = SheetEquipment.objects.get(id=sheet_equipment_id)
         new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
         new_update.main_data_entry_completed = True
+        new_update.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
+        new_update.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
         new_update.save()
         return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
 
@@ -346,6 +348,8 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=this_sheet_equipment.equipment_type)
     this_equipment = EquipmentDb.objects.get(id=this_sheet_equipment.equipment.id)
+    sat = this_sheet_equipment.number_of_supply_air_terminal
+    rat = this_sheet_equipment.number_of_return_air_terminal
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains=this_sheet_equipment)
 
@@ -357,10 +361,14 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                 SheetEquipmentCommonData.objects.filter(key=value_field.key,
                                                         sheet_equipment=this_sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
             this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            this_sheet_equipment.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
+            this_sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             this_sheet_equipment.save()
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
 
     parameters = {'this_sheet_equipment': this_sheet_equipment,
+                  'rat': rat,
+                  'sat': sat,
                   'showing_fields': showing_fields,
                   'manufacturers': manufacturers,
                   'value_fields': value_fields,
