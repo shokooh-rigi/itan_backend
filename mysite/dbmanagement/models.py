@@ -261,3 +261,15 @@ class EquipmentCustomField(models.Model):
 
     def __str__(self):
         return self.equipment_value_name
+
+
+class AirTerminalCode(models.Model):
+    name = models.CharField(max_length=5, blank=False)
+    default = models.CharField(max_length=10, blank=True)
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = 'RGDs'
+        verbose_name_plural = 'RGDs'

@@ -195,7 +195,7 @@ function closePopup(win, newID, newRepr, id, edit) {
         $(id + " option:selected").remove();
     }
     $(id).append('<option value=' + newID + ' selected >' + newRepr + '</option>');
-    if (id = 'id_control_system') {
+    if (id == 'id_control_system') {
         $('form').submit();
     }
     win.close();

@@ -80,3 +80,4 @@ class TestSheetAdmin(admin.ModelAdmin):
 
 admin.site.register(TestSheet, TestSheetAdmin)
 admin.site.register(TestSheetColumn)
+admin.site.register(AirTerminalCode)

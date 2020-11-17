@@ -3,6 +3,17 @@ import datetime
 from mysite.order.models import Order
 
 
+class SupplyorReturnChoices(Enum):
+    Supply = 1
+    Return = 2
+
+    @staticmethod
+    def get_items():
+        return (
+            (SupplyorReturnChoices.Supply.value, 'Supply'),
+            (SupplyorReturnChoices.Return.value, 'Return'),
+        )
+
 # Create your models here.
 
 
@@ -79,6 +90,8 @@ class SheetEquipment(models.Model):
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
+    terminal_design_data_entry_completed = models.BooleanField(default=False)
+    terminal_actual_data_entry_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.sheet) + ": " + self.equipment_type.name
@@ -109,3 +122,25 @@ class SheetEquipmentCustomData(models.Model):
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.column_title
+
+
+class AirTerminalEquipment(models.Model):
+    sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
+    air_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=True, null=True)
+    vav_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=True, null=True)
+    code = models.ForeignKey(AirTerminalCode, on_delete=models.CASCADE, blank=True, null=True)
+    outlet_no = models.SmallIntegerField(blank=False, null=False)
+    type = models.PositiveSmallIntegerField(choices=SupplyorReturnChoices.get_items(), default=1, null=False)
+
+    def __str__(self):
+        return str(self.sheet) + ": " + str(self.air_equipment) + ": " + str(self.vav_equipment)
+
+
+class AirTerminalSheetData(models.Model):
+    data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
+    air_terminal_equipment = models.ForeignKey(AirTerminalEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return str(self.data_type) + ' ' + str(self.air_terminal_equipment)

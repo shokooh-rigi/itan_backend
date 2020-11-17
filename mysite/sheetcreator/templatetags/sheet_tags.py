@@ -3,13 +3,14 @@ from mysite.dbmanagement.models import EquipmentTypeCustomField, EquipmentCustom
 from ...settings import MEDIA_URL
 from django.shortcuts import get_object_or_404
 
-from mysite.sheetcreator.models import SheetEquipmentActualData, TestSheetData, TestSheetField, EquipmentDbDesignData
+from mysite.sheetcreator.models import *
 
 register = template.Library()
 
 
 @register.simple_tag
 def get_design_value(request, design_field, equipment, request_page):
+    print(design_field, ' | ', equipment)
     if request_page == 1:
         return_value = EquipmentDbDesignData.objects.filter(equipment=equipment, key=design_field)
         if return_value.exists():
@@ -31,6 +32,45 @@ def get_design_value(request, design_field, equipment, request_page):
             else:
                 this_sheet_field = get_object_or_404(TestSheetField, id=design_field.id)
                 return this_sheet_field.default_value
+
+
+@register.simple_tag
+def get_terminal_design_value(request, design_field, air_terminal_equipment):
+    terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment)
+    return_value = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
+                                                       air_terminal_equipment=terminal_equipment,
+                                                       sheet_field=design_field)
+    if return_value.count() > 0:
+        return return_value.first().value
+    else:
+        this_sheet_field = get_object_or_404(TestSheetField, id=design_field.id)
+        return this_sheet_field.default_value
+
+
+@register.simple_tag
+def get_terminal_actual_value(request, actual_field, air_terminal_equipment):
+    terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment)
+    return_value = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
+                                                       air_terminal_equipment=terminal_equipment,
+                                                       sheet_field=actual_field)
+    if return_value.count() > 0:
+        return return_value.first().value
+    else:
+        this_sheet_field = get_object_or_404(TestSheetField, id=actual_field.id)
+        return this_sheet_field.default_value
+
+
+@register.simple_tag
+def get_terminal_code_value(request, air_terminal_equipment):
+    terminal_equipment_count = AirTerminalEquipment.objects.filter(id=air_terminal_equipment).count()
+    if terminal_equipment_count > 0:
+        terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment).code
+        if terminal_equipment:
+            return terminal_equipment.id
+        else:
+            return ''
+    else:
+        return ''
 
 
 @register.simple_tag

@@ -27,12 +27,14 @@
                 Actual Value
             </div>
         </div>
+        {% if supply_repeat_list %}
+            <h2 class="my-4">Supply Air Terminals</h2>
+        {% for supply_terminal_equipment in supply_terminal_equipments %}
         <div class="row form-line">
-            {% for actual_field in actual_fields %}
-                {% if actual_field.field_name|lower != 'note' %}
-                    {% with 'actual_value_'|concatenate:actual_field.id as filed_name %}
+                {% for actual_field in actual_fields %}
+                    {% with 'supply_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:supply_terminal_equipment.id as field_name %}
                         <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                                 {{ actual_field.field_name }}
                                 {% if actual_field.required_in_actual %}
                                     <span class="required">*</span>
@@ -40,18 +42,39 @@
                             </label>
                         </div>
                         <div class="col-lg-3">
-                            <label for="{{ filed_name }}" class="control-label" style="width: 100%;">
+                            <label for="{{ field_name }}" class="control-label equal_fields" data-fieldid="{{ actual_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if actual_field.field_name|lower != 'note' %}
                                 <input style="width: 100%;" {% get_field_type actual_field %}
                                        {% if actual_field.required_in_actual %}required=""{% endif %}
-                                       name="{{ filed_name }}" class="form-control" id="{{ filed_name }}"
-                                       value="{% get_actual_value request actual_field this_sheet_equipment %}"/>
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="form-control eq{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       value="{% if actual_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}{% endif %}"
+                                       {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                <textarea style="width: 100%;"
+                                       {% if actual_field.required_in_actual %}required=""{% endif %}
+                                       name="{{ field_name }}" maxlength="50"
+                                          class="form-control" id="{{ field_name }}">{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}</textarea>
+                                {% endif %}
                             </label>
+                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                            </div>
                         </div>
                     {% endwith %}
-                {% else %}
-                    {% with 'actual_value_'|concatenate:actual_field.id as filed_name %}
+                {% endfor %}
+            <br />
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if return_repeat_list %}
+            <h2 class="my-4">Return Air Terminals</h2>
+        {% for return_terminal_equipment in return_terminal_equipments %}
+        <div class="row form-line">
+                {% for actual_field in actual_fields %}
+                    {% with 'return_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:return_terminal_equipment.id as field_name %}
                         <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                                 {{ actual_field.field_name }}
                                 {% if actual_field.required_in_actual %}
                                     <span class="required">*</span>
@@ -59,16 +82,31 @@
                             </label>
                         </div>
                         <div class="col-lg-3">
-                            <label for="{{ filed_name }}" class="control-label" style="width: 100%;">
-                                <textarea style="width: 100%;" {% get_field_type actual_field %}
+                            <label for="{{ field_name }}" class="control-label equal_fields" data-fieldid="{{ actual_field.id }}" data-defaultval="{% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if actual_field.field_name|lower != 'note' %}
+                                    <input style="width: 100%;" {% get_field_type actual_field %}
                                        {% if actual_field.required_in_actual %}required=""{% endif %}
-                                       name="{{ filed_name }}" class="form-control" id="{{ filed_name }}">{% get_actual_value request actual_field this_sheet_equipment %}</textarea>
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="form-control eq{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       value="{% if actual_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}{% endif %}"
+                                       {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                <textarea style="width: 100%;"
+                                       {% if actual_field.required_in_actual %}required=""{% endif %}
+                                       name="{{ field_name }}" maxlength="50"
+                                          class="form-control" id="{{ field_name }}">{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}</textarea>
+                                {% endif %}
                             </label>
+                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                            </div>
                         </div>
                     {% endwith %}
-                {% endif %}
-            {% endfor %}
+                {% endfor %}
+            <br />
         </div>
+        {% endfor %}
+        {% endif %}
         <div class="row">
             <div class="col-lg-12" style="padding-right: 36px;">
                 <input type="submit" class="btn btn-primary" value="Save" name="next"/>
@@ -76,6 +114,18 @@
             </div>
         </div>
     </form>
+    <script>
+        $('.equal_fields').each(function( index ) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq' + field_id).on('change', function () {
+                    let first_value = $(this).val();
+                    $('.eq' + field_id).val(first_value);
+                });
+            }
+        });
+    </script>
     <script>
         $('#id_proposal').on('change', function () {
             if ($(this).val() === '') {
@@ -109,10 +159,11 @@
         * Set the parentheses for the fields that need parentheses.
         * */
 
-        const showParenthesesFields = {{ show_parentheses_fields | safe }};
-        for (const field of showParenthesesFields) {
-            const input = $('[name=' + field.id + ']');
-            const defaultValue = field.defaultValue.trim();
+        $( ".show_parentheses" ).each(function( index ) {
+            const input = $(this);
+            const defaultValue = $(this).parent().data('defaultval').trim();
+            const loop_id = $(this).parent().data('loopid');
+            const field_id = $(this).parent().data('fieldid');
             const onInputChange = () => {
                 const value = input.val().trim();
                 let rawValue = '';
@@ -125,11 +176,14 @@
                     input.val(defaultValue);
                 } else {
                     input.val('(' + rawValue + ')');
+                    if (loop_id == 1) {
+                        $('.eq' + field_id).val('(' + rawValue + ')');
+                    }
                 }
             };
             onInputChange();
             input.on('change', onInputChange);
-        }
+        });
     </script>
     <script>
         /*
