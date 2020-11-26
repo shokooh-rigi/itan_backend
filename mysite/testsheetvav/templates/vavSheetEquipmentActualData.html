@@ -51,7 +51,7 @@
                 {% else %}
                     {% with 'actual_value_'|concatenate:actual_field.id as filed_name %}
                         <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label">
+                            <label style="width: 100%;" for="{{ filed_name }}" class="control-label note-field">
                                 {{ actual_field.field_name }}
                                 {% if actual_field.required_in_actual %}
                                     <span class="required">*</span>
@@ -96,13 +96,7 @@
         });
     </script>
     <script>
-        $(function () {
-            $("#id_date_po_received, #id_estimated_date_of_project").datetimepicker({
-                format: 'm/d/Y',
-                timepicker: false,
-                scrollInput: false,
-            });
-        });
+        $('.note-field').eq(1).html('Fan Powered Note');
     </script>
     <script>
         /*

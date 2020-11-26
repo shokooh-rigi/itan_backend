@@ -48,7 +48,7 @@ def vav_sheet_list(request):
 @login_required
 def vav_sheet_add(request):
     form = VavSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='vav').values_list('project_id')).order_by('project_number')
+    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='vav').values_list('project_id')).order_by('-project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('vavSheetHome')
@@ -237,9 +237,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                                                          design_data_entry_completed=True)
 
     vavp_available = False
-    for sheet_equipment in sheet_equipments:
-        if sheet_equipment.equipment_type.test_sheet.inheritance:
-            vavp_available = True
 
     if is_report_pdf:
         sheet_equipments = sheet_equipments.filter(actual_data_entry_completed=True)
@@ -253,11 +250,13 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         len_equipments = group_equipments.count()
         for i in range(math.ceil(len_equipments / equipment_in_page)):
             last_loop += 1
-            page = {'rows': [], 'notes': []}
+            page = {'rows': [], 'notes': [], 'vavp_available': 0}
             for j in range(equipment_in_page):
                 index = i * equipment_in_page + j
                 if index < len_equipments:
                     page['rows'].append(fetch_sheet_equipment_data(group_equipments[index], is_report_pdf))
+                    if group_equipments[index].equipment_type.test_sheet.inheritance:
+                        page['vavp_available'] = 1
                 else:
                     page['rows'].append(get_pdf_empty_row())
             if page['rows']:
@@ -338,6 +337,7 @@ def equipments_generate_report_pdf(request, sheet_id):
 
 @login_required
 def vav_sheet_equipment_general_data(request, sheet_equipment_id):
+    next_url = request.GET.get("next")
     sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
     manufacturers = EquipmentManufacturer.objects.filter(
@@ -358,6 +358,8 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
+            if next_url:
+                return redirect(WEB_URL + next_url)
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         if edit_page:
             for value_field in value_fields:
@@ -367,8 +369,16 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             if request.POST.get('id_equipment'):
                 sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             sheet_equipment.equipment_group = request.POST.get('equipment_group')
+            old_supply_number = sheet_equipment.number_of_supply_air_terminal
             sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
+            if int(old_supply_number) != int(request.POST.get('number_of_supply_air_terminal')):
+                if int(old_supply_number) > int(request.POST.get('number_of_supply_air_terminal')):
+                    AirTerminalEquipment.objects.filter(vav_equipment=sheet_equipment).delete()
+                sheet_equipment.terminal_design_data_entry_completed = False
+                sheet_equipment.terminal_actual_data_entry_completed = False
             sheet_equipment.save()
+            if next_url:
+                return redirect(WEB_URL + next_url)
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         else:
             for every_field in showing_fields:

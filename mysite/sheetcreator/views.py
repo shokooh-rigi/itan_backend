@@ -49,7 +49,7 @@ def sheet_list(request):
 @login_required
 def sheet_add(request):
     form = SheetForm(request.POST or None, request.FILES or None, initial={'test_sheet_type': 1})
-    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id')).order_by('project_number')
+    orders = Order.objects.exclude(id__in=Sheet.objects.filter(test_sheet_type_id=1).values_list('project_id')).order_by('-project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('sheetHome')
@@ -342,6 +342,7 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
 
 @login_required
 def sheet_equipment_common_data_edit(request, sheet_equipment_id):
+    next_url = request.GET.get("next")
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
     value_fields = SheetEquipmentCommonData.objects.filter(sheet_equipment_id=sheet_equipment_id)
@@ -355,15 +356,29 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
+            if next_url:
+                return redirect(WEB_URL + next_url)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
             for value_field in value_fields:
                 SheetEquipmentCommonData.objects.filter(key=value_field.key,
                                                         sheet_equipment=this_sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
             this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            old_supply_number = this_sheet_equipment.number_of_supply_air_terminal
+            old_return_number = this_sheet_equipment.number_of_return_air_terminal
             this_sheet_equipment.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
             this_sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
+            if int(old_supply_number) != int(request.POST.get('number_of_supply_air_terminal')) or int(
+                    old_return_number) != int(request.POST.get('number_of_return_air_terminal')):
+                if int(old_supply_number) > int(request.POST.get('number_of_supply_air_terminal')):
+                    AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment, type=1).delete()
+                if int(old_return_number) > int(request.POST.get('number_of_return_air_terminal')):
+                    AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment, type=2).delete()
+                this_sheet_equipment.terminal_design_data_entry_completed = False
+                this_sheet_equipment.terminal_actual_data_entry_completed = False
             this_sheet_equipment.save()
+            if next_url:
+                return redirect(WEB_URL + next_url)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
 
     parameters = {'this_sheet_equipment': this_sheet_equipment,

@@ -270,13 +270,13 @@
                             {% if row.code %}{% if row.design.size %}{{ row.design.size }}{% else %}-{% endif %} / {% if row.design.kw %}{{ row.design.kw }}{% else %}-{% endif %}{% endif %}
                         </td>
                         <td class="pdf-table-cell">
-                            &nbsp;{{ row.design.fan_cfm }}
+                            &nbsp;{% if row.code %}{% if row.design.fan_cfm != '' %}{{ row.design.fan_cfm }}{% else %}----{% endif %}{% endif %}
                         </td>
                         <td class="pdf-table-cell">
-                            &nbsp;{{ row.design.min_cfm }}
+                            &nbsp;{% if row.code %}{% if row.design.min_cfm != '' %}{{ row.design.min_cfm }}{% else %}----{% endif %}{% endif %}
                         </td>
                         <td class="pdf-table-cell">
-                            &nbsp;{{ row.design.max_cfm }}
+                            &nbsp;{% if row.code %}{% if row.design.max_cfm != '' %}{{ row.design.max_cfm }}{% else %}----{% endif %}{% endif %}
                         </td>
                         <td class="pdf-table-cell">
                             &nbsp;{{ row.actual.kf }}
@@ -285,7 +285,7 @@
                             &nbsp;{% if row.code %}{% if row.actual.min_cfm %}{{ row.actual.min_cfm }}{% else %}-{% endif %} / {% if row.actual.fan_cfm %}{{ row.actual.fan_cfm }}{% else %}-{% endif %}{% endif %}
                         </td>
                         <td class="pdf-table-cell">
-                            &nbsp;{{ row.actual.max_cfm }}
+                            &nbsp;{% if row.code %}{% if row.actual.max_cfm != '' %}{{ row.actual.max_cfm }}{% else %}----{% endif %}{% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -296,11 +296,13 @@
                         Notes:
                     </td>
                     <td colspan="9">
+                    <div id="note-div-actual" class="note-div">
                         {% for row in page.rows %}
                             {% if row.actual.note %}
-                                <div class="note-div">{{ row.actual.note }}</div>
+                                {{ row.actual.note }} |
                             {% endif %}
                         {% endfor %}
+                    </div>
                     </td>
                 </tr>
                 </tbody>
@@ -308,9 +310,9 @@
         </div>
     {% endfor %}
 </div>
-{% if form.vavp_available %}
+{% for page in form.data %}
+{% if page.vavp_available %}
 <div id="content_frame">
-    {% for page in form.data %}
         <div class="content pdf-page-content">
             <table class="table pdf-table">
                 <!-- Table head section -->
@@ -517,18 +519,20 @@
                         Notes:
                     </td>
                     <td colspan="10">
+                    <div id="note-div-vavp" class="note-div">
                         {% for row in page.rows %}
                             {% if row.vavp.note %}
-                                <div class="note-div">{{ row.vavp.note }}</div>
+                                {{ row.vavp.note }} |
                             {% endif %}
                         {% endfor %}
+                    </div>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    {% endfor %}
-</div>
+    </div>
 {% endif %}
+{% endfor %}
 </body>
 </html>

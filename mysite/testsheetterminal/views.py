@@ -14,6 +14,7 @@ from .forms import *
 from .render import Render as PDFRender
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
+from django.db.models import Count
 
 
 # Create your views here.
@@ -49,9 +50,7 @@ def terminal_sheet_list(request):
 @login_required
 def terminal_sheet_add(request):
     form = TerminalSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(
-        id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='terminal').values_list(
-            'project_id')).order_by('project_number')
+    orders = Order.objects.filter(Q(datasheet__datasheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_return_air_terminal__gt=0)).exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='terminal').values_list('project_id')).order_by('-project_number').distinct()
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('terminalSheetHome')
@@ -70,8 +69,9 @@ def terminal_sheet_add(request):
 @login_required
 def terminal_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav').filter(number_of_supply_air_terminal__gt=0)
-    air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov').filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0))
+    my_project = my_sheet.project
+    vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav', sheet__project=my_project).filter(number_of_supply_air_terminal__gt=0)
+    air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0))
     parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
                   'vav_sheet_equipments': vav_sheet_equipments,
                   'my_sheet': my_sheet,
@@ -82,103 +82,72 @@ def terminal_sheet_equipment_list(request, sheet_id):
     return render(request, "terminalSheetEquipmentsList.html", parameters)
 
 
-def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
-    general_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
-    general_data = TestSheetGeneralData.objects.filter(sheet_equipment=this_sheet_equipment)
-    inherit = False
-    if this_sheet_equipment.equipment_type.test_sheet.inheritance:
-        inherit = True
-    equipment_data = {
-        'inherit': inherit,
-        'code': general_data.get(key=general_fields.get(column_title__iexact='code')).value,
-    }
+def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_report_pdf: bool):
+    if this_sheet_equipment.air_equipment:
+        equipment_data = {
+            'name': this_sheet_equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+            'outlet_no': this_sheet_equipment.outlet_no,
+            'code': this_sheet_equipment.code
+        }
+    else:
+        equipment_data = {
+            'name': this_sheet_equipment.vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
+            'outlet_no': this_sheet_equipment.outlet_no,
+            'code': this_sheet_equipment.code
+        }
 
     design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
     design_data = [
-        ('type', 'type'),
+        ('room_no', 'room no.'),
         ('size', 'size'),
-        ('kw', 'kw'),
-        ('fan_cfm', 'fan cfm'),
-        ('min_cfm', 'min. cfm'),
-        ('max_cfm', 'max. cfm'),
+        ('ak_factor', 'ak factor'),
+        ('fpm', 'fpm'),
+        ('cfm', 'cfm'),
     ]
+
     equipment_data['design'] = {}
     for key, val in design_data:
         design_field = design_fields.get(field_name__iexact=val)
-        if this_sheet_equipment.equipment:
-            design_value = EquipmentDbDesignData.objects.get(equipment=this_sheet_equipment.equipment,
-                                                             key=design_field).value
-        else:
-            design_value = TestSheetData.objects.get(data_type=DataTypeChoices.Design.value, sheet_field=design_field,
-                                                     sheet_equipment=this_sheet_equipment).value
+        design_value = AirTerminalSheetData.objects.get(data_type=DataTypeChoices.Design.value, sheet_field=design_field,
+                                                     air_terminal_equipment=this_sheet_equipment).value
         equipment_data['design'][key] = design_value
 
     if is_report_pdf:
         actual_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_actual=True)
         actual_data = [
-            ('kf', 'k.f.'),
-            ('fan_cfm', 'fan cfm'),
-            ('min_cfm', 'min. cfm'),
-            ('max_cfm', 'max. cfm'),
-            ('address', 'address'),
+            ('initial_fpm', 'initial fpm'),
+            ('initial_cfm', 'initial cfm'),
+            ('final_fpm', 'final fpm'),
+            ('final_cfm', 'final cfm'),
             ('note', 'note'),
         ]
         equipment_data['actual'] = {}
         for key, val in actual_data:
             actual_field = actual_fields.get(field_name__iexact=val)
-            actual_value = TestSheetData.objects.get(data_type=DataTypeChoices.Actual.value, sheet_field=actual_field,
-                                                     sheet_equipment=this_sheet_equipment).value
+            actual_value = AirTerminalSheetData.objects.get(data_type=DataTypeChoices.Actual.value, sheet_field=actual_field,
+                                                     air_terminal_equipment=this_sheet_equipment).value
             equipment_data['actual'][key] = actual_value
-
-        if this_sheet_equipment.equipment_type.test_sheet.inheritance:
-            if this_sheet_equipment.equipment_type.test_sheet.inheritance.name.lower() == 'vav':
-                actual_fields = this_sheet_equipment.equipment_type.test_sheet.testsheetfield_set.filter(
-                    show_in_actual=True)
-                actual_data = [
-                    ('nameplate_fan_volt', 'nameplate fan volt'),
-                    ('nameplate_fan_amp', 'nameplate fan amp'),
-                    ('nameplate_heat_va', 'nameplate heat v/a'),
-                    ('t_in', 't in'),
-                    ('fan_va', 'fan v/a'),
-                    ('heat_va', 'heat v/a'),
-                    ('t_out', 't out'),
-                    ('model', 'model'),
-                    ('note', 'note'),
-                ]
-                equipment_data['vavp'] = {}
-                for key, val in actual_data:
-                    actual_field = actual_fields.get(field_name__iexact=val)
-                    actual_value = TestSheetData.objects.get(data_type=DataTypeChoices.Actual.value,
-                                                             sheet_field=actual_field,
-                                                             sheet_equipment=this_sheet_equipment).value
-                    equipment_data['vavp'][key] = actual_value
 
     return equipment_data
 
 
 def get_pdf_empty_row():
     return {
-        'code': '',
+        'name': '',
         'design': {
-            'type': '',
-            'size_kw': '',
-            'fan_cfm': '',
-            'min_cfm': '',
-            'max_cfm': '',
+            'room_no': '',
+            'outlet_no': '',
+            'code': '',
+            'size': '',
+            'ak_factor': '',
+            'fpm': '',
+            'cfm': '',
         },
         'actual': {
-            'address': '',
-            'kf': '',
-            'min_fan_cfm': '',
-            'max_cfm': '',
-            'nameplate_fan_volt': '',
-            'nameplate_fan_amp': '',
-            'nameplate_heat_va': '',
-            't_in': '',
-            'fan_va': '',
-            'a_heat_va': '',
-            't_out': '',
-            'model': '',
+            'initial_fpm': '',
+            'initial_cfm': '',
+            'final_fpm': '',
+            'final_cfm': '',
             'note': '',
         },
     }
@@ -186,38 +155,187 @@ def get_pdf_empty_row():
 
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    sheet_equipments = DataSheetEquipment.objects.filter(sheet=my_sheet, main_data_entry_completed=True,
-                                                         design_data_entry_completed=True)
-
-    vavp_available = False
-    for sheet_equipment in sheet_equipments:
-        if sheet_equipment.equipment_type.test_sheet.inheritance:
-            vavp_available = True
+    air_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, vav_equipment__isnull=True).order_by('air_equipment', 'type')
+    vav_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True).order_by('vav_equipment')
 
     if is_report_pdf:
-        sheet_equipments = sheet_equipments.filter(actual_data_entry_completed=True)
+        air_sheet_equipments = air_sheet_equipments.filter(air_equipment__terminal_actual_data_entry_completed=True)
+        vav_sheet_equipments = vav_sheet_equipments.filter(vav_equipment__terminal_actual_data_entry_completed=True)
+
 
     data = []
-    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
-    equipment_in_page = 22
-    last_loop = 0
-    for group in equipment_groups:
-        group_equipments = sheet_equipments.filter(equipment_group=group)
-        len_equipments = group_equipments.count()
-        for i in range(math.ceil(len_equipments / equipment_in_page)):
-            last_loop += 1
-            page = {'rows': [], 'notes': []}
-            for j in range(equipment_in_page):
-                index = i * equipment_in_page + j
-                if index < len_equipments:
-                    page['rows'].append(fetch_sheet_equipment_data(group_equipments[index], is_report_pdf))
-                else:
-                    page['rows'].append(get_pdf_empty_row())
-            if page['rows']:
-                data.append(page)
+    page = {'rows': []}
 
-    if len(data) == 0:
-        data.append([])
+    last_air_equipment = 0
+    last_air_equipment_type = 0
+    d_total = 0
+    i_total = 0
+    f_total = 0
+    eq_type = ''
+    eq_name = ''
+    i = 0
+    equipment_in_page = 22
+    supply_lines = 0
+    return_lines = 0
+
+    for air_equipment in air_sheet_equipments:
+        if air_equipment.air_equipment.id != last_air_equipment or air_equipment.type != last_air_equipment_type:
+            if last_air_equipment != 0:
+                circle_time = equipment_in_page - i - supply_lines - return_lines
+                if air_equipment.air_equipment.id == last_air_equipment:
+                    circle_time = 0
+                else:
+                    i = 0
+                    supply_lines = 0
+                    return_lines = 0
+                previous_general_data = {
+                    'eq_name': eq_name,
+                    'eq_type': eq_type,
+                    'd_cfm_total': d_total,
+                    'i_cfm_total': i_total,
+                    'f_cfm_total': f_total,
+                    'empty_rows': range(circle_time),
+                }
+                page['rows'][len(page['rows']) - 1].append(previous_general_data)
+                d_total = 0
+                i_total = 0
+                f_total = 0
+            if air_equipment.air_equipment.id != last_air_equipment and last_air_equipment != 0:
+                data.append(page)
+                page = {'rows': []}
+            d_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
+                                                                     sheet_field__field_name__iexact='cfm').value)
+            i_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                     sheet_field__field_name__iexact='initial cfm').value)
+            f_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                     sheet_field__field_name__iexact='final cfm').value)
+            page['rows'].append([])
+            last_air_equipment = air_equipment.air_equipment.id
+            last_air_equipment_type = air_equipment.type
+            if air_equipment.type == 1:
+                eq_type = 'SUPPLY'
+            else:
+                eq_type = 'RETURN'
+            eq_name = air_equipment.air_equipment.sheetequipmentcommondata_set.get(
+                key__column_title__icontains='fan no.').value
+        else:
+            d_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
+                                                                      sheet_field__field_name__iexact='cfm').value)
+            i_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                      sheet_field__field_name__iexact='initial cfm').value)
+            f_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                      sheet_field__field_name__iexact='final cfm').value)
+
+        page['rows'][len(page['rows']) - 1].append(fetch_sheet_equipment_data(air_equipment, is_report_pdf))
+        i += 1
+        if air_equipment.type == 1:
+            supply_lines = 3
+        else:
+            return_lines = 3
+
+    if air_sheet_equipments:
+        circle_time = equipment_in_page - i - supply_lines - return_lines
+        last_general_data = {
+            'eq_name': eq_name,
+            'eq_type': eq_type,
+            'd_cfm_total': d_total,
+            'i_cfm_total': i_total,
+            'f_cfm_total': f_total,
+            'empty_rows': range(circle_time),
+        }
+        page['rows'][len(page['rows']) - 1].append(last_general_data)
+        data.append(page)
+
+    page = {'rows': []}
+
+    last_vav_equipment = 0
+    d_total = 0
+    i_total = 0
+    f_total = 0
+    eq_type = 'SUPPLY'
+    eq_name = ''
+    i = 0
+    equipment_in_page = 22
+    for vav_equipment in vav_sheet_equipments:
+        if vav_equipment.vav_equipment.id != last_vav_equipment:
+            if last_vav_equipment != 0:
+                circle_time = equipment_in_page - i - 3
+                i = 0
+                previous_general_data = {
+                    'eq_name': eq_name,
+                    'eq_type': eq_type,
+                    'd_cfm_total': d_total,
+                    'i_cfm_total': i_total,
+                    'f_cfm_total': f_total,
+                    'empty_rows': range(circle_time),
+                }
+                page['rows'][len(page['rows']) - 1].append(previous_general_data)
+                d_total = 0
+                i_total = 0
+                f_total = 0
+                i = 0
+            if vav_equipment.vav_equipment.id != last_vav_equipment and last_vav_equipment != 0:
+                data.append(page)
+                page = {'rows': []}
+            d_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
+                                                                     sheet_field__field_name__iexact='cfm').value)
+            i_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                     sheet_field__field_name__iexact='initial cfm').value)
+            f_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                     sheet_field__field_name__iexact='final cfm').value)
+            page['rows'].append([])
+            last_vav_equipment = vav_equipment.vav_equipment.id
+            eq_name = vav_equipment.vav_equipment.testsheetgeneraldata_set.get(
+                key__column_title__icontains='code').value
+        else:
+            d_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
+                                                                      sheet_field__field_name__iexact='cfm').value)
+            i_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                      sheet_field__field_name__iexact='initial cfm').value)
+            f_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                      sheet_field__field_name__iexact='final cfm').value)
+
+        page['rows'][len(page['rows']) - 1].append(fetch_sheet_equipment_data(vav_equipment, is_report_pdf))
+        i += 1
+
+    if vav_sheet_equipments:
+        circle_time = equipment_in_page - i - 3
+        last_general_data = {
+            'eq_name': eq_name,
+            'eq_type': eq_type,
+            'd_cfm_total': d_total,
+            'i_cfm_total': i_total,
+            'f_cfm_total': f_total,
+            'empty_rows': range(circle_time),
+        }
+        page['rows'][len(page['rows']) - 1].append(last_general_data)
+
+        data.append(page)
+
+
+    #
+    # equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
+    # equipment_in_page = 22
+    # last_loop = 0
+    # for group in equipment_groups:
+    #     group_equipments = sheet_equipments.filter(equipment_group=group)
+    #     len_equipments = group_equipments.count()
+    #     for i in range(math.ceil(len_equipments / equipment_in_page)):
+    #         last_loop += 1
+    #         page = {'rows': []}
+    #         for j in range(equipment_in_page):
+    #             index = i * equipment_in_page + j
+    #             if index < len_equipments:
+    #                 page['rows'].append(fetch_sheet_equipment_data(group_equipments[index], is_report_pdf))
+    #                 if group_equipments[index].equipment_type.test_sheet.inheritance:
+    #                     page['vavp_available'] = 1
+    #             else:
+    #                 page['rows'].append(get_pdf_empty_row())
+    #         if page['rows']:
+    #             data.append(page)
+    #
+    # if len(data) == 0:
+    #     data.append([])
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -228,14 +346,14 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
+
+    print(data)
     return {
         'form': {
             'my_sheet': my_sheet,
-            'vavp_available': vavp_available,
             'data': data,
-            'last_loop': last_loop,
         },
-        'file_name': 'V.A.V. BOX SCHEDULE {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': 'Air Terminal Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                           my_sheet.project.project_number,
                                                           '' if is_report_pdf else ' TECH').upper(),
         'license_owner': license_owner,
@@ -261,8 +379,8 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 @login_required
 def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTechTemplate.html', parameters,
-                                                  'vavEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTechTemplate.html', parameters,
+                                                  'terminalEquipmentReport')
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/pdf")
@@ -275,8 +393,8 @@ def equipments_generate_tech_pdf(request, sheet_id):
 @login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTemplate.html', parameters,
-                                                  'vavEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTemplate.html', parameters,
+                                                  'terminalEquipmentReport')
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
@@ -295,94 +413,6 @@ def split(value: str, sep: str):
 
 def contains(value: str, sub: str):
     return value.find(sub) != -1
-
-
-def find_closest_design_value(actual_value: str, design_value: str, sep: str):
-    if contains(design_value, sep):
-        splitted = split(design_value, sep)
-        if actual_value and actual_value.strip():
-            actual_value = eval(actual_value.strip())
-            return min(splitted, key=lambda x: abs(float(x) - actual_value))
-        else:
-            return splitted[0]
-    return design_value
-
-
-def get_assigment_operations(this_sheet_equipment: DataSheetEquipment, is_design_form: bool):
-    is_actual_form = not is_design_form
-
-    design_field_regex = re.compile(r'\[field-[\d]+-design]', re.I)
-    actual_field_regex = re.compile(r'\[field-[\d]+-actual]', re.I)
-    design_field_name_prefix = 'company_value_'
-    actual_field_name_prefix = 'actual_value_'
-
-    test_sheet_operations = this_sheet_equipment.sheet.test_sheet_type.testsheetoperation_set
-    design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
-
-    if is_design_form:
-        field_regex = design_field_regex
-        field_name_prefix = design_field_name_prefix
-        custom_operations = test_sheet_operations.filter(apply_on_design=True)
-    else:
-        field_regex = actual_field_regex
-        field_name_prefix = actual_field_name_prefix
-        custom_operations = test_sheet_operations.filter(apply_on_actual=True)
-
-    def replace_design_values(expression):
-        def get_design_value(m):
-            field_id = m.group()[7:-8]
-            design_field = design_fields.get(pk=field_id)
-            if this_sheet_equipment.equipment:
-                design_value = EquipmentDbDesignData.objects.get(equipment=this_sheet_equipment.equipment,
-                                                                 key=design_field).value
-            else:
-                design_value = TestSheetData.objects.get(data_type=DataTypeChoices.Design.value,
-                                                         sheet_field=design_field,
-                                                         sheet_equipment=this_sheet_equipment).value
-            if contains(design_value, '-'):
-                design_value = design_value.replace(' ', '').replace('-', ',')
-                design_value = '{' + field_id + ',' + design_value + '}'
-            return design_value
-
-        expression = re.sub(design_field_regex, get_design_value, expression)
-        return expression
-
-    def jquery_selector(field_regex_matched):
-        name = f'{field_name_prefix}{field_regex_matched[7:-8]}'
-        return f'$(\'[name="{name}"]\')'
-
-    assignment_operations = custom_operations.filter(operand_type=OperandChoices.AssignTo.value)
-    assignments = []
-    for assignment in assignment_operations:
-        left_side = assignment.operation.strip().lower()
-        right_side = assignment.result_field.strip().lower()
-
-        # ignore assignment when:
-        #
-        #                               | left_side has 'actual' word
-        #       | is_design_form and ---  OR
-        #       |                       | right_side does not matches [field-ID-design]
-        # if ---  OR
-        #       |
-        #       | is_actual_form and right_side does not matches [field-ID-actual]
-        #
-        if (is_design_form and (contains(left_side, 'actual') or not re.fullmatch(design_field_regex, right_side))) or \
-                (is_actual_form and not re.fullmatch(actual_field_regex, right_side)):
-            continue
-
-        try:
-            left_side = re.sub(field_regex, lambda m: f'parseFloat({jquery_selector(m.group())}.val())', left_side)
-
-            # when is_actual_form and the formula has design fields
-            # replace design fields in the formula with design values previously saved in the database
-            if is_actual_form and contains(left_side, 'design'):
-                left_side = replace_design_values(left_side)
-
-            final_expression = f'{jquery_selector(right_side)}.val({left_side})'
-            assignments.append(final_expression)
-        except:
-            continue
-    return assignments
 
 
 def check_form_values(request, this_sheet_equipment: AirTerminalEquipment, is_design_form: bool):
@@ -516,7 +546,7 @@ def check_form_values(request, this_sheet_equipment: AirTerminalEquipment, is_de
 @login_required
 def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    is_air_moving = SheetEquipment.objects.filter(id=sheet_equipment_id)
+    is_air_moving = SheetEquipment.objects.filter(id=sheet_equipment_id, sheet__project_id=my_sheet.project.id)
     if is_air_moving:
         equipment_type = 1
         this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
@@ -537,7 +567,6 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
         for i in range(0, return_repeat_num):
             return_repeat_list.append(i)
     codes = AirTerminalCode.objects.all()
-    assignment_operations = get_assigment_operations(this_sheet_equipment, True)
 
     for i in range(supply_repeat_num):
         i += 1
@@ -597,7 +626,6 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                     'this_sheet_equipment': this_sheet_equipment,
                     'equipment_type': equipment_type,
                     'design_fields': design_fields,
-                    'assignment_operations': assignment_operations,
                     'error_msg': error_msg,
                     'sheet_code': sheet_code,
                     'supply_repeat_list': supply_repeat_list,
@@ -657,7 +685,6 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
         'this_sheet_equipment': this_sheet_equipment,
         'equipment_type': equipment_type,
         'design_fields': design_fields,
-        'assignment_operations': assignment_operations,
         'sheet_code': sheet_code,
         'my_sheet': my_sheet,
         'supply_repeat_list': supply_repeat_list,
@@ -695,12 +722,6 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
     codes = AirTerminalCode.objects.all()
 
     actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains='terminal')
-    # if this_sheet_equipment.equipment_type.test_sheet.inheritance:
-    #     if this_sheet_equipment.equipment_type.test_sheet.inheritance.name.lower() == 'vav':
-    #         actual_fields2 = this_sheet_equipment.equipment_type.test_sheet.testsheetfield_set.filter(
-    #             show_in_actual=True)
-    #         actual_fields = list(chain(actual_fields, actual_fields2))
-    assignment_operations = get_assigment_operations(this_sheet_equipment, False)
 
     if is_air_moving:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
@@ -728,7 +749,6 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                     'this_sheet_equipment': this_sheet_equipment,
                     'equipment_type': equipment_type,
                     'actual_fields': actual_fields,
-                    'assignment_operations': assignment_operations,
                     'sheet_code': sheet_code,
                     'my_sheet': my_sheet,
                     'supply_repeat_list': supply_repeat_list,
@@ -788,7 +808,6 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
         'this_sheet_equipment': this_sheet_equipment,
         'equipment_type': equipment_type,
         'actual_fields': actual_fields,
-        'assignment_operations': assignment_operations,
         'sheet_code': sheet_code,
         'my_sheet': my_sheet,
         'supply_repeat_list': supply_repeat_list,

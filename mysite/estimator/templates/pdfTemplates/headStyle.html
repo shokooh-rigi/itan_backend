@@ -20,7 +20,13 @@
             {% if os != "Windows" %}
             @font-face {
                 font-family: customfont;
+                font-weight: normal;
                 src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
+            }
+            @font-face {
+                font-family: customfont;
+                font-weight: bold;
+                src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambriab.ttf);
             }
 
             body {

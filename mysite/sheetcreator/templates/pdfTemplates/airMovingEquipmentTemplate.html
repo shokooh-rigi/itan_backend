@@ -638,7 +638,7 @@
                         Notes:
                     </td>
                     <td colspan="8" class="">
-                        <div class="">{{ page.0.note }}</div>
+                        <div class="">{{ page.0.note }}</div>{% if page.0.note != '' and page.1.note != '' %} | {% endif %}
                         <div class="">{{ page.1.note }}</div>
                     </td>
                 </tr>
