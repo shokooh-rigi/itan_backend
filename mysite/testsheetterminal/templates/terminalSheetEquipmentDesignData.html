@@ -43,12 +43,25 @@
                         </div>
                         <div class="col-lg-3">
                             <label for="{{ field_name }}" class="control-label equal_fields_supply" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                            {% if design_field.field_name|lower != 'size' %}
                                 <input style="width: 100%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}" maxlength="50"
-                                       class="form-control {% if design_field.field_name|lower == 'size' %}size_eq_supply size_{{ supply_terminal_equipment.id }}{% endif %} eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       class="form-control eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                        value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field supply_terminal_equipment.id %}{% endif %}"
-                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %}>
+                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                            {% else %}
+                                <input style="width: 46%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
+                                       name="{{ field_name }}-x" maxlength="50"
+                                       class="size-split form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                       value="" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
+                                        X
+                                <input style="width: 46%;" {% get_field_type design_field %}
+                                        name="{{ field_name }}-y" maxlength="50"
+                                       class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                       value="" />
+                            {% endif %}
                             </label>
                             <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
                                 <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
@@ -100,12 +113,25 @@
                         </div>
                         <div class="col-lg-3">
                             <label for="{{ field_name }}" class="control-label equal_fields_return" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                            {% if design_field.field_name|lower != 'size' %}
                                 <input style="width: 100%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}" maxlength="50"
-                                       class="form-control {% if design_field.field_name|lower == 'size' %}size_eq_return size_{{ return_terminal_equipment.id }}{% endif %} eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       class="form-control eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                        value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field return_terminal_equipment.id %}{% endif %}"
-                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %}>
+                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                            {% else %}
+                                <input style="width: 46%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
+                                       name="{{ field_name }}-x" maxlength="50"
+                                       class="size-split form-control size_eq_return_x size_{{ return_terminal_equipment.id }}_x eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                       value="" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
+                                        X
+                                <input style="width: 46%;" {% get_field_type design_field %}
+                                        name="{{ field_name }}-y" maxlength="50"
+                                       class="form-control size_eq_return_y size_{{ return_terminal_equipment.id }}_y eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                       value="" />
+                            {% endif %}
                             </label>
                             <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
                                 <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
@@ -148,6 +174,22 @@
         </div>
     </form>
     <script>
+
+        $(document).ready(function () {
+            $('.size-split').each(function (index) {
+                if ($(this).data('orgval') != '') {
+                    const full_size = $(this).data('orgval').replace("X", "x");
+                    let element_id = $(this).attr('id');
+                    element_id = element_id.slice(0, -2);
+                    const size_splited = full_size.split("x");
+                    const size_x = size_splited[0];
+                    const size_y = size_splited[1];
+                    $('#' + element_id + '-x').val(size_x);
+                    $('#' + element_id + '-y').val(size_y);
+                }
+            });
+        });
+
         $("form input[type=submit][name=cancel]").click(function() {
             $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
             $(this).attr("clicked", "true");
@@ -190,29 +232,63 @@
         $('.select_eq_supply').on('change', function () {
             if ($(this).parent().data('loopid') == 1) {
                 $('.select_eq_supply').val($(this).val());
-                const selected_default = $(this).children("option:selected").data('default');
-                $('.size_eq_supply').val(selected_default);
+                const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+                const selected_default_x = selected_default[0];
+                const selected_default_y = selected_default[1];
+                $('.size_eq_supply_x').val(selected_default_x);
+                $('.size_eq_supply_y').val(selected_default_y);
             }
         });
 
         $('.select_eq_return').on('change', function () {
             if ($(this).parent().data('loopid') == 1) {
                 $('.select_eq_return').val($(this).val());
-                const selected_default = $(this).children("option:selected").data('default');
-                $('.size_eq_return').val(selected_default);
+                const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+                const selected_default_x = selected_default[0];
+                const selected_default_y = selected_default[1];
+                $('.size_eq_return_x').val(selected_default_x);
+                $('.size_eq_return_y').val(selected_default_y);
             }
         });
 
+        $('.select_eq_supply').each(function( index ) {
+            const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+            const selected_default_x = selected_default[0];
+            const selected_default_y = selected_default[1];
+            const size_input_x = '.size_' + $(this).data('eqid') + '_x';
+            const size_input_y = '.size_' + $(this).data('eqid') + '_y';
+            $(size_input_x).val(selected_default_x);
+            $(size_input_y).val(selected_default_y);
+        });
+
         $('.select_eq_supply').on('change', function () {
-            const selected_default = $(this).children("option:selected").data('default');
-            const size_input = '.size_' + $(this).data('eqid');
-            $(size_input).val(selected_default);
+            const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+            const selected_default_x = selected_default[0];
+            const selected_default_y = selected_default[1];
+            const size_input_x = '.size_' + $(this).data('eqid') + '_x';
+            const size_input_y = '.size_' + $(this).data('eqid') + '_y';
+            $(size_input_x).val(selected_default_x);
+            $(size_input_y).val(selected_default_y);
+        });
+
+        $('.select_eq_return').each(function( index ) {
+            const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+            const selected_default_x = selected_default[0];
+            const selected_default_y = selected_default[1];
+            const size_input_x = '.size_' + $(this).data('eqid') + '_x';
+            const size_input_y = '.size_' + $(this).data('eqid') + '_y';
+            $(size_input_x).val(selected_default_x);
+            $(size_input_y).val(selected_default_y);
         });
 
         $('.select_eq_return').on('change', function () {
-            const selected_default = $(this).children("option:selected").data('default');
-            const size_input = '.size_' + $(this).data('eqid');
-            $(size_input).val(selected_default);
+            const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
+            const selected_default_x = selected_default[0];
+            const selected_default_y = selected_default[1];
+            const size_input_x = '.size_' + $(this).data('eqid') + '_x';
+            const size_input_y = '.size_' + $(this).data('eqid') + '_y';
+            $(size_input_x).val(selected_default_x);
+            $(size_input_y).val(selected_default_y);
         });
     </script>
 

@@ -310,19 +310,19 @@
                                     &nbsp;{{ equipment.design.ak_factor }}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.fpm }}
+                                    &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;{{ equipment.design.cfm }}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.actual.initial_fpm }}
+                                    &nbsp;{% if equipment.actual.initial_fpm != '' %}{{ equipment.actual.initial_fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;{{ equipment.actual.initial_cfm }}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.actual.final_fpm }}
+                                    &nbsp;{% if equipment.actual.final_fpm != '' %}{{ equipment.actual.final_fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;{{ equipment.actual.final_cfm }}

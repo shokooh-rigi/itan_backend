@@ -258,9 +258,12 @@
                     {% for equipment in equipment_group %}
                         {% if forloop.last %}
                             <tr class="pdf-table-row section-middle-row">
-                                <td colspan="5" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
+                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
                                     {{ equipment.eq_name }} {{ equipment.eq_type }}
                                 </td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
@@ -273,9 +276,12 @@
                     {% for equipment in equipment_group %}
                         {% if forloop.last %}
                             <tr class="pdf-table-row section-middle-row">
-                                <td colspan="5" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
+                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
                                     TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}
                                 </td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{{ equipment.d_cfm_total }}</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
@@ -304,7 +310,7 @@
                                     &nbsp;{{ equipment.design.ak_factor }}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.fpm }}
+                                    &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;{{ equipment.design.cfm }}

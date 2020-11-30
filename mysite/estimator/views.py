@@ -438,6 +438,7 @@ def estimate_delete(request, estimate_id):
                 this_estimate.bfm.archive = False
                 this_estimate.bfm.save()
             this_estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(this_estimate.id, 'E')})
+            this_estimate.project.delete()
             this_estimate.delete()
         return redirect('estimatorHome')
     elif request.method == "POST" and request.user.is_authenticated and this_estimate.created_by != request.user:

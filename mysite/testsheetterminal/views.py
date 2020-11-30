@@ -155,8 +155,8 @@ def get_pdf_empty_row():
 
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    air_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, vav_equipment__isnull=True).order_by('air_equipment', 'type')
-    vav_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True).order_by('vav_equipment')
+    air_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, vav_equipment__isnull=True, air_equipment__terminal_design_data_entry_completed=True).order_by('air_equipment', 'type', 'outlet_no')
+    vav_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True, vav_equipment__terminal_design_data_entry_completed=True).order_by('vav_equipment', 'outlet_no')
 
     if is_report_pdf:
         air_sheet_equipments = air_sheet_equipments.filter(air_equipment__terminal_actual_data_entry_completed=True)
@@ -205,10 +205,11 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 page = {'rows': []}
             d_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
                                                                      sheet_field__field_name__iexact='cfm').value)
-            i_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                     sheet_field__field_name__iexact='initial cfm').value)
-            f_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                     sheet_field__field_name__iexact='final cfm').value)
+            if is_report_pdf:
+                i_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                         sheet_field__field_name__iexact='initial cfm').value)
+                f_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                         sheet_field__field_name__iexact='final cfm').value)
             page['rows'].append([])
             last_air_equipment = air_equipment.air_equipment.id
             last_air_equipment_type = air_equipment.type
@@ -221,10 +222,11 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         else:
             d_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
                                                                       sheet_field__field_name__iexact='cfm').value)
-            i_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                      sheet_field__field_name__iexact='initial cfm').value)
-            f_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                      sheet_field__field_name__iexact='final cfm').value)
+            if is_report_pdf:
+                i_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                          sheet_field__field_name__iexact='initial cfm').value)
+                f_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                          sheet_field__field_name__iexact='final cfm').value)
 
         page['rows'][len(page['rows']) - 1].append(fetch_sheet_equipment_data(air_equipment, is_report_pdf))
         i += 1
@@ -279,10 +281,11 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 page = {'rows': []}
             d_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
                                                                      sheet_field__field_name__iexact='cfm').value)
-            i_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                     sheet_field__field_name__iexact='initial cfm').value)
-            f_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                     sheet_field__field_name__iexact='final cfm').value)
+            if is_report_pdf:
+                i_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                         sheet_field__field_name__iexact='initial cfm').value)
+                f_total = int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                         sheet_field__field_name__iexact='final cfm').value)
             page['rows'].append([])
             last_vav_equipment = vav_equipment.vav_equipment.id
             eq_name = vav_equipment.vav_equipment.testsheetgeneraldata_set.get(
@@ -290,10 +293,11 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         else:
             d_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
                                                                       sheet_field__field_name__iexact='cfm').value)
-            i_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                      sheet_field__field_name__iexact='initial cfm').value)
-            f_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                      sheet_field__field_name__iexact='final cfm').value)
+            if is_report_pdf:
+                i_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                          sheet_field__field_name__iexact='initial cfm').value)
+                f_total += int(vav_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
+                                                                          sheet_field__field_name__iexact='final cfm').value)
 
         page['rows'][len(page['rows']) - 1].append(fetch_sheet_equipment_data(vav_equipment, is_report_pdf))
         i += 1
@@ -543,6 +547,9 @@ def check_form_values(request, this_sheet_equipment: AirTerminalEquipment, is_de
     return None
 
 
+def manual_replace(s, char, index):
+    return s[:index] + char + s[index +1:]
+
 @login_required
 def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
@@ -639,8 +646,16 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                 new_code = request.POST.get(f'supply_code_select_{supply_terminal_equipment.id}')
                 AirTerminalEquipment.objects.filter(id=supply_terminal_equipment.id).update(code=new_code)
                 for design_field in design_fields:
-                    new_value = request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}').strip()
-
+                    if design_field.field_name.lower() == 'size':
+                        new_val_x = request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}-x').strip()
+                        new_val_x = str(new_val_x).replace(" ", "")
+                        new_val_y = str(request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}-y').strip())
+                        if new_val_y[0] == ' ':
+                            print('are bud')
+                            new_val_y = new_val_y[1:]
+                        new_value = new_val_x + ' X ' + new_val_y
+                    else:
+                        new_value = request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}').strip()
                     num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                       air_terminal_equipment=supply_terminal_equipment,
                                                                       sheet_field=design_field).count()
@@ -661,7 +676,17 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                     new_code = request.POST.get(f'return_code_select_{return_terminal_equipment.id}')
                     AirTerminalEquipment.objects.filter(id=return_terminal_equipment.id).update(code=new_code)
                     for design_field in design_fields:
-                        new_value = request.POST.get(f'return_company_value_{design_field.id}_{return_terminal_equipment.id}').strip()
+                        if design_field.field_name.lower() == 'size':
+                            new_val_x = request.POST.get(f'return_company_value_{design_field.id}_{return_terminal_equipment.id}-x').strip()
+                            new_val_x = str(new_val_x).replace(" ", "")
+                            new_val_y = str(request.POST.get(f'return_company_value_{design_field.id}_{return_terminal_equipment.id}-y').strip())
+                            if new_val_y[0] == ' ':
+                                print('are budddd')
+                                new_val_y = new_val_y[1:]
+                            new_value = new_val_x + ' X ' + new_val_y
+                        else:
+                            new_value = request.POST.get(
+                                f'return_company_value_{design_field.id}_{return_terminal_equipment.id}').strip()
 
                         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                           air_terminal_equipment=return_terminal_equipment,
@@ -700,7 +725,7 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
 def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
 
-    is_air_moving = SheetEquipment.objects.filter(id=sheet_equipment_id)
+    is_air_moving = SheetEquipment.objects.filter(id=sheet_equipment_id, sheet__project_id=my_sheet.project.id)
     if is_air_moving:
         equipment_type = 1
         this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
