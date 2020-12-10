@@ -4,22 +4,33 @@
             @page {
                 size: letter landscape;
                 @frame col1_frame {
-                    -pdf-frame-content: col1_content_frame;
                     -pdf-frame-border: 1;
                     left: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
                 }
                 @frame col2_frame {
-                    -pdf-frame-content: col2_content_frame;
+                    -pdf-frame-border: 1;
+                    right: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
+                }
+                @frame col3_frame {
+                    -pdf-frame-border: 1;
+                    left: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
+                }
+                @frame col4_frame {
                     -pdf-frame-border: 1;
                     right: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
                 }
             }
-            div.together { -pdf-keep-with-next: true; }
 
             {% if os != "Windows" %}
             @font-face {
                 font-family: customfont;
+                font-weight: normal;
                 src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
+            }
+            @font-face {
+                font-family: customfont;
+                font-weight: bold;
+                src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambriab.ttf);
             }
 
             body {

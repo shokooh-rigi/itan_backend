@@ -111,6 +111,7 @@ class TechLabelForm(ModelForm):
             'point_of_contact_name',
             'point_of_contact_cell_phone',
             'point_of_contact_office_phone',
+            'schedule_date',
             'tech_notes',
         ]
 

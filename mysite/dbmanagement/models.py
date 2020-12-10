@@ -166,7 +166,7 @@ class Equipment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True)
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255, blank=False)
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     estimate_work = models.IntegerField(default=10, blank=False, null=False, verbose_name='Estimate Work in Minutes')
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)

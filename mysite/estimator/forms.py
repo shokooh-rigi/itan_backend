@@ -129,8 +129,7 @@ class EstimateFullForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EstimateFullForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(
-            company__company_type__name__iexact='mechanical contractor')
+        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
         self.fields['engineer'].queryset = Person.objects.filter(
             company__company_type__name__iexact='mechanical engineer')
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'

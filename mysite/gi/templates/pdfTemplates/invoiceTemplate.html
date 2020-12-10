@@ -101,17 +101,18 @@
                         <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">{{ invoice.percent_of_performance_completed }}% </td>
                     </tr>
                     <tr style="text-align: right;">
-                        <td style="padding: 5px 5px 0 5px;">Total payment received to date: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.total_payment_received_to_date|floatformat:2|intcomma }} </td>
-                    </tr>
-                    <tr style="text-align: right;">
-                        <td style="padding: 5px 5px 0 5px;">Past due amount: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ invoice.past_due_amount|floatformat:2|intcomma }} </td>
-                    </tr>
-                    <tr style="text-align: right;">
-                        <td style="padding: 5px 5px 0 5px; font-size: 11pt;">Total amount due: </td>
+                        <td style="padding: 5px 5px 0 5px; font-size: 11pt;">Total Invoiced: </td>
                         <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ total_amount_due|floatformat:2|intcomma }} </td>
                     </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px;">Total Paid: </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% calculate_total_paid invoice %} </td>
+                    </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px;">Balance Due: </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }} </td>
+                    </tr>
+
 
                   </tbody>
                </table>

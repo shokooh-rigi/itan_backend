@@ -1,0 +1,393 @@
+{% load static %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Air Terminal Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 9.5%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 14.5%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            border: 1px solid black;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.data %}
+        <div class="content pdf-page-content">
+            <table class="table pdf-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th scope="col" class="wide-th"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td></td>
+                    <td class="pdf-table-title-td" colspan="8">Air Terminal Sheet</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
+                    <td class="pdf-table-cell" colspan="5">
+                        &nbsp;{{ form.my_sheet.project.project_number }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.sheet_date | date }}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td class="pdf-table-cell" colspan="5">
+                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                    </td>
+                    <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
+                        &nbsp;{{ form.my_sheet.system }}
+                    </td>
+                </tr>
+
+                <!-- Title rows -->
+                <tr class="pdf-table-row section-first-row">
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Room No.
+                    </td>
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Outlet No.
+                    </td>
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Code
+                    </td>
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Size
+                    </td>
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        AK Factor
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Initial
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Final
+                    </td>
+                </tr>
+                <tr class="pdf-table-row section-middle-row">
+                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
+                        FPM
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
+                        CFM
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
+                        FPM
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell center-title">
+                        CFM
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
+                        FPM
+                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
+                        CFM
+                    </td>
+                </tr>
+
+                <!-- Data rows -->
+                {% for equipment_group in page.rows %}
+                    {% for equipment in equipment_group %}
+                        {% if forloop.last %}
+                            <tr class="pdf-table-row section-middle-row">
+                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
+                                    {{ equipment.eq_name }} {{ equipment.eq_type }}
+                                </td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for equipment in equipment_group %}
+                        {% if forloop.last %}
+                            <tr class="pdf-table-row section-middle-row">
+                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold;">
+                                    TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}
+                                </td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{{ equipment.d_cfm_total }}</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;</td>
+                                <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;</td>
+                            </tr>
+                            <tr class="pdf-table-row section-middle-row">
+                                <td colspan="11" class="pdf-table-cell">&nbsp;</td>
+                            </tr>
+                        {% else %}
+                            <tr class="pdf-table-row section-middle-row">
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.design.room_no }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.outlet_no }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.code }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.design.size }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.design.ak_factor }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;{{ equipment.design.cfm }}
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for equipment in equipment_group %}
+                        {% if forloop.last %}
+                            {% for em_row in equipment.empty_rows %}
+                                <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                                <td class="pdf-table-cell">
+                                    &nbsp;
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- Note section -->
+                <tr class="pdf-table-note-section">
+                    <td class="note-title">
+                        Notes:
+                    </td>
+                    <td colspan="9">
+                    <div id="note-div-actual" class="note-div">
+                        * Not Applicable … Direct Reading Flow Hood
+                    </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>

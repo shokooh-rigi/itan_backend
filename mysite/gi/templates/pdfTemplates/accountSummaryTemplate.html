@@ -1,0 +1,106 @@
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load custom_tags %}
+{% load humanize %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Proposal</title>
+        {% include "pdfTemplates/headStyle.html" %}
+    </head>
+    <body>
+
+        {% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+        {% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    <div class="content">
+            <div class="row form-line" style="text-align: center; padding: 0; font-size: 9pt;">
+                <table style="padding: 0;">
+                  <tbody>
+                    <tr style="text-align: center;">
+                        <td style="font-weight: bold; text-align: left; vertical-align: bottom; width: 70%; color: #aaa; font-size: 34px; padding-top: 12px;">ACCOUNT SUMMARY</td>
+                        <td style="padding: 2px; font-weight: bold; width: 15%;">
+                            <div style="padding: 5px; font-weight: bold; text-align: right;">Date:</div>
+                            <div style="padding: 0px; font-weight: bold; text-align: right;">Statement No:</div>
+                        </td>
+                        <td style="font-weight: bold; width: 15%;">
+                            <div style="padding: 5px; font-weight: bold;">{{ account_summary.created_on|date:'m/d/Y' }}</div>
+                            <div style="padding: 0px; font-weight: bold;">{{ account_summary.statement_no }}</div>
+                        </td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line" style="font-size: 9pt;">
+               <table style="padding: 0 0 5px 0;">
+                  <tbody>
+                    <tr style="text-align: left; border: none;">
+                        <td style="padding: 5px 0 0 0; font-weight: bold;">Customer</td>
+                    </tr>
+                    <tr style="text-align: left;">
+                        <td style="padding: 0px;"><b>{{ account_summary.customer.name }}</b>
+                        {% if account_summary.customer.address_line_1 %}<br />{{ account_summary.customer.address_line_1 }}{% endif %}
+                        {% if account_summary.customer.address_line_2 %}<br />{{ account_summary.customer.address_line_2 }}{% endif %}
+                        {% if account_summary.customer.city %}<br />{{ account_summary.customer.city }}{% endif %}{% if account_summary.customer.state %}, {{ account_summary.customer.state }}{% endif %}
+                        {% if account_summary.customer.zip %} {{ account_summary.customer.zip }}{% endif %}
+                        <br />Attention: {{ account_summary.attention }}</td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line" style="font-size: 9pt;">
+               <table style="padding: 10px; text-align: center;">
+                  <tbody>
+                    <tr style="border: 1px solid #000; ">
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Invoice No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Date</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">PO No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Project Name</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Invoice Amount</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Balance Due</td>
+                    </tr>
+                    {% for invoice in customer_invoices %}
+                    <tr style="border: 1px solid #000; ">
+                        <td style="padding: 5px 0 0 0;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} </td>
+                        <td style="padding: 5px 0 0 0;">{{ invoice.created_on|date:'m/d/Y' }} </td>
+                        <td style="padding: 5px 0 0 0;">{{ invoice.order.po_number }} </td>
+                        <td style="padding: 5px 0 0 0;">{{ invoice.order.proposal.quote.estimate.project.name }} </td>
+                        <td style="padding: 5px 0 0 0;">${% calculate_total_amount_due invoice %} </td>
+                        <td style="padding: 5px 0 0 0;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }} </td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-size: 11pt;" colspan="5" border="0">Total amount due: </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${{ account_summary.total|floatformat:2|intcomma }} </td>
+                    </tr>
+
+                  </tbody>
+               </table>
+               <br />
+            </div>
+            <div class="row form-line text-center" style="font-size: 9pt; text-align: center;">
+                If you have any questions concerning this invoice, feel free to contact us at any time.
+                <table style="padding: 20px; font-size: 8pt;">
+                  <tbody>
+                    <tr style="text-align: center;">
+                        <td style="padding: 5px; font-weight: bold;">Signature:</td>
+                        <td style="padding: 5px;"><img alt="" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_signature }}" class="signature" style="height: 50px;" /></td>
+                        <td style="padding: 5px; font-weight: bold;"> </td>
+                        <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
+                        <td style="padding: 5px;"><span style="text-decoration: underline;">{{ license_owner }}</span>, <span style="text-decoration: underline;">{{ owner_title }}</span></td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line text-center" style="text-align: center; font-size: 10pt;">
+                THANK YOU FOR YOUR BUSINESS!
+            </div>
+    </div>
+</div>
+    </body>
+</html>

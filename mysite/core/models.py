@@ -5,7 +5,7 @@ from django.core.validators import MinLengthValidator, MaxValueValidator, MinVal
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from djrichtextfield.models import RichTextField
+from tinymce.models import HTMLField
 
 from custom_user.models import User
 
@@ -236,7 +236,7 @@ class CompanySubmittalForm(models.Model):
 
 class EmailBodyTemplate(models.Model):
     name = models.CharField(max_length=255, blank=False, unique=True)
-    content = RichTextField(null=True, blank=True, help_text='<b>Current User Information:</b><br />'
+    content = HTMLField(null=True, blank=True, help_text='<b>Current User Information:</b><br />'
                                                              '[user_name]: Logged in user Name | '
                                                              '[user_title]: Logged in user Title | '
                                                              '[user_cel]: Logged in user Cellphone Number | '
@@ -282,6 +282,7 @@ class ModulesToEmailTemplateRelation(models.Model):
         (6, 'COI'),
         (7, 'Submittal'),
         (8, 'Settlement'),
+        (9, 'Account Summary'),
     )
     module = models.PositiveSmallIntegerField(choices=modules_list, unique=True, blank=False)
 

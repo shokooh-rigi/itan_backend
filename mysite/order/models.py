@@ -85,9 +85,10 @@ class TechLabel(models.Model):
     schedule_drawing = models.BooleanField(default=False)
     mechanical_drawing = models.BooleanField(default=False)
     tech_test_sheets = models.BooleanField(default=False)
-    point_of_contact_name = models.CharField(max_length=50, blank=False, null=False)
-    point_of_contact_cell_phone = models.CharField(max_length=15, blank=False)
-    point_of_contact_office_phone = models.CharField(max_length=15, blank=True)
+    point_of_contact_name = models.CharField(max_length=50, blank=True, null=True)
+    point_of_contact_cell_phone = models.CharField(max_length=15, blank=True, null=True)
+    point_of_contact_office_phone = models.CharField(max_length=15, blank=True, null=True)
+    schedule_date = models.DateField(blank=True, null=True)
     tech_notes = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -96,6 +97,11 @@ class TechLabel(models.Model):
     @classmethod
     def create_techlabel_pdf(cls, parameters):
         techlabel_pdf = Render.render_to_file('pdfTemplates/techLabelTemplate.html', parameters, 'techlabel')
+        return techlabel_pdf
+
+    @classmethod
+    def create_techlabel_extra_pdf(cls, parameters):
+        techlabel_pdf = Render.render_to_file('pdfTemplates/techLabelExtraTemplate.html', parameters, 'techlabelextra')
         return techlabel_pdf
 
     # @classmethod

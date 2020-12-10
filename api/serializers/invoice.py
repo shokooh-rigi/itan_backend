@@ -21,8 +21,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'project_name',
             'total_ordered',
             'percent_of_performance_completed',
-            'total_payment_received_to_date',
-            'past_due_amount',
             'total_invoiced',
             'created_on',
         ]

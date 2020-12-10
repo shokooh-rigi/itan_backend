@@ -1,5 +1,5 @@
 from platform import system
-
+import os
 from django.contrib.auth.decorators import login_required
 from django.core.mail import BadHeaderError, EmailMessage
 from django.core.paginator import Paginator
@@ -177,17 +177,47 @@ def invoice_add(request, order_id=None):
 @login_required
 def invoice_view(request, invoice_id):
     invoice = Invoice.objects.get(id=invoice_id)
+    if request.user.last_name == '' or request.user.last_name is None:
+        user_name = 'TAB Technologies, INC. Operator'
+    else:
+        user_name = request.user.first_name + " " + request.user.last_name
+    if request.user.profile.title == '' or request.user.profile.title is None:
+        user_title = 'Estimator'
+    else:
+        user_title = request.user.profile.title
+    user_signature = request.user.profile.e_sign
     change_orders = ChangeOrder.objects.filter(order=invoice.order)
     total_amount_due = calculate_total_amount_due(invoice)
     parameters = {
+        'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
+            invoice.id).zfill(3),
         'invoice': invoice,
         'change_orders': change_orders,
         'total_amount_due': total_amount_due,
         'estimate': invoice.order.proposal.quote.estimate,
+        'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+        'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+        'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+        'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+        'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+        'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+        'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+        'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+        'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+        'user_name': user_name,
+        'user_title': user_title,
+        'user_signature': user_signature,
         'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
         'STATIC_URL': STATIC_URL,
+        'MEDIA_URL': MEDIA_URL,
+        'os': system(),
     }
+    invoice_pdf = Invoice.create_invoice_pdf(parameters)
+    parameters['invoice_pdf'] = invoice_pdf[1]
     return render(request, "invoiceView.html", parameters)
 
 
@@ -214,7 +244,7 @@ def invoice_edit(request, invoice_id):
                 change_orders = ChangeOrder.objects.filter(order=invoice.order)
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {'form': form,
-                              'file_name': 'invoice-' + str(invoice.order.project_number[3:]).zfill(3) + str(
+                              'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                                   invoice.id).zfill(3),
                               'invoice': invoice,
                               'change_orders': change_orders,
@@ -298,6 +328,242 @@ def invoice_archive(request, invoice_id):
     return render(request, "invoiceArchive.html", parameters)
 
 
+@login_required
+def invoice_payment(request, invoice_id):
+    form = InvoicePaymentForm(request.POST or None, request.FILES or None, initial={'created_by': request.user, 'invoice': invoice_id})
+    invoice = Invoice.objects.get(id=invoice_id)
+    invoice_transactions = InvoiceTransaction.objects.filter(invoice=invoice_id)
+    if request.method == 'POST':
+        form.fields['created_by'].widget = forms.HiddenInput()
+        if request.POST.get("cancel"):
+            return redirect('invoiceHome')
+        if form.is_valid():
+            if request.POST.get("next"):
+                form.cleaned_data['created_by'] = request.user
+                form.cleaned_data['invoice'] = invoice_id
+                transaction = form.save()
+                return redirect('invoicePayment', invoice_id)
+    parameters = {'form': form,
+                  'invoice_transactions': invoice_transactions,
+                  'invoice': invoice
+                  }
+    return render(request, "invoicePayment.html", parameters)
+
+
+@login_required
+def invoice_payment_delete(request, transaction_id):
+    this_transaction = get_object_or_404(InvoiceTransaction, id=transaction_id)
+    invoice_id = this_transaction.invoice.id
+    if request.method == "POST" and request.user.is_authenticated and this_transaction.created_by == request.user:
+        if request.POST.get("confirm"):
+            this_transaction.delete()
+        return redirect('invoicePayment', invoice_id)
+    elif request.method == "POST" and request.user.is_authenticated and this_transaction.created_by != request.user:
+        if request.POST.get("confirm"):
+            error_msg = "This record was created by another user, you are not authorized to delete this record."
+            parameters = {
+                'this_transaction': this_transaction,
+                'invoice_id': invoice_id,
+                'error_msg': error_msg
+            }
+            return render(request, "transactionDelete.html", parameters)
+        return redirect('invoicePayment')
+    parameters = {'this_transaction': this_transaction,
+                  'invoice_id': invoice_id
+                  }
+    return render(request, "transactionDelete.html", parameters)
+
+
+@login_required
+def account_summary_list(request):
+    form = EmailForm(request.POST)
+    if request.user.last_name == '' or request.user.last_name is None:
+        user_name = 'TAB Technologies, INC. Operator'
+    else:
+        user_name = request.user.first_name + " " + request.user.last_name
+    if request.user.profile.title == '' or request.user.profile.title is None:
+        user_title = 'Estimator'
+    else:
+        user_title = request.user.profile.title
+    if request.user.profile.cell == '' or request.user.profile.cell is None:
+        user_cell = ''
+    else:
+        user_cell = request.user.profile.cell
+    if request.user.profile.tel == '' or request.user.profile.tel is None:
+        user_tel = LicenseInfo.objects.get(key='OwnerTel').value + ' Office'
+    else:
+        user_tel = request.user.profile.tel + ' Office'
+    if request.method == 'POST':
+        if form.is_valid():
+            to_email = form.cleaned_data['to_email']
+            to_email = to_email.replace(" ", "").split(',')
+            cc = form.cleaned_data['cc']
+            cc = cc.replace(" ", "").split(',')
+            email_id = form.cleaned_data['email_id']
+            subject = form.cleaned_data['subject']
+            if ModulesToEmailTemplateRelation.objects.filter(module=9).exists():
+                invoice_content = ModulesToEmailTemplateRelation.objects.get(module=9).template.content
+            else:
+                invoice_content = "There was no email template defined for 'Account Summary'."
+            if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
+                footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
+            else:
+                footer_content = "There was no email template defined for 'Email Footer'."
+            footer_content = footer_content.__str__() \
+                .replace("[user_name]", user_name) \
+                .replace("[user_title]", user_title) \
+                .replace("[user_cel]", user_cell) \
+                .replace("[user_tel]", user_tel)
+            message = invoice_content + '<br />' + footer_content
+            try:
+                msg = EmailMessage(
+                    subject,
+                    message,
+                    DEFAULT_FROM_EMAIL,
+                    [to_email],
+                    cc=[cc],
+                )
+                msg.content_subtype = "html"
+                msg.attach_file('media/pdfs/accountsummary/AccountSummary-' + str(email_id) + '.pdf')
+                msg.send()
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            return redirect('accountSummaryHome')
+
+    search = request.GET.get('search', '')
+
+    pagination = 20
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
+    ordering = '-created_on'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
+
+    from_date = request.GET.get("fromDate", '01/01/2000')
+    to_date = request.GET.get("toDate", '01/01/2100')
+    if from_date and to_date:
+        from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
+        to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
+        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
+
+        object_list = AccountSummary.objects.filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
+
+    else:
+        object_list = AccountSummary.objects.order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    account_summaries = paginator.get_page(page)
+
+    parameters = {'account_summaries': account_summaries,
+                  'form': form,
+                  'WEB_URL': WEB_URL,
+                  'MEDIA_URL': MEDIA_URL,
+                  }
+    return render(request, "accountSummary.html", parameters)
+
+
+
+@login_required
+def account_summary_add(request, customer_id=None):
+    form = AccountSummaryForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
+    if customer_id:
+        customers = ContactInfo.objects.filter(id=customer_id)
+    else:
+        customers = ContactInfo.objects.filter(company_type__name__iexact='mechanical contractor')
+    if request.user.last_name == '' or request.user.last_name is None:
+        user_name = 'TAB Technologies, INC. Operator'
+    else:
+        user_name = request.user.first_name + " " + request.user.last_name
+    if request.user.profile.title == '' or request.user.profile.title is None:
+        user_title = 'Estimator'
+    else:
+        user_title = request.user.profile.title
+    user_signature = request.user.profile.e_sign
+    if request.method == 'POST':
+        form.fields['created_by'].widget = forms.HiddenInput()
+        if request.POST.get("cancel"):
+            return redirect('accountSummaryHome')
+        if form.is_valid():
+            if request.POST.get("next"):
+                form.cleaned_data['created_by'] = request.user
+                customer = form.cleaned_data['customer']
+                customer_invoices = Invoice.objects.filter(order__proposal__quote__estimate__customer__company=customer)
+                this_total = 0
+                for invoice in customer_invoices:
+                    this_total += float(calculate_remaining_invoice_due(invoice))
+                    if calculate_remaining_invoice_due(invoice) == 0:
+                        customer_invoices = customer_invoices.exclude(pk=invoice.pk)
+                if this_total == 0:
+                    error_msg = "This Customer has no remained invoice to pay."
+                    parameters = {
+                        'error_msg': error_msg,
+                        'form': form,
+                        'customers': customers
+                    }
+                    return render(request, "accountSummaryAdd.html", parameters)
+                account_summary = form.save()
+                account_summary.total = float(this_total)
+                account_summary.save()
+                parameters = {'form': form,
+                              'account_summary': account_summary,
+                              'customer_invoices': customer_invoices,
+                              'file_name': 'AccountSummary-' + account_summary.statement_no,
+                              'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                              'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                              'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+                              'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+                              'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+                              'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+                              'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+                              'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+                              'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+                              'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                              'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                              'user_name': user_name,
+                              'user_title': user_title,
+                              'user_signature': user_signature,
+                              'WEB_URL': WEB_URL,
+                              'STATIC_URL': STATIC_URL,
+                              'MEDIA_URL': MEDIA_URL,
+                              'os': system(),
+                              }
+                account_summary_pdf = AccountSummary.create_account_summary_pdf(parameters)
+                parameters['account_summary_pdf'] = account_summary_pdf[1]
+                return redirect('accountSummaryHome')
+    parameters = {'form': form,
+                  'customers': customers
+                  }
+    return render(request, "accountSummaryAdd.html", parameters)
+
+
+@login_required
+def accout_summary_delete(request, account_summary_id):
+    this_account_summary = get_object_or_404(AccountSummary, id=account_summary_id)
+    if request.method == "POST" and request.user.is_authenticated and this_account_summary.created_by == request.user:
+        if request.POST.get("confirm"):
+            parameters = {'file_name': 'AccountSummary-' + this_account_summary.statement_no,
+                          }
+            AccountSummary.delete_account_summary_pdf(parameters)
+            this_account_summary.delete()
+        return redirect('accountSummaryHome')
+    elif request.method == "POST" and request.user.is_authenticated and this_account_summary.created_by != request.user:
+        if request.POST.get("confirm"):
+            error_msg = "This record was created by another user, you are not authorized to delete this record."
+            parameters = {
+                'this_account_summary': this_account_summary,
+                'error_msg': error_msg
+            }
+            return render(request, "accountSummaryDelete.html", parameters)
+        return redirect('invoicePayment')
+    parameters = {'this_account_summary': this_account_summary,
+                  }
+    return render(request, "accountSummaryDelete.html", parameters)
+
+
 def equipment_total_calculator(equipment):
     if equipment.price_override:
         return float(equipment.price_override) * float(equipment.quantity)
@@ -338,8 +604,26 @@ def order_total_calculator(estimate_id, order):
 def calculate_total_amount_due(invoice):
     sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
     completed_percentage = invoice.percent_of_performance_completed
-    received_to_date = float(invoice.total_payment_received_to_date)
-    past_amount = float(invoice.past_due_amount)
     total = (sub_total * completed_percentage / 100)
-    total = total - received_to_date + past_amount
     return total
+
+
+def calculate_total_paid(invoice):
+    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
+    total = 0
+    for transaction in transactions:
+        total += transaction.amount
+    return total
+
+
+def calculate_remaining_invoice_due(invoice):
+    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
+    total_paid = 0
+    for transaction in transactions:
+        total_paid += transaction.amount
+
+    sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+    completed_percentage = invoice.percent_of_performance_completed
+    total = (sub_total * completed_percentage / 100)
+    remaining = float(total) - float(total_paid)
+    return remaining

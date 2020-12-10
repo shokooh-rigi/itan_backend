@@ -40,13 +40,13 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_point_of_contact_name" class="control-label">POC Name <span class="required">*</span></label>
+                    <label for="id_point_of_contact_name" class="control-label">POC Name</label>
                     {{ form.point_of_contact_name }}
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_point_of_contact_cell_phone" class="control-label">POC Cell Phone <span class="required">*</span></label>
+                    <label for="id_point_of_contact_cell_phone" class="control-label">POC Cell Phone</label>
                     {{ form.point_of_contact_cell_phone }}
                 </div>
             </div>
@@ -54,6 +54,12 @@
                 <div class="col-lg-12">
                     <label for="id_point_of_contact_office_phone" class="control-label">POC Office Phone</label>
                     {{ form.point_of_contact_office_phone }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_schedule_date" class="control-label">Schedule Date</label>
+                    {{ form.schedule_date }}
                 </div>
             </div>
             <div class="row form-line">
@@ -71,5 +77,14 @@
             </div>
         </div>
 	</form>
+        <script>
+        $(function () {
+            $("#id_schedule_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
 
 {% endblock %}

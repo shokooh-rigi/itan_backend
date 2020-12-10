@@ -25,6 +25,7 @@ urlpatterns = [
     path('profile/', core_views.profile_edit, name='ProfileEdit'),
     path('activities/', core_views.activities, name='Activities'),
     path('djrichtextfield/', include('djrichtextfield.urls')),
+    path('tinymce/', include('tinymce.urls')),
 
     path('', include('mysite.estimator.urls')),
     path('', include('mysite.submittal.urls')),
@@ -41,6 +42,7 @@ urlpatterns = [
     path('', include('mysite.sheetcreator.urls')),
     path('', include('mysite.testsheetvav.urls')),
     path('', include('mysite.testsheetterminal.urls')),
+    path('', include('mysite.generatereport.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),

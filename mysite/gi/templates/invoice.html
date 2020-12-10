@@ -113,33 +113,36 @@
         <table class="table table-striped" id="printThis">
             <thead>
                 <tr>
-                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Invoice Number</a></th>
-                    <th data-sortable="order__project_number"><a href="{% if request.GET.ordering == 'order__project_number' %}?{% url_replace request 'ordering' '-order__project_number' %}{% else %}?{% url_replace request 'ordering' 'order__project_number' %}{% endif %}">Project Number</a></th>
-                    <th data-sortable="order__date_po_received"><a href="{% if request.GET.ordering == 'order__date_po_received' %}?{% url_replace request 'ordering' '-order__date_po_received' %}{% else %}?{% url_replace request 'ordering' 'order__date_po_received' %}{% endif %}">PO Date</a></th>
-                    <th data-sortable="order__proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="order__proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
-                    <th>Total Ordered</th>
-                    <th>Total Invoiced</th>
-                    <th>Created on</th>
-                    <th>View</th>
-                    <th>Actions</th>
+                    <th style="padding: .75rem .5rem;" data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Invoice Number</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__project_number"><a href="{% if request.GET.ordering == 'order__project_number' %}?{% url_replace request 'ordering' '-order__project_number' %}{% else %}?{% url_replace request 'ordering' 'order__project_number' %}{% endif %}">Project Number</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__date_po_received"><a href="{% if request.GET.ordering == 'order__date_po_received' %}?{% url_replace request 'ordering' '-order__date_po_received' %}{% else %}?{% url_replace request 'ordering' 'order__date_po_received' %}{% endif %}">PO Date</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
+                    <th style="padding: .75rem .5rem;">Invoice Date</th>
+                    <th style="padding: .75rem .5rem;">Total Invoiced</th>
+                    <th style="padding: .75rem .5rem;">Total Paid</th>
+                    <th style="padding: .75rem .5rem;">Balance Due</th>
+                    <th style="padding: .75rem .5rem;">View</th>
+                    <th style="padding: .75rem .5rem;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for invoice in invoices %}
                     {% if invoice.mark_as_paid == False %}
                         <tr>
-                            <td>{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
-                            <td>{{ invoice.order.project_number }}</td>
-                            <td>{{ invoice.order.date_po_received }}</td>
-                            <td>{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
-                            <td>{{ invoice.order.proposal.quote.estimate.project }}</td>
-                            <td>${% order_total_calculator invoice.order.proposal.quote.estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }}</td>
-                            <td>${% calculate_total_amount_due invoice %}</td>
-                            <td>{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
-                            <td><a href="{% url 'invoiceView' invoice_id=invoice.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>
-                            <td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.project_number }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.date_po_received }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.project }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
+                            <td style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice %}</td>
+                            <td style="padding: .75rem .5rem;">${% calculate_total_paid invoice %}</td>
+                            <td style="padding: .75rem .5rem;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }}</td>
+                            <td style="padding: .75rem .5rem;"><a href="{% url 'invoiceView' invoice_id=invoice.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>
+                            <td style="padding: .75rem .5rem;">
                                 <a href="{% url 'invoiceEdit' invoice_id=invoice.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
+                                <a href="{% url 'invoicePayment' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon transactionicon" data-toggle="tooltip" data-placement="bottom" title="Transactions"></div></a>
                                 <a href="{% url 'invoiceDelete' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'invoiceArchive' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
                                 <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/Invoice-{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
@@ -214,7 +217,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                    {{ form.invoice_id.as_hidden }}
+                    {{ form.email_id.as_hidden }}
                     <div class="form-actions">
                       <button type="submit" class="btn btn-success" value="Next" name="send">Send</button>
                     </div>
@@ -230,7 +233,7 @@
     $(document).ready(function() {
         $(".alert").css('display', 'none');
         $(document).on("click", ".email_modal", function () {
-             $(".modal-body #id_invoice_id").val( $(this).data('id') );
+             $(".modal-body #id_email_id").val( $(this).data('id') );
              $(".modal-body #id_subject").val( $(this).data('project') );
              $(".modal-header .modal-title").text('Email Invoice #' + invoiceId);
         });

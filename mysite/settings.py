@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'custom_user.apps.CustomUserConfig',
     'djrichtextfield',
+    'tinymce',
     'import_export',
     'rest_framework',
     'snowpenguin.django.recaptcha2',
@@ -72,6 +73,7 @@ INSTALLED_APPS = [
     'mysite.sheetcreator',
     'mysite.testsheetvav',
     'mysite.testsheetterminal',
+    'mysite.generatereport',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags',
@@ -245,3 +247,6 @@ BOOTSTRAP4 = {
 
 RECAPTCHA_PRIVATE_KEY = '6Levt-YUAAAAAClOFMj-oIofEeszrY4CMcQERlZj'
 RECAPTCHA_PUBLIC_KEY = '6Levt-YUAAAAAEtQg-rc4Y9FqatZuPEdDeR4mDCk'
+
+TINYMCE_SPELLCHECKER = False
+TINYMCE_COMPRESSOR = True

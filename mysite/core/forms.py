@@ -96,7 +96,7 @@ class EmailForm(forms.Form):
     subject = forms.CharField(required=True, label='Subject')
     to_email = forms.CharField(required=True, label='To')
     cc = forms.CharField(required=False, label='CC')
-    email_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
+    email_id = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     def __init__(self, *args, **kwargs):
         super(EmailForm, self).__init__(*args, **kwargs)

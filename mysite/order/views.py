@@ -195,6 +195,9 @@ def tech_label(request, order_id):
                               }
                 techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
                 parameters['techlabel_pdf'] = techlabel_pdf[1]
+                if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                    techlabel_extra_pdf = TechLabel.create_techlabel_extra_pdf(parameters)
+                    parameters['techlabel_extra_pdf'] = techlabel_extra_pdf[1]
                 file_path = os.path.join(settings.MEDIA_ROOT, parameters['techlabel_pdf'])
                 if os.path.exists(file_path):
                     with open(file_path, 'rb') as fh:

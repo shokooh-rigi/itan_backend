@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Invoice {{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} Transactions</h2>
+    <h4>Total Amount ${% order_total_calculator invoice.order.proposal.quote.estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }} - Total Due: ${% calculate_total_amount_due invoice %}</h4>
+    <ul class="list-group">
+    {% if invoice_transactions %}
+    {% for invoice_transaction in invoice_transactions %}
+        <li class="list-group-item">
+            Transaction Amount: <b>${{ invoice_transaction.amount }} </b>
+            - Transaction Date: <b>{{ invoice_transaction.payment_date }} </b>
+            {% if invoice_transaction.payment_no %}- Transaction No: <b>{{ invoice_transaction.payment_no }} </b>{% endif %}
+            <a href="{% url 'invoicePaymentDelete' invoice_transaction.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+        </li>
+    {%  endfor %}
+    {% else %}
+        There are no Transactions yet.
+    {% endif %}
+    </ul>
+    <br />
+    <br />
+    <h2>New Invoice Payment for this Invoice</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="invoicePayment-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.invoice.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_amount" class="control-label position-relative">Amount <span class="required">*</span>
+                    <div style="position: absolute; opacity: 0.5; top: 2px; left: 190px; pointer-events: none;">
+                        <label style="width: 100%; text-align: right;">$</label>
+                    </div>
+                    </label>
+                    {{ form.amount }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_payment_date" class="control-label">Payment Date <span class="required">*</span></label>
+                    {{ form.payment_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_payment_no" class="control-label">Payment No.</label>
+                    {{ form.payment_no }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Create" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+    $(document).ready(function() {
+        $("#customer").text($('#id_order').find(':selected').data('customer'));
+        $("#project").text($('#id_order').find(':selected').data('project'));
+        $("#total_amount").text($('#id_order').find(':selected').data('totalamount'));
+        $('#id_order').on('change', function () {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#project").text($(this).find(':selected').data('project'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    });
+    </script>
+
+    <script>
+        $(function () {
+            $("#id_payment_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

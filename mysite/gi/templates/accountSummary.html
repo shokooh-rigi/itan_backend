@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <div class="text-center">
+        <a href="{% url 'accountSummaryAdd' %}"><button type="button" class="btn btn-primary big">Generate Account Summary</button></a>
+        <br /><br /><hr />
+
+
+        <div class="row" style="margin: 10px auto; position: relative;">
+            <form action="?{% url_replace request 'search' '' %}">
+                <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                    <label for="search"></label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Project Name/Number..." value="{{ request.GET.search }}" />
+                    <input type="hidden" name="paginate_by" value="{{ request.GET.paginate_by }}" />
+                    <input type="hidden" name="ordering" value="{{ request.GET.ordering }}" />
+                    <input type="hidden" name="fromDate" value="{{ request.GET.fromDate }}" />
+                    <input type="hidden" name="toDate" value="{{ request.GET.toDate }}" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="pagination" style="position: absolute; left: 50%; bottom: 50%; transform: translate(-50%, 50%);">
+              {% if account_summaries.has_previous %}
+                <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+                 <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' account_summaries.previous_page_number %}">
+                  <i class="fa fa-angle-left" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+
+              {% for num in account_summaries.paginator.page_range %}
+
+                {% if account_summaries.number == num %}
+                <span class="pagination-number pagination-current">{{ num }}</span>
+                {% elif num > account_summaries.number|add:'-3' and num < account_summaries.number|add:'3' %}
+                <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+                {% endif %}
+
+              {% endfor %}
+
+              {% if account_summaries.has_next %}
+                <a class="pagination-action" href="?{% url_replace request 'page' account_summaries.next_page_number %}">
+                  <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' account_summaries.paginator.num_pages %}">
+                  <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            </div>
+            <div class="pagination-select">
+                <header class="title">items per page</header>
+                <div class="btn-group">
+                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
+                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_300" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '300' %}">300</a></button>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin: 10px auto; text-align: left;">
+            <div class="col-sm-12" style="text-align: center; margin: -7px 0 7px 0;">
+                <button class="btn btn-primary" id="printbtn">Print This Table</button>
+            </div>
+        </div>
+
+
+
+
+
+        <table class="table table-striped" id="printThis">
+            <thead>
+                <tr>
+                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th data-sortable="statement_no"><a href="{% if request.GET.ordering == 'statement_no' %}?{% url_replace request 'ordering' '-statement_no' %}{% else %}?{% url_replace request 'ordering' 'statement_no' %}{% endif %}">Statement Number</a></th>
+                    <th data-sortable="customer"><a href="{% if request.GET.ordering == 'customer' %}?{% url_replace request 'ordering' '-customer' %}{% else %}?{% url_replace request 'ordering' 'customer' %}{% endif %}">Customer</a></th>
+                    <th>Total</th>
+                    <th>Created on</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account_summary in account_summaries %}
+                    <tr>
+                        <td>{{ account_summary.id }}</td>
+                        <td>{{ account_summary.statement_no }}</td>
+                        <td>{{ account_summary.customer }}</td>
+                        <td>${{ account_summary.total }}</td>
+                        <td>{{ account_summary.created_on|date:"DATE_FORMAT" }}</td>
+                        <td>
+                            <a href="{% url 'accountSummaryDelete' account_summary_id=account_summary.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+{#                            <a href="{% url 'invoiceArchive' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
+                            <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/accountsummary/AccountSummary-{{ account_summary.statement_no }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                            <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-id="{{ account_summary.statement_no }}" data-customer="{{ account_summary.customer }}" data-customeremail="{{ account_summary.customer.mail }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if is_paginated %}
+        <ul class="pagination">
+            {% if account_summaries.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' account_summaries.previous_page_number %}">Previous</a></li>
+            {% endif %}
+            Page {{ account_summaries.number }} of {{ account_summaries.paginator.num_pages }}
+            {% if account_summaries.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' account_summaries.next_page_number %}">Next</a></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+
+
+        <div class="pagination">
+          {% if account_summaries.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' account_summaries.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in account_summaries.paginator.page_range %}
+
+            {% if account_summaries.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > account_summaries.number|add:'-3' and num < account_summaries.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if account_summaries.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' account_summaries.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' invaccount_summariesoices.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
+
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header" style="display: block;">
+                <button type="button" class="close" data-dismiss="modal" style="float: right;">&times;</button>
+                <h4 class="modal-title" style="float: left;">Email Account Summary</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {{ field.help_text }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {{ form.email_id.as_hidden }}
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-success" value="Next" name="send">Send</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $(".alert").css('display', 'none');
+        $(document).on("click", ".email_modal", function () {
+             $(".modal-body #id_email_id").val( $(this).data('id') );
+             $(".modal-body #id_subject").val( $(this).data('customer') + ' Account Summary' );
+             $(".modal-body #id_to").val( $(this).data('customeremail') );
+             $(".modal-header .modal-title").text('Email Account Summary #' + invoiceId);
+        });
+
+        var sortables = ['id', 'statement_no'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test1);
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test2);
+            }
+        }
+
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=300') > 0) {
+            $(".pagination-select #paginate_300").addClass('selected');
+            $(".pagination-select #paginate_300 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').addClass('hide');
+                    $('#printThis').css('margin-top','100px');
+                    $('#printThis tr th:nth-last-child(1), #printThis tr td:nth-last-child(1)').css('display','none');
+                },
+                afterPrint: function(){
+                    $('#topnav').removeClass('hide');
+                    $('#printThis').css('margin-top','0px');
+                    $('#printThis tr th:nth-last-child(1), #printThis tr td:nth-last-child(1)').css('display','table-cell');
+                },
+            });
+        });
+    });
+</script>
+    <script>
+        $(function () {
+            $("#id_fromDate, #id_toDate").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+{% endblock %}
