@@ -6,10 +6,18 @@
 
 {% block content %}
     <div class="text-center">
-    <h2>AIR MOVING EQUIPMENT SHEET LIST</h2>
-
-        <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary">Generate Equipment Sheet</button></a>
-        <br /><br />
+        <h2>PROJECTS LIST</h2>
+        <h3>Select Projects Filtered By:</h3>
+        <div class="btn-group type-select" style="margin: 10px auto;">
+            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
+            <a class="btn btn-primary inprogressselected" href="?{% url_replace request 'type' 'tp' %}">Tech Package</a>
+            <a class="btn btn-primary reportedselected" href="?{% url_replace request 'type' 'ts' %}">Tech Scheduled</a>
+            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'jc' %}">Job Completed</a>
+            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'ro' %}">Report Out</a>
+            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'in' %}">Invoiced</a>
+            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'co' %}">Completed</a>
+        </div>
+        <br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">
                 <div class="form-group" style="display: inline-block; transform: translateY(2px);">
@@ -19,30 +27,30 @@
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>
             <div class="pagination" style="position: absolute; left: 50%; bottom: 50%; transform: translate(-50%, 50%);">
-              {% if sheets.has_previous %}
+              {% if projects.has_previous %}
                 <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
                  <i class="fa fa-angle-double-left" aria-hidden="true"></i>
                 </a>
-                <a class="pagination-action" href="?{% url_replace request 'page' sheets.previous_page_number %}">
+                <a class="pagination-action" href="?{% url_replace request 'page' projects.previous_page_number %}">
                   <i class="fa fa-angle-left" aria-hidden="true"></i>
                 </a>
               {% endif %}
 
-              {% for num in sheets.paginator.page_range %}
+              {% for num in projects.paginator.page_range %}
 
-                {% if sheets.number == num %}
+                {% if projects.number == num %}
                 <span class="pagination-number pagination-current">{{ num }}</span>
-                {% elif num > sheets.number|add:'-3' and num < sheets.number|add:'3' %}
+                {% elif num > projects.number|add:'-3' and num < projects.number|add:'3' %}
                 <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
                 {% endif %}
 
               {% endfor %}
 
-              {% if sheets.has_next %}
-                <a class="pagination-action" href="?{% url_replace request 'page' sheets.next_page_number %}">
+              {% if projects.has_next %}
+                <a class="pagination-action" href="?{% url_replace request 'page' projects.next_page_number %}">
                   <i class="fa fa-angle-right" aria-hidden="true"></i>
                 </a>
-                <a class="pagination-action" href="?{% url_replace request 'page' sheets.paginator.num_pages %}">
+                <a class="pagination-action" href="?{% url_replace request 'page' projects.paginator.num_pages %}">
                   <i class="fa fa-angle-double-right" aria-hidden="true"></i>
                 </a>
               {% endif %}
@@ -59,61 +67,62 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Sheet ID</a></th>
-                    <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project</a></th>
+                    <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project #</a></th>
+                    <th data-sortable="project__proposal__quote__estimate__customer__company__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Customer</a></th>
                     <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
-                    <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
-                    <th>Equipments List</th>
+                    <th>Order Total</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Tech Package" style="text-decoration: underline;">TP</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Tech Scheduled" style="text-decoration: underline;">TS</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Job Completed" style="text-decoration: underline;">JC</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Report Out" style="text-decoration: underline;">RO</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Invoiced" style="text-decoration: underline;">I</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Completed" style="text-decoration: underline;">C</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for sheet in sheets %}
+                {% for project in projects %}
                     <tr>
-                        <td>{{ sheet.id }}</td>
-                        <td>{{ sheet.project.project_number }}</td>
-                        <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
-                        <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
-                        <td>{{ sheet.sheet_date }}</td>
-                        <td>
-                            <a href="{% url 'sheetEquipmentAdd' sheet.id %}" style="display: inline-block;"><div class="icon addicon" data-toggle="tooltip" data-placement="bottom" title="Add Equipment"></div></a>
-                            <a href="{% url 'sheetEquipmentsList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
-                        </td>
-                        <td>
-{#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
-                            <a href="{% url 'sheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
-                            <a href="{% url 'sheetArchive' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
-                        </td>
+                        <td>{{ project.project_number }}</td>
+                        <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
+                        <td>{{ project.proposal.quote.estimate.project.name }}</td>
+                        <td>${% order_total_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>{% if project.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.report_out %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.invoiced %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td><a href="{% url 'projectProcessEdit' project.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
         <div class="pagination">
-          {% if sheets.has_previous %}
+          {% if projects.has_previous %}
             <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
              <i class="fa fa-angle-double-left" aria-hidden="true"></i>
             </a>
-            <a class="pagination-action" href="?{% url_replace request 'page' sheets.previous_page_number %}">
+            <a class="pagination-action" href="?{% url_replace request 'page' projects.previous_page_number %}">
               <i class="fa fa-angle-left" aria-hidden="true"></i>
             </a>
           {% endif %}
 
-          {% for num in sheets.paginator.page_range %}
+          {% for num in projects.paginator.page_range %}
 
-            {% if sheets.number == num %}
+            {% if projects.number == num %}
             <span class="pagination-number pagination-current">{{ num }}</span>
-            {% elif num > sheets.number|add:'-3' and num < sheets.number|add:'3' %}
+            {% elif num > projects.number|add:'-3' and num < projects.number|add:'3' %}
             <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
             {% endif %}
 
           {% endfor %}
 
-          {% if sheets.has_next %}
-            <a class="pagination-action" href="?{% url_replace request 'page' sheets.next_page_number %}">
+          {% if projects.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' projects.next_page_number %}">
               <i class="fa fa-angle-right" aria-hidden="true"></i>
             </a>
-            <a class="pagination-action" href="?{% url_replace request 'page' sheets.paginator.num_pages %}">
+            <a class="pagination-action" href="?{% url_replace request 'page' projects.paginator.num_pages %}">
               <i class="fa fa-angle-double-right" aria-hidden="true"></i>
             </a>
           {% endif %}

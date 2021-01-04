@@ -23,6 +23,7 @@ class DataSheet(models.Model):
     sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
     system = models.CharField(max_length=50, blank=False)
     number_of_equipment_groups = models.IntegerField(default=1, blank=False)
+    archive = models.BooleanField(default=False)
 
     def __str__(self):
         return self.test_sheet_type.name + " " + self.project.project_number
@@ -76,6 +77,7 @@ class Sheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
     sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
     system = models.CharField(max_length=50, blank=False)
+    archive = models.BooleanField(default=False)
 
     def __str__(self):
         return self.test_sheet_type.name + " " + self.project.project_number

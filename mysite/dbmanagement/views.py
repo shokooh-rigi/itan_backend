@@ -6,6 +6,7 @@ from .forms import *
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from ..dbmanagement.models import ShowParenthesesChoices
+from django import forms
 
 
 @login_required
@@ -42,7 +43,7 @@ def equipment_create(request):
         if form.is_valid():
             if request.POST.get("save"):
                 this_equipment = form.save()
-                if this_equipment.equipment_type.test_sheet == 1:
+                if this_equipment.equipment_type.test_sheet.id == 1:
                     return redirect('EquipmentsValues', this_equipment.pk)
                 else:
                     return redirect('VavEquipmentsValues', this_equipment.pk)

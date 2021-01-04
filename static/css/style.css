@@ -446,6 +446,10 @@ input[type=text][readonly] {
     background-image: url("../images/icons/edit.svg");
 }
 
+.icon.addicon {
+    background-image: url("../images/icons/plus.svg");
+}
+
 .icon.transactionicon {
     background-image: url("../images/icons/transaction.svg");
 }

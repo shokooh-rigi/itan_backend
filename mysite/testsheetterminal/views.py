@@ -751,17 +751,17 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
     if is_air_moving:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          air_equipment=this_sheet_equipment,
-                                                                         type=1)
+                                                                         type=1).order_by('outlet_no')
         return_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          air_equipment=this_sheet_equipment,
-                                                                         type=2)
+                                                                         type=2).order_by('outlet_no')
     else:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
-                                                                         type=1)
+                                                                         type=1).order_by('outlet_no')
         return_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
-                                                                         type=2)
+                                                                         type=2).order_by('outlet_no')
 
     if request.method == 'POST':
         if request.POST.get("cancel"):

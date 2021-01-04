@@ -31,7 +31,7 @@ def sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Sheet.objects.filter(test_sheet_type_id=1)
+    object_list = Sheet.objects.filter(test_sheet_type_id=1, archive=False)
     object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
                                      Q(project__project_number__icontains=project_name)).order_by(ordering)
 
@@ -117,6 +117,31 @@ def sheet_equipment(request, sheet_id):
                   'first_equipment_id': first_equipment_id,
                   }
     return render(request, "sheetEquipment.html", parameters)
+
+
+@login_required
+def add_equipment(request, sheet_id):
+    sheet = Sheet.objects.get(id=sheet_id)
+    form = SheetEquipmentForm(request.POST or None, initial={'sheet': sheet_id})
+
+    equipments = Equipment.objects.filter(test_sheet__name__icontains='air mov')
+
+    sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            for i in range(0, form.cleaned_data['quantity']):
+                item_sheet_equipment = SheetEquipment()
+                item_sheet_equipment.sheet = Sheet.objects.get(id=sheet_id)
+                item_sheet_equipment.equipment_type = Equipment.objects.get(id=form.cleaned_data['equipment_type'].id)
+                item_sheet_equipment.save()
+            return redirect('sheetEquipmentsList', sheet_id)
+    parameters = {'sheet': sheet,
+                  'form': form,
+                  'sheet_equipments': sheet_equipments,
+                  'equipments': equipments,
+                  }
+    return render(request, "sheetEquipmentAdd.html", parameters)
 
 
 @login_required
@@ -841,6 +866,21 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
                   'required_fields': required_fields,
                   }
     return render(request, "EquipmentActualValueEdit.html", parameters)
+
+
+@login_required
+def sheet_archive(request, sheet_id):
+    this_sheet = get_object_or_404(Sheet, id=sheet_id)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('sheetHome')
+        if request.POST.get("confirm"):
+            this_sheet.archive = True
+            this_sheet.save()
+            return redirect('sheetHome')
+    parameters = {'this_sheet': this_sheet,
+                  }
+    return render(request, "sheet_archive.html", parameters)
 
 
 @login_required

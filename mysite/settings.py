@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'mysite.testsheetvav',
     'mysite.testsheetterminal',
     'mysite.generatereport',
+    'mysite.projectprocess',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags',

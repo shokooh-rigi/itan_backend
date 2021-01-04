@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+
+{% block content %}
+    <h2>Add Air Moving Equipments for {{ sheet.project.project_number }} {{ sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_equipment_type" class="control-label">Equipment</label>
+                    <select name="equipment_type" class="form-control" required="" id="id_equipment_type">
+                        <option value="" selected="">---------</option>
+
+                        {% for equipment in equipments %}
+                            <option value="{{ equipment.id }}">{{ equipment.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_quantity" class="control-label">Quantity</label>
+                    {{ form.quantity }}
+                </div>
+            </div>
+            {{ form.sheet.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Add" />
+                </div>
+            </div>
+        </div>
+	</form>
+    <br />
+    <a href="{% url "sheetHome" %}"><button class="btn btn-danger">Cancel</button></a>
+    <script>
+        $('#id_equipment_type').on('change', function() {
+            if ($(this).find(':selected').data('selectedbefore') === 1) {
+                $('#equipment_message').text($(this).find(':selected').text());
+                $('.change-alert').slideDown();
+            }
+            else {
+                $('.change-alert').slideUp();
+            }
+
+        });
+    </script>
+{% endblock %}

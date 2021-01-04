@@ -43,6 +43,7 @@ urlpatterns = [
     path('', include('mysite.testsheetvav.urls')),
     path('', include('mysite.testsheetterminal.urls')),
     path('', include('mysite.generatereport.urls')),
+    path('', include('mysite.projectprocess.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),

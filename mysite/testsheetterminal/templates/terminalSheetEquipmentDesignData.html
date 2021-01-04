@@ -47,19 +47,19 @@
                                 <input style="width: 100%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}" maxlength="50"
-                                       class="form-control eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       class="form-control eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                        value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field supply_terminal_equipment.id %}{% endif %}"
                                        {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
                             {% else %}
                                 <input style="width: 46%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}-x" maxlength="50"
-                                       class="size-split form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                       class="size-split form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
                                        value="" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
                                         X
                                 <input style="width: 46%;" {% get_field_type design_field %}
                                         name="{{ field_name }}-y" maxlength="50"
-                                       class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                       class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
                                        value="" />
                             {% endif %}
                             </label>
@@ -117,19 +117,19 @@
                                 <input style="width: 100%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}" maxlength="50"
-                                       class="form-control eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       class="form-control eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                        value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field return_terminal_equipment.id %}{% endif %}"
                                        {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
                             {% else %}
                                 <input style="width: 46%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}-x" maxlength="50"
-                                       class="size-split form-control size_eq_return_x size_{{ return_terminal_equipment.id }}_x eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                       class="size-split form-control size_eq_return_x size_{{ return_terminal_equipment.id }}_x eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
                                        value="" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
                                         X
                                 <input style="width: 46%;" {% get_field_type design_field %}
                                         name="{{ field_name }}-y" maxlength="50"
-                                       class="form-control size_eq_return_y size_{{ return_terminal_equipment.id }}_y eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                       class="form-control size_eq_return_y size_{{ return_terminal_equipment.id }}_y eq_return{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
                                        value="" />
                             {% endif %}
                             </label>
@@ -209,10 +209,16 @@
             let field_id = $(this).data('fieldid');
             let loop_id = $(this).data('loopid');
             if (loop_id == 1) {
-                $(this).find('.eq_supply' + field_id).on('change', function () {
+                $(this).find('.eq_supply' + field_id + '_x').on('change', function () {
                     if ( $(this).parent().parent().is(':nth-child(2)') == false ) {
                         let first_value = $(this).val();
-                        $('.eq_supply' + field_id).val(first_value);
+                        $('.eq_supply' + field_id + '_x').val(first_value);
+                    }
+                });
+				$(this).find('.eq_supply' + field_id + '_y').on('change', function () {
+                    if ( $(this).parent().parent().is(':nth-child(2)') == false ) {
+                        let first_value = $(this).val();
+                        $('.eq_supply' + field_id + '_y').val(first_value);
                     }
                 });
             }
@@ -221,10 +227,16 @@
             let field_id = $(this).data('fieldid');
             let loop_id = $(this).data('loopid');
             if (loop_id == 1) {
-                $(this).find('.eq_return' + field_id).on('change', function () {
+                $(this).find('.eq_return' + field_id + '_x').on('change', function () {
                     if ( $(this).parent().parent().is(':nth-child(2)') == false ) {
                         let first_value = $(this).val();
-                        $('.eq_return' + field_id).val(first_value);
+                        $('.eq_return' + field_id + '_x').val(first_value);
+                    }
+                });
+				$(this).find('.eq_return' + field_id + '_y').on('change', function () {
+                    if ( $(this).parent().parent().is(':nth-child(2)') == false ) {
+                        let first_value = $(this).val();
+                        $('.eq_return' + field_id + '_y').val(first_value);
                     }
                 });
             }
