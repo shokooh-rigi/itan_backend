@@ -6,12 +6,14 @@ from mysite.order.models import Order
 class SupplyorReturnChoices(Enum):
     Supply = 1
     Return = 2
+    Outside = 3
 
     @staticmethod
     def get_items():
         return (
             (SupplyorReturnChoices.Supply.value, 'Supply'),
             (SupplyorReturnChoices.Return.value, 'Return'),
+            (SupplyorReturnChoices.Outside.value, 'Outside'),
         )
 
 # Create your models here.
@@ -89,6 +91,7 @@ class SheetEquipment(models.Model):
     equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
     number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     number_of_return_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_outside_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)

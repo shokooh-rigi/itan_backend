@@ -131,6 +131,58 @@
         </div>
         {% endfor %}
         {% endif %}
+        {% if outside_repeat_list %}
+            <h2 class="my-4">Outside Air Terminals</h2>
+        {% for outside_terminal_equipment in outside_terminal_equipments %}
+        <div class="row form-line">
+            <div class="col-lg-3">
+                <label style="width: 100%;" for="outlet_no" class="control-label">
+                    Outlet No.
+                </label>
+            </div>
+            <div class="col-lg-3">
+                <label for="outlet_no" class="control-label equal_fields_outside" style="width: 100%;">
+                    <input style="width: 100%;" type="text"
+                           name="outlet_no" maxlength="50" class="form-control" id="outlet_no"
+                           value="{{ outside_terminal_equipment.outlet_no }}" readonly />
+                </label>
+            </div>
+                {% for actual_field in actual_fields %}
+                    {% with 'outside_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:outside_terminal_equipment.id as field_name %}
+                        <div class="col-lg-3">
+                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                {{ actual_field.field_name }}
+                                {% if actual_field.required_in_actual %}
+                                    <span class="required">*</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="{{ field_name }}" class="control-label equal_fields_outside" data-fieldid="{{ actual_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if actual_field.field_name|lower != 'note' %}
+                                    <input style="width: 100%;" {% get_field_type actual_field %}
+                                       {% if actual_field.required_in_actual %}required=""{% endif %}
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="form-control eq_outside{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       value="{% if actual_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_actual_value request actual_field outside_terminal_equipment.id %}{% endif %}"
+                                       {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                <textarea style="width: 100%;"
+                                       {% if actual_field.required_in_actual %}required=""{% endif %}
+                                       name="{{ field_name }}" maxlength="50"
+                                          class="form-control" id="{{ field_name }}">{% get_terminal_actual_value request actual_field outside_terminal_equipment.id %}</textarea>
+                                {% endif %}
+                            </label>
+                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                            </div>
+                        </div>
+                    {% endwith %}
+                {% endfor %}
+            <br />
+        </div>
+        {% endfor %}
+        {% endif %}
         <div class="row">
             <div class="col-lg-12" style="padding-right: 36px;">
                 <input type="submit" class="btn btn-primary" value="Save" name="next"/>
@@ -156,6 +208,16 @@
                 $(this).find('.eq_return' + field_id).on('change', function () {
                     let first_value = $(this).val();
                     $('.eq_return' + field_id).val(first_value);
+                });
+            }
+        });
+        $('.equal_fields_outside').each(function( index ) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq_outside' + field_id).on('change', function () {
+                    let first_value = $(this).val();
+                    $('.eq_outside' + field_id).val(first_value);
                 });
             }
         });
@@ -219,40 +281,6 @@
             input.on('change', onInputChange);
         });
     </script>
-    <script>
-        /*
-        * Evaluate assignment operations.
-        * */
-        const assignmentOperations = {{ assignment_operations | safe }};
 
-        function find_closest_design_value(actual_value, design_value) {
-            if (actual_value && actual_value.trim()) {
-                actual_value = parseFloat(actual_value.trim());
-                return design_value.reduce((a, b) => Math.abs(b - actual_value) < Math.abs(a - actual_value) ? b : a);
-            } else {
-                return design_value[0];
-            }
-        }
-
-        for (const assignment of assignmentOperations) {
-            const readonlyField = eval(assignment.substring(0, assignment.indexOf('.val(')));
-            readonlyField.attr('readonly', '');
-        }
-
-        const evalAssignmentOperations = () => {
-            for (let assignment of assignmentOperations) {
-                assignment = assignment.replace(/{[\d,]+\d}/gi, (match) => {
-                    const nums = match.substring(1, match.length - 1).split(',');
-                    const actual_value = $('[name="actual_value_' + nums[0] + '"]').val();
-                    nums.shift();
-                    return find_closest_design_value(actual_value, nums.map((v) => parseFloat(v)));
-                });
-                eval(assignment);
-            }
-        };
-
-        evalAssignmentOperations();
-        $('form').on('change', evalAssignmentOperations);
-    </script>
 
 {% endblock %}

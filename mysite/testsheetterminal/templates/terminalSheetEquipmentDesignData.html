@@ -166,6 +166,71 @@
         </div>
         {% endfor %}
         {% endif %}
+        {% if outside_repeat_list %}
+            <h2 class="my-4">Outside Air Terminals</h2>
+        {% for outside_terminal_equipment in outside_terminal_equipments %}
+        <div class="row form-line">
+                {% for design_field in design_fields %}
+                    {% with 'outside_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:outside_terminal_equipment.id as field_name %}
+                        <div class="col-lg-3">
+                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                {{ design_field.field_name }}
+                                {% if design_field.required_in_design %}
+                                    <span class="required">*</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="{{ field_name }}" class="control-label equal_fields_outside" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                            {% if design_field.field_name|lower != 'size' %}
+                                <input style="width: 100%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
+                                       data-eqid="{{ outside_terminal_equipment.id }}"
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="form-control {% if design_field.field_name|lower == 'ak factor' %}ak_factor ak_factor_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'fpm' %}fpm fpm_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'cfm' %}has_cfm{% endif %} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field outside_terminal_equipment.id %}{% endif %}"
+                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                            {% else %}
+                                <input style="width: 100%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
+                                       data-eqid="{{ outside_terminal_equipment.id }}"
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="size-split has_inch form-control size_eq_outside size_{{ outside_terminal_equipment.id }} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                       value="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" />
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">inch</label>
+                                </div>
+                            {% endif %}
+                            </label>
+                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                            </div>
+                        </div>
+
+
+                        {% if forloop.counter == 2 %}
+                        <div class="col-lg-3">
+                            <label style="width: 100%;" for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label">
+                                Code <span class="required">*</span>
+                            </label>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label select_equal_fields" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
+                                <input data-eqid="{{ outside_terminal_equipment.id }}" name="outside_code_select_{{ outside_terminal_equipment.id }}" id="outside_code_select_{{ outside_terminal_equipment.id }}" class="form-control select_eq_outside" style="width: 100%;" value="{% if outside_terminal_equipment.code %}{{ outside_terminal_equipment.code }}{% endif %}" />
+                            </label>
+                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                            </div>
+                        </div>
+                        {% endif %}
+
+
+                    {% endwith %}
+                {% endfor %}
+            <br />
+        </div>
+        {% endfor %}
+        {% endif %}
         <div class="row">
             <div class="col-lg-12" style="padding-right: 36px;">
                 <input type="submit" class="btn btn-primary" value="It's all good" name="next"/>
@@ -186,6 +251,74 @@
                     const size_y = size_splited[1];
                     $('#' + element_id + '-x').val(size_x);
                     $('#' + element_id + '-y').val(size_y);
+                }
+            });
+            $('.has_inch').each(function (index) {
+                $(this).val($(this).val().replace("″", ""));
+            });
+
+            $('.ak_factor, .fpm').each(function (index) {
+                $(this).attr('readonly', 'readonly');
+            });
+
+            $('.has_inch').each(function (index) {
+                let loop_id = $(this).parent().data('loopid');
+                let new_val = (($(this).val() / 24) ** 2) * 3.14
+                new_val = Math.round(new_val * 100) / 100
+                if (loop_id == 1) {
+                    $('.ak_factor').val(new_val);
+                }
+                else {
+                    $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                }
+            });
+
+            $('.has_inch').on('change', function () {
+                let loop_id = $(this).parent().data('loopid');
+                let new_val = (($(this).val() / 24) ** 2) * 3.14
+                new_val = Math.round(new_val * 100) / 100
+                if (loop_id == 1) {
+                    $('.ak_factor').val(new_val);
+                }
+                else {
+                    $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                }
+                $('.has_cfm').each(function (index) {
+                    if ($(this).val() != '') {
+                        let new_val = $(this).val() / $('.ak_factor_' + $(this).data('eqid')).val();
+                        new_val = Math.round(new_val * 100) / 100
+                        $('.fpm_' + $(this).data('eqid')).val(new_val);
+                    }
+                });
+            });
+
+            $('.has_cfm').each(function (index) {
+                if ($(this).val() != '') {
+                    let new_val = $(this).val() / $('.ak_factor_' + $(this).data('eqid')).val();
+                    new_val = Math.round(new_val * 100) / 100
+                    $('.fpm_' + $(this).data('eqid')).val(new_val);
+                }
+            });
+
+            $('.has_cfm').on('change', function () {
+                if ($(this).val() != '') {
+                    let loop_id = $(this).parent().data('loopid');
+                    let new_val = $(this).val() / $('.ak_factor_' + $(this).data('eqid')).val();
+                    new_val = Math.round(new_val * 100) / 100
+                    if (loop_id == 1) {
+                        $('.has_cfm').each(function (index) {
+                            if ($(this).val() != '' && $('.size_' + $(this).data('eqid')).val() != '') {
+                                let new_val = $(this).val() / $('.ak_factor_' + $(this).data('eqid')).val();
+                                new_val = Math.round(new_val * 100) / 100
+                                $('.fpm_' + $(this).data('eqid')).val(new_val);
+                            }
+                        });
+                    }
+                    else {
+                        if ($('.size_' + $(this).data('eqid')).val() != '') {
+                            $('.fpm_' + $(this).data('eqid')).val(new_val);
+                        }
+                    }
                 }
             });
         });
@@ -241,6 +374,18 @@
                 });
             }
         });
+        $('.equal_fields_outside').each(function( index ) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq_outside' + field_id).on('change', function () {
+                    if ( $(this).parent().parent().is(':nth-child(2)') == false ) {
+                        let first_value = $(this).val();
+                        $('.eq_outside' + field_id).val(first_value);
+                    }
+                });
+            }
+        });
         $('.select_eq_supply').on('change', function () {
             if ($(this).parent().data('loopid') == 1) {
                 $('.select_eq_supply').val($(this).val());
@@ -262,6 +407,7 @@
                 $('.size_eq_return_y').val(selected_default_y);
             }
         });
+
 
         $('.select_eq_supply').each(function( index ) {
             const selected_default = $(this).children("option:selected").data('default').replace("X", "x").split("x");
@@ -302,6 +448,7 @@
             $(size_input_x).val(selected_default_x);
             $(size_input_y).val(selected_default_y);
         });
+
     </script>
 
     <script>
