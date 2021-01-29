@@ -82,6 +82,18 @@ class OperandChoices(Enum):
         )
 
 
+class NumberOfFieldsChoices(Enum):
+    One = 1
+    Two = 2
+
+    @staticmethod
+    def get_items():
+        return (
+            (FieldRangeOrSelectiveChoices.Range.value, 'Size in One Field (inch)'),
+            (FieldRangeOrSelectiveChoices.Selective.value, 'Size in Two Field (x*y)'),
+        )
+
+
 # ======================================================================================================================
 
 
@@ -266,6 +278,7 @@ class EquipmentCustomField(models.Model):
 class AirTerminalCode(models.Model):
     name = models.CharField(max_length=5, blank=False)
     default = models.CharField(max_length=10, blank=True)
+    size_type = models.PositiveSmallIntegerField(choices=NumberOfFieldsChoices.get_items(), default=2, null=False, verbose_name='No. of Size Fields')
     is_custom = models.BooleanField(default=False)
 
     def __str__(self):

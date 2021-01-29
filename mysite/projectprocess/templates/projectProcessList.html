@@ -19,10 +19,10 @@
         </div>
         <br />
         <div class="row" style="margin: 10px auto; position: relative;">
-            <form action="?{% url_replace request 'project_name' '' %}">
+            <form action="?{% url_replace request 'search' '' %}">
                 <div class="form-group" style="display: inline-block; transform: translateY(2px);">
                     <label for="project_name"></label>
-                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name/Number..." value="{{ request.GET.project_name }}" />
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Project Name/Number..." value="{{ request.GET.search }}" />
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>
@@ -87,12 +87,12 @@
                         <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
                         <td>{{ project.proposal.quote.estimate.project.name }}</td>
                         <td>${% order_total_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
-                        <td>{% if project.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td>{% if project.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td>{% if project.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td>{% if project.report_out %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td>{% if project.invoiced %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td>{% if project.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.report_out %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.invoiced %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocess.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td><a href="{% url 'projectProcessEdit' project.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                     </tr>
                 {% endfor %}

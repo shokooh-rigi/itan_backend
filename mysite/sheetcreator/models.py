@@ -7,6 +7,7 @@ class SupplyorReturnChoices(Enum):
     Supply = 1
     Return = 2
     Outside = 3
+    Other = 4
 
     @staticmethod
     def get_items():
@@ -14,6 +15,7 @@ class SupplyorReturnChoices(Enum):
             (SupplyorReturnChoices.Supply.value, 'Supply'),
             (SupplyorReturnChoices.Return.value, 'Return'),
             (SupplyorReturnChoices.Outside.value, 'Outside'),
+            (SupplyorReturnChoices.Other.value, 'Other'),
         )
 
 # Create your models here.
@@ -30,6 +32,10 @@ class DataSheet(models.Model):
     def __str__(self):
         return self.test_sheet_type.name + " " + self.project.project_number
 
+    class Meta:
+        verbose_name = 'VAV & Air Terminal Sheets'
+        verbose_name_plural = 'VAV & Air Terminal Sheets'
+
 
 class DataSheetEquipment(models.Model):
     sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
@@ -43,8 +49,13 @@ class DataSheetEquipment(models.Model):
     terminal_design_data_entry_completed = models.BooleanField(default=False)
     terminal_actual_data_entry_completed = models.BooleanField(default=False)
 
+    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     def __str__(self):
         return str(self.sheet) + ": " + self.equipment_type.name
+
+    class Meta(object):
+        ordering = ['field_order']
 
 
 class TestSheetGeneralData(models.Model):
@@ -84,6 +95,10 @@ class Sheet(models.Model):
     def __str__(self):
         return self.test_sheet_type.name + " " + self.project.project_number
 
+    class Meta:
+        verbose_name = 'Air Moving Sheets'
+        verbose_name_plural = 'Air Moving Sheets'
+
 
 class SheetEquipment(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, blank=False, null=False)
@@ -92,14 +107,20 @@ class SheetEquipment(models.Model):
     number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     number_of_return_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     number_of_outside_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_any_other = models.SmallIntegerField(default=0, blank=False, null=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
     terminal_design_data_entry_completed = models.BooleanField(default=False)
     terminal_actual_data_entry_completed = models.BooleanField(default=False)
 
+    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     def __str__(self):
         return str(self.sheet) + ": " + self.equipment_type.name
+
+    class Meta(object):
+        ordering = ['field_order']
 
 
 class SheetEquipmentCommonData(models.Model):
@@ -136,6 +157,7 @@ class AirTerminalEquipment(models.Model):
     code = models.ForeignKey(AirTerminalCode, on_delete=models.CASCADE, blank=True, null=True)
     outlet_no = models.SmallIntegerField(blank=False, null=False)
     type = models.PositiveSmallIntegerField(choices=SupplyorReturnChoices.get_items(), default=1, null=False)
+    equipment_name = models.CharField(max_length=255, blank=False, null=True)
 
     def __str__(self):
         return str(self.sheet) + ": " + str(self.air_equipment) + ": " + str(self.vav_equipment)

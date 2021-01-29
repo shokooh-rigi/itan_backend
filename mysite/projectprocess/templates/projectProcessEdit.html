@@ -3,75 +3,138 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Generate Terminal Test Sheet</h2>
-    <form method = 'POST' action= '' enctype = "multipart/form-data" id="sheetAdd-form">
+    <h2>Edit Project Process</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="processEdit-form">
         <div class="form-group">
             {% csrf_token %}
-{#            {{ form.test_sheet_type }}#}
-            <div class="row form-line">
-                <div class="col-lg-12">
-                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
-                    <select name="project" class="form-control" required="" id="id_project" style="transform: translateX(-9px);">
-                        <option value="" selected="" data-projectname="">---------</option>
-                        {% for order in orders %}
-                            <option value="{{ order.id }}" data-projectname="{{ order.proposal.quote.estimate.project.name }}">
-                                {{ order.project_number }}</option>
-                        {% endfor %}
-                    </select>
+            {{ form.order.as_hidden }}
+
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Tech Package <span class="required">*</span></label>
+                        {{ form.tech_package }}
+                    </div>
                 </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="total_amount" class="control-label">Project Name</label>
-                    <span class="form-control" id="project_name" style="max-width:230px;min-height: 36px; height: auto; background-color: #eee;"></span>
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_sheet_date" class="control-label">Date <span class="required">*</span></label>
-                    {{ form.sheet_date }}
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">System Name<span class="required">*</span></label>
-                    {{ form.system }}
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Tech Package Date</label>
+                        {{ form.tech_package_date }}
+                    </div>
                 </div>
             </div>
 
-{#            <div class="row form-line">#}
-{#                <div class="col-lg-12" style="padding-right: 36px;">#}
-{#                    <label for="id_validity" class="control-label">Type <span class="required">*</span></label>#}
-{#                    <select name="test_sheet_type" class="form-control" required="" id="id_test_sheet_type">#}
-{#                    {% for x, y in form.fields.test_sheet_type.choices %}#}
-{#                        <option value="{{ x }}" {% if x.sheet_generator %}disabled{% endif %}>{{ y }}</option>#}
-{#                    {% endfor %}#}
-{#                    </select>#}
-{#                </div>#}
-{#            </div>#}
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Tech Scheduled <span class="required">*</span></label>
+                        {{ form.tech_scheduled }}
+                    </div>
+                </div>
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Tech Scheduled Date</label>
+                        {{ form.tech_scheduled_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Job Completed <span class="required">*</span></label>
+                        {{ form.job_completed }}
+                    </div>
+                </div>
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Job Completed Date</label>
+                        {{ form.job_completed_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Report Out <span class="required">*</span></label>
+                        {{ form.report_out }}
+                    </div>
+                </div>
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Report Out Date</label>
+                        {{ form.report_out_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Invoiced <span class="required">*</span></label>
+                        {{ form.invoiced }}
+                    </div>
+                </div>
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Invoiced Date</label>
+                        {{ form.invoiced_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-group my-4">
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package" class="control-label">Completed <span class="required">*</span></label>
+                        {{ form.completed }}
+                    </div>
+                </div>
+                <div class="row form-line m-0">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="id_tech_package_date" class="control-label">Completed Date</label>
+                        {{ form.completed_date }}
+                    </div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Generate" name="next" />
+                    <input type="submit" class="btn btn-success" value="Save" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>
             </div>
         </div>
 	</form>
     <script>
-        $('#id_project').on('change', function() {
-            if($(this).val() === '') {
-                $("#project_name").text('');
-            }
-            else {
-                $("#project_name").text($(this).find(':selected').data('projectname'));
-
-            }
+        $(document).ready(function() {
+            $('#id_tech_package, input[type=submit]').prop( "disabled", false );
+            $(".package-group input[type=checkbox]").each(function() {
+                if ($(this).is(":checked")) {
+                    $(this).prop("disabled", false);
+                    $(this).parent().parent().next().find('input[type=text]').prop("disabled", false);
+                    $(this).parent().parent().parent().next().find('input[type=checkbox]').prop("disabled", false);
+                }
+            });
+            $('.package-group input').on('change', function () {
+                if ($(this).is(":checked") && $(this).is(':checkbox')) {
+                    $(this).parent().parent().next().find('.form-control').prop( "disabled", false );
+                    $(this).parent().parent().parent().next().find('input[type=checkbox]').prop( "disabled", false );
+                } else {
+                    if ($(this).is(':checkbox')) {
+                        $(this).parent().parent().next().find('.form-control').prop( "disabled", true ).val('');
+                        $(this).parent().parent().parent().nextAll().find('input').prop( "disabled", true ).prop( "checked", false );
+                        $(this).parent().parent().parent().nextAll().find('input[type=text]').val('');
+                    }
+                }
+                $('input[type=submit]').prop( "disabled", false );
+            });
         });
     </script>
     <script>
         $(function () {
-            $("#id_sheet_date").datetimepicker({
+            $("#id_tech_package_date, #id_tech_scheduled_date, #id_job_completed_date, #id_report_out_date, #id_invoiced_date, #id_completed_date").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
                 scrollInput: false,

@@ -351,9 +351,11 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update = SheetEquipment.objects.get(id=sheet_equipment_id)
         new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
         new_update.main_data_entry_completed = True
+
         new_update.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
         new_update.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
         new_update.number_of_outside_air_terminal = request.POST.get('number_of_outside_air_terminal')
+        new_update.number_of_any_other = request.POST.get('number_of_any_other')
         new_update.save()
         return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
 
@@ -378,6 +380,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     sat = this_sheet_equipment.number_of_supply_air_terminal
     rat = this_sheet_equipment.number_of_return_air_terminal
     oat = this_sheet_equipment.number_of_outside_air_terminal
+    ao = this_sheet_equipment.number_of_any_other
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains=this_sheet_equipment)
 
@@ -393,15 +396,40 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
             this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             old_supply_number = this_sheet_equipment.number_of_supply_air_terminal
             old_return_number = this_sheet_equipment.number_of_return_air_terminal
+            old_outside_number = this_sheet_equipment.number_of_outside_air_terminal
+            old_other_number = this_sheet_equipment.number_of_any_other
             this_sheet_equipment.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
             this_sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             this_sheet_equipment.number_of_outside_air_terminal = request.POST.get('number_of_outside_air_terminal')
+            this_sheet_equipment.number_of_any_other = request.POST.get('number_of_any_other')
             if int(old_supply_number) != int(request.POST.get('number_of_supply_air_terminal')) or int(
-                    old_return_number) != int(request.POST.get('number_of_return_air_terminal')):
+                    old_return_number) != int(request.POST.get('number_of_return_air_terminal')) or int(
+                    old_outside_number) != int(request.POST.get('number_of_outside_air_terminal')) or int(
+                    old_other_number) != int(request.POST.get('number_of_any_other')):
                 if int(old_supply_number) > int(request.POST.get('number_of_supply_air_terminal')):
-                    AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment, type=1).delete()
+                    air_terminal_equipments = AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment,
+                                                                                  type=1)
+                    for air_terminal_equipment in air_terminal_equipments:
+                        AirTerminalSheetData.objects.filter(air_terminal_equipment=air_terminal_equipment).delete()
+                        air_terminal_equipment.delete()
                 if int(old_return_number) > int(request.POST.get('number_of_return_air_terminal')):
-                    AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment, type=2).delete()
+                    air_terminal_equipments = AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment,
+                                                                                  type=2)
+                    for air_terminal_equipment in air_terminal_equipments:
+                        AirTerminalSheetData.objects.filter(air_terminal_equipment=air_terminal_equipment).delete()
+                        air_terminal_equipment.delete()
+                if int(old_outside_number) > int(request.POST.get('number_of_outside_air_terminal')):
+                    air_terminal_equipments = AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment,
+                                                                                  type=3)
+                    for air_terminal_equipment in air_terminal_equipments:
+                        AirTerminalSheetData.objects.filter(air_terminal_equipment=air_terminal_equipment).delete()
+                        air_terminal_equipment.delete()
+                if int(old_other_number) > int(request.POST.get('number_of_any_other')):
+                    air_terminal_equipments = AirTerminalEquipment.objects.filter(air_equipment=this_sheet_equipment,
+                                                                                  type=4)
+                    for air_terminal_equipment in air_terminal_equipments:
+                        AirTerminalSheetData.objects.filter(air_terminal_equipment=air_terminal_equipment).delete()
+                        air_terminal_equipment.delete()
                 this_sheet_equipment.terminal_design_data_entry_completed = False
                 this_sheet_equipment.terminal_actual_data_entry_completed = False
             this_sheet_equipment.save()
@@ -413,6 +441,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                   'rat': rat,
                   'sat': sat,
                   'oat': oat,
+                  'ao': ao,
                   'showing_fields': showing_fields,
                   'manufacturers': manufacturers,
                   'value_fields': value_fields,

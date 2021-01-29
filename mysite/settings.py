@@ -158,7 +158,7 @@ if ENV == 'test':
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -219,6 +219,7 @@ if ENV == 'test':
 AUTH_USER_MODEL = 'custom_user.User'
 
 DATE_INPUT_FORMATS = ['%m/%d/%Y']
+DATE_FORMAT = "m/d/Y"
 
 if ENV == 'local':
     WEB_URL = 'http://127.0.0.1:8000'

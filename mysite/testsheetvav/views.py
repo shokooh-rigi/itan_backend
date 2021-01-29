@@ -312,7 +312,7 @@ def equipments_generate_tech_pdf(request, sheet_id):
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name + '.pdf'
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name
             return response
     else:
         return 'error'
@@ -328,7 +328,7 @@ def equipments_generate_report_pdf(request, sheet_id):
         with open(pdf_path, 'rb') as fh:
             my_file = fh.read()
             response = HttpResponse(my_file, content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name + '.pdf'
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name
             response['Content-Length'] = len(my_file)
             return response
     else:
