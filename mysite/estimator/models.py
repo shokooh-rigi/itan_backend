@@ -102,6 +102,7 @@ class EstimateEquipment(models.Model):
     quantity = models.IntegerField(blank=False)
     price_override = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    # if flag is True means it counts in estimate price (its service is in the estimate services)
     flag = models.BooleanField(default=True)
 
     class Meta:

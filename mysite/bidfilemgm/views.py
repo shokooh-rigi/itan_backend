@@ -108,6 +108,56 @@ def bidfiles_add(request):
 
 
 @login_required
+def bidfiles_addfile(request, bidfiles_id):
+    this_bfm = get_object_or_404(BidFile, id=bidfiles_id)
+    form = BidFileEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('bidFilesHome')
+        if request.POST.get("next"):
+            temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+            if not os.path.exists(temp_path):
+                os.makedirs(temp_path)
+            files_list = request.FILES.getlist('uploaded_file')
+            files = []
+            size_sum = 0
+            for f in files_list:
+                size_sum = size_sum + f.size
+            if size_sum > MAX_UPLOAD_SIZE:
+                error_msg = "Selected files exceeded maximum upload size!"
+                parameters = {
+                    'form': form,
+                    'error_msg': error_msg
+                }
+                return render(request, "bfmAdd.html", parameters)
+            for f in files_list:
+                files.append(os.path.join(temp_path, f.name))
+                handle_uploaded_file(f, files[-1])
+            # b = Project(name=form.cleaned_data['project_name'], created_by=request.user)
+            # b.save()
+            entry = form
+            project_clean_name = this_bfm.project.name.replace(' ', '_') \
+                .replace('!', '') \
+                .replace('@', '') \
+                .replace('#', '') \
+                .replace('$', '') \
+                .replace('%', '') \
+                .replace('^', '') \
+                .replace('&', '') \
+                .replace('*', '') \
+                .replace("/", '')
+            zip_file_name = str(this_bfm.pk) + '. ' + project_clean_name + '.zip'
+            addto_zip_file(files, temp_path, zip_file_name)
+            BidFile.objects.filter(id=this_bfm.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
+            return redirect('bidFilesHome')
+        else:
+            print(request)
+    parameters = {'form': form,
+                  }
+    return render(request, "bfmAddFile.html", parameters)
+
+
+@login_required
 def bidfiles_edit(request, bidfiles_id):
     this_bfm = get_object_or_404(BidFile, id=bidfiles_id)
     form = BidFileEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
@@ -188,3 +238,15 @@ def create_zip_file(filenames, path, project_name):
         os.remove(file)
     zf.close()
     return zf
+
+
+def addto_zip_file(filenames, path, project_name):
+    zip_filename = os.path.join(path, project_name)
+    zf = zipfile.ZipFile(zip_filename, "a")
+    for file in filenames:
+        fdir, fname = os.path.split(file)
+        zf.write(file, fname)
+        os.remove(file)
+    zf.close()
+    return zf
+

@@ -106,6 +106,10 @@ admin.site.register(CompanyType, CompanyTypeAdmin)
 
 
 class ContactInfoAdmin(ImportExportModelAdmin):
+    search_fields = [
+        'customer_id',
+        'name'
+    ]
     readonly_fields = ('created_by', 'created_on',)
 
     def save_model(self, request, obj, form, change):

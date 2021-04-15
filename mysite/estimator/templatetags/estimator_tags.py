@@ -64,7 +64,7 @@ def service_total_calculator(service, estimate_equipments_pricing):
 @register.simple_tag
 def estimate_sub_total_calculator(estimate_id):
     estimate = Estimate.objects.get(id=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
+    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
     estimate_sub = 0
     for estimate_equipment_pricing in estimate_equipments_pricing:
         equipment_total = equipment_total_calculator(estimate_equipment_pricing)
@@ -78,12 +78,6 @@ def estimate_sub_total_calculator(estimate_id):
                      + float(estimate.estimatedetails.adjustment)
     estimate_total = round(estimate_total, 2)
     return estimate_total
-
-
-@register.simple_tag
-def estimate_sub_total_calculator_display(estimate_id):
-    subt = estimate_sub_total_calculator(estimate_id)
-    return '{0:.2f}'.format(subt)
 
 
 @register.simple_tag

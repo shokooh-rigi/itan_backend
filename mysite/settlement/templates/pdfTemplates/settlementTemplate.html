@@ -1,5 +1,6 @@
 {% load static %}
 {% load custom_tags %}
+{% load order_tags %}
 {% load settlement_tags %}
 {% load humanize %}
 
@@ -19,49 +20,107 @@
 <div id="content_frame">
     <div class="content" style="font-size: 14px;">
         <div class="row form-line" style="border-bottom: 1px solid #000; padding: 20px 0 2px 0;">
-            <div class="col-sm-6"><b>Settlement No.:</b> {{ settlement.id }}</div>
+            <div class="col-12 text-center" style="text-align: center;"><b>Technicians Settlement Sheet</b></div>
         </div>
-        <div class="row form-line" style="border-bottom: 1px solid #000; padding: 10px 0 2px 0;">
-            <div class="col-sm-6"><b>Contractor:</b> {{ settlement.contractor }}</div>
+        <div class="row form-line" style="padding: 20px 0 2px 0;">
+            <table class="table">
+                <thead>
+                      <tr>
+                          <td><b>Settlement #:</b> {{ settlement.id }}</td>
+                          <td><b>Date:</b> {{ settlement.created_on|date:'M-d-Y' }}</td>
+{#                          <td><b>Contractor:</b> {{ settlement.contractor }}</td>#}
+                      </tr>
+                </thead>
+            </table>
         </div>
-        <div class="row form-line" style="border-bottom: 1px solid #000; padding: 10px 0 2px 0;">
-            <div class="col-sm-6 "><b>Settle Date:</b> {{ settlement.created_on }}</div>
-        </div>
+        <table class="table table-striped" style="width: 10pt; display: inline-block;">
+            <thead>
+                  <tr>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">ID Number</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Name</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Address</th>
+                  </tr>
+            </thead>
+            <tbody>
+                  <tr>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">{% if settlement.contractor.id_number %}{{ settlement.contractor.id_number }}{% else %}-{% endif %}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.contractor }}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">
+                        {% if settlement.contractor.company.address_line_1 %}<br />{{ settlement.contractor.company.address_line_1 }}{% endif %}
+                        {% if settlement.contractor.company.address_line_2 %}<br />{{ settlement.contractor.company.address_line_2 }}{% endif %}
+                        {% if settlement.contractor.company.city %}<br />{{ settlement.contractor.company.city }}{% endif %}
+                        {% if settlement.contractor.company.state %}, {{ settlement.contractor.company.state }}{% endif %}
+                        {% if settlement.contractor.company.zip %}, {{ settlement.contractor.company.zip }}{% endif %}
+                      </td>
+                  </tr>
+            </tbody>
+        </table>
         <br />
-        <div class="row form-line" style="padding: 10px 0 2px 0;">
-             Detailed list of Settled Projects:
-        </div>
+        <table class="table table-striped" style="width: 400px; float: left;">
+            <thead>
+                  <tr>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">From</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">To</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">SubTotal</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Expenses</th>
+                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Total</th>
+                  </tr>
+            </thead>
+            <tbody>
+                  <tr>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.settlement_start|date:'M-d-Y' }}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.settlement_end|date:'M-d-Y' }}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">${{ settlement.fixed_expenses|floatformat:2|intcomma }}</td>
+                      <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_total_settled_including_expenses settlement as cts %}{{ cts|floatformat:2|intcomma }}</td>
+                  </tr>
+            </tbody>
+        </table>
+        <br />
         <div class="row form-line">
             <table class="table table-striped" id="servicetable">
                 <thead>
                       <tr>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Item</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project Number</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project Name</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Settlement based on</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Settlement amount</th>
+{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Item</th>#}
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project No</th>
+                            <th colspan="3" scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project Name</th>
+{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Address</th>#}
+{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Settlement based on</th>#}
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Type</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Status</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Price</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Hours</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Rate</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">%</th>
+                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Amount</th>
                       </tr>
                 </thead>
                 <tbody>
                     {% for settled_order in settled_orders %}
                     <tr>
-                        <th scope="row" style="padding: 5px 0 1px 0; text-align: center;">{{forloop.counter}}</th>
+{#                        <th scope="row" style="padding: 5px 0 1px 0; text-align: center;">{{forloop.counter}}</th>#}
                         <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_order.order.project_number }}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_order.order.proposal.quote.estimate.project.name }}</td>
+                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_order.order.proposal.quote.estimate.project.name }}</td>
+{#                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.order.proposal.quote.estimate.project.address_line_1 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.address_line_2 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if settled_order.order.proposal.quote.estimate.project.city %}{{ settled_order.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.state %}, {{ settled_order.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.zip %} {{ settled_order.order.proposal.quote.estimate.project.zip }}{% endif %}</td>#}
+                        <td style="padding: 5px 0 1px 0; text-align: center;">Final</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.order.completion_percentage == 100 %}C{% else %}I{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}${% order_total_calculator settled_order.order.proposal.quote.estimate.id settled_order.order as otc %}{{ otc|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}-{% else %}{{ settled_order.settled_hours }}{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}%{{ settlement.contractor.company.interest_percentage }}{% else %}{{ settlement.contractor.hourly_rate }}{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}%{{ settled_order.contractor_involvement_percentage }}{% else %}-{% endif %}</td>
                         <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_order.settled_value|floatformat:2|intcomma }}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>
+{#                        <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>#}
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <br /><br />
         <div class="row form-line">
             <div class="col-sm-4 text-right" style="margin: 0px 0px auto auto;">
                 <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</span></div></div>
             </div>
         </div>
-        <br />
+
     </div>
 </div>
     </body>

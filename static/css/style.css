@@ -13,6 +13,15 @@ i {
     margin: 0 5px;
 }
 
+.clear {
+    clear: both;
+    display: block;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 -webkit-appearance: none;
@@ -454,8 +463,16 @@ input[type=text][readonly] {
     background-image: url("../images/icons/transaction.svg");
 }
 
+.icon.historyicon {
+    background-image: url("../images/icons/history.svg");
+}
+
 .icon.archiveicon {
     background-image: url("../images/icons/archive.svg");
+}
+
+.icon.drawingicon {
+    background-image: url("../images/icons/drawing.svg");
 }
 
 .icon.downloadicon {
@@ -636,34 +653,6 @@ input[type=text][readonly] {
     height: 34px;
 }
 
-#calendar.dover:before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255,255,255,.7);
-    z-index: 3;
-}
-
-#calendar.dover:after {
-    content: "Drop to make an Schedule";
-    font-size: 2em;
-    font-weight: bold;
-    position: absolute;
-    top: 50%;
-    -webkit-transform: translateY(-50%);
-    -moz-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-    left: 0;
-    right: 0;
-    display: inline-block;
-    text-align: center;
-    z-index: 4;
-}
-
 .assignable-schedule {
     height: 100%;
 }
@@ -713,4 +702,183 @@ input[type=text][readonly] {
     top: 0;
     right: -10px;
     transform: translateX(100%);
+}
+
+.calendar-page {
+
+}
+
+.calendar-page .left-panel {
+    width: 20%;
+}
+
+.calendar-page .left-panel {
+    width: 80%;
+}
+
+.calendar-page .lnb-calendars-item input[type="checkbox"].tui-full-calendar-checkbox-square {
+    display: none;
+}
+
+.calendar-page .lnb-calendars-item input[type="checkbox"].tui-full-calendar-checkbox-square + span {
+    display: inline-block;
+    cursor: pointer;
+    line-height: 14px;
+    margin-right: 8px;
+    width: 14px;
+    height: 14px;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IArs4c6QAAADpJREFUKBVjPHfu3O5///65MJAAmJiY9jCcOXPmP6kApIeJBItQlI5qRAkOVM5o4KCGBwqPkcxEvhsAbzRE+Jhb9IwAAAAASUVORK5CYII=) no-repeat;
+    vertical-align: middle;
+}
+
+.calendar-page .lnb-calendars-item input[type="checkbox"].tui-full-calendar-checkbox-square:checked + span {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IArs4c6QAAAMBJREFUKBWVkjEOwjAMRe2WgZW7IIHEDdhghhuwcQ42rlJugAQS54Cxa5cq1QM5TUpByZfS2j9+dlJVt/tX5ZxbS4ZU9VLkQvSHKTIGRaVJYFmKrBbTCJxE2UgCdDzMZDkHrOV6b95V0US6UmgKodujEZbJg0B0ZgEModO5lrY1TMQf1TpyJGBEjD+E2NPN7ukIUDiF/BfEXgRiGEw8NgkffYGYwCi808fpn/6OvfUfsDr/Vc1IfRf8sKnFVqeiVQfDu0tf/nWH9gAAAABJRU5ErkJggg==) no-repeat;
+}
+
+.calendar-page .lnb-calendars-item input[type="checkbox"].tui-full-calendar-checkbox-round {
+    display: none;
+}
+
+.calendar-page .lnb-calendars-item input[type="checkbox"].tui-full-calendar-checkbox-round + span {
+    display: inline-block;
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    vertical-align: middle;
+    margin-right: 8px;
+    border-radius: 8px;
+    border: solid 2px;
+        border-top-color: currentcolor;
+        border-right-color: currentcolor;
+        border-bottom-color: currentcolor;
+        border-left-color: currentcolor;
+    background: transparent;
+        background-color: transparent;
+}
+
+.modal .an-assigned {
+    background-color: rgba(0,0,0,.1);
+}
+
+.modal .an-assigned .remove-assigned:hover {
+    color: #3788d8 !important;
+}
+
+.involvement_percentage {
+    position: relative;
+}
+
+.involvement_percentage:after {
+    content: '%';
+    opacity: 0.5;
+    position: absolute;
+    top: 50%;
+    right: 0.5em;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.involvement_percentage .involvement_percentage_input {
+    width: 70px;
+}
+
+.fc .fc-non-business {
+    background: rgba(255, 215, 215, 0.5) !important;
+}
+
+.fc-event-main {
+    overflow: hidden;
+}
+
+.order-line-disabled {
+    position: relative;
+}
+
+.order-line-disabled:after {
+    content: '';
+    position: absolute;
+    width: 93%;
+    height: 100%;
+    opacity: 0.1;
+    background: #000;
+    right: 0;
+    border-radius: 10px;
+}
+
+.switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-left: -50px;
+}
+
+.switch-toggle:before {
+    content: "Hourly";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-120%, -50%);
+}
+
+.switch-toggle:after {
+    content: "Percentage";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(116%, -50%);
+}
+
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-toggle .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #b82634;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch-toggle .slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch-toggle input:checked + .slider {
+  background-color: #2196F3;
+}
+
+.switch-toggle input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+.switch-toggle input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.switch-toggle .slider.round {
+  border-radius: 34px;
+}
+
+.switch-toggle .slider.round:before {
+  border-radius: 50%;
 }

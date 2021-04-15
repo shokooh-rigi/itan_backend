@@ -118,9 +118,32 @@ def vav_sheet_equipment(request, sheet_id):
 @login_required
 def vav_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
 
-    parameters = {'sheet_equipments': sheet_equipments,
+    project_name = request.GET.get('project_name', '')
+
+    pagination = 50
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
+    ordering = 'field_order'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
+
+    object_list = DataSheetEquipment.objects.filter(sheet=sheet_id)
+    search_lowercase = project_name.lower()
+    search_contains_letters = search_lowercase.islower()
+    if project_name:
+        if search_contains_letters:
+            object_list = object_list.filter(testsheetgeneraldata__value__icontains=project_name)
+        else:
+            object_list = object_list.filter(Q(testsheetgeneraldata__value__icontains=project_name) | Q(id=project_name))
+    object_list = object_list.order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    sheets = paginator.get_page(page)
+
+    parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
                   'WEB_URL': WEB_URL,

@@ -69,9 +69,12 @@ def terminal_sheet_add(request):
 @login_required
 def terminal_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
+    project_name = request.GET.get('project_name', '')
     my_project = my_sheet.project
     vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav', sheet__project=my_project).filter(number_of_supply_air_terminal__gt=0)
     air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0))
+    vav_sheet_equipments = vav_sheet_equipments.filter(testsheetgeneraldata__value__icontains=project_name).distinct()
+    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).distinct()
     parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
                   'vav_sheet_equipments': vav_sheet_equipments,
                   'my_sheet': my_sheet,
@@ -839,7 +842,9 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
     supply_repeat_list = []
     return_repeat_list = []
     outside_repeat_list = []
+    other_repeat_list = []
     return_repeat_num = 0
+    other_repeat_num = 0
     outside_repeat_num = 0
     supply_repeat_num = this_sheet_equipment.number_of_supply_air_terminal
     for i in range(0, supply_repeat_num):
@@ -851,6 +856,9 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
         outside_repeat_num = this_sheet_equipment.number_of_outside_air_terminal
         for i in range(0, outside_repeat_num):
             outside_repeat_list.append(i)
+        other_repeat_num = this_sheet_equipment.number_of_any_other
+        for i in range(0, other_repeat_num):
+            other_repeat_list.append(i)
     codes = AirTerminalCode.objects.filter(is_custom=False)
 
     actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains='terminal')
@@ -863,8 +871,11 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                                                                          air_equipment=this_sheet_equipment,
                                                                          type=2).order_by('outlet_no')
         outside_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
-                                                                         air_equipment=this_sheet_equipment,
-                                                                         type=3).order_by('outlet_no')
+                                                                          air_equipment=this_sheet_equipment,
+                                                                          type=3).order_by('outlet_no')
+        other_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
+                                                                          air_equipment=this_sheet_equipment,
+                                                                          type=4).order_by('outlet_no')
     else:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
@@ -873,8 +884,11 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                                                                          vav_equipment=this_sheet_equipment,
                                                                          type=2).order_by('outlet_no')
         outside_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
-                                                                         vav_equipment=this_sheet_equipment,
-                                                                         type=3).order_by('outlet_no')
+                                                                          vav_equipment=this_sheet_equipment,
+                                                                          type=3).order_by('outlet_no')
+        other_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
+                                                                          vav_equipment=this_sheet_equipment,
+                                                                          type=4).order_by('outlet_no')
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -892,10 +906,12 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                     'supply_repeat_list': supply_repeat_list,
                     'return_repeat_list': return_repeat_list,
                     'outside_repeat_list': outside_repeat_list,
+                    'other_repeat_list': other_repeat_list,
                     'codes': codes,
                     'supply_terminal_equipments': supply_terminal_equipments,
                     'return_terminal_equipments': return_terminal_equipments,
                     'outside_terminal_equipments': outside_terminal_equipments,
+                    'other_equipments': other_equipments,
                     'error_msg': error_msg,
                 }
                 return render(request, "terminalSheetEquipmentActualData.html", parameters)
@@ -960,6 +976,26 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                                                               sheet_field=actual_field,
                                                               value=new_value)
                             new_object.save()
+
+                for other_equipment in other_equipments:
+                    for actual_field in actual_fields:
+                        new_value = request.POST.get(
+                            f'other_actual_value_{actual_field.id}_{other_equipment.id}').strip()
+
+                        num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
+                                                                          air_terminal_equipment=other_equipment,
+                                                                          sheet_field=actual_field).count()
+
+                        if num_results > 0:
+                            AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
+                                                                air_terminal_equipment=other_equipment,
+                                                                sheet_field=actual_field).update(value=new_value)
+                        else:
+                            new_object = AirTerminalSheetData(data_type=DataTypeChoices.Actual.value,
+                                                              air_terminal_equipment=other_equipment,
+                                                              sheet_field=actual_field,
+                                                              value=new_value)
+                            new_object.save()
             this_sheet_equipment.terminal_actual_data_entry_completed = True
             this_sheet_equipment.save()
             return redirect('terminalSheetEquipmentList', my_sheet.id)
@@ -973,10 +1009,12 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
         'supply_repeat_list': supply_repeat_list,
         'return_repeat_list': return_repeat_list,
         'outside_repeat_list': outside_repeat_list,
+        'other_repeat_list': other_repeat_list,
         'codes': codes,
         'supply_terminal_equipments': supply_terminal_equipments,
         'return_terminal_equipments': return_terminal_equipments,
         'outside_terminal_equipments': outside_terminal_equipments,
+        'other_equipments': other_equipments,
     }
     return render(request, "terminalSheetEquipmentActualData.html", parameters)
 

@@ -25,6 +25,7 @@ class CompanyType(models.Model):
 
 
 class ContactInfo(models.Model):
+    customer_id = models.PositiveIntegerField(blank=True, null=True, unique=True)
     name = models.CharField(max_length=255, blank=False, error_messages={'required': 'Name Required.'})
     tel = models.CharField(max_length=15, blank=True)
     fax = models.CharField(max_length=15, blank=True)
@@ -52,7 +53,18 @@ class ContactInfo(models.Model):
         return self.name
 
 
+@receiver(post_save, sender=ContactInfo)
+def update_customer_id(sender, instance, created, **kwargs):
+    if created:
+        new_number = Setting.objects.get(key='Customer ID Last Digit')
+        new_number.value = int(Setting.objects.get(key='Customer ID Last Digit').value) + 1
+        new_number.save()
+        instance.customer_id = Setting.objects.get(key='Customer ID Last Digit').value
+        instance.save()
+
+
 class Person(models.Model):
+    id_number = models.PositiveIntegerField(blank=True, null=True, unique=True)
     company = models.ForeignKey(ContactInfo, on_delete=models.CASCADE, blank=False)
     name = models.CharField(max_length=255, blank=False)
     title = models.CharField(max_length=255, blank=True)
@@ -66,6 +78,8 @@ class Person(models.Model):
     fax = models.CharField(max_length=15, blank=True)
     mail = models.EmailField(max_length=55, blank=True)
     web = models.CharField(max_length=55, blank=True)
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="exclusive for sub contractors.")
+    # fixed_monthly_payment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="exclusive for sub contractors.")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)

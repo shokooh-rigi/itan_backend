@@ -17,7 +17,7 @@ class EstimateAdmin(ImportExportModelAdmin):
             obj.created_by = request.user
         for this_equipment in EstimateEquipment.objects.filter(estimate=obj.id):
             if this_equipment.equipment.service not in form.cleaned_data['service']:
-                this_equipment.delete()
+                this_equipment.flag = False
         obj.save()
 
 

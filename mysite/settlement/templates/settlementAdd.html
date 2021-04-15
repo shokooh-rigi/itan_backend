@@ -13,6 +13,24 @@
                     {{ form.contractor }}
                 </div>
             </div>
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-12">
+                    <label for="id_architect_name" class="control-label">Start Date <span class="required">*</span></label>
+                    {{ form.settlement_start }}
+                </div>
+            </div>
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-12">
+                    <label for="id_architect_name" class="control-label">End Date <span class="required">*</span></label>
+                    {{ form.settlement_end }}
+                </div>
+            </div>
+            <div class="row form-line" style="margin: 20px auto;">
+                <div class="col-lg-12">
+                    <label for="id_architect_name" class="control-label">Fixed Expenses</label>
+                    {{ form.fixed_expenses }}
+                </div>
+            </div>
             {{ form.created_by.as_hidden }}
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
@@ -28,6 +46,20 @@
         });
         $('#id_assigned_to_contractor').on('change', function() {
             $('#id_assigned_to_employee').val("");
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_settlement_start").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+            $("#id_settlement_end").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
         });
     </script>
 

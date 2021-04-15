@@ -3,23 +3,17 @@
             .logo { width: 120px; display: inline-block; float: left; }
             @page {
                 size: letter landscape;
-                @frame col1_frame {
+                @frame left_content_frame {
                     -pdf-frame-border: 1;
                     left: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
                 }
-                @frame col2_frame {
+                @frame right_content_frame {
                     -pdf-frame-border: 1;
-                    right: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
-                }
-                @frame col3_frame {
-                    -pdf-frame-border: 1;
-                    left: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
-                }
-                @frame col4_frame {
-                    -pdf-frame-border: 1;
-                    right: 20pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
+                    left: 410pt; top: 15pt; width: 360pt; height: 560pt; padding: 5pt 20pt;
                 }
             }
+
+            div.together { -pdf-keep-with-next: true; }
 
             {% if os != "Windows" %}
             @font-face {

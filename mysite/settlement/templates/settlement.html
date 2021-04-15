@@ -72,7 +72,7 @@
                     <tr>
                         <td>{{ settlement.id }}</td>
                         <td>{{ settlement.contractor }}</td>
-                        <td>{% for settled_order in settlement.settledorders_set.all %}{{ settled_order }}: {% calculate_settlement_amount settled_order as csa %}${{ csa|floatformat:2|intcomma }}{%if not forloop.last%}<br />{%endif%}{% endfor %}</td>
+                        <td>{% for settled_order in settlement.settledorders_set.all %}{{ settled_order }}{%if not forloop.last%}<br />{%endif%}{% endfor %}</td>
                         <td>{% calculate_total_settled settlement as cts %}${{ cts|floatformat:2|intcomma }}</td>
                         <td>{{ settlement.created_on }}</td>
                         <td>

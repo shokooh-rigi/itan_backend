@@ -10,6 +10,8 @@ import os
 from .forms import *
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MAX_UPLOAD_SIZE, UPLOAD_URL
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file
+from ..gi.models import *
+from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 
 
 # Create your views here.
@@ -86,6 +88,12 @@ def order_edit(request, order_id):
             return redirect('equipmentSubmittal', order_id=order_id)
         if request.POST.get("tl"):
             return redirect('techLabel', order_id=order_id)
+        if request.POST.get("ucd"):
+            return redirect('coloredDrawing', order_id=order_id)
+        if request.POST.get("usp"):
+            return redirect('sitePictures', order_id=order_id)
+        if request.POST.get("uts"):
+            return redirect('testSheets', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
                 form.save()
@@ -153,6 +161,61 @@ def change_order(request, order_id):
             if request.POST.get("save"):
                 form.cleaned_data['order'] = order_id
                 form.save()
+                try:
+                    if request.user.last_name == '' or request.user.last_name is None:
+                        user_name = 'TAB Technologies, INC. Operator'
+                    else:
+                        user_name = request.user.first_name + " " + request.user.last_name
+                    if request.user.profile.title == '' or request.user.profile.title is None:
+                        user_title = 'Estimator'
+                    else:
+                        user_title = request.user.profile.title
+                    user_signature = request.user.profile.e_sign
+                    change_orders = ChangeOrder.objects.filter(order=this_order.invoice.order)
+                    total_amount_due = calculate_total_amount_due(this_order.invoice)
+                    transactions_count = InvoiceTransaction.objects.filter(invoice=this_order.invoice).count()
+                    change_orders_count = ChangeOrder.objects.filter(order=this_order).count()
+                    total_count = transactions_count + change_orders_count + this_order.invoice.times_estimate_changed
+                    new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
+                        this_order.id).zfill(3) + '-' + str(total_count).zfill(3)
+                    pdf_parameters = {
+                        'file_name': new_file_name,
+                        'total_count': total_count,
+                        'invoice': this_order.invoice,
+                        'change_orders': change_orders,
+                        'total_amount_due': total_amount_due,
+                        'estimate': this_order.invoice.order.proposal.quote.estimate,
+                        'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                        'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+                        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+                        'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+                        'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+                        'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+                        'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+                        'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+                        'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                        'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                        'user_name': user_name,
+                        'user_title': user_title,
+                        'user_signature': user_signature,
+                        'WEB_URL': WEB_URL,
+                        'STATIC_URL': STATIC_URL,
+                        'MEDIA_URL': MEDIA_URL,
+                        'os': system(),
+                    }
+                    Invoice.create_invoice_pdf(pdf_parameters)
+                    total_invoiced = calculate_total_amount_due(this_order.invoice)
+                    total_paid = calculate_total_paid(this_order.invoice)
+                    balance_due = calculate_remaining_invoice_due(this_order.invoice)
+                    new_object = InvoiceHistory(invoice=this_order.invoice, total_invoiced=total_invoiced,
+                                                total_paid=total_paid,
+                                                balance_due=balance_due, pdf_filename=new_file_name)
+                    new_object.save()
+                except:
+                    pass
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
@@ -178,10 +241,15 @@ def tech_label(request, order_id):
             if request.POST.get("savep"):
                 form.cleaned_data['order'] = order_id
                 this_tech_label = form.save()
+                if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                    has_pre_demo = 1
+                else:
+                    has_pre_demo = 0
                 parameters = {'form': form,
                               'datenow': datetime.datetime.now().date(),
                               'file_name': 'techlabel-' + str(this_order.project_number),
                               'tech_label': this_tech_label,
+                              'has_pre_demo': has_pre_demo,
                               'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                               'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                               'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
@@ -195,9 +263,9 @@ def tech_label(request, order_id):
                               }
                 techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
                 parameters['techlabel_pdf'] = techlabel_pdf[1]
-                if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
-                    techlabel_extra_pdf = TechLabel.create_techlabel_extra_pdf(parameters)
-                    parameters['techlabel_extra_pdf'] = techlabel_extra_pdf[1]
+                # if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                #     techlabel_extra_pdf = TechLabel.create_techlabel_extra_pdf(parameters)
+                #     parameters['techlabel_extra_pdf'] = techlabel_extra_pdf[1]
                 file_path = os.path.join(settings.MEDIA_ROOT, parameters['techlabel_pdf'])
                 if os.path.exists(file_path):
                     with open(file_path, 'rb') as fh:
@@ -250,6 +318,7 @@ def order_equipment_submittal(request, order_id):
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
+                        'page_title': 'Equipment Submittal',
                         'error_msg': error_msg
                     }
                     return render(request, "EquipmentSubmittal.html", parameters)
@@ -274,8 +343,166 @@ def order_equipment_submittal(request, order_id):
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
+                  'page_title': 'Equipment Submittal',
                   }
     return render(request, "EquipmentSubmittal.html", parameters)
+
+
+@login_required
+def order_colored_drawing(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_colored_drawing")
+                if not os.path.exists(temp_path):
+                    os.makedirs(temp_path)
+                files_list = request.FILES.getlist('colored_drawing')
+                files = []
+                size_sum = 0
+                for f in files_list:
+                    size_sum = size_sum + f.size
+                if size_sum > MAX_UPLOAD_SIZE:
+                    error_msg = "Selected files exceeded maximum upload size!"
+                    parameters = {
+                        'form': form,
+                        'page_title': 'Tech Marked Drawing',
+                        'error_msg': error_msg
+                    }
+                    return render(request, "ColoredDrawing.html", parameters)
+                for f in files_list:
+                    files.append(os.path.join(temp_path, f.name))
+                    handle_uploaded_file(f, files[-1])
+                project_clean_name = this_order.project_number.replace(' ', '_') \
+                    .replace('!', '') \
+                    .replace('@', '') \
+                    .replace('#', '') \
+                    .replace('$', '') \
+                    .replace('%', '') \
+                    .replace('^', '') \
+                    .replace('&', '') \
+                    .replace('*', '') \
+                    .replace("/", '')
+                zip_file_name = project_clean_name + '-Colored-Drawing.zip'
+                print(zip_file_name)
+                create_zip_file(files, temp_path, zip_file_name)
+                # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                Order.objects.filter(id=order_id).update(colored_drawing=UPLOAD_URL + 'order_colored_drawing/' + zip_file_name)
+
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  'page_title': 'Tech Marked Drawing',
+                  }
+    return render(request, "ColoredDrawing.html", parameters)
+
+
+@login_required
+def order_site_pictures(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_site_pictures")
+                if not os.path.exists(temp_path):
+                    os.makedirs(temp_path)
+                files_list = request.FILES.getlist('site_pictures')
+                files = []
+                size_sum = 0
+                for f in files_list:
+                    size_sum = size_sum + f.size
+                if size_sum > MAX_UPLOAD_SIZE:
+                    error_msg = "Selected files exceeded maximum upload size!"
+                    parameters = {
+                        'form': form,
+                        'page_title': 'Site Pictures',
+                        'error_msg': error_msg
+                    }
+                    return render(request, "SitePictures.html", parameters)
+                for f in files_list:
+                    files.append(os.path.join(temp_path, f.name))
+                    handle_uploaded_file(f, files[-1])
+                project_clean_name = this_order.project_number.replace(' ', '_') \
+                    .replace('!', '') \
+                    .replace('@', '') \
+                    .replace('#', '') \
+                    .replace('$', '') \
+                    .replace('%', '') \
+                    .replace('^', '') \
+                    .replace('&', '') \
+                    .replace('*', '') \
+                    .replace("/", '')
+                zip_file_name = project_clean_name + '-Site-Pictures.zip'
+                create_zip_file(files, temp_path, zip_file_name)
+                # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                Order.objects.filter(id=order_id).update(site_pictures=UPLOAD_URL + 'order_site_pictures/' + zip_file_name)
+
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  'page_title': 'Site Pictures',
+                  }
+    return render(request, "SitePictures.html", parameters)
+
+
+@login_required
+def order_test_sheets(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderEdit', order_id=order_id)
+        if form.is_valid():
+            if request.POST.get("save"):
+
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_test_sheets")
+                if not os.path.exists(temp_path):
+                    os.makedirs(temp_path)
+                files_list = request.FILES.getlist('test_sheets')
+                files = []
+                size_sum = 0
+                for f in files_list:
+                    size_sum = size_sum + f.size
+                if size_sum > MAX_UPLOAD_SIZE:
+                    error_msg = "Selected files exceeded maximum upload size!"
+                    parameters = {
+                        'form': form,
+                        'page_title': 'Test Sheets',
+                        'error_msg': error_msg
+                    }
+                    return render(request, "TestSheets.html", parameters)
+                for f in files_list:
+                    files.append(os.path.join(temp_path, f.name))
+                    handle_uploaded_file(f, files[-1])
+                project_clean_name = this_order.project_number.replace(' ', '_') \
+                    .replace('!', '') \
+                    .replace('@', '') \
+                    .replace('#', '') \
+                    .replace('$', '') \
+                    .replace('%', '') \
+                    .replace('^', '') \
+                    .replace('&', '') \
+                    .replace('*', '') \
+                    .replace("/", '')
+                zip_file_name = project_clean_name + '-Test-Sheets.zip'
+                create_zip_file(files, temp_path, zip_file_name)
+                # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                Order.objects.filter(id=order_id).update(test_sheets=UPLOAD_URL + 'order_test_sheets/' + zip_file_name)
+
+                return redirect('orderEdit', order_id=order_id)
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  'page_title': 'Test Sheets',
+                  }
+    return render(request, "TestSheets.html", parameters)
 
 
 @login_required

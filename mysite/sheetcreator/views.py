@@ -147,9 +147,32 @@ def add_equipment(request, sheet_id):
 @login_required
 def equipments_list(request, sheet_id):
     my_sheet = Sheet.objects.get(id=sheet_id)
-    sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
 
-    parameters = {'sheet_equipments': sheet_equipments,
+    project_name = request.GET.get('project_name', '')
+
+    pagination = 50
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
+    ordering = 'field_order'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
+
+    object_list = SheetEquipment.objects.filter(sheet=sheet_id)
+    search_lowercase = project_name.lower()
+    search_contains_letters = search_lowercase.islower()
+    if project_name:
+        if search_contains_letters:
+            object_list = object_list.filter(sheetequipmentcommondata__value__icontains=project_name)
+        else:
+            object_list = object_list.filter(Q(sheetequipmentcommondata__value__icontains=project_name) | Q(id=project_name))
+    object_list = object_list.order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    sheets = paginator.get_page(page)
+
+    parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
                   'WEB_URL': WEB_URL,
@@ -855,7 +878,7 @@ def equipment_actual_values_edit(request, sheet_equipment_id):
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     equipment_type_custom_fields = this_sheet_equipment.equipment.equipment_type.equipmenttypecustomfield_set.all()
     other_custom_fields = SheetEquipmentCustomData.objects.filter(sheet_equipment=this_sheet_equipment)
-    custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment)
+    custom_fields = SheetEquipmentActualData.objects.filter(sheet_equipment=this_sheet_equipment).order_by('key')
     assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
                                                               custom_fields, False)
     show_parentheses_fields = get_show_parentheses_fields_actual(equipment_type_custom_fields, custom_fields, False)

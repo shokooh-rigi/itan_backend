@@ -67,18 +67,20 @@ INSTALLED_APPS = [
     'mysite.bidfilemgm',
     'mysite.ibfm',
     'mysite.administrative',
-    'mysite.schedule',
+    'mysite.scheduler',
     'mysite.settlement',
+    'mysite.techupload',
     'mysite.dbmanagement',
     'mysite.sheetcreator',
     'mysite.testsheetvav',
     'mysite.testsheetterminal',
     'mysite.generatereport',
     'mysite.projectprocess',
+    'mysite.masspayment',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags',
-    'mysite.pdf_analyzer'
+    'mysite.pdf_analyzer',
 ]
 
 MIDDLEWARE = [

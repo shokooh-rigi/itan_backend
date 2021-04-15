@@ -57,21 +57,21 @@
                <table style="padding: 10px; text-align: center;">
                   <tbody>
                     <tr style="border: 1px solid #000; ">
-                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Invoice No.</td>
-                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Date</td>
-                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">PO No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 90px;">Invoice No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 90px;">Date</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 90px;">PO No.</td>
                         <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Project Name</td>
-                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Invoice Amount</td>
-                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Balance Due</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 90px;">Invoice Amount</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 90px;">Balance Due</td>
                     </tr>
                     {% for invoice in customer_invoices %}
                     <tr style="border: 1px solid #000; ">
-                        <td style="padding: 5px 0 0 0;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} </td>
-                        <td style="padding: 5px 0 0 0;">{{ invoice.created_on|date:'m/d/Y' }} </td>
-                        <td style="padding: 5px 0 0 0;">{{ invoice.order.po_number }} </td>
+                        <td style="padding: 5px 0 0 0; width: 90px;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} </td>
+                        <td style="padding: 5px 0 0 0; width: 90px;">{{ invoice.created_on|date:'m/d/Y' }} </td>
+                        <td style="padding: 5px 0 0 0; width: 90px;">{{ invoice.order.po_number }} </td>
                         <td style="padding: 5px 0 0 0;">{{ invoice.order.proposal.quote.estimate.project.name }} </td>
-                        <td style="padding: 5px 0 0 0;">${% calculate_total_amount_due invoice %} </td>
-                        <td style="padding: 5px 0 0 0;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }} </td>
+                        <td style="padding: 5px 0 0 0; width: 90px;">${% calculate_total_amount_due invoice %} </td>
+                        <td style="padding: 5px 0 0 0; width: 90px;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }} </td>
                     </tr>
                     {% endfor %}
                     <tr style="text-align: right;">

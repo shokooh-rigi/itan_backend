@@ -35,6 +35,12 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Invoice Adjustment</label>
+                    {{ form.invoice_adjustment }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label">Note</label>
                     {{ form.note }}
                 </div>
@@ -44,8 +50,11 @@
                     <input type="submit" class="btn btn-primary" value="Change Order" name="co" />
                     <input type="submit" class="btn btn-primary" value="Control System" name="cs" />
                     <input type="submit" class="btn btn-primary" value="Equipment Submittal" name="es" />
-                    <input type="submit" class="btn btn-primary" value="Tech Label" name="tl" />
-                    <br class="clear" style="margin: 24px auto;" />
+                    <input type="submit" class="btn btn-primary" value="Tech Label" name="tl" /><br class="clear my-2" />
+                    <input type="submit" class="btn btn-secondary" value="Tech Marked Drawing" name="ucd" />
+                    <input type="submit" class="btn btn-secondary" value="Site Pictures" name="usp" />
+                    <input type="submit" class="btn btn-secondary" value="Test Sheet" name="uts" />
+                    <br class="clear my-2" />
                     <input type="submit" class="btn btn-success" value="Save" name="save" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>

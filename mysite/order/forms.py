@@ -14,6 +14,9 @@ class ProposalWidget(s2forms.ModelSelect2Widget):
 
 class OrderForm(ModelForm):
     equipment_submittal = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    colored_drawing = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    site_pictures = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    test_sheets = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     class Meta:
         model = Order
         fields = [
@@ -22,8 +25,12 @@ class OrderForm(ModelForm):
             'po_number',
             'date_po_received',
             'estimated_date_of_project',
+            'invoice_adjustment',
             'control_system',
             'equipment_submittal',
+            'colored_drawing',
+            'site_pictures',
+            'test_sheets',
             'note',
         ]
         widgets = {

@@ -1,12 +1,15 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
 
-from mysite.schedule.models import *
+from mysite.scheduler.models import *
 
 
 # Create your models here.
 
 class Settlement(models.Model):
-    contractor = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True)
+    contractor = models.ForeignKey(Person, on_delete=models.CASCADE, blank=False, null=False)
+    settlement_start = models.DateTimeField(blank=False, null=True)
+    settlement_end = models.DateTimeField(blank=False, null=True)
+    fixed_expenses = models.DecimalField(default=0, max_digits=8, decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
@@ -29,8 +32,14 @@ class Settlement(models.Model):
 
 class SettledOrders(models.Model):
     settlement = models.ForeignKey(Settlement, on_delete=models.CASCADE, blank=False, null=False)
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True)
     settled_value = models.DecimalField(max_digits=8, decimal_places=2)
+    # 0 means Hourly and 1 means By Percentage
+    settled_type = models.BooleanField(default=False)
+    settled_hours = models.PositiveIntegerField(default=0)
+    contractor_involvement_percentage = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
+    completion_percentage = models.PositiveIntegerField(default=0,
+                                                        validators=[MaxValueValidator(100), MinValueValidator(0)])
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -70,7 +70,7 @@
                         {{ estimate_service }}{%if not forloop.last%}, {%endif%}
                         {% endfor %}
                     </td>
-                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator_display quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
                 </tr>
                 {% if predemo_calculated > 0 %}
                 <tr>

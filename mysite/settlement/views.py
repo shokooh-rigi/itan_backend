@@ -1,4 +1,3 @@
-import datetime
 from platform import system
 
 from django import forms
@@ -15,8 +14,11 @@ from .forms import SettlementForm, SettledOrderForm
 from .models import Settlement, SettledOrders, ModulesToEmailTemplateRelation
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from ..gi.views import order_total_calculator
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from ..scheduler.models import *
+import datetime
+from ..gi.views import order_total_calculator
+
 
 
 # Create your views here.
@@ -110,7 +112,7 @@ def settlement_add(request):
 def settlement_orders(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
     form = SettledOrderForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
-    orders = Order.objects.order_by('-created_on')
+    orders = Order.objects.filter(schedule__scheduletech__assigned_to_contractor=this_settlement.contractor, schedule__scheduletech__settlement=False).filter(schedule__schedule_start__gt=this_settlement.settlement_start, schedule__schedule_end__lt=this_settlement.settlement_end).order_by('-created_on').distinct()
     settled_orders = SettledOrders.objects.filter(settlement=this_settlement)
     settled_total = 0
     for settled_order in settled_orders:
@@ -122,18 +124,65 @@ def settlement_orders(request, settlement_id):
                 this_settlement.delete()
             return redirect('settlementHome')
         if request.POST.get("next"):
+            for order in orders:
+                total_settled_value = 0
+                contractor_involvement_percentage = 0
+                total_schedules_duration = 0
+                if request.POST.get("order-include-" + str(order.id)):
+                    if request.POST.get("or-toggle-" + str(order.id)):
+                        settled_type = True
+                        project_this_period_percentage = int(request.POST.get("percentage-" + str(order.id)))
+                        order.completion_percentage = order.completion_percentage + project_this_period_percentage
+                        order.save()
+                        schedule_list = Schedule.objects.filter(order=order)
+                        for schedule in schedule_list:
+                            schedule_tech = ScheduleTech.objects.get(schedule=schedule,
+                                                                     assigned_to_contractor=this_settlement.contractor)
+                            schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
+                            total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+                            settle_value = project_this_period_percentage/100 * float(this_settlement.contractor.company.interest_percentage)/100 * float(order_total_calculator(order.proposal.quote.estimate.id, order))
+                            total_settled_value = total_settled_value + round(settle_value, 2)
+                            schedule_tech.settlement = True
+                            schedule_tech.save()
+                        formula_top = 0
+                        for schedule in schedule_list:
+                            schedule_tech = ScheduleTech.objects.get(schedule=schedule,
+                                                                     assigned_to_contractor=this_settlement.contractor)
+                            schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
+                            formula_top = formula_top + (schedule_duration_in_hours/total_schedules_duration*schedule_tech.involvement_percentage)
+                        contractor_involvement_percentage = formula_top
+
+                    else:
+                        settled_type = False
+                        project_this_period_percentage = int(request.POST.get("percentage-" + str(order.id)))
+                        order.completion_percentage = order.completion_percentage + project_this_period_percentage
+                        order.save()
+                        schedule_list = Schedule.objects.filter(order=order)
+                        for schedule in schedule_list:
+                            schedule_tech = ScheduleTech.objects.get(schedule=schedule, assigned_to_contractor=this_settlement.contractor)
+                            schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
+                            total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+                            settle_value = float(this_settlement.contractor.hourly_rate) * float(schedule_duration_in_hours)
+                            total_settled_value = total_settled_value + round(settle_value, 2)
+                            schedule_tech.settlement = True
+                            schedule_tech.save()
+                    settled_order = SettledOrders(settlement=this_settlement, order=order, settled_value=total_settled_value,
+                                                  settled_type=settled_type, settled_hours=total_schedules_duration,
+                                                  contractor_involvement_percentage=contractor_involvement_percentage,
+                                                  completion_percentage=project_this_period_percentage)
+                    settled_order.save()
             return redirect('settlementView', this_settlement.id)
-        if form.is_valid():
-            if request.POST.get("add"):
-                old_settled_value = Order.objects.get(id=form.cleaned_data['order'].id).order_settled_value
-                new_settled_value = float(old_settled_value) + float(form.cleaned_data['settled_value'])
-                Order.objects.filter(id=form.cleaned_data['order'].id).update(order_settled_value=new_settled_value)
-                if float(new_settled_value) == float(
-                        order_total_calculator(form.cleaned_data['order'].proposal.quote.estimate.id,
-                                               form.cleaned_data['order'])):
-                    Order.objects.filter(id=form.cleaned_data['order'].id).update(fully_settled=True)
-                form.save()
-                return redirect('settlementOrders', this_settlement.pk)
+        # if form.is_valid():
+        #     if request.POST.get("add"):
+        #         old_settled_value = Order.objects.get(id=form.cleaned_data['order'].id).order_settled_value
+        #         new_settled_value = float(old_settled_value) + float(form.cleaned_data['settled_value'])
+        #         Order.objects.filter(id=form.cleaned_data['order'].id).update(order_settled_value=new_settled_value)
+        #         if float(new_settled_value) == float(
+        #                 order_total_calculator(form.cleaned_data['order'].proposal.quote.estimate.id,
+        #                                        form.cleaned_data['order'])):
+        #             Order.objects.filter(id=form.cleaned_data['order'].id).update(fully_settled=True)
+        #         form.save()
+        #         return redirect('settlementOrders', this_settlement.pk)
     parameters = {'form': form,
                   'this_settlement': this_settlement,
                   'orders': orders,
@@ -191,27 +240,34 @@ def settlement_delete(request, settlement_id):
         if request.POST.get("confirm"):
             for settled_order in this_settlement.settledorders_set.all():
                 settled_order.order.fully_settled = False
-                settled_order.order.order_settled_value = settled_order.order.order_settled_value - settled_order.settled_value
+                # settled_order.order.order_settled_value = settled_order.order.order_settled_value - settled_order.settled_value
+                settled_order.order.completion_percentage = settled_order.order.completion_percentage - settled_order.completion_percentage
                 settled_order.order.save()
+                schedule_list = Schedule.objects.filter(order=settled_order.order)
+                for schedule in schedule_list:
+                    schedule_tech = ScheduleTech.objects.get(schedule=schedule,
+                                                             assigned_to_contractor=this_settlement.contractor)
+                    schedule_tech.settlement = False
+                    schedule_tech.save()
             this_settlement.delete()
         return redirect('settlementHome')
     parameters = {'this_settlement': this_settlement
                   }
     return render(request, "settlementDelete.html", parameters)
 
-
-@login_required
-def settled_order_delete(request, settlement_id, settled_order_id):
-    this_settled_order = get_object_or_404(SettledOrders, id=settled_order_id)
-    if request.method == "POST" and request.user.is_authenticated:
-        if request.POST.get("confirm"):
-            this_settled_order.order.fully_settled = False
-            this_settled_order.order.order_settled_value = this_settled_order.order.order_settled_value - this_settled_order.settled_value
-            this_settled_order.order.save()
-            this_settled_order.delete()
-        return redirect('settlementOrders', settlement_id)
-    parameters = {
-        'this_settled_order': this_settled_order,
-        'settlement_id': settlement_id,
-    }
-    return render(request, "settledOrderDelete.html", parameters)
+#
+# @login_required
+# def settled_order_delete(request, settlement_id, settled_order_id):
+#     this_settled_order = get_object_or_404(SettledOrders, id=settled_order_id)
+#     if request.method == "POST" and request.user.is_authenticated:
+#         if request.POST.get("confirm"):
+#             this_settled_order.order.fully_settled = False
+#             this_settled_order.order.order_settled_value = this_settled_order.order.order_settled_value - this_settled_order.settled_value
+#             this_settled_order.order.save()
+#             this_settled_order.delete()
+#         return redirect('settlementOrders', settlement_id)
+#     parameters = {
+#         'this_settled_order': this_settled_order,
+#         'settlement_id': settlement_id,
+#     }
+#     return render(request, "settledOrderDelete.html", parameters)

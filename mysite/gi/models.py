@@ -8,7 +8,7 @@ class Invoice(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False)
     date_started = models.DateField(blank=True, null=True)
     date_completed = models.DateField(blank=True, null=True)
-    terms = models.CharField(max_length=255, blank=True)
+    terms = models.CharField(max_length=255, blank=True, default='Due upon Receipt')
     description = models.TextField(max_length=255, blank=True, default='Testing and Balancing')
     percent_of_performance_completed = models.PositiveIntegerField(default=100, validators=[MaxValueValidator(100),
                                                                                           MinValueValidator(0)])
@@ -16,6 +16,7 @@ class Invoice(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     mark_as_paid = models.BooleanField(default=False)
+    times_estimate_changed = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["-created_on"]
@@ -23,7 +24,7 @@ class Invoice(models.Model):
         verbose_name_plural = 'Invoice List'
 
     def __str__(self):
-        return estimate_number_generator(self.order.proposal.quote.id) + "I"
+        return estimate_number_generator(self.order.proposal.quote.estimate.id) + "I"
 
     @classmethod
     def create_invoice_pdf(cls, parameters):
@@ -89,3 +90,20 @@ def update_statement_number(sender, instance, created, **kwargs):
         instance.statement_no = Setting.objects.get(key='Project Number Pre Text').value.replace('A', 'S') + \
                                   Setting.objects.get(key='Account Summary Number Last Digit').value.zfill(3)
         instance.save()
+
+
+class InvoiceHistory(models.Model):
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
+    total_invoiced = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(1)], blank=False, null=False)
+    total_paid = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0)], blank=False, null=False)
+    balance_due = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0)], blank=False, null=False)
+    pdf_filename = models.CharField(max_length=50, blank=False, null=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_on"]
+        verbose_name = 'Invoice History'
+        verbose_name_plural = 'Invoice History'
+
+    def __str__(self):
+        return str(self.invoice) + ': History ' + str(self.pdf_filename)

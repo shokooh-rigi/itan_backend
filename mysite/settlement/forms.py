@@ -8,6 +8,9 @@ class SettlementForm(ModelForm):
         model = Settlement
         fields = [
             'contractor',
+            'settlement_start',
+            'settlement_end',
+            'fixed_expenses',
             'created_by',
         ]
 

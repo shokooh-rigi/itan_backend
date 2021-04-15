@@ -10,7 +10,7 @@
                 <div class="col-lg-12">
                     <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
                     {{ form.customer }}
-                    <div class="form-icon"><a href="{% url 'personCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
                     <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
 $("#edit_person").click(function(){
 	person_id = $("#id_customer option:selected").val();
 	if(person_id != '') {
-        var url = "/person/" + person_id + "/edit/";
+        var url = "/custromer_person/" + person_id + "/edit/";
 	    showEditPopup(url);
     }
 	else {

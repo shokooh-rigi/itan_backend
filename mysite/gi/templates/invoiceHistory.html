@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Invoice {{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} History</h2>
+    {% if invoice_histories %}
+    <ul class="list-group">
+    {% for invoice_history in invoice_histories %}
+        <li class="list-group-item">
+            Invoice Number: <b>{{ invoice_history.pdf_filename }} </b>
+            <br />Total Invoiced: <b>${{ invoice_history.total_invoiced }} </b>
+            <br />Total Paid: <b>${{ invoice_history.total_paid }} </b>
+            <br />Balance: <b>${{ invoice_history.balance_due }} </b>
+            <br />PDF File: <b><a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/{{ invoice_history.pdf_filename }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></b>
+        </li>
+    {%  endfor %}
+    </ul>
+    {% endif %}
+    <script>
+    $(document).ready(function() {
+        $("#customer").text($('#id_order').find(':selected').data('customer'));
+        $("#project").text($('#id_order').find(':selected').data('project'));
+        $("#total_amount").text($('#id_order').find(':selected').data('totalamount'));
+        $('#id_order').on('change', function () {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#project").text($(this).find(':selected').data('project'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    });
+    </script>
+
+    <script>
+        $(function () {
+            $("#id_payment_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

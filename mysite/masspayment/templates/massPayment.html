@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Consolidated Payment for Customer Number {{ customer.customer_id }}, {{ customer.name }}</h2>
+    <br />
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="massPayment-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="my-4">
+                <div class="row form-line">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="payment-number" class="control-label">Payment No.</label>
+                        <input id="payment-number" name="payment-number" type="text" class="form-control" />
+                    </div>
+                </div>
+                <div class="row form-line">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="payment-date" class="control-label">Payment Date <span class="required">*</span></label>
+                        <input id="payment-date" name="payment-date" type="text" class="form-control" required />
+                    </div>
+                </div>
+                <div class="row form-line">
+                    <div class="col-lg-12" style="padding-right: 36px;">
+                        <label for="payment-desc" class="control-label">Payment Description</label>
+                        <input id="payment-desc" name="payment-desc" type="text" class="form-control" />
+                    </div>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="padding: .75rem .5rem;">Invoice</th>
+                            <th style="padding: .75rem .5rem;">Project</th>
+                            <th style="padding: .75rem .5rem;">Invoice Date</th>
+                            <th style="padding: .75rem .5rem;">Total Invoiced</th>
+                            <th style="padding: .75rem .5rem;">Total Paid</th>
+                            <th style="padding: .75rem .5rem;">Balance Due</th>
+                            <th style="padding: .75rem .5rem;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                            {% calculate_remaining_invoice_due invoice as crid %}
+                            <tr>
+                                <td style="padding: .75rem .5rem;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
+                                <td style="padding: .75rem .5rem;">{{ invoice.order.project_number }}</td>
+                                <td style="padding: .75rem .5rem;">{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
+                                <td class="total-invoiced" style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice %}</td>
+                                <td class="total-paid" style="padding: .75rem .5rem;">${% calculate_total_paid invoice %}</td>
+                                <td class="balance-due" style="padding: .75rem .5rem;">${{ crid|floatformat:2|intcomma }}</td>
+                                <td class="amount" style="padding: .75rem .5rem;"><input id="amount-{{ invoice.id }}" name="amount-{{ invoice.id }}" type="text" class="form-control" /></td>
+                            </tr>
+                        {% endfor %}
+                            <tr class="font-weight-bold text-white bg-dark">
+                                <td colspan="3" style="padding: .75rem .5rem;">TOTAL</td>
+                                <td class="t-total-invoiced" style="padding: .75rem .5rem;">${{ total_invoiced|floatformat:2|intcomma }}</td>
+                                <td class="t-total-paid" style="padding: .75rem .5rem;">${{ total_paid|floatformat:2|intcomma }}</td>
+                                <td class="t-balance-due" style="padding: .75rem .5rem;">${{ total_balance_due|floatformat:2|intcomma }}</td>
+                                <td class="t-amount" style="padding: .75rem .5rem;"></td>
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $(document).ready(function() {
+
+            let total_amount = 0
+            function updateTotalAmount() {
+                total_amount = 0
+                $('.amount input').each(function() {
+                    if ($(this).val() !== '')
+                        total_amount += parseFloat($(this).val());
+                });
+                $('.t-amount').text('$' + total_amount);
+            }
+            updateTotalAmount();
+
+            $(".amount input").on('keyup change', function () {
+                updateTotalAmount();
+            });
+
+            $("input[name=next]").click(function(e) {
+                const total_balance_due = $('.t-balance-due').text().replace(' ', '').replace(',', '').replace('$', '')
+                if (parseFloat(total_balance_due) < total_amount) {
+                    e.preventDefault();
+                    alert('Input Values are greater than the Total of Balance Due! Please Correct it.')
+                }
+            });
+
+
+            $('#id_tech_package, input[type=submit]').prop( "disabled", false );
+            $(".package-group input[type=checkbox]").each(function() {
+                if ($(this).is(":checked")) {
+                    $(this).prop("disabled", false);
+                    $(this).parent().parent().next().find('input[type=text]').prop("disabled", false);
+                    $(this).parent().parent().parent().next().find('input[type=checkbox]').prop("disabled", false);
+                }
+            });
+            $('.package-group input').on('change', function () {
+                if ($(this).is(":checked") && $(this).is(':checkbox')) {
+                    $(this).parent().parent().next().find('.form-control').prop( "disabled", false );
+                    $(this).parent().parent().parent().next().find('input[type=checkbox]').prop( "disabled", false );
+                } else {
+                    if ($(this).is(':checkbox')) {
+                        $(this).parent().parent().next().find('.form-control').prop( "disabled", true ).val('');
+                        $(this).parent().parent().parent().nextAll().find('input').prop( "disabled", true ).prop( "checked", false );
+                        $(this).parent().parent().parent().nextAll().find('input[type=text]').val('');
+                    }
+                }
+                $('input[type=submit]').prop( "disabled", false );
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#payment-date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

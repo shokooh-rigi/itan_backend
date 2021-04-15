@@ -38,13 +38,20 @@ class Order(models.Model):
     po_number = models.CharField(max_length=30, blank=False)
     date_po_received = models.DateField(blank=True, null=True)
     estimated_date_of_project = models.DateField(blank=True, null=True)
+    invoice_adjustment = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     control_system = models.ForeignKey(ControlSystem, on_delete=models.SET_NULL, blank=True, null=True)
     equipment_submittal = models.FileField(upload_to='uploads/order_equipment_submittal', blank=True, null=True)
+    colored_drawing = models.FileField(upload_to='uploads/order_colored_drawing', blank=True, null=True)
+    site_pictures = models.FileField(upload_to='uploads/order_site_pictures', blank=True, null=True)
+    test_sheets = models.FileField(upload_to='uploads/order_test_sheets', blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)
     fully_settled = models.BooleanField(default=False)
     order_settled_value = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    completion_percentage = models.PositiveIntegerField(default=0,
+                                                        validators=[MaxValueValidator(100), MinValueValidator(0)])
     note = models.TextField(max_length=2000, blank=True, null=True)
+    partial_job_done = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-proposal"]
@@ -97,11 +104,6 @@ class TechLabel(models.Model):
     @classmethod
     def create_techlabel_pdf(cls, parameters):
         techlabel_pdf = Render.render_to_file('pdfTemplates/techLabelTemplate.html', parameters, 'techlabel')
-        return techlabel_pdf
-
-    @classmethod
-    def create_techlabel_extra_pdf(cls, parameters):
-        techlabel_pdf = Render.render_to_file('pdfTemplates/techLabelExtraTemplate.html', parameters, 'techlabelextra')
         return techlabel_pdf
 
     # @classmethod

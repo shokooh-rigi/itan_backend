@@ -12,6 +12,7 @@ function CalendarInfo() {
     this.bgColor = null;
     this.borderColor = null;
     this.dragBgColor = null;
+    this.type = null;
 }
 
 function addCalendar(calendar) {
@@ -44,7 +45,7 @@ function hexToRGBA(hex) {
 (function() {
     var calendar;
     var id = 0;
-
+    let local_id = 0;
 
     $.ajax({
         url: "/schedule/get_tech_list/",
@@ -53,16 +54,19 @@ function hexToRGBA(hex) {
         data: '',
         success: function(data) {
             data.forEach(function(o) {
-            calendar = new CalendarInfo();
-            id = o.calendar_id;
-            calendar.id = String(id);
-            calendar.name = o.calendar_name;
-            calendar.color = o.calendar_color;
-            calendar.bgColor = o.calendar_bg_color;
-            calendar.dragBgColor = o.calendar_bg_color;
-            calendar.borderColor = o.calendar_bg_color;
-            addCalendar(calendar);
-        });
+                local_id ++;
+                calendar = new CalendarInfo();
+                id = o.calendar_id;
+                calendar.id = String(id);
+                calendar.local_id = String(local_id);
+                calendar.name = o.calendar_name;
+                calendar.type = o.type;
+                calendar.color = o.calendar_color;
+                calendar.bgColor = o.calendar_bg_color;
+                calendar.dragBgColor = o.calendar_bg_color;
+                calendar.borderColor = o.calendar_bg_color;
+                addCalendar(calendar);
+            });
         }
     });
     // $.getJSON("/schedule/get_tech_list/", function(data){

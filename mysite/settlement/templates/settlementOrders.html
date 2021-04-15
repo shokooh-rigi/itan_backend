@@ -7,67 +7,106 @@
 {% block content %}
     <h2>Select Projects to Settle with {{ this_settlement.contractor }}</h2>
     <br />
-    <h3>Add Projects</h3>
+    <h3>Projects</h3>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
         <div class="form-group">
             {% csrf_token %}
-            <div class="alert alert-warning change-alert" style="display: none;">
-                <strong>Warning!</strong> You already Settled based on $<span id="old_settled_amount"></span> on this project before...
-            </div>
             {{ form.settlement.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_order" class="control-label">Project</label>
-                    <select name="order" class="form-control" id="id_order">
-                        <option value="" selected="" data-oldsettled="0">---------</option>
-
-                        {% for order in orders %}
-                            <option value="{{ order.id }}" data-oldsettled="{{ order.order_settled_value  }}" data-price="{% order_total_calculator order.proposal.quote.estimate.id order %}">{{ order.project_number }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12">
-                    <div class="">
-                        <input type="checkbox" class="" name="price_overrider" id="price_overrider" value="price_overrider" style="display: inline-block; width: 18px;" />
-                        <label class="" style="padding-left: 5px; display: inline-block; width: 350px;" for="price_overrider">Confirm to override settlement price</label>
-                    </div>
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12">
-                    <label for="price_override" class="control-label">Price Override</label>
-                    {{ form.settled_value }}
-                    {{ form.order_value.as_hidden }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <input type="submit" class="btn btn-success" value="Add/Update" name="add" />
+                    {% for order in orders %}
+                        <div class="row form-line order-line order-line-disabled rounded">
+                            <div class="col-1 p-1 h-auto my-2">
+                                <input type="checkbox" class="order-include mt-2" name="order-include-{{ order.id }}" id="order-include-{{ order.id }}" value="order-include" />
+                            </div>
+                            <div class="col-2 p-1 my-2">
+                                <label for="price_override" class="control-label m-0">Order #{{ order.project_number }}</label>
+                            </div>
+                            <div class="col-3 p-1 my-2">
+                                <label class="switch-toggle m-0" style="width: 60px;">
+                                    <input class="or_toggle" type="checkbox" name="or-toggle-{{ order.id }}" />
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Completion Percentage to Date
+                                    <input id="old_cp" class="form-control" type="text" placeholder="%" style="width: 60px;" value="{{ order.completion_percentage }}" readonly />
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Completion Percentage in this Period
+                                    <input id="this_cp" name="percentage-{{ order.id }}" class="form-control" type="text" placeholder="%" style="width: 60px;" />
+                                </label>
+                            </div>
+                        </div>
+{#                            <option value="{{ order.id }}" data-oldsettled="{{ order.order_settled_value  }}" data-price="{% order_total_calculator order.proposal.quote.estimate.id order %}">{{ order.project_number }}</option>#}
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        <ul class="list-group">
-        {% for settled_order in settled_orders %}
-            <li class="list-group-item">
-                Order: <b>#{{ settled_order.order }} </b> -
-                Settlement based on <b>${{ settled_order.settled_value|floatformat:2|intcomma }} </b>
-                Settlement amount <b>${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</b>
-                <a href="{% url 'settledOrderDelete' settlement_id=this_settlement.id settled_order_id=settled_order.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
-            </li>
-        {%  endfor %}
-        </ul>
-            <br />
-
-    <br />
-    <h4>Settlement Total: ${{ settled_total|floatformat:2|intcomma }}</h4>
+{#        <ul class="list-group">#}
+{#        {% for settled_order in settled_orders %}#}
+{#            <li class="list-group-item">#}
+{#                Order: <b>#{{ settled_order.order }} </b> -#}
+{#                Settlement based on <b>${{ settled_order.settled_value|floatformat:2|intcomma }} </b>#}
+{#                Settlement amount <b>${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</b>#}
+{#                <a href="{% url 'settledOrderDelete' settlement_id=this_settlement.id settled_order_id=settled_order.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>#}
+{#            </li>#}
+{#        {%  endfor %}#}
+{#        </ul>#}
+{#            <br />#}
+{##}
+{#    <br />#}
+{#    <h4>Settlement Total: ${{ settled_total|floatformat:2|intcomma }}</h4>#}
     <br />
         <input type="submit" class="btn btn-primary" value="Next" name="next" formnovalidate />
         <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
 	</form>
 
     <script>
+
+
+
+        $(document).ready(function() {
+
+
+
+            $('#this_cp').on('change', function() {
+
+                const total_cp = parseInt($(this).val()) + parseInt($(this).closest('.row').find('#old_cp').val())
+                if (total_cp > 100) {
+                    $(this).val('')
+                    alert('Total Completion Percentage is greater than 100%')
+                } else {
+                }
+            })
+
+
+
+
+            function checkboxChecked() {
+                $( ".order-include" ).each(function( index ) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.order-line').removeClass('order-line-disabled')
+                    } else {
+                        $(this).closest('.order-line').addClass('order-line-disabled')
+                    }
+                })
+            }
+            checkboxChecked();
+
+            $( ".order-include" ).change(function() {
+                checkboxChecked();
+            })
+
+
+        });
+
+
+
+
         $("#price_overrider").attr('checked', false);
         $("#id_settled_value").attr('readonly', true);
         $("#price_overrider").click(function(){

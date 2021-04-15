@@ -33,7 +33,6 @@
                             <th scope="col" style="background-color: #333; color: #fff;">Item</th>
                             <th scope="col" style="background-color: #333; color: #fff;">Project Number</th>
                             <th scope="col" style="background-color: #333; color: #fff;">Project Name</th>
-                            <th scope="col" style="background-color: #333; color: #fff;">Settlement based on</th>
                             <th scope="col" style="background-color: #333; color: #fff;">Settlement amount</th>
                       </tr>
                 </thead>
@@ -44,7 +43,6 @@
                         <td>{{ settled_order.order.project_number }}</td>
                         <td>{{ settled_order.order.proposal.quote.estimate.project.name }}</td>
                         <td>${{ settled_order.settled_value|floatformat:2|intcomma }}</td>
-                        <td>${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -10,9 +10,11 @@ from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import *
+from ..gi.models import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 
 # Create your views here.
 
@@ -272,8 +274,48 @@ def estimator_add(request, bfm_id=None):
     parameters = {
         'form': form,
         'bfms': bfms,
+        'page_action': 'New',
     }
     return render(request, "estimatorAdd.html", parameters)
+
+
+@login_required
+def estimator_edit(request, estimate_id):
+    this_estimate = get_object_or_404(Estimate, id=estimate_id)
+    form = EstimateForm(request.POST or None, instance=this_estimate)
+    no_bfm = 1
+    if this_estimate.bfm:
+        bfms = BidFile.objects.filter(id=this_estimate.bfm.id)
+        no_bfm = 0
+    else:
+        bfms = None
+
+    if request.method == 'POST':
+        form.fields['created_by'].widget = forms.HiddenInput()
+        if request.POST.get("cancel"):
+            return redirect('estimatorHome')
+        if form.is_valid():
+            if request.POST.get("next"):
+                form.cleaned_data['created_by'] = request.user
+                new_estimate = form.save()
+                EstimateDetails.objects.filter(estimate=new_estimate) \
+                    .update(pre_demo=form.cleaned_data['predemo'])
+                estimate_equipments = EstimateEquipment.objects.filter(estimate=new_estimate)
+                for this_equipment in estimate_equipments:
+                    if this_equipment.equipment.service not in new_estimate.service.all():
+                        this_equipment.flag = False
+                        this_equipment.save()
+                    else:
+                        this_equipment.flag = True
+                        this_equipment.save()
+                return HttpResponseRedirect(reverse('estimateEquipment', args=(new_estimate.pk, 0)))
+    parameters = {
+        'form': form,
+        'bfms': bfms,
+        'no_bfm': no_bfm,
+        'page_action': 'Edit',
+    }
+    return render(request, "estimatorEdit.html", parameters)
 
 
 @login_required
@@ -631,7 +673,7 @@ def get_company_id(request):
 
 
 @login_required
-def person_create_popup(request):
+def customer_person_create_popup(request):
     form = CustomerForm(request.POST or None, initial={'created_by': request.user})
     form.fields['created_by'].widget = forms.HiddenInput()
     if form.is_valid():
@@ -643,9 +685,34 @@ def person_create_popup(request):
 
 
 @login_required
-def person_edit_popup(request, pk=None):
+def customer_person_edit_popup(request, pk=None):
     instance = get_object_or_404(Person, pk=pk)
     form = CustomerForm(request.POST or None, instance=instance)
+    form.fields['created_by'].widget = forms.HiddenInput()
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 1);</script>' % (instance.pk, instance))
+
+    return render(request, "customer_form.html", {"form": form})
+
+
+@login_required
+def engineer_person_create_popup(request):
+    form = EngineerForm(request.POST or None, initial={'created_by': request.user})
+    form.fields['created_by'].widget = forms.HiddenInput()
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 0);</script>' % (instance.pk, instance))
+
+    return render(request, "customer_form.html", {"form": form})
+
+
+@login_required
+def engineer_person_edit_popup(request, pk=None):
+    instance = get_object_or_404(Person, pk=pk)
+    form = EngineerForm(request.POST or None, instance=instance)
     form.fields['created_by'].widget = forms.HiddenInput()
     if form.is_valid():
         instance = form.save()
@@ -768,7 +835,7 @@ def estimate_equipment(request, estimate_id, estimate_service_id):
     estimate = Estimate.objects.get(id=estimate_id)
     interval_count = estimate.service.count()
     interval_set = estimate.service.all()[estimate_service_id]
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate)
+    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
     estimate_money = 0
     for estimate_equipment_pricing in estimate_equipments_pricing:
         if estimate_equipment_pricing.price_override:
@@ -788,10 +855,6 @@ def estimate_equipment(request, estimate_id, estimate_service_id):
         next_url = reverse('estimateEquipment', kwargs={'estimate_id': estimate_id,
                                                         'estimate_service_id': estimate_service_id + 1})
         next_url_text = 'Go To Next Service Equipments'
-    else:
-        for thisequipment in estimate_equipments_pricing:
-            if thisequipment.equipment.service not in estimate.service.all():
-                thisequipment.delete()
     equipments = Equipment.objects.filter(service=interval_set.id)
     equipment_in = []
     for estimate_equipment_one in estimate_equipments_pricing:
@@ -814,7 +877,7 @@ def estimate_equipment(request, estimate_id, estimate_service_id):
             else:
                 EstimateEquipment.objects.filter(estimate=estimate_id, equipment=form.cleaned_data['equipment']) \
                     .update(quantity=form.cleaned_data['quantity'], price_override=form.cleaned_data['price_override'])
-                estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate)
+                estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
                 estimate_money = 0
                 for estimate_equipment_pricing in estimate_equipments_pricing:
                     if estimate_equipment_pricing.price_override:
@@ -854,7 +917,7 @@ def estimate_equipment_delete(request, estimate_equipment_id, interval_id):
 def estimate_details(request, estimate_id):
     estimate = Estimate.objects.get(id=estimate_id)
     instance = get_object_or_404(EstimateDetails, estimate=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate)
+    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
     estimate_sub = 0
     for estimate_equipment_pricing in estimate_equipments_pricing:
         if estimate_equipment_pricing.price_override:
@@ -899,7 +962,7 @@ def estimate_bid(request, estimate_id):
     company_name = LicenseInfo.objects.get(key='CompanyName').value
     estimate = Estimate.objects.get(id=estimate_id)
     instance = get_object_or_404(EstimateDetails, estimate=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
+    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
     estimate_sub = 0
     for estimate_equipment_pricing in estimate_equipments_pricing:
         equipment_total = equipment_total_calculator(estimate_equipment_pricing)
@@ -917,6 +980,20 @@ def estimate_bid(request, estimate_id):
     estimate_work = estimate_total_work(estimate_id)
     estimate_work_in_hours = int(estimate_work / 60)
     estimate_work_in_minutes = int(estimate_work % 60)
+
+    if request.user.last_name == '' or request.user.last_name is None:
+        user_name = 'TAB Technologies, INC. Operator'
+    else:
+        user_name = request.user.first_name + " " + request.user.last_name
+    if request.user.profile.title == '' or request.user.profile.title is None:
+        user_title = 'Estimator'
+    else:
+        user_title = request.user.profile.title
+    user_signature = request.user.profile.e_sign
+    if request.user.profile.cell == '' or request.user.profile.cell is None:
+        user_cell = ''
+    else:
+        user_cell = request.user.profile.cell
 
     parameters = {'file_name': pdf_filename_generator(estimate.id, 'E'),
                   'estimate': estimate,
@@ -942,6 +1019,10 @@ def estimate_bid(request, estimate_id):
                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                   'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                   'company_name': company_name,
+                  'user_name': user_name,
+                  'user_title': user_title,
+                  'user_signature': user_signature,
+                  'user_cell': user_cell,
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   'STATIC_URL': STATIC_URL,
@@ -949,6 +1030,46 @@ def estimate_bid(request, estimate_id):
                   }
     estimate_pdf = Estimate.create_estimate_pdf(parameters)
     parameters['estimate_pdf'] = estimate_pdf[1]
+    try:
+        parameters['file_name'] = pdf_filename_generator(estimate.id, 'Q')
+        parameters['quote'] = estimate.quote
+        Quote.create_quote_pdf(parameters)
+    except:
+        pass
+    try:
+        parameters['file_name'] = pdf_filename_generator(estimate.id, 'P')
+        parameters['proposal'] = estimate.quote.proposal
+        parameters['estimate'] = estimate
+        Proposal.create_proposal_pdf(parameters)
+    except:
+        pass
+
+    try:
+        last_invoice_history_total = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).order_by('id').last()
+        if float(last_invoice_history_total.total_invoiced) != float(calculate_total_amount_due(estimate.quote.proposal.order.invoice)):
+            Invoice.objects.filter(id=estimate.quote.proposal.order.invoice.id) \
+                .update(times_estimate_changed=estimate.quote.proposal.order.invoice.times_estimate_changed + 1)
+            transactions_count = InvoiceTransaction.objects.filter(invoice=estimate.quote.proposal.order.invoice.id).count()
+            change_orders_count = ChangeOrder.objects.filter(order=estimate.quote.proposal.order.invoice.order).count()
+            total_count = transactions_count + change_orders_count + estimate.quote.proposal.order.invoice.times_estimate_changed + 1
+            invoice_file_name = 'Invoice-' + str(estimate.quote.proposal.order.project_number[3:]).zfill(3) + '-' + str(
+                estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count).zfill(3)
+            parameters['file_name'] = invoice_file_name
+            parameters['total_count'] = total_count
+            parameters['invoice'] = estimate.quote.proposal.order.invoice
+            change_orders = ChangeOrder.objects.filter(order=estimate.quote.proposal.order)
+            parameters['change_orders'] = change_orders
+            parameters['total_amount_due'] = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
+            Invoice.create_invoice_pdf(parameters)
+
+            total_invoiced = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
+            total_paid = calculate_total_paid(estimate.quote.proposal.order.invoice)
+            balance_due = calculate_remaining_invoice_due(estimate.quote.proposal.order.invoice)
+            new_object = InvoiceHistory(invoice=estimate.quote.proposal.order.invoice, total_invoiced=total_invoiced, total_paid=total_paid,
+                                        balance_due=balance_due, pdf_filename=invoice_file_name)
+            new_object.save()
+    except:
+        pass
     return render(request, "estimateBid.html", parameters)
 
 
@@ -961,7 +1082,7 @@ def equipment_total_calculator(equipment):
 
 def estimate_total_calculator(estimate_id):
     estimate = Estimate.objects.get(id=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id)
+    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
     estimate_sub = 0
     for estimate_equipment_pricing in estimate_equipments_pricing:
         equipment_total = equipment_total_calculator(estimate_equipment_pricing)
@@ -979,7 +1100,7 @@ def estimate_total_calculator(estimate_id):
 
 
 def estimate_total_work(estimate_id):
-    estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id)
+    estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
     estimate_work = 0
     for each_estimate_equipment in estimate_equipments:
         work_total = int(each_estimate_equipment.quantity) * int(each_estimate_equipment.equipment.estimate_work)

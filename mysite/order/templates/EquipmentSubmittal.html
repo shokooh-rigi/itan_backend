@@ -3,7 +3,7 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Upload Equipment Submittal for Project Number #{{ this_order.project_number }}</h2>
+    <h2>Upload {{ page_title }} for Project Number #{{ this_order.project_number }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="equipmentSubmittal-form">
         <div class="form-group">
             {% csrf_token %}

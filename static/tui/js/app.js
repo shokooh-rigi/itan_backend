@@ -518,46 +518,6 @@ $(document).ready(function () {
         })(window, tui.Calendar);
 
 
-        // set calendars
-        (function () {
-            var calendarDiv = document.getElementById('calendarList');
-            var html = [];
-
-            CalendarList.forEach(function (calendar) {
-                html.push('<div class="lnb-calendars-item" draggable="true" data-id="' + calendar.id + '" ondragstart="dragTech(event)"><label>' +
-                    '<input type="checkbox" class="tui-full-calendar-checkbox-round" value="' + calendar.id + '" checked>' +
-                    '<span style="border-color: ' + calendar.borderColor + '; background-color: ' + calendar.borderColor + ';"></span>' +
-                    '<span>' + calendar.name + '</span>' +
-                    '</label></div>'
-                );
-            });
-            calendarDiv.innerHTML = html.join('\n');
-
-        })();
-
-        (function () {
-            var orderDiv = document.getElementById('orderList');
-            var html = [];
-            html.push('<h4>Orders</h4>');
-
-
-            $.getJSON("/schedule/get_schedule_list/2", function(data) {
-                data.forEach(function (order) {
-                    html.push('<div class="lnb-calendars-item"><label>' +
-                        '<div id="order-' + order.id + '" data-id="' + order.id + '" data-location="' + order.location + '" data-body="' + order.body + '" data-estimate="' + order.estimated_work + '" class="draggable-order" draggable="true" ondragstart="drag(event)" value="' + order.id + '" checked>' +
-                        '<span style="border-color: ' + order.borderColor + '; background-color: ' + order.borderColor + ';"></span>' +
-                        '<span>' + order.body + '</span>' +
-                        '</div></label></div>'
-                    );
-                });
-                orderDiv.innerHTML = html.join('\n');
-            }).fail(function(){
-                console.log("An error has occurred.");
-            });
-
-
-        })();
-
     }, 2000);
 
 });

@@ -1,0 +1,492 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <script>
+        // load tui stylesheets
+
+        // if you use the default popups, use these two css.
+        {#$('<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />').appendTo('head');#}
+        {#$('<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />').appendTo('head');#}
+        {##}
+        {#$('<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css" />').appendTo('head');#}
+        {##}
+        {#$('<link rel="stylesheet" type="text/css" href="{% static 'tui/css/default.css'%}" />').appendTo('head');#}
+        {#$('<link rel="stylesheet" type="text/css" href="{% static 'tui/css/icons.css'%}" />').appendTo('head');#}
+        $('<link rel="stylesheet" type="text/css" href="{% static 'fullcalendar/main.css'%}" />').appendTo('head');
+    </script>
+
+
+
+    <div class="modal" id="schedule-edit">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Schedule for order #<span id="modal-order-id"></span></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body text-left">
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Project</div>
+                        <div id="project_name" class="d-inline-block px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Assigned Employees</div>
+                        <div id="employee_list" class="rounded px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Assigned Contractors</div>
+                        <div id="contractor_list" class="rounded px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Start</div>
+                        <div id="start_date" class="d-inline-block px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">End</div>
+                        <div id="end_date" class="d-inline-block px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox py-2">
+                        <div class="d-block"><span class="d-inline-block px-2 py-2 font-weight-bold">Estimated Total Hours: </span><span id="estimated_total_hours" class="d-inline-block px-2 py-1"></span></div>
+                        <div class="d-block" id="time_spent_by_each_tech"></div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger delete-schedule" data-dismiss="modal">Delete Schedule</button>
+                    <button type="button" class="btn btn-success save-schedule">Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal" id="maintenance-edit">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Maintenance</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body text-left">
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Project</div>
+                        <div id="project_name" class="d-inline-block px-2 py-1">
+                            {{ form.order }}
+                        </div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Description</div>
+                        <textarea id="desc" class="form-control w-100"></textarea>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Assigned Employees</div>
+                        <div id="employee_list" class="rounded px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Assigned Contractors</div>
+                        <div id="contractor_list" class="rounded px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox border-bottom py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">Start</div>
+                        <div id="start_date" class="d-inline-block px-2 py-1"></div>
+                    </div>
+                    <div class="fieldBox py-2">
+                        <div class="d-block px-2 py-2 font-weight-bold">End</div>
+                        <div id="end_date" class="d-inline-block px-2 py-1"></div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger delete-schedule" data-dismiss="modal">Delete Maintenance Schedule</button>
+                    <button type="button" class="btn btn-success save-schedule">Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <h2>Schedule</h2>
+
+    <div class="calendar-page d-flex">
+        <div class="left-panel col-3">
+            <div id="lnb-calendars" class="lnb-calendars d-flex flex-column" style="height: 670px;">
+                <div id="calendarList" class="lnb-calendars-d1 text-left" style="max-height: 40%; min-height: 20%; overflow: auto;"></div>
+                <div id="maintenanceList" class="lnb-calendars-item text-left bg-transparent my-4" style="overflow: auto; min-height: 75px;">
+                    <h4 class="text-center">MAINTENANCE</h4>
+                    <div class="draggable maintenance btn btn-warning">Maintenance</div>
+                </div>
+                <div id="orderList" class="lnb-calendars-d1 mt-3"></div>
+            </div>
+            {#            <div class="lnb-footer">#}
+            {#                © NHN Corp.#}
+            {#            </div>#}
+        </div>
+        <div class="right-panel col-9">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+
+    <form method='POST' action=''>
+        <div class="form-group">
+            {% csrf_token %}
+        </div>
+    </form>
+
+    <script src="{% static 'js/cal-ajax-setup.js' %}"></script>
+
+    {#    <!-- load tui scripts -->#}
+        <script src="{% static 'tui/js/moment.min.js' %}"></script>
+    {#    <script src="{% static 'tui/js/chance.min.js' %}"></script>#}
+    {##}
+    {#    <script src="{% static 'tui/js/tui-code-snippet.min.js' %}"></script>#}
+    {#    <script src="{% static 'tui/js/tui-time-picker.min.js' %}"></script>#}
+    {#    <script src="{% static 'tui/js/tui-date-picker.min.js' %}"></script>#}
+    {#    <script src="{% static 'tui/js/tui-calendar.js' %}"></script>#}
+    {##}
+    <script src="{% static 'tui/js/data/calendars.js' %}"></script>
+    <script src="{% static 'fullcalendar/main.js' %}"></script>
+    <script src="{% static 'js/schedule-init.js' %}"></script>
+{#        <script src="{% static 'tui/js/app.js' %}"></script>#}
+    {{ form.media.js }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+
+        // set calendars
+        (function () {
+            var calendarDiv = document.getElementById('calendarList');
+            var html = [];
+            html.push('<h4 class="text-center">TECHS</h4>');
+
+            CalendarList.forEach(function (calendar) {
+                html.push('<div class="lnb-calendars-item" draggable="true" data-type="' + calendar.type + '" data-id="' + calendar.id + '" ondragstart="dragTech(event)"><label>' +
+                    '<span>' + calendar.local_id + '. ' + calendar.name + '</span>' +
+                    '</label></div>'
+                );
+            });
+            calendarDiv.innerHTML = html.join('\n');
+
+        })();
+
+        (function () {
+            var orderDiv = document.getElementById('orderList');
+            var html = [];
+            html.push('<h4>ORDERS</h4>');
+
+
+            $.getJSON("/schedule/get_schedule_list/2", function (data) {
+                data.forEach(function (order) {
+                    html.push('<div class="lnb-calendars-item my-2">' +
+                        '<div style="background-color: ' + order.color + '" id="order-' + order.id + '" data-id="' + order.id + '" data-location="' + order.location + '" data-body="' + order.body + '" data-estimate="' + order.estimated_work + '" class="draggable p-1 text-white rounded text-left" value="' + order.id + '" checked>' +
+                        '<span style="border-color: ' + order.borderColor + '; background-color: ' + order.borderColor + ';"></span>' +
+                        '<span>' + order.body + '</span>' +
+                        '</div></div>'
+                    );
+                });
+                orderDiv.innerHTML = html.join('\n');
+            }).fail(function () {
+                console.log("An error has occurred.");
+            });
+
+
+        })();
+
+    </script>
+
+    <script>
+
+
+
+
+
+        {#        function allowDrop(ev) {#}
+        {#            if( ev.dataTransfer.getData("type") == "order" ) {#}
+        {#                ev.preventDefault();#}
+        {#                document.getElementById("calendar").classList.add("dover");#}
+        {#            }#}
+        {##}
+        {#        }#}
+        {##}
+        {#        function dropLeave(ev) {#}
+        {#            if( ev.dataTransfer.getData("type") == "order" ) {#}
+        {#                ev.preventDefault();#}
+        {#                document.getElementById("calendar").classList.remove("dover");#}
+        {#            }#}
+        {#        }#}
+        {##}
+        {#        function drag(ev) {#}
+        {#            ev.dataTransfer.setData("type", "order");#}
+        {#            ev.dataTransfer.setData("elementId", ev.target.id);#}
+        {#            ev.dataTransfer.setData("text", ev.target.textContent);#}
+        {#            ev.dataTransfer.setData("body", ev.target.dataset.body);#}
+        {#            ev.dataTransfer.setData("id", ev.target.dataset.id);#}
+        {#            ev.dataTransfer.setData("estimate", ev.target.dataset.estimate);#}
+        {#            ev.dataTransfer.setData("location", ev.target.dataset.location);#}
+        {#        }#}
+        {##}
+        {##}
+        {#        function drop(ev) {#}
+        {#            if( ev.dataTransfer.getData("type") == "order" ) {#}
+        {#                ev.preventDefault();#}
+        {#                document.getElementById("calendar").classList.remove("dover");#}
+        {#                var el_id = ev.dataTransfer.getData("elementId");#}
+        {#                var id = ev.dataTransfer.getData("id");#}
+        {#                var body = ev.dataTransfer.getData("body");#}
+        {#                var estimate = ev.dataTransfer.getData("estimate");#}
+        {#                var location = ev.dataTransfer.getData("location");#}
+        {#                var start = new Date();#}
+        {#                var end = moment(start).add(estimate, 'm').toDate();#}
+        {##}
+        {#                $.ajax({#}
+        {#                  type: "POST",#}
+        {#                  url: "{% url 'create_schedule' %}",#}
+        {#                  data: {#}
+        {#                      'order_id': id,#}
+        {#                      'schedule_start': formatDate(start),#}
+        {#                      'schedule_end': formatDate(end)#}
+        {#                  },#}
+        {#                    success: function(result) {#}
+        {#                      console.log(result);#}
+        {#                    }#}
+        {#                });#}
+        {##}
+        {#                cal.createSchedules([#}
+        {#                   {#}
+        {#                       id: id,#}
+        {#                       calendarId: '0',#}
+        {#                       title: body,#}
+        {#                       body: body,#}
+        {#                       location: location,#}
+        {#                       category: 'time',#}
+        {#                       start: start,#}
+        {#                       end: end,#}
+        {#                       goingDuration: '30',#}
+        {#                       comingDuration: '30'#}
+        {#                   }#}
+        {#                ]);#}
+        {##}
+        {#                cal.scrollToNow();#}
+        {#                cal.today();#}
+        {##}
+        {#                document.getElementById(el_id).parentElement.parentElement.remove();#}
+        {##}
+        {#            }#}
+        {#        }#}
+        {##}
+        $(document).ready(function () {
+            $(document).on({
+                click: function (e) {
+                    e.preventDefault();
+                    const that = $(this)
+                    const assigned_id = $(this).parent().attr('id');
+                    let assigned_type = ''
+                    if ($(this).parent().parent().attr('id') === 'employee_list')
+                        assigned_type = 'employee'
+                    else if ($(this).parent().parent().attr('id') === 'contractor_list')
+                        assigned_type = 'contractor'
+                    const order_id = $(this).closest('.modal').attr('data-id')
+                    const schedule_id = $(this).closest('.modal').attr('data-scheduleid')
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'update_schedule' %}",
+                        data: {
+                            'type': 'tech_remove',
+                            'org_order_id': order_id,
+                            'schedule_id': schedule_id,
+                            'new_tech_id': assigned_id,
+                            'tech_type': assigned_type
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            if (response.result == true) {
+                                that.parent().remove();
+                                const event = calendar.getEventById('schedule-' + schedule_id);
+                                const tech_count = parseInt($('#schedule-edit .involvement_percentage_input').length);
+                                let remaining_percentage = 100
+                                const rounded_mean = (remaining_percentage/tech_count).toFixed(0)
+                                $('#schedule-edit .involvement_percentage_input').each(function(i, obj) {
+                                    if (i === tech_count - 1) {
+                                        $(this).val(remaining_percentage)
+                                    } else {
+                                        $(this).val(rounded_mean)
+                                        remaining_percentage = remaining_percentage - rounded_mean
+                                    }
+                                });
+                                calendar.refetchEvents();
+                            }
+                        }
+                    });
+                }
+            }, '.modal .remove-assigned');
+
+            $(document).on({
+                click: function (e) {
+                    e.preventDefault();
+                    if ($(this).closest('.modal').attr('data-scheduleid')) {
+                        const r = confirm("Are you sure you want to delete this schedule?");
+                        if (r === true) {
+                            const order_id = $(this).closest('.modal').attr('data-orderid')
+                            const schedule_id = $(this).closest('.modal').attr('data-scheduleid')
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'update_schedule' %}",
+                                data: {
+                                    'type': 'calendar_delete',
+                                    'org_order_id': order_id,
+                                    'schedule_id': schedule_id
+                                },
+                                success: function (response) {
+                                    console.log(response);
+                                    if (response.result == true) {
+                                        const event = calendar.getEventById('schedule-' + schedule_id);
+                                        if (response.no_schedule_left == true) {
+                                            $('#orderList').find('.draggable[data-id=' + order_id + ']').css('background', '#3699ff');
+                                        }
+                                        event.remove()
+                                    } else {
+                                        alert(response.msg)
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        const r = confirm("Are you sure you want to delete this Maintenance?");
+                        if (r === true) {
+                            const order_id = $(this).closest('.modal').attr('data-orderid')
+                            const maintenance_id = $(this).closest('.modal').attr('data-maintenanceid')
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'update_maintenance' %}",
+                                data: {
+                                    'type': 'calendar_delete',
+                                    'org_order_id': order_id,
+                                    'maintenance_id': maintenance_id
+                                },
+                                success: function (response) {
+                                    console.log(response);
+                                    if (response.result == true) {
+                                        const event = calendar.getEventById('maintenance-' + maintenance_id);
+                                        event.remove()
+                                    } else {
+                                        alert(response.msg)
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }, '.delete-schedule');
+
+
+            $(document).on({
+                click: function (e) {
+                    e.preventDefault();
+                    if ($(this).closest('.modal').attr('data-scheduleid')) {
+                        const order_id = $(this).closest('.modal').attr('data-orderid');
+                        const schedule_id = $(this).closest('.modal').attr('data-scheduleid');
+                        let total_percentage = 0;
+                        $(this).closest('#schedule-edit').find('.involvement_percentage_input').each(function(i, obj) {
+                            total_percentage += parseInt($(this).val());
+                        });
+                        if (total_percentage === 100) {
+                            let techs = []
+                            $(this).closest('#schedule-edit').find('.an-assigned').each(function(i, obj) {
+                                if ( $(this).parent().attr('id') == 'employee_list' ) {
+                                    techs.push({
+                                        id: $(this).attr('id'),
+                                        type: 'employee',
+                                        new_percentage: $(this).find('.involvement_percentage_input').val()
+                                    })
+                                } else if ( $(this).parent().attr('id') == 'contractor_list' ) {
+                                    techs.push({
+                                        id: $(this).attr('id'),
+                                        type: 'contractor',
+                                        new_percentage: $(this).find('.involvement_percentage_input').val()
+                                    })
+                                }
+                            });
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'update_schedule' %}",
+                                data: {
+                                    'type': 'update_percentages',
+                                    'org_order_id': order_id,
+                                    'schedule_id': schedule_id,
+                                    'techs': JSON.stringify(techs)
+                                },
+                                success: function (response) {
+                                    if (response.result == true) {
+                                        alert('Changes Saved.');
+                                    }
+                                }
+                            });
+                        } else {
+                            alert('The total of involvement Percentages do not add up to 100%. Please check and try again.')
+                        }
+                    } else {
+                        const maintenance_id = $(this).closest('.modal').attr('data-maintenanceid');
+                        if ( $('#maintenance-edit #id_order').val() ) {
+                            const order_id = $('#maintenance-edit #id_order').val();
+                            const desc = $('#maintenance-edit #desc').val();
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'update_maintenance' %}",
+                                data: {
+                                    'type': 'update_order',
+                                    'org_order_id': order_id,
+                                    'maintenance_id': maintenance_id,
+                                    'desc': desc
+                                },
+                                success: function (response) {
+                                    if (response.result == true) {
+                                        alert('Maintenance Project Information Updated.');
+                                        $("#maintenance-edit").modal('hide');
+                                        calendar.refetchEvents();
+                                    }
+                                }
+                            });
+                        } else {
+                            alert('Please select a Project to save this Maintenance Schedule.');
+                        }
+
+                    }
+                }
+            }, '.save-schedule');
+
+         });
+
+
+    </script>
+
+
+{% endblock %}

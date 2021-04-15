@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>{{ page_action }} Estimate</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="estimatorAdd-form">
+        <div class="form-group">
+            {% csrf_token %}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
+                    <div class="row-data">
+                        {{ form.customer }}
+                        <div class="select-icons">
+                            <div class="form-icon"><a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
+                    <div class="row-data">
+                        {{ form.project }}
+                        <div class="select-icons">
+                            <div class="form-icon"><a href="{% url 'projectCreate' %}" id="add_project" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_engineer" class="control-label">Engineer <span class="required">*</span></label>
+                    <div class="row-data">
+                        {{ form.engineer }}
+                        <div class="select-icons">
+                            <div class="form-icon"><a href="{% url 'engineerCreate' %}" id="add_engineer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_engineer" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_service" class="control-label">Services Offered <span class="required">*</span></label>
+                    {{ form.service }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_due_date" class="control-label">Due Date <span class="required">*</span></label>
+                    {{ form.due_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_drawing_date" class="control-label">Drawing Date</label>
+                    {{ form.drawing_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_predemo" class="control-label">Pre Demo</label>
+                    {{ form.predemo }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12">
+                    <input type="submit" class="btn btn-success" value="Next" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+        <script>
+            $(document).ready(function() {
+                $('#id_customer option, #id_project option').attr('disabled', false);
+                $.ajax({
+                    type: 'GET',
+                    async: false,
+                    url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')
+                }).then(function (data) {
+                    for(x in data.results) {
+                        if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {
+                            break;
+                        }
+                    }
+                    var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                    $('#id_customer').append(option).trigger('change');
+
+                    $('#id_customer').trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+                });
+                {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
+                $.ajax({
+                    type: 'GET',
+                    async: false,
+                    url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')
+                }).then(function (data) {
+                    for(x in data.results) {
+                        if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {
+                            break;
+                        }
+                    }
+                    var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                    $('#id_project').append(option).trigger('change');
+
+                    $('#id_project').trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+                });
+                {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
+                {#$("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));#}
+                $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                {#$('#id_customer, #id_project').attr({'readonly': 'readonly'}).trigger('change');#}
+                if ($('#id_bfm').find(':selected').data('dlink') != '') {
+                    $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
+                }
+                else {
+                    $("#dlink_href").hide();
+                }
+                if ($('#id_bfm').find(':selected').data('bfmnote') != '') {
+                    $("#bfm_note").attr('data-content', $(this).find(':selected').data('bfmnote')).show();
+                } else {
+                    $("#bfm_note").hide();
+                }
+                $('#id_bfm').on('change', function() {
+                    if ($(this).val() === '') {
+                        $('#id_customer, #id_project').val('').attr({'readonly': false}).trigger('change');
+                        $('#id_due_date').attr('readonly', false).val('');
+                        $('#id_customer option, #id_project option').attr('disabled', false);
+                        $("#dlink_href").attr("href", '').hide();
+                        $("#bfm_note").hide();
+                    } else {
+                        $('#id_customer option, #id_project option').attr('disabled', false);
+                        $.ajax({
+                            type: 'GET',
+                            async: false,
+                            url: '/select2/fields/auto.json?term=' + encodeURIComponent($(this).find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_customer').append(option).trigger('change');
+
+                            $('#id_customer').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
+                        $.ajax({
+                            type: 'GET',
+                            async: false,
+                            url: '/select2/fields/auto.json?term=' + encodeURIComponent($(this).find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')
+                        }).then(function (data) {
+                            for(x in data.results) {
+                                if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {
+                                    break;
+                                }
+                            }
+                            var option = new Option(data.results[x].text, data.results[x].id, true, true);
+                            $('#id_project').append(option).trigger('change');
+
+                            $('#id_project').trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: data
+                                }
+                            });
+                        });
+                        {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
+                        $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
+                        $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);
+                        $('#id_customer, #id_project').attr({'readonly': 'readonly'}).trigger('change');
+                        if ($(this).find(':selected').data('dlink') != '') {
+                            $("#dlink_href").attr("href", $("#id_bfm").find(':selected').data('dlink')).show();
+                        }
+                        else {
+                            $("#dlink_href").hide();
+                        }
+                        if ($(this).find(':selected').data('bfmnote') != '') {
+                            $("#bfm_note").attr('data-content', $(this).find(':selected').data('bfmnote')).show();
+                        } else {
+                            $("#bfm_note").hide();
+                        }
+                    }
+                });
+                $("#edit_person").click(function(){
+                    person_id = $("#id_customer option:selected").val();
+                    if(person_id != '') {
+                        var url = "/custromer_person/" + person_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+                $("#edit_project").click(function(){
+                    project_id = $("#id_project option:selected").val();
+                    if(project_id != '') {
+                        var url = "/project/" + project_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+                $("#edit_engineer").click(function(){
+                    person_id = $("#id_engineer option:selected").val();
+                    if(person_id != '') {
+                        var url = "/engineer_person/" + person_id + "/edit/";
+                        showEditPopup(url);
+                    }
+                    else {
+                        alert("Something Went Wrong");
+                    }
+                });
+            });
+    </script>
+
+    <script>
+        $(function () {
+            $("#id_due_date, #id_drawing_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+{% endblock %}

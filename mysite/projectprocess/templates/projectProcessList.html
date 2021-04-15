@@ -8,14 +8,23 @@
     <div class="text-center">
         <h2>PROJECTS LIST</h2>
         <h3>Select Projects Filtered By:</h3>
-        <div class="btn-group type-select" style="margin: 10px auto;">
-            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
-            <a class="btn btn-primary inprogressselected" href="?{% url_replace request 'type' 'tp' %}">Tech Package</a>
-            <a class="btn btn-primary reportedselected" href="?{% url_replace request 'type' 'ts' %}">Tech Scheduled</a>
-            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'jc' %}">Job Completed</a>
-            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'ro' %}">Report Out</a>
-            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'in' %}">Invoiced</a>
-            <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'co' %}">Completed</a>
+        <div class="btn-group type-select" style="margin: 10px auto 0 auto;">
+            <a class="btn btn-primary allselected" style="width: 50px;" href="?{% url_replace request 'type' 'all' %}">All</a>
+            <a class="btn btn-primary tpselected" style="width: 180px;" href="?{% url_replace request 'type' 'tp' %}">Tech Package</a>
+            <a class="btn btn-primary tsselected" style="width: 200px;" href="?{% url_replace request 'type' 'ts' %}">Tech Scheduled</a>
+            <a class="btn btn-primary jcselected" style="width: 200px;" href="?{% url_replace request 'type' 'jc' %}">Job Completed</a>
+            <a class="btn btn-primary roselected" style="width: 140px;" href="?{% url_replace request 'type' 'ro' %}">Report Out</a>
+            <a class="btn btn-primary inselected" style="width: 120px;" href="?{% url_replace request 'type' 'in' %}">Invoiced</a>
+            <a class="btn btn-primary coselected" style="width: 160px;" href="?{% url_replace request 'type' 'co' %}">Completed</a>
+        </div>
+        <div class="btn-group type-select" style="margin: 0 auto 10px auto;">
+            <a class="btn btn-primary allselected" style="width: 50px;" href="?{% url_replace request 'type' 'all' %}">All</a>
+            <a class="btn btn-primary ntpselected" style="width: 180px;" href="?{% url_replace request 'type' 'ntp' %}">No Tech Package</a>
+            <a class="btn btn-primary ntsselected" style="width: 200px;" href="?{% url_replace request 'type' 'nts' %}">No Tech Scheduled</a>
+            <a class="btn btn-primary njcselected" style="width: 200px;" href="?{% url_replace request 'type' 'njc' %}">Job Not Completed</a>
+            <a class="btn btn-primary nroselected" style="width: 140px;" href="?{% url_replace request 'type' 'nro' %}">No Report</a>
+            <a class="btn btn-primary ninselected" style="width: 120px;" href="?{% url_replace request 'type' 'nin' %}">No Invoice</a>
+            <a class="btn btn-primary ncoselected" style="width: 160px;" href="?{% url_replace request 'type' 'nco' %}">Not Completed</a>
         </div>
         <br />
         <div class="row" style="margin: 10px auto; position: relative;">
@@ -67,9 +76,9 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project #</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__customer__company__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
+                    <th data-sortable="project_number"><a href="{% if request.GET.ordering == 'project_number' %}?{% url_replace request 'ordering' '-project_number' %}{% else %}?{% url_replace request 'ordering' 'project_number' %}{% endif %}">Project #</a></th>
+                    <th data-sortable="proposal__quote__estimate__customer__company__name"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer__company__name' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer__company__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer__company__name' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
                     <th>Order Total</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Package" style="text-decoration: underline;">TP</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Scheduled" style="text-decoration: underline;">TS</th>
@@ -93,8 +102,23 @@
                         <td>{% if project.projectprocess.report_out %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.invoiced %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
-                        <td><a href="{% url 'projectProcessEdit' project.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
+                        <td><a href="{% url 'projectProcessEdit' project.id 0 %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                     </tr>
+                    {% if project.proposal.quote.estimate.estimatedetails.pre_demo != 0 %}
+                    <tr>
+                        <td>{{ project.project_number }}-PREDEMO</td>
+                        <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
+                        <td>{{ project.proposal.quote.estimate.project.name }}</td>
+                        <td>${% order_total_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>{% if project.projectprocesspredemo.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocesspredemo.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocesspredemo.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocesspredemo.report_out %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocesspredemo.invoiced %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td>{% if project.projectprocesspredemo.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
+                        <td><a href="{% url 'projectProcessEdit' project.id 1 %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
+                    </tr>
+                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>
@@ -130,7 +154,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['id', 'project__project_number', 'sheet_date', 'project__proposal__quote__estimate__project__name', 'project__proposal__quote__estimate__project__address_line_1'];
+        var sortables = ['project_number', 'proposal__quote__estimate__project__name', 'proposal__quote__estimate__customer__company__name'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
@@ -160,6 +184,63 @@
         else if (window.location.href.indexOf('paginate_by=') > 0) {
             $(".pagination-select #paginate_all").addClass('selected');
             $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+
+        if (window.location.href.indexOf('type=') <= 0) {
+            $(".type-select .allselected").addClass('active');
+            $(".type-select .allselected").removeAttr("href");
+        }
+        if (window.location.href.indexOf('type=all') > 0) {
+            $(".type-select .allselected").addClass('active');
+            $(".type-select .allselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=tp') > 0) {
+            $(".type-select .tpselected").addClass('active');
+            $(".type-select .tpselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=ts') > 0) {
+            $(".type-select .tsselected").addClass('active');
+            $(".type-select .tsselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=jc') > 0) {
+            $(".type-select .jcselected").addClass('active');
+            $(".type-select .jcselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=ro') > 0) {
+            $(".type-select .roselected").addClass('active');
+            $(".type-select .roselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=in') > 0) {
+            $(".type-select .inselected").addClass('active');
+            $(".type-select .inselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=co') > 0) {
+            $(".type-select .coselected").addClass('active');
+            $(".type-select .coselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=ntp') > 0) {
+            $(".type-select .ntpselected").addClass('active');
+            $(".type-select .ntpselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=nts') > 0) {
+            $(".type-select .ntsselected").addClass('active');
+            $(".type-select .ntsselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=njc') > 0) {
+            $(".type-select .njcselected").addClass('active');
+            $(".type-select .njcselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=nro') > 0) {
+            $(".type-select .nroselected").addClass('active');
+            $(".type-select .nroselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=nin') > 0) {
+            $(".type-select .ninselected").addClass('active');
+            $(".type-select .ninselected").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('type=nco') > 0) {
+            $(".type-select .ncoselected").addClass('active');
+            $(".type-select .ncoselected").removeAttr("href");
         }
     });
 </script>

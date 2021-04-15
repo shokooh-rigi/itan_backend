@@ -12,6 +12,7 @@ urlpatterns = [
     path('invoice/delete/<int:invoice_id>/', views.invoice_delete, name='invoiceDelete'),
     path('invoice/payment/<int:invoice_id>/', views.invoice_payment, name='invoicePayment'),
     path('transaction/delete/<int:transaction_id>/', views.invoice_payment_delete, name='invoicePaymentDelete'),
+    path('invoice/history/<int:invoice_id>/', views.invoice_history, name='invoiceHistory'),
     path('account_summary/', views.account_summary_list, name='accountSummaryHome'),
     path('account_summary/add/', views.account_summary_add, name='accountSummaryAdd'),
     path('account_summary/delete/<int:account_summary_id>/', views.accout_summary_delete, name='accountSummaryDelete'),
