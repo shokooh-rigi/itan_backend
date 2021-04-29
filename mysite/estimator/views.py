@@ -79,14 +79,14 @@ def estimate_list(request):
 
         object_list = Estimate.objects.filter(Q(project__name__icontains=search)
                                               | Q(customer__company__name__icontains=search)) \
-            .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
+            .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False)
 
     else:
         object_list = Estimate.objects.filter(Q(project__name__icontains=search)
                                               | Q(customer__company__name__icontains=search)) \
-            .filter(archive=False).order_by(ordering)
+            .filter(archive=False)
 
-    object_list = object_list.annotate(null_count=Count('quote')).order_by('null_count')
+    object_list = object_list.annotate(null_count=Count('quote')).order_by('null_count', ordering)
 
     total_rows = object_list.count()
 
