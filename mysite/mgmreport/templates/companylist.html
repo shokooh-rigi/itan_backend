@@ -9,6 +9,7 @@
         <table class="table table-striped" id="printThis">
             <thead>
                 <tr>
+                    <th>Customer #</th>
                     <th>Type</th>
                     <th>Name</th>
                     <th>Contact Persons</th>
@@ -22,6 +23,7 @@
             <tbody>
                 {% for contact in contacts %}
                         <tr>
+                            <td>{% if contact.company.customer_id %}{{ contact.company.customer_id }}{% else %}{% endif %}</td>
                             <td>{{ contact.company.company_type }}</td>
                             <td>{{ contact.company.name }}</td>
                             <td>{{ contact.name }}</td>

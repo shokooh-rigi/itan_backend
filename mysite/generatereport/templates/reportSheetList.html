@@ -8,7 +8,7 @@
     <div class="text-center">
     <h2>REPORT LIST</h2>
 
-        <a href="{% url 'reportSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Report Sheet</button></a>
+        <a href="{% url 'reportSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Report</button></a>
         <br /><br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'search' '' %}">
@@ -64,7 +64,6 @@
                     <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
                     <th data-sortable="project__proposal__quote__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
                     <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
-                    <th>Equipments List</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -75,12 +74,13 @@
                         <td>{{ sheet.project.project_number }}</td>
                         <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
                         <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
-                        <td>{{ sheet.sheet_date }}</td>
-                        <td><a href="{% url 'terminalSheetEquipmentList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
+                        <td>{{ sheet.report_date }}</td>
                         <td>
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
-                            <a href="{% url 'terminalSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
-{#                            <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
+                            <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/report/FINAL SHEET {{ sheet.project.proposal.quote.estimate.project.name|upper }}-{{ sheet.project.project_number }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                            <a href="{% url 'reportSheetRecreate' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon refreshicon" data-toggle="tooltip" data-placement="bottom" title="Recreate PDF"></div></a>
+                            {% if not sheet.project.projectprocess.report_out %}<a href="{% url 'reportSheetFinalize' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon finalicon" data-toggle="tooltip" data-placement="bottom" title="Finalization"></div></a>{% else %}<div class="icon d-inline-block finalicon disableicon" data-toggle="tooltip" data-placement="bottom" title="Project Finalized"></div>{% endif %}
+                            <a href="{% url 'reportSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                         </td>
                     </tr>
                 {% endfor %}

@@ -38,9 +38,7 @@ class ContactInfo(models.Model):
     zip = models.CharField(max_length=10, blank=True, null=True)
     company_type = models.ForeignKey(CompanyType, on_delete=models.CASCADE,
                                      error_messages={'required': 'You have to specify Company Type.'})
-    interest_percentage = models.PositiveIntegerField(default=0,
-                                                      validators=[MaxValueValidator(100), MinValueValidator(0)],
-                                                      help_text="exclusive for sub contractors.")
+    customer_adjustment_in_percentage = models.IntegerField(default=0)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -64,7 +62,6 @@ def update_customer_id(sender, instance, created, **kwargs):
 
 
 class Person(models.Model):
-    id_number = models.PositiveIntegerField(blank=True, null=True, unique=True)
     company = models.ForeignKey(ContactInfo, on_delete=models.CASCADE, blank=False)
     name = models.CharField(max_length=255, blank=False)
     title = models.CharField(max_length=255, blank=True)
@@ -78,8 +75,6 @@ class Person(models.Model):
     fax = models.CharField(max_length=15, blank=True)
     mail = models.EmailField(max_length=55, blank=True)
     web = models.CharField(max_length=55, blank=True)
-    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="exclusive for sub contractors.")
-    # fixed_monthly_payment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="exclusive for sub contractors.")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
@@ -118,8 +113,23 @@ class Profile(models.Model):
         (6, 'super tech'),
     )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
+    STATUS_CHOICES = (
+        (1, 'Employee'),
+        (2, 'Contractor'),
+    )
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, blank=True, null=True)
+    id_number = models.PositiveIntegerField(blank=True, null=True, unique=True)
+
+    interest_percentage = models.PositiveIntegerField(default=0,
+                                                      validators=[MaxValueValidator(100), MinValueValidator(0)],
+                                                      help_text="exclusive for sub contractors.")
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True,
+                                      help_text="exclusive for sub contractors.")
+
     customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='profile_customer')
+    tech = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True,
+                                 related_name='profile_tech')
     physical_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
     physical_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
     physical_city = models.CharField(max_length=55, blank=True, null=True)

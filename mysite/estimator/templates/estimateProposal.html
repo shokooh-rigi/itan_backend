@@ -2,6 +2,7 @@
 {% load static %}
 {% load estimator_tags %}
 {% load custom_tags %}
+{% load humanize %}
 
 {% block content %}
     <h2>Estimate No. {% estimate_number_generator estimate_id %}</h2>
@@ -38,7 +39,7 @@
                 <ul class="service_list">
                     {% for service in estimate.service.all %}
                     <li>{{ service }} Service
-                        ${% service_total_calculator service estimate_equipments_pricing %}
+                        ${% service_total_calculator service estimate_equipments_pricing as stc %}{{ stc|floatformat:2|intcomma }}
                     </li>
                     <br/>
                 {% endfor %}

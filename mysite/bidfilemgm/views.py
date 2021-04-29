@@ -99,7 +99,8 @@ def bidfiles_add(request):
                     .replace("/", '')
                 zip_file_name = str(entry.pk) + '. ' + project_clean_name + '.zip'
                 create_zip_file(files, temp_path, zip_file_name)
-                os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
+                if BidFile.objects.get(id=entry.pk).uploaded_file:
+                    os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
                 BidFile.objects.filter(id=entry.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
@@ -203,7 +204,6 @@ def bidfiles_delete(request, bidfiles_id):
         if request.POST.get("confirm"):
             file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")),
                                      "media" + this_bidfile.uploaded_file.name)
-            print(file_path)
             if os.path.isfile(file_path):
                 os.remove(file_path)
             this_bidfile.delete()

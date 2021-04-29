@@ -15,6 +15,8 @@ from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
+from .templatetags.estimator_tags import *
+from django.db.models import Count
 
 # Create your views here.
 
@@ -84,6 +86,8 @@ def estimate_list(request):
                                               | Q(customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
+    object_list = object_list.annotate(null_count=Count('quote')).order_by('null_count')
+
     total_rows = object_list.count()
 
     paginator = Paginator(object_list, pagination)
@@ -108,6 +112,8 @@ def quotation_list(request):
             to_email = to_email.replace(" ", "").replace(";", ",").split(',')
             cc = form.cleaned_data['cc']
             cc = cc.replace(" ", "").replace(";", ",").split(',')
+            cc.append('est@tabtechinc.com')
+            cc.append('a.behehsti@tabtechinc.com')
             email_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
             this_estimate = get_object_or_404(Estimate, id=email_id)
@@ -185,6 +191,8 @@ def proposal_list(request):
             to_email = to_email.replace(" ", "").replace(";", ",").split(',')
             cc = form.cleaned_data['cc']
             cc = cc.replace(" ", "").replace(";", ",").split(',')
+            cc.append('est@tabtechinc.com')
+            cc.append('a.behehsti@tabtechinc.com')
             email_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
             this_estimate = get_object_or_404(Estimate, id=email_id)
@@ -480,7 +488,6 @@ def estimate_delete(request, estimate_id):
                 this_estimate.bfm.archive = False
                 this_estimate.bfm.save()
             this_estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(this_estimate.id, 'E')})
-            this_estimate.project.delete()
             this_estimate.delete()
         return redirect('estimatorHome')
     elif request.method == "POST" and request.user.is_authenticated and this_estimate.created_by != request.user:
@@ -938,8 +945,12 @@ def estimate_details(request, estimate_id):
                 form.cleaned_data['estimate'] = estimate
                 form.cleaned_data['saved_flag'] = True
                 form.save()
+                if not estimate.estimatedetails.customer_adjustment:
+                    estimate.estimatedetails.customer_adjustment = estimate_customer_adjustment_calculator(estimate_id)
+                    estimate.estimatedetails.save()
                 return redirect('estimateBid', estimate_id)
     parameters = {'estimate_id': estimate_id,
+                  'estimate': estimate,
                   'form': form,
                   'estimate_equipments_pricing': estimate_equipments_pricing,
                   'estimate_sub': estimate_sub
@@ -976,6 +987,7 @@ def estimate_bid(request, estimate_id):
     estimate_total = estimate_sub + control_system_calculated + hours_calculated \
                      + predemo_calculated \
                      + float(estimate.estimatedetails.adjustment)
+    estimate_total += float(estimate.estimatedetails.customer_adjustment)
     estimate_total = round(estimate_total, 2)
     estimate_work = estimate_total_work(estimate_id)
     estimate_work_in_hours = int(estimate_work / 60)
@@ -1053,7 +1065,7 @@ def estimate_bid(request, estimate_id):
             change_orders_count = ChangeOrder.objects.filter(order=estimate.quote.proposal.order.invoice.order).count()
             total_count = transactions_count + change_orders_count + estimate.quote.proposal.order.invoice.times_estimate_changed + 1
             invoice_file_name = 'Invoice-' + str(estimate.quote.proposal.order.project_number[3:]).zfill(3) + '-' + str(
-                estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count).zfill(3)
+                estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count)
             parameters['file_name'] = invoice_file_name
             parameters['total_count'] = total_count
             parameters['invoice'] = estimate.quote.proposal.order.invoice
@@ -1073,32 +1085,6 @@ def estimate_bid(request, estimate_id):
     return render(request, "estimateBid.html", parameters)
 
 
-def equipment_total_calculator(equipment):
-    if equipment.price_override:
-        return float(equipment.price_override) * float(equipment.quantity)
-    else:
-        return float(equipment.equipment.price) * float(equipment.quantity)
-
-
-def estimate_total_calculator(estimate_id):
-    estimate = Estimate.objects.get(id=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
-    estimate_sub = 0
-    for estimate_equipment_pricing in estimate_equipments_pricing:
-        equipment_total = equipment_total_calculator(estimate_equipment_pricing)
-        estimate_sub += float(equipment_total)
-
-    control_system_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2)
-    hours_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2)
-    predemo_calculated = estimate.estimatedetails.pre_demo * 1200
-    estimate_total = estimate_sub + control_system_calculated + hours_calculated + predemo_calculated \
-                     + float(estimate.estimatedetails.adjustment)
-    estimate_total = round(estimate_total, 2)
-    return estimate_total
-
-
 def estimate_total_work(estimate_id):
     estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
     estimate_work = 0
@@ -1113,19 +1099,3 @@ def estimate_number_generator(estimate_id):
     estimator_long_id = estimate.created_by.id + 100
     estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
-
-
-def pdf_filename_generator(estimate_id, pdf_type):
-    estimate = Estimate.objects.get(id=estimate_id)
-    longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name \
-        .replace(' ', '_') \
-        .replace('!', '') \
-        .replace('@', '') \
-        .replace('#', '') \
-        .replace('$', '') \
-        .replace('%', '') \
-        .replace('^', '') \
-        .replace('&', '') \
-        .replace('*', '') \
-        .replace("/", '')

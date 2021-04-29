@@ -42,8 +42,15 @@ def customer(request):
 
 
 @login_required
+def management(request):
+    return render(request, 'iconbase-management.html')
+
+
+@login_required
 def home(request):
     if request.user.profile.user_type > 1:
+        if request.user.profile.user_type == 5:
+            return redirect("techPanel:schedule")
         return render(request, 'home.html')
     else:
         return redirect("/customer/")

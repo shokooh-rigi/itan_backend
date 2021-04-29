@@ -14,6 +14,7 @@ from .forms import *
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from .models import *
 from .render import Render as PDFRender
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -154,6 +155,40 @@ def equipments_list(request, sheet_id):
     if request.GET.get('paginate_by'):
         pagination = request.GET.get('paginate_by')
 
+
+    object_list = SheetEquipment.objects.filter(sheet=sheet_id)
+    search_lowercase = project_name.lower()
+    search_contains_letters = search_lowercase.islower()
+    if project_name:
+        if search_contains_letters:
+            object_list = object_list.filter(sheetequipmentcommondata__value__icontains=project_name)
+        else:
+            object_list = object_list.filter(Q(sheetequipmentcommondata__value__icontains=project_name) | Q(id=project_name))
+    object_list = object_list.order_by('main_data_entry_completed', 'design_data_entry_completed', 'actual_data_entry_completed')
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    sheets = paginator.get_page(page)
+
+    parameters = {'sheet_equipments': sheets,
+                  'my_sheet': my_sheet,
+                  'sheet_id': sheet_id,
+                  'WEB_URL': WEB_URL,
+                  'MEDIA_URL': MEDIA_URL,
+                  }
+    return render(request, "sheetEquipmentsList.html", parameters)
+
+
+@login_required
+def sort_equipments_list(request, sheet_id):
+    my_sheet = Sheet.objects.get(id=sheet_id)
+
+    project_name = request.GET.get('project_name', '')
+
+    pagination = 500
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
     ordering = 'field_order'
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
@@ -178,7 +213,27 @@ def equipments_list(request, sheet_id):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "sheetEquipmentsList.html", parameters)
+    return render(request, "sortEquipmentsList.html", parameters)
+
+
+@login_required
+def update_sheet_equipments_positioning(request, sheet_id):
+    if request.method == "POST" and request.is_ajax():
+        sheet_equipments_array = request.POST.getlist('sheetEquipmentsArray[]')
+        sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
+        i = 1
+        for equipment_id in sheet_equipments_array:
+            equipment = sheet_equipments.get(id=equipment_id)
+            equipment.field_order = i
+            equipment.save()
+            i = i+1
+        return JsonResponse({
+            'result': True,
+            'msg': 'Equipments Positioning Successfully Updated!'
+        })
+    else:
+        status = "Bad"
+        return JsonResponse(status, safe=False)
 
 
 def fetch_sheet_equipment_data(equipment: SheetEquipment):
@@ -275,6 +330,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
 
     data = []
     len_equipments = sheet_equipments.count()
+    # number of columns per page
     equipment_in_page = 2
     for i in range(math.ceil(len_equipments / equipment_in_page)):
         page = []
@@ -302,7 +358,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
             'my_sheet': my_sheet,
             'data': data,
         },
-        'file_name': ('TEST SHEET {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': ('AIR MOVING {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                   my_sheet.project.project_number,
                                                   '' if is_report_pdf else ' TECH')).upper(),
         'license_owner': license_owner,
@@ -753,7 +809,7 @@ def parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custo
             related_value = custom_field.company_value
             if '-' in related_value:
                 related_value = related_value.replace(' ', '').replace('-', ',')
-                related_value = '{' + str(custom_field.id) + ',' + related_value + '}'
+                related_value = '{' + str(get_related_id(equipment_type_custom_field.id)) + ',' + related_value + '}'
             design_values_matches[equipment_type_custom_field_id] = related_value
         return related_value
 

@@ -9,6 +9,9 @@
         <h2>DEFINED VAV EQUIPMENT LIST
             FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
+        <a href="{% url 'sortVavEquipmentsList' sheet_id %}">
+            <button type="button" class="btn btn-primary">Sort Report Equipments</button>
+        </a>
         <a href="{% url 'vavSheetEquipmentsGenerateTechPDF' sheet_id %}" target="_blank" download="">
             <button type="button" class="btn btn-primary">Generate Tech PDF</button>
         </a>

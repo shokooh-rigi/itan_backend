@@ -135,7 +135,7 @@
                             <td>{{ estimate.engineer.company.name }}</td>
                             <td>{% for service in estimate.service.all %}{{ service }}{%if not forloop.last%}, {%endif%}{% endfor %}</td>
                             <td>{{ estimate.due_date }}</td>
-                            <td>${% estimate_total_calculator estimate.id %}</td>
+                            <td>${% estimate_total_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
                             <td><a href="{% url 'estimateEquipment' estimate_id=estimate.id estimate_service_id=0 %}" data-toggle="tooltip" data-placement="bottom" title="Edit"><div class="icon editicon"></div></a></td>
                             <td><a href="{% url 'estimateDetails' estimate_id=estimate.id %}"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                             <td><a href="{% url 'estimateBid' estimate_id=estimate.id %}"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a></td>
@@ -270,7 +270,7 @@ function updateURLParameter(url, param, paramVal)
         $(".alert").css('display', 'none');
         $(document).on("click", ".email_modal", function () {
              $(".modal-body #id_email_id").val( $(this).data('id') );
-             $(".modal-body #id_subject").val( $(this).data('project') );
+             $(".modal-body #id_subject").val( 'TAB ESTIMATE FOR: ' + $(this).data('project') );
              $(".modal-header .modal-title").text('Email Estimate #' + $(this).data('name'));
         });
         $('#date_filter_clear').click(function() {

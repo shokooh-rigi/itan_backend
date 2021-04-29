@@ -358,36 +358,40 @@
                 $(this).attr('readonly', 'readonly');
             });
 
+            // we might have to calculate supply for DUCTed same as outside air
             $('.has_inch').each(function (index) {
-                let loop_id = $(this).parent().data('loopid');
-                let new_val = (($(this).val() / 24) ** 2) * 3.14;
-                new_val = trunc2decimal(new_val);
-                if (loop_id == 1) {
-                    $('.ak_factor').val(new_val);
-                }
-                else {
-                    $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                if ($(this).parent().hasClass('equal_fields_outside')) {
+                    let loop_id = $(this).parent().data('loopid');
+                    let new_val = (($(this).val() / 24) ** 2) * 3.14;
+                    new_val = trunc2decimal(new_val);
+                    if (loop_id == 1) {
+                        $('.ak_factor').val(new_val);
+                    }
+                    else {
+                        $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                    }
                 }
             });
 
             $('.has_inch').on('change', function () {
-                let loop_id = $(this).parent().data('loopid');
-                let new_val = (($(this).val() / 24) ** 2) * 3.14
-                new_val = trunc2decimal(new_val);
-                if (loop_id == 1) {
-                    $('.ak_factor').val(new_val);
-                }
-                else {
-                    $('.ak_factor_' + $(this).data('eqid')).val(new_val);
-                }
-                $('.has_cfm').each(function (index) {
-                    if ($(this).val() != '') {
-                        let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
-                        let new_val = $(this).val() / size_val;
-                        new_val = trunc2decimal(new_val);
-                        $('.fpm_' + $(this).data('eqid')).val(new_val);
+                if ($(this).parent().hasClass('equal_fields_outside')) {
+                    let loop_id = $(this).parent().data('loopid');
+                    let new_val = (($(this).val() / 24) ** 2) * 3.14
+                    new_val = trunc2decimal(new_val);
+                    if (loop_id == 1) {
+                        $('.ak_factor').val(new_val);
+                    } else {
+                        $('.ak_factor_' + $(this).data('eqid')).val(new_val);
                     }
-                });
+                    $('.has_cfm').each(function (index) {
+                        if ($(this).val() != '') {
+                            let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
+                            let new_val = $(this).val() / size_val;
+                            new_val = trunc2decimal(new_val);
+                            $('.fpm_' + $(this).data('eqid')).val(new_val);
+                        }
+                    });
+                }
             });
 
             $('.has_cfm').each(function (index) {
@@ -520,6 +524,7 @@
             else {
                 if ($(size_input_inch).val() != '') {
                     if (selected_sizetype == 1) {
+                        alert('are')
                         const full_size = $(size_input_inch).val();
                         const size_inch = full_size.slice(0, -1);
                         $(size_input_inch).val(size_inch);
@@ -527,7 +532,7 @@
                     else {
                         const full_size = $(size_input_inch).val();
                         const size_splited = full_size.split("X");
-                        const size_inch = full_size.slice(0, -1);
+                        const size_inch = full_size
                         const size_x = size_splited[0].trim();
                         const size_y = size_splited[1].trim();
                         $(size_input_inch).val(size_inch);

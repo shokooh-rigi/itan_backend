@@ -12,19 +12,19 @@
             <a class="btn btn-primary allselected" style="width: 50px;" href="?{% url_replace request 'type' 'all' %}">All</a>
             <a class="btn btn-primary tpselected" style="width: 180px;" href="?{% url_replace request 'type' 'tp' %}">Tech Package</a>
             <a class="btn btn-primary tsselected" style="width: 200px;" href="?{% url_replace request 'type' 'ts' %}">Tech Scheduled</a>
-            <a class="btn btn-primary jcselected" style="width: 200px;" href="?{% url_replace request 'type' 'jc' %}">Job Completed</a>
+            <a class="btn btn-primary jcselected" style="width: 200px;" href="?{% url_replace request 'type' 'jc' %}">Job In Progress</a>
             <a class="btn btn-primary roselected" style="width: 140px;" href="?{% url_replace request 'type' 'ro' %}">Report Out</a>
             <a class="btn btn-primary inselected" style="width: 120px;" href="?{% url_replace request 'type' 'in' %}">Invoiced</a>
-            <a class="btn btn-primary coselected" style="width: 160px;" href="?{% url_replace request 'type' 'co' %}">Completed</a>
+            <a class="btn btn-primary coselected" style="width: 160px;" href="?{% url_replace request 'type' 'co' %}">Paid Out</a>
         </div>
         <div class="btn-group type-select" style="margin: 0 auto 10px auto;">
             <a class="btn btn-primary allselected" style="width: 50px;" href="?{% url_replace request 'type' 'all' %}">All</a>
             <a class="btn btn-primary ntpselected" style="width: 180px;" href="?{% url_replace request 'type' 'ntp' %}">No Tech Package</a>
             <a class="btn btn-primary ntsselected" style="width: 200px;" href="?{% url_replace request 'type' 'nts' %}">No Tech Scheduled</a>
-            <a class="btn btn-primary njcselected" style="width: 200px;" href="?{% url_replace request 'type' 'njc' %}">Job Not Completed</a>
+{#            <a class="btn btn-primary njcselected" style="width: 200px;" href="?{% url_replace request 'type' 'njc' %}">Job Not Completed</a>#}
             <a class="btn btn-primary nroselected" style="width: 140px;" href="?{% url_replace request 'type' 'nro' %}">No Report</a>
             <a class="btn btn-primary ninselected" style="width: 120px;" href="?{% url_replace request 'type' 'nin' %}">No Invoice</a>
-            <a class="btn btn-primary ncoselected" style="width: 160px;" href="?{% url_replace request 'type' 'nco' %}">Not Completed</a>
+            <a class="btn btn-primary ncoselected" style="width: 160px;" href="?{% url_replace request 'type' 'nco' %}">Balance Remaining</a>
         </div>
         <br />
         <div class="row" style="margin: 10px auto; position: relative;">
@@ -82,10 +82,10 @@
                     <th>Order Total</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Package" style="text-decoration: underline;">TP</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Scheduled" style="text-decoration: underline;">TS</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Job Completed" style="text-decoration: underline;">JC</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Job In Progress" style="text-decoration: underline;">JIP</th>
                     <th data-toggle="tooltip" data-placement="top" title="Report Out" style="text-decoration: underline;">RO</th>
                     <th data-toggle="tooltip" data-placement="top" title="Invoiced" style="text-decoration: underline;">I</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Completed" style="text-decoration: underline;">C</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Paid Out" style="text-decoration: underline;">PO</th>
                     <th>Actions</th>
                 </tr>
             </thead>

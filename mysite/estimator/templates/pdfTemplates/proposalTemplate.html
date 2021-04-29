@@ -76,7 +76,7 @@
                     {% endif %}
                     <tr style="font-size: 16px;">
                         <td style="padding: 5px;">Total Amount:</td>
-                        <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator proposal.quote.estimate.id %}</td>
+                        <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator proposal.quote.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
                     </tr>
                   </tbody>
                 </table>

@@ -9,6 +9,7 @@ class Schedule(models.Model):
     schedule_start = models.DateTimeField(blank=False, null=False)
     schedule_end = models.DateTimeField(blank=False, null=False)
     archive = models.BooleanField(default=False)
+    pre_demo = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
@@ -24,11 +25,14 @@ class Schedule(models.Model):
 class Maintenance(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
     assigned_to_employee = models.ForeignKey(User, blank=True, null=True, related_name='maintenance_assigned_to_employee', on_delete=models.CASCADE)
-    assigned_to_contractor = models.ForeignKey(Person, blank=True, null=True, related_name='maintenance_assigned_to_contractor', on_delete=models.CASCADE)
+    assigned_to_contractor = models.ForeignKey(User, blank=True, null=True, related_name='maintenance_assigned_to_contractor', on_delete=models.CASCADE)
     schedule_start = models.DateTimeField(blank=False, null=False)
     schedule_end = models.DateTimeField(blank=False, null=False)
     description = models.TextField(max_length=500, blank=True)
     archive = models.BooleanField(default=False)
+    settlement = models.BooleanField(default=False)
+    tech_upload = models.FileField(upload_to='uploads/techfiles', blank=True, null=True)
+    note = models.TextField(max_length=1000, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
@@ -44,9 +48,11 @@ class Maintenance(models.Model):
 class ScheduleTech(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, blank=False, null=False)
     assigned_to_employee = models.ForeignKey(User, blank=True, null=True, related_name='assigned_to_employee', on_delete=models.CASCADE)
-    assigned_to_contractor = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
+    assigned_to_contractor = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     involvement_percentage = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
     settlement = models.BooleanField(default=False)
+    tech_upload = models.FileField(upload_to='uploads/techfiles', blank=True, null=True)
+    note = models.TextField(max_length=1000, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

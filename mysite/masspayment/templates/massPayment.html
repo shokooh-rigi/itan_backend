@@ -48,8 +48,8 @@
                                 <td style="padding: .75rem .5rem;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
                                 <td style="padding: .75rem .5rem;">{{ invoice.order.project_number }}</td>
                                 <td style="padding: .75rem .5rem;">{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
-                                <td class="total-invoiced" style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice %}</td>
-                                <td class="total-paid" style="padding: .75rem .5rem;">${% calculate_total_paid invoice %}</td>
+                                <td class="total-invoiced" style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice as ctad %}{{ ctad|floatformat:2|intcomma }}</td>
+                                <td class="total-paid" style="padding: .75rem .5rem;">${% calculate_total_paid invoice as ctp %}{{ ctp|floatformat:2|intcomma }}</td>
                                 <td class="balance-due" style="padding: .75rem .5rem;">${{ crid|floatformat:2|intcomma }}</td>
                                 <td class="amount" style="padding: .75rem .5rem;"><input id="amount-{{ invoice.id }}" name="amount-{{ invoice.id }}" type="text" class="form-control" /></td>
                             </tr>

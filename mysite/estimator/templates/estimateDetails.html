@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load estimator_tags %}
+{% load humanize %}
 
 {% block content %}
     <h2>Estimate Details No. {% estimate_number_generator estimate_id %}</h2>
@@ -45,8 +46,14 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
-                    <label for="id_company" class="control-label">Adjustment</label>
+                    <label for="id_company" class="control-label">Manual Adjustment</label>
                     {{ form.adjustment }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_company" class="control-label">Customer Adjustment</label>
+                    <input type="text" name="customer_adjustment" value="{% if estimate.estimatedetails.customer_adjustment %}{{ estimate.estimatedetails.customer_adjustment|floatformat:2|intcomma }}{% else %}{{ estimate.customer.company.customer_adjustment_in_percentage }}%{% endif %}" class="form-control" id="id_customer_adjustment" readonly>
                 </div>
             </div>
             <div class="row form-line">

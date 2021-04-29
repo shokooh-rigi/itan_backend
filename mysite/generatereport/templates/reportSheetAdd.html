@@ -3,7 +3,7 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Generate Report Sheet</h2>
+    <h2>Generate Report</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="sheetAdd-form">
         <div class="form-group">
             {% csrf_token %}
@@ -31,11 +31,36 @@
                     {{ form.report_date }}
                 </div>
             </div>
-            <br />
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label text-center">General Notes & Comments</label>
                     {{ form.general_notes_and_comments }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label class="switch-toggle auto_manual m-0" style="width: 60px;">
+                        <input class="or_toggle" type="checkbox" name="or-toggle" disabled />
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label text-center">Table of Content (PDF) <span class="required">*</span></label>
+                    {{ form.upload_table_of_content }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label text-center">Test Sheets (PDF) <span class="required">*</span></label>
+                    {{ form.upload_test_sheets }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label text-center">Drawing Files (PDF) <span class="required">*</span></label>
+                    {{ form.upload_drawing_pdf }}
                 </div>
             </div>
 

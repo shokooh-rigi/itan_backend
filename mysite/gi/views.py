@@ -12,6 +12,7 @@ from ..core.forms import EmailForm
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from django import forms
 from ..projectprocess.models import ProjectProcess
+from ..order.templatetags.order_tags import *
 
 
 # Create your views here.
@@ -175,7 +176,7 @@ def invoice_add(request, order_id=None):
                 new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid,
                                             balance_due=balance_due
                                             , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(
-                        3) + '-' + str(invoice.id).zfill(3) + '-000')
+                        3) + '-' + str(invoice.id).zfill(3) + '-0')
                 new_object.save()
 
                 if ProjectProcess.objects.filter(order_id=invoice.order.id).exists():
@@ -247,7 +248,7 @@ def invoice_view(request, invoice_id):
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
         new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid, balance_due=balance_due
-                                    , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(invoice.id).zfill(3) + '-000')
+                                    , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(invoice.id).zfill(3) + '-0')
         new_object.save()
     parameters = {
         'invoice': invoice,
@@ -285,7 +286,7 @@ def invoice_edit(request, invoice_id):
                 change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
                 total_count = transactions_count + change_orders_count + invoice.times_estimate_changed
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                        invoice.id).zfill(3) + '-' + str(total_count).zfill(3)
+                        invoice.id).zfill(3) + '-' + str(total_count)
                 parameters = {
                     'file_name': new_file_name,
                     'total_count': total_count,
@@ -336,6 +337,9 @@ def invoice_delete(request, invoice_id):
                 this_invoice.id).zfill(3),
                           }
             Invoice.delete_invoice_pdf(parameters)
+            this_invoice.order.projectprocess.invoiced = False
+            this_invoice.order.projectprocess.invoiced_date = None
+            this_invoice.order.projectprocess.save()
             this_invoice.delete()
         return redirect('invoiceHome')
     elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
@@ -403,7 +407,7 @@ def invoice_payment(request, invoice_id):
                 change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
                 total_count = transactions_count + change_orders_count + invoice.times_estimate_changed
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                        invoice.id).zfill(3) + '-' + str(total_count).zfill(3)
+                        invoice.id).zfill(3) + '-' + str(total_count)
                 parameters = {
                     'file_name': new_file_name,
                     'total_count': total_count,
@@ -683,68 +687,3 @@ def accout_summary_delete(request, account_summary_id):
     parameters = {'this_account_summary': this_account_summary,
                   }
     return render(request, "accountSummaryDelete.html", parameters)
-
-
-def equipment_total_calculator(equipment):
-    if equipment.price_override:
-        return float(equipment.price_override) * float(equipment.quantity)
-    else:
-        return float(equipment.equipment.price) * float(equipment.quantity)
-
-
-def estimate_total_calculator(estimate_id):
-    estimate = Estimate.objects.get(id=estimate_id)
-    estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
-    estimate_sub = 0
-    for estimate_equipment_pricing in estimate_equipments_pricing:
-        equipment_total = equipment_total_calculator(estimate_equipment_pricing)
-        estimate_sub += float(equipment_total)
-
-    control_system_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2)
-    hours_calculated = round(
-        (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2)
-    predemo_calculated = estimate.estimatedetails.pre_demo * 1200
-    estimate_total = estimate_sub + control_system_calculated + hours_calculated + predemo_calculated \
-                     + float(estimate.estimatedetails.adjustment)
-    estimate_total = round(estimate_total, 2)
-    return estimate_total
-
-
-def order_total_calculator(estimate_id, order):
-    estimate_total = estimate_total_calculator(estimate_id)
-    change_orders = ChangeOrder.objects.filter(order=order)
-    co_total = 0
-    for change_order in change_orders:
-        co_total = co_total + change_order.amount
-    order_total = estimate_total + float(co_total)
-    order_total = round(order_total, 2)
-    return order_total
-
-
-def calculate_total_amount_due(invoice):
-    sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
-    completed_percentage = invoice.percent_of_performance_completed
-    total = (sub_total * completed_percentage / 100)
-    return total
-
-
-def calculate_total_paid(invoice):
-    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
-    total = 0
-    for transaction in transactions:
-        total += transaction.amount
-    return total
-
-
-def calculate_remaining_invoice_due(invoice):
-    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
-    total_paid = 0
-    for transaction in transactions:
-        total_paid += transaction.amount
-
-    sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
-    completed_percentage = invoice.percent_of_performance_completed
-    total = (sub_total * completed_percentage / 100)
-    remaining = float(total) - float(total_paid)
-    return remaining

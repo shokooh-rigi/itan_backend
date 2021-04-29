@@ -6,16 +6,7 @@
 {% block content %}
     <div class="text-center">
         <br />
-        <h3>Select MGM Report For:</h3>
-        <div class="btn-group type-select" style="margin: 10px auto;">
-            <a class="btn btn-primary estimateselected" href="?{% url_replace request 'type' 'estimate' %}">Estimate</a>
-            <a class="btn btn-primary quoteselected" href="?{% url_replace request 'type' 'quote' %}">Quote</a>
-            <a class="btn btn-primary proposalselected" href="?{% url_replace request 'type' 'proposal' %}">Proposal</a>
-            <a class="btn btn-primary orderselected" href="?{% url_replace request 'type' 'order' %}">Order</a>
-            <a class="btn btn-primary invoiceselected" href="?{% url_replace request 'type' 'invoice' %}">Invoice</a>
-        </div>
-        <hr />
-        {% if request.GET %}
+        <h3>{{ bid_type|capfirst }} MGM Report</h3>
         <form id="filter_by_date" method="get" action="">
             <div class="row form-line">
                 <div class="col-lg-12">
@@ -84,8 +75,6 @@
                 </tr>
             </tbody>
         </table>
-
-        {% endif %}
 
         {% endif %}
 

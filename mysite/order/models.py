@@ -38,7 +38,7 @@ class Order(models.Model):
     po_number = models.CharField(max_length=30, blank=False)
     date_po_received = models.DateField(blank=True, null=True)
     estimated_date_of_project = models.DateField(blank=True, null=True)
-    invoice_adjustment = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    invoice_adjustment = models.DecimalField(max_digits=8, decimal_places=2, default=0, blank=True, null=True)
     control_system = models.ForeignKey(ControlSystem, on_delete=models.SET_NULL, blank=True, null=True)
     equipment_submittal = models.FileField(upload_to='uploads/order_equipment_submittal', blank=True, null=True)
     colored_drawing = models.FileField(upload_to='uploads/order_colored_drawing', blank=True, null=True)
@@ -50,6 +50,8 @@ class Order(models.Model):
     order_settled_value = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     completion_percentage = models.PositiveIntegerField(default=0,
                                                         validators=[MaxValueValidator(100), MinValueValidator(0)])
+    pre_demo_completion_percentage = models.PositiveIntegerField(default=0,
+                                                                 validators=[MaxValueValidator(100), MinValueValidator(0)])
     note = models.TextField(max_length=2000, blank=True, null=True)
     partial_job_done = models.BooleanField(default=False)
 

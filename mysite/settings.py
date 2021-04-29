@@ -77,6 +77,10 @@ INSTALLED_APPS = [
     'mysite.generatereport',
     'mysite.projectprocess',
     'mysite.masspayment',
+    'mysite.jobcosting',
+    'mysite.companyperformance',
+    'mysite.revenueperformance',
+    'mysite.dashboard-tech',
     'api',
     'django.contrib.humanize',
     'mysite.estimator.templatetags',
@@ -243,7 +247,7 @@ DJRICHTEXTFIELD_CONFIG = {
 
 FILE_UPLOAD_PERMISSIONS = 0o644
 MAX_UPLOAD_SIZE = 262144000
-DEFAULT_FROM_EMAIL = 'Estimator at TAB <estimator@tabtechinc.com>'
+DEFAULT_FROM_EMAIL = 'Estimator at TAB TECHNOLOGIES <estimator@tabtechinc.com>'
 
 BOOTSTRAP4 = {
     'include_jquery': True,

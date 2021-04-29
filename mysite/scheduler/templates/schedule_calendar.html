@@ -132,7 +132,11 @@
                     <h4 class="text-center">MAINTENANCE</h4>
                     <div class="draggable maintenance btn btn-warning">Maintenance</div>
                 </div>
-                <div id="orderList" class="lnb-calendars-d1 mt-3"></div>
+                <div class="mt-3" style="max-height: 60%;">
+                    <h4>ORDERS</h4>
+                    <input id="order-search" class="form-control" placeholder="Project # / Name" />
+                    <div id="orderList" class="lnb-calendars-d1" style="max-height: 80%;"></div>
+                </div>
             </div>
             {#            <div class="lnb-footer">#}
             {#                © NHN Corp.#}
@@ -201,13 +205,12 @@
         (function () {
             var orderDiv = document.getElementById('orderList');
             var html = [];
-            html.push('<h4>ORDERS</h4>');
 
 
             $.getJSON("/schedule/get_schedule_list/2", function (data) {
                 data.forEach(function (order) {
                     html.push('<div class="lnb-calendars-item my-2">' +
-                        '<div style="background-color: ' + order.color + '" id="order-' + order.id + '" data-id="' + order.id + '" data-location="' + order.location + '" data-body="' + order.body + '" data-estimate="' + order.estimated_work + '" class="draggable p-1 text-white rounded text-left" value="' + order.id + '" checked>' +
+                        '<div style="background-color: ' + order.color + '" id="order-' + order.id + '" data-id="' + order.id + '" data-location="' + order.location + '" data-body="' + order.body + '" data-estimate="' + order.estimated_work + '" data-predemo="' + order.predemo + '" class="draggable p-1 text-white rounded text-left" value="' + order.id + '" checked>' +
                         '<span style="border-color: ' + order.borderColor + '; background-color: ' + order.borderColor + ';"></span>' +
                         '<span>' + order.body + '</span>' +
                         '</div></div>'
@@ -304,6 +307,45 @@
         {#        }#}
         {##}
         $(document).ready(function () {
+
+            $('#calendar .fc-timeGridWeek-view .fc-scrollgrid:before, #calendar .fc-timeGridWeek-view .fc-scrollgrid').append('<div id="prev-action" class="move-action">Prev Week</div>');
+            $('#calendar .fc-timeGridWeek-view .fc-scrollgrid:before, #calendar .fc-timeGridWeek-view .fc-scrollgrid').append('<div id="next-action" class="move-action">Next Week</div>');
+
+            $("#calendar .fc-timeGridWeek-view .fc-scrollgrid:before, #calendar .fc-timeGridWeek-view .fc-scrollgrid .move-action").mouseenter(function() {
+                const thisID = $(this).attr('id')
+                setTimeout(function(){
+                    if ($('#' + thisID + ':hover').length != 0) {
+                        if (thisID == 'prev-action') {
+                            calendar.prev();
+                        } else {
+                            calendar.next();
+                        }
+                    }
+                }, 1000);
+            });
+
+            function searchOrders() {
+                const searchVal = $('#order-search').val().toLowerCase();
+                $('#orderList .lnb-calendars-item').each(function () {
+                    const thisText = $(this).text().toLowerCase();
+                    if ( thisText.indexOf(searchVal) >= 0 ) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            searchOrders();
+
+            $('#order-search').keyup(function () {
+                searchOrders();
+            });
+
+            $('#order-search').change(function () {
+                searchOrders();
+            });
+
             $(document).on({
                 click: function (e) {
                     e.preventDefault();
@@ -370,7 +412,7 @@
                                     if (response.result == true) {
                                         const event = calendar.getEventById('schedule-' + schedule_id);
                                         if (response.no_schedule_left == true) {
-                                            $('#orderList').find('.draggable[data-id=' + order_id + ']').css('background', '#3699ff');
+                                            $('#orderList').find('.draggable[data-id=' + order_id + '][data-predemo=' + response.is_predemo + ']').css('background', '#3699ff');
                                         }
                                         event.remove()
                                     } else {

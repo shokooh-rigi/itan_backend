@@ -1,0 +1,75 @@
+{% load static %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Report Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    <div class="content pdf-page-content">
+        <table class="table" style="font-size: 14pt;">
+            <!-- Table head section -->
+            <thead>
+                <tr>
+                    <th colspan="8"></th>
+                    <th colspan="2" style="text-align: right;">PAGE i</th>
+                </tr>
+            </thead>
+        </table>
+        <div style="text-align: center; font-size: 17pt; padding: 0;">
+            <span style="font-weight: bold;">INSTRUMENTATION</span><br />
+            <span style="font-size: 13pt;">AIR BALANCE</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
+            <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+        </div>
+        <div style="text-align: center;"><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ instruction_image }}" style="height: 620px; width: 530pt;" /></div>
+    </div>
+    <pdf:nextpage/>
+    <div class="content pdf-page-content">
+        <table class="table" style="font-size: 14pt;">
+            <!-- Table head section -->
+            <thead>
+                <tr>
+                    <th colspan="8"></th>
+                    <th colspan="2" style="text-align: right;">PAGE ii</th>
+                </tr>
+            </thead>
+        </table>
+        <div style="text-align: center; font-size: 17pt; padding: 0;">
+            <span style="font-weight: bold;">GENERAL NOTES AND COMMENTS</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
+        <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+        </div>
+        <br />
+        <div style="font-size: 13pt;">
+            {{ report_sheet.general_notes_and_comments }}
+        </div>
+    </div>
+    <pdf:nextpage/>
+    <div class="content pdf-page-content">
+        <table class="table" style="font-size: 14pt;">
+            <!-- Table head section -->
+            <thead>
+                <tr>
+                    <th colspan="8"></th>
+                    <th colspan="2" style="text-align: right;">PAGE iii</th>
+                </tr>
+            </thead>
+        </table>
+        <div style="text-align: center; font-size: 17pt; padding: 0;">
+            <span style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}<br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+        </div>
+        <div style="text-align: center;"><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ abbreviation_image }}" style="height: 540pt; width: 530pt;" /></div>
+    </div>
+</div>
+</body>
+</html>

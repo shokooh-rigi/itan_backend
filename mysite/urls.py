@@ -46,6 +46,9 @@ urlpatterns = [
     path('', include('mysite.generatereport.urls')),
     path('', include('mysite.projectprocess.urls')),
     path('', include('mysite.masspayment.urls')),
+    path('', include('mysite.jobcosting.urls')),
+    path('', include('mysite.companyperformance.urls')),
+    path('', include('mysite.revenueperformance.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
     url(r'^section/tech/$', core_views.tech, name='Tech'),
@@ -53,6 +56,8 @@ urlpatterns = [
     url(r'^section/data/$', core_views.data, name='Data'),
     url(r'^section/accounting/$', core_views.accounting, name='Accounting'),
     url(r'^section/customer/$', core_views.customer, name='Customer'),
+    url(r'^section/management/$', core_views.management, name='Management'),
+    path('tech/', include('mysite.dashboard-tech.urls'), name='techPanel'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

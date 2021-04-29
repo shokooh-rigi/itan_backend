@@ -1,6 +1,7 @@
 {% load static %}
 {% load estimator_tags %}
 {% load custom_tags %}
+{% load humanize %}
 
 <html>
     <head>
@@ -74,7 +75,7 @@
                               ${{ estimate_equipment_pricing.equipment.price }}
                             {% endif %}
                         </td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">${% equipment_total_calculator estimate_equipment_pricing %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">${% equipment_total_calculator estimate_equipment_pricing as eqtc %}{{ eqtc|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -83,12 +84,13 @@
         <br /><br />
         <div class="row form-line">
             <div class="col-sm-4 text-right" style="margin: 0px 0px auto auto;">
-                <div style="text-align: right;"><div class="d-inline-block">Sub Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_sub|floatformat:2 }}</span></div></div>
-                <div style="text-align: right;"><div class="d-inline-block">Control System: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ control_system_calculated|floatformat:2 }}</span></div></div>
-                <div style="text-align: right;"><div class="d-inline-block">Hours: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ hours_calculated|floatformat:2 }}</span></div></div>
-                <div style="text-align: right;"><div class="d-inline-block">Pre Demo: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ predemo_calculated|floatformat:2 }}</span></div></div>
-                <div style="text-align: right;"><div class="d-inline-block">Adjustment: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate.estimatedetails.adjustment|floatformat:2 }}</span></div></div>
-                <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_total|floatformat:2 }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Sub Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_sub|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Control System: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ control_system_calculated|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Hours: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ hours_calculated|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Pre Demo: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ predemo_calculated|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Manual Adjustment: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate.estimatedetails.adjustment|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Customer Adjustment: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate.estimatedetails.customer_adjustment|floatformat:2|intcomma }}</span></div></div>
+                <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${{ estimate_total|floatformat:2|intcomma }}</span></div></div>
                 <div style="text-align: right;"><div class="d-inline-block">Total Work: <span style="display: inline-block; width: 180px; font-weight: bold; padding-top: 10px;">{% if estimate_work_in_hours %}{{ estimate_work_in_hours }} hour{% if estimate_work_in_hours != 1 %}s{% endif %}{% endif %} {% if estimate_work_in_hours and estimate_work_in_minutes %}and {% endif %}{% if estimate_work_in_minutes %}{{ estimate_work_in_minutes }} minute{% if estimate_work_in_minutes != 1 %}s{% endif %}{% endif %}</span></div></div>
             </div>
         </div>

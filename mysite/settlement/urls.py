@@ -7,7 +7,7 @@ urlpatterns = [
     path('settlement/add/', settlement_add, name='settlementAdd'),
     path('settlement/view/<int:settlement_id>/', settlement_view, name='settlementView'),
     path('settlement/orders/<int:settlement_id>/', settlement_orders, name='settlementOrders'),
-    path('settlement/edit/<int:settlement_id>/', settlement_orders, name='settlementEdit'),
+    path('settlement/edit/<int:settlement_id>/', settlement_edit, name='settlementEdit'),
     path('settlement/delete/<int:settlement_id>/', settlement_delete, name='settlementDelete'),
     # path('settlement/delete-settled-order/<int:settlement_id>/<int:settled_order_id>/', settled_order_delete,
     #      name='settledOrderDelete'),

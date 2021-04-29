@@ -86,7 +86,7 @@
                     </tr>
                     <tr style="border: 1px solid #000;">
                         <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
-                        <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id %} </td>
+                        <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }} </td>
                     </tr>
                     {% for change_order in change_orders %}
                     <tr style="border: 1px solid #000;">
@@ -108,7 +108,7 @@
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Total Paid: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">{% if invoice_view_page %}$0{% else %}${% calculate_total_paid invoice %}{% endif %} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">{% if invoice_view_page %}$0{% else %}${% calculate_total_paid invoice as ctp %}{{ ctp|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Balance Due: </td>

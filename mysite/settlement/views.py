@@ -10,15 +10,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from mysite.core.models import LicenseInfo, LicenseFiles
 from mysite.order.models import Order
-from .forms import SettlementForm, SettledOrderForm
-from .models import Settlement, SettledOrders, ModulesToEmailTemplateRelation
+from .forms import SettlementForm, SettledScheduleForm
+from .models import Settlement, SettledSchedule, ModulesToEmailTemplateRelation, SettledMaintenances
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from ..scheduler.models import *
 import datetime
 from ..gi.views import order_total_calculator
-
 
 
 # Create your views here.
@@ -72,15 +71,14 @@ def settlement_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Settlement.objects.filter(Q(contractor__name__icontains=search)
-                                            | Q(contractor__company__name__icontains=search)) \
+    object_list = Settlement.objects.filter(Q(contractor__first_name__icontains=search) | Q(contractor__last_name__icontains=search)) \
         .order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     settlements = paginator.get_page(page)
 
-    must_go = Settlement.objects.filter(settledorders__order__isnull=True)
+    must_go = Settlement.objects.filter(settledschedule__isnull=True)
     must_go.delete()
 
     parameters = {'settlements': settlements,
@@ -111,85 +109,161 @@ def settlement_add(request):
 @login_required
 def settlement_orders(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
-    form = SettledOrderForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
-    orders = Order.objects.filter(schedule__scheduletech__assigned_to_contractor=this_settlement.contractor, schedule__scheduletech__settlement=False).filter(schedule__schedule_start__gt=this_settlement.settlement_start, schedule__schedule_end__lt=this_settlement.settlement_end).order_by('-created_on').distinct()
-    settled_orders = SettledOrders.objects.filter(settlement=this_settlement)
-    settled_total = 0
-    for settled_order in settled_orders:
-        settled_total = settled_total + (
-                settled_order.settled_value * settled_order.settlement.contractor.company.interest_percentage / 100)
+    form = SettledScheduleForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
+    schedules = Schedule.objects.filter(scheduletech__assigned_to_contractor=this_settlement.contractor, scheduletech__settlement=False).filter(schedule_start__gt=this_settlement.settlement_start, schedule_end__lt=this_settlement.settlement_end).order_by('-created_on').distinct()
+    maintenances = Maintenance.objects.filter(assigned_to_contractor=this_settlement.contractor, settlement=False).filter(schedule_start__gt=this_settlement.settlement_start, schedule_end__lt=this_settlement.settlement_end).order_by('-created_on').distinct()
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            if not this_settlement.settledorders_set.exists():
-                this_settlement.delete()
+            this_settlement.delete()
             return redirect('settlementHome')
         if request.POST.get("next"):
-            for order in orders:
+            for schedule in schedules:
                 total_settled_value = 0
-                contractor_involvement_percentage = 0
                 total_schedules_duration = 0
-                if request.POST.get("order-include-" + str(order.id)):
-                    if request.POST.get("or-toggle-" + str(order.id)):
+                quoted_price = 0
+                prev_payment = None
+                if request.POST.get("order-include-" + str(schedule.id)):
+                    if request.POST.get("or-toggle-" + str(schedule.id)):
                         settled_type = True
-                        project_this_period_percentage = int(request.POST.get("percentage-" + str(order.id)))
-                        order.completion_percentage = order.completion_percentage + project_this_period_percentage
-                        order.save()
-                        schedule_list = Schedule.objects.filter(order=order)
-                        for schedule in schedule_list:
-                            schedule_tech = ScheduleTech.objects.get(schedule=schedule,
-                                                                     assigned_to_contractor=this_settlement.contractor)
-                            schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
-                            total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
-                            settle_value = project_this_period_percentage/100 * float(this_settlement.contractor.company.interest_percentage)/100 * float(order_total_calculator(order.proposal.quote.estimate.id, order))
-                            total_settled_value = total_settled_value + round(settle_value, 2)
-                            schedule_tech.settlement = True
-                            schedule_tech.save()
-                        formula_top = 0
-                        for schedule in schedule_list:
-                            schedule_tech = ScheduleTech.objects.get(schedule=schedule,
-                                                                     assigned_to_contractor=this_settlement.contractor)
-                            schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
-                            formula_top = formula_top + (schedule_duration_in_hours/total_schedules_duration*schedule_tech.involvement_percentage)
-                        contractor_involvement_percentage = formula_top
-
+                        project_this_period_percentage = int(request.POST.get("percentage-" + str(schedule.id)))
+                        if schedule.pre_demo:
+                            schedule.order.pre_demo_completion_percentage = schedule.order.pre_demo_completion_percentage + project_this_period_percentage
+                        else:
+                            schedule.order.completion_percentage = schedule.order.completion_percentage + project_this_period_percentage
+                        schedule.order.save()
+                        schedule_tech = ScheduleTech.objects.get(schedule=schedule,
+                                                                 assigned_to_contractor=this_settlement.contractor)
+                        schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
+                        total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+                        if request.POST.get("quoted-price-" + str(schedule.id)):
+                            override_quoted_price = float(request.POST.get("quoted-price-" + str(schedule.id)))
+                            quoted_price = override_quoted_price
+                        else:
+                            quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
+                        settle_value = (project_this_period_percentage / 100 * float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100
+                        total_settled_value = total_settled_value + round(settle_value, 2)
+                        schedule_tech.settlement = True
+                        schedule_tech.save()
                     else:
                         settled_type = False
-                        project_this_period_percentage = int(request.POST.get("percentage-" + str(order.id)))
-                        order.completion_percentage = order.completion_percentage + project_this_period_percentage
-                        order.save()
-                        schedule_list = Schedule.objects.filter(order=order)
-                        for schedule in schedule_list:
-                            schedule_tech = ScheduleTech.objects.get(schedule=schedule, assigned_to_contractor=this_settlement.contractor)
+                        project_this_period_percentage = int(request.POST.get("percentage-" + str(schedule.id)))
+                        if schedule.pre_demo:
+                            schedule.order.pre_demo_completion_percentage = schedule.order.pre_demo_completion_percentage + project_this_period_percentage
+                        else:
+                            schedule.order.completion_percentage = schedule.order.completion_percentage + project_this_period_percentage
+                        schedule.order.save()
+                        schedule_tech = ScheduleTech.objects.get(schedule=schedule,
+                                                                 assigned_to_contractor=this_settlement.contractor)
+                        if request.POST.get("total-hour-" + str(schedule.id)):
+                            override_total_duration = float(request.POST.get("total-hour-" + str(schedule.id)))
+                            schedule_duration_in_hours = override_total_duration
+                        else:
                             schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
-                            total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
-                            settle_value = float(this_settlement.contractor.hourly_rate) * float(schedule_duration_in_hours)
-                            total_settled_value = total_settled_value + round(settle_value, 2)
-                            schedule_tech.settlement = True
-                            schedule_tech.save()
-                    settled_order = SettledOrders(settlement=this_settlement, order=order, settled_value=total_settled_value,
-                                                  settled_type=settled_type, settled_hours=total_schedules_duration,
-                                                  contractor_involvement_percentage=contractor_involvement_percentage,
-                                                  completion_percentage=project_this_period_percentage)
-                    settled_order.save()
+                        total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+                        settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(schedule_duration_in_hours)
+                        total_settled_value = total_settled_value + round(settle_value, 2)
+                        schedule_tech.settlement = True
+                        schedule_tech.save()
+                    if request.POST.get("pp-" + str(schedule.id)):
+                        prev_payment = request.POST.get("pp-" + str(schedule.id))
+                    settled_schedule = SettledSchedule(settlement=this_settlement, schedule=schedule,
+                                                       settled_total=quoted_price,
+                                                       settled_value=total_settled_value,
+                                                       settled_type=settled_type, settled_hours=total_schedules_duration,
+                                                       completion_percentage=project_this_period_percentage,
+                                                       previous_payment=prev_payment)
+                    settled_schedule.save()
+            for maintenance in maintenances:
+                total_settled_value = 0
+                total_schedules_duration = 0
+                if request.POST.get("maintenance-include-" + str(maintenance.id)):
+                    schedule = Maintenance.objects.get(order=maintenance.order, assigned_to_contractor=this_settlement.contractor)
+                    if request.POST.get("maintenance-total-hour-" + str(maintenance.id)):
+                        override_total_duration = float(request.POST.get("maintenance-total-hour-" + str(maintenance.id)))
+                        schedule_duration_in_hours = override_total_duration
+                    else:
+                        schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
+                    total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+                    settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(schedule_duration_in_hours)
+                    total_settled_value = total_settled_value + round(settle_value, 2)
+                    schedule.settlement = True
+                    schedule.save()
+                settled_maintenance = SettledMaintenances(settlement=this_settlement, maintenance=maintenance, settled_value=total_settled_value, settled_hours=total_schedules_duration)
+                settled_maintenance.save()
             return redirect('settlementView', this_settlement.id)
-        # if form.is_valid():
-        #     if request.POST.get("add"):
-        #         old_settled_value = Order.objects.get(id=form.cleaned_data['order'].id).order_settled_value
-        #         new_settled_value = float(old_settled_value) + float(form.cleaned_data['settled_value'])
-        #         Order.objects.filter(id=form.cleaned_data['order'].id).update(order_settled_value=new_settled_value)
-        #         if float(new_settled_value) == float(
-        #                 order_total_calculator(form.cleaned_data['order'].proposal.quote.estimate.id,
-        #                                        form.cleaned_data['order'])):
-        #             Order.objects.filter(id=form.cleaned_data['order'].id).update(fully_settled=True)
-        #         form.save()
-        #         return redirect('settlementOrders', this_settlement.pk)
     parameters = {'form': form,
                   'this_settlement': this_settlement,
-                  'orders': orders,
-                  'settled_orders': settled_orders,
-                  'settled_total': settled_total,
+                  'schedules': schedules,
+                  'maintenances': maintenances,
                   }
     return render(request, "settlementOrders.html", parameters)
+
+
+@login_required
+def settlement_edit(request, settlement_id):
+    this_settlement = get_object_or_404(Settlement, id=settlement_id)
+    form = SettledScheduleForm(request.POST or None, request.FILES or None, initial={'settlement': this_settlement.id})
+    schedules = SettledSchedule.objects.filter(settlement_id=settlement_id)
+    maintenances = SettledMaintenances.objects.filter(settlement_id=settlement_id)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('settlementHome')
+        if request.POST.get("next"):
+            for schedule in schedules:
+                total_settled_value = 0
+                total_schedules_duration = 0
+                quoted_price = 0
+                prev_payment = None
+                if request.POST.get("or-toggle-" + str(schedule.id)):
+                    settled_type = True
+                    project_this_period_percentage = int(request.POST.get("percentage-" + str(schedule.id)))
+                    if schedule.schedule.pre_demo:
+                        schedule.schedule.order.pre_demo_completion_percentage = schedule.schedule.order.pre_demo_completion_percentage + project_this_period_percentage - schedule.completion_percentage
+                    else:
+                        schedule.schedule.order.completion_percentage = schedule.schedule.order.completion_percentage + project_this_period_percentage - schedule.completion_percentage
+                    schedule.schedule.order.save()
+                    schedule_tech = ScheduleTech.objects.get(schedule=schedule.schedule,
+                                                             assigned_to_contractor=this_settlement.contractor)
+                    override_quoted_price = float(request.POST.get("quoted-price-" + str(schedule.id)))
+                    quoted_price = override_quoted_price
+                    settle_value = (project_this_period_percentage / 100 * float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100
+                    total_settled_value = total_settled_value + round(settle_value, 2)
+                else:
+                    settled_type = False
+                    project_this_period_percentage = int(request.POST.get("percentage-" + str(schedule.id)))
+                    if schedule.schedule.pre_demo:
+                        schedule.schedule.order.pre_demo_completion_percentage = schedule.schedule.order.pre_demo_completion_percentage + project_this_period_percentage - schedule.completion_percentage
+                    else:
+                        schedule.schedule.order.completion_percentage = schedule.schedule.order.completion_percentage + project_this_period_percentage - schedule.completion_percentage
+                    schedule.schedule.order.save()
+                    override_total_duration = float(request.POST.get("total-hour-" + str(schedule.id)))
+                    total_schedules_duration = override_total_duration
+                    schedule.settled_hours = total_schedules_duration
+                    settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(total_schedules_duration)
+                    total_settled_value = total_settled_value + round(settle_value, 2)
+                if request.POST.get("pp-" + str(schedule.id)):
+                    prev_payment = request.POST.get("pp-" + str(schedule.id))
+                schedule.settled_total = quoted_price
+                schedule.settled_value = total_settled_value
+                schedule.settled_type = settled_type
+                schedule.completion_percentage = project_this_period_percentage
+                schedule.previous_payment = prev_payment
+                schedule.save()
+            for maintenance in maintenances:
+                override_total_duration = float(request.POST.get("maintenance-total-hour-" + str(maintenance.id)))
+                total_schedules_duration = override_total_duration
+                settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(total_schedules_duration)
+                maintenance.settled_value = settle_value
+                maintenance.settled_hours = total_schedules_duration
+                maintenance.save()
+            return redirect('settlementView', this_settlement.id)
+    parameters = {'form': form,
+                  'this_settlement': this_settlement,
+                  'schedules': schedules,
+                  'maintenances': maintenances,
+                  }
+    return render(request, "settlementEdit.html", parameters)
+
 
 
 @login_required
@@ -204,11 +278,14 @@ def settlement_view(request, settlement_id):
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
     settlement = Settlement.objects.get(id=settlement_id)
-    settled_orders = SettledOrders.objects.filter(settlement=settlement)
+    settled_schedules = SettledSchedule.objects.filter(settlement=settlement).order_by('schedule__schedule_start')
+    settled_maintenances = SettledMaintenances.objects.filter(settlement=settlement)
+    settlement_id_prefix = settlement.settlement_start.strftime("%y%m")
 
     parameters = {'file_name': 'settlement-' + str(settlement_id),
                   'settlement': settlement,
-                  'settled_orders': settled_orders,
+                  'settled_schedules': settled_schedules,
+                  'settled_maintenances': settled_maintenances,
                   'datetime': datetime.datetime.now(),
                   'license_owner': license_owner,
                   'owner_title': owner_title,
@@ -227,6 +304,7 @@ def settlement_view(request, settlement_id):
                   'MEDIA_URL': MEDIA_URL,
                   'STATIC_URL': STATIC_URL,
                   'os': system(),
+                  'settlement_id_prefix': settlement_id_prefix,
                   }
     settlement_pdf = Settlement.create_settlement_pdf(parameters)
     parameters['settlement_pdf'] = settlement_pdf[1]
@@ -238,36 +316,21 @@ def settlement_delete(request, settlement_id):
     this_settlement = get_object_or_404(Settlement, id=settlement_id)
     if request.method == "POST" and request.user.is_authenticated:
         if request.POST.get("confirm"):
-            for settled_order in this_settlement.settledorders_set.all():
-                settled_order.order.fully_settled = False
-                # settled_order.order.order_settled_value = settled_order.order.order_settled_value - settled_order.settled_value
-                settled_order.order.completion_percentage = settled_order.order.completion_percentage - settled_order.completion_percentage
-                settled_order.order.save()
-                schedule_list = Schedule.objects.filter(order=settled_order.order)
-                for schedule in schedule_list:
-                    schedule_tech = ScheduleTech.objects.get(schedule=schedule,
-                                                             assigned_to_contractor=this_settlement.contractor)
-                    schedule_tech.settlement = False
-                    schedule_tech.save()
+            for settled_schedule in this_settlement.settledschedule_set.all():
+                settled_schedule.schedule.order.fully_settled = False
+                if settled_schedule.schedule.pre_demo:
+                    settled_schedule.schedule.order.pre_demo_completion_percentage = settled_schedule.schedule.order.pre_demo_completion_percentage - settled_schedule.completion_percentage
+                else:
+                    settled_schedule.schedule.order.completion_percentage = settled_schedule.schedule.order.completion_percentage - settled_schedule.completion_percentage
+                settled_schedule.schedule.order.save()
+                schedule_tech = ScheduleTech.objects.get(schedule=settled_schedule.schedule, assigned_to_contractor=this_settlement.contractor)
+                schedule_tech.settlement = False
+                schedule_tech.save()
+            for settled_maintenance in this_settlement.settledmaintenances_set.all():
+                settled_maintenance.maintenance.settlement = False
+                settled_maintenance.maintenance.save()
             this_settlement.delete()
         return redirect('settlementHome')
     parameters = {'this_settlement': this_settlement
                   }
     return render(request, "settlementDelete.html", parameters)
-
-#
-# @login_required
-# def settled_order_delete(request, settlement_id, settled_order_id):
-#     this_settled_order = get_object_or_404(SettledOrders, id=settled_order_id)
-#     if request.method == "POST" and request.user.is_authenticated:
-#         if request.POST.get("confirm"):
-#             this_settled_order.order.fully_settled = False
-#             this_settled_order.order.order_settled_value = this_settled_order.order.order_settled_value - this_settled_order.settled_value
-#             this_settled_order.order.save()
-#             this_settled_order.delete()
-#         return redirect('settlementOrders', settlement_id)
-#     parameters = {
-#         'this_settled_order': this_settled_order,
-#         'settlement_id': settlement_id,
-#     }
-#     return render(request, "settledOrderDelete.html", parameters)

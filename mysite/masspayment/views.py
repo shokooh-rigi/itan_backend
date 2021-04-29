@@ -107,7 +107,7 @@ def mass_payment(request, contact_id):
                     change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
                     total_count = transactions_count + change_orders_count + invoice.times_estimate_changed
                     new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                        invoice.id).zfill(3) + '-' + str(total_count).zfill(3)
+                        invoice.id).zfill(3) + '-' + str(total_count)
                     parameters = {
                         'file_name': new_file_name,
                         'total_count': total_count,

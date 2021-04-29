@@ -96,27 +96,40 @@
                       </tr>
                 </thead>
                 <tbody>
-                    {% for settled_order in settled_orders %}
+                    {% for settled_schedule in settled_schedules %}
                     <tr>
 {#                        <th scope="row" style="padding: 5px 0 1px 0; text-align: center;">{{forloop.counter}}</th>#}
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_order.order.project_number }}</td>
-                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_order.order.proposal.quote.estimate.project.name }}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_schedule.schedule.order.project_number }}</td>
+                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_schedule.schedule.order.proposal.quote.estimate.project.name }}</td>
 {#                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.order.proposal.quote.estimate.project.address_line_1 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.address_line_2 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if settled_order.order.proposal.quote.estimate.project.city %}{{ settled_order.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.state %}, {{ settled_order.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.zip %} {{ settled_order.order.proposal.quote.estimate.project.zip }}{% endif %}</td>#}
-                        <td style="padding: 5px 0 1px 0; text-align: center;">Final</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.order.completion_percentage == 100 %}C{% else %}I{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}${% order_total_calculator settled_order.order.proposal.quote.estimate.id settled_order.order as otc %}{{ otc|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}-{% else %}{{ settled_order.settled_hours }}{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}%{{ settlement.contractor.company.interest_percentage }}{% else %}{{ settlement.contractor.hourly_rate }}{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.settled_type %}%{{ settled_order.contractor_involvement_percentage }}{% else %}-{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_order.settled_value|floatformat:2|intcomma }}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.schedule.pre_demo %}PRE-DEMO{% else %}Final{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.schedule.order.completion_percentage == 100 %}C{% else %}I{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}${% order_total_calculator settled_schedule.schedule.order.proposal.quote.estimate.id settled_schedule.schedule.order as otc %}{{ otc|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}-{% else %}{{ settled_schedule.settled_hours }}{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}%{{ settlement.contractor.profile.interest_percentage }}{% else %}{{ settlement.contractor.profile.hourly_rate }}{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}%{% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}-{% endif %}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_schedule.settled_value|floatformat:2|intcomma }}</td>
 {#                        <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>#}
+                    </tr>
+                    {% endfor %}
+                    {% for settled_maintenance in settled_maintenances %}
+                    <tr>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.schedule.order.project_number }}</td>
+                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.schedule.order.proposal.quote.estimate.project.name }}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">Extra</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">C</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">N.A.</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.settled_hours }}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.contractor.profile.hourly_rate }}</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">-</td>
+                        <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_maintenance.settled_value|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <div class="row form-line">
-            <div class="col-sm-4 text-right" style="margin: 0px 0px auto auto;">
+            <div class="col-sm-4 text-right" style="margin: 0 0 auto auto;">
                 <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</span></div></div>
             </div>
         </div>

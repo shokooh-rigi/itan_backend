@@ -177,7 +177,7 @@ def change_order(request, order_id):
                     change_orders_count = ChangeOrder.objects.filter(order=this_order).count()
                     total_count = transactions_count + change_orders_count + this_order.invoice.times_estimate_changed
                     new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
-                        this_order.id).zfill(3) + '-' + str(total_count).zfill(3)
+                        this_order.id).zfill(3) + '-' + str(total_count)
                     pdf_parameters = {
                         'file_name': new_file_name,
                         'total_count': total_count,
@@ -388,7 +388,6 @@ def order_colored_drawing(request, order_id):
                     .replace('*', '') \
                     .replace("/", '')
                 zip_file_name = project_clean_name + '-Colored-Drawing.zip'
-                print(zip_file_name)
                 create_zip_file(files, temp_path, zip_file_name)
                 # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
                 Order.objects.filter(id=order_id).update(colored_drawing=UPLOAD_URL + 'order_colored_drawing/' + zip_file_name)
@@ -561,3 +560,4 @@ def manufacturer_edit_popup(request, pk=None):
             '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "cs_manufacturer_form.html", {"form": form})
+

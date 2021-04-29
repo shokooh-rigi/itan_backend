@@ -70,6 +70,7 @@
             <thead>
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
+                    <th data-sortable="customer_id"><a href="{% if request.GET.ordering == 'customer_id' %}?{% url_replace request 'ordering' '-customer_id' %}{% else %}?{% url_replace request 'ordering' 'customer_id' %}{% endif %}">Customer ID</a></th>
                     <th data-sortable="customer"><a href="{% if request.GET.ordering == 'customer' %}?{% url_replace request 'ordering' '-customer' %}{% else %}?{% url_replace request 'ordering' 'customer' %}{% endif %}">Customer</a></th>
                     <th data-sortable="type"><a href="{% if request.GET.ordering == 'type' %}?{% url_replace request 'ordering' '-type' %}{% else %}?{% url_replace request 'ordering' 'type' %}{% endif %}">Document Type</a></th>
                     <th>Actions</th>
@@ -79,6 +80,7 @@
                 {% for document in documents %}
                         <tr>
                             <td>{{ document.id }}</td>
+                            <td>{% if document.customer.customer_id %}{{ document.customer.customer_id }}{% else %}{% endif %}</td>
                             <td>{{ document.customer.name }}</td>
                             <td>{{ document.type }}</td>
                             <td>

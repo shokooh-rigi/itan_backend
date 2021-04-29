@@ -1,3 +1,9 @@
+@font-face {
+    font-family: webCambria;
+    font-weight: normal;
+    src: url('../fonts/cambriab.ttf');
+}
+
 h1, h2 {
     text-transform: uppercase;
 }
@@ -186,7 +192,7 @@ input[type=text][readonly] {
     display: flex;
     width: 100%;
     align-items: stretch;
-    background: rgba(255, 255, 255, .9);
+    background: rgba(255, 255, 255, 1);
     padding: 1.25rem 2.5rem;
     position: fixed;
     top: 0;
@@ -288,6 +294,7 @@ input[type=text][readonly] {
 #topnav ul ul ul {
     right: 100px;
     top: 0px;
+    z-index: 1;
 }
 
 .logosection {
@@ -319,7 +326,7 @@ input[type=text][readonly] {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    left: 55px;
+    left: 75px;
 }
 
 .logosection .sitelogotext .textholder {
@@ -469,6 +476,14 @@ input[type=text][readonly] {
 
 .icon.archiveicon {
     background-image: url("../images/icons/archive.svg");
+}
+
+.icon.refreshicon {
+    background-image: url("../images/icons/refresh.svg");
+}
+
+.icon.finalicon {
+    background-image: url("../images/icons/final.svg");
 }
 
 .icon.drawingicon {
@@ -749,12 +764,51 @@ input[type=text][readonly] {
     margin-right: 8px;
     border-radius: 8px;
     border: solid 2px;
-        border-top-color: currentcolor;
-        border-right-color: currentcolor;
-        border-bottom-color: currentcolor;
-        border-left-color: currentcolor;
+    border-top-color: currentcolor;
+    border-right-color: currentcolor;
+    border-bottom-color: currentcolor;
+    border-left-color: currentcolor;
     background: transparent;
-        background-color: transparent;
+    background-color: transparent;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid {
+    position: relative;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid .move-action {
+    position: absolute;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    overflow: hidden;
+    background: rgba(255,255,255,1);
+    z-index: 5;
+    opacity: 0.5;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid .move-action.active {
+    display: inline-flex;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid #prev-action {
+    left: 50px;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid #next-action {
+    right: 20px;
+}
+
+#calendar .fc-timeGridWeek-view .fc-scrollgrid  .move-action:hover {
+    font-size: 1.2rem;
 }
 
 .modal .an-assigned {
@@ -830,6 +884,14 @@ input[type=text][readonly] {
     transform: translate(116%, -50%);
 }
 
+.switch-toggle.auto_manual:before {
+    content: "Manual";
+}
+
+.switch-toggle.auto_manual:after {
+    content: "Automatic";
+}
+
 .switch-toggle input {
   opacity: 0;
   width: 0;
@@ -881,4 +943,41 @@ input[type=text][readonly] {
 
 .switch-toggle .slider.round:before {
   border-radius: 50%;
+}
+
+.nav-line-tabs .nav-item .nav-link {
+    padding: 5px;
+}
+
+.nav-line-tabs .nav-item .nav-link.active, .nav-line-tabs .nav-item.show .nav-link, .nav-line-tabs .nav-item .nav-link:hover:not(.disabled) {
+    background-color: #009EF7;
+    color: #fff;
+}
+
+td.ui-sortable-icon {
+    cursor: pointer;
+    background-image: url('../images/icons/handle.svg');
+    background-repeat: no-repeat;
+    background-size: 50% auto;
+    background-position: center center;
+    width: 30px;
+}
+
+.table-striped.striped-red > tbody > tr:nth-child(2n+1) > td, .table-striped.striped-red > tbody > tr:nth-child(2n+1) > th {
+    background-color: rgba(255, 90, 0, 0.1) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+}
+
+.table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+    background-color: rgba(0,0,0,.05) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+}
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
 }

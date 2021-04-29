@@ -18,6 +18,7 @@ import mysite.settings
 from ..estimator.views import estimate_total_work
 from ..core.models import *
 import json
+from ..projectprocess.models import ProjectProcess, ProjectProcessPreDemo
 
 
 # activate(TIME_ZONE)
@@ -184,10 +185,27 @@ def schedule_orders_list(request, type):
                         assigned_to_employees_names.append(schedule_tech.assigned_to_employee.email)
                 elif schedule_tech.assigned_to_contractor:
                     assigned_to_contractors.append(schedule_tech.assigned_to_contractor.id)
-                    assigned_to_contractors_names.append(schedule_tech.assigned_to_contractor.name)
+                    if schedule_tech.assigned_to_contractor.last_name:
+                        assigned_to_contractors_names.append(
+                            schedule_tech.assigned_to_contractor.first_name + ' ' + schedule_tech.assigned_to_contractor.last_name)
+                    else:
+                        assigned_to_contractors_names.append(schedule_tech.assigned_to_contractor.email)
             any_assigned = False
             if ScheduleTech.objects.filter(schedule=schedule).count() > 0:
                 any_assigned = True
+            poc_name = ''
+            poc_cell_phone = ''
+            poc_office_phone = ''
+            tech_notes = ''
+            try:
+                poc_name = schedule.order.techlabel.point_of_contact_name
+                tech_notes = schedule.order.techlabel.tech_notes
+                if schedule.order.techlabel.point_of_contact_cell_phone:
+                    poc_cell_phone = schedule.order.techlabel.point_of_contact_cell_phone
+                if schedule.order.techlabel.point_of_contact_office_phone:
+                    poc_office_phone = schedule.order.techlabel.point_of_contact_office_phone
+            except:
+                pass
             response_data.append({
                 'order_id': str(schedule.order.id),
                 'schedule_id': str(schedule.id),
@@ -196,6 +214,16 @@ def schedule_orders_list(request, type):
                 'assigned_to_employees_names': assigned_to_employees_names,
                 'assigned_to_contractors_names': assigned_to_contractors_names,
                 'project_number': schedule.order.project_number,
+                'project_name': str(schedule.order.proposal.quote.estimate.project),
+                'customer': str(schedule.order.proposal.quote.estimate.customer.company.name),
+                'engineer': str(schedule.order.proposal.quote.estimate.engineer.company.name),
+                'predemo': schedule.order.proposal.quote.estimate.estimatedetails.pre_demo,
+                'is_predemo': schedule.pre_demo,
+                'poc_name': poc_name,
+                'poc_cell_phone': poc_cell_phone,
+                'poc_office_phone': poc_office_phone,
+                'control_system': str(schedule.order.control_system),
+                'special_instruction': tech_notes,
                 'title': str(schedule.order.proposal.quote.estimate.project),
                 'assigned': any_assigned,
                 'location': full_address,
@@ -221,7 +249,11 @@ def schedule_orders_list(request, type):
                     assigned_to_employees_names.append(maintenance.assigned_to_employee.email)
             elif maintenance.assigned_to_contractor:
                 assigned_to_contractors.append(maintenance.assigned_to_contractor.id)
-                assigned_to_contractors_names.append(maintenance.assigned_to_contractor.name)
+                if maintenance.assigned_to_contractor.last_name:
+                    assigned_to_contractors_names.append(
+                        maintenance.assigned_to_contractor.first_name + ' ' + maintenance.assigned_to_contractor.last_name)
+                else:
+                    assigned_to_contractors_names.append(maintenance.assigned_to_contractor.email)
             any_assigned = False
             if maintenance.assigned_to_employee or maintenance.assigned_to_contractor:
                 any_assigned = True
@@ -252,13 +284,19 @@ def schedule_orders_list(request, type):
             })
         return JsonResponse(response_data, safe=False)
     elif type == 2:
-        orders = Order.objects.filter(projectprocess__job_completed=False).order_by('project_number')
+        # orders = Order.objects.filter(projectprocess__job_completed=False).order_by('project_number')
+        orders = Order.objects.all().order_by('project_number')
         response_data = []
         for order in orders:
-            if not order.projectprocess.tech_scheduled:
+            if ProjectProcess.objects.filter(order=order).exists():
+                if not order.projectprocess.tech_scheduled:
+                    color = '#3699ff'
+                elif order.projectprocess.tech_scheduled and not order.projectprocess.job_completed:
+                    color = '#8950fc'
+                else:
+                    color = '#3699ff'
+            else:
                 color = '#3699ff'
-            elif order.projectprocess.tech_scheduled and not order.projectprocess.job_completed:
-                color = '#8950fc'
             full_address = ''
             if order.proposal.quote.estimate.project.address_line_1:
                 full_address += order.proposal.quote.estimate.project.address_line_1
@@ -278,8 +316,28 @@ def schedule_orders_list(request, type):
                 'location': full_address,
                 'category': 'time',
                 'estimated_work': estimate_total_work(order.proposal.quote.estimate.id),
-                'color': color
+                'color': color,
+                'predemo': False
             })
+            if order.proposal.quote.estimate.estimatedetails.pre_demo != 0:
+                if ProjectProcessPreDemo.objects.filter(order=order).exists():
+                    if not order.projectprocesspredemo.tech_scheduled:
+                        color = '#3699ff'
+                    elif order.projectprocesspredemo.tech_scheduled and not order.projectprocesspredemo.job_completed:
+                        color = '#8950fc'
+                else:
+                    color = '#3699ff'
+                response_data.append({
+                    'id': order.id,
+                    'number': order.project_number,
+                    'title': order.project_number,
+                    'body': order.project_number + ': ' + str(order.proposal.quote.estimate.project) + ' - PREDEMO',
+                    'location': full_address,
+                    'category': 'time',
+                    'estimated_work': estimate_total_work(order.proposal.quote.estimate.id),
+                    'color': color,
+                    'predemo': True
+                })
 
         return JsonResponse(response_data, safe=False)
 
@@ -287,7 +345,6 @@ def schedule_orders_list(request, type):
 @login_required
 def schedule_tech_list(request):
     employee_list = User.objects.filter(Q(profile__user_type=5) | Q(profile__user_type=6))
-    contractor_list = Person.objects.filter(company__company_type__name__iexact='sub contractor')
     r = lambda: random.randint(0, 230)
     response_data = []
     # response_data.append({
@@ -298,28 +355,16 @@ def schedule_tech_list(request):
     #     'calendar_color': '#ffffff',
     #     'calendar_bg_color': '#000000'
     # })
-    for tech in employee_list:
+    for employee in employee_list:
         random_color = '#%02X%02X%02X' % (r(), r(), r())
         response_data.append({
-            'id': tech.id,
-            'type': 'employee',
-            'calendar_id': tech.id,
-            'calendar_name': tech.first_name + " " + tech.last_name,
+            'id': employee.id,
+            'type': 'employee' if employee.profile.status == 1 else 'contractor',
+            'calendar_id': employee.id,
+            'calendar_name': employee.first_name + " " + employee.last_name,
             'calendar_color': '#ffffff',
             'calendar_bg_color': random_color
         })
-
-    for contractor in contractor_list:
-        random_color = '#%02X%02X%02X' % (r(), r(), r())
-        response_data.append({
-            'id': contractor.id,
-            'type': 'contractor',
-            'calendar_id': contractor.id,
-            'calendar_name': contractor.name,
-            'calendar_color': '#ffffff',
-            'calendar_bg_color': random_color
-        })
-
     return JsonResponse(response_data, safe=False)
 
 
@@ -336,16 +381,29 @@ def create_schedule(request):
                 'result': True,
             })
         else:
+            if request.POST.get('is_predemo') == 'true':
+                is_predemo = True
+            else:
+                is_predemo = False
             order_id = request.POST.get('order_id')
             order = Order.objects.get(id=order_id)
-            order.projectprocess.tech_package = True
-            order.projectprocess.tech_scheduled = True
-            order.projectprocess.save()
+            if is_predemo:
+                if not ProjectProcessPreDemo.objects.filter(order=order).exists():
+                    ProjectProcessPreDemo.objects.create(order=order)
+                order.projectprocesspredemo.tech_package = True
+                order.projectprocesspredemo.tech_scheduled = True
+                order.projectprocesspredemo.save()
+            else:
+                if not ProjectProcess.objects.filter(order=order).exists():
+                    ProjectProcess.objects.create(order=order)
+                order.projectprocess.tech_package = True
+                order.projectprocess.tech_scheduled = True
+                order.projectprocess.save()
             schedule_date_end = request.POST.get('schedule_end')
             schedule_date_start = request.POST.get('schedule_start')
             current_user = request.user
             new_schedule = Schedule(order=order, schedule_start=schedule_date_start, schedule_end=schedule_date_end,
-                                    created_by=current_user)
+                                    created_by=current_user, pre_demo=is_predemo)
             new_schedule.save()
             return JsonResponse({
                 'result': True,
@@ -365,17 +423,26 @@ def update_schedule(request):
         schedule_update = get_object_or_404(Schedule, id=schedule_id)
         new_tech_id = request.POST.get('new_tech_id')
         if update_type == 'calendar_delete':
-            print(schedule_update.id)
+            if schedule_update.pre_demo:
+                is_predemo = True
+            else:
+                is_predemo = False
             schedule_update.delete()
-            other_schedules = Schedule.objects.filter(order__id=order_id)
+            other_schedules = Schedule.objects.filter(order__id=order_id, pre_demo=is_predemo)
             no_schedule_left = False
             if not other_schedules:
-                schedule_update.order.projectprocess.tech_scheduled = False
-                schedule_update.order.projectprocess.save()
-                no_schedule_left = True
+                if is_predemo:
+                    schedule_update.order.projectprocesspredemo.tech_scheduled = False
+                    schedule_update.order.projectprocesspredemo.save()
+                    no_schedule_left = True
+                else:
+                    schedule_update.order.projectprocess.tech_scheduled = False
+                    schedule_update.order.projectprocess.save()
+                    no_schedule_left = True
             return JsonResponse({
                 'result': True,
                 'no_schedule_left': no_schedule_left,
+                'is_predemo': is_predemo,
                 'msg': 'Schedule Deleted from database successfully.'
             })
         else:
@@ -436,8 +503,11 @@ def update_schedule(request):
                     err_msg = ''
                     if has_conflict:
                         if conflicted_type == 'contractor':
-                            conflicted_user = Person.objects.get(id=conflicted_user)
-                            err_msg = conflicted_user.name + ' has another job to do on this date.'
+                            conflicted_user = User.objects.get(id=conflicted_user)
+                            if conflicted_user.last_name:
+                                err_msg = conflicted_user.first_name + ' ' + conflicted_user.last_name + ' has another job to do on this date.'
+                            else:
+                                err_msg = conflicted_user.email + ' has another job to do on this date.'
                             return JsonResponse({
                                 'result': False,
                                 'err_msg': err_msg
@@ -446,7 +516,7 @@ def update_schedule(request):
                                                                  assigned_to_contractor=new_tech_id).count()
                     if assigned_count == 0:
                         new_tech_schedule = ScheduleTech(schedule=this_schedule,
-                                                         assigned_to_contractor=Person.objects.get(id=new_tech_id))
+                                                         assigned_to_contractor=User.objects.get(id=new_tech_id))
                         new_tech_schedule.save()
 
                 all_tech_schedules = ScheduleTech.objects.filter(schedule=this_schedule)
@@ -545,8 +615,11 @@ def update_schedule(request):
                 err_msg = ''
                 if has_conflict:
                     if conflicted_type == 'contractor':
-                        conflicted_user = Person.objects.get(id=conflicted_user)
-                        err_msg = conflicted_user.name + ' has another job to do on this date.'
+                        conflicted_user = User.objects.get(id=conflicted_user)
+                        if conflicted_user.last_name:
+                            err_msg = conflicted_user.first_name + ' ' + conflicted_user.last_name + ' has another job to do on this date.'
+                        else:
+                            err_msg = conflicted_user.email + ' has another job to do on this date.'
                     elif conflicted_type == 'employee':
                         conflicted_user = User.objects.get(id=conflicted_user)
                         if conflicted_user.last_name:
@@ -651,15 +724,18 @@ def update_maintenance(request):
                     err_msg = ''
                     if has_conflict:
                         if conflicted_type == 'contractor':
-                            conflicted_user = Person.objects.get(id=conflicted_user)
-                            err_msg = conflicted_user.name + ' has another job to do on this date.'
+                            conflicted_user = User.objects.get(id=conflicted_user)
+                            if conflicted_user.last_name:
+                                err_msg = conflicted_user.first_name + ' ' + conflicted_user.last_name + ' has another job to do on this date.'
+                            else:
+                                err_msg = conflicted_user.email + ' has another job to do on this date.'
                             return JsonResponse({
                                 'result': False,
                                 'err_msg': err_msg
                             })
                     new_tech_maintenance = Maintenance.objects.get(id=maintenance_id)
                     new_tech_maintenance.assigned_to_employee = None
-                    new_tech_maintenance.assigned_to_contractor = Person.objects.get(id=new_tech_id)
+                    new_tech_maintenance.assigned_to_contractor = User.objects.get(id=new_tech_id)
                     new_tech_maintenance.save()
 
             elif update_type == 'update_order':
@@ -722,8 +798,11 @@ def update_maintenance(request):
                 err_msg = ''
                 if has_conflict:
                     if conflicted_type == 'contractor':
-                        conflicted_user = Person.objects.get(id=conflicted_user)
-                        err_msg = conflicted_user.name + ' has another job to do on this date.'
+                        conflicted_user = User.objects.get(id=conflicted_user)
+                        if conflicted_user.last_name:
+                            err_msg = conflicted_user.first_name + ' ' + conflicted_user.last_name + ' has another job to do on this date.'
+                        else:
+                            err_msg = conflicted_user.email + ' has another job to do on this date.'
                     elif conflicted_type == 'employee':
                         conflicted_user = User.objects.get(id=conflicted_user)
                         if conflicted_user.last_name:
@@ -765,7 +844,10 @@ def get_schedule_info(request, schedule_id):
                     'involvement_percentage': schedule_tech.involvement_percentage
                 })
             elif schedule_tech.assigned_to_contractor:
-                tech_name = schedule_tech.assigned_to_contractor.name
+                if schedule_tech.assigned_to_contractor.last_name:
+                    tech_name = schedule_tech.assigned_to_contractor.first_name + ' ' + schedule_tech.assigned_to_contractor.last_name
+                else:
+                    tech_name = schedule_tech.assigned_to_contractor.email
                 techs_array.append({
                     'tech_id': schedule_tech.assigned_to_contractor.id,
                     'tech_name': tech_name,

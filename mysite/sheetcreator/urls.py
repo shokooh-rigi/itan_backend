@@ -5,6 +5,8 @@ from mysite.sheetcreator import views
 urlpatterns = [
     path('sheetcreator/', views.sheet_list, name='sheetHome'),
     path('sheetcreator/equipments_list/<int:sheet_id>/', views.equipments_list, name='sheetEquipmentsList'),
+    path('sheetcreator/sort_equipments_list/<int:sheet_id>/', views.sort_equipments_list, name='sortEquipmentsList'),
+    path('sheetcreator/sort_equipments/<int:sheet_id>/', views.update_sheet_equipments_positioning, name='sortEquipments'),
     path('sheetcreator/equipments_generate_tech_pdf/<int:sheet_id>/', views.equipments_generate_tech_pdf, name='sheetEquipmentsGenerateTechPDF'),
     path('sheetcreator/equipments_generate_report_pdf/<int:sheet_id>/', views.equipments_generate_report_pdf, name='sheetEquipmentsGenerateReportPDF'),
     path('sheetcreator/add/', views.sheet_add, name='sheetAdd'),

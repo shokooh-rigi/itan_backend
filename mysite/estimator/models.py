@@ -8,6 +8,13 @@ from .render import Render
 from django.conf import settings
 
 
+def estimate_number_generator(estimate_id):
+    estimate = Estimate.objects.get(id=estimate_id)
+    estimator_long_id = estimate.created_by.id + 100
+    estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
+    return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
+
+
 # Create your models here.
 
 
@@ -47,7 +54,7 @@ class Estimate(models.Model):
 
 class Quote(models.Model):
     estimate = models.OneToOneField(Estimate, on_delete=models.CASCADE, blank=False)
-    note = models.TextField(max_length=255, blank=True, null=True)
+    note = models.TextField(max_length=500, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)
 
@@ -120,6 +127,8 @@ class EstimateDetails(models.Model):
         (1, '1%'),
         (2, '2%'),
         (3, '3%'),
+        (4, '4%'),
+        (5, '5%'),
     )
     control_system = models.PositiveSmallIntegerField(choices=cs_choices, default=0)
     hours_choices = (
@@ -131,6 +140,7 @@ class EstimateDetails(models.Model):
     hours = models.PositiveSmallIntegerField(choices=hours_choices, default=0)
     pre_demo = models.FloatField(default=0)
     adjustment = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    customer_adjustment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     remark = models.TextField(max_length=500, blank=True)
     validity = models.IntegerField(blank=False, default=30)
     saved_flag = models.BooleanField(default=False)
@@ -149,10 +159,3 @@ class EstimateDetails(models.Model):
 def create_estimate_details(sender, instance, created, **kwargs):
     if created:
         EstimateDetails.objects.create(estimate=instance)
-
-
-def estimate_number_generator(estimate_id):
-    estimate = Estimate.objects.get(id=estimate_id)
-    estimator_long_id = estimate.created_by.id + 100
-    estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
-    return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)

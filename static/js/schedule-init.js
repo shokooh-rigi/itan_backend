@@ -211,7 +211,8 @@
                                             'partial': order.partial,
                                             'order_id': order.order_id,
                                             'schedule_id': order.schedule_id,
-                                            'assigned': order.assigned
+                                            'assigned': order.assigned,
+                                            'is_predemo': order.is_predemo
                                         }
                                     });
                                 }
@@ -234,8 +235,10 @@
                     data.el.setAttribute('ondragover', 'allowDropTech(event)');
                 },
                 eventContent: function (arg) {
-                    console.log(arg.event)
                     let returnHtml = '<div class="text-left">' + arg.timeText + '<br />' + arg.event.title + '</div>'
+                    if (arg.event.extendedProps.is_predemo) {
+                        returnHtml += '(predemo)<br />'
+                    }
                     if (arg.event.extendedProps.employees_names) {
                         arg.event.extendedProps.employees_names.forEach(function (employee) {
                             returnHtml += '<i class="d-block text-left p-1 font-weight-bolder">' + employee + '</i>'
@@ -259,8 +262,9 @@
                     let r = true
                     if (info.draggedEl.attributes['data-id']) {
                         const id = info.draggedEl.dataset.id;
-                        const estimate = info.draggedEl.dataset.estimate;
-                        let remaining_estimate = estimate;
+                        const has_pre_demo = info.draggedEl.dataset.predemo;
+                        // const estimate = info.draggedEl.dataset.estimate;
+                        // let remaining_estimate = estimate;
                         let start = info.date;
                         start = start.setHours(7, 0, 0, 0);
                         if (now>new Date(start)) {
@@ -269,44 +273,49 @@
                         if (r === true) {
                             droppedElID = info.draggedEl.attributes['data-id'].value;
                             info.draggedEl.style.backgroundColor = '#8950fc';
-                            while (remaining_estimate > 480) {
-                                while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
-                                    start = moment(start).add(1, 'days')
-                                }
-                                let end = new moment(start);
-                                end = end.add(480, 'minutes');
-                                $.ajax({
-                                    type: "POST",
-                                    url: "/schedule/create_schedule/",
-                                    async: false,
-                                    data: {
-                                        'order_id': id,
-                                        'schedule_start': dateFormat(start, 'isoDateTime'),
-                                        'schedule_end': dateFormat(end, 'isoDateTime')
-                                    },
-                                    success: function (result) {
-                                        droppedElScheduleID = result.schedule_id;
-                                    }
-                                });
-                                remaining_estimate = remaining_estimate - 480
+                            // while (remaining_estimate > 480) {
+                            //     while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
+                            //         start = moment(start).add(1, 'days')
+                            //     }
+                            //     let end = new moment(start);
+                            //     end = end.add(480, 'minutes');
+                            //     $.ajax({
+                            //         type: "POST",
+                            //         url: "/schedule/create_schedule/",
+                            //         async: false,
+                            //         data: {
+                            //             'order_id': id,
+                            //             'schedule_start': dateFormat(start, 'isoDateTime'),
+                            //             'schedule_end': dateFormat(end, 'isoDateTime')
+                            //         },
+                            //         success: function (result) {
+                            //             droppedElScheduleID = result.schedule_id;
+                            //         }
+                            //     });
+                            //     remaining_estimate = remaining_estimate - 480
+                            //     start = moment(start).add(1, 'days')
+                            // }
+                            // let end = new moment(start);
+                            // if (remaining_estimate === estimate) {
+                            //     end = end.add(480, 'minutes');
+                            // } else {
+                            //     while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
+                            //         start = moment(start).add(1, 'days')
+                            //         end = new moment(start);
+                            //     }
+                            //     if (remaining_estimate <= 60) {
+                            //         end = end.add(60, 'minutes');
+                            //     } else {
+                            //         end = end.add(remaining_estimate, 'minutes');
+                            //         end = end.set({minute:0, second:0, millisecond:0})
+                            //     }
+                            //
+                            // }
+                            while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
                                 start = moment(start).add(1, 'days')
                             }
                             let end = new moment(start);
-                            if (remaining_estimate === estimate) {
-                                end = end.add(480, 'minutes');
-                            } else {
-                                while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
-                                    start = moment(start).add(1, 'days')
-                                    end = new moment(start);
-                                }
-                                if (remaining_estimate <= 60) {
-                                    end = end.add(60, 'minutes');
-                                } else {
-                                    end = end.add(remaining_estimate, 'minutes');
-                                    end = end.set({minute:0, second:0, millisecond:0})
-                                }
-
-                            }
+                            end = end.add(480, 'minutes');
                             $.ajax({
                                 type: "POST",
                                 url: "/schedule/create_schedule/",
@@ -314,7 +323,8 @@
                                 data: {
                                     'order_id': id,
                                     'schedule_start': dateFormat(start, 'isoDateTime'),
-                                    'schedule_end': dateFormat(end, 'isoDateTime')
+                                    'schedule_end': dateFormat(end, 'isoDateTime'),
+                                    'is_predemo': has_pre_demo
                                 },
                                 success: function (result) {
                                     droppedElScheduleID = result.schedule_id;
@@ -347,7 +357,13 @@
                     }
                 },
 
+                eventDragStart: function (info) {
+                    $('#calendar .fc-timeGridWeek-view .fc-scrollgrid .move-action').addClass('active')
+                },
 
+                eventDragStop: function (info) {
+                    $('#calendar .fc-timeGridWeek-view .fc-scrollgrid .move-action').removeClass('active')
+                },
 
                 eventDrop: function (info) {
                     if (info.event.extendedProps.schedule_id) {

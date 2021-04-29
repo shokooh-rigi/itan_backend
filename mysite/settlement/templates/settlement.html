@@ -61,8 +61,9 @@
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">ID</a></th>
                     <th data-sortable="contractor"><a href="{% if request.GET.ordering == 'contractor' %}?{% url_replace request 'ordering' '-contractor' %}{% else %}?{% url_replace request 'ordering' 'contractor' %}{% endif %}">Contractor</a></th>
-                    <th>Orders</th>
                     <th>Total Settled</th>
+                    <th data-sortable="settlement_start"><a href="{% if request.GET.ordering == 'settlement_start' %}?{% url_replace request 'ordering' '-settlement_start' %}{% else %}?{% url_replace request 'ordering' 'settlement_start' %}{% endif %}">Settlement Start</a></th>
+                    <th data-sortable="settlement_end"><a href="{% if request.GET.ordering == 'settlement_end' %}?{% url_replace request 'ordering' '-settlement_end' %}{% else %}?{% url_replace request 'ordering' 'settlement_end' %}{% endif %}">Settlement End</a></th>
                     <th data-sortable="created_on"><a href="{% if request.GET.ordering == 'created_on' %}?{% url_replace request 'ordering' '-created_on' %}{% else %}?{% url_replace request 'ordering' 'created_on' %}{% endif %}">Creation Date</a></th>
                     <th>Actions</th>
                 </tr>
@@ -72,14 +73,15 @@
                     <tr>
                         <td>{{ settlement.id }}</td>
                         <td>{{ settlement.contractor }}</td>
-                        <td>{% for settled_order in settlement.settledorders_set.all %}{{ settled_order }}{%if not forloop.last%}<br />{%endif%}{% endfor %}</td>
-                        <td>{% calculate_total_settled settlement as cts %}${{ cts|floatformat:2|intcomma }}</td>
-                        <td>{{ settlement.created_on }}</td>
+                        <td>{% calculate_total_settled_including_expenses settlement as cts %}${{ cts|floatformat:2|intcomma }}</td>
+                        <td>{{ settlement.settlement_start|date:'M d, Y' }}</td>
+                        <td>{{ settlement.settlement_end|date:'M d, Y' }}</td>
+                        <td>{{ settlement.created_on|date:'M d, Y' }}</td>
                         <td>
-                            <a href="{% url 'settlementEdit' settlement_id=settlement.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
+                            <a href="{% url 'settlementEdit' settlement.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                             <a href="{% url 'settlementDelete' settlement_id=settlement.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
-                            <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/settlement/settlement-{{ settlement.id }}.pdf" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
-                            <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{{ settlement.id }}" data-id="{{ settlement.id }}" data-toemail="{{ settlement.contractor.mail }}" data-contractor="Settlement #{{ settlement.id }} - {{ settlement.contractor }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                            <a href="{% url 'settlementView' settlement.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View"></div></a>
+
                         </td>
                     </tr>
                 {% endfor %}

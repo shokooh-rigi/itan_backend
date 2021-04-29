@@ -13,6 +13,7 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from .render import Render as PDFRender
 from ..sheetcreator.models import *
 from itertools import chain
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -125,6 +126,39 @@ def vav_sheet_equipment_list(request, sheet_id):
     if request.GET.get('paginate_by'):
         pagination = request.GET.get('paginate_by')
 
+    object_list = DataSheetEquipment.objects.filter(sheet=sheet_id)
+    search_lowercase = project_name.lower()
+    search_contains_letters = search_lowercase.islower()
+    if project_name:
+        if search_contains_letters:
+            object_list = object_list.filter(testsheetgeneraldata__value__icontains=project_name)
+        else:
+            object_list = object_list.filter(Q(testsheetgeneraldata__value__icontains=project_name) | Q(id=project_name))
+    object_list = object_list.order_by('main_data_entry_completed', 'design_data_entry_completed', 'actual_data_entry_completed')
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    sheets = paginator.get_page(page)
+
+    parameters = {'sheet_equipments': sheets,
+                  'my_sheet': my_sheet,
+                  'sheet_id': sheet_id,
+                  'WEB_URL': WEB_URL,
+                  'MEDIA_URL': MEDIA_URL,
+                  }
+    return render(request, "vavSheetEquipmentsList.html", parameters)
+
+
+@login_required
+def sort_vav_sheet_equipment_list(request, sheet_id):
+    my_sheet = DataSheet.objects.get(id=sheet_id)
+
+    project_name = request.GET.get('project_name', '')
+
+    pagination = 500
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
     ordering = 'field_order'
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
@@ -149,7 +183,27 @@ def vav_sheet_equipment_list(request, sheet_id):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "vavSheetEquipmentsList.html", parameters)
+    return render(request, "sortVavSheetEquipmentsList.html", parameters)
+
+
+@login_required
+def update_sheet_equipments_positioning(request, sheet_id):
+    if request.method == "POST" and request.is_ajax():
+        sheet_equipments_array = request.POST.getlist('sheetEquipmentsArray[]')
+        sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
+        i = 1
+        for equipment_id in sheet_equipments_array:
+            equipment = sheet_equipments.get(id=equipment_id)
+            equipment.field_order = i
+            equipment.save()
+            i = i+1
+        return JsonResponse({
+            'result': True,
+            'msg': 'Equipments Positioning Successfully Updated!'
+        })
+    else:
+        status = "Bad"
+        return JsonResponse(status, safe=False)
 
 
 def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
