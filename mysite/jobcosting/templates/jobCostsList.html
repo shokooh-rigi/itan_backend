@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load humanize %}
+{% load costing_tags %}
+{% load order_tags %}
+
+{% block content %}
+    <div class="text-center">
+        <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
+        <table class="table table-striped" id="printThis">
+            <thead>
+                <tr>
+                    <th>Project #</th>
+                    <th>Project Name</th>
+                    <th>Estimated Hours</th>
+                    <th>Actual Hours</th>
+                    <th>Hours Delta</th>
+                    <th>Estimated Price</th>
+                    <th>Actual Price</th>
+                    <th>Price Delta</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in object_list %}
+                        <tr>
+                            <td>{{ order.project_number }}</td>
+                            <td>{{ order.proposal.quote.estimate.project }}</td>
+                            <td>{% estimate_total_work order.proposal.quote.estimate.id as etw %}{{ etw|floatformat:2 }}</td>
+                            <td>{% actual_total_work order.id as atw %}{{ atw|floatformat:2 }}</td>
+                            <td>{% delta_total_work order as dtw %}{% if dtw < 0 %}<span class="text-danger font-weight-bold">{{ dtw|floatformat:0 }}%</span>{% else %}<span class="text-success font-weight-bold">{{ dtw|floatformat:0 }}%</span>{% endif %}</td>
+                            <td>{% estimate_total_calculator order.proposal.quote.estimate.id as etp %}${{ etp|floatformat:2|intcomma }}</td>
+                            <td>{% calculate_total_amount_due order.invoice as atp %}${{ atp|floatformat:2|intcomma }}</td>
+                            <td>{% delta_total_price order as dtp %}{% if dtp < 0 %}<span class="text-danger font-weight-bold">{{ dtp|floatformat:0 }}%</span>{% else %}<span class="text-success font-weight-bold">{{ dtp|floatformat:0 }}%</span>{% endif %}</td>
+                        </tr>
+                {% endfor %}
+{#                <tr style="font-weight: bold;">#}
+{#                    <td>#}
+{#                        Total#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {{ total_rows }}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        ${{ total_of_all|floatformat:2|intcomma }}#}
+{#                    </td>#}
+{#                </tr>#}
+            </tbody>
+        </table>
+
+    </div>
+
+    <script>
+
+
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
+
+
+
+    $(document).ready(function() {
+        $('#date_filter_clear').click(function() {
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "fromDate", ""));
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
+            location.reload();
+        });
+        if (window.location.href.indexOf('type=estimate') > 0) {
+            $(".type-select a.estimateselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=quote') > 0) {
+            $(".type-select a.quoteselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=proposal') > 0) {
+            $(".type-select a.proposalselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=order') > 0) {
+            $(".type-select a.orderselected").addClass("active");
+            $("#filter_by_date h5 .filter_by_type").text('Estimate Date of Project');
+        }
+        else if (window.location.href.indexOf('type=invoice') > 0) {
+            $(".type-select a.invoiceselected").addClass("active");
+            $("#filter_by_date h5 .filter_by_type").text('Creation Date');
+        }
+    });
+</script>
+
+    <script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').hide();
+                    $('#printThis').css('margin-top','100px');
+                },
+                afterPrint: function(){
+                    $('#topnav').show();
+                    $('#printThis').css('margin-top','0px');
+                },
+            });
+        });
+    });
+    </script>
+    <script>
+        $(function () {
+            $("#id_fromDate, #id_toDate").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+		scrollInput: false,
+            });
+        });
+    </script>
+{% endblock %}

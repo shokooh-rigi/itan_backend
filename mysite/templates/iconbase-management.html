@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div id="sectionpanel">
+        <div class="container">
+            <div class="row pt-1 justify-content-center">
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'EquipmentsList' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-01.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Equipments Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'CompanyList' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-02.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Customers Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'BidsList' 'estimate' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-03.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Estimates Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'BidsList' 'quote' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-04.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Quotes Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+            </div>
+            <div class="row pt-1 justify-content-center">
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'BidsList' 'order' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-05.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Orders Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'BidsList' 'invoice' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-06.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Invoices Report</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'projectProcessHome' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-07.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Project Management</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'PerformanceList' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-08.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Company Performance</h6>
+                        </div>
+                    </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'RevenueList' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/management-09.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h6 class="card-title text-uppercase">Revenue Performance</h6>
+                        </div>
+                    </a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        $(document).ready(function() {
+            $(".main").addClass('nobg');
+        });
+    </script>
+{% endblock %}

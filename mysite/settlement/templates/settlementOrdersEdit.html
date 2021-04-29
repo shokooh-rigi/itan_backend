@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load order_tags %}
+{% load settlement_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Select Projects to Settle with {{ this_settlement.contractor }}</h2>
+    <br />
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.settlement.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <h4 class="text-center">Projects</h4>
+                    {% for schedule in schedules %}
+                        <div class="row form-line order-line order-line-disabled rounded">
+                            <div class="col-1 p-1 h-auto my-2">
+                                <input type="checkbox" class="order-include mt-2" name="order-include-{{ schedule.id }}" id="order-include-{{ schedule.id }}" value="order-include" />
+                            </div>
+                            <div class="col-2 p-1 my-2">
+                                <label for="price_override" class="control-label m-0">Order #{{ schedule.order.project_number }}{% if schedule.pre_demo %} (Pre Demo){% endif %}</label>
+                            </div>
+                            <div class="col-3 p-1 my-2">
+                                <label class="switch-toggle m-0" style="width: 60px;">
+                                    <input class="or_toggle" type="checkbox" name="or-toggle-{{ schedule.id }}" />
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Total Hour (override)
+                                    <input id="total-hour-{{ schedule.id }}" name="total-hour-{{ schedule.id }}" class="form-control total-hour" type="text" style="width: 160px;" value="" />
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Quoted Price
+                                    <input id="quoted-price-{{ schedule.id }}" name="quoted-price-{{ schedule.id }}" class="form-control quoted-price" type="text" style="width: 160px;" value="" placeholder="{% order_quote_price schedule as oqp %}{{ oqp|floatformat:2|intcomma }}" />
+                                </label>
+                            </div>
+                            <div class="col-1 p-1">
+                            </div>
+                            <div class="col-4 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Completion Percentage to Date
+                                    <input required id="old_cp" class="form-control" type="text" placeholder="%" style="width: 60px;" value="{% if schedule.pre_demo %}{{ schedule.order.pre_demo_completion_percentage }}{% else %}{{ schedule.order.completion_percentage }}{% endif %}" readonly />
+                                </label>
+                            </div>
+                            <div class="col-4 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Completion Percentage in this Period
+                                    <input id="this_cp" name="percentage-{{ schedule.id }}" class="form-control" type="text" placeholder="%" style="width: 60px;" />
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center previous-payment">
+                                    Previous Payment
+                                    <input id="previous_payment" name="pp-{{ schedule.id }}" class="form-control" type="text" style="width: 160px;" />
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <h4 class="text-center">Maintenances</h4>
+                    {% for maintenance in maintenances %}
+                        <div class="row form-line order-line order-line-disabled rounded">
+                            <div class="col-1 p-1 h-auto my-2">
+                                <input type="checkbox" class="maintenance-include mt-2" name="maintenance-include-{{ maintenance.id }}" id="maintenance-include-{{ maintenance.id }}" value="maintenance-include" />
+                            </div>
+                            <div class="col-2 p-1 my-2">
+                                <label for="price_override" class="control-label m-0">Order #{{ maintenance.order.project_number }}</label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    Total Hour (override)
+                                    <input id="total-hour-{{ maintenance.id }}" name="total-hour-{{ maintenance.id }}" class="form-control total-hour" type="text" style="width: 160px;" value="" />
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    <br />
+        <input type="submit" class="btn btn-primary" value="Next" name="next" />
+        <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+	</form>
+
+    <script>
+
+
+
+        $(document).ready(function() {
+
+
+
+            $('#this_cp').on('change', function() {
+
+                const total_cp = parseInt($(this).val()) + parseInt($(this).closest('.row').find('#old_cp').val())
+                if (total_cp > 100) {
+                    $(this).val('')
+                    alert('Total Completion Percentage is greater than 100%')
+                } else {
+                }
+            })
+
+
+
+
+            function checkboxChecked() {
+                $( ".order-include" ).each(function( index ) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.order-line').removeClass('order-line-disabled')
+                        $(this).closest('.order-line').find('#this_cp').prop('required', true)
+                    } else {
+                        $(this).closest('.order-line').addClass('order-line-disabled')
+                        $(this).closest('.order-line').find('#this_cp').prop('required', false)
+                    }
+                })
+                $( ".maintenance-include" ).each(function( index ) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.order-line').removeClass('order-line-disabled')
+                    } else {
+                        $(this).closest('.order-line').addClass('order-line-disabled')
+                    }
+                })
+                $( ".or_toggle" ).each(function( index ) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.order-line').find('.total-hour').prop('disabled', true)
+                        $(this).closest('.order-line').find('.quoted-price').prop('disabled', false)
+                    } else {
+                        $(this).closest('.order-line').find('.total-hour').prop('disabled', false)
+                        $(this).closest('.order-line').find('.quoted-price').prop('disabled', true)
+                    }
+                })
+            }
+            checkboxChecked();
+
+            $( ".or_toggle" ).change(function() {
+                checkboxChecked();
+            })
+
+            $( ".order-include" ).change(function() {
+                checkboxChecked();
+            })
+
+            $( ".maintenance-include" ).change(function() {
+                checkboxChecked();
+            })
+
+
+        });
+
+
+
+
+        $("#price_overrider").attr('checked', false);
+        $("#id_settled_value").attr('readonly', true);
+        $("#price_overrider").click(function(){
+            $("#id_settled_value").attr('readonly', !this.checked);
+        });
+
+        if ($('#id_order').find(':selected').data('oldsettled') != 0) {
+            $('#old_settled_amount').text($('#id_order').find(':selected').data('oldsettled'));
+            $('.change-alert').slideDown();
+        }
+        else {
+            $('.change-alert').slideUp();
+        }
+
+
+        $('#id_order').on('change', function() {
+            if ($(this).find(':selected').data('oldsettled') != 0) {
+                $('#old_settled_amount').text($(this).find(':selected').data('oldsettled'));
+                $('.change-alert').slideDown();
+            }
+            else {
+                $('.change-alert').slideUp();
+            }
+            $("#price_overrider").prop( "checked", false );
+            $("#id_settled_value").attr('readonly', true);
+            $("#id_settled_value").val($(this).find(':selected').data('price'));
+        });
+    </script>
+{% endblock %}

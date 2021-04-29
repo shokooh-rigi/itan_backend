@@ -1,0 +1,1748 @@
+{% load static %}
+<!DOCTYPE html>
+<!--
+Product Name: Metronic - Bootstrap 5 HTML Multi-purpose Admin Dashboard ThemeAuthor: KeenThemes
+Purchase: https://1.envato.market/EA4JPWebsite: http://www.keenthemes.com/
+Contact: support@keenthemes.com
+Follow: www.twitter.com/keenthemes
+Dribbble: www.dribbble.com/keenthemes
+Like: www.facebook.com/keenthemes
+License: For each use you must have a valid license purchased only from above link in order to legally use the theme for your project.-->
+<html lang="en">
+	<!--begin::Head-->
+	<head><base href="">
+		<meta charset="utf-8" />
+		<title>Technician Panel</title>
+		<meta name="description" content="Craft admin dashboard live demo. Check out all the features of the admin panel. A large number of settings, additional services and widgets." />
+		<meta name="keywords" content="Craft, bootstrap, Angular 10, Vue, React, Laravel, admin themes, free admin themes, bootstrap admin, bootstrap dashboard" />
+		<link rel="canonical" href="https://airdec.net" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="shortcut icon" href="{% static "images/logo.svg" %}" />
+		<!--begin::Fonts-->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+		<!--end::Fonts-->
+		<!--begin::Global Stylesheets Bundle(used by all pages)-->
+		<link href="{% static "assets/plugins/global/plugins.bundle.css" %}" rel="stylesheet" type="text/css" />
+		<link href="{% static "assets/css/style.bundle.css" %}" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="{% static 'fullcalendar/main.css'%}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style-tech.css'%}" />
+		<!--end::Global Stylesheets Bundle-->
+	</head>
+	<!--end::Head-->
+	<!--begin::Body-->
+	<body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px">
+		<!--begin::Main-->
+		<!--begin::Root-->
+		<div class="d-flex flex-column flex-root">
+			<!--begin::Page-->
+			<div class="page d-flex flex-row flex-column-fluid">
+				<!--begin::Aside-->
+				<div id="kt_aside" class="aside aside-light aside-hoverable" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_mobile_toggle">
+					<!--begin::Brand-->
+                    <div class="aside-logo flex-column-auto" id="kt_aside_logo">
+						<!--begin::Logo-->
+						<a class="col-12 row" href="{% url 'techPanel:schedule' %}">
+							<img alt="TAB Tech Logo" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_logo }}" class="col-12 logo m-0 p-4" />
+{#                            <span class="col-9 text-white fw-bolder fs-7 m-0 p-0 d-flex align-items-center">TAB Technologies, INC.<br>Member AABC</span>#}
+						</a>
+						<!--end::Logo-->
+						<!--begin::Aside toggler-->
+{#						<div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-toggle" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="aside-minimize">#}
+{#							<span class="svg-icon svg-icon-1 rotate-180">#}
+{#								<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">#}
+{#									<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">#}
+{#										<polygon points="0 0 24 0 24 24 0 24" />#}
+{#										<path d="M5.29288961,6.70710318 C4.90236532,6.31657888 4.90236532,5.68341391 5.29288961,5.29288961 C5.68341391,4.90236532 6.31657888,4.90236532 6.70710318,5.29288961 L12.7071032,11.2928896 C13.0856821,11.6714686 13.0989277,12.281055 12.7371505,12.675721 L7.23715054,18.675721 C6.86395813,19.08284 6.23139076,19.1103429 5.82427177,18.7371505 C5.41715278,18.3639581 5.38964985,17.7313908 5.76284226,17.3242718 L10.6158586,12.0300721 L5.29288961,6.70710318 Z" fill="#000000" fill-rule="nonzero" transform="translate(8.999997, 11.999999) scale(-1, 1) translate(-8.999997, -11.999999)" />#}
+{#										<path d="M10.7071009,15.7071068 C10.3165766,16.0976311 9.68341162,16.0976311 9.29288733,15.7071068 C8.90236304,15.3165825 8.90236304,14.6834175 9.29288733,14.2928932 L15.2928873,8.29289322 C15.6714663,7.91431428 16.2810527,7.90106866 16.6757187,8.26284586 L22.6757187,13.7628459 C23.0828377,14.1360383 23.1103407,14.7686056 22.7371482,15.1757246 C22.3639558,15.5828436 21.7313885,15.6103465 21.3242695,15.2371541 L16.0300699,10.3841378 L10.7071009,15.7071068 Z" fill="#000000" fill-rule="nonzero" opacity="0.5" transform="translate(15.999997, 11.999999) scale(-1, 1) rotate(-270.000000) translate(-15.999997, -11.999999)" />#}
+{#									</g>#}
+{#								</svg>#}
+{#							</span>#}
+{#						</div>#}
+						<!--end::Aside toggler-->
+					</div>
+					<!--end::Brand-->
+					<!--begin::Aside menu-->
+					<div class="aside-menu flex-column-fluid">
+						<!--begin::Aside Menu-->
+						<div class="hover-scroll-overlay-y my-5 my-lg-5" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-height="auto" data-kt-scroll-dependencies="#kt_aside_logo, #kt_aside_footer" data-kt-scroll-wrappers="#kt_aside_menu" data-kt-scroll-offset="0">
+							<!--begin::Menu-->
+							<div class="menu menu-column menu-title-gray-800 menu-state-title-primary menu-state-icon-primary menu-state-bullet-primary menu-arrow-gray-500" id="#kt_aside_menu" data-kt-menu="true">
+								<div class="menu-item">
+									<a class="menu-link active d-none" href="#">
+										<span class="menu-icon">
+											<!--begin::Svg Icon | path: icons/stockholm/Design/PenAndRuller.svg-->
+											<span class="svg-icon svg-icon-2">
+												<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+													<path d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z" fill="#000000" opacity="0.3" />
+													<path d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z" fill="#000000" />
+												</svg>
+											</span>
+											<!--end::Svg Icon-->
+										</span>
+										<span class="menu-title">Dashboard</span>
+									</a>
+								</div>
+{#								<div class="menu-item">#}
+{#									<div class="menu-content pt-8 pb-2">#}
+{#										<span class="menu-section text-muted text-uppercase fs-8">Crafted</span>#}
+{#									</div>#}
+{#								</div>#}
+{#								<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#									<span class="menu-link">#}
+{#										<span class="menu-icon">#}
+{#											<!--begin::Svg Icon | path: icons/stockholm/Code/Compiling.svg-->#}
+{#											<span class="svg-icon svg-icon-2">#}
+{#												<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">#}
+{#													<path d="M2.56066017,10.6819805 L4.68198052,8.56066017 C5.26776695,7.97487373 6.21751442,7.97487373 6.80330086,8.56066017 L8.9246212,10.6819805 C9.51040764,11.267767 9.51040764,12.2175144 8.9246212,12.8033009 L6.80330086,14.9246212 C6.21751442,15.5104076 5.26776695,15.5104076 4.68198052,14.9246212 L2.56066017,12.8033009 C1.97487373,12.2175144 1.97487373,11.267767 2.56066017,10.6819805 Z M14.5606602,10.6819805 L16.6819805,8.56066017 C17.267767,7.97487373 18.2175144,7.97487373 18.8033009,8.56066017 L20.9246212,10.6819805 C21.5104076,11.267767 21.5104076,12.2175144 20.9246212,12.8033009 L18.8033009,14.9246212 C18.2175144,15.5104076 17.267767,15.5104076 16.6819805,14.9246212 L14.5606602,12.8033009 C13.9748737,12.2175144 13.9748737,11.267767 14.5606602,10.6819805 Z" fill="#000000" opacity="0.3" />#}
+{#													<path d="M8.56066017,16.6819805 L10.6819805,14.5606602 C11.267767,13.9748737 12.2175144,13.9748737 12.8033009,14.5606602 L14.9246212,16.6819805 C15.5104076,17.267767 15.5104076,18.2175144 14.9246212,18.8033009 L12.8033009,20.9246212 C12.2175144,21.5104076 11.267767,21.5104076 10.6819805,20.9246212 L8.56066017,18.8033009 C7.97487373,18.2175144 7.97487373,17.267767 8.56066017,16.6819805 Z M8.56066017,4.68198052 L10.6819805,2.56066017 C11.267767,1.97487373 12.2175144,1.97487373 12.8033009,2.56066017 L14.9246212,4.68198052 C15.5104076,5.26776695 15.5104076,6.21751442 14.9246212,6.80330086 L12.8033009,8.9246212 C12.2175144,9.51040764 11.267767,9.51040764 10.6819805,8.9246212 L8.56066017,6.80330086 C7.97487373,6.21751442 7.97487373,5.26776695 8.56066017,4.68198052 Z" fill="#000000" />#}
+{#												</svg>#}
+{#											</span>#}
+{#											<!--end::Svg Icon-->#}
+{#										</span>#}
+{#										<span class="menu-title">Pages</span>#}
+{#										<span class="menu-arrow"></span>#}
+{#									</span>#}
+{#									<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#											<span class="menu-link">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Profile</span>#}
+{#												<span class="menu-arrow"></span>#}
+{#											</span>#}
+{#											<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/overview.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Overview</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/projects.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Projects</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/campaigns.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Campaigns</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/documents.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Documents</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/connections.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Connections</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/profile/activity.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Activity</span>#}
+{#													</a>#}
+{#												</div>#}
+{#											</div>#}
+{#										</div>#}
+{#										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#											<span class="menu-link">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Projects</span>#}
+{#												<span class="menu-arrow"></span>#}
+{#											</span>#}
+{#											<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/list.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">My Porjects</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/project.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">View Project</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/targets.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Targets</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/budget.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Budget</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/users.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Users</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/files.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Files</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/activity.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Activity</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/projects/settings.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Settings</span>#}
+{#													</a>#}
+{#												</div>#}
+{#											</div>#}
+{#										</div>#}
+{#										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#											<span class="menu-link">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Wizards</span>#}
+{#												<span class="menu-arrow"></span>#}
+{#											</span>#}
+{#											<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/wizards/horizontal.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Horizontal</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/wizards/vertical.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Vertical</span>#}
+{#													</a>#}
+{#												</div>#}
+{#											</div>#}
+{#										</div>#}
+{#										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#											<span class="menu-link">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Search</span>#}
+{#												<span class="menu-arrow"></span>#}
+{#											</span>#}
+{#											<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/search/horizontal.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Horizontal</span>#}
+{#													</a>#}
+{#												</div>#}
+{#												<div class="menu-item">#}
+{#													<a class="menu-link" href="pages/search/vertical.html">#}
+{#														<span class="menu-bullet">#}
+{#															<span class="bullet bullet-dot"></span>#}
+{#														</span>#}
+{#														<span class="menu-title">Vertical</span>#}
+{#													</a>#}
+{#												</div>#}
+{#											</div>#}
+{#										</div>#}
+{#									</div>#}
+{#								</div>#}
+{#								<div data-kt-menu-trigger="click" class="menu-item menu-accordion">#}
+{#									<span class="menu-link">#}
+{#										<span class="menu-icon">#}
+{#											<!--begin::Svg Icon | path: icons/stockholm/General/User.svg-->#}
+{#											<span class="svg-icon svg-icon-2">#}
+{#												<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">#}
+{#													<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">#}
+{#														<polygon points="0 0 24 0 24 24 0 24" />#}
+{#														<path d="M12,11 C9.790861,11 8,9.209139 8,7 C8,4.790861 9.790861,3 12,3 C14.209139,3 16,4.790861 16,7 C16,9.209139 14.209139,11 12,11 Z" fill="#000000" fill-rule="nonzero" opacity="0.3" />#}
+{#														<path d="M3.00065168,20.1992055 C3.38825852,15.4265159 7.26191235,13 11.9833413,13 C16.7712164,13 20.7048837,15.2931929 20.9979143,20.2 C21.0095879,20.3954741 20.9979143,21 20.2466999,21 C16.541124,21 11.0347247,21 3.72750223,21 C3.47671215,21 2.97953825,20.45918 3.00065168,20.1992055 Z" fill="#000000" fill-rule="nonzero" />#}
+{#													</g>#}
+{#												</svg>#}
+{#											</span>#}
+{#											<!--end::Svg Icon-->#}
+{#										</span>#}
+{#										<span class="menu-title">Account</span>#}
+{#										<span class="menu-arrow"></span>#}
+{#									</span>#}
+{#									<div class="menu-sub menu-sub-accordion menu-active-bg">#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/overview.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Overview</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/settings.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Settings</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/security.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Security</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/billing.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Billing</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/statements.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Statements</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/referrals.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">Referrals</span>#}
+{#											</a>#}
+{#										</div>#}
+{#										<div class="menu-item">#}
+{#											<a class="menu-link" href="account/api-keys.html">#}
+{#												<span class="menu-bullet">#}
+{#													<span class="bullet bullet-dot"></span>#}
+{#												</span>#}
+{#												<span class="menu-title">API Keys</span>#}
+{#											</a>#}
+{#										</div>#}
+{#									</div>#}
+{#								</div>#}
+
+								<div class="menu-item">
+									<div class="menu-content">
+										<div class="separator mx-1 my-4"></div>
+									</div>
+								</div>
+
+							</div>
+							<!--end::Menu-->
+						</div>
+					</div>
+					<!--end::Aside menu-->
+					<!--begin::Footer-->
+					<div class="aside-footer flex-column-auto" id="kt_aside_footer"></div>
+					<!--end::Footer-->
+				</div>
+				<!--end::Aside-->
+				<!--begin::Wrapper-->
+				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+					<!--begin::Header-->
+					<div id="kt_header" style="" class="header align-items-stretch">
+						<!--begin::Container-->
+						<div class="container-fluid d-flex align-items-stretch justify-content-between">
+							<!--begin::Aside mobile toggle-->
+							<div class="d-flex align-items-center d-lg-none ms-n3 me-1" data-bs-toggle="tooltip" title="Show aside menu">
+								<div class="btn btn-icon btn-active-light-primary" id="kt_aside_mobile_toggle">
+									<!--begin::Svg Icon | path: icons/stockholm/Text/Menu.svg-->
+									<span class="svg-icon svg-icon-2x mt-1">
+										<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+											<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+												<rect x="0" y="0" width="24" height="24" />
+												<rect fill="#000000" x="4" y="5" width="16" height="3" rx="1.5" />
+												<path d="M5.5,15 L18.5,15 C19.3284271,15 20,15.6715729 20,16.5 C20,17.3284271 19.3284271,18 18.5,18 L5.5,18 C4.67157288,18 4,17.3284271 4,16.5 C4,15.6715729 4.67157288,15 5.5,15 Z M5.5,10 L18.5,10 C19.3284271,10 20,10.6715729 20,11.5 C20,12.3284271 19.3284271,13 18.5,13 L5.5,13 C4.67157288,13 4,12.3284271 4,11.5 C4,10.6715729 4.67157288,10 5.5,10 Z" fill="#000000" opacity="0.3" />
+											</g>
+										</svg>
+									</span>
+									<!--end::Svg Icon-->
+								</div>
+							</div>
+							<!--end::Aside mobile toggle-->
+							<!--begin::Mobile logo-->
+							<div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+								<a href="index.html" class="d-lg-none">
+									<img alt="Logo" src="{% static 'assets/media/logos/logo-1-dark.svg' %}" class="h-15px" />
+								</a>
+							</div>
+							<!--end::Mobile logo-->
+							<!--begin::Wrapper-->
+							<div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1">
+								<!--begin::Navbar-->
+								<div class="d-flex align-items-stretch" id="kt_header_nav">
+									<!--begin::Menu wrapper-->
+									<div class="header-menu align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_header_menu_mobile_toggle" data-kt-place="true" data-kt-place-mode="prepend" data-kt-place-parent="{default: '#kt_body', lg: '#kt_header_nav'}">
+                                        <div class="d-flex align-items-center me-3">
+									<!--begin::Title-->
+									<h1 class="d-flex align-items-center text-dark fw-bolder my-1 fs-3">Your Scheduled Projects
+									<!--begin::Separator-->
+									<span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
+									<!--end::Separator-->
+									<!--begin::Description-->
+{#									<small class="text-muted fs-7 fw-bold my-1 ms-1">#XRS-45670</small>#}
+									<!--end::Description--></h1>
+									<!--end::Title-->
+								</div>
+									</div>
+									<!--end::Menu wrapper-->
+								</div>
+								<!--end::Navbar-->
+								<!--begin::Topbar-->
+								<div class="d-flex align-items-stretch flex-shrink-0">
+									<!--begin::Toolbar wrapper-->
+									<div class="d-flex align-items-stretch flex-shrink-0">
+										<!--begin::Notifications-->
+										<div class="d-flex align-items-center ms-1 ms-lg-3">
+											<!--begin::Menu-->
+											<div class="btn btn-icon btn-active-light-primary position-relative w-40px h-40px d-none" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end" data-kt-menu-flip="bottom">
+												<!--begin::Svg Icon | path: icons/stockholm/Communication/Group-chat.svg-->
+												<span class="svg-icon svg-icon-1">
+													<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+														<path d="M16,15.6315789 L16,12 C16,10.3431458 14.6568542,9 13,9 L6.16183229,9 L6.16183229,5.52631579 C6.16183229,4.13107011 7.29290239,3 8.68814808,3 L20.4776218,3 C21.8728674,3 23.0039375,4.13107011 23.0039375,5.52631579 L23.0039375,13.1052632 L23.0206157,17.786793 C23.0215995,18.0629336 22.7985408,18.2875874 22.5224001,18.2885711 C22.3891754,18.2890457 22.2612702,18.2363324 22.1670655,18.1421277 L19.6565168,15.6315789 L16,15.6315789 Z" fill="#000000" />
+														<path d="M1.98505595,18 L1.98505595,13 C1.98505595,11.8954305 2.88048645,11 3.98505595,11 L11.9850559,11 C13.0896254,11 13.9850559,11.8954305 13.9850559,13 L13.9850559,18 C13.9850559,19.1045695 13.0896254,20 11.9850559,20 L4.10078614,20 L2.85693427,21.1905292 C2.65744295,21.3814685 2.34093638,21.3745358 2.14999706,21.1750444 C2.06092565,21.0819836 2.01120804,20.958136 2.01120804,20.8293182 L2.01120804,18.32426 C1.99400175,18.2187196 1.98505595,18.1104045 1.98505595,18 Z M6.5,14 C6.22385763,14 6,14.2238576 6,14.5 C6,14.7761424 6.22385763,15 6.5,15 L11.5,15 C11.7761424,15 12,14.7761424 12,14.5 C12,14.2238576 11.7761424,14 11.5,14 L6.5,14 Z M9.5,16 C9.22385763,16 9,16.2238576 9,16.5 C9,16.7761424 9.22385763,17 9.5,17 L11.5,17 C11.7761424,17 12,16.7761424 12,16.5 C12,16.2238576 11.7761424,16 11.5,16 L9.5,16 Z" fill="#000000" opacity="0.3" />
+													</svg>
+												</span>
+												<!--end::Svg Icon-->
+												<span class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink"></span>
+											</div>
+											<!--begin::Menu-->
+											<div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">
+												<!--begin::Heading-->
+												<div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-image:url('{% static "assets/media//misc/pattern-1.jpg" %}')">
+													<!--begin::Title-->
+													<h3 class="text-white fw-bold px-9 mt-10 mb-6">Notifications
+													<span class="fs-8 opacity-75 ps-3">24 reports</span></h3>
+													<!--end::Title-->
+													<!--begin::Tabs-->
+													<ul class="nav nav-line-tabs nav-line-tabs-2x nav-stretch fw-bold px-9">
+														<li class="nav-item">
+															<a class="nav-link text-white opacity-75 opacity-state-100 pb-4" data-bs-toggle="tab" href="#kt_topbar_notifications_1">Alerts</a>
+														</li>
+														<li class="nav-item">
+															<a class="nav-link text-white opacity-75 opacity-state-100 pb-4 active" data-bs-toggle="tab" href="#kt_topbar_notifications_2">Updates</a>
+														</li>
+														<li class="nav-item">
+															<a class="nav-link text-white opacity-75 opacity-state-100 pb-4" data-bs-toggle="tab" href="#kt_topbar_notifications_3">Logs</a>
+														</li>
+													</ul>
+													<!--end::Tabs-->
+												</div>
+												<!--end::Heading-->
+												<!--begin::Tab content-->
+												<div class="tab-content">
+													<!--begin::Tab panel-->
+													<div class="tab-pane fade" id="kt_topbar_notifications_1" role="tabpanel">
+														<!--begin::Items-->
+														<div class="scroll-y mh-325px my-5 px-8">
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-primary">
+																			<!--begin::Svg Icon | path: icons/stockholm/Clothes/Crown.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-primary">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<path d="M11.2600599,5.81393408 L2,16 L22,16 L12.7399401,5.81393408 C12.3684331,5.40527646 11.7359848,5.37515988 11.3273272,5.7466668 C11.3038503,5.7680094 11.2814025,5.79045722 11.2600599,5.81393408 Z" fill="#000000" opacity="0.3" />
+																					<path d="M12.0056789,15.7116802 L20.2805786,6.85290308 C20.6575758,6.44930487 21.2903735,6.42774054 21.6939717,6.8047378 C21.8964274,6.9938498 22.0113578,7.25847607 22.0113578,7.535517 L22.0113578,20 L16.0113578,20 L2,20 L2,7.535517 C2,7.25847607 2.11493033,6.9938498 2.31738608,6.8047378 C2.72098429,6.42774054 3.35378194,6.44930487 3.7307792,6.85290308 L12.0056789,15.7116802 Z" fill="#000000" />
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Project Alice</a>
+																		<div class="text-gray-400 fs-7">Phase 1 development</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">1 hr</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-danger">
+																			<!--begin::Svg Icon | path: icons/stockholm/Code/Warning-2.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-danger">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<path d="M11.1669899,4.49941818 L2.82535718,19.5143571 C2.557144,19.9971408 2.7310878,20.6059441 3.21387153,20.8741573 C3.36242953,20.9566895 3.52957021,21 3.69951446,21 L21.2169432,21 C21.7692279,21 22.2169432,20.5522847 22.2169432,20 C22.2169432,19.8159952 22.1661743,19.6355579 22.070225,19.47855 L12.894429,4.4636111 C12.6064401,3.99235656 11.9909517,3.84379039 11.5196972,4.13177928 C11.3723594,4.22181902 11.2508468,4.34847583 11.1669899,4.49941818 Z" fill="#000000" opacity="0.3" />
+																					<rect fill="#000000" x="11" y="9" width="2" height="7" rx="1" />
+																					<rect fill="#000000" x="11" y="17" width="2" height="2" rx="1" />
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">HR Confidential</a>
+																		<div class="text-gray-400 fs-7">Confidential staff documents</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">2 hrs</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-warning">
+																			<!--begin::Svg Icon | path: icons/stockholm/Communication/Group.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-warning">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<path d="M18,14 C16.3431458,14 15,12.6568542 15,11 C15,9.34314575 16.3431458,8 18,8 C19.6568542,8 21,9.34314575 21,11 C21,12.6568542 19.6568542,14 18,14 Z M9,11 C6.790861,11 5,9.209139 5,7 C5,4.790861 6.790861,3 9,3 C11.209139,3 13,4.790861 13,7 C13,9.209139 11.209139,11 9,11 Z" fill="#000000" fill-rule="nonzero" opacity="0.3" />
+																					<path d="M17.6011961,15.0006174 C21.0077043,15.0378534 23.7891749,16.7601418 23.9984937,20.4 C24.0069246,20.5466056 23.9984937,21 23.4559499,21 L19.6,21 C19.6,18.7490654 18.8562935,16.6718327 17.6011961,15.0006174 Z M0.00065168429,20.1992055 C0.388258525,15.4265159 4.26191235,13 8.98334134,13 C13.7712164,13 17.7048837,15.2931929 17.9979143,20.2 C18.0095879,20.3954741 17.9979143,21 17.2466999,21 C13.541124,21 8.03472472,21 0.727502227,21 C0.476712155,21 -0.0204617505,20.45918 0.00065168429,20.1992055 Z" fill="#000000" fill-rule="nonzero" />
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Company HR</a>
+																		<div class="text-gray-400 fs-7">Corporeate staff profiles</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">5 hrs</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-success">
+																			<!--begin::Svg Icon | path: icons/stockholm/General/Thunder.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-success">
+																				<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+																						<rect x="0" y="0" width="24" height="24" />
+																						<path d="M12.3740377,19.9389434 L18.2226499,11.1660251 C18.4524142,10.8213786 18.3592838,10.3557266 18.0146373,10.1259623 C17.8914367,10.0438285 17.7466809,10 17.5986122,10 L13,10 L13,4.47708173 C13,4.06286817 12.6642136,3.72708173 12.25,3.72708173 C11.9992351,3.72708173 11.7650616,3.85240758 11.6259623,4.06105658 L5.7773501,12.8339749 C5.54758575,13.1786214 5.64071616,13.6442734 5.98536267,13.8740377 C6.10856331,13.9561715 6.25331908,14 6.40138782,14 L11,14 L11,19.5229183 C11,19.9371318 11.3357864,20.2729183 11.75,20.2729183 C12.0007649,20.2729183 12.2349384,20.1475924 12.3740377,19.9389434 Z" fill="#000000" />
+																					</g>
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Project Redux</a>
+																		<div class="text-gray-400 fs-7">New frontend admin theme</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">2 days</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-primary">
+																			<!--begin::Svg Icon | path: icons/stockholm/Communication/Flag.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-primary">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<path d="M3.5,3 L5,3 L5,19.5 C5,20.3284271 4.32842712,21 3.5,21 L3.5,21 C2.67157288,21 2,20.3284271 2,19.5 L2,4.5 C2,3.67157288 2.67157288,3 3.5,3 Z" fill="#000000" />
+																					<path d="M6.99987583,2.99995344 L19.754647,2.99999303 C20.3069317,2.99999474 20.7546456,3.44771138 20.7546439,3.99999613 C20.7546431,4.24703684 20.6631995,4.48533385 20.497938,4.66895776 L17.5,8 L20.4979317,11.3310353 C20.8673908,11.7415453 20.8341123,12.3738351 20.4236023,12.7432941 C20.2399776,12.9085564 20.0016794,13 19.7546376,13 L6.99987583,13 L6.99987583,2.99995344 Z" fill="#000000" opacity="0.3" />
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Project Breafing</a>
+																		<div class="text-gray-400 fs-7">Product launch status update</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">21 Jan</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-info">
+																			<!--begin::Svg Icon | path: icons/stockholm/Design/Image.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-info">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+																						<polygon points="0 0 24 0 24 24 0 24" />
+																						<path d="M6,5 L18,5 C19.6568542,5 21,6.34314575 21,8 L21,17 C21,18.6568542 19.6568542,20 18,20 L6,20 C4.34314575,20 3,18.6568542 3,17 L3,8 C3,6.34314575 4.34314575,5 6,5 Z M5,17 L14,17 L9.5,11 L5,17 Z M16,14 C17.6568542,14 19,12.6568542 19,11 C19,9.34314575 17.6568542,8 16,8 C14.3431458,8 13,9.34314575 13,11 C13,12.6568542 14.3431458,14 16,14 Z" fill="#000000" />
+																					</g>
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Banner Assets</a>
+																		<div class="text-gray-400 fs-7">Collection of banner images</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">21 Jan</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center">
+																	<!--begin::Symbol-->
+																	<div class="symbol symbol-35px me-4">
+																		<span class="symbol-label bg-light-warning">
+																			<!--begin::Svg Icon | path: icons/stockholm/Design/Component.svg-->
+																			<span class="svg-icon svg-icon-2 svg-icon-warning">
+																				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																					<path d="M12.7442084,3.27882877 L19.2473374,6.9949025 C19.7146999,7.26196679 20.003129,7.75898194 20.003129,8.29726722 L20.003129,15.7027328 C20.003129,16.2410181 19.7146999,16.7380332 19.2473374,17.0050975 L12.7442084,20.7211712 C12.2830594,20.9846849 11.7169406,20.9846849 11.2557916,20.7211712 L4.75266256,17.0050975 C4.28530007,16.7380332 3.99687097,16.2410181 3.99687097,15.7027328 L3.99687097,8.29726722 C3.99687097,7.75898194 4.28530007,7.26196679 4.75266256,6.9949025 L11.2557916,3.27882877 C11.7169406,3.01531506 12.2830594,3.01531506 12.7442084,3.27882877 Z M12,14.5 C13.3807119,14.5 14.5,13.3807119 14.5,12 C14.5,10.6192881 13.3807119,9.5 12,9.5 C10.6192881,9.5 9.5,10.6192881 9.5,12 C9.5,13.3807119 10.6192881,14.5 12,14.5 Z" fill="#000000" />
+																				</svg>
+																			</span>
+																			<!--end::Svg Icon-->
+																		</span>
+																	</div>
+																	<!--end::Symbol-->
+																	<!--begin::Title-->
+																	<div class="mb-0 me-2">
+																		<a href="#" class="fs-6 text-gray-800 text-hover-primary fw-bolder">Icon Assets</a>
+																		<div class="text-gray-400 fs-7">Collection of SVG icons</div>
+																	</div>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">20 March</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+														</div>
+														<!--end::Items-->
+														<!--begin::View more-->
+														<div class="py-3 text-center border-top">
+															<a href="pages/profile/activity.html" class="btn btn-color-gray-600 btn-active-color-primary">View All
+															<!--begin::Svg Icon | path: icons/stockholm/Navigation/Right-2.svg-->
+															<span class="svg-icon svg-icon-5">
+																<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																	<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+																		<polygon points="0 0 24 0 24 24 0 24" />
+																		<rect fill="#000000" opacity="0.5" transform="translate(8.500000, 12.000000) rotate(-90.000000) translate(-8.500000, -12.000000)" x="7.5" y="7.5" width="2" height="9" rx="1" />
+																		<path d="M9.70710318,15.7071045 C9.31657888,16.0976288 8.68341391,16.0976288 8.29288961,15.7071045 C7.90236532,15.3165802 7.90236532,14.6834152 8.29288961,14.2928909 L14.2928896,8.29289093 C14.6714686,7.914312 15.281055,7.90106637 15.675721,8.26284357 L21.675721,13.7628436 C22.08284,14.136036 22.1103429,14.7686034 21.7371505,15.1757223 C21.3639581,15.5828413 20.7313908,15.6103443 20.3242718,15.2371519 L15.0300721,10.3841355 L9.70710318,15.7071045 Z" fill="#000000" fill-rule="nonzero" transform="translate(14.999999, 11.999997) scale(1, -1) rotate(90.000000) translate(-14.999999, -11.999997)" />
+																	</g>
+																</svg>
+															</span>
+															<!--end::Svg Icon--></a>
+														</div>
+														<!--end::View more-->
+													</div>
+													<!--end::Tab panel-->
+													<!--begin::Tab panel-->
+													<div class="tab-pane fade show active" id="kt_topbar_notifications_2" role="tabpanel">
+														<!--begin::Wrapper-->
+														<div class="d-flex flex-column px-9">
+															<!--begin::Section-->
+															<div class="pt-10 pb-0">
+																<!--begin::Title-->
+																<h3 class="text-dark text-center fw-bolder">Get Pro Access</h3>
+																<!--end::Title-->
+																<!--begin::Text-->
+																<div class="text-center text-gray-600 fw-bold pt-1">Outlines keep you honest. They stoping you from amazing poorly about drive</div>
+																<!--end::Text-->
+																<!--begin::Action-->
+																<div class="text-center mt-5 mb-9">
+																	<a href="#" class="btn btn-sm btn-primary px-6" data-bs-toggle="modal" data-bs-target="#kt_modal_upgrade_plan">Upgrade</a>
+																</div>
+																<!--end::Action-->
+															</div>
+															<!--end::Section-->
+															<!--begin::Illustration-->
+															<img class="mh-200px" alt="metronic" src="{% static 'assets/media/svg/illustrations/work.svg' %}" />
+															<!--end::Illustration-->
+														</div>
+														<!--end::Wrapper-->
+													</div>
+													<!--end::Tab panel-->
+													<!--begin::Tab panel-->
+													<div class="tab-pane fade" id="kt_topbar_notifications_3" role="tabpanel">
+														<!--begin::Items-->
+														<div class="scroll-y mh-325px my-5 px-8">
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-success me-4">200 OK</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">New order</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Just now</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-danger me-4">500 ERR</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">New customer</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">2 hrs</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-success me-4">200 OK</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Payment process</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">5 hrs</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-warning me-4">300 WRN</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Search query</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">2 days</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-success me-4">200 OK</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">API connection</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">1 week</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-success me-4">200 OK</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Database restore</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Mar 5</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-warning me-4">300 WRN</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">System update</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">May 15</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-warning me-4">300 WRN</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Server OS update</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Apr 3</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-warning me-4">300 WRN</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">API rollback</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Jun 30</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-danger me-4">500 ERR</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Refund process</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Jul 10</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-danger me-4">500 ERR</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Withdrawal process</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Sep 10</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+															<!--begin::Item-->
+															<div class="d-flex flex-stack py-4">
+																<!--begin::Section-->
+																<div class="d-flex align-items-center me-2">
+																	<!--begin::Code-->
+																	<span class="w-70px badge badge-light-danger me-4">500 ERR</span>
+																	<!--end::Code-->
+																	<!--begin::Title-->
+																	<a href="#" class="text-gray-800 text-hover-primary fw-bold">Mail tasks</a>
+																	<!--end::Title-->
+																</div>
+																<!--end::Section-->
+																<!--begin::Label-->
+																<span class="badge badge-light fs-8">Dec 10</span>
+																<!--end::Label-->
+															</div>
+															<!--end::Item-->
+														</div>
+														<!--end::Items-->
+														<!--begin::View more-->
+														<div class="py-3 text-center border-top">
+															<a href="pages/profile/activity.html" class="btn btn-color-gray-600 btn-active-color-primary">View All
+															<!--begin::Svg Icon | path: icons/stockholm/Navigation/Right-2.svg-->
+															<span class="svg-icon svg-icon-5">
+																<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																	<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+																		<polygon points="0 0 24 0 24 24 0 24" />
+																		<rect fill="#000000" opacity="0.5" transform="translate(8.500000, 12.000000) rotate(-90.000000) translate(-8.500000, -12.000000)" x="7.5" y="7.5" width="2" height="9" rx="1" />
+																		<path d="M9.70710318,15.7071045 C9.31657888,16.0976288 8.68341391,16.0976288 8.29288961,15.7071045 C7.90236532,15.3165802 7.90236532,14.6834152 8.29288961,14.2928909 L14.2928896,8.29289093 C14.6714686,7.914312 15.281055,7.90106637 15.675721,8.26284357 L21.675721,13.7628436 C22.08284,14.136036 22.1103429,14.7686034 21.7371505,15.1757223 C21.3639581,15.5828413 20.7313908,15.6103443 20.3242718,15.2371519 L15.0300721,10.3841355 L9.70710318,15.7071045 Z" fill="#000000" fill-rule="nonzero" transform="translate(14.999999, 11.999997) scale(1, -1) rotate(90.000000) translate(-14.999999, -11.999997)" />
+																	</g>
+																</svg>
+															</span>
+															<!--end::Svg Icon--></a>
+														</div>
+														<!--end::View more-->
+													</div>
+													<!--end::Tab panel-->
+												</div>
+												<!--end::Tab content-->
+											</div>
+											<!--end::Menu-->
+											<!--end::Menu-->
+										</div>
+										<!--end::Notifications-->
+										<!--begin::User-->
+										<div class="d-flex align-items-center ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
+											<!--begin::Menu-->
+											<div class="cursor-pointer symbol symbol-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end" data-kt-menu-flip="bottom">
+												<img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ current_user.profile.pic }}" alt="userpic" />
+											</div>
+											<!--begin::Menu-->
+											<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold py-4 fs-6 w-275px" data-kt-menu="true">
+												<!--begin::Menu item-->
+												<div class="menu-item px-3">
+													<div class="menu-content d-flex align-items-center px-3">
+														<!--begin::Avatar-->
+														<div class="symbol symbol-50px me-5">
+															<img alt="User Pic" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ current_user.profile.pic }}" />
+														</div>
+														<!--end::Avatar-->
+														<!--begin::Username-->
+														<div class="d-flex flex-column">
+															<div class="fw-bolder d-flex align-items-center fs-5">{% if current_user.last_name %}{{ current_user.first_name }} {{ current_user.last_name }}{% endif %}
+															<span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">Tech</span></div>
+															<a href="#" class="fw-bold text-muted text-hover-primary fs-7">{{ current_user.email }}</a>
+														</div>
+														<!--end::Username-->
+													</div>
+												</div>
+												<!--end::Menu item-->
+												<!--begin::Menu separator-->
+												<div class="separator my-2"></div>
+												<!--end::Menu separator-->
+												<!--begin::Menu item-->
+												<div class="menu-item px-5 d-none">
+													<a href="account/overview.html" class="menu-link px-5">My Profile</a>
+												</div>
+												<!--end::Menu item-->
+												<!--begin::Menu item-->
+												<div class="menu-item px-5 d-none">
+													<a href="{% url 'techPanel:schedule' %}" class="menu-link px-5">
+														<span class="menu-text">My Projects</span>
+														<span class="menu-badge">
+															<span class="badge badge-light-danger badge-circle fw-bolder fs-7">3</span>
+														</span>
+													</a>
+												</div>
+												<!--end::Menu item-->
+												<!--begin::Menu item-->
+												<div class="menu-item px-5">
+													<a href="{% url 'logout' %}" class="menu-link px-5">Sign Out</a>
+												</div>
+												<!--end::Menu item-->
+											</div>
+											<!--end::Menu-->
+											<!--end::Menu-->
+										</div>
+										<!--end::User -->
+										<!--begin::Heaeder menu toggle-->
+										<div class="d-flex align-items-center d-lg-none ms-2 me-n3" data-bs-toggle="tooltip" title="Show header menu">
+											<div class="btn btn-icon btn-active-light-primary" id="kt_header_menu_mobile_toggle">
+												<!--begin::Svg Icon | path: icons/stockholm/Text/Toggle-Right.svg-->
+												<span class="svg-icon svg-icon-1">
+													<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+														<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+															<rect x="0" y="0" width="24" height="24" />
+															<path fill-rule="evenodd" clip-rule="evenodd" d="M22 11.5C22 12.3284 21.3284 13 20.5 13H3.5C2.6716 13 2 12.3284 2 11.5C2 10.6716 2.6716 10 3.5 10H20.5C21.3284 10 22 10.6716 22 11.5Z" fill="black" />
+															<path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd" d="M14.5 20C15.3284 20 16 19.3284 16 18.5C16 17.6716 15.3284 17 14.5 17H3.5C2.6716 17 2 17.6716 2 18.5C2 19.3284 2.6716 20 3.5 20H14.5ZM8.5 6C9.3284 6 10 5.32843 10 4.5C10 3.67157 9.3284 3 8.5 3H3.5C2.6716 3 2 3.67157 2 4.5C2 5.32843 2.6716 6 3.5 6H8.5Z" fill="black" />
+														</g>
+													</svg>
+												</span>
+												<!--end::Svg Icon-->
+											</div>
+										</div>
+										<!--end::Heaeder menu toggle-->
+									</div>
+									<!--end::Toolbar wrapper-->
+								</div>
+								<!--end::Topbar-->
+							</div>
+							<!--end::Wrapper-->
+						</div>
+						<!--end::Container-->
+					</div>
+					<!--end::Header-->
+					<!--begin::Content-->
+					<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+						<!--begin::Toolbar-->
+						<div class="toolbar" id="kt_toolbar">
+							<!--begin::Container-->
+{#							<div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">#}
+{#								<!--begin::Actions-->#}
+{#								<div class="d-flex align-items-center py-1">#}
+{#									<!--begin::Wrapper-->#}
+{#									<div class="me-4">#}
+{#										<!--begin::Menu-->#}
+{#										<a href="#" class="btn btn-sm btn-flex btn-light btn-active-primary fw-bolder" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-start" data-kt-menu-flip="top-end">#}
+{#										<!--begin::Svg Icon | path: icons/stockholm/Text/Filter.svg-->#}
+{#										<span class="svg-icon svg-icon-5 svg-icon-gray-500 me-1">#}
+{#											<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">#}
+{#												<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">#}
+{#													<rect x="0" y="0" width="24" height="24" />#}
+{#													<path d="M5,4 L19,4 C19.2761424,4 19.5,4.22385763 19.5,4.5 C19.5,4.60818511 19.4649111,4.71345191 19.4,4.8 L14,12 L14,20.190983 C14,20.4671254 13.7761424,20.690983 13.5,20.690983 C13.4223775,20.690983 13.3458209,20.6729105 13.2763932,20.6381966 L10,19 L10,12 L4.6,4.8 C4.43431458,4.5790861 4.4790861,4.26568542 4.7,4.1 C4.78654809,4.03508894 4.89181489,4 5,4 Z" fill="#000000" />#}
+{#												</g>#}
+{#											</svg>#}
+{#										</span>#}
+{#										<!--end::Svg Icon-->Filter</a>#}
+{#										<!--begin::Menu 1-->#}
+{#										<div class="menu menu-sub menu-sub-dropdown w-250px w-md-300px" data-kt-menu="true">#}
+{#											<!--begin::Header-->#}
+{#											<div class="px-7 py-5">#}
+{#												<div class="fs-5 text-dark fw-bolder">Filter Options</div>#}
+{#											</div>#}
+{#											<!--end::Header-->#}
+{#											<!--begin::Menu separator-->#}
+{#											<div class="separator border-gray-200"></div>#}
+{#											<!--end::Menu separator-->#}
+{#											<!--begin::Form-->#}
+{#											<div class="px-7 py-5">#}
+{#												<!--begin::Input group-->#}
+{#												<div class="mb-10">#}
+{#													<!--begin::Label-->#}
+{#													<label class="form-label fw-bold">Status:</label>#}
+{#													<!--end::Label-->#}
+{#													<!--begin::Input-->#}
+{#													<div>#}
+{#														<select class="form-select form-select-solid" data-kt-select2="true" data-placeholder="Select option" data-allow-clear="true">#}
+{#															<option></option>#}
+{#															<option value="1">Approved</option>#}
+{#															<option value="2">Pending</option>#}
+{#															<option value="2">In Process</option>#}
+{#															<option value="2">Rejected</option>#}
+{#														</select>#}
+{#													</div>#}
+{#													<!--end::Input-->#}
+{#												</div>#}
+{#												<!--end::Input group-->#}
+{#												<!--begin::Input group-->#}
+{#												<div class="mb-10">#}
+{#													<!--begin::Label-->#}
+{#													<label class="form-label fw-bold">Member Type:</label>#}
+{#													<!--end::Label-->#}
+{#													<!--begin::Options-->#}
+{#													<div class="d-flex">#}
+{#														<!--begin::Options-->#}
+{#														<label class="form-check form-check-sm form-check-custom form-check-solid me-5">#}
+{#															<input class="form-check-input" type="checkbox" value="1" />#}
+{#															<span class="form-check-label">Author</span>#}
+{#														</label>#}
+{#														<!--end::Options-->#}
+{#														<!--begin::Options-->#}
+{#														<label class="form-check form-check-sm form-check-custom form-check-solid">#}
+{#															<input class="form-check-input" type="checkbox" value="2" checked="checked" />#}
+{#															<span class="form-check-label">Customer</span>#}
+{#														</label>#}
+{#														<!--end::Options-->#}
+{#													</div>#}
+{#													<!--end::Options-->#}
+{#												</div>#}
+{#												<!--end::Input group-->#}
+{#												<!--begin::Input group-->#}
+{#												<div class="mb-10">#}
+{#													<!--begin::Label-->#}
+{#													<label class="form-label fw-bold">Notifications:</label>#}
+{#													<!--end::Label-->#}
+{#													<!--begin::Switch-->#}
+{#													<div class="form-check form-switch form-switch-sm form-check-custom form-check-solid">#}
+{#														<input class="form-check-input" type="checkbox" value="" name="notifications" checked="checked" />#}
+{#														<label class="form-check-label">Enabled</label>#}
+{#													</div>#}
+{#													<!--end::Switch-->#}
+{#												</div>#}
+{#												<!--end::Input group-->#}
+{#												<!--begin::Actions-->#}
+{#												<div class="d-flex justify-content-end">#}
+{#													<button type="reset" class="btn btn-sm btn-white btn-active-light-primary me-2" data-kt-menu-dismiss="true">Reset</button>#}
+{#													<button type="submit" class="btn btn-sm btn-primary" data-kt-menu-dismiss="true">Apply</button>#}
+{#												</div>#}
+{#												<!--end::Actions-->#}
+{#											</div>#}
+{#											<!--end::Form-->#}
+{#										</div>#}
+{#										<!--end::Menu 1-->#}
+{#										<!--end::Menu-->#}
+{#									</div>#}
+{#									<!--end::Wrapper-->#}
+{#								</div>#}
+{#								<!--end::Actions-->#}
+{#							</div>#}
+							<!--end::Container-->
+						</div>
+						<!--end::Toolbar-->
+						<!--begin::Post-->
+						<div class="post d-flex flex-column-fluid" id="kt_post">
+							<!--begin::Container-->
+							<div id="kt_content_container" class="container">
+								<!--begin::Row-->
+								<div class="row gy-5 gx-xl-8">
+									<!--begin::Col-->
+									<div class="col-xxl-12">
+										<!--begin::List Widget 3-->
+										<div class="card card-xxl-stretch mb-xl-3">
+											<!--begin::Header-->
+											<div class="card-header border-0">
+												<h3 class="card-title fw-bolder text-dark">Technicians</h3>
+												<div class="card-toolbar">
+												</div>
+											</div>
+											<!--end::Header-->
+											<!--begin::Body-->
+											<div class="card-body pt-2">
+                                                <div id="calendar"></div>
+                                                <form method='POST' action=''>
+                                                    <div class="form-group">
+                                                        {% csrf_token %}
+                                                    </div>
+                                                </form>
+											</div>
+											<!--end::Body-->
+										</div>
+										<!--end:List Widget 3-->
+									</div>
+									<!--end::Col-->
+								</div>
+								<!--end::Row-->
+							</div>
+							<!--end::Container-->
+						</div>
+						<!--end::Post-->
+					</div>
+					<!--end::Content-->
+					<!--begin::Footer-->
+					<div class="footer py-4 d-flex flex-lg-column" id="kt_footer">
+						<!--begin::Container-->
+						<div class="container-fluid d-flex flex-column flex-md-row align-items-center justify-content-between">
+							<!--begin::Copyright-->
+							<div class="text-dark order-2 order-md-1">
+								<span class="text-muted fw-bold me-1"><span id="current_year"></span>©</span>
+								<a href="https://tabtechinc.com/" target="_blank" class="text-gray-800 text-hover-primary">Tabtechinc</a>
+							</div>
+							<!--end::Copyright-->
+							<!--begin::Menu-->
+							<ul class="menu menu-gray-600 menu-hover-primary fw-bold order-1">
+								<li class="menu-item">
+									<a href="https://keenthemes.com/faqs" target="_blank" class="menu-link px-2">About</a>
+								</li>
+								<li class="menu-item">
+									<a href="https://keenthemes.com/support" target="_blank" class="menu-link px-2">Support</a>
+								</li>
+								<li class="menu-item">
+									<a href="https://1.envato.market/EA4JP" target="_blank" class="menu-link px-2">Purchase</a>
+								</li>
+							</ul>
+							<!--end::Menu-->
+						</div>
+						<!--end::Container-->
+					</div>
+					<!--end::Footer-->
+				</div>
+				<!--end::Wrapper-->
+			</div>
+			<!--end::Page-->
+		</div>
+		<!--end::Root-->
+		<!--begin::Drawers-->
+		<!--end::Drawers-->
+		<!--begin::Modals-->
+        <div class="modal" tabindex="-1" id="schedule-edit">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Schedule for order #<span id="modal-order-id"></span></h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body text-left">
+
+
+                        <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#kt_tab_pane_1">General Information</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_2">Download</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_3">Upload</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">Field Data</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade active show" id="kt_tab_pane_1" role="tabpanel">
+                                <div class="d-flex flex-stack mb-2">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Project #</span>
+                                        <i class="fas fa-exclamation-circle ms-2 fs-base" data-bs-toggle="tooltip" title="" data-bs-original-title="Specify your unique app name" aria-label="Specify your unique app name"></i>
+                                    </label>
+                                    <div id="project_number" class="fs-5 fw-bold text-gray-800 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-2">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Customer Name</span>
+                                    </label>
+                                    <div id="customer_name" class="fs-5 fw-bold text-gray-800 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-2">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Project Name</span>
+                                    </label>
+                                    <div id="project_name" class="fs-5 fw-bold text-gray-800 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Address</span>
+                                    </label>
+                                    <div id="project_address" class="fs-5 fw-bold text-gray-800 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">MEP</span>
+                                    </label>
+                                    <div id="mep_name" class="fs-5 fw-bold text-gray-800 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Pre Demo</span>
+                                    </label>
+                                    <div id="pre_demo" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-2">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">POC Name</span>
+                                    </label>
+                                    <div id="poc_name" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">POC Phone Number</span>
+                                    </label>
+                                    <div id="poc_phone" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Control System</span>
+                                    </label>
+                                    <div id="control_system" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Special Instruction</span>
+                                    </label>
+                                    <div id="special_instruction" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-2">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Start</span>
+                                    </label>
+                                    <div id="start_date" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">End</span>
+                                    </label>
+                                    <div id="end_date" class="d-inline-block fs-5 px-2 py-1 text-end"></div>
+                                </div>
+                                <form id="tech-note-form" class="d-flex flex-stack mb-8">
+                                    <!--begin::Label-->
+                                    <div class="d-flex flex-column me-2">
+                                        <label class="fs-6 fw-bold mb-2">Tech Note</label>
+                                        <textarea class="form-control form-control-solid" rows="3" id="tech_note" name="tech_note" placeholder="Type Note For Yourself"></textarea>
+                                    </div>
+                                    <!--end::Label-->
+                                    <!--begin::Switch-->
+                                    <label class="form-check form-switch form-check-custom form-check-solid">
+                                        <button type="submit" id="kt_modal_new_target_submit" class="btn btn-success btn-sm">
+                                            <span class="indicator-label">Submit</span>
+                                            <span class="indicator-progress">Please wait...
+                                            <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                        </button>
+                                    </label>
+                                    <!--end::Switch-->
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Equipment Submittals</span>
+                                    </label>
+                                    <a href="" id="equipment_submittal" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Test Sheets</span>
+                                    </label>
+                                    <a href="" id="test_sheets" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Tech Marked Drawing</span>
+                                    </label>
+                                    <a href="" id="tech_marked_drawing" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Site Pictures</span>
+                                    </label>
+                                    <a href="" id="site_pictures" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                </div>
+                                <div class="d-flex flex-stack mb-4">
+                                    <label class="d-flex align-items-center fs-5 fw-bold mb-2">
+                                        <span class="">Control System Software</span>
+                                    </label>
+                                    <a href="" id="cs_software" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
+                                <div class="card card-custom">
+                                    <div class="card-body">
+                                        <form id="upload-form" enctype="multipart/form-data" method="POST" novalidate="">
+                                            {% csrf_token %}
+                                            <input class="form-control" type="file" id="upload_tech" name="upload_tech" multiple />
+                                            <button type="submit" id="upload_btn" class="btn btn-success mt-5">Upload</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel"><div class="text-center" id="test_sheet_link"></div></div>
+                        </div>
+
+
+                </div>
+            </div>
+        </div>
+
+		<!--end::Modals-->
+		<!--begin::Scrolltop-->
+		<div id="kt_scrolltop" class="scrolltop" data-kt-scrolltop="true">
+			<!--begin::Svg Icon | path: icons/stockholm/Navigation/Up-2.svg-->
+			<span class="svg-icon">
+				<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+					<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+						<polygon points="0 0 24 0 24 24 0 24" />
+						<rect fill="#000000" opacity="0.5" x="11" y="10" width="2" height="10" rx="1" />
+						<path d="M6.70710678,12.7071068 C6.31658249,13.0976311 5.68341751,13.0976311 5.29289322,12.7071068 C4.90236893,12.3165825 4.90236893,11.6834175 5.29289322,11.2928932 L11.2928932,5.29289322 C11.6714722,4.91431428 12.2810586,4.90106866 12.6757246,5.26284586 L18.6757246,10.7628459 C19.0828436,11.1360383 19.1103465,11.7686056 18.7371541,12.1757246 C18.3639617,12.5828436 17.7313944,12.6103465 17.3242754,12.2371541 L12.0300757,7.38413782 L6.70710678,12.7071068 Z" fill="#000000" fill-rule="nonzero" />
+					</g>
+				</svg>
+			</span>
+			<!--end::Svg Icon-->
+		</div>
+		<!--end::Scrolltop-->
+		<!--end::Main-->
+		<!--begin::Javascript-->
+		<!--begin::Global Javascript Bundle(used by all pages)-->
+		<script src="{% static "assets/plugins/global/plugins.bundle.js" %}"></script>
+		<script src="{% static "assets/js/scripts.bundle.js" %}"></script>
+		<!--end::Global Javascript Bundle-->
+		<!--begin::Page Custom Javascript(used by this page)-->
+		<script src="{% static "assets/js/custom/widgets.js" %}"></script>
+        <script src="{% static 'tech_schedule/cal-ajax-setup.js' %}"></script>
+        <script src="{% static 'tech_schedule/moment.min.js' %}"></script>
+        <script src="{% static 'fullcalendar/main.js' %}"></script>
+        <script src="{% static 'tech_schedule/schedule-init.js' %}"></script>
+        <script>
+
+
+        const scheduleModal = new bootstrap.Modal(document.getElementById('schedule-edit'), {
+          keyboard: false
+        })
+
+
+
+            $(document).ready(function () {
+
+                $('.footer #current_year').text(new Date().getFullYear())
+                $('#upload-form').submit(function(e) {
+                    e.preventDefault();
+                    $form = $(this)
+                    var formData = new FormData(this);
+                    if ($(this).closest('.modal').attr('data-scheduleid')) {
+                        const schedule_id = $(this).closest('.modal').attr('data-scheduleid');
+                        formData.append('schedule_id', schedule_id)
+                        $.ajax({
+                            url: "{% url 'techPanel:upload_tech' %}",
+                            type: 'POST',
+                            data: formData,
+                            success: function (response) {
+                                if (response.result == true) {
+                                    Swal.fire({
+                                        text: "Upload Successful!",
+                                        icon: "success",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    }).then(function (result) {
+                                        if (result.isConfirmed) {
+                                            {#scheduleModal.hide();#}
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        text: response.msg,
+                                        icon: "danger",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    })
+                                }
+                            },
+                            cache: false,
+                            contentType: false,
+                            processData: false
+                        });
+                    } else if ($(this).closest('.modal').attr('data-maintenanceid')) {
+                        const maintenance_id = $(this).closest('.modal').attr('data-maintenanceid');
+                        formData.append('maintenance_id', maintenance_id)
+                        $.ajax({
+                            url: "{% url 'techPanel:upload_tech' %}",
+                            type: 'POST',
+                            data: formData,
+                            success: function (response) {
+                                if (response.result == true) {
+                                    Swal.fire({
+                                        text: "Upload Successful!",
+                                        icon: "success",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    }).then(function (result) {
+                                        if (result.isConfirmed) {
+                                            {#scheduleModal.hide();#}
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        text: response.msg,
+                                        icon: "danger",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    })
+                                }
+                            },
+                            cache: false,
+                            contentType: false,
+                            processData: false
+                        });
+                    }
+                });
+
+                {#$(document).on({#}
+                {#    click: function (e) {#}
+                {#        e.preventDefault();#}
+                {#        var formData = new FormData($('#upload-form'));#}
+                {#        if ($(this).closest('.modal').attr('data-scheduleid')) {#}
+                {##}
+                {#            console.log(formData)#}
+                {#            $.ajax({#}
+                {#                type: "POST",#}
+                {#                url: "{% url 'techPanel:upload_tech' %}",#}
+                {#                data: formData,#}
+                {#                cache: false,#}
+                {#                processData: false,#}
+                {#                contentType: false,#}
+                {#                success: function (response) {#}
+                {#                    if (response.result == true) {#}
+                {#                        Swal.fire({#}
+                {#                            text: "Upload Successful!",#}
+                {#                            icon: "success",#}
+                {#                            buttonsStyling: false,#}
+                {#                            confirmButtonText: "Ok, got it!",#}
+                {#                            customClass: {#}
+                {#                                confirmButton: "btn btn-primary"#}
+                {#                            }#}
+                {#                        }).then(function (result) {#}
+                {#                            if (result.isConfirmed) {#}
+                                                {#scheduleModal.hide();#}
+                {#                            }#}
+                {#                        });#}
+                {#                    } else {#}
+                {#                        Swal.fire({#}
+                {#                            text: response.msg,#}
+                {#                            icon: "danger",#}
+                {#                            buttonsStyling: false,#}
+                {#                            confirmButtonText: "Ok, got it!",#}
+                {#                            customClass: {#}
+                {#                                confirmButton: "btn btn-primary"#}
+                {#                            }#}
+                {#                        })#}
+                {#                    }#}
+                {#                }#}
+                {#            });#}
+                {#        } else {#}
+                {#            const maintenance_id = $(this).closest('.modal').attr('data-maintenanceid');#}
+                {#            if ( $('#maintenance-edit #id_order').val() ) {#}
+                {#                const order_id = $('#maintenance-edit #id_order').val();#}
+                {#                const desc = $('#maintenance-edit #desc').val();#}
+                {#                $.ajax({#}
+                {#                    type: "POST",#}
+                {#                    url: "{% url 'update_maintenance' %}",#}
+                {#                    data: {#}
+                {#                        'type': 'update_order',#}
+                {#                        'org_order_id': order_id,#}
+                {#                        'maintenance_id': maintenance_id,#}
+                {#                        'desc': desc#}
+                {#                    },#}
+                {#                    success: function (response) {#}
+                {#                        if (response.result == true) {#}
+                {#                            alert('Maintenance Project Information Updated.');#}
+                {#                            $("#maintenance-edit").modal('hide');#}
+                {#                            calendar.refetchEvents();#}
+                {#                        }#}
+                {#                    }#}
+                {#                });#}
+                {#            } else {#}
+                {#                alert('Please select a Project to save this Maintenance Schedule.');#}
+                {#            }#}
+                {##}
+                {#        }#}
+                {#    }#}
+                {#}, '#upload_btn');#}
+
+             });
+        </script>
+        <script>
+            var KTModalNewTarget = function () {
+            var submitButton;
+            var form;
+            var modal;
+            var modalEl;
+
+            // Handle form validation and submittion
+            var handleForm = function() {
+                // Stepper custom navigation
+
+                // Action buttons
+                submitButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Validate form before submit
+
+                    submitButton.setAttribute('data-kt-indicator', 'on');
+
+                    // Disable button to avoid multiple click
+                    submitButton.disabled = true;
+
+                    const schedule_id = $(this).closest('.modal').attr('data-scheduleid');
+                    const maintenance_id = $(this).closest('.modal').attr('data-maintenanceid');
+                    const note_text = $(this).closest('.modal').find('#tech_note').val();
+                    if ($(this).closest('.modal').attr('data-scheduleid')) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'techPanel:update_note' %}",
+                            data: {
+                                'schedule_id': schedule_id,
+                                'note_text': note_text
+                            },
+                            success: function (response) {
+                                console.log(response)
+                                if (response.result == true) {
+                                    submitButton.removeAttribute('data-kt-indicator');
+
+                                    // Enable button
+                                    submitButton.disabled = false;
+
+                                    // Show success message. For more info check the plugin's official documentation: https://sweetalert2.github.io/
+                                    Swal.fire({
+                                        text: "Your note successfully Saved!",
+                                        icon: "success",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    }).then(function (result) {
+                                        if (result.isConfirmed) {
+                                            modal.hide();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    } else if ($(this).closest('.modal').attr('data-maintenanceid')) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'techPanel:update_note' %}",
+                            data: {
+                                'maintenance_id': maintenance_id,
+                                'note_text': note_text
+                            },
+                            success: function (response) {
+                                console.log(response)
+                                if (response.result == true) {
+                                    submitButton.removeAttribute('data-kt-indicator');
+
+                                    // Enable button
+                                    submitButton.disabled = false;
+
+                                    // Show success message. For more info check the plugin's official documentation: https://sweetalert2.github.io/
+                                    Swal.fire({
+                                        text: "Your note successfully Saved!",
+                                        icon: "success",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn btn-primary"
+                                        }
+                                    }).then(function (result) {
+                                        if (result.isConfirmed) {
+                                            modal.hide();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+
+            }
+
+            return {
+                // Public functions
+                init: function () {
+                    // Elements
+                    modalEl = document.querySelector('#schedule-edit');
+
+                    if (!modalEl) {
+                        return;
+                    }
+
+                    modal = new bootstrap.Modal(modalEl);
+
+                    form = document.querySelector('#tech-note-form');
+                    submitButton = document.getElementById('kt_modal_new_target_submit');
+
+                    handleForm();
+                }
+            };
+        }();
+
+        // On document ready
+        KTUtil.onDOMContentLoaded(function () {
+            KTModalNewTarget.init();
+        });
+        </script>
+		<!--end::Page Custom Javascript-->
+		<!--end::Javascript-->
+	</body>
+	<!--end::Body-->
+</html>
