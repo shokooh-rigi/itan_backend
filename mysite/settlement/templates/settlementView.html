@@ -60,9 +60,9 @@
                                     <th scope="col">
                                         Tech %
                                     </th>
-{#                                    <th scope="col">#}
-{#                                        Job %#}
-{#                                    </th>#}
+                                    <th scope="col">
+                                        Job %
+                                    </th>
                                     <th scope="col">
                                         Previous Payment
                                     </th>
@@ -94,9 +94,9 @@
                                         <td>
                                             {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}%{% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}-{% endif %}{% else %}N.A.{% endif %}
                                         </td>
-{#                                        <td>#}
-{#                                            %{{ settled_schedule.completion_percentage }}#}
-{#                                        </td>#}
+                                        <td>
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.completion_percentage %}%{{ settled_schedule.completion_percentage }}{% else %}-{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
                                         <td>
                                             {% if settled_schedule.previous_payment %}${{ settled_schedule.previous_payment|floatformat:2|intcomma }}{% endif %}
                                         </td>
@@ -115,7 +115,7 @@
                                         <td>N.A.</td>
                                         <td>{{ settled_maintenance.settled_hours }}</td>
                                         <td>{{ settlement.contractor.profile.hourly_rate }}</td>
-{#                                        <td>-</td>#}
+                                        <td>-</td>
                                         <td>-</td>
                                         <td></td>
                                         <td>${{ settled_maintenance.settled_value|floatformat:2|intcomma }}</td>

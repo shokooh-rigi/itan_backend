@@ -40,6 +40,7 @@ class SettledSchedule(models.Model):
     settled_hours = models.FloatField(default=0)
     previous_payment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     settle_override = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    completion_percentage = models.PositiveIntegerField(validators=[MaxValueValidator(100), MinValueValidator(0)], blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

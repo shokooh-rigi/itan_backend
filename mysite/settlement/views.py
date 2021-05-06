@@ -124,10 +124,15 @@ def settlement_orders(request, settlement_id):
                 total_schedules_duration = 0
                 quoted_price = 0
                 prev_payment = None
+                completion_percentage = None
                 if request.POST.get("order-include-" + str(schedule.id)):
                     if request.POST.get("pp-" + str(schedule.id)):
                         prev_payment = request.POST.get("pp-" + str(schedule.id))
                     if request.POST.get("or-toggle-" + str(schedule.id)):
+                        order_schedules = Schedule.objects.filter(order=schedule.order, pre_demo=schedule.pre_demo)
+                        order_total_scheduled = 0
+                        for order_schedule in order_schedules:
+                            order_total_scheduled += ((order_schedule.schedule_end - order_schedule.schedule_start).total_seconds()) / 3600
                         settled_type = True
                         if schedule.pre_demo:
                             schedule.order.pre_demo_completion_percentage = 100
@@ -138,12 +143,17 @@ def settlement_orders(request, settlement_id):
                                                                  assigned_to_contractor=this_settlement.contractor)
                         schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
                         total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+
+                        print(total_schedules_duration)
+                        print(order_total_scheduled)
+                        completion_percentage = round(total_schedules_duration / order_total_scheduled * 100)
+
                         if request.POST.get("quoted-price-" + str(schedule.id)):
                             override_quoted_price = float(request.POST.get("quoted-price-" + str(schedule.id)))
                             quoted_price = override_quoted_price
                         else:
                             quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
-                        settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100
+                        settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100 * completion_percentage/100
                         total_settled_value = total_settled_value + round(settle_value, 2)
                         if prev_payment:
                             total_settled_value -= float(prev_payment)
@@ -180,7 +190,8 @@ def settlement_orders(request, settlement_id):
                                                            settled_value=total_settled_value,
                                                            settled_type=settled_type,
                                                            settled_hours=total_schedules_duration,
-                                                           previous_payment=prev_payment)
+                                                           previous_payment=prev_payment,
+                                                           completion_percentage=completion_percentage)
                     settled_schedule.save()
             for maintenance in maintenances:
                 total_settled_value = 0
@@ -223,10 +234,21 @@ def settlement_edit(request, settlement_id):
                 total_schedules_duration = 0
                 quoted_price = 0
                 prev_payment = None
+                completion_percentage = None
                 if request.POST.get("pp-" + str(schedule.id)):
                     prev_payment = request.POST.get("pp-" + str(schedule.id))
                 if request.POST.get("or-toggle-" + str(schedule.id)):
                     settled_type = True
+                    order_schedules = Schedule.objects.filter(order=schedule.schedule.order, pre_demo=schedule.schedule.pre_demo)
+                    order_total_scheduled = 0
+                    for order_schedule in order_schedules:
+                        order_total_scheduled += ((order_schedule.schedule_end - order_schedule.schedule_start).total_seconds()) / 3600
+                    schedule_duration_in_hours = ((schedule.schedule.schedule_end - schedule.schedule.schedule_start).total_seconds()) / 3600
+                    total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
+
+                    print(total_schedules_duration)
+                    print(order_total_scheduled)
+                    completion_percentage = round(total_schedules_duration / order_total_scheduled * 100)
                     if schedule.schedule.pre_demo:
                         schedule.schedule.order.pre_demo_completion_percentage = 100
                     else:
@@ -236,7 +258,7 @@ def settlement_edit(request, settlement_id):
                                                              assigned_to_contractor=this_settlement.contractor)
                     override_quoted_price = float(request.POST.get("quoted-price-" + str(schedule.id)))
                     quoted_price = override_quoted_price
-                    settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100
+                    settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100 * completion_percentage/100
                     total_settled_value = total_settled_value + round(settle_value, 2)
                     if prev_payment:
                         total_settled_value -= float(prev_payment)
@@ -253,6 +275,7 @@ def settlement_edit(request, settlement_id):
                 schedule.settled_value = total_settled_value
                 schedule.settled_type = settled_type
                 schedule.previous_payment = prev_payment
+                schedule.completion_percentage = completion_percentage
                 if request.POST.get("settle-override-" + str(schedule.id)):
                     schedule.settle_override = float(request.POST.get("settle-override-" + str(schedule.id)))
                 schedule.save()
