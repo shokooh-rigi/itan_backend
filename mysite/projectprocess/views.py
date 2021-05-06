@@ -89,6 +89,7 @@ def project_process_list(request):
 
 @login_required
 def project_process_edit(request, order_id, pre_demo):
+    this_order = Order.objects.get(id=order_id)
     if pre_demo == 0:
         if ProjectProcess.objects.filter(order_id=order_id).exists():
             instance = get_object_or_404(ProjectProcess, order_id=order_id)
@@ -109,6 +110,8 @@ def project_process_edit(request, order_id, pre_demo):
                 form.cleaned_data['order'] = order_id
                 form.save()
                 return redirect('projectProcessHome')
-    parameters = {'form': form,
-                  }
+    parameters = {
+        'form': form,
+        'this_order': this_order,
+    }
     return render(request, "projectProcessEdit.html", parameters)

@@ -186,7 +186,6 @@
         let BPHCalcInput = null;
         let i = 0;
         for (var assignment of assignmentOperations) {
-            alert(assignment)
             let answerIndex = -1
             while (true) {
                 if (assignment.includes("{")) {
@@ -195,7 +194,6 @@
                             assignment.indexOf("{") + 1,
                             assignment.indexOf("}")
                         );
-                        alert(mySubString);
                         mySubString = mySubString.split(',');
                         const needle = $('#actual_value_' + mySubString[0]).val();
                         mySubString.shift();
@@ -204,7 +202,6 @@
                             return Math.abs(b - needle) < Math.abs(a - needle) ? b : a;
                         });
                         answerIndex = mySubStringBackup.indexOf(closest);
-                        alert(answerIndex)
                         sub_stinger = assignment.substring(assignment.indexOf("{"), assignment.indexOf("}") + 1);
                         assignment = assignment.replace(sub_stinger, closest);
                         assignmentOperations[i] = assignmentOperations[i].replace(sub_stinger, closest);
@@ -236,7 +233,6 @@
 
         const evalAssignmentOperations = () => {
             for (const assignment of assignmentOperations) {
-                alert(assignment)
                 eval(assignment);
             }
             if (BPHCalcInput) {

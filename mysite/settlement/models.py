@@ -37,10 +37,9 @@ class SettledSchedule(models.Model):
     settled_value = models.DecimalField(max_digits=8, decimal_places=2)
     # 0 means Hourly and 1 means By Percentage
     settled_type = models.BooleanField(default=False)
-    settled_hours = models.PositiveIntegerField(default=0)
-    completion_percentage = models.PositiveIntegerField(default=0,
-                                                        validators=[MaxValueValidator(100), MinValueValidator(0)])
+    settled_hours = models.FloatField(default=0)
     previous_payment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    settle_override = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -54,7 +53,7 @@ class SettledMaintenances(models.Model):
     settlement = models.ForeignKey(Settlement, on_delete=models.CASCADE, blank=False, null=False)
     maintenance = models.ForeignKey(Maintenance, on_delete=models.CASCADE, blank=True)
     settled_value = models.DecimalField(max_digits=8, decimal_places=2)
-    settled_hours = models.PositiveIntegerField(default=0)
+    settled_hours = models.FloatField(default=0)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

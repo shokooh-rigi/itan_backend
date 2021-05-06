@@ -60,9 +60,9 @@
                                     <th scope="col">
                                         Tech %
                                     </th>
-                                    <th scope="col">
-                                        Job %
-                                    </th>
+{#                                    <th scope="col">#}
+{#                                        Job %#}
+{#                                    </th>#}
                                     <th scope="col">
                                         Previous Payment
                                     </th>
@@ -84,26 +84,24 @@
                                             {% if settled_schedule.schedule.order.completion_percentage == 100 %}
                                                 C{% else %}I{% endif %}</td>
                                         <td>
-                                            {% if settled_schedule.settled_type %}${{ settled_schedule.settled_total|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}${{ settled_schedule.settled_total|floatformat:2|intcomma }}{% else %}-{% endif %}{% else %}N.A.{% endif %}</td>
                                         <td>
-                                            {% if settled_schedule.settled_type %}-{% else %}
-                                                {{ settled_schedule.settled_hours }}{% endif %}</td>
-                                        <td>
-                                            {% if settled_schedule.settled_type %}%
-                                                {{ settlement.contractor.profile.interest_percentage }}{% else %}
-                                                {{ settlement.contractor.profile.hourly_rate }}{% endif %}</td>
-                                        <td>
-                                            {% if settled_schedule.settled_type %}%
-                                                {% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}
-                                                -{% endif %}</td>
-                                        <td>
-                                            %{{ settled_schedule.completion_percentage }}
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}-{% else %}{{ settled_schedule.settled_hours }}{% endif %}{% else %}N.A.{% endif %}
                                         </td>
+                                        <td>
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}%{{ settlement.contractor.profile.interest_percentage }}{% else %}{{ settlement.contractor.profile.hourly_rate }}{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}%{% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}-{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+{#                                        <td>#}
+{#                                            %{{ settled_schedule.completion_percentage }}#}
+{#                                        </td>#}
                                         <td>
                                             {% if settled_schedule.previous_payment %}${{ settled_schedule.previous_payment|floatformat:2|intcomma }}{% endif %}
                                         </td>
                                         <td>
-                                            ${{ settled_schedule.settled_value|floatformat:2|intcomma }}
+                                            {% if not settled_schedule.settle_override %}${{ settled_schedule.settled_value|floatformat:2|intcomma }}{% else %}${{ settled_schedule.settle_override|floatformat:2|intcomma }}{% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -117,7 +115,7 @@
                                         <td>N.A.</td>
                                         <td>{{ settled_maintenance.settled_hours }}</td>
                                         <td>{{ settlement.contractor.profile.hourly_rate }}</td>
-                                        <td>-</td>
+{#                                        <td>-</td>#}
                                         <td>-</td>
                                         <td></td>
                                         <td>${{ settled_maintenance.settled_value|floatformat:2|intcomma }}</td>

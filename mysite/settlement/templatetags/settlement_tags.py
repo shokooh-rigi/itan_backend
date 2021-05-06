@@ -18,7 +18,10 @@ def calculate_total_settled(settlement):
     settled_maintenances = SettledMaintenances.objects.filter(settlement=settlement)
     total = 0
     for settled_order in settled_orders:
-        total = total + settled_order.settled_value
+        if settled_order.settle_override:
+            total = total + settled_order.settle_override
+        else:
+            total = total + settled_order.settled_value
     for settled_maintenance in settled_maintenances:
         total = total + settled_maintenance.settled_value
     return total

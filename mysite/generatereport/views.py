@@ -159,6 +159,9 @@ def report_sheet_finalize(request, sheet_id):
     report_sheet.project.projectprocess.report_out = True
     report_sheet.project.projectprocess.report_out_date = datetime.datetime.now().date()
     report_sheet.project.projectprocess.save()
+    report_sheet.project.completion_percentage = 100
+    report_sheet.project.pre_demo_completion_percentage = 100
+    report_sheet.project.save()
     return redirect('reportSheetHome')
 
 # @login_required

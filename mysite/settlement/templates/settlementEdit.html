@@ -15,11 +15,18 @@
                 <div class="col-lg-12">
                     <h4 class="text-center">Projects</h4>
                     {% for schedule in schedules %}
-                        <div class="row form-line order-line rounded">
-                            <div class="col-1 p-1 h-auto my-2">
+                        <div class="row form-line order-line rounded" data-job-completed="{% if schedule.schedule.pre_demo %}{% if schedule.schedule.order.pre_demo_completion_percentage == 100 %}1{% else %}0{% endif %}{% else %}{% if schedule.schedule.order.completion_percentage == 100 %}1{% else %}0{% endif %}{% endif %}">
+                            <div class="col-4 p-1 my-2">
+                                <div>Order</div>
+                                <label for="price_override" class="control-label text-center m-0 font-weight-bold">#{{ schedule.schedule.order.project_number }}{% if schedule.schedule.pre_demo %} (Pre Demo){% endif %}</label>
                             </div>
-                            <div class="col-2 p-1 my-2">
-                                <label for="price_override" class="control-label m-0">Order #{{ schedule.schedule.order.project_number }}{% if schedule.schedule.pre_demo %} (Pre Demo){% endif %}</label>
+                            <div class="col-4 p-1">
+                                <div>Project</div>
+                                <label class="control-label m-0 text-center font-weight-bold">{{ schedule.schedule.order.proposal.quote.estimate.project }}</label>
+                            </div>
+                            <div class="col-4 p-1">
+                                <div>Schedule Date</div>
+                                <label class="control-label m-0 text-center font-weight-bold">{{ schedule.schedule.schedule_start|date:'M d' }}</label>
                             </div>
                             <div class="col-3 p-1 my-2">
                                 <label class="switch-toggle m-0" style="width: 60px;">
@@ -33,24 +40,22 @@
                                     <input id="total-hour-{{ schedule.id }}" name="total-hour-{{ schedule.id }}" class="form-control total-hour" type="text" style="width: 160px;" value="{{ schedule.settled_hours }}" />
                                 </label>
                             </div>
-                            <div class="col-3 p-1">
+                            <div class="col-2 p-1">
                                 <label class="w-100 m-0 text-center job-percentage">
                                     Quoted Price
                                     <input id="quoted-price-{{ schedule.id }}" name="quoted-price-{{ schedule.id }}" class="form-control quoted-price" type="text" style="width: 160px;" value="{{ schedule.settled_total }}" />
                                 </label>
                             </div>
                             <div class="col-2 p-1">
-                            </div>
-                            <div class="col-5 p-1">
-                                <label class="w-100 m-0 text-center job-percentage">
-                                    Completion Percentage in this Period
-                                    <input id="this_cp" name="percentage-{{ schedule.id }}" class="form-control" type="text" placeholder="%" style="width: 60px;" value="{{ schedule.completion_percentage }}" />
-                                </label>
-                            </div>
-                            <div class="col-5 p-1">
                                 <label class="w-100 m-0 text-center previous-payment">
                                     Previous Payment
                                     <input id="previous_payment" name="pp-{{ schedule.id }}" class="form-control" type="text" style="width: 160px;" value="{% if schedule.previous_payment %}{{ schedule.previous_payment }}{% endif %}" />
+                                </label>
+                            </div>
+                            <div class="col-2 p-1">
+                                <label class="w-100 m-0 text-center previous-payment">
+                                    Settlement (override)
+                                    <input id="settle-override" name="settle-override-{{ schedule.id }}" class="form-control" type="text" style="width: 160px;" value="{% if schedule.settle_override %}{{ schedule.settle_override }}{% endif %}" />
                                 </label>
                             </div>
                         </div>
@@ -58,10 +63,21 @@
                     <h4 class="text-center">Maintenances</h4>
                     {% for maintenance in maintenances %}
                         <div class="row form-line order-line rounded">
-                            <div class="col-1 p-1 h-auto my-2">
+                            <div class="col-3 p-1 my-2">
+                                <div>Order</div>
+                                <label for="price_override" class="control-label text-center font-weight-bold m-0">#{{ maintenance.maintenance.order.project_number }}</label>
                             </div>
-                            <div class="col-2 p-1 my-2">
-                                <label for="price_override" class="control-label m-0">Order #{{ maintenance.maintenance.order.project_number }}</label>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    <div>Schedule Date</div>
+                                    <label class="control-label m-0 text-center font-weight-bold">{{ maintenance.maintenance.schedule_start|date:'M d' }}</label>
+                                </label>
+                            </div>
+                            <div class="col-3 p-1">
+                                <label class="w-100 m-0 text-center job-percentage">
+                                    <div>Project</div>
+                                    <label class="control-label m-0 text-center font-weight-bold">{{ maintenance.maintenance.order.proposal.quote.estimate.project }}</label>
+                                </label>
                             </div>
                             <div class="col-3 p-1">
                                 <label class="w-100 m-0 text-center job-percentage">
@@ -130,6 +146,16 @@
             checkboxChecked();
 
             $( ".or_toggle" ).change(function() {
+                if ($(this).is(":checked")) {
+                    if ( $(this).closest('.row').attr('data-job-completed') == '0' ) {
+                        const r = confirm("This job hasn't completed yet. Are you sure you want to override this and flag this job as Completed?");
+                        if (r == true) {
+                            $(this).closest('.row').attr('data-job-completed', 1)
+                        } else {
+                            $(this).prop('checked', false);
+                        }
+                    }
+                }
                 checkboxChecked();
             })
 

@@ -21,7 +21,7 @@ from django.db.models import Count
 
 
 @login_required
-def terminal_sheet_list(request):
+def velocity_sheet_list(request):
     search = request.GET.get('search', '')
 
     pagination = 20
@@ -32,7 +32,7 @@ def terminal_sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = DataSheet.objects.filter(test_sheet_type__name__icontains='terminal')
+    object_list = DataSheet.objects.filter(test_sheet_type__name__icontains='traverse')
     object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=search) |
                                      Q(project__project_number__icontains=search)).order_by(ordering)
 
@@ -44,30 +44,30 @@ def terminal_sheet_list(request):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "terminalList.html", parameters)
+    return render(request, "velocityList.html", parameters)
 
 
 @login_required
-def terminal_sheet_add(request):
-    form = TerminalSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.filter(Q(datasheet__datasheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_return_air_terminal__gt=0)).exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='terminal').values_list('project_id')).order_by('-project_number').distinct()
+def velocity_sheet_add(request):
+    form = VelocitySheetForm(request.POST or None, request.FILES or None)
+    orders = Order.objects.filter(sheet__isnull=False).exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='traverse').values_list('project_id')).order_by('-project_number').distinct()
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('terminalSheetHome')
+            return redirect('velocitySheetHome')
         if form.is_valid():
             if request.POST.get("next"):
                 sheet = form.save(commit=False)
-                sheet.test_sheet_type = TestSheet.objects.get(name__iexact='air terminal')
+                sheet.test_sheet_type = TestSheet.objects.get(name__iexact='traverse')
                 sheet.save()
-                return redirect('terminalSheetEquipmentList', sheet.id)
+                return redirect('velocitySheetEquipmentList', sheet.id)
     parameters = {'form': form,
                   'orders': orders,
                   }
-    return render(request, "terminalSheetAdd.html", parameters)
+    return render(request, "velocitySheetAdd.html", parameters)
 
 
 @login_required
-def terminal_sheet_equipment_list(request, sheet_id):
+def velocity_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
     project_name = request.GET.get('project_name', '')
     my_project = my_sheet.project
@@ -82,7 +82,26 @@ def terminal_sheet_equipment_list(request, sheet_id):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "terminalSheetEquipmentsList.html", parameters)
+    return render(request, "velocitySheetEquipmentsList.html", parameters)
+
+
+@login_required
+def velocity_equipment_add(request, sheet_id):
+    my_sheet = DataSheet.objects.get(id=sheet_id)
+    project_name = request.GET.get('project_name', '')
+    my_project = my_sheet.project
+    vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav', sheet__project=my_project).filter(number_of_supply_air_terminal__gt=0)
+    air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0) | Q(number_of_outside_air_terminal__gt=0) | Q(number_of_any_other__gt=0))
+    vav_sheet_equipments = vav_sheet_equipments.filter(testsheetgeneraldata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed').distinct()
+    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed').distinct()
+    parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
+                  'vav_sheet_equipments': vav_sheet_equipments,
+                  'my_sheet': my_sheet,
+                  'sheet_id': sheet_id,
+                  'WEB_URL': WEB_URL,
+                  'MEDIA_URL': MEDIA_URL,
+                  }
+    return render(request, "velocitySheetEquipmentsList.html", parameters)
 
 
 def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_report_pdf: bool):
