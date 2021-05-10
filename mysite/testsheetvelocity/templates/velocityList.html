@@ -6,9 +6,9 @@
 
 {% block content %}
     <div class="text-center">
-    <h2>TERMINAL EQUIPMENT SHEET LIST</h2>
+    <h2>VELOCITY TRAVERSE TEST SHEET LIST</h2>
 
-        <a href="{% url 'terminalSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Terminal Equipment Sheet</button></a>
+        <a href="{% url 'velocitySheetAdd' %}"><button type="button" class="btn btn-primary">Generate Velocty Test Sheet</button></a>
         <br /><br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">
@@ -62,7 +62,6 @@
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Sheet ID</a></th>
                     <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project</a></th>
                     <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
                     <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
                     <th>Equipments List</th>
                     <th>Actions</th>
@@ -74,12 +73,11 @@
                         <td>{{ sheet.id }}</td>
                         <td>{{ sheet.project.project_number }}</td>
                         <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
-                        <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
                         <td>{{ sheet.sheet_date }}</td>
                         <td><a href="{% url 'terminalSheetEquipmentList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                         <td>
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
-                            <a href="{% url 'terminalSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+                            <a href="{% url 'velocitySheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
 {#                            <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
                         </td>
                     </tr>

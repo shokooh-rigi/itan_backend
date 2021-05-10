@@ -9,6 +9,6 @@ urlpatterns = [
     path('velocity/equipments_generate_report_pdf/<int:sheet_id>/', views.equipments_generate_report_pdf, name='velocityGenerateReportPDF'),
     path('velocity/equipments_list/<int:sheet_id>/', views.velocity_sheet_equipment_list, name='velocitySheetEquipmentList'),
     # path('velocity/equipment_design_data/<int:sheet_id>/<int:sheet_equipment_id>/', views.velocity_sheet_equipment_design_data, name='velocitySheetEquipmentDesignData'),
-    # path('velocity/equipment_actual_value/<int:sheet_id>/<int:sheet_equipment_id>/', views.velocity_sheet_equipment_actual_data, name='velocitySheetEquipmentActualData'),
-    # path('velocity/delete/<int:sheet_id>/', views.velocity_sheet_delete, name='velocitySheetDelete'),
+    path('velocity/equipment_actual_value/<int:sheet_id>/<int:sheet_equipment_id>/', views.velocity_actual_data, name='velocityActualData'),
+    path('velocity/delete/<int:sheet_id>/', views.velocity_sheet_delete, name='velocitySheetDelete'),
 ]

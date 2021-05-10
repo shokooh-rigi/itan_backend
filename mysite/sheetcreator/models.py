@@ -113,6 +113,7 @@ class SheetEquipment(models.Model):
     actual_data_entry_completed = models.BooleanField(default=False)
     terminal_design_data_entry_completed = models.BooleanField(default=False)
     terminal_actual_data_entry_completed = models.BooleanField(default=False)
+    velocity_data = models.BooleanField(default=False)
 
     field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
