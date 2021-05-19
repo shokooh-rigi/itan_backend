@@ -112,6 +112,11 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 
+@register.filter
+def get_list(dictionary, key):
+    return dictionary[key]
+
+
 @register.simple_tag
 def random_int(a, b=None):
     if b is None:

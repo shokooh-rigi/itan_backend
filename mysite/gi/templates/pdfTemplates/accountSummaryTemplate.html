@@ -26,11 +26,11 @@
                         <td style="font-weight: bold; text-align: left; vertical-align: bottom; width: 70%; color: #aaa; font-size: 34px; padding-top: 12px;">ACCOUNT SUMMARY</td>
                         <td style="padding: 2px; font-weight: bold; width: 15%;">
                             <div style="padding: 5px; font-weight: bold; text-align: right;">Date:</div>
-                            <div style="padding: 0px; font-weight: bold; text-align: right;">Statement No:</div>
+                            <div style="padding: 5px; font-weight: bold; text-align: right;">Statement No:</div>
                         </td>
                         <td style="font-weight: bold; width: 15%;">
-                            <div style="padding: 5px; font-weight: bold;">{{ account_summary.created_on|date:'m/d/Y' }}</div>
-                            <div style="padding: 0px; font-weight: bold;">{{ account_summary.statement_no }}</div>
+                            <div style="padding: 5px; font-weight: bold; text-align: left;">{{ account_summary.created_on|date:'m/d/Y' }}</div>
+                            <div style="padding: 0px; font-weight: bold; text-align: left;">{{ account_summary.statement_no }}</div>
                         </td>
                     </tr>
                   </tbody>

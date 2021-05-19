@@ -61,7 +61,7 @@ class DataSheetEquipment(models.Model):
 class TestSheetGeneralData(models.Model):
     sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.column_title
@@ -71,7 +71,7 @@ class TestSheetData(models.Model):
     data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
     sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.data_type) + ' ' + str(self.sheet_equipment)
@@ -127,7 +127,7 @@ class SheetEquipment(models.Model):
 class SheetEquipmentCommonData(models.Model):
     sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.column_title
@@ -136,7 +136,7 @@ class SheetEquipmentCommonData(models.Model):
 class SheetEquipmentActualData(models.Model):
     sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(EquipmentCustomField, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.equipment_value_name
@@ -145,7 +145,7 @@ class SheetEquipmentActualData(models.Model):
 class SheetEquipmentCustomData(models.Model):
     sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(SheetActualDataCustomField, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.sheet_equipment) + " " + self.key.column_title
@@ -168,7 +168,7 @@ class AirTerminalSheetData(models.Model):
     data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
     air_terminal_equipment = models.ForeignKey(AirTerminalEquipment, on_delete=models.CASCADE, blank=False, null=False)
     sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=50, blank=False)
+    value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
         return str(self.data_type) + ' ' + str(self.air_terminal_equipment)

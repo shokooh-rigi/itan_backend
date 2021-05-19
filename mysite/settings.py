@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'mysite.testsheetvav',
     'mysite.testsheetterminal',
     'mysite.testsheetvelocity',
+    'mysite.testsheetflow',
     'mysite.generatereport',
     'mysite.projectprocess',
     'mysite.masspayment',

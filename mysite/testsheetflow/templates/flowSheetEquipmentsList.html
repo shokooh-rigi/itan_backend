@@ -6,13 +6,15 @@
 
 {% block content %}
     <div class="text-center">
-        <h2>DEFINED VELOCITY FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
+        <h2>DEFINED VELOCITY
+            FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
         <a href="{% url 'velocityGenerateReportPDF' sheet_id %}" target="_blank" download="">
             <button type="button" class="btn btn-primary">Generate Report PDF</button>
         </a>
-        <br />
-        <br />
+        <br>
+
+        <br>
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">
                 <div class="form-group" style="display: inline-block; transform: translateY(2px);">
@@ -42,14 +44,11 @@
                             {% endfor %}
                         </td>
                         <td>
-                            {% for velocity_equipment in sheet_equipment.velocityequipment_set.all %}
-                                {% if velocity_equipment.velocity_data %}
-                                    <a href="{% url 'velocityActualData' sheet_id velocity_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>
-                                {% else %}
-                                    <a href="{% url 'velocityActualData' sheet_id velocity_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Velocity Data"></div></a>
-                                {% endif %}
-                            {% endfor %}
-                            <a href="{% url 'velocityAddEquipment' sheet_id sheet_equipment.id %}" style="display: inline-block;"><div class="icon addicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Add Velocity Equipment"></div></a>
+                            {% if sheet_equipment.velocity_data %}
+                                <div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'velocityActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>
+                            {% else %}
+                                <a href="{% url 'velocityActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Velocity Data"></div></a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

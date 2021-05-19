@@ -51,7 +51,7 @@
                                        name="{{ field_name }}" maxlength="50"
                                        class="form-control eq_supply{{ actual_field.id }} {{ actual_field.field_name.lower|normalize_string }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                        id="{{ field_name }}"
-                                       value="{% get_velocity_actual_value request actual_field velocity_equipment %}"
+                                       value="{% get_velocity_actual_value request actual_field this_sheet_equipment %}"
                                        {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
                             {% else %}
                                 <textarea style="width: 100%;"
@@ -72,8 +72,8 @@
         <br />
         <div class="row form-line">
             <div class="text-center w-100"><b>Table</b><br /><br />
-                Row <input type="number" class="form-control" name="table-row" id="table-row" style="width: 60px;" value="{{ velocity_equipment.velocity_row }}" />
-                Column <input type="number" class="form-control" name="table-col" id="table-col" style="width: 60px;" value="{{ velocity_equipment.velocity_col }}" />
+                Row <input type="number" class="form-control" name="table-row" id="table-row" style="width: 60px;" value="{{ this_sheet_equipment.velocity_row }}" />
+                Column <input type="number" class="form-control" name="table-col" id="table-col" style="width: 60px;" value="{{ this_sheet_equipment.velocity_col }}" />
             </div>
             <div id="table-box" class="text-center w-100 p-4">
 
@@ -174,7 +174,7 @@
                     for (let i = 0; i < i_step; i++) {
                         $('#table-box').append('<div class="row-' + (i + 1) + '">');
                         for (let j = 0; j < j_step; j++) {
-                            const my_value = JSON.parse('{% get_velocity_table_value request velocity_equipment %}')
+                            const my_value = JSON.parse('{% get_velocity_table_value request this_sheet_equipment %}')
                             $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="' + ((my_value[i] && my_value[i][j]) ? my_value[i][j] : '') +'" />');
                         }
                     }
