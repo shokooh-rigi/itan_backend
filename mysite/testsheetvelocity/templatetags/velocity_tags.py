@@ -55,3 +55,7 @@ def get_velocity_cell_value(equipment_id, row, col):
     else:
         return ''
 
+
+@register.simple_tag
+def add(a, b):
+    return a+b

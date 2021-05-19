@@ -91,6 +91,10 @@
             border: 1px solid black;
         }
 
+        .pdf-table-row-thick {
+            border: 2px solid black;
+        }
+
         .pdf-table-row.section-first-row {
             border-bottom: none;
         }
@@ -169,67 +173,48 @@
                 <!-- Table head section -->
                 <thead>
                 <tr class="pdf-head-tr">
-                    <th scope="col" class="wide-th"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
+                    <th scope="col" colspan="14"></th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <!-- Table title -->
                 <tr class="pdf-table-title">
-                    <td></td>
-                    <td class="pdf-table-title-td" colspan="8">VELOCITY TRAVERSE TEST SHEET</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
+                    <td class="pdf-table-title-td" colspan="11">VELOCITY TRAVERSE TEST SHEET</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="3">Page {{ forloop.counter }}</td>
                 </tr>
 
                 <!-- Project specifications -->
                 <tr class="pdf-table-project-tr">
-                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
-                    <td class="pdf-table-cell border" colspan="5">
+                    <td class="pdf-table-cell pdf-table-title-cell" colspan="2">PROJECT NO:</td>
+                    <td class="pdf-table-cell border" colspan="6">
                         &nbsp;{{ form.my_sheet.project.project_number }}
                     </td>
-                    <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td class="pdf-table-cell pdf-table-title-cell" colspan="2">DATE:</td>
                     <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
                         &nbsp;{{ form.my_sheet.sheet_date | date }}
                     </td>
                 </tr>
                 <tr class="pdf-table-project-tr">
-                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
-                    <td class="pdf-table-cell border" colspan="5">
+                    <td class="pdf-table-cell pdf-table-title-cell" colspan="2">PROJECT:</td>
+                    <td class="pdf-table-cell border" colspan="6">
                         &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
                     </td>
-                    <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
-                    </td>
+                    <td class="pdf-table-cell pdf-table-title-cell" colspan="2">SYSTEM:</td>
                     <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
                         &nbsp;{{ velocity_equipment|get_list:'Fan No.' }}
                     </td>
                 </tr>
-                </tbody>
-            </table>
-
-            <br />
-
-            <table class="table pdf-table">
-                <tbody>
                 <!-- Title rows -->
-                <tr class="section-first-row border" style="border-bottom-width: 0">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Fan No.
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Fan No.' }}
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title no-border">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title no-border">
 
                     </td>
                     <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title border">
@@ -239,15 +224,15 @@
                         Final
                     </td>
                 </tr>
-                <tr class="section-first-row border" style="border-bottom-width: 0; border-top-width: 0;">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Design C.F.M.
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Design C.F.M.' }}
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title no-border">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                         Actual C.F.M.:
                     </td>
                     <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
@@ -257,15 +242,15 @@
                         {{ velocity_equipment|get_list:'Actual CFM. Final' }}
                     </td>
                 </tr>
-                <tr class="section-first-row border" style="border-bottom-width: 0; border-top-width: 0;">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Duct Size
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Duct Size' }}
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title no-border">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                         Duct Static:
                     </td>
                     <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
@@ -276,15 +261,15 @@
                     </td>
                 </tr>
 
-                <tr class="section-first-row border" style="border-bottom-width: 0; border-top-width: 0;">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Duct Area
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Duct Area' }} Sq. Ft.
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title no-border">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                         Actual Vel:
                     </td>
                     <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
@@ -295,21 +280,21 @@
                     </td>
                 </tr>
 
-                <tr class="section-first-row border" style="border-bottom-width: 0; border-top-width: 0;">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Req. Vel
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell center-title no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Req. Vel' }} FPM
                     </td>
                 </tr>
 
-                <tr class="section-first-row border" style="border-bottom-width: 1px; border-top-width: 0;">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-border">
+                <tr class="section-first-row pdf-table-row-thick" style="border-top-width: 0;">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
                         Traverse Location
                     </td>
-                    <td colspan="3" class="pdf-table-cell pdf-table-center-cell center-title no-border"
+                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
                         style="border-bottom: 1px solid black;">
                         {{ velocity_equipment|get_list:'Traverse Location' }}
                     </td>
@@ -317,23 +302,21 @@
 
                 </tbody>
             </table>
-
-            <br />
-
-            <table class="table pdf-table">
+            <table class="table pdf-table" style="margin-top: 8px;">
                 <tbody>
                 {% for i in max_row %}
-                    <tr class="pdf-table-row section-middle-row">
+                    <tr class="pdf-table-row-thick section-middle-row" style="border-bottom-width: 0; {% if i == 0 %}border-top-width: 2px;{% else %}border-top-width: 1px;{% endif %}">
                         {% for j in max_col %}
                             <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">{% get_velocity_cell_value velocity_equipment|get_list:'equipment_id' i j %}</td>
                         {% endfor %}
                     </tr>
                 {% endfor %}
-                <tr class="pdf-table-row no-border">
-                    <td class="note-title">
+                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
+                    <td></td>
+                    <td class="pdf-table-cell note-title">
                         Notes:
                     </td>
-                    <td class="pdf-table-cell" colspan="12">
+                    <td class="pdf-table-cell" colspan="13">
                         {{ velocity_equipment|get_list:'Note' }}
                     </td>
                 </tr>
