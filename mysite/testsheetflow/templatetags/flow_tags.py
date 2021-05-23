@@ -9,10 +9,22 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_velocity_actual_value(request, actual_field, equipment):
+def get_flow_design_value(request, design_field, equipment):
+    if request.method == 'POST':
+        return request.POST.get(f'design_value_{design_field.id}')
+    return_value = FlowSheetData.objects.filter(flow_equipment=equipment, sheet_field=design_field)
+    if return_value.count() > 0:
+        return return_value.first().value
+    else:
+        this_sheet_field = get_object_or_404(TestSheetField, id=design_field.id)
+        return this_sheet_field.default_value
+
+
+@register.simple_tag
+def get_flow_actual_value(request, actual_field, equipment):
     if request.method == 'POST':
         return request.POST.get(f'actual_value_{actual_field.id}')
-    return_value = VelocitySheetData.objects.filter(air_moving_equipment=equipment, sheet_field=actual_field)
+    return_value = FlowSheetData.objects.filter(flow_equipment=equipment, sheet_field=actual_field)
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -20,38 +32,6 @@ def get_velocity_actual_value(request, actual_field, equipment):
         return this_sheet_field.default_value
 
 
-@register.simple_tag
-def get_velocity_table_value(request, equipment):
-    table_datas = VelocitySheetTableData.objects.filter(air_moving_equipment=equipment)
-    if table_datas.count() > 0:
-        return_value = []
-        row_num = 0
-        row_data = []
-        for table_data in table_datas:
-            if table_data.row == row_num:
-                row_data.append(int(table_data.value))
-            else:
-                return_value.append(row_data)
-                row_num = table_data.row
-                row_data = []
-                row_data.append(int(table_data.value))
-        return_value.append(row_data)
-        return return_value
-    else:
-        return '{}'
-
-
 @register.filter
 def normalize_string(value):
     return value.replace(" ", "_").replace(".", "")
-
-
-@register.simple_tag
-def get_velocity_cell_value(equipment_id, row, col):
-    exists = VelocitySheetTableData.objects.filter(air_moving_equipment_id=equipment_id, row=row, col=col).count()
-    if exists > 0:
-        table_cell = VelocitySheetTableData.objects.get(air_moving_equipment_id=equipment_id, row=row, col=col)
-        return table_cell.value
-    else:
-        return ''
-

@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from ..sheetcreator.models import *
+from .models import *
 
 
 class FlowSheetForm(ModelForm):
@@ -25,19 +25,18 @@ class FlowSheetForm(ModelForm):
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
 
 
-class VavSheetEquipmentForm(ModelForm):
-    quantity = forms.IntegerField(required=True, min_value=1)
-
+class FlowSheetEquipmentForm(ModelForm):
     class Meta:
-        model = DataSheetEquipment
+        model = FlowEquipment
         fields = [
             'sheet',
-            'equipment_type',
-            'quantity',
+            'location',
+            'unit_number',
+            'model_number',
         ]
 
     def __init__(self, *args, **kwargs):
-        super(VavSheetEquipmentForm, self).__init__(*args, **kwargs)
+        super(FlowSheetEquipmentForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

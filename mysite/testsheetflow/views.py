@@ -75,13 +75,13 @@ def flow_sheet_add(request):
 
 
 @login_required
-def velocity_sheet_equipment_list(request, sheet_id):
+def flow_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
     project_name = request.GET.get('project_name', '')
-    my_project = my_sheet.project
-    air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).order_by('-velocity_data')
-    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).distinct()
-    parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
+    flow_equipments = FlowEquipment.objects.filter(sheet=my_sheet).order_by('id')
+    if project_name:
+        flow_equipments = flow_equipments.filter(Q(unit_number__icontains=project_name) | Q(model_number__icontains=project_name)).distinct()
+    parameters = {'flow_equipments': flow_equipments,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
                   'WEB_URL': WEB_URL,
@@ -91,7 +91,7 @@ def velocity_sheet_equipment_list(request, sheet_id):
 
 
 @login_required
-def velocity_equipment_add(request, sheet_id):
+def flow_equipment_add(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
     project_name = request.GET.get('project_name', '')
     my_project = my_sheet.project
@@ -156,28 +156,6 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
             equipment_data['actual'][key] = actual_value
 
     return equipment_data
-
-
-def get_pdf_empty_row():
-    return {
-        'name': '',
-        'design': {
-            'room_no': '',
-            'outlet_no': '',
-            'code': '',
-            'size': '',
-            'ak_factor': '',
-            'fpm': '',
-            'cfm': '',
-        },
-        'actual': {
-            'initial_fpm': '',
-            'initial_cfm': '',
-            'final_fpm': '',
-            'final_cfm': '',
-            'note': '',
-        },
-    }
 
 
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
@@ -262,71 +240,100 @@ def manual_replace(s, char, index):
 
 
 @login_required
-def velocity_actual_data(request, sheet_id, sheet_equipment_id):
-    my_sheet = DataSheet.objects.get(id=sheet_id)
-
-    equipment_type = 1
-    this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
-    sheet_code = this_sheet_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
-    codes = AirTerminalCode.objects.filter(is_custom=False)
-
-    actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains='traverse')
-
-    # assignment_operations = parse_assigment_operations_actual(this_sheet_equipment, equipment_type_custom_fields,
-    #                                                           custom_fields)
-
-    ak_factor_field_id = TestSheetField.objects.get(field_name__iexact='AK Factor').id
+def flow_common_data(request, flow_equipment_id):
+    flow_equipment = get_object_or_404(FlowEquipment, id=flow_equipment_id)
+    form = FlowSheetEquipmentForm(request.POST or None, request.FILES or None, instance=flow_equipment)
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
-            return redirect('velocitySheetEquipmentList', my_sheet.id)
+            return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
+        if form.is_valid():
+            if request.POST.get("save"):
+                form.cleaned_data['sheet'] = flow_equipment.sheet
+                saving_obj = form.save(commit=False)
+                saving_obj.main_data_entry_completed = True
+                saving_obj.save()
+                return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
+
+    parameters = {
+        'form': form,
+        'flow_equipment': flow_equipment,
+    }
+    return render(request, "flowSheetEquipmentGeneralData.html", parameters)
+
+
+@login_required
+def flow_design_data(request, flow_equipment_id):
+    flow_equipment = get_object_or_404(FlowEquipment, id=flow_equipment_id)
+
+    design_fields = TestSheetField.objects.filter(show_in_design=True, test_sheet__name__icontains='flow')
+
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
+        if request.POST.get("next"):
+
+            for design_field in design_fields:
+                new_value = request.POST.get(f'supply_design_value_{design_field.id}').strip()
+
+                num_results = FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                                                           sheet_field=design_field).count()
+
+                if num_results > 0:
+                    FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                                                 sheet_field=design_field).update(value=new_value)
+                else:
+                    new_object = FlowSheetData(flow_equipment=flow_equipment,
+                                               sheet_field=design_field,
+                                               value=new_value)
+                    new_object.save()
+
+            flow_equipment.design_data_entry_completed = True
+            flow_equipment.save()
+            return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
+
+    parameters = {
+        'flow_equipment': flow_equipment,
+        'design_fields': design_fields,
+    }
+    return render(request, "flowSheetEquipmentDesignData.html", parameters)
+
+
+@login_required
+def flow_actual_data(request, flow_equipment_id):
+    flow_equipment = get_object_or_404(FlowEquipment, id=flow_equipment_id)
+
+    actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains='flow')
+
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
         if request.POST.get("next"):
 
             for actual_field in actual_fields:
                 new_value = request.POST.get(f'supply_actual_value_{actual_field.id}').strip()
 
-                num_results = VelocitySheetData.objects.filter(air_moving_equipment=this_sheet_equipment,
-                                                               sheet_field=actual_field).count()
+                num_results = FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                                                           sheet_field=actual_field).count()
 
                 if num_results > 0:
-                    VelocitySheetData.objects.filter(air_moving_equipment=this_sheet_equipment,
-                                                     sheet_field=actual_field).update(value=new_value)
+                    FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                                                 sheet_field=actual_field).update(value=new_value)
                 else:
-                    new_object = VelocitySheetData(air_moving_equipment=this_sheet_equipment,
-                                                   sheet_field=actual_field,
-                                                   value=new_value)
+                    new_object = FlowSheetData(flow_equipment=flow_equipment,
+                                               sheet_field=actual_field,
+                                               value=new_value)
                     new_object.save()
 
-            table_row = int(request.POST.get('table-row'))
-            table_col = int(request.POST.get('table-col'))
-
-            old_velocity_table_data = VelocitySheetTableData.objects.filter(air_moving_equipment=this_sheet_equipment)
-            for velocity_data in old_velocity_table_data:
-                velocity_data.delete()
-
-            for i in range(table_row):
-                for j in range(table_col):
-                    data_val = request.POST.get('table-data-' + str(i) + '-' + str(j))
-                    VelocitySheetTableData(air_moving_equipment=this_sheet_equipment,
-                                           row=i, col=j,
-                                           value=data_val).save()
-
-            this_sheet_equipment.velocity_data = True
-            this_sheet_equipment.velocity_row = table_row
-            this_sheet_equipment.velocity_col = table_col
-            this_sheet_equipment.save()
-            return redirect('velocitySheetEquipmentList', my_sheet.id)
+            flow_equipment.actual_data_entry_completed = True
+            flow_equipment.save()
+            return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
 
     parameters = {
-        'this_sheet_equipment': this_sheet_equipment,
-        'equipment_type': equipment_type,
+        'flow_equipment': flow_equipment,
         'actual_fields': actual_fields,
-        'sheet_code': sheet_code,
-        'my_sheet': my_sheet,
-        'codes': codes,
-        'ak_factor_field_id': ak_factor_field_id
     }
-    return render(request, "velocitySheetEquipmentActualData.html", parameters)
+    return render(request, "flowSheetEquipmentActualData.html", parameters)
 
 
 @login_required
