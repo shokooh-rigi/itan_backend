@@ -7,6 +7,7 @@ from mysite.sheetcreator.models import *
 class FlowEquipment(models.Model):
     sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=True, null=True)
+    br_number = models.CharField(max_length=20, blank=True, null=True)
     location = models.CharField(max_length=20, blank=True, null=True)
     unit_number = models.CharField(max_length=20, blank=True, null=True)
     model_number = models.CharField(max_length=20, blank=True, null=True)

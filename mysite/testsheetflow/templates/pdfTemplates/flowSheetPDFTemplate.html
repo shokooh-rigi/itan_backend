@@ -1,0 +1,352 @@
+{% load static %}
+{% load estimator_tags %}
+{% load flow_tags %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Flow Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 9.5%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 14.5%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .border {
+            border: 1px solid black;
+        }
+
+        .pdf-table .no-border {
+            border: 0px solid black;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 1px solid black;
+        }
+
+        .top-row-thick th, .top-row-thick td {
+            border-top: 2px solid black;
+        }
+
+        .bottom-row-thick th, .bottom-row-thick td {
+            border-top: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.total_pages_range %}
+        <div class="content pdf-page-content">
+            <table class="table pdf-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th colspan="21" scope="col"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td colspan="18" class="pdf-table-title-td">FLOW TEST SHEET</td>
+                    <td colspan="3" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="padding: 0 2px 0;">PROJECT NO:</td>
+                    <td colspan="11" class="pdf-table-cell border">
+                        &nbsp;{{ form.my_sheet.project.project_number }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td colspan="6" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ form.my_sheet.sheet_date | date }}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td colspan="11" class="pdf-table-cell border">
+                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                    </td>
+                    <td colspan="6" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ form.my_sheet.system }}
+                    </td>
+                </tr>
+                <!-- Title rows -->
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <th rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title" style="border-left-width: 2px;">
+                        Br No.
+                    </th>
+                    <th rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                        FMF No.
+                    </th>
+                    <th rowspan="2" colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Location
+                    </th>
+                    <th rowspan="2" colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Unit Number
+                    </th>
+                    <th rowspan="2" colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Model Number
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Design
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Initial Test
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                        Final
+                    </th>
+                </tr>
+                <tr class="section-first-row pdf-table-row">
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        G.P.M.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        G.P.M.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                        G.P.M.
+                    </th>
+                </tr>
+                {% for flow_equipment in form.flow_equipment_data %}
+                    <tr class="pdf-table-row">
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
+                            {{ flow_equipment|get_item:'br_no' }}
+                        </td>
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
+                            {{ forloop.counter }}
+                        </td>
+                        <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'location' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'unit_number' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'model_number' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'Design Set / P.D.' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'Design G.P.M.' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'Initial Test Set / P.D.' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'Initial Test G.P.M.' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ flow_equipment|get_item:'Final Set / P.D.' }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell" style="border-right-width: 2px;">
+                            {{ flow_equipment|get_item:'Final G.P.M.' }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for empty_row in empty_row_range %}
+                    <tr class="section-first-row pdf-table-row" style="height: 28px;">
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
+
+                        </td>
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell" style="border-right-width: 2px;">
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
+                    <td class="pdf-table-cell" colspan="1">
+                        Notes:
+                    </td>
+                    <td class="pdf-table-cell" colspan="19">
+                        {% for flow_equipment in form.flow_equipment_data %}
+                            {% with flow_equipment|get_item:'Note' as note %}
+                                {% if note != '' %}{{ note }} | {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>

@@ -164,7 +164,7 @@ def equipments_list(request, sheet_id):
             object_list = object_list.filter(sheetequipmentcommondata__value__icontains=project_name)
         else:
             object_list = object_list.filter(Q(sheetequipmentcommondata__value__icontains=project_name) | Q(id=project_name))
-    object_list = object_list.order_by('main_data_entry_completed', 'design_data_entry_completed', 'actual_data_entry_completed')
+    object_list = object_list.order_by('main_data_entry_completed', 'design_data_entry_completed', 'actual_data_entry_completed', 'field_order')
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')

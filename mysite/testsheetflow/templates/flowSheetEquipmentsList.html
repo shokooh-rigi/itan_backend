@@ -9,7 +9,10 @@
         <h2>DEFINED FLOW EQUIPMENTS
             FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
-        <a href="{% url 'velocityGenerateReportPDF' sheet_id %}" target="_blank" download="">
+        <a href="{% url 'flowGenerateTechPDF' sheet_id %}" target="_blank" download="">
+            <button type="button" class="btn btn-primary">Generate Tech PDF</button>
+        </a>
+        <a href="{% url 'flowGenerateReportPDF' sheet_id %}" target="_blank" download="">
             <button type="button" class="btn btn-primary">Generate Report PDF</button>
         </a>
         <br>

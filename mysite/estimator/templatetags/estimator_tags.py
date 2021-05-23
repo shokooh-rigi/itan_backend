@@ -109,7 +109,10 @@ def in_setting(things, key):
 
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    if dictionary.get(key):
+        return dictionary.get(key)
+    else:
+        return ''
 
 
 @register.filter

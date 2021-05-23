@@ -30,6 +30,7 @@ class FlowSheetEquipmentForm(ModelForm):
         model = FlowEquipment
         fields = [
             'sheet',
+            'br_number',
             'location',
             'unit_number',
             'model_number',

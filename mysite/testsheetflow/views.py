@@ -159,15 +159,25 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
 
 
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
+    total_pdf_row = 22
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    air_moving_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_sheet.project, velocity_data=True).all()
-    velocity_equipments = []
-    for air_moving_equipment in air_moving_equipments:
-        velocity_equipment = {}
-        for velocity_data in air_moving_equipment.velocitysheetdata_set.all():
-            velocity_equipment[velocity_data.sheet_field.field_name] = velocity_data.value
-        velocity_equipment['equipment_id'] = air_moving_equipment.id
-        velocity_equipments.append(velocity_equipment)
+    flow_equipments = FlowEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
+    total_pages = int(flow_equipments.count() / total_pdf_row) + 1
+    flow_equipment_data = []
+    for flow_equipment in flow_equipments:
+        flow_equipment_obj = {}
+        flow_equipment_obj['id'] = flow_equipment.id
+        flow_equipment_obj['br_no'] = flow_equipment.br_number
+        flow_equipment_obj['location'] = flow_equipment.location
+        flow_equipment_obj['unit_number'] = flow_equipment.unit_number
+        flow_equipment_obj['model_number'] = flow_equipment.model_number
+        if is_report_pdf:
+            flowsheetdatas = flow_equipment.flowsheetdata_set.all()
+        else:
+            flowsheetdatas = flow_equipment.flowsheetdata_set.filter(sheet_field__show_in_actual=False)
+        for flow_data in flowsheetdatas:
+            flow_equipment_obj[flow_data.sheet_field.field_name] = flow_data.value
+        flow_equipment_data.append(flow_equipment_obj)
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -180,14 +190,15 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     company_name = LicenseInfo.objects.get(key='CompanyName').value
 
     return {
-        'max_row': range(14),
-        'max_col': range(14),
+        'total_pdf_row': total_pdf_row,
+        'empty_row_range': range(total_pdf_row - (flow_equipments.count() % total_pdf_row)),
         'form': {
+            'total_pages_range': range(total_pages),
             'my_sheet': my_sheet,
-            'air_moving_equipments': air_moving_equipments,
-            'velocity_equipments': velocity_equipments
+            'flow_equipments': flow_equipments,
+            'flow_equipment_data': flow_equipment_data
         },
-        'file_name': 'Velocity Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': 'Flow Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                      my_sheet.project.project_number,
                                                      '' if is_report_pdf else ' TECH').upper(),
         'license_owner': license_owner,
@@ -211,10 +222,27 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 
 
 @login_required
+def equipments_generate_tech_pdf(request, sheet_id):
+    parameters = get_pdf_parameters(sheet_id, False)
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/flowSheetPDFTemplate.html', parameters,
+                                                  'flowPDFReport')
+
+    if os.path.exists(pdf_path):
+        with open(pdf_path, 'rb') as fh:
+            my_file = fh.read()
+            response = HttpResponse(my_file, content_type="application/pdf")
+            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            response['Content-Length'] = len(my_file)
+            return response
+    else:
+        return 'error'
+
+
+@login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/velocitySheetEquipmentTemplate.html', parameters,
-                                                  'velocityEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/flowSheetPDFTemplate.html', parameters,
+                                                  'flowPDFReport')
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:
