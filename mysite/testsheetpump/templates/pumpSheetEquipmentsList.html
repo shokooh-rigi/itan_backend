@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>DEFINED PUMP EQUIPMENTS
+            FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
+        <br>
+        <a href="{% url 'pumpGenerateTechPDF' sheet_id %}" target="_blank" download="">
+            <button type="button" class="btn btn-primary">Generate Tech PDF</button>
+        </a>
+        <a href="{% url 'pumpGenerateReportPDF' sheet_id %}" target="_blank" download="">
+            <button type="button" class="btn btn-primary">Generate Report PDF</button>
+        </a>
+        <br>
+
+        <br>
+        <div class="row" style="margin: 10px auto; position: relative;">
+            <form action="?{% url_replace request 'project_name' '' %}">
+                <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                    <label for="project_name"></label>
+                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Name..." value="{{ request.GET.project_name }}" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Pump Number</th>
+                    <th>Model Number</th>
+                    <th>General Information</th>
+                    <th>Design Data</th>
+                    <th>Actual Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sheet_equipment in pump_equipments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if sheet_equipment.pump_number %}
+                                {{ sheet_equipment.pump_number }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sheet_equipment.equipment.model_number %}
+                                {{ sheet_equipment.equipment.model_number }}
+                            {% endif %}
+                        </td>
+                        <td class="disable-drag">{% if sheet_equipment.main_data_entry_completed == 0 %}<a href="{% url 'pumpCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter General Information"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'pumpCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit General Info"></div></a>{% endif %}</td>
+                        <td class="disable-drag">{% if sheet_equipment.design_data_entry_completed == 0 %}<a href="{% url 'pumpDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'pumpDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}</td>
+                        <td class="disable-drag">{% if sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'pumpActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'pumpActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<script>
+    $(document).ready(function() {
+        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test1);
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test2);
+            }
+        }
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=5') > 0) {
+            $(".pagination-select #paginate_5").addClass('selected');
+            $(".pagination-select #paginate_5 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+{% endblock %}

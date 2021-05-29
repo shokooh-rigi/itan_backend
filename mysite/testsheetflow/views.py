@@ -93,20 +93,10 @@ def flow_sheet_equipment_list(request, sheet_id):
 @login_required
 def flow_equipment_add(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    project_name = request.GET.get('project_name', '')
-    my_project = my_sheet.project
-    vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav', sheet__project=my_project).filter(number_of_supply_air_terminal__gt=0)
-    air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0) | Q(number_of_outside_air_terminal__gt=0) | Q(number_of_any_other__gt=0))
-    vav_sheet_equipments = vav_sheet_equipments.filter(testsheetgeneraldata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed').distinct()
-    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed').distinct()
-    parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
-                  'vav_sheet_equipments': vav_sheet_equipments,
-                  'my_sheet': my_sheet,
-                  'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  }
-    return render(request, "velocitySheetEquipmentsList.html", parameters)
+    equipment_type = Equipment.objects.get(name__iexact='FLOW METER FITTING MANUAL')
+    flow_equipment = FlowEquipment(sheet=my_sheet, equipment_type=equipment_type)
+    flow_equipment.save()
+    return redirect('flowSheetEquipmentList', sheet_id)
 
 
 def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_report_pdf: bool):
@@ -162,8 +152,12 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     total_pdf_row = 22
     my_sheet = DataSheet.objects.get(id=sheet_id)
     flow_equipments = FlowEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
+    if is_report_pdf:
+        flow_equipments = flow_equipments.filter(actual_data_entry_completed=True)
     total_pages = int(flow_equipments.count() / total_pdf_row) + 1
     flow_equipment_data = []
+    i = 1
+    flow_equipment_page = []
     for flow_equipment in flow_equipments:
         flow_equipment_obj = {}
         flow_equipment_obj['id'] = flow_equipment.id
@@ -177,7 +171,12 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
             flowsheetdatas = flow_equipment.flowsheetdata_set.filter(sheet_field__show_in_actual=False)
         for flow_data in flowsheetdatas:
             flow_equipment_obj[flow_data.sheet_field.field_name] = flow_data.value
-        flow_equipment_data.append(flow_equipment_obj)
+        flow_equipment_page.append(flow_equipment_obj)
+        if i % total_pdf_row == 0:
+            flow_equipment_data.append(flow_equipment_page)
+            flow_equipment_page = []
+        i += 1
+    flow_equipment_data.append(flow_equipment_page)
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -194,6 +193,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         'empty_row_range': range(total_pdf_row - (flow_equipments.count() % total_pdf_row)),
         'form': {
             'total_pages_range': range(total_pages),
+            'total_pages': total_pages,
             'my_sheet': my_sheet,
             'flow_equipments': flow_equipments,
             'flow_equipment_data': flow_equipment_data

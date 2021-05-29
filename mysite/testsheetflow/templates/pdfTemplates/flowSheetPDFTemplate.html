@@ -258,42 +258,47 @@
                     </th>
                 </tr>
                 {% for flow_equipment in form.flow_equipment_data %}
+                    {% if forloop.counter == forloop.parentloop.counter %}
+                    {% for eq in flow_equipment %}
                     <tr class="pdf-table-row">
                         <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
-                            {{ flow_equipment|get_item:'br_no' }}
+                            {{ eq|get_item:'br_no' }}
                         </td>
                         <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
                             {{ forloop.counter }}
                         </td>
                         <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'location' }}
+                            {{ eq|get_item:'location' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'unit_number' }}
+                            {{ eq|get_item:'unit_number' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'model_number' }}
+                            {{ eq|get_item:'model_number' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'Design Set / P.D.' }}
+                            {{ eq|get_item:'Design Set / P.D.' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'Design G.P.M.' }}
+                            {{ eq|get_item:'Design G.P.M.' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'Initial Test Set / P.D.' }}
+                            {{ eq|get_item:'Initial Test Set / P.D.' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'Initial Test G.P.M.' }}
+                            {{ eq|get_item:'Initial Test G.P.M.' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-                            {{ flow_equipment|get_item:'Final Set / P.D.' }}
+                            {{ eq|get_item:'Final Set / P.D.' }}
                         </td>
                         <td colspan="2" class="pdf-table-cell pdf-table-center-cell" style="border-right-width: 2px;">
-                            {{ flow_equipment|get_item:'Final G.P.M.' }}
+                            {{ eq|get_item:'Final G.P.M.' }}
                         </td>
                     </tr>
+                    {% endfor %}
+                    {% endif %}
                 {% endfor %}
+                {% if forloop.counter == form.total_pages %}
                 {% for empty_row in empty_row_range %}
                     <tr class="section-first-row pdf-table-row" style="height: 28px;">
                         <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
@@ -331,15 +336,20 @@
                         </td>
                     </tr>
                 {% endfor %}
+                {% endif %}
                 <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
                     <td class="pdf-table-cell" colspan="1">
                         Notes:
                     </td>
-                    <td class="pdf-table-cell" colspan="19">
+                    <td class="pdf-table-cell" colspan="19" style="text-align: left">
                         {% for flow_equipment in form.flow_equipment_data %}
-                            {% with flow_equipment|get_item:'Note' as note %}
-                                {% if note != '' %}{{ note }} | {% endif %}
-                            {% endwith %}
+                            {% if forloop.counter == forloop.parentloop.counter %}
+                                {% for eq in flow_equipment %}
+                                    {% with eq|get_item:'Note' as note %}
+                                        {% if note != '' %}{{ note }} | {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% endif %}
                         {% endfor %}
                     </td>
                 </tr>

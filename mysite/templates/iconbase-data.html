@@ -56,13 +56,15 @@
                     </div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-05.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Pump</h6>
-                        </div>
+                    <div class="card pt-1">
+                        <a href="{% url 'pumpSheetHome' %}">
+                            <div class="col-sm-12 rounded-circle mx-auto d-block">
+                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-05.svg" %}" alt="Card image" />
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-uppercase">Pump</h6>
+                            </div>
+                        </a>
                     </div>
                 </div>
                 <div class="col col-sm-2">
@@ -146,13 +148,15 @@
                     </div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1"><a href="{% url 'flowSheetHome' %}">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 15px;">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-14.svg" %}" alt="Card image" />
-                        </div></a>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Flow Measuring</h6>
-                        </div>
+                    <div class="card pt-1">
+                        <a href="{% url 'flowSheetHome' %}">
+                            <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 15px;">
+                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-14.svg" %}" alt="Card image" />
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-uppercase">Flow Measuring</h6>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>

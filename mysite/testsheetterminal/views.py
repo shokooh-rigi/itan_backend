@@ -15,6 +15,7 @@ from .render import Render as PDFRender
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
 from django.db.models import Count
+from django.db.models.functions import Cast, Coalesce
 
 
 # Create your views here.
@@ -158,8 +159,8 @@ def get_pdf_empty_row():
 
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    air_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, vav_equipment__isnull=True, air_equipment__terminal_design_data_entry_completed=True).order_by('air_equipment_id', 'type', 'outlet_no')
-    vav_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True, vav_equipment__terminal_design_data_entry_completed=True).order_by('vav_equipment_id', 'outlet_no')
+    air_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, vav_equipment__isnull=True, air_equipment__terminal_design_data_entry_completed=True).order_by('air_equipment__field_order', 'air_equipment_id', 'type', 'outlet_no')
+    vav_sheet_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True, vav_equipment__terminal_design_data_entry_completed=True).order_by('vav_equipment__field_order', 'vav_equipment_id', 'vav_equipment__field_order', 'outlet_no')
 
     if is_report_pdf:
         air_sheet_equipments = air_sheet_equipments.filter(air_equipment__terminal_actual_data_entry_completed=True)
