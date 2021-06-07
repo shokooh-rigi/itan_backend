@@ -100,7 +100,7 @@ class NumberOfFieldsChoices(Enum):
 class TestSheet(models.Model):
     name = models.CharField(max_length=255, blank=False)
     inheritance = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
-    priority = models.IntegerField(blank=True)
+    priority = models.IntegerField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     sheet_generator = models.BooleanField(default=False)
     flag = models.BooleanField(default=True)

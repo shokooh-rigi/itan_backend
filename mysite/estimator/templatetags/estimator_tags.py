@@ -109,15 +109,22 @@ def in_setting(things, key):
 
 @register.filter
 def get_item(dictionary, key):
-    if dictionary.get(key):
-        return dictionary.get(key)
+    if dictionary:
+        if dictionary.get(key):
+            return dictionary.get(key)
+        else:
+            return ''
     else:
         return ''
 
 
 @register.filter
 def get_list(dictionary, key):
-    return dictionary[key]
+    if dictionary:
+        if dictionary[key]:
+            return dictionary[key]
+        else:
+            return ''
 
 
 @register.simple_tag

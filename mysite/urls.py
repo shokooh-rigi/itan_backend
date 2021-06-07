@@ -46,6 +46,7 @@ urlpatterns = [
     path('', include('mysite.testsheetvelocity.urls')),
     path('', include('mysite.testsheetflow.urls')),
     path('', include('mysite.testsheetpump.urls')),
+    path('', include('mysite.testsheetduct.urls')),
     path('', include('mysite.generatereport.urls')),
     path('', include('mysite.projectprocess.urls')),
     path('', include('mysite.masspayment.urls')),

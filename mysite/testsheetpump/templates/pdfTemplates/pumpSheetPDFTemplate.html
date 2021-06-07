@@ -169,7 +169,6 @@
 
 {% include "pdfTemplates/pdfFooterTemplate.html" %}
 
-
 <div id="content_frame">
     {% for page in form.total_pages_range %}
         <div class="content pdf-page-content">
@@ -246,13 +245,13 @@
                                 Serial No.
                             </td>
                             <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
-                                {{ pump_equipment.0|get_item:'Serial Number-2' }}
+                                {{ pump_equipment.0|get_item:'Serial No.-2' }}
                             </td>
                             <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Serial No.
                             </td>
                             <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
-                                {{ pump_equipment.1|get_item:'Serial Number-2' }}
+                                {{ pump_equipment.1|get_item:'Serial No.-2' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
@@ -297,24 +296,298 @@
                                 {{ pump_equipment.1|get_item:'Max. Wk. Pr.-1' }} / {{ pump_equipment.1|get_item:'Mfg. Date-1' }}
                             </td>
                         </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Test Data
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                GPM
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                FT
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                BHP
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Test Data
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                GPM
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                FT
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                BHP
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Design
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Design GPM-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Design FT-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Design BHP-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Design
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Design GPM-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Design FT-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Design BHP-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row bottom-row-thick">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Actual
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Actual GPM-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Actual FT-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Actual BHP-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Actual
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Actual BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Actual BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Actual BHP-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Discharge
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Discharge GPM-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Discharge FT-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Discharge BHP-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Discharge
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Discharge BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Discharge BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Discharge BHP-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Suction
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Suction GPM-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Suction FT-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Suction BHP-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Suction
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Suction BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Suction BHP-2' }}
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Suction BHP-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row bottom-row-thick">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                P
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'P-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                P
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'P-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Shut-Off
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Shut-Off-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Shut-Off
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Shut-Off-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Discharge / Suction
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Discharge / Suction-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Discharge / Suction
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Discharge / Suction-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row bottom-row-thick">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                P
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'P2-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                P
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'P2-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Motor Mfg.
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Motor Mfg.-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Motor Mfg.
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'Motor Mfg.-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                H.P. / Frame
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'H.P.-1' }} / {{ pump_equipment.0|get_item:'Frame-1' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                H.P. / Frame
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'H.P.-1' }} / {{ pump_equipment.1|get_item:'Frame-1' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                S.F. / Code
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'S.F.-1' }} / {{ pump_equipment.0|get_item:'Code-1' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                S.F. / Code
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'S.F.-1' }} / {{ pump_equipment.1|get_item:'Code-1' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                RPM / Phase / Hz
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'RPM-1' }} / {{ pump_equipment.0|get_item:'Phase-1' }} / {{ pump_equipment.0|get_item:'Hz-1' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                RPM / Phase / Hz
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ pump_equipment.1|get_item:'RPM-1' }} / {{ pump_equipment.1|get_item:'Phase-1' }} / {{ pump_equipment.1|get_item:'Hz-1' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Amps
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Amps-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                ACT: {{ pump_equipment.0|get_item:'Amps-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Amps
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Amps-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                ACT: {{ pump_equipment.1|get_item:'Amps-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row bottom-row-thick">
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Volts
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.0|get_item:'Volts-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                ACT: {{ pump_equipment.0|get_item:'Volts-2' }}
+                            </td>
+                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Volts
+                            </td>
+                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ pump_equipment.1|get_item:'Volts-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                ACT: {{ pump_equipment.1|get_item:'Volts-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row bottom-row-thick" style="height: 60px;">
+                            <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top;">
+                                Remarks: {{ pump_equipment.0|get_item:'Note-2' }}
+                            </td>
+                            <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top; border-right-width: 2px;">
+                                Remarks: {{ pump_equipment.1|get_item:'Note-2' }}
+                            </td>
+                        </tr>
                     {% endif %}
                 {% endfor %}
-{#                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">#}
-{#                    <td class="pdf-table-cell">#}
-{#                        Notes:#}
-{#                    </td>#}
-{#                    <td class="pdf-table-cell" colspan="19" style="text-align: left">#}
-{#                        {% for pump_equipment in form.pump_equipment_data %}#}
-{#                            {% if forloop.counter == forloop.parentloop.counter %}#}
-{#                                {% for eq in pump_equipment %}#}
-{#                                    {% with eq|get_item:'Note' as note %}#}
-{#                                        {% if note != '' %}{{ note }} | {% endif %}#}
-{#                                    {% endwith %}#}
-{#                                {% endfor %}#}
-{#                            {% endif %}#}
-{#                        {% endfor %}#}
-{#                    </td>#}
-{#                </tr>#}
                 </tbody>
             </table>
         </div>

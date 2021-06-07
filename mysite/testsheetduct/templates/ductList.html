@@ -6,9 +6,9 @@
 
 {% block content %}
     <div class="text-center">
-    <h2>FLOW TEST SHEET LIST</h2>
+    <h2>DUCT TEST SHEET LIST</h2>
 
-        <a href="{% url 'flowSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Flow Test Sheet</button></a>
+        <a href="{% url 'ductSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Duct Test Sheet</button></a>
         <br /><br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">
@@ -75,11 +75,11 @@
                         <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
                         <td>{{ sheet.sheet_date }}</td>
                         <td>
-                            <a href="{% url 'flowEquipmentAdd' sheet.id %}" style="display: inline-block; margin-right: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Add a Flow Equipment"></div></a>
-                            <a href="{% url 'flowSheetEquipmentList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
+                            <a href="{% url 'ductEquipmentAdd' sheet.id %}" style="display: inline-block;"><div class="icon addicon" data-toggle="tooltip" data-placement="bottom" title="Add a Duct Equipment"></div></a>
+                            <a href="{% url 'ductSheetEquipmentList' sheet.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                         </td>
                         <td>
-                            <a href="{% url 'flowSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
+                            <a href="{% url 'ductSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
 {#                            <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
                         </td>
                     </tr>
