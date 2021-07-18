@@ -3,7 +3,7 @@ from django import forms
 from .models import *
 
 
-class DuctSheetForm(ModelForm):
+class DaltSheetForm(ModelForm):
     equipment_quantity = forms.IntegerField(required=True, min_value=1, max_value=50)
 
     class Meta:
@@ -17,7 +17,7 @@ class DuctSheetForm(ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        super(DuctSheetForm, self).__init__(*args, **kwargs)
+        super(DaltSheetForm, self).__init__(*args, **kwargs)
         self.fields['test_sheet_type'].required = False
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
@@ -25,15 +25,15 @@ class DuctSheetForm(ModelForm):
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
 
 
-class DuctSheetEquipmentForm(ModelForm):
+class DaltSheetEquipmentForm(ModelForm):
     class Meta:
-        model = DuctEquipment
+        model = DaltEquipment
         fields = [
             'sheet',
         ]
 
     def __init__(self, *args, **kwargs):
-        super(DuctSheetEquipmentForm, self).__init__(*args, **kwargs)
+        super(DaltSheetEquipmentForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

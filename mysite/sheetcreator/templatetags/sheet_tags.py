@@ -94,6 +94,8 @@ def get_field_type(field):
         return 'type=number'
     elif field_type == FieldTypeChoices.Float.value:
         return 'type=number step=any'
+    elif field_type == FieldTypeChoices.SelectOption.value:
+        return 'type=checkbox'
     return 'type=text'
 
 
@@ -104,3 +106,8 @@ def concatenate(value, arg):
         return str(value) + str(arg)
     except Exception:
         return ''
+
+
+@register.filter
+def normalize_string(value):
+    return value.replace(" ", "_").replace(".", "").replace("(", "").replace(")", "")

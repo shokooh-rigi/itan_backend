@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load sheet_tags %}
-{% load duct_tags %}
+{% load dalt_tags %}
 
 {% block content %}
-    <h2>Enter Duct Actual Data for
-        #{{ duct_equipment.sheet.project.project_number }}
-        {{ duct_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <h2>Enter Dalt Design Data for
+        #{{ dalt_equipment.sheet.project.project_number }}
+        {{ dalt_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>
-    <form method='POST' action='' enctype="multipart/form-data" id="duct-actual-data-form">
+    <form method='POST' action='' enctype="multipart/form-data" id="dalt-design-data-form">
         <div class="form-group">
             {% csrf_token %}
         </div>
@@ -29,39 +29,39 @@
             </div>
         </div>
         <div class="row form-line">
-            {% for actual_field in actual_fields %}
-                {% with 'supply_actual_value_'|concatenate:actual_field.id as field_name %}
+            {% for design_field in design_fields %}
+                {% with 'supply_design_value_'|concatenate:design_field.id as field_name %}
                     <div class="col-lg-3">
                         <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                            {{ actual_field.field_name }}
-                            {% if actual_field.required_in_actual %}
+                            {{ design_field.field_name }}
+                            {% if design_field.required_in_design %}
                                 <span class="required">*</span>
                             {% endif %}
                         </label>
                     </div>
                     <div class="col-lg-3">
                         <label for="{{ field_name }}" class="control-label equal_fields_supply"
-                               data-fieldid="{{ actual_field.id }}"
+                               data-fieldid="{{ design_field.id }}"
                                data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
-                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                {% if design_field.default_value %}{{ design_field.default_value }}{% endif %}"
                                style="width: 100%;">
-                            {% if actual_field.field_name|lower != 'note' %}
-                                <input style="width: 100%;" {% get_field_type actual_field %}
-                                       {% if actual_field.required_in_actual %}required=""{% endif %}
+                            {% if design_field.field_name|lower != 'note' and design_field.field_name|lower != 'daltwork description' %}
+                                <input style="width: 100%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
                                        name="{{ field_name }}" maxlength="50"
-                                       class="form-control {{ actual_field.field_name.lower|normalize_string }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                       class="form-control {{ design_field.field_name.lower|normalize_string }} {% if design_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                        id="{{ field_name }}"
-                                       value="{% get_duct_actual_value request actual_field duct_equipment %}" />
+                                       value="{% get_dalt_design_value request design_field dalt_equipment %}" />
                             {% else %}
                                 <textarea style="width: 100%;"
-                                          {% if actual_field.required_in_actual %}required=""{% endif %}
+                                          {% if design_field.required_in_design %}required=""{% endif %}
                                           name="{{ field_name }}" maxlength="50"
                                           class="form-control"
                                           id="{{ field_name }}"></textarea>
                             {% endif %}
                         </label>
                         <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                            <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                         </div>
                     </div>
                 {% endwith %}
@@ -71,12 +71,14 @@
         <div class="row">
             <div class="col-lg-12" style="padding-right: 36px;">
                 <input type="submit" class="btn btn-primary" value="Save" name="next"/>
-                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate/>
             </div>
         </div>
     </form>
     <script>
         $(document).ready(function () {
+
+
         });
 
     </script>

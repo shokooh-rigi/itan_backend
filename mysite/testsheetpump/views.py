@@ -116,7 +116,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         if is_report_pdf:
             pumpsheetdatas = pump_equipment.pumpsheetdata_set.all()
         else:
-            pumpsheetdatas = pump_equipment.pumpsheetdata_set.filter(sheet_field__show_in_actual=False)
+            pumpsheetdatas = pump_equipment.pumpsheetdata_set.filter(data_type=1)
         for pump_data in pumpsheetdatas:
             pump_equipment_obj[pump_data.sheet_field.field_name + '-' + str(pump_data.data_type)] = pump_data.value
         pump_equipment_page.append(pump_equipment_obj)

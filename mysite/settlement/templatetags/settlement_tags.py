@@ -50,3 +50,8 @@ def order_quote_price(schedule):
 @register.simple_tag
 def tech_involvement(schedule, contractor):
     return ScheduleTech.objects.get(schedule=schedule, assigned_to_contractor=contractor).involvement_percentage
+
+
+@register.simple_tag
+def previous_payment_calc(settled_schedule):
+    return float(settled_schedule.previous_payment) * float(settled_schedule.settlement.contractor.profile.interest_percentage) / 100

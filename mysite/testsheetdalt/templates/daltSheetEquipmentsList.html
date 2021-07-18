@@ -6,13 +6,13 @@
 
 {% block content %}
     <div class="text-center">
-        <h2>DEFINED DUCT EQUIPMENTS
+        <h2>DEFINED DALT EQUIPMENTS
             FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
-        <a href="{% url 'ductGenerateTechPDF' sheet_id %}" target="_blank" download="">
+        <a href="{% url 'daltGenerateTechPDF' sheet_id %}" target="_blank" download="">
             <button type="button" class="btn btn-primary">Generate Tech PDF</button>
         </a>
-        <a href="{% url 'ductGenerateReportPDF' sheet_id %}" target="_blank" download="">
+        <a href="{% url 'daltGenerateReportPDF' sheet_id %}" target="_blank" download="">
             <button type="button" class="btn btn-primary">Generate Report PDF</button>
         </a>
         <br>
@@ -37,11 +37,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for sheet_equipment in duct_equipments %}
+                {% for sheet_equipment in dalt_equipments %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td class="disable-drag">{% if sheet_equipment.design_data_entry_completed == 0 %}<a href="{% url 'ductDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'ductDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}</td>
-                        <td class="disable-drag">{% if sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'ductActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'ductActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
+                        <td class="disable-drag">{% if sheet_equipment.design_data_entry_completed == 0 %}<a href="{% url 'daltDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'daltDesignData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}</td>
+                        <td class="disable-drag">{% if sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'daltActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'daltActualData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

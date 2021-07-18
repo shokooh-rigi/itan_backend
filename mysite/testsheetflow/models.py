@@ -24,6 +24,7 @@ class FlowEquipment(models.Model):
 
 
 class FlowSheetData(models.Model):
+    data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
     flow_equipment = models.ForeignKey(FlowEquipment, on_delete=models.CASCADE, blank=False, null=False)
     sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
     value = models.CharField(max_length=500, blank=False)

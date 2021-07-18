@@ -46,13 +46,15 @@
                     </a></div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-04.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Chiller</h6>
-                        </div>
+                    <div class="card pt-1">
+                        <a href="{% url 'chillerSheetHome' %}">
+                            <div class="col-sm-12 rounded-circle mx-auto d-block">
+                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-04.svg" %}" alt="Card image" />
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-uppercase">Chiller</h6>
+                            </div>
+                        </a>
                     </div>
                 </div>
                 <div class="col col-sm-2">
@@ -128,25 +130,25 @@
                     </a></div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1">
-                        <a href="{% url 'ductSheetHome' %}">
+                    <div class="card pt-1 coming-soon">
                             <div class="col-sm-12 rounded-circle mx-auto d-block">
                                 <img class="card-img-top" src="{% static "images/icons/iconset/tech-12.svg" %}" alt="Card image" />
                             </div>
                             <div class="card-body">
                                 <h6 class="card-title text-uppercase">Duct Heater</h6>
                             </div>
-                        </a>
                     </div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 14px;">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-13.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Dalt</h6>
-                        </div>
+                    <div class="card pt-1">
+                        <a href="{% url 'daltSheetHome' %}">
+                            <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 14px;">
+                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-13.svg" %}" alt="Card image" />
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-uppercase">Dalt</h6>
+                            </div>
+                        </a>
                     </div>
                 </div>
                 <div class="col col-sm-2">
@@ -160,6 +162,16 @@
                             </div>
                         </a>
                     </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1"><a href="{% url 'vbfhsSheetHome' %}">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">V.A.V Box Fan Heat Schedule</h6>
+                        </div>
+                    </a></div>
                 </div>
             </div>
         </div>

@@ -141,7 +141,7 @@ def invoice_add(request, order_id=None):
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {
                     'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                        invoice.id).zfill(3),
+                        invoice.id).zfill(3) + '-1',
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
@@ -176,7 +176,7 @@ def invoice_add(request, order_id=None):
                 new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid,
                                             balance_due=balance_due
                                             , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(
-                        3) + '-' + str(invoice.id).zfill(3) + '-0')
+                        3) + '-' + str(invoice.id).zfill(3) + '-1')
                 new_object.save()
 
                 if ProjectProcess.objects.filter(order_id=invoice.order.id).exists():
@@ -200,6 +200,7 @@ def invoice_add(request, order_id=None):
 @login_required
 def invoice_view(request, invoice_id):
     invoice = Invoice.objects.get(id=invoice_id)
+    latest_invoice_history = InvoiceHistory.objects.filter(invoice=invoice).order_by('id').last()
     num_results = InvoiceHistory.objects.filter(invoice=invoice).count()
     if num_results == 0:
         if request.user.last_name == '' or request.user.last_name is None:
@@ -215,7 +216,7 @@ def invoice_view(request, invoice_id):
         total_amount_due = calculate_total_amount_due(invoice)
         parameters = {
             'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                invoice.id).zfill(3),
+                invoice.id).zfill(3) + '-1',
             'invoice': invoice,
             'change_orders': change_orders,
             'total_amount_due': total_amount_due,
@@ -248,9 +249,11 @@ def invoice_view(request, invoice_id):
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
         new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid, balance_due=balance_due
-                                    , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(invoice.id).zfill(3) + '-0')
+                                    , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(invoice.id).zfill(3) + '-1')
         new_object.save()
+    print(latest_invoice_history.pdf_filename)
     parameters = {
+        'latest_invoice_history': latest_invoice_history,
         'invoice': invoice,
         'estimate': invoice.order.proposal.quote.estimate,
         'WEB_URL': WEB_URL,
@@ -282,9 +285,7 @@ def invoice_edit(request, invoice_id):
                 user_signature = request.user.profile.e_sign
                 change_orders = ChangeOrder.objects.filter(order=invoice.order)
                 total_amount_due = calculate_total_amount_due(invoice)
-                transactions_count = InvoiceTransaction.objects.filter(invoice=invoice_id).count()
-                change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
-                total_count = transactions_count + change_orders_count + invoice.times_estimate_changed
+                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                         invoice.id).zfill(3) + '-' + str(total_count)
                 parameters = {
@@ -380,6 +381,7 @@ def invoice_archive(request, invoice_id):
 
 @login_required
 def invoice_payment(request, invoice_id):
+    nowww = datetime.datetime.now().strftime("%m/%d/%Y")
     form = InvoicePaymentForm(request.POST or None, request.FILES or None, initial={'created_by': request.user, 'invoice': invoice_id})
     invoice = Invoice.objects.get(id=invoice_id)
     invoice_transactions = InvoiceTransaction.objects.filter(invoice=invoice_id)
@@ -405,10 +407,11 @@ def invoice_payment(request, invoice_id):
                 total_amount_due = calculate_total_amount_due(invoice)
                 transactions_count = InvoiceTransaction.objects.filter(invoice=invoice_id).count()
                 change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
-                total_count = transactions_count + change_orders_count + invoice.times_estimate_changed
+                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                         invoice.id).zfill(3) + '-' + str(total_count)
                 parameters = {
+                    'nowww': nowww,
                     'file_name': new_file_name,
                     'total_count': total_count,
                     'invoice': invoice,

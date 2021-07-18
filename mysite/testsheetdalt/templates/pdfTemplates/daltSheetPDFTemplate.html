@@ -178,7 +178,7 @@
 {% include "pdfTemplates/pdfFooterTemplate.html" %}
 
 
-{% for duct_equipment in duct_equipment_data %}
+{% for dalt_equipment in dalt_equipment_data %}
 
 <div id="content_frame">
     <div class="content pdf-page-content">
@@ -229,7 +229,7 @@
             </tr>
             <tr class="section-first-row pdf-table-row">
                 <td colspan="18" class="pdf-table-cell" style="height: 100px;">
-                    {{ duct_equipment|get_item:'ductwork description-1'|upper }}
+                    {{ dalt_equipment|get_item:'ductwork description-1'|upper }}
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row">
@@ -237,7 +237,7 @@
                     Duct design operating static pressure
                 </td>
                 <td colspan="3" class="pdf-table-cell" style="border-right-width: 0;">
-                    {{ duct_equipment|get_item:'duct design oprating static pressure-2' }}
+                    {{ dalt_equipment|get_item:'duct design oprating static pressure-2' }}
                 </td>
                 <td colspan="2" class="pdf-table-cell" style="border-left-width: 0;">
                     " W.G.
@@ -252,7 +252,7 @@
                     Duct design test static pressure
                 </td>
                 <td colspan="3" class="pdf-table-cell" style="border-right-width: 0;">
-                    {{ duct_equipment|get_item:'duct design test static pressure-2' }}
+                    {{ dalt_equipment|get_item:'duct design test static pressure-2' }}
                 </td>
                 <td colspan="2" class="pdf-table-cell" style="border-left-width: 0;">
                     " W.G.
@@ -267,7 +267,7 @@
                     Duct capacity
                 </td>
                 <td colspan="3" class="pdf-table-cell" style="border-right-width: 0;">
-                    {{ duct_equipment|get_item:'duct capacity-2' }}
+                    {{ dalt_equipment|get_item:'duct capacity-2' }}
                 </td>
                 <td colspan="2" class="pdf-table-cell" style="border-left-width: 0;">
                     CFM
@@ -286,7 +286,7 @@
             </tr>
             <tr class="section-first-row pdf-table-row">
                 <td colspan="18" class="pdf-table-cell pdf-table-title-cell center-title">
-                    {{ duct_equipment|get_item:'mal' }} CFM
+                    {{ dalt_equipment|get_item:'mal' }} CFM
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row">
@@ -299,7 +299,7 @@
             </tr>
             <tr class="section-first-row pdf-table-row">
                 <td colspan="18" class="pdf-table-cell pdf-table-title-cell">
-                    Test apparatus: {{ duct_equipment|get_item:'test apparatus-1' }}
+                    Test apparatus: {{ dalt_equipment|get_item:'test apparatus-1' }}
                 </td>
             </tr>
 
@@ -308,7 +308,7 @@
                     Blower:
                 </td>
                 <td colspan="15" class="pdf-table-cell" style="text-align: left;">
-                    {{ duct_equipment|get_item:'blower-1' }}
+                    {{ dalt_equipment|get_item:'blower-1' }}
                 </td>
             </tr>
 
@@ -320,13 +320,13 @@
                     Turbo size
                 </td>
                 <td colspan="4" style="border-left-width: 0" class="pdf-table-cell center-title">
-                    {{ duct_equipment|get_item:'tube size-2' }} " Diameter
+                    {{ dalt_equipment|get_item:'tube size-2' }} " Diameter
                 </td>
                 <td colspan="4" style="border-right-width: 0;" class="pdf-table-cell center-title">
                     Orifice size
                 </td>
                 <td colspan="4" style="border-left-width: 0;" class="pdf-table-cell center-title">
-                    {{ duct_equipment|get_item:'orifice size-2' }} " Diameter
+                    {{ dalt_equipment|get_item:'orifice size-2' }} " Diameter
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row">
@@ -334,7 +334,7 @@
                     Calibrated:
                 </td>
                 <td colspan="7" class="pdf-table-cell center-title">
-                    {{ duct_equipment|get_item:'calibrated-1' }}
+                    {{ dalt_equipment|get_item:'calibrated-1' }}
                 </td>
                 <td colspan="8" class="pdf-table-cell center-title no-border" style="border-width: 0; border-right-width: 2px;">
 
@@ -346,7 +346,7 @@
                     Test static pressure:
                 </td>
                 <td colspan="3" style="border-right-width: 0;" class="pdf-table-cell center-title border">
-                    {{ duct_equipment|get_item:'test static pressure-2' }}
+                    {{ dalt_equipment|get_item:'test static pressure-2' }}
                 </td>
                 <td colspan="2" style="border-left-width: 0;" class="pdf-table-cell center-title border">
                     " W.G.
@@ -360,7 +360,7 @@
                     Test orifice differential pressure:
                 </td>
                 <td colspan="3" style="border-right-width: 0;" class="pdf-table-cell center-title border">
-                    {{ duct_equipment|get_item:'test orifice differencial pressure-2' }}
+                    {{ dalt_equipment|get_item:'test orifice differencial pressure-2' }}
                 </td>
                 <td colspan="2" style="border-left-width: 0;" class="pdf-table-cell center-title border">
                     " W.G.
@@ -369,7 +369,7 @@
                     Leakage:
                 </td>
                 <td colspan="2" style="border-right-width: 0;border-left-width: 0" class="pdf-table-cell center-title border">
-                    {{ duct_equipment|get_item:'leakage-2' }}
+                    {{ dalt_equipment|get_item:'leakage-2' }}
                 </td>
                 <td colspan="1" style="border-left-width: 0" class="pdf-table-cell center-title border">
                     CFM
@@ -397,7 +397,7 @@
             </tr>
             <tr class="section-first-row pdf-table-row bottom-row-thick">
                 <td style="height: 70px;" colspan="18" class="pdf-table-cell">
-                     {{ duct_equipment|get_item:'note-2' }}
+                     {{ dalt_equipment|get_item:'note-2' }}
                 </td>
             </tr>
             </tbody>

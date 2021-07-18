@@ -9,6 +9,7 @@
         <div class="form-group">
             {% csrf_token %}
             {{ form.proposal.as_hidden }}
+            {{ form.control_system.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_architect_name" class="control-label">Architect Name</label>

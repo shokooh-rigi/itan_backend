@@ -175,7 +175,7 @@ def change_order(request, order_id):
                     total_amount_due = calculate_total_amount_due(this_order.invoice)
                     transactions_count = InvoiceTransaction.objects.filter(invoice=this_order.invoice).count()
                     change_orders_count = ChangeOrder.objects.filter(order=this_order).count()
-                    total_count = transactions_count + change_orders_count + this_order.invoice.times_estimate_changed
+                    total_count = InvoiceHistory.objects.filter(invoice=this_order.invoice).count() + 1
                     new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
                         this_order.id).zfill(3) + '-' + str(total_count)
                     pdf_parameters = {

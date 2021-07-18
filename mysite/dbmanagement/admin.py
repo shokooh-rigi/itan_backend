@@ -23,7 +23,7 @@ class EqCustomFieldAdmin(admin.TabularInline):
     model = EquipmentCustomField
 
 
-class EquipmentDbAdmin(admin.ModelAdmin):
+class EquipmentDbAdmin(ImportExportModelAdmin):
     inlines = [EqCustomFieldAdmin, ]
 
 
@@ -53,7 +53,7 @@ class ActualDataCustomOperationAdmin(admin.TabularInline):
     model = ActualDataCustomOperation
 
 
-class EquipmentTypeAdmin(admin.ModelAdmin):
+class EquipmentTypeAdmin(ImportExportModelAdmin):
     inlines = [EqTypeCustomFieldAdmin, EqTypeCustomOperationAdmin, ActualDataCustomOperationAdmin, ]
 
 
@@ -68,7 +68,7 @@ class TestSheetOperationAdmin(SortableInlineAdminMixin, admin.TabularInline):
     model = TestSheetOperation
 
 
-class TestSheetAdmin(admin.ModelAdmin):
+class TestSheetAdmin(ImportExportModelAdmin):
     inlines = [TestSheetFieldAdmin, TestSheetOperationAdmin, ]
 
     class Media:

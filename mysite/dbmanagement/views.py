@@ -162,23 +162,24 @@ def vav_equipment_values(request, equipment_id):
                     min_value = my_range[0]
                     max_value = my_range[1]
                     sent_value = request.POST.get('company_value_' + str(design_field.id))
-                    if design_field.field_type == 1:
-                        sent_value = int(sent_value)
-                        min_value = int(min_value)
-                        max_value = int(max_value)
-                    elif design_field.field_type == 2:
-                        sent_value = float(sent_value)
-                        min_value = float(min_value)
-                        max_value = float(max_value)
-                    if sent_value < min_value or sent_value > max_value:
-                        error_msg = design_field.field_name + " Value is not in Range!"
-                        parameters = {'this_equipment': this_equipment,
-                                      'design_fields': design_fields,
-                                      'error_msg': error_msg,
-                                      'show_parentheses_fields': show_parentheses_fields,
-                                      'required_fields': required_fields,
-                                      }
-                        return render(request, "vav_equipment_fields.html", parameters)
+                    if sent_value != '':
+                        if design_field.field_type == 1:
+                            sent_value = int(sent_value)
+                            min_value = int(min_value)
+                            max_value = int(max_value)
+                        elif design_field.field_type == 2:
+                            sent_value = float(sent_value)
+                            min_value = float(min_value)
+                            max_value = float(max_value)
+                        if sent_value < min_value or sent_value > max_value:
+                            error_msg = design_field.field_name + " Value is not in Range!"
+                            parameters = {'this_equipment': this_equipment,
+                                          'design_fields': design_fields,
+                                          'error_msg': error_msg,
+                                          'show_parentheses_fields': show_parentheses_fields,
+                                          'required_fields': required_fields,
+                                          }
+                            return render(request, "vav_equipment_fields.html", parameters)
                 elif design_field.field_range_or_selective == 2:
                     if design_field.field_type == 3:
                         break

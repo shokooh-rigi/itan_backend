@@ -141,7 +141,19 @@
                         title: 'Maintenance',
                         duration: { minutes: 60 }
                     };
-                } else {
+                } else if (eventEl.classList.contains('losttime')) {
+                    return {
+                        title: 'Lost Time',
+                        duration: { minutes: 60 }
+                    };
+                }
+                 else if (eventEl.classList.contains('off')) {
+                     return {
+                        title: 'Off/Vacation',
+                        duration: { minutes: 60 }
+                    };
+                }
+                else {
                     let minute_duration = eventEl.dataset.estimate
                     if (eventEl.dataset.estimate<60)
                         minute_duration = 60
@@ -155,10 +167,16 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             calendar = new FullCalendar.Calendar(calendarEl, {
+                height: 850,
+                headerToolbar: {
+                  left: 'timeGridWeek,timeGridDay',
+                  center: 'title',
+                  right: 'today prev,next'
+                },
                 editable: true,
                 allDaySlot: false,
                 businessHours: {
-                  daysOfWeek: [ 1, 2, 3, 4, 5 ],
+                  daysOfWeek: [ 0, 1, 2, 3, 4, 5, 6 ],
                   startTime: '07:00',
                   endTime: '15:00',
                 },
@@ -311,9 +329,6 @@
                             //     }
                             //
                             // }
-                            while (new Date(start).getDay() === 0 || new Date(start).getDay() === 6) {
-                                start = moment(start).add(1, 'days')
-                            }
                             let end = new moment(start);
                             end = end.add(480, 'minutes');
                             $.ajax({
@@ -340,11 +355,18 @@
                         if (r === true) {
                             let end = new moment(start);
                             end = end.add(60, 'minutes');
+                            let maintenanceType = 1;
+                            if (info.draggedEl.classList.contains('losttime')) {
+                                maintenanceType = 2
+                            } else if (info.draggedEl.classList.contains('off')) {
+                                maintenanceType = 3
+                            }
                             $.ajax({
                                 type: "POST",
                                 url: "/schedule/create_schedule/",
                                 async: false,
                                 data: {
+                                    'type': maintenanceType,
                                     'maintenance': true,
                                     'schedule_start': dateFormat(start, 'isoDateTime'),
                                     'schedule_end': dateFormat(end, 'isoDateTime')
@@ -505,13 +527,28 @@
                             }
                         });
                         $("#maintenance-edit").modal();
+                        $('#maintenance-edit .modal-body .fieldBox').show()
+                        if (schedule_information.type == '2') {
+                            $('#maintenance-edit .modal-title').text('Lost Time')
+                        } else if (schedule_information.type == '3') {
+                            $('#maintenance-edit .modal-title').text('Off/Vacation')
+                            $('#maintenance-edit .modal-body > .fieldBox:first').hide()
+                        }
                         $("#maintenance-edit").attr('data-orderid', info.event.extendedProps.order_id);
                         $("#maintenance-edit").attr('data-maintenanceid', info.event.extendedProps.maintenance_id);
+                        $("#maintenance-edit").attr('data-type', schedule_information.type);
                         $("#maintenance-edit #modal-order-id").text(info.event.extendedProps.project_number)
                         $('#maintenance-edit .modal-body #desc').val(schedule_information.desc);
                         $('#maintenance-edit .modal-body #project_name select').val('');
-                        if (info.event.extendedProps.order_id)
-                            $('#maintenance-edit .modal-body #project_name select').val(info.event.extendedProps.order_id);
+                        if (info.event.extendedProps.order_id) {
+                            var my_select2 = $('#maintenance-edit .modal-body #project_name select');
+                            var option = new Option(info.event.title.split("<")[0], info.event.extendedProps.order_id, true, true);
+                            my_select2.append(option).trigger('change');
+                        } else {
+                            var my_select2 = $('#maintenance-edit .modal-body #project_name select');
+                            var option = new Option('', '', true, true);
+                            my_select2.append(option).trigger('change');
+                        }
                         $('#maintenance-edit .modal-body #start_date').text(dateFormat(info.event.start, 'mediumDateTime'));
                         $('#maintenance-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
                         $('#maintenance-edit .modal-body #employee_list').text('');

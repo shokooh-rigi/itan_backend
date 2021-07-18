@@ -24,6 +24,7 @@ class FieldTypeChoices(Enum):
     Integer = 1
     Float = 2
     Characters = 3
+    SelectOption = 4
 
     @staticmethod
     def get_items():
@@ -31,6 +32,7 @@ class FieldTypeChoices(Enum):
             (FieldTypeChoices.Integer.value, 'Integer ex: 1, 2, 3, ...'),
             (FieldTypeChoices.Float.value, 'Float ex: 1.2, 52.75, ...'),
             (FieldTypeChoices.Characters.value, 'Characters ex: mechanical, water based, ...'),
+            (FieldTypeChoices.SelectOption.value, 'Selectable Yes or No'),
         )
 
 

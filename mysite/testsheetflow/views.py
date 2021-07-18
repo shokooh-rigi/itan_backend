@@ -168,7 +168,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         if is_report_pdf:
             flowsheetdatas = flow_equipment.flowsheetdata_set.all()
         else:
-            flowsheetdatas = flow_equipment.flowsheetdata_set.filter(sheet_field__show_in_actual=False)
+            flowsheetdatas = flow_equipment.flowsheetdata_set.filter(data_type=1)
         for flow_data in flowsheetdatas:
             flow_equipment_obj[flow_data.sheet_field.field_name] = flow_data.value
         flow_equipment_page.append(flow_equipment_obj)
@@ -304,14 +304,14 @@ def flow_design_data(request, flow_equipment_id):
             for design_field in design_fields:
                 new_value = request.POST.get(f'supply_design_value_{design_field.id}').strip()
 
-                num_results = FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                num_results = FlowSheetData.objects.filter(data_type=1, flow_equipment=flow_equipment,
                                                            sheet_field=design_field).count()
 
                 if num_results > 0:
-                    FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                    FlowSheetData.objects.filter(data_type=1, flow_equipment=flow_equipment,
                                                  sheet_field=design_field).update(value=new_value)
                 else:
-                    new_object = FlowSheetData(flow_equipment=flow_equipment,
+                    new_object = FlowSheetData(data_type=1, flow_equipment=flow_equipment,
                                                sheet_field=design_field,
                                                value=new_value)
                     new_object.save()
@@ -341,14 +341,14 @@ def flow_actual_data(request, flow_equipment_id):
             for actual_field in actual_fields:
                 new_value = request.POST.get(f'supply_actual_value_{actual_field.id}').strip()
 
-                num_results = FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                num_results = FlowSheetData.objects.filter(data_type=2, flow_equipment=flow_equipment,
                                                            sheet_field=actual_field).count()
 
                 if num_results > 0:
-                    FlowSheetData.objects.filter(flow_equipment=flow_equipment,
+                    FlowSheetData.objects.filter(data_type=2, flow_equipment=flow_equipment,
                                                  sheet_field=actual_field).update(value=new_value)
                 else:
-                    new_object = FlowSheetData(flow_equipment=flow_equipment,
+                    new_object = FlowSheetData(data_type=2, flow_equipment=flow_equipment,
                                                sheet_field=actual_field,
                                                value=new_value)
                     new_object.save()

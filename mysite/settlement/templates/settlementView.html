@@ -98,7 +98,7 @@
                                             {% if not settled_schedule.settle_override %}{% if settled_schedule.completion_percentage %}%{{ settled_schedule.completion_percentage }}{% else %}-{% endif %}{% else %}N.A.{% endif %}
                                         </td>
                                         <td>
-                                            {% if settled_schedule.previous_payment %}${{ settled_schedule.previous_payment|floatformat:2|intcomma }}{% endif %}
+                                            {% if settled_schedule.previous_payment %}${% previous_payment_calc settled_schedule as ppc %}{{ ppc|floatformat:2|intcomma }}{% endif %}
                                         </td>
                                         <td>
                                             {% if not settled_schedule.settle_override %}${{ settled_schedule.settled_value|floatformat:2|intcomma }}{% else %}${{ settled_schedule.settle_override|floatformat:2|intcomma }}{% endif %}
@@ -261,6 +261,9 @@
         <div class="row form-line">
             <div class="col-lg-12">
                 <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print Settlement</button>
+{#                <a href="{% url 'generateSettlementPDF' settlement.id %}" target="_blank" download="">#}
+{#                    <button class="btn btn-primary" id="savepdf" name="savepdf" style="margin: 5px auto 20px auto;">Save PDF</button>#}
+{#                </a>#}
             </div>
         </div>
     </div>
@@ -268,7 +271,7 @@
                                                 value="Go Back To Settlements List" name="done"/></a>
 
     <div id="footer_content" style="display: none">
-        <table style="padding: 20px; font-size: 14px; width: 100%; position: fixed; bottom: 0;">
+        <table style="padding: 20px; font-size: 14px; width: 100%; position: sticky; bottom: 0;">
             <tbody>
             <tr>
                 <td style="padding: 0; text-align: center; width: 20pt;">
@@ -337,6 +340,7 @@
             $(document).ready(function() {
                 $('#printbtn').click(function() {
                     $('#printThis').printThis({
+                        pageTitle: "Reza May 21",
                         importCSS: true,
                         importStyle: true,
                         header: $('.header'),
@@ -344,12 +348,12 @@
                         beforePrint: function(){
                             $('#topnav').hide();
                             $('#footer_content').show();
-                            $('#printThis').css('margin-top','100px');
+                            {#$('#printThis').css({'padding-top': '300px', 'padding-bottom': '400px' });#}
                         },
                         afterPrint: function(){
                             $('#topnav').show();
                             $('#footer_content').hide();
-                            $('#printThis').css('margin-top','0px');
+                            $('#printThis').css({'padding-top': '0', 'padding-bottom': '0'});
                         },
                     });
                 });

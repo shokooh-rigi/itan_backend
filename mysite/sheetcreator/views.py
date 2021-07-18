@@ -44,7 +44,7 @@ def sheet_list(request):
                   'WEB_URL': WEB_URL,
                   'MEDIA_URL': MEDIA_URL,
                   }
-    return render(request, "sheetList.html", parameters)
+    return render(request, "airMovingSheetList.html", parameters)
 
 
 @login_required
@@ -63,7 +63,7 @@ def sheet_add(request):
     parameters = {'form': form,
                   'orders': orders,
                   }
-    return render(request, "sheetAdd.html", parameters)
+    return render(request, "airMovingSheetAdd.html", parameters)
 
 
 @login_required

@@ -7,10 +7,10 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_duct_design_value(request, design_field, equipment):
+def get_dalt_design_value(request, design_field, equipment):
     if request.method == 'POST':
         return request.POST.get(f'design_value_{design_field.id}')
-    return_value = DuctSheetData.objects.filter(data_type=1, duct_equipment=equipment, sheet_field=design_field)
+    return_value = DaltSheetData.objects.filter(data_type=1, dalt_equipment=equipment, sheet_field=design_field)
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -19,10 +19,10 @@ def get_duct_design_value(request, design_field, equipment):
 
 
 @register.simple_tag
-def get_duct_actual_value(request, actual_field, equipment):
+def get_dalt_actual_value(request, actual_field, equipment):
     if request.method == 'POST':
         return request.POST.get(f'actual_value_{actual_field.id}')
-    return_value = DuctSheetData.objects.filter(data_type=2, duct_equipment=equipment, sheet_field=actual_field)
+    return_value = DaltSheetData.objects.filter(data_type=2, dalt_equipment=equipment, sheet_field=actual_field)
     if return_value.count() > 0:
         return return_value.first().value
     else:

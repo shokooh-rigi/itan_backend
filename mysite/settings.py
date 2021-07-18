@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import environ
+
+env = environ.Env()
+
+environ.Env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,6 +61,7 @@ INSTALLED_APPS = [
     'snowpenguin.django.recaptcha2',
     'django_select2',
     'adminsortable2',
+    'storages',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',
@@ -77,7 +83,12 @@ INSTALLED_APPS = [
     'mysite.testsheetvelocity',
     'mysite.testsheetflow',
     'mysite.testsheetpump',
-    'mysite.testsheetduct',
+    'mysite.testsheetdalt',
+    'mysite.testsheetchiller',
+    'mysite.testsheetvavboxfanheatschedule',
+    'mysite.testsheetinductionunit',
+    'mysite.testsheetprimaryheatexchanger',
+    'mysite.testsheetairmovingequipment',
     'mysite.generatereport',
     'mysite.projectprocess',
     'mysite.masspayment',
@@ -262,3 +273,18 @@ RECAPTCHA_PUBLIC_KEY = '6Levt-YUAAAAAEtQg-rc4Y9FqatZuPEdDeR4mDCk'
 
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
+
+# AWS_ACCESS_KEY_ID = 'OGFXM9GOVSTERDBXNF14'
+# AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = 'djangouscentralstorage'
+# AWS_S3_ENDPOINT_URL = 'https://s3.us-central-1.wasabisys.com'
+#
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.us-central-1.wasabisys.com' % AWS_STORAGE_BUCKET_NAME
+#
+# AWS_LOCATION = 'static'
+#
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
+# STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

@@ -9,6 +9,161 @@
         <meta charset="utf-8">
         <title>Settlement</title>
         {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 9.5%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 14.5%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .border {
+            border: 1px solid black;
+        }
+
+        .pdf-table .no-border {
+            border: 0px solid black;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 1px solid black;
+        }
+
+        .top-row-thick th, .top-row-thick td {
+            border-top: 2px solid black;
+        }
+
+        .bottom-row-thick th, .bottom-row-thick td {
+            border-bottom: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+    </style>
     </head>
     <body>
 
@@ -18,121 +173,234 @@
 
 
 <div id="content_frame">
-    <div class="content" style="font-size: 14px;">
-        <div class="row form-line" style="border-bottom: 1px solid #000; padding: 20px 0 2px 0;">
-            <div class="col-12 text-center" style="text-align: center;"><b>Technicians Settlement Sheet</b></div>
-        </div>
-        <div class="row form-line" style="padding: 20px 0 2px 0;">
-            <table class="table">
-                <thead>
-                      <tr>
-                          <td><b>Settlement #:</b> {{ settlement.id }}</td>
-                          <td><b>Date:</b> {{ settlement.created_on|date:'M-d-Y' }}</td>
-{#                          <td><b>Contractor:</b> {{ settlement.contractor }}</td>#}
-                      </tr>
-                </thead>
-            </table>
-        </div>
-        <table class="table table-striped" style="width: 10pt; display: inline-block;">
+    <div class="content pdf-page-content">
+        <table class="">
             <thead>
-                  <tr>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">ID Number</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Name</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Address</th>
-                  </tr>
+                <tr class="pdf-head-tr">
+                    <th colspan="18" scope="col"></th>
+                </tr>
             </thead>
             <tbody>
-                  <tr>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">{% if settlement.contractor.id_number %}{{ settlement.contractor.id_number }}{% else %}-{% endif %}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.contractor }}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">
-                        {% if settlement.contractor.company.address_line_1 %}<br />{{ settlement.contractor.company.address_line_1 }}{% endif %}
-                        {% if settlement.contractor.company.address_line_2 %}<br />{{ settlement.contractor.company.address_line_2 }}{% endif %}
-                        {% if settlement.contractor.company.city %}<br />{{ settlement.contractor.company.city }}{% endif %}
-                        {% if settlement.contractor.company.state %}, {{ settlement.contractor.company.state }}{% endif %}
-                        {% if settlement.contractor.company.zip %}, {{ settlement.contractor.company.zip }}{% endif %}
-                      </td>
-                  </tr>
+            <tr>
+                <td>
+                    <div class="content">
+                        <table class="table font-weight-bold">
+                            <tbody>
+                                <tr class="pdf-table-title">
+                                    <td class="pdf-table-cell center-title">Technicians Settlement Sheet</td>
+                                    <td class="pdf-table-cell center-title" style="text-align: right;">Settlement #</td>
+                                    <td class="pdf-table-cell center-title">{{ settlement_id_prefix }}{% if settlement.contractor.profile.id_number %}{{ settlement.contractor.profile.id_number|stringformat:"d"|slice:"-2:" }}{% else %}-{% endif %}</td>
+                                    <td class="pdf-table-cell center-title" style="text-align: right;">Date</td>
+                                    <td class="pdf-table-cell center-title">{{ settlement.created_on|date:'m/d/Y' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row form-line">
+                            <table class="table table-bordered table-striped striped-red border border-dark" style="border-width: 2px !important;">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Project No</th>
+                                    <th colspan="3" scope="col">Project Name</th>
+                                    <th scope="col">
+                                        Type
+                                    </th>
+                                    <th scope="col">
+                                        Status
+                                    </th>
+                                    <th scope="col">
+                                        Price
+                                    </th>
+                                    <th scope="col">
+                                        Hours
+                                    </th>
+                                    <th scope="col">
+                                        Rate
+                                    </th>
+                                    <th scope="col">
+                                        Tech %
+                                    </th>
+                                    <th scope="col">
+                                        Job %
+                                    </th>
+                                    <th scope="col">
+                                        Previous Payment
+                                    </th>
+                                    <th scope="col">
+                                        Amount
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for settled_schedule in settled_schedules %}
+                                    <tr>
+                                        <td class="pdf-table-cell center-title">{{ settled_schedule.schedule.schedule_start|date:'d-M' }}</td>
+                                        <td class="pdf-table-cell center-title">{{ settled_schedule.schedule.order.project_number }}</td>
+                                        <td class="pdf-table-cell center-title" colspan="3">{{ settled_schedule.schedule.order.proposal.quote.estimate.project.name }}</td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if settled_schedule.schedule.pre_demo %}PRE-DEMO{% else %}
+                                                Final{% endif %}</td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if settled_schedule.schedule.order.completion_percentage == 100 %}
+                                                C{% else %}I{% endif %}</td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}${{ settled_schedule.settled_total|floatformat:2|intcomma }}{% else %}-{% endif %}{% else %}N.A.{% endif %}</td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}-{% else %}{{ settled_schedule.settled_hours }}{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}%{{ settlement.contractor.profile.interest_percentage }}{% else %}{{ settlement.contractor.profile.hourly_rate }}{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.settled_type %}%{% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}-{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}{% if settled_schedule.completion_percentage %}%{{ settled_schedule.completion_percentage }}{% else %}-{% endif %}{% else %}N.A.{% endif %}
+                                        </td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if settled_schedule.previous_payment %}${% previous_payment_calc settled_schedule as ppc %}{{ ppc|floatformat:2|intcomma }}{% endif %}
+                                        </td>
+                                        <td class="pdf-table-cell center-title">
+                                            {% if not settled_schedule.settle_override %}${{ settled_schedule.settled_value|floatformat:2|intcomma }}{% else %}${{ settled_schedule.settle_override|floatformat:2|intcomma }}{% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% for settled_maintenance in settled_maintenances %}
+                                    <tr>
+                                        <td class="pdf-table-cell center-title">{{ settled_maintenance.maintenance.schedule_start|date:'d-M' }}</td>
+                                        <td class="pdf-table-cell center-title">{{ settled_maintenance.maintenance.order.project_number }}</td>
+                                        <td class="pdf-table-cell center-title" colspan="3">{{ settled_maintenance.maintenance.order.proposal.quote.estimate.project.name }}</td>
+                                        <td class="pdf-table-cell center-title">Extra</td>
+                                        <td class="pdf-table-cell center-title">C</td>
+                                        <td class="pdf-table-cell center-title">N.A.</td>
+                                        <td class="pdf-table-cell center-title">{{ settled_maintenance.settled_hours }}</td>
+                                        <td class="pdf-table-cell center-title">{{ settlement.contractor.profile.hourly_rate }}</td>
+                                        <td class="pdf-table-cell center-title">-</td>
+                                        <td class="pdf-table-cell center-title">-</td>
+                                        <td class="pdf-table-cell center-title"></td>
+                                        <td class="pdf-table-cell center-title">${{ settled_maintenance.settled_value|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row form-line">
+                            <div class="col-sm-4 text-right" style="margin: 0 0 auto auto;">
+                                <div style="text-align: right;">
+                                    <div class="d-inline-block">Total: <span
+                                            style="display: inline-block; width: 180px; font-weight: bold;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row form-line">
+                            <div class="col-3 p-0">
+                                <table class="table table-striped border border-dark" style="border-width: 2px !important;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="text-center" style="background-color: #000 !important; color: #fff;">
+                                                From<br/>{{ settlement.settlement_start|date:'M-d-Y' }}</th>
+                                            <th scope="col" class="text-center" style="background-color: #000 !important; color: #fff;">
+                                                To<br/>{{ settlement.settlement_end|date:'M-d-Y' }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>SubTotal</td>
+                                            <td class="text-right">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expenses</td>
+                                            <td class="text-right">${{ settlement.fixed_expenses|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Total</td>
+                                            <td class="font-weight-bold text-right">
+                                                ${% calculate_total_settled_including_expenses settlement as cts %}{{ cts|floatformat:2|intcomma }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div><div class="col-3 p-0"></div>
+                            <div class="col-6 p-0">
+                                <table class="table table-striped border border-dark" style="border-width: 2px !important;">
+
+                                    <tbody>
+                                        <tr>
+                                            <th colspan="3" class="text-center" style="background-color: #000 !important; color: #fff;">
+                                                Payment Info
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Date
+                                            </td>
+                                            <td>
+                                                Amount
+                                            </td>
+                                            <td>
+                                                Check No.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">
+                                                {{ settlement.created_on|date:'m/d/Y' }}
+                                            </td>
+                                            <td class="font-weight-bold">
+                                                ${% calculate_total_settled_including_expenses settlement as cts %}{{ cts|floatformat:2|intcomma }}
+                                            </td>
+                                            <td class="font-weight-bold">
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="3" class="text-center" style="background-color: #000 !important; color: #fff;">
+                                                Technician Info
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td>ID Number</td>
+                                            <td colspan="2" class="font-weight-bold">
+                                                {% if settlement.contractor.profile.id_number %}
+                                                    {{ settlement.contractor.profile.id_number }}{% else %}-{% endif %}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td colspan="2" class="font-weight-bold">
+                                                {% if settlement.contractor.profile.tech.company %}{{ settlement.contractor.profile.tech.company }}{% else %}{{ settlement.contractor.first_name }} {{ settlement.contractor.last_name }}{% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Address</td>
+                                            <td colspan="2" class="font-weight-bold">
+                                                {% if settlement.contractor.profile.tech.company.address_line_1 %}
+                                                    {{ settlement.contractor.profile.tech.company.address_line_1 }}{% endif %}
+                                                {% if settlement.contractor.profile.tech.company.address_line_2 %},
+                                                    {{ settlement.contractor.profile.tech.company.address_line_2 }}{% endif %}
+                                                {% if settlement.contractor.profile.tech.company.city %},
+                                                    {{ settlement.contractor.profile.tech.company.city }}{% endif %}
+                                                {% if settlement.contractor.profile.tech.company.state %},
+                                                    {{ settlement.contractor.profile.tech.company.state }}{% endif %}
+                                                {% if settlement.contractor.profile.tech.company.zip %},
+                                                    {{ settlement.contractor.profile.tech.company.zip }}{% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
             </tbody>
+            <tfoot>
+            <tr>
+                <td>
+                    <div class="footer-space">&nbsp;</div>
+                </td>
+            </tr>
+            </tfoot>
         </table>
-        <br />
-        <table class="table table-striped" style="width: 400px; float: left;">
-            <thead>
-                  <tr>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">From</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">To</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">SubTotal</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Expenses</th>
-                      <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Total</th>
-                  </tr>
-            </thead>
-            <tbody>
-                  <tr>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.settlement_start|date:'M-d-Y' }}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.settlement_end|date:'M-d-Y' }}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">${{ settlement.fixed_expenses|floatformat:2|intcomma }}</td>
-                      <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_total_settled_including_expenses settlement as cts %}{{ cts|floatformat:2|intcomma }}</td>
-                  </tr>
-            </tbody>
-        </table>
-        <br />
-        <div class="row form-line">
-            <table class="table table-striped" id="servicetable">
-                <thead>
-                      <tr>
-{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Item</th>#}
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project No</th>
-                            <th colspan="3" scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Project Name</th>
-{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Address</th>#}
-{#                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Settlement based on</th>#}
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Type</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Status</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Price</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Hours</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Rate</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">%</th>
-                            <th scope="col" style="background-color: #333; color: #fff; padding: 5px 0 1px 0;">Amount</th>
-                      </tr>
-                </thead>
-                <tbody>
-                    {% for settled_schedule in settled_schedules %}
-                    <tr>
-{#                        <th scope="row" style="padding: 5px 0 1px 0; text-align: center;">{{forloop.counter}}</th>#}
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_schedule.schedule.order.project_number }}</td>
-                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_schedule.schedule.order.proposal.quote.estimate.project.name }}</td>
-{#                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_order.order.proposal.quote.estimate.project.address_line_1 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.address_line_2 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ settled_order.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if settled_order.order.proposal.quote.estimate.project.city %}{{ settled_order.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.state %}, {{ settled_order.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if settled_order.order.proposal.quote.estimate.project.zip %} {{ settled_order.order.proposal.quote.estimate.project.zip }}{% endif %}</td>#}
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.schedule.pre_demo %}PRE-DEMO{% else %}Final{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.schedule.order.completion_percentage == 100 %}C{% else %}I{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}${% order_total_calculator settled_schedule.schedule.order.proposal.quote.estimate.id settled_schedule.schedule.order as otc %}{{ otc|floatformat:2|intcomma }}{% else %}-{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}-{% else %}{{ settled_schedule.settled_hours }}{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}%{{ settlement.contractor.profile.interest_percentage }}{% else %}{{ settlement.contractor.profile.hourly_rate }}{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{% if settled_schedule.settled_type %}%{% tech_involvement settled_schedule.schedule settlement.contractor %}{% else %}-{% endif %}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_schedule.settled_value|floatformat:2|intcomma }}</td>
-{#                        <td style="padding: 5px 0 1px 0; text-align: center;">${% calculate_settlement_amount settled_order as csa %}{{ csa|floatformat:2|intcomma }}</td>#}
-                    </tr>
-                    {% endfor %}
-                    {% for settled_maintenance in settled_maintenances %}
-                    <tr>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.schedule.order.project_number }}</td>
-                        <td colspan="3" style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.schedule.order.proposal.quote.estimate.project.name }}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">Extra</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">C</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">N.A.</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settled_maintenance.settled_hours }}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">{{ settlement.contractor.profile.hourly_rate }}</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">-</td>
-                        <td style="padding: 5px 0 1px 0; text-align: center;">${{ settled_maintenance.settled_value|floatformat:2|intcomma }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="row form-line">
-            <div class="col-sm-4 text-right" style="margin: 0 0 auto auto;">
-                <div style="text-align: right;"><div class="d-inline-block">Total: <span style="display: inline-block; width: 180px; font-weight: bold;">${% calculate_total_settled settlement as cts %}{{ cts|floatformat:2|intcomma }}</span></div></div>
-            </div>
-        </div>
 
     </div>
 </div>

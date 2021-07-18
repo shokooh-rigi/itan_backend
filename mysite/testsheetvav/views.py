@@ -31,7 +31,7 @@ def vav_sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = DataSheet.objects.filter(test_sheet_type__name__icontains='vav')
+    object_list = DataSheet.objects.filter(test_sheet_type__name__iexact='vav')
     object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=search) |
                                      Q(project__project_number__icontains=search)).order_by(ordering)
 
@@ -49,7 +49,7 @@ def vav_sheet_list(request):
 @login_required
 def vav_sheet_add(request):
     form = VavSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='vav').values_list('project_id')).order_by('-project_number')
+    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__iexact='vav').values_list('project_id')).order_by('-project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('vavSheetHome')
@@ -70,7 +70,7 @@ def vav_sheet_equipment(request, sheet_id):
     sheet = DataSheet.objects.get(id=sheet_id)
     form = VavSheetEquipmentForm(request.POST or None, initial={'sheet': sheet_id})
 
-    equipments = Equipment.objects.filter(Q(test_sheet__name__icontains='vav') | Q(test_sheet__inheritance__name__icontains='vav'))
+    equipments = Equipment.objects.filter(Q(test_sheet__name__iexact='vav') | Q(test_sheet__inheritance__name__iexact='vav'))
 
     equipment_in = []
     sheet_equipments = DataSheetEquipment.objects.filter(sheet=sheet_id)
@@ -207,7 +207,7 @@ def update_sheet_equipments_positioning(request, sheet_id):
 
 
 def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
-    general_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
+    general_fields = TestSheetColumn.objects.filter(test_sheet__name__iexact='vav')
     general_data = TestSheetGeneralData.objects.filter(sheet_equipment=this_sheet_equipment)
     inherit = False
     if this_sheet_equipment.equipment_type.test_sheet.inheritance:
@@ -416,15 +416,15 @@ def equipments_generate_report_pdf(request, sheet_id):
 def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     next_url = request.GET.get("next")
     sheet_equipment = DataSheetEquipment.objects.get(id=sheet_equipment_id)
-    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='vav')
+    showing_fields = TestSheetColumn.objects.filter(test_sheet__name__iexact='vav')
     manufacturers = EquipmentManufacturer.objects.filter(
         equipmentdb__equipment_type=sheet_equipment.equipment_type).distinct()
-    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='vav',
+    Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__iexact='vav',
                                               equipment_type=sheet_equipment.equipment_type)
 
     sat = sheet_equipment.number_of_supply_air_terminal
 
-    equipments = Equipment.objects.filter(test_sheet__name__icontains='vav')
+    equipments = Equipment.objects.filter(test_sheet__name__iexact='vav')
 
     equipment_groups = list(map(lambda x: chr(x), range(65, 65 + sheet_equipment.sheet.number_of_equipment_groups)))
 

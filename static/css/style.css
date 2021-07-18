@@ -994,6 +994,14 @@ td.ui-sortable-icon {
     z-index: 10;
 }
 
+.fc-timeGridDay-view .fc-scrollgrid-section-liquid {
+    height: 757px !important;
+}
+
+.fc-timeGridDay-view .move-action {
+    display: none !important;
+}
+
 @media print {
     body {
         -webkit-print-color-adjust: exact;

@@ -11,6 +11,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import BidFileForm, BidFileEditForm
 from .models import BidFile
 from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
+from django.core.files import File
+from io import BytesIO
 
 
 # Create your views here.
@@ -84,6 +86,7 @@ def bidfiles_add(request):
                     files.append(os.path.join(temp_path, f.name))
                     handle_uploaded_file(f, files[-1])
                 form.cleaned_data['created_by'] = request.user
+                form.uploaded_file = None
                 # b = Project(name=form.cleaned_data['project_name'], created_by=request.user)
                 # b.save()
                 entry = form.save()
@@ -98,10 +101,11 @@ def bidfiles_add(request):
                     .replace('*', '') \
                     .replace("/", '')
                 zip_file_name = str(entry.pk) + '. ' + project_clean_name + '.zip'
-                create_zip_file(files, temp_path, zip_file_name)
+                zf = create_zip_file(files, temp_path, zip_file_name)
                 if BidFile.objects.get(id=entry.pk).uploaded_file:
-                    os.remove(BidFile.objects.get(id=entry.pk).uploaded_file.path)
-                BidFile.objects.filter(id=entry.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
+                    os.remove(os.path.abspath(os.path.dirname("__file__")) + BidFile.objects.get(id=entry.pk).uploaded_file.path)
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                BidFile.objects.get(id=entry.pk).uploaded_file.save(zip_file_name, file)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
                   }

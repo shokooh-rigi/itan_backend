@@ -1057,29 +1057,25 @@ def estimate_bid(request, estimate_id):
         pass
 
     try:
-        last_invoice_history_total = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).order_by('id').last()
-        if float(last_invoice_history_total.total_invoiced) != float(calculate_total_amount_due(estimate.quote.proposal.order.invoice)):
-            Invoice.objects.filter(id=estimate.quote.proposal.order.invoice.id) \
-                .update(times_estimate_changed=estimate.quote.proposal.order.invoice.times_estimate_changed + 1)
-            transactions_count = InvoiceTransaction.objects.filter(invoice=estimate.quote.proposal.order.invoice.id).count()
-            change_orders_count = ChangeOrder.objects.filter(order=estimate.quote.proposal.order.invoice.order).count()
-            total_count = transactions_count + change_orders_count + estimate.quote.proposal.order.invoice.times_estimate_changed + 1
-            invoice_file_name = 'Invoice-' + str(estimate.quote.proposal.order.project_number[3:]).zfill(3) + '-' + str(
-                estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count)
-            parameters['file_name'] = invoice_file_name
-            parameters['total_count'] = total_count
-            parameters['invoice'] = estimate.quote.proposal.order.invoice
-            change_orders = ChangeOrder.objects.filter(order=estimate.quote.proposal.order)
-            parameters['change_orders'] = change_orders
-            parameters['total_amount_due'] = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
-            Invoice.create_invoice_pdf(parameters)
+        Invoice.objects.filter(id=estimate.quote.proposal.order.invoice.id) \
+            .update(times_estimate_changed=estimate.quote.proposal.order.invoice.times_estimate_changed + 1)
+        total_count = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).count() + 1
+        invoice_file_name = 'Invoice-' + str(estimate.quote.proposal.order.project_number[3:]).zfill(3) + '-' + str(
+            estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count)
+        parameters['file_name'] = invoice_file_name
+        parameters['total_count'] = total_count
+        parameters['invoice'] = estimate.quote.proposal.order.invoice
+        change_orders = ChangeOrder.objects.filter(order=estimate.quote.proposal.order)
+        parameters['change_orders'] = change_orders
+        parameters['total_amount_due'] = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
+        Invoice.create_invoice_pdf(parameters)
 
-            total_invoiced = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
-            total_paid = calculate_total_paid(estimate.quote.proposal.order.invoice)
-            balance_due = calculate_remaining_invoice_due(estimate.quote.proposal.order.invoice)
-            new_object = InvoiceHistory(invoice=estimate.quote.proposal.order.invoice, total_invoiced=total_invoiced, total_paid=total_paid,
-                                        balance_due=balance_due, pdf_filename=invoice_file_name)
-            new_object.save()
+        total_invoiced = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
+        total_paid = calculate_total_paid(estimate.quote.proposal.order.invoice)
+        balance_due = calculate_remaining_invoice_due(estimate.quote.proposal.order.invoice)
+        new_object = InvoiceHistory(invoice=estimate.quote.proposal.order.invoice, total_invoiced=total_invoiced, total_paid=total_paid,
+                                    balance_due=balance_due, pdf_filename=invoice_file_name)
+        new_object.save()
     except:
         pass
     return render(request, "estimateBid.html", parameters)

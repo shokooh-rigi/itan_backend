@@ -261,10 +261,35 @@ def schedule_orders_list(request, type):
             if maintenance.order and any_assigned:
                 details_completed = True
             maintenance_order_id = ''
-            maintenance_title = 'Maintenace Placeholder'
+            maintenance_title = 'Maintenace'
             if maintenance.order:
                 maintenance_title = str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
                 maintenance_order_id = maintenance.order.id
+            color = '#fff'
+            if maintenance.maintenance_type == 1:
+                if details_completed:
+                    color = '#000'
+                    bg_color = '#ffc107'
+                else:
+                    bg_color = '#6c757d'
+            if maintenance.maintenance_type == 2:
+                maintenance_title = 'Lost Time'
+                if maintenance.order:
+                    maintenance_title = str(maintenance.order.project_number + '<br />' + str(
+                        maintenance.order.proposal.quote.estimate.project))
+                if details_completed:
+                    bg_color = '#c82333'
+
+                else:
+                    bg_color = '#6c757d'
+            if maintenance.maintenance_type == 3:
+                maintenance_title = 'Off/Vacation'
+                if any_assigned:
+                    details_completed = True
+                if details_completed:
+                    bg_color = '#23272b'
+                else:
+                    bg_color = '#6c757d'
             response_data.append({
                 'order_id': maintenance_order_id,
                 'maintenance_id': str(maintenance.id),
@@ -279,8 +304,8 @@ def schedule_orders_list(request, type):
                 'end': maintenance.schedule_end,
                 'goingDuration': str(30),
                 'comingDuration': str(30),
-                'bg_color': '#ffc107' if details_completed else '#6c757d',
-                'color': '#000' if details_completed else '#fff',
+                'bg_color': bg_color,
+                'color': color,
             })
         return JsonResponse(response_data, safe=False)
     elif type == 2:
@@ -375,7 +400,8 @@ def create_schedule(request):
             current_user = request.user
             schedule_date_start = request.POST.get('schedule_start')
             schedule_date_end = request.POST.get('schedule_end')
-            new_maintenance = Maintenance(schedule_start=schedule_date_start, schedule_end=schedule_date_end, created_by=current_user)
+            maintenance_type = request.POST.get('type')
+            new_maintenance = Maintenance(schedule_start=schedule_date_start, schedule_end=schedule_date_end, created_by=current_user, maintenance_type=maintenance_type)
             new_maintenance.save()
             return JsonResponse({
                 'result': True,
@@ -461,9 +487,15 @@ def update_schedule(request):
                                                                         schedule__schedule_end__gt=start_check) |
                                                                       Q(assigned_to_employee__id=new_tech_id,
                                                                         schedule__schedule_start__gt=start_check,
-                                                                        schedule__schedule_start__lt=end_check)).exclude(
-                        schedule=this_schedule)
-                    if this_tech_schedules:
+                                                                        schedule__schedule_start__lt=end_check)).exclude(schedule=this_schedule)
+                    maintenance_conflict = Maintenance.objects.filter(
+                        Q(assigned_to_employee__id=new_tech_id,
+                          schedule_start__lt=start_check,
+                          schedule_end__gt=start_check) |
+                        Q(assigned_to_employee__id=new_tech_id,
+                          schedule_start__gt=start_check,
+                          schedule_start__lt=end_check))
+                    if this_tech_schedules or maintenance_conflict:
                         has_conflict = True
                         conflicted_user = new_tech_id
                         conflicted_type = 'employee'
@@ -494,9 +526,15 @@ def update_schedule(request):
                                                                         schedule__schedule_end__gt=start_check) |
                                                                       Q(assigned_to_contractor__id=new_tech_id,
                                                                         schedule__schedule_start__gt=start_check,
-                                                                        schedule__schedule_start__lt=end_check)).exclude(
-                        schedule=this_schedule)
-                    if this_tech_schedules:
+                                                                        schedule__schedule_start__lt=end_check)).exclude(schedule=this_schedule)
+                    maintenance_conflict = Maintenance.objects.filter(
+                        Q(assigned_to_contractor__id=new_tech_id,
+                          schedule_start__lt=start_check,
+                          schedule_end__gt=start_check) |
+                        Q(assigned_to_contractor__id=new_tech_id,
+                          schedule_start__gt=start_check,
+                          schedule_start__lt=end_check))
+                    if this_tech_schedules or maintenance_conflict:
                         has_conflict = True
                         conflicted_user = new_tech_id
                         conflicted_type = 'contractor'
@@ -589,25 +627,39 @@ def update_schedule(request):
                 for schedule_tech in all_schedule_techs.all():
                     if schedule_tech.assigned_to_employee:
                         this_schedule_techs = ScheduleTech.objects.filter(
-                            Q(assigned_to_employee=schedule_tech.assigned_to_employee,
+                            Q(assigned_to_employee__id=schedule_tech.assigned_to_employee.id,
                               schedule__schedule_start__lt=start_check,
                               schedule__schedule_end__gt=start_check) |
-                            Q(assigned_to_employee=schedule_tech.assigned_to_employee,
+                            Q(assigned_to_employee__id=schedule_tech.assigned_to_employee.id,
                               schedule__schedule_start__gt=start_check,
                               schedule__schedule_start__lt=end_check)).exclude(schedule=this_schedule)
-                        if this_schedule_techs:
+                        maintenance_conflict = Maintenance.objects.filter(
+                            Q(assigned_to_employee__id=schedule_tech.assigned_to_employee.id,
+                              schedule_start__lt=start_check,
+                              schedule_end__gt=start_check) |
+                            Q(assigned_to_employee__id=schedule_tech.assigned_to_employee.id,
+                              schedule_start__gt=start_check,
+                              schedule_start__lt=end_check))
+                        if this_schedule_techs or maintenance_conflict:
                             has_conflict = True
                             conflicted_user = schedule_tech.assigned_to_employee.id
                             conflicted_type = 'employee'
                     elif schedule_tech.assigned_to_contractor:
                         this_schedule_techs = ScheduleTech.objects.filter(
-                            Q(assigned_to_contractor=schedule_tech.assigned_to_contractor,
+                            Q(assigned_to_contractor__id=schedule_tech.assigned_to_contractor.id,
                               schedule__schedule_start__lt=start_check,
                               schedule__schedule_end__gt=start_check) |
-                            Q(assigned_to_contractor=schedule_tech.assigned_to_contractor,
+                            Q(assigned_to_contractor__id=schedule_tech.assigned_to_contractor.id,
                               schedule__schedule_start__gt=start_check,
                               schedule__schedule_start__lt=end_check)).exclude(schedule=this_schedule)
-                        if this_schedule_techs:
+                        maintenance_conflict = Maintenance.objects.filter(
+                            Q(assigned_to_contractor__id=schedule_tech.assigned_to_contractor.id,
+                              schedule_start__lt=start_check,
+                              schedule_end__gt=start_check) |
+                            Q(assigned_to_contractor__id=schedule_tech.assigned_to_contractor.id,
+                              schedule_start__gt=start_check,
+                              schedule_start__lt=end_check))
+                        if this_schedule_techs or maintenance_conflict:
                             has_conflict = True
                             conflicted_user = schedule_tech.assigned_to_contractor.id
                             conflicted_type = 'contractor'
@@ -673,11 +725,12 @@ def update_maintenance(request):
                                                                       Q(assigned_to_employee__id=new_tech_id,
                                                                         schedule__schedule_start__gt=start_check,
                                                                         schedule__schedule_start__lt=end_check))
+
                     maintenance_conflict = Maintenance.objects.filter(
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=new_tech_id,
                           schedule_start__lt=start_check,
                           schedule_end__gt=start_check) |
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=new_tech_id,
                           schedule_start__gt=start_check,
                           schedule_start__lt=end_check)).exclude(id=this_maintenance.id)
                     if this_tech_schedules or maintenance_conflict:
@@ -711,10 +764,10 @@ def update_maintenance(request):
                                                                         schedule__schedule_start__gt=start_check,
                                                                         schedule__schedule_start__lt=end_check))
                     maintenance_conflict = Maintenance.objects.filter(
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=new_tech_id,
                           schedule_start__lt=start_check,
                           schedule_end__gt=start_check) |
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=new_tech_id,
                           schedule_start__gt=start_check,
                           schedule_start__lt=end_check)).exclude(id=this_maintenance.id)
                     if this_tech_schedules or maintenance_conflict:
@@ -740,7 +793,9 @@ def update_maintenance(request):
 
             elif update_type == 'update_order':
                 this_maintenance = Maintenance.objects.get(id=maintenance_id)
-                this_maintenance.order = Order.objects.get(id=order_id)
+                maintenance_type = request.POST.get('maintenance_type')
+                if maintenance_type != '3':
+                    this_maintenance.order = Order.objects.get(id=order_id)
                 this_maintenance.description = request.POST.get('desc')
                 this_maintenance.save()
                 return JsonResponse({
@@ -758,17 +813,17 @@ def update_maintenance(request):
                 conflicted_type = None
                 if this_maintenance.assigned_to_employee:
                     this_schedule_techs = ScheduleTech.objects.filter(
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=this_maintenance.assigned_to_employee.id,
                           schedule__schedule_start__lt=start_check,
                           schedule__schedule_end__gt=start_check) |
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=this_maintenance.assigned_to_employee.id,
                           schedule__schedule_start__gt=start_check,
                           schedule__schedule_start__lt=end_check))
                     maintenance_conflict = Maintenance.objects.filter(
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=this_maintenance.assigned_to_employee.id,
                           schedule_start__lt=start_check,
                           schedule_end__gt=start_check) |
-                        Q(assigned_to_employee=this_maintenance.assigned_to_employee,
+                        Q(assigned_to_employee__id=this_maintenance.assigned_to_employee.id,
                           schedule_start__gt=start_check,
                           schedule_start__lt=end_check)).exclude(id=this_maintenance.id)
                     if this_schedule_techs or maintenance_conflict:
@@ -777,17 +832,17 @@ def update_maintenance(request):
                         conflicted_type = 'employee'
                 elif this_maintenance.assigned_to_contractor:
                     this_schedule_techs = ScheduleTech.objects.filter(
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=this_maintenance.assigned_to_contractor.id,
                           schedule__schedule_start__lt=start_check,
                           schedule__schedule_end__gt=start_check) |
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=this_maintenance.assigned_to_contractor.id,
                           schedule__schedule_start__gt=start_check,
                           schedule__schedule_start__lt=end_check))
                     maintenance_conflict = Maintenance.objects.filter(
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=this_maintenance.assigned_to_contractor.id,
                           schedule_start__lt=start_check,
                           schedule_end__gt=start_check) |
-                        Q(assigned_to_contractor=this_maintenance.assigned_to_contractor,
+                        Q(assigned_to_contractor__id=this_maintenance.assigned_to_contractor.id,
                           schedule_start__gt=start_check,
                           schedule_start__lt=end_check)).exclude(id=this_maintenance.id)
                     if this_schedule_techs or maintenance_conflict:
@@ -879,7 +934,10 @@ def get_maintenance_info(request, maintenance_id):
                 'tech_type': 'employee',
             })
         elif this_maintenance.assigned_to_contractor:
-            tech_name = this_maintenance.assigned_to_contractor.name
+            if this_maintenance.assigned_to_contractor.last_name:
+                tech_name = this_maintenance.assigned_to_contractor.first_name + ' ' + this_maintenance.assigned_to_contractor.last_name
+            else:
+                tech_name = this_maintenance.assigned_to_contractor.email
             techs_array.append({
                 'tech_id': this_maintenance.assigned_to_contractor.id,
                 'tech_name': tech_name,
@@ -887,6 +945,7 @@ def get_maintenance_info(request, maintenance_id):
             })
         return JsonResponse({
             'result': True,
+            'type': this_maintenance.maintenance_type,
             'techs': techs_array,
             'desc': this_maintenance.description
         })

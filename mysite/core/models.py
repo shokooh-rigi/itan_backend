@@ -181,7 +181,7 @@ class BusinessCheckingAccount(models.Model):
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=255, blank=False)
+    name = models.CharField(max_length=255, blank=False, help_text='(/ : ?) characters are not allowed on project name')
     address_line_1 = models.CharField(max_length=255, blank=True)
     address_line_2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=55, blank=True)

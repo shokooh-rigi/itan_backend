@@ -33,7 +33,7 @@
     <div class="text-center">
         <div class="row form-line">
             <div class="col-lg-12">
-                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/Invoice-{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}.pdf?{% random_int 100000 999999 %}"><button name="print" class="btn btn-info" id="printStatement" formnovalidate>Download Invoice</button></a>
+                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/{{ latest_invoice_history.pdf_filename }}.pdf?{% random_int 100000 999999 %}"><button name="print" class="btn btn-info" id="printStatement" formnovalidate>Download Invoice</button></a>
                 <a href="{% url 'invoiceHome' %}"><input type="submit" class="btn btn-primary" value="Go Back To Invoice List" name="done" /></a>
             </div>
         </div>

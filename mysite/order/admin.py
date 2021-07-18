@@ -54,3 +54,4 @@ class TechLabelAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(TechLabel, TechLabelAdmin)
+admin.site.register(ChangeOrder)

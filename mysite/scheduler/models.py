@@ -3,7 +3,6 @@ from mysite.order.models import *
 
 # Create your models here.
 
-
 class Schedule(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
     schedule_start = models.DateTimeField(blank=False, null=False)
@@ -29,6 +28,12 @@ class Maintenance(models.Model):
     schedule_start = models.DateTimeField(blank=False, null=False)
     schedule_end = models.DateTimeField(blank=False, null=False)
     description = models.TextField(max_length=500, blank=True)
+    MAINTENANCE_TYPE_CHOICES = (
+        (1, 'Maintenance'),
+        (2, 'Lost Time'),
+        (3, 'Off/Vacation'),
+    )
+    maintenance_type = models.PositiveSmallIntegerField(choices=MAINTENANCE_TYPE_CHOICES, default=1)
     archive = models.BooleanField(default=False)
     settlement = models.BooleanField(default=False)
     tech_upload = models.FileField(upload_to='uploads/techfiles', blank=True, null=True)

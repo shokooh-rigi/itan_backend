@@ -443,6 +443,8 @@ class ProjectForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
 
+        self.fields['name'].widget.attrs['pattern'] = '[^/:?,]+'
+
         self.fields['zip'].widget.attrs['placeholder'] = 'Only numbers allowed'
         self.fields['zip'].widget.attrs['pattern'] = '(\d{5}([\-]\d{4})?)'
 

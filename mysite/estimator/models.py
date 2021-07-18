@@ -140,7 +140,7 @@ class EstimateDetails(models.Model):
     hours = models.PositiveSmallIntegerField(choices=hours_choices, default=0)
     pre_demo = models.FloatField(default=0)
     adjustment = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    customer_adjustment = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    customer_adjustment = models.DecimalField(default=0, max_digits=8, decimal_places=2, blank=True, null=True)
     remark = models.TextField(max_length=500, blank=True)
     validity = models.IntegerField(blank=False, default=30)
     saved_flag = models.BooleanField(default=False)

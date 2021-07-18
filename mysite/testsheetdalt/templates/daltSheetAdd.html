@@ -3,7 +3,7 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Generate Duct Test Sheet</h2>
+    <h2>Generate Dalt Test Sheet</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="sheetAdd-form">
         <div class="form-group">
             {% csrf_token %}
@@ -40,7 +40,7 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Duct Equipment Quantity <span class="required">*</span></label>
+                    <label for="id_validity" class="control-label">Dalt Equipment Quantity <span class="required">*</span></label>
                     {{ form.equipment_quantity }}
                 </div>
             </div>
