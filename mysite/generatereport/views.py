@@ -21,7 +21,7 @@ from ..testsheetvav.views import equipments_generate_report_pdf as generate_air_
 from PyPDF2 import PdfFileMerger
 import random
 from ..settings import MEDIA_URL_NOSLASH
-import img2pdf
+# import img2pdf
 from PIL import Image
 
 
