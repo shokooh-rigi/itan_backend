@@ -71,7 +71,7 @@
         </div>
         <br />
         <div class="row form-line">
-            <div class="text-center w-100"><b>Table</b><br /><br />
+            <div class="text-center w-100"><b>Table <span class="required">*</span></b><br /><br />
                 Row <input type="number" class="form-control" name="table-row" id="table-row" style="width: 60px;" value="{{ velocity_equipment.velocity_row }}" />
                 Column <input type="number" class="form-control" name="table-col" id="table-col" style="width: 60px;" value="{{ velocity_equipment.velocity_col }}" />
             </div>
@@ -175,7 +175,7 @@
                         $('#table-box').append('<div class="row-' + (i + 1) + '">');
                         for (let j = 0; j < j_step; j++) {
                             const my_value = JSON.parse('{% get_velocity_table_value request velocity_equipment %}')
-                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="' + ((my_value[i] && my_value[i][j]) ? my_value[i][j] : '') +'" />');
+                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="' + ((my_value[i] && my_value[i][j]) ? my_value[i][j] : '') +'" required />');
                         }
                     }
                     last_table_row = i_step
@@ -192,7 +192,7 @@
                     for (let i = last_table_row; i < i_step; i++) {
                         $('#table-box').append('<div class="row-' + (i + 1) + '">');
                         for (let j = 0; j < j_step; j++) {
-                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="" />');
+                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="" required />');
                         }
                     }
                     last_table_row = i_step
@@ -206,7 +206,7 @@
                 if (j_step > last_table_col) {
                     for (let i = 0; i < i_step; i++) {
                         for (let j = last_table_col; j < j_step; j++) {
-                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="" />');
+                            $('#table-box .row-' + (i + 1)).append('<input data-row="' + (i + 1) + '" data-col="' + (j + 1) + '" name="table-data-' + i + '-' + j + '" type="text" class="form-control m-1 table-data" style="width: 65px;" value="" required />');
                         }
                     }
                     last_table_col = j_step
