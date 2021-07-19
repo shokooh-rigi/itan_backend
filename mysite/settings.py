@@ -100,7 +100,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'mysite.estimator.templatetags',
     'mysite.pdf_analyzer',
-    'readonly',
 ]
 
 MIDDLEWARE = [
@@ -111,7 +110,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'readonly.middleware.DatabaseReadOnlyMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -127,7 +125,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'mysite.context_processors.read_only',
             ],
         },
     },
@@ -291,8 +288,3 @@ TINYMCE_COMPRESSOR = True
 # ]
 # STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
 # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-
-SITE_READ_ONLY = False
-# Enable
-DB_READ_ONLY_MIDDLEWARE_MESSAGE = True
