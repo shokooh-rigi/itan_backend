@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 
-from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
+# from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
 from mysite.pdf_analyzer.models import AddressExtractionRun, AddressExtractionDebug
 from mysite.pdf_analyzer.src.logger.logger_models import ADDRESS_RUN_STEPS
 
@@ -156,16 +156,16 @@ def bidfiles_delete(request, bidfiles_id):
 ########################################################################################################################
 # PDF Analyzer
 # find project address
-@login_required()
-def pdf_analyzer_project_address_run(request, bidfile_id):
-    bidfile = get_object_or_404(iBidFile, pk=bidfile_id)
-
-    active_runs = AddressExtractionRun.objects.filter(file=bidfile, is_finished=False)
-    if active_runs.exists():
-        return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', active_runs.first().pk)
-
-    run_id = start_find_project_address(bidfile, bidfile.project.name)
-    return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
+# @login_required()
+# def pdf_analyzer_project_address_run(request, bidfile_id):
+#     bidfile = get_object_or_404(iBidFile, pk=bidfile_id)
+#
+#     active_runs = AddressExtractionRun.objects.filter(file=bidfile, is_finished=False)
+#     if active_runs.exists():
+#         return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', active_runs.first().pk)
+#
+#     run_id = start_find_project_address(bidfile, bidfile.project.name)
+#     return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)
 
 
 @login_required()

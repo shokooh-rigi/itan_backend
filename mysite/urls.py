@@ -28,7 +28,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
 
     path('', include('mysite.estimator.urls')),
-    path('', include('mysite.submittal.urls')),
+    # path('', include('mysite.submittal.urls')),
     path('', include('mysite.mgmreport.urls')),
     path('', include('mysite.order.urls')),
     path('', include('mysite.coi.urls')),
