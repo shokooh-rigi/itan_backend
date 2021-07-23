@@ -29,18 +29,12 @@ def get_velocity_table_value(request, equipment):
         row_data = []
         for table_data in table_datas:
             if table_data.row == row_num:
-                if table_data.value:
-                    row_data.append(int(table_data.value))
-                else:
-                    row_data.append(table_data.value)
+                row_data.append(int(table_data.value))
             else:
                 return_value.append(row_data)
                 row_num = table_data.row
                 row_data = []
-                if table_data.value:
-                    row_data.append(int(table_data.value))
-                else:
-                    row_data.append(table_data.value)
+                row_data.append(int(table_data.value))
         return_value.append(row_data)
         return return_value
     else:
