@@ -1,0 +1,629 @@
+{% load static %}
+{% load estimator_tags %}
+{% load primary_heat_exchanger_tags %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ sheet_type_name }} Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 9.5%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 14.5%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .border {
+            border: 1px solid black;
+        }
+
+        .pdf-table .no-border {
+            border: 0px solid black;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 1px solid black;
+        }
+
+        .pdf-table-row .pdf-table-cell:first-child {
+            border-left: 2px solid black;
+        }
+
+        .pdf-table-row:last-child {
+            border-right: 2px solid black;
+        }
+
+        .top-row-thick th, .top-row-thick td {
+            border-top: 2px solid black;
+        }
+
+        .bottom-row-thick th, .bottom-row-thick td {
+            border-bottom: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.total_pages_range %}
+    <div class="content pdf-page-content">
+        <table class="table pdf-table">
+            <!-- Table head section -->
+            <thead>
+            <tr class="pdf-head-tr">
+                <th colspan="22" scope="col"></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <!-- Table title -->
+            <tr class="pdf-table-title">
+                <td colspan="18" class="pdf-table-title-td text-uppercase">{{ sheet_type_name }}</td>
+                <td colspan="4" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
+            </tr>
+
+            <!-- Project specifications -->
+            <tr class="pdf-table-project-tr">
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="padding: 0 2px 0;">PROJECT NO:</td>
+                <td colspan="10" class="pdf-table-cell border">
+                    {{ form.my_sheet.project.project_number }}
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    {{ form.my_sheet.sheet_date | date }}
+                </td>
+            </tr>
+            <tr class="pdf-table-project-tr">
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                <td colspan="10" class="pdf-table-cell border">
+                    {{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    {{ form.my_sheet.system }}
+                </td>
+            </tr>
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <td colspan="6" class="pdf-table-cell pdf-table-title-cell">
+                        Unit Data
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'unit_number' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                </tr>
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" style="text-align: left" class="pdf-table-cell">
+                        Location
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'location' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                </tr>
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Service
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'service' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        RATING, B.T.U./Hour
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'rating_btu_hour' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Manufacturer
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'manufacturer' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Model Number
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'model_number' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Serial Number
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="4" class="pdf-table-cell">
+                                    {{ eq|get_item:'serial_number' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="4" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+                <tr class="pdf-table-row top-row-thick">
+                    <td colspan="6" class="pdf-table-cell pdf-table-title-cell">
+                        Test Data: Steam
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell" style="border-right-width: 2px;">
+                        Actual
+                    </td>
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Pressure, P.S.I.
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Pressure, P.S.I.-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Pressure, P.S.I.-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <td colspan="6" class="pdf-table-cell pdf-table-title-cell">
+                        Test Data: Primary Hot Water
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell">
+                        Actual
+                    </td>
+
+                    <td colspan="2" class="pdf-table-cell">
+                        Design
+                    </td>
+                    <td colspan="2" class="pdf-table-cell" style="border-right-width: 2px;">
+                        Actual
+                    </td>
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Entering Water Temperature
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Entering Water Tempreture-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Entering Water Tempreture-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Leaving Water Temperature
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Leaving Water Tempreture-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Leaving Water Tempreture-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Flow, G.P.M.
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Flow, G.P.M.-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Flow, G.P.M.-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Pressure Drop, Ft.
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Pressure Drop, Ft.-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Pressure Drop, Ft.-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+
+
+                <tr class="section-first-row pdf-table-row">
+                    <td colspan="6" class="pdf-table-cell" style="text-align: left">
+                        Control Settings
+                    </td>
+                    {% for equipment in form.equipment_data %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            {% for eq in equipment %}
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Control Settings-1' }}
+                                </td>
+                                <td colspan="2" class="pdf-table-cell">
+                                    {{ eq|get_item:'Control Settings-2' }}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        {% if forloop.counter == form.total_pages %}
+                            {% for empty_row in empty_row_range %}
+                                <td colspan="2" class="pdf-table-cell">
+                                </td>
+                                <td colspan="2" class="pdf-table-cell" {% if forloop.last %}style="border-right-width: 2px;"{% endif %}>
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                <tr class="no-border" style="border-top: 2px solid black;">
+                    <td class="pdf-table-cell" colspan="1">
+                        Notes:
+                    </td>
+                    <td class="pdf-table-cell" colspan="21" style="text-align: left">
+                        {% for induction_unit_equipment in form.induction_unit_equipment_data %}
+                            {% if forloop.counter == forloop.parentloop.counter %}
+                                {% for eq in induction_unit_equipment %}
+                                    {% with eq|get_item:'Note-2' as note %}
+                                        {% if note != '' %}{{ note }} | {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endfor %}
+</div>
+</body>
+</html>

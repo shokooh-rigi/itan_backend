@@ -6,7 +6,6 @@ from adminsortable2.admin import SortableInlineAdminMixin
 
 from .models import *
 
-
 class ManufacturerResource(resources.ModelResource):
     class Meta:
         model = EquipmentManufacturer
@@ -80,4 +79,10 @@ class TestSheetAdmin(ImportExportModelAdmin):
 
 admin.site.register(TestSheet, TestSheetAdmin)
 admin.site.register(TestSheetColumn)
-admin.site.register(AirTerminalCode)
+
+
+class AirTerminalCodeAdmin(ImportExportModelAdmin):
+    model = AirTerminalCode
+
+
+admin.site.register(AirTerminalCode, AirTerminalCodeAdmin)

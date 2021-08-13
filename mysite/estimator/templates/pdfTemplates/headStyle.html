@@ -1,4 +1,5 @@
 {% load estimator_tags %}
+{% load static %}
         <style type="text/css">
             .logo { width: 160px; display: inline-block; float: left; }
             @page {
@@ -21,12 +22,12 @@
             @font-face {
                 font-family: customfont;
                 font-weight: normal;
-                src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambria.ttf);
+                src: url({% static 'fonts/cambria.ttf' %});
             }
             @font-face {
                 font-family: customfont;
                 font-weight: bold;
-                src: url({{ WEB_URL }}{{ STATIC_URL }}fonts/cambriab.ttf);
+                src: url({% static 'fonts/cambriab.ttf' %});
             }
 
             body {

@@ -13,7 +13,9 @@ from .models import BidFile
 from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from django.core.files import File
 from io import BytesIO
-
+from ..s3_file_manager import S3
+import requests
+import os
 
 # Create your views here.
 
@@ -102,10 +104,12 @@ def bidfiles_add(request):
                     .replace("/", '')
                 zip_file_name = str(entry.pk) + '. ' + project_clean_name + '.zip'
                 zf = create_zip_file(files, temp_path, zip_file_name)
+                s3 = S3()
                 if BidFile.objects.get(id=entry.pk).uploaded_file:
-                    os.remove(os.path.abspath(os.path.dirname("__file__")) + BidFile.objects.get(id=entry.pk).uploaded_file.path)
+                    s3.delete_file_from_bucket(key=MEDIA_URL + str(BidFile.objects.get(id=entry.pk).uploaded_file))
                 file = open(temp_path + '/' + zip_file_name, 'rb')
                 BidFile.objects.get(id=entry.pk).uploaded_file.save(zip_file_name, file)
+                os.remove(temp_path + '/' + zip_file_name)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
                   }
@@ -152,8 +156,17 @@ def bidfiles_addfile(request, bidfiles_id):
                 .replace('*', '') \
                 .replace("/", '')
             zip_file_name = str(this_bfm.pk) + '. ' + project_clean_name + '.zip'
+            s3 = S3()
+            response = requests.get(s3.get_bucket_object('media/' + str(this_bfm.uploaded_file.file)))
+            f = open(os.path.join(temp_path, zip_file_name), 'wb')
+            f.write(response.content)
+            f.close()
             addto_zip_file(files, temp_path, zip_file_name)
-            BidFile.objects.filter(id=this_bfm.pk).update(uploaded_file=UPLOAD_URL + 'bidfiles/' + zip_file_name)
+            if BidFile.objects.get(id=this_bfm.pk).uploaded_file:
+                s3.delete_file_from_bucket(key=MEDIA_URL + str(BidFile.objects.get(id=this_bfm.pk).uploaded_file))
+            file = open(temp_path + '/' + zip_file_name, 'rb')
+            BidFile.objects.get(id=this_bfm.pk).uploaded_file.save(zip_file_name, file)
+            os.remove(temp_path + '/' + zip_file_name)
             return redirect('bidFilesHome')
         else:
             print(request)
@@ -206,10 +219,8 @@ def bidfiles_delete(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
     if request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by == request.user:
         if request.POST.get("confirm"):
-            file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")),
-                                     "media" + this_bidfile.uploaded_file.name)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+            s3 = S3()
+            s3.delete_file_from_bucket(key=MEDIA_URL + str(this_bidfile.uploaded_file))
             this_bidfile.delete()
         return redirect('bidFilesHome')
     elif request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by != request.user:

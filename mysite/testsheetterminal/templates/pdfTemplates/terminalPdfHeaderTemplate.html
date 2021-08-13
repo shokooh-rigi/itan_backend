@@ -1,0 +1,36 @@
+        <div id="header_content" style="margin-bottom: -10px;">
+             <table class="proposal_header">
+                <tbody>
+                    <tr>
+                        <td style="padding: 4px 0 0 0; width: 90%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 10%; vertical-align: bottom;"><b>{{ pdf_header_text }}</b></td>
+                    </tr>
+                </tbody>
+            </table>
+            <img alt="owner logo" style="position: absolute; top: -10px; margin-top: -20px; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+            <table class="table pdf-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th scope="col" class="wide-th"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Table title -->
+                    <tr class="pdf-table-title">
+                        <td class="pdf-table-title-td" colspan="8">Air Terminal Sheet</td>
+                        <td class="pdf-table-title-td pdf-page-number" colspan="2">Page <pdf:pagenumber/> </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>

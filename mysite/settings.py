@@ -88,7 +88,11 @@ INSTALLED_APPS = [
     'mysite.testsheetvavboxfanheatschedule',
     'mysite.testsheetinductionunit',
     'mysite.testsheetprimaryheatexchanger',
+    'mysite.testsheetprimaryheatexchanger2',
     'mysite.testsheetairmovingequipment',
+    'mysite.testsheetvavboxtemperatureschedule',
+    'mysite.testsheetvavboxschedule',
+    'mysite.testsheetpitottraversesummary',
     'mysite.generatereport',
     'mysite.projectprocess',
     'mysite.masspayment',
@@ -135,35 +139,12 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-if ENV == 'local':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-
-if ENV == 'production':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'dtabtech_maindb',
-            'USER': 'dtabtech_dtab',
-            'PASSWORD': 'UzP^e&9pXEK,',
-            'HOST': 'localhost',
-        }
-    }
-
-if ENV == 'test':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'airtab_dbnew2',
-            'USER': 'airtab_usr',
-            'PASSWORD': 'GKY%ZZyd@p=v',
-            'HOST': 'localhost',
-        }
-    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -186,24 +167,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-if ENV == 'local':
-    STATIC_URL = '/static/'
-if ENV == 'production':
-    STATIC_URL = '/dashboard/static/'
-if ENV == 'test':
-    STATIC_URL = '/python/static/'
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-if ENV == 'local':
-    MEDIA_URL = '/media/'
-if ENV == 'production':
-    MEDIA_URL = '/dashboard/media/'
-if ENV == 'test':
-    MEDIA_URL = '/python/media/'
 MEDIA_URL_NOSLASH = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -219,23 +184,8 @@ LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-if ENV == 'local':
-    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-if ENV == 'production':
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_USE_SSL = True
-    EMAIL_HOST = 'mail.tabtechinc.com'
-    EMAIL_HOST_USER = 'contactus@tabtechinc.com'
-    EMAIL_HOST_PASSWORD = 'J8]FrgW#OY8b'
-    EMAIL_PORT = 465
-if ENV == 'test':
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_USE_SSL = True
-    EMAIL_HOST = 'mail.tabtechinc.com'
-    EMAIL_HOST_USER = 'estimator2@tabtechinc.com'
-    EMAIL_HOST_PASSWORD = '7V]{vni6+~&M'
-    EMAIL_PORT = 465
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 AUTH_USER_MODEL = 'custom_user.User'
 
@@ -261,30 +211,38 @@ DJRICHTEXTFIELD_CONFIG = {
 }
 
 FILE_UPLOAD_PERMISSIONS = 0o644
-MAX_UPLOAD_SIZE = 262144000
+MAX_UPLOAD_SIZE = 524288000
 DEFAULT_FROM_EMAIL = 'Estimator at TAB TECHNOLOGIES <estimator@tabtechinc.com>'
 
 BOOTSTRAP4 = {
     'include_jquery': True,
 }
 
-RECAPTCHA_PRIVATE_KEY = '6Levt-YUAAAAAClOFMj-oIofEeszrY4CMcQERlZj'
+RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PRIVATE_KEY')
 RECAPTCHA_PUBLIC_KEY = '6Levt-YUAAAAAEtQg-rc4Y9FqatZuPEdDeR4mDCk'
 
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
 
-# AWS_ACCESS_KEY_ID = 'OGFXM9GOVSTERDBXNF14'
-# AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = 'djangouscentralstorage'
-# AWS_S3_ENDPOINT_URL = 'https://s3.us-central-1.wasabisys.com'
-#
-# AWS_S3_CUSTOM_DOMAIN = '%s.s3.us-central-1.wasabisys.com' % AWS_STORAGE_BUCKET_NAME
-#
-# AWS_LOCATION = 'static'
-#
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),
-# ]
-# STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = 'EA8U7ESW7BOLAMRCJBPD'
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'reza-local'
+AWS_REGION_NAME = 'eu-central-1'
+AWS_S3_ENDPOINT_URL = 'https://s3.%s.wasabisys.com' % AWS_REGION_NAME
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.wasabisys.com' % (AWS_STORAGE_BUCKET_NAME, AWS_REGION_NAME)
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_S3_OBJECT_PARAMETERS
+AWS_LOCATION = 'static/'
+AWS_DEFAULT_ACL = 'public-read'
+AWS_QUERYSTRING_AUTH = True
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+
+DEFAULT_FILE_STORAGE = 'mysite.storage_backends.MediaStorage'
+MEDIA_URL = 'media/'

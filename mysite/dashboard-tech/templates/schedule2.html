@@ -1,4 +1,5 @@
 {% load static %}
+{% load estimator_tags %}
 <!DOCTYPE html>
 <!--
 Product Name: Metronic - Bootstrap 5 HTML Multi-purpose Admin Dashboard ThemeAuthor: KeenThemes
@@ -42,7 +43,7 @@ License: For each use you must have a valid license purchased only from above li
                     <div class="aside-logo flex-column-auto" id="kt_aside_logo">
 						<!--begin::Logo-->
 						<a class="col-12 row" href="{% url 'techPanel:schedule' %}">
-							<img alt="TAB Tech Logo" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_logo }}" class="col-12 logo m-0 p-4" />
+							<img alt="TAB Tech Logo" src="{% get_s3_file_url owner_logo '' %}" class="col-12 logo m-0 p-4" />
 {#                            <span class="col-9 text-white fw-bolder fs-7 m-0 p-0 d-flex align-items-center">TAB Technologies, INC.<br>Member AABC</span>#}
 						</a>
 						<!--end::Logo-->
@@ -1377,31 +1378,31 @@ License: For each use you must have a valid license purchased only from above li
                                     <label class="d-flex align-items-center fs-5 fw-bold mb-2">
                                         <span class="">Equipment Submittals</span>
                                     </label>
-                                    <a href="" id="equipment_submittal" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                    <a href="#" id="equipment_submittal" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
                                 </div>
                                 <div class="d-flex flex-stack mb-4">
                                     <label class="d-flex align-items-center fs-5 fw-bold mb-2">
                                         <span class="">Test Sheets</span>
                                     </label>
-                                    <a href="" id="test_sheets" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                    <a href="#" id="test_sheets" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
                                 </div>
                                 <div class="d-flex flex-stack mb-4">
                                     <label class="d-flex align-items-center fs-5 fw-bold mb-2">
                                         <span class="">Tech Marked Drawing</span>
                                     </label>
-                                    <a href="" id="tech_marked_drawing" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                    <a href="#" id="tech_marked_drawing" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
                                 </div>
                                 <div class="d-flex flex-stack mb-4">
                                     <label class="d-flex align-items-center fs-5 fw-bold mb-2">
                                         <span class="">Site Pictures</span>
                                     </label>
-                                    <a href="" id="site_pictures" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                    <a href="#" id="site_pictures" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
                                 </div>
                                 <div class="d-flex flex-stack mb-4">
                                     <label class="d-flex align-items-center fs-5 fw-bold mb-2">
                                         <span class="">Control System Software</span>
                                     </label>
-                                    <a href="" id="cs_software" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
+                                    <a href="#" id="cs_software" class="d-inline-block fs-5 px-2 py-1 text-end"><button class="btn btn-primary">Download</button></a>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">

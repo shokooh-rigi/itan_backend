@@ -121,7 +121,7 @@
             <div class="col-sm-12 together" style="vertical-align: text-top;">
                 <p>If you have any questions please feel free to contact me.</p>
                 <p>By:<br />{{ user_name }}, {{ user_title }}</p>
-                <p><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" class="signature" style="height: 50px;" /><br />Signature</p>
+                <p><img src="{% get_s3_file_url user_signature '' %}" class="signature" style="height: 50px;" /><br />Signature</p>
             </div>
         </div>
     </div>

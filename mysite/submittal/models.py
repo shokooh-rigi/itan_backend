@@ -1,5 +1,5 @@
 from mysite.core.models import *
-from ..estimator.render import *
+from ..render import *
 
 
 class CompanySubmittal(models.Model):
@@ -20,7 +20,7 @@ class CompanySubmittal(models.Model):
 
     @classmethod
     def create_letterhead_pdf(cls, parameters):
-        letterhead_pdf = Render.render_to_file('pdfTemplates/submittalTemplate.html', parameters, 'coverletter')
+        letterhead_pdf = Render.render_to_file('pdfTemplates/submittalTemplate.html', parameters, 'coverletter', False)
         return letterhead_pdf
 
     @classmethod

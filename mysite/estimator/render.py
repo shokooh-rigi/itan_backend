@@ -5,6 +5,8 @@ import xhtml2pdf.pisa as pisa
 from django.http import HttpResponse
 from django.template.loader import get_template
 
+from ..s3_file_manager import S3
+
 
 class Render:
 
@@ -29,6 +31,8 @@ class Render:
             os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/" + pdf_type))
         with open(file_path, 'wb') as pdf:
             pisa.pisaDocument(BytesIO(html.encode("UTF-8")), pdf)
+        s3 = S3()
+        s3.upload_file_to_bucket(file_name=file_name, key=file_path)
         return [file_name, file_path]
 
     @staticmethod

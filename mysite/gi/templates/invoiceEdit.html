@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load estimator_tags %}
+{% load order_tags %}
 
 {% block content %}
     <h2>Edit Invoice</h2>
@@ -8,6 +9,23 @@
         <div class="form-group">
             {% csrf_token %}
             {{ form.order.as_hidden }}
+            {% order_predemo_calculator invoice.order.proposal.quote.estimate.id invoice.order as opc %}
+            <div class="row form-line {% if opc|floatformat:"0" == '0' %}d-none{% endif %}">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="predemo_selected" class="control-label">Pre-Demo Select</label>
+                    <div class="d-inline-block" style="width: 230px;">
+                        <input id="predemo_selected" name="predemo_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" {% if invoice.invoice_type == 1 or invoice.invoice_type == 2 %}checked{% endif %} />
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line {% if opc|floatformat:"0" == '0' %}d-none{% endif %}">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="final_selected" class="control-label">Final Select</label>
+                    <div class="d-inline-block" style="width: 230px;">
+                        <input id="final_selected" name="final_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" {% if invoice.invoice_type == 1 or invoice.invoice_type == 3 %}checked{% endif %} />
+                    </div>
+                </div>
+            </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label">Date Started</label>
@@ -54,6 +72,17 @@
         </div>
 	</form>
     <script>
+        $("#predemo_selected").change(function(){
+            if(this.checked && $("#final_selected").prop('checked') === false) {
+                $('#id_description').val('Pre-Demo Testing')
+            }
+        });
+
+        $("#final_selected").change(function(){
+            if(this.checked) {
+                $('#id_description').val('Testing and Balancing')
+            }
+        });
         $('#id_order').on('change', function() {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#engineer").text($(this).find(':selected').data('engineer'));

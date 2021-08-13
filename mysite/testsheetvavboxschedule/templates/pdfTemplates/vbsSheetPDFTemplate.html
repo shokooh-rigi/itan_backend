@@ -1,0 +1,375 @@
+{% load static %}
+{% load estimator_tags %}
+{% load pump_tags %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ sheet_type_name }} Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 9.5%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 14.5%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .border {
+            border: 1px solid black;
+        }
+
+        .pdf-table .no-border {
+            border: 0px solid black;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 1px solid black;
+        }
+
+        .top-row-thick th, .top-row-thick td {
+            border-top: 2px solid black;
+        }
+
+        .bottom-row-thick th, .bottom-row-thick td {
+            border-bottom: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+
+
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.total_pages_range %}
+    <div class="content pdf-page-content">
+        <table class="table pdf-table">
+            <!-- Table head section -->
+            <thead>
+            <tr class="pdf-head-tr">
+                <th colspan="21" scope="col"></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td colspan="19" class="pdf-table-title-td">{{ sheet_type_name }} TEST SHEET</td>
+                    <td colspan="2" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="padding: 0 2px 0;">PROJECT NO:</td>
+                    <td colspan="8" class="pdf-table-cell border">
+                        &nbsp;{{ form.my_sheet.project.project_number }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td colspan="8" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ form.my_sheet.sheet_date | date }}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td colspan="3" class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td colspan="8" class="pdf-table-cell border">
+                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                    </td>
+                    <td colspan="8" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ form.my_sheet.system }}
+                    </td>
+                </tr>
+                <!-- Title rows -->
+
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <td colspan="3" rowspan="2" style="border-bottom-width: 0;border-left-width: 2px;border-top-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Address</b>
+                    </td>
+                    <td colspan="2" rowspan="2" style="border-bottom-width: 0;border-top-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Code</b>
+                    </td>
+                    <td colspan="2" rowspan="2" style="border-bottom-width: 0;border-top-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Type</b>
+                    </td>
+                    <td colspan="2" rowspan="2" style="border-bottom-width: 0;border-top-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Size / KW</b>
+                    </td>
+
+                    <td colspan="6" style="border-bottom-width: 0;border-top-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Design</b>
+                    </td>
+
+                    <td colspan="6" style="border-bottom-width: 0;border-top-width: 2px;border-right-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Actual</b>
+                    </td>
+                </tr>
+
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                    </td>
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+                        <b>Min.<br>CFM</b>
+                    </td>
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+                        <b>Max.<br>CFM</b>
+                    </td>
+
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+                        <b>K.F.</b>
+                    </td>
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+                        <b>Max.<br>CFM</b>
+                    </td>
+                    <td colspan="2" style="border-bottom-width: 0;border-top-width: 0;border-right-width: 2px"
+                        class="pdf-table-cell center-title">
+                        <b>Max.<br>CFM</b>
+                    </td>
+
+                </tr>
+
+
+                {% for vbs_equipment in form.vbs_equipment_data %}
+                    {% if forloop.counter == forloop.parentloop.counter %}
+                        {% for eq in vbs_equipment %}
+
+                        <tr class="section-first-row pdf-table-row top-row-thick">
+                            <td colspan="3" style="border-bottom-width: 0;border-top-width: 0;border-left-width: 2px"
+                                class="pdf-table-cell center-title">
+                                {{ eq|get_item:'Address-1' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Code-1' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Type-1' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Size/KW-1' }}
+                            </td>
+
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Min. CFM-1' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Max. CFM-1' }}
+                            </td>
+
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'K.F.-2' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell">
+                                {{ eq|get_item:'Min. CFM-2' }}
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0;border-right-width: 2px" class="pdf-table-cell">
+                                {{ eq|get_item:'Max. CFM-2' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if forloop.counter == form.total_pages %}
+                    {% for empty_row in empty_row_range %}
+                        <tr class="section-first-row pdf-table-row" style="height: 28px;">
+                            <td colspan="3" style="border-bottom-width: 0;border-top-width: 0;border-left-width: 2px"
+                                class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0" class="pdf-table-cell center-title">
+
+                            </td>
+                            <td colspan="2" style="border-bottom-width: 0;border-top-width: 0;border-right-width: 2px"
+                                class="pdf-table-cell center-title">
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
+                    <td class="pdf-table-cell" colspan="1">
+                        Notes:
+                    </td>
+                    <td class="pdf-table-cell" colspan="19" style="text-align: left">
+                        {% for vbfhs_equipment in form.vbfhs_equipment_data %}
+                            {% if forloop.counter == forloop.parentloop.counter %}
+                                {% for eq in vbfhs_equipment %}
+                                    {% with eq|get_item:'Note' as note %}
+                                        {% if note != '' %}{{ note }} | {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>

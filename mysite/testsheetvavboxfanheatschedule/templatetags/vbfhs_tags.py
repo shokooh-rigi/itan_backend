@@ -12,7 +12,7 @@ register = template.Library()
 def get_vbfhs_design_value(request, design_field, equipment):
     if request.method == 'POST':
         return request.POST.get(f'design_value_{design_field.id}')
-    return_value = VbfhsSheetData.objects.filter(vbfhs_equipment=equipment, sheet_field=design_field)
+    return_value = VbfhsSheetData.objects.filter(vbfhs_equipment=equipment, sheet_field=design_field, data_type=1)
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -24,7 +24,7 @@ def get_vbfhs_design_value(request, design_field, equipment):
 def get_vbfhs_actual_value(request, actual_field, equipment):
     if request.method == 'POST':
         return request.POST.get(f'actual_value_{actual_field.id}')
-    return_value = VbfhsSheetData.objects.filter(vbfhs_equipment=equipment, sheet_field=actual_field)
+    return_value = VbfhsSheetData.objects.filter(vbfhs_equipment=equipment, sheet_field=actual_field, data_type=2)
     if return_value.count() > 0:
         return return_value.first().value
     else:

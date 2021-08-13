@@ -1,4 +1,5 @@
 {% load static %}
+{% load estimator_tags %}
 
 <html>
 <head>
@@ -91,7 +92,7 @@
                         AIR BALANCE COUNCIL CERTIFICATION NO. 90-07-25
                     </td>
                     <td class="pdf-table-title-td font-weight-bold" style="width: 50%; border-left-color: white;">
-                        <img alt="tbe-signature" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ report_stamp }}" class="signature" style="height: 500px;"/><br/>
+                        <img alt="tbe-signature" src="{% get_s3_file_url report_stamp '' %}" class="signature" style="height: 500px;"/><br/>
                     </td>
                 </tr>
                 <tr style="border-top-color: white;">

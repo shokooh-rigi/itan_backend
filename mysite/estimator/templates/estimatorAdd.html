@@ -17,7 +17,7 @@
                             {% endfor %}
                         </select>
                         <div class="select-icons">
-                            <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a href="{% url 'bidFilesAdd' %}" id="add_bfm"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
                             <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                             <div id="bfm_note" class="icon noteicon" style="display: inline-block; margin-left: 5px; cursor: pointer;" data-toggle="popover" data-placement="bottom" title="BFM Note"></div>
                         </div>
@@ -30,8 +30,8 @@
                     <div class="row-data">
                         {{ form.customer }}
                         <div class="select-icons">
-                            <div class="form-icon"><a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                            <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                            <div class="form-icon"><a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_person" style="cursor: pointer; cursor: hand;"><img src = "{% static 'admin/img/icon-changelink.svg' %}"></a></div>
                         </div>
                     </div>
                 </div>
@@ -42,8 +42,8 @@
                     <div class="row-data">
                         {{ form.project }}
                         <div class="select-icons">
-                            <div class="form-icon"><a href="{% url 'projectCreate' %}" id="add_project" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                            <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                            <div class="form-icon"><a href="{% url 'projectCreate' %}" id="add_project" onclick="return showAddPopup(this);"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_project" style="cursor: pointer; cursor: hand;"><img src = "{% static 'admin/img/icon-changelink.svg' %}"></a></div>
                         </div>
                     </div>
                 </div>
@@ -54,8 +54,8 @@
                     <div class="row-data">
                         {{ form.engineer }}
                         <div class="select-icons">
-                            <div class="form-icon"><a href="{% url 'engineerCreate' %}" id="add_engineer" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                            <div class="form-icon"><a id="edit_engineer" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                            <div class="form-icon"><a href="{% url 'engineerCreate' %}" id="add_engineer" onclick="return showAddPopup(this);"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
+                            <div class="form-icon"><a id="edit_engineer" style="cursor: pointer; cursor: hand;"><img src = "{% static 'admin/img/icon-changelink.svg' %}"></a></div>
                         </div>
                     </div>
                 </div>

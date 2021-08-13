@@ -56,6 +56,7 @@
             font-weight: normal;
             border: 1px solid black;
             padding: 5px 2px 1px;
+            height: 30px;
         }
 
         .pdf-table .pdf-table-cell.pdf-table-title-cell {
@@ -210,13 +211,13 @@
                     <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
                         Room No.
                     </td>
-                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 85px">
                         Outlet No.
                     </td>
                     <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
                         Code
                     </td>
-                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 100px">
                         Size
                     </td>
                     <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
@@ -259,7 +260,11 @@
                         {% if forloop.last %}
                             <tr class="pdf-table-row section-middle-row">
                                 <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">
-                                    {{ equipment.eq_name }} {{ equipment.eq_type }}
+                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}
+                                        {{ equipment.eq_type }}
+                                    {% else %}
+                                        {{ equipment.eq_name }} {{ equipment.eq_type }}
+                                    {% endif %}
                                 </td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
@@ -277,17 +282,21 @@
                         {% if forloop.last %}
                             <tr class="pdf-table-row section-middle-row">
                                 <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">
-                                    TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}
+                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}
+                                        TOTAL {{ equipment.eq_type }}
+                                    {% else %}
+                                        TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}
+                                    {% endif %}
                                 </td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{{ equipment.d_cfm_total }}</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.d_cfm_total != 0 %}{{ equipment.d_cfm_total }}{% endif %}</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{{ equipment.i_cfm_total }}</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.i_cfm_total != 0 %}{{ equipment.i_cfm_total }}{% endif %}</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{{ equipment.f_cfm_total }}</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.f_cfm_total != 0 %}{{ equipment.f_cfm_total }}{% endif %}</td>
                             </tr>
                             <tr class="pdf-table-row section-middle-row">
                                 <td colspan="11" class="pdf-table-cell">&nbsp;</td>

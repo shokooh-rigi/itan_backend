@@ -65,13 +65,12 @@
                                                name="{{ field_name }}" maxlength="50"
                                                class="form-control eq_supply{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
-                                               value="
-                                                       {% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}{% endif %}"
+                                               value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
                                     {% else %}
                                         <textarea style="width: 100%;"
                                                   {% if actual_field.required_in_actual %}required=""{% endif %}
-                                                  name="{{ field_name }}" maxlength="50"
+                                                  name="{{ field_name }}"
                                                   class="form-control"
                                                   id="{{ field_name }}">{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}</textarea>
                                     {% endif %}
@@ -124,13 +123,12 @@
                                                name="{{ field_name }}" maxlength="50"
                                                class="form-control eq_return{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
-                                               value="
-                                                       {% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}{% endif %}"
+                                               value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
                                     {% else %}
                                         <textarea style="width: 100%;"
                                                   {% if actual_field.required_in_actual %}required=""{% endif %}
-                                                  name="{{ field_name }}" maxlength="50"
+                                                  name="{{ field_name }}"
                                                   class="form-control"
                                                   id="{{ field_name }}">{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}</textarea>
                                     {% endif %}
@@ -188,7 +186,7 @@
                                     {% else %}
                                         <textarea style="width: 100%;"
                                                   {% if actual_field.required_in_actual %}required=""{% endif %}
-                                                  name="{{ field_name }}" maxlength="50"
+                                                  name="{{ field_name }}"
                                                   class="form-control"
                                                   id="{{ field_name }}">{% get_terminal_actual_value request actual_field outside_terminal_equipment.id %}</textarea>
                                     {% endif %}
@@ -253,13 +251,12 @@
                                                name="{{ field_name }}" maxlength="50"
                                                class="form-control eq_other{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
-                                               value="
-                                                       {% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field other_equipment.id %}{% endif %}"
+                                               value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field other_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
                                     {% else %}
                                         <textarea style="width: 100%;"
                                                   {% if actual_field.required_in_actual %}required=""{% endif %}
-                                                  name="{{ field_name }}" maxlength="50"
+                                                  name="{{ field_name }}"
                                                   class="form-control"
                                                   id="{{ field_name }}">{% get_terminal_actual_value request actual_field other_equipment.id %}</textarea>
                                     {% endif %}
@@ -298,36 +295,7 @@
                 $(this).closest('.form-line').find('.final_fpm').val(new_val)
             });
         });
-        {#$('.equal_fields_supply').each(function (index) {#}
-        {#    let field_id = $(this).data('fieldid');#}
-        {#    let loop_id = $(this).data('loopid');#}
-        {#    if (loop_id == 1) {#}
-        {#        $(this).find('.eq_supply' + field_id).on('change', function () {#}
-        {#            let first_value = $(this).val();#}
-        {#            $('.eq_supply' + field_id).val(first_value);#}
-        {#        });#}
-        {#    }#}
-        {#});#}
-        {#$('.equal_fields_return').each(function (index) {#}
-        {#    let field_id = $(this).data('fieldid');#}
-        {#    let loop_id = $(this).data('loopid');#}
-        {#    if (loop_id == 1) {#}
-        {#        $(this).find('.eq_return' + field_id).on('change', function () {#}
-        {#            let first_value = $(this).val();#}
-        {#            $('.eq_return' + field_id).val(first_value);#}
-        {#        });#}
-        {#    }#}
-        {#});#}
-        {#$('.equal_fields_outside').each(function (index) {#}
-        {#    let field_id = $(this).data('fieldid');#}
-        {#    let loop_id = $(this).data('loopid');#}
-        {#    if (loop_id == 1) {#}
-        {#        $(this).find('.eq_outside' + field_id).on('change', function () {#}
-        {#            let first_value = $(this).val();#}
-        {#            $('.eq_outside' + field_id).val(first_value);#}
-        {#        });#}
-        {#    }#}
-        {#});#}
+
     </script>
 
     <script>

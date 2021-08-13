@@ -13,7 +13,9 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from django import forms
 from ..projectprocess.models import ProjectProcess
 from ..order.templatetags.order_tags import *
-
+import requests
+import os
+from ..s3_file_manager import *
 
 # Create your views here.
 
@@ -43,7 +45,7 @@ def invoice_list(request):
             to_email = to_email.replace(" ", "").split(',')
             cc = form.cleaned_data['cc']
             cc = cc.replace(" ", "").split(',')
-            invoice_id = form.cleaned_data['invoice_id']
+            invoice_id = form.cleaned_data['email_id']
             subject = form.cleaned_data['subject']
             # subject = 'TAB Technologies INC. Invoice NO. ' + str(invoice_id).zfill(4)
             if ModulesToEmailTemplateRelation.objects.filter(module=3).exists():
@@ -65,12 +67,19 @@ def invoice_list(request):
                     subject,
                     message,
                     DEFAULT_FROM_EMAIL,
-                    [to_email],
-                    cc=[cc],
+                    to_email,
+                    cc=cc,
                 )
                 msg.content_subtype = "html"
-                msg.attach_file('media/pdfs/invoice/invoice-' + str(invoice_id) + '.pdf')
+                latest_invoice_history = InvoiceHistory.objects.filter(invoice__id=invoice_id).order_by('id').last()
+                s3 = S3()
+                response = requests.get(s3.get_bucket_object('media/pdfs/invoice/' + latest_invoice_history.pdf_filename + '.pdf'))
+                f = open('media/pdfs/invoice/' + latest_invoice_history.pdf_filename + '.pdf', 'wb')
+                f.write(response.content)
+                f.close()
+                msg.attach_file('media/pdfs/invoice/' + latest_invoice_history.pdf_filename + '.pdf')
                 msg.send()
+                os.remove('media/pdfs/invoice/' + latest_invoice_history.pdf_filename + '.pdf')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             return redirect('invoiceHome')
@@ -127,7 +136,17 @@ def invoice_add(request, order_id=None):
         if form.is_valid():
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
+
                 invoice = form.save()
+                if invoice.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                    if request.POST.get("predemo_selected") and request.POST.get("final_selected"):
+                        invoice_type = 1
+                    elif request.POST.get("predemo_selected"):
+                        invoice_type = 2
+                    else:
+                        invoice_type = 3
+                    invoice.invoice_type = invoice_type
+                    invoice.save()
                 if request.user.last_name == '' or request.user.last_name is None:
                     user_name = 'TAB Technologies, INC. Operator'
                 else:
@@ -142,6 +161,7 @@ def invoice_add(request, order_id=None):
                 parameters = {
                     'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                         invoice.id).zfill(3) + '-1',
+                    'total_count': '1',
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
@@ -190,11 +210,88 @@ def invoice_add(request, order_id=None):
                 project_process.invoiced_date = datetime.datetime.now().date()
                 project_process.invoiced = True
                 project_process.save()
-                return redirect('invoiceView', invoice.id)
+                return redirect('invoiceHome')
     parameters = {'form': form,
                   'orders': orders
                   }
     return render(request, "invoiceAdd.html", parameters)
+
+
+@login_required
+def invoice_edit(request, invoice_id):
+    this_invoice = get_object_or_404(Invoice, id=invoice_id)
+    form = InvoiceForm(request.POST or None, request.FILES or None, instance=this_invoice)
+    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id'))
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('invoiceHome')
+        if form.is_valid():
+            if request.POST.get("save"):
+                invoice = form.save()
+                if invoice.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                    if request.POST.get("predemo_selected") and request.POST.get("final_selected"):
+                        invoice_type = 1
+                    elif request.POST.get("predemo_selected"):
+                        invoice_type = 2
+                    else:
+                        invoice_type = 3
+                    invoice.invoice_type = invoice_type
+                    invoice.save()
+                if request.user.last_name == '' or request.user.last_name is None:
+                    user_name = 'TAB Technologies, INC. Operator'
+                else:
+                    user_name = request.user.first_name + " " + request.user.last_name
+                if request.user.profile.title == '' or request.user.profile.title is None:
+                    user_title = 'Estimator'
+                else:
+                    user_title = request.user.profile.title
+                user_signature = request.user.profile.e_sign
+                change_orders = ChangeOrder.objects.filter(order=invoice.order)
+                total_amount_due = calculate_total_amount_due(invoice)
+                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+                new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
+                        invoice.id).zfill(3) + '-' + str(total_count)
+                parameters = {
+                    'file_name': new_file_name,
+                    'total_count': total_count,
+                    'invoice': invoice,
+                    'change_orders': change_orders,
+                    'total_amount_due': total_amount_due,
+                    'estimate': invoice.order.proposal.quote.estimate,
+                    'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                    'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                    'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+                    'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+                    'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+                    'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+                    'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+                    'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+                    'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+                    'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                    'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                    'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                    'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                    'user_name': user_name,
+                    'user_title': user_title,
+                    'user_signature': user_signature,
+                    'WEB_URL': WEB_URL,
+                    'STATIC_URL': STATIC_URL,
+                    'MEDIA_URL': MEDIA_URL,
+                    'os': system(),
+                }
+                Invoice.create_invoice_pdf(parameters)
+                total_invoiced = calculate_total_amount_due(invoice)
+                total_paid = calculate_total_paid(invoice)
+                balance_due = calculate_remaining_invoice_due(invoice)
+                new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid, balance_due=balance_due, pdf_filename=new_file_name)
+                new_object.save()
+                return redirect('invoiceHome')
+    parameters = {
+        'form': form,
+        'orders': orders,
+        'invoice': this_invoice
+    }
+    return render(request, "invoiceEdit.html", parameters)
 
 
 @login_required
@@ -251,7 +348,6 @@ def invoice_view(request, invoice_id):
         new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid, balance_due=balance_due
                                     , pdf_filename='Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(invoice.id).zfill(3) + '-1')
         new_object.save()
-    print(latest_invoice_history.pdf_filename)
     parameters = {
         'latest_invoice_history': latest_invoice_history,
         'invoice': invoice,
@@ -264,72 +360,6 @@ def invoice_view(request, invoice_id):
 
 
 @login_required
-def invoice_edit(request, invoice_id):
-    this_invoice = get_object_or_404(Invoice, id=invoice_id)
-    form = InvoiceForm(request.POST or None, request.FILES or None, instance=this_invoice)
-    orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id'))
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('invoiceHome')
-        if form.is_valid():
-            if request.POST.get("save"):
-                invoice = form.save()
-                if request.user.last_name == '' or request.user.last_name is None:
-                    user_name = 'TAB Technologies, INC. Operator'
-                else:
-                    user_name = request.user.first_name + " " + request.user.last_name
-                if request.user.profile.title == '' or request.user.profile.title is None:
-                    user_title = 'Estimator'
-                else:
-                    user_title = request.user.profile.title
-                user_signature = request.user.profile.e_sign
-                change_orders = ChangeOrder.objects.filter(order=invoice.order)
-                total_amount_due = calculate_total_amount_due(invoice)
-                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-                new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                        invoice.id).zfill(3) + '-' + str(total_count)
-                parameters = {
-                    'file_name': new_file_name,
-                    'total_count': total_count,
-                    'invoice': invoice,
-                    'change_orders': change_orders,
-                    'total_amount_due': total_amount_due,
-                    'estimate': invoice.order.proposal.quote.estimate,
-                    'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
-                    'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
-                    'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-                    'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-                    'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
-                    'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
-                    'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
-                    'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
-                    'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
-                    'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
-                    'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-                    'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-                    'company_name': LicenseInfo.objects.get(key='CompanyName').value,
-                    'user_name': user_name,
-                    'user_title': user_title,
-                    'user_signature': user_signature,
-                    'WEB_URL': WEB_URL,
-                    'STATIC_URL': STATIC_URL,
-                    'MEDIA_URL': MEDIA_URL,
-                    'os': system(),
-                }
-                Invoice.create_invoice_pdf(parameters)
-                total_invoiced = calculate_total_amount_due(invoice)
-                total_paid = calculate_total_paid(invoice)
-                balance_due = calculate_remaining_invoice_due(invoice)
-                new_object = InvoiceHistory(invoice=invoice, total_invoiced=total_invoiced, total_paid=total_paid, balance_due=balance_due, pdf_filename=new_file_name)
-                new_object.save()
-                return redirect('invoiceView', invoice.id)
-    parameters = {'form': form,
-                  'orders': orders
-                  }
-    return render(request, "invoiceEdit.html", parameters)
-
-
-@login_required
 def invoice_delete(request, invoice_id):
     this_invoice = get_object_or_404(Invoice, id=invoice_id)
     if request.method == "POST" and request.user.is_authenticated and this_invoice.created_by == request.user:
@@ -338,9 +368,12 @@ def invoice_delete(request, invoice_id):
                 this_invoice.id).zfill(3),
                           }
             Invoice.delete_invoice_pdf(parameters)
-            this_invoice.order.projectprocess.invoiced = False
-            this_invoice.order.projectprocess.invoiced_date = None
-            this_invoice.order.projectprocess.save()
+            try:
+                this_invoice.order.projectprocess.invoiced = False
+                this_invoice.order.projectprocess.invoiced_date = None
+                this_invoice.order.projectprocess.save()
+            except:
+                pass
             this_invoice.delete()
         return redirect('invoiceHome')
     elif request.method == "POST" and request.user.is_authenticated and this_invoice.created_by != request.user:
@@ -482,7 +515,7 @@ def invoice_payment_delete(request, transaction_id):
                 'error_msg': error_msg
             }
             return render(request, "transactionDelete.html", parameters)
-        return redirect('invoicePayment')
+        return redirect('invoicePayment', invoice_id)
     parameters = {'this_transaction': this_transaction,
                   'invoice_id': invoice_id
                   }

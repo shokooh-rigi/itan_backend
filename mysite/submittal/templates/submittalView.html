@@ -1,6 +1,6 @@
 submittal_number_generator{% extends 'base.html' %}
 {% load static %}
-{% load submittal_tags %}
+{% load estimator_tags %}
 {% load custom_tags %}
 
 {% block content %}
@@ -8,7 +8,7 @@ submittal_number_generator{% extends 'base.html' %}
     <h3>Cover Letter Preview</h3>
     <div class="container text-left" id="printSubmittalPage" style="display: block; padding: 30px 10px; border: 1px solid rgba(0,0,0,.5); border-radius: 5px;">
         <header class="proposal_header">
-            <img alt="owner logo" class="figure-img logo" src="{% media_url %}{{ pdf_header_logo }}" />
+            <img alt="owner logo" class="figure-img logo" src="{% get_s3_file_url pdf_header_logo '' %}" style="max-width: 200px" />
             <span style="float: right; margin-top: 40px;">Member AABC</span>{{ extension1 }}
         </header>
         <div class="row form-line">

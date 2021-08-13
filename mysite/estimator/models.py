@@ -4,7 +4,7 @@ import datetime
 from django.dispatch import receiver
 from mysite.bidfilemgm.models import BidFile
 from mysite.dbmanagement.models import *
-from .render import Render
+from ..render import Render
 from django.conf import settings
 
 

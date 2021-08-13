@@ -159,16 +159,17 @@ def schedule_list(request):
 
     for maintenance in maintenance_list:
         full_address = ''
-        if maintenance.order.proposal.quote.estimate.project.address_line_1:
-            full_address += maintenance.order.proposal.quote.estimate.project.address_line_1
-        if maintenance.order.proposal.quote.estimate.project.address_line_2:
-            full_address += ' ' + maintenance.order.proposal.quote.estimate.project.address_line_2
-        if maintenance.order.proposal.quote.estimate.project.city:
-            full_address += ' ' + maintenance.order.proposal.quote.estimate.project.city
-        if maintenance.order.proposal.quote.estimate.project.state:
-            full_address += ' ' + maintenance.order.proposal.quote.estimate.project.state
-        if maintenance.order.proposal.quote.estimate.project.zip:
-            full_address += ' ' + maintenance.order.proposal.quote.estimate.project.zip
+        if maintenance.order:
+            if maintenance.order.proposal.quote.estimate.project.address_line_1:
+                full_address += maintenance.order.proposal.quote.estimate.project.address_line_1
+            if maintenance.order.proposal.quote.estimate.project.address_line_2:
+                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.address_line_2
+            if maintenance.order.proposal.quote.estimate.project.city:
+                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.city
+            if maintenance.order.proposal.quote.estimate.project.state:
+                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.state
+            if maintenance.order.proposal.quote.estimate.project.zip:
+                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.zip
         assigned_to_employees = []
         assigned_to_employees_names = []
         assigned_to_contractors = []
@@ -192,10 +193,18 @@ def schedule_list(request):
         if maintenance.order and any_assigned:
             details_completed = True
         maintenance_order_id = ''
-        maintenance_title = 'Maintenace Placeholder'
+        maintenance_title = 'Maintenance'
+        if maintenance.maintenance_type == 2:
+            maintenance_title = 'Lost Time'
+        elif maintenance.maintenance_type == 3:
+            maintenance_title = 'Off/Vacation'
         if maintenance.order:
-            maintenance_title = str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
+            if maintenance.maintenance_type == 1:
+                maintenance_title = 'Maintenance ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
+            else:
+                maintenance_title = 'Lost Time ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
             maintenance_order_id = maintenance.order.id
+
         poc_name = ''
         poc_cell_phone = ''
         poc_office_phone = ''
@@ -226,25 +235,38 @@ def schedule_list(request):
         except:
             pass
         test_sheet_id = ''
-        test_sheet_count = Sheet.objects.filter(project__id=maintenance.order.id).count()
+        test_sheet_count = 0
+        if maintenance.order:
+            test_sheet_count = Sheet.objects.filter(project__id=maintenance.order.id).count()
         if test_sheet_count > 0:
             test_sheet_id = Sheet.objects.get(project__id=maintenance.order.id).id
+
+        if maintenance.maintenance_type == 1:
+            bg_color = '#ffc107' if details_completed else '#6c757d'
+            color = '#000' if details_completed else '#fff'
+        elif maintenance.maintenance_type == 2:
+            bg_color = '#b82634' if details_completed else '#6c757d'
+            color = '#fff'
+        else:
+            bg_color = '#000'
+            color = '#fff'
         response_data.append({
             'order_id': maintenance_order_id,
             'maintenance_id': str(maintenance.id),
+            'maintenance_type': maintenance.maintenance_type,
             'assigned_to_employees': assigned_to_employees,
             'assigned_to_contractors': assigned_to_contractors,
             'assigned_to_employees_names': assigned_to_employees_names,
             'assigned_to_contractors_names': assigned_to_contractors_names,
-            'project_number': maintenance.order.project_number,
-            'project_name': str(maintenance.order.proposal.quote.estimate.project),
-            'customer': str(maintenance.order.proposal.quote.estimate.customer.company.name),
-            'engineer': str(maintenance.order.proposal.quote.estimate.engineer.company.name),
-            'predemo': maintenance.order.proposal.quote.estimate.estimatedetails.pre_demo,
+            'project_number': maintenance.order.project_number if maintenance.order else 0,
+            'project_name': str(maintenance.order.proposal.quote.estimate.project) if maintenance.order else '',
+            'customer': str(maintenance.order.proposal.quote.estimate.customer.company.name) if maintenance.order else '',
+            'engineer': str(maintenance.order.proposal.quote.estimate.engineer.company.name) if maintenance.order else '',
+            'predemo': maintenance.order.proposal.quote.estimate.estimatedetails.pre_demo if maintenance.order else 0,
             'poc_name': poc_name,
             'poc_cell_phone': poc_cell_phone,
             'poc_office_phone': poc_office_phone,
-            'control_system': str(maintenance.order.control_system),
+            'control_system': str(maintenance.order.control_system) if maintenance.order else '',
             'special_instruction': special_instruction,
             'tech_note': maintenance.note,
             'equipment_submittals_link': equipment_submittal,
@@ -261,8 +283,8 @@ def schedule_list(request):
             'goingDuration': str(30),
             'comingDuration': str(30),
             'completed': details_completed,
-            'bg_color': '#ffc107' if details_completed else '#6c757d',
-            'color': '#000' if details_completed else '#fff',
+            'bg_color': bg_color,
+            'color': color,
             'test_sheet_id': test_sheet_id
         })
     return JsonResponse(response_data, safe=False)

@@ -20,12 +20,12 @@
                      <table class="proposal_header" style="padding: 0;">
                         <tbody style="padding: 0;">
                             <tr>
-                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{% get_s3_file_url pdf_header_logo '' %}" /></td>
                                 <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                             </tr>
                         </tbody>
                     </table>
-                    <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+                    <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT NAME: </b>{{ tech_label.order.proposal.quote.estimate.project|upper }}</div>
@@ -45,10 +45,10 @@
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 25%;"><b>PRE-DEMO: </b></td>
                     <td style="width: 15%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo <= 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo <= 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">YES</td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">NO</td>
                 </tr></tbody></table></div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date|upper }}{% endif %}</div>
@@ -56,10 +56,10 @@
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 30%;"><b>TEST SHEETS: </b></td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">YES</td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">NO</td>
                 </tr></tbody></table></div>
             </div>
@@ -71,12 +71,12 @@
                      <table class="proposal_header">
                         <tbody>
                             <tr>
-                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{% get_s3_file_url pdf_header_logo '' %}" /></td>
                                 <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                             </tr>
                         </tbody>
                     </table>
-                    <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+                    <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
@@ -91,12 +91,12 @@
                      <table class="proposal_header" style="padding: 0;">
                         <tbody style="padding: 0;">
                             <tr>
-                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{% get_s3_file_url pdf_header_logo '' %}" /></td>
                                 <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                             </tr>
                         </tbody>
                     </table>
-                    <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+                    <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT NAME: </b>{{ tech_label.order.proposal.quote.estimate.project|upper }}</div>
@@ -116,10 +116,10 @@
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 25%;"><b>PRE-DEMO: </b></td>
                     <td style="width: 15%;"> </td>
-                    <td style="width: 5%;"><img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/></td>
+                    <td style="width: 5%;"><img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/></td>
                     <td style="width: 5%;">YES</td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;"><img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/></td>
+                    <td style="width: 5%;"><img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/></td>
                     <td style="width: 5%;">NO</td>
                 </tr></tbody></table></div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date|upper }}{% endif %}</div>
@@ -127,10 +127,10 @@
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 30%;"><b>TEST SHEETS: </b></td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">YES</td>
                     <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle1.png" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{{ WEB_URL }}{{ STATIC_URL }}images/xhtml2pdf/circle2.png" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
+                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
                     <td style="width: 5%;">NO</td>
                 </tr></tbody></table></div>
 
@@ -143,12 +143,12 @@
                      <table class="proposal_header">
                         <tbody>
                             <tr>
-                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                                <td style="padding: 4px 0 0 0; width: 82%;"><img alt="owner logo" style="height: 50px; width: auto;" src="{% get_s3_file_url pdf_header_logo '' %}" /></td>
                                 <td style="padding: 4px 0 0 0; width: 18%; line-height: 7px; vertical-align: bottom; font-size: 10px;"><b>{{ pdf_header_text }}</b></td>
                             </tr>
                         </tbody>
                     </table>
-                    <img style="position: absolute; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+                    <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>

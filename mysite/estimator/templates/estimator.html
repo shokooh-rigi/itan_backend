@@ -145,7 +145,7 @@
                                 <a href="{% url 'estimatorEdit' estimate_id=estimate.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'estimateDelete' estimate_id=estimate.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'estimateArchive' estimate_id=estimate.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
-                                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/estimate/{% pdf_filename_generator estimate.id 'E' %}.pdf" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Estimate"></div></a>
+                                <a href="{% get_s3_file_url estimate.id 'estimate' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Estimate"></div></a>
                                 <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% estimate_number_generator estimate.id %}" data-id="{{ estimate.id }}" data-project="{{ estimate.project.name }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
                             </td>
                         </tr>

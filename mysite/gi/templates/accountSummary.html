@@ -92,7 +92,7 @@
                         <td>
                             <a href="{% url 'accountSummaryDelete' account_summary_id=account_summary.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
 {#                            <a href="{% url 'invoiceArchive' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>#}
-                            <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/accountsummary/AccountSummary-{{ account_summary.statement_no }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                            <a href="{% get_s3_file_url account_summary.statement_no 'account_summary' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                             <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-id="{{ account_summary.statement_no }}" data-customer="{{ account_summary.customer }}" data-customeremail="{{ account_summary.customer.mail }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
                         </td>
                     </tr>

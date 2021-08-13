@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load sheet_tags %}
+{% load primary_heat_exchanger_2_tags %}
+
+{% block content %}
+    <h2>Enter {{ sheet_type_name }} Design Data for
+        #{{ equipment.sheet.project.project_number }}
+        {{ equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method='POST' action='' enctype="multipart/form-data" id="chiller-design-data-form">
+        <div class="form-group">
+            {% csrf_token %}
+        </div>
+        <div class="row form-line" style="font-weight: bold;">
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Value
+            </div>
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Value
+            </div>
+        </div>
+        <div class="row form-line">
+            {% for design_field in design_fields %}
+                {% with 'supply_design_value_'|concatenate:design_field.id as field_name %}
+                    <div class="col-lg-3">
+                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                            {{ design_field.field_name }}
+                            {% if design_field.required_in_design %}
+                                <span class="required">*</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                               data-fieldid="{{ design_field.id }}"
+                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+                                {% if design_field.default_value %}{{ design_field.default_value }}{% endif %}"
+                               style="width: 100%;">
+                            {% if design_field.field_name|lower != 'note' %}
+                                <input style="width: 100%;" {% get_field_type design_field %}
+                                       {% if design_field.required_in_design %}required=""{% endif %}
+                                       name="{{ field_name }}" maxlength="50"
+                                       class="form-control {{ design_field.field_name.lower|normalize_string }} {% if design_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                       id="{{ field_name }}"
+                                       value="{% get_primary_heat_exchanger_2_design_value request design_field equipment %}" />
+                            {% else %}
+                                <textarea style="width: 100%;"
+                                          {% if design_field.required_in_design %}required=""{% endif %}
+                                          name="{{ field_name }}"
+                                          class="form-control"
+                                          id="{{ field_name }}"></textarea>
+                            {% endif %}
+                        </label>
+                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                            <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                        </div>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+            <br/>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-primary" value="Save" name="next"/>
+                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate/>
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function () {
+
+
+        });
+
+    </script>
+
+    <script>
+        /*
+        * Set the parentheses for the fields that need parentheses.
+        * */
+
+        $(".show_parentheses").each(function (index) {
+            const input = $(this);
+            const defaultValue = $(this).parent().data('defaultval').trim();
+            const loop_id = $(this).parent().data('loopid');
+            const field_id = $(this).parent().data('fieldid');
+            const onInputChange = () => {
+                const value = input.val().trim();
+                let rawValue = '';
+                for (const ch of value) {
+                    if (ch !== '(' && ch !== ')') {
+                        rawValue += ch;
+                    }
+                }
+                if (!rawValue || rawValue.toLowerCase() === defaultValue.toLowerCase()) {
+                    input.val(defaultValue);
+                } else {
+                    input.val('(' + rawValue + ')');
+                    if (loop_id == 1) {
+                        $('.eq' + field_id).val('(' + rawValue + ')');
+                    }
+                }
+            };
+            onInputChange();
+            input.on('change', onInputChange);
+        });
+    </script>
+
+
+
+
+
+
+{% endblock %}

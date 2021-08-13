@@ -14,7 +14,7 @@
             Transaction Amount: <b>${{ invoice_transaction.amount }} </b>
             - Transaction Date: <b>{{ invoice_transaction.payment_date }} </b>
             {% if invoice_transaction.payment_no %}- Transaction No: <b>{{ invoice_transaction.payment_no }} </b>{% endif %}
-            <a href="{% url 'invoicePaymentDelete' invoice_transaction.id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+            <a href="{% url 'invoicePaymentDelete' invoice_transaction.id %}" id="estimate_equipment_delete"><img src = "{% static 'admin/img/icon-deletelink.svg' %}"></a>
         </li>
     {%  endfor %}
     {% else %}

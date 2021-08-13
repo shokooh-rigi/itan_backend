@@ -131,7 +131,7 @@
                                 <td style="padding: 2px;"><b>Name, Title</b></td>
                             </tr>
                             <tr style="margin: 0px auto;">
-                                <td style="padding: 2px;"><img class="img-fluid" style="height: 50px;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ user_signature }}" /><br /><b>Signature</b></td>
+                                <td style="padding: 2px;"><img class="img-fluid" style="height: 50px;" src="{% get_s3_file_url user_signature '' %}" /><br /><b>Signature</b></td>
                                 <td style="padding: 2px;"><br /><br /><br /><b>Signature</b></td>
                             </tr>
                         </tbody>

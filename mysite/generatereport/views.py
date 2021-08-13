@@ -23,6 +23,8 @@ import random
 from ..settings import MEDIA_URL_NOSLASH
 import img2pdf
 from PIL import Image
+from ..s3_file_manager import S3
+import urllib.request as url_request
 
 
 # Create your views here.
@@ -125,27 +127,36 @@ def report_sheet_recreate(request, sheet_id):
     cover = open(cover_pdf[1], "rb")
     merger.append(fileobj=cover)
 
-    table_of_content_file = open(MEDIA_URL_NOSLASH + report_sheet.upload_table_of_content.name, "rb")
+    s3 = S3()
+    response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_table_of_content.file)))
+    table_of_content_file = open(response[0], "rb")
     merger.append(fileobj=table_of_content_file)
 
     report = open(report_pdf[1], "rb")
     merger.append(fileobj=report)
 
-    test_sheets = open(MEDIA_URL_NOSLASH + report_sheet.upload_test_sheets.name, "rb")
+    response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_test_sheets.file)))
+    test_sheets = open(response[0], "rb")
     merger.append(fileobj=test_sheets)
 
-    drawings = open(MEDIA_URL_NOSLASH + report_sheet.upload_drawing_pdf.name, "rb")
+    response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
+    drawings = open(response[0], "rb")
     merger.append(fileobj=drawings)
 
     if not os.path.exists(
             os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report"))
-    output = open(MEDIA_URL_NOSLASH + "pdfs/report/" + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper() + ".pdf", "wb")
+    file_name = ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper() + '.pdf'
+    file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report", file_name)
+    s3_path = os.path.join("media/pdfs/report", file_name)
+    output = open(file_path, "wb")
     merger.write(output)
+    output.close()
     cover.close()
     table_of_content_file.close()
     test_sheets.close()
     drawings.close()
+    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
 
     return redirect('reportSheetHome')
 

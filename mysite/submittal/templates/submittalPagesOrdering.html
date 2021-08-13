@@ -43,7 +43,7 @@
         <li class="list-group-item">
             Form Name: <b>{{ submittal_form_selected.submittal_form.form_name }} </b>
             - Ordering: <b>{{ submittal_form_selected.ordering }} </b>
-            <a href="{% url 'submittalFormDelete' submittal_id=submittal_id submittal_form_id=submittal_form_selected.id %}" id="submittal_form_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+            <a href="{% url 'submittalFormDelete' submittal_id=submittal_id submittal_form_id=submittal_form_selected.id %}" id="submittal_form_delete"><img src = "{% static 'admin/img/icon-deletelink.svg' %}"></a>
         </li>
     {%  endfor %}
     </ul>

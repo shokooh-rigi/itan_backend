@@ -13,8 +13,8 @@
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_amount" class="control-label">Select Control System</label>
                     {{ form.control_system }}
-                    <div class="form-icon"><a href="{% url 'csCreate' %}" id="add_cs" onclick="return showAddPopup(this);"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
-                    <div class="form-icon"><a id="edit_cs" style="cursor: pointer; cursor: hand;"><img src = "{% static '/admin/img/icon-changelink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'csCreate' %}" id="add_cs" onclick="return showAddPopup(this);"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a id="edit_cs" style="cursor: pointer; cursor: hand;"><img src = "{% static 'admin/img/icon-changelink.svg' %}"></a></div>
                 </div>
             </div>
             {% if this_order.control_system %}

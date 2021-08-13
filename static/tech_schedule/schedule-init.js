@@ -338,8 +338,8 @@
                         $("#schedule-edit .modal-body #tech_note").text(info.event.extendedProps.tech_note)
                         $('#schedule-edit .modal-body #start_date').text(dateFormat(info.event.start, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
-                        $('#schedule-edit .modal-body #equipment_submittal').attr('href', info.event.extendedProps.equipment_submittals_link);
-                        let url_mask = ''
+
+                        let url_mask = '#'
                         if (info.event.extendedProps.test_sheet_id == '') {
                             $('#schedule-edit .modal-body #test_sheet_link').html('The Desired Test Sheet are not Available, Contact Your Supervisor.');
                         }
@@ -347,26 +347,27 @@
                             url_mask = "/sheetcreator/equipments_list/" + info.event.extendedProps.test_sheet_id;
                             $('#schedule-edit .modal-body #test_sheet_link').html('<a href="' + url_mask +'"><button>Go To Project Air Moving Test Sheet</button></a>');
                         }
+                        $('#schedule-edit .modal-body #equipment_submittal').attr('href', ((info.event.extendedProps.equipment_submittals_link != '') ? info.event.extendedProps.equipment_submittals_link: '#'));
                         if (info.event.extendedProps.equipment_submittals_link == '')
                             $('#schedule-edit .modal-body #equipment_submittal button').prop('disabled', true);
                         else
                             $('#schedule-edit .modal-body #equipment_submittal button').prop('disabled', false);
-                        $('#schedule-edit .modal-body #test_sheets').attr('href', info.event.extendedProps.test_sheets_link);
+                        $('#schedule-edit .modal-body #test_sheets').attr('href', ((info.event.extendedProps.test_sheets_link != '') ? info.event.extendedProps.test_sheets_link : '#'));
                         if (info.event.extendedProps.test_sheets_link == '')
                             $('#schedule-edit .modal-body #test_sheets button').prop('disabled', true);
                         else
                             $('#schedule-edit .modal-body #test_sheets button').prop('disabled', false);
-                        $('#schedule-edit .modal-body #tech_marked_drawing').attr('href', info.event.extendedProps.tech_marked_drawing_link);
+                        $('#schedule-edit .modal-body #tech_marked_drawing').attr('href', ((info.event.extendedProps.tech_marked_drawing_link != '') ? info.event.extendedProps.tech_marked_drawing_link : '#'));
                         if (info.event.extendedProps.tech_marked_drawing_link == '')
                             $('#schedule-edit .modal-body #tech_marked_drawing button').prop('disabled', true);
                         else
                             $('#schedule-edit .modal-body #tech_marked_drawing button').prop('disabled', false);
-                        $('#schedule-edit .modal-body #site_pictures button').attr('href', info.event.extendedProps.site_pictures_link);
+                        $('#schedule-edit .modal-body #site_pictures button').attr('href', ((info.event.extendedProps.site_pictures_link != '') ? info.event.extendedProps.site_pictures_link : '#'));
                         if (info.event.extendedProps.site_pictures_link == '')
                             $('#schedule-edit .modal-body #site_pictures button').prop('disabled', true);
                         else
                             $('#schedule-edit .modal-body #site_pictures button').prop('disabled', false);
-                        $('#schedule-edit .modal-body #cs_software button').attr('href', info.event.extendedProps.cs_software_link);
+                        $('#schedule-edit .modal-body #cs_software button').attr('href', ((info.event.extendedProps.cs_software_link != '') ? info.event.extendedProps.cs_software_link : '#'));
                         if (info.event.extendedProps.cs_software_link == '')
                             $('#schedule-edit .modal-body #cs_software button').prop('disabled', true);
                         else

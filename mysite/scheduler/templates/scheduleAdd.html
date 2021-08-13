@@ -16,7 +16,7 @@
                             <option value="{{ order.id }}">{{ order }} - {{ order.proposal.quote.estimate.project }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
                 </div>
             </div>
             <div class="row form-line" style="margin: 20px auto;">

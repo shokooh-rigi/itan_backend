@@ -1,4 +1,5 @@
 {% load static %}
+{% load estimator_tags %}
 
 <html>
 <head>
@@ -30,7 +31,7 @@
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
             <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
         </div>
-        <div style="text-align: center;"><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ instruction_image }}" style="height: 620px; width: 530pt;" /></div>
+        <div style="text-align: center;"><img src="{% get_s3_file_url instruction_image '' %}" style="height: 620px; width: 530pt;" /></div>
     </div>
     <pdf:nextpage/>
     <div class="content pdf-page-content">
@@ -68,7 +69,7 @@
             <span style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}<br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
         </div>
-        <div style="text-align: center;"><img src="{{ WEB_URL }}{{ MEDIA_URL }}{{ abbreviation_image }}" style="height: 540pt; width: 530pt;" /></div>
+        <div style="text-align: center;"><img src="{% get_s3_file_url abbreviation_image '' %}" style="height: 540pt; width: 530pt;" /></div>
     </div>
 </div>
 </body>

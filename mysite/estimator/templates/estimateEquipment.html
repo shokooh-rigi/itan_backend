@@ -69,7 +69,7 @@
             </b>
             - Total Price: <b>
             ${% equipment_total_calculator estimate_equipment_pricing as eqtc %}{{ eqtc|floatformat:2|intcomma }}</b>
-            <a href="{% url 'estimateEquipmentDelete' estimate_equipment_id=estimate_equipment_pricing.id interval_id=estimate_service_id %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+            <a href="{% url 'estimateEquipmentDelete' estimate_equipment_id=estimate_equipment_pricing.id interval_id=estimate_service_id %}" id="estimate_equipment_delete"><img src = "{% static 'admin/img/icon-deletelink.svg' %}"></a>
         </li>
         {% endif %}
     {%  endfor %}

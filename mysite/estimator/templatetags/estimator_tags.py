@@ -1,6 +1,8 @@
 from django import template
 import random
 from ..models import Estimate, EstimateEquipment
+from ...s3_file_manager import S3
+from ...submittal.forms import CompanySubmittal
 
 register = template.Library()
 
@@ -11,6 +13,14 @@ def estimate_number_generator(estimate_id):
     estimator_long_id = estimate.created_by.id + 100
     estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
+
+
+@register.simple_tag
+def submittal_number_generator(submittal_id):
+    submittal = CompanySubmittal.objects.get(id=submittal_id)
+    submittal_long_id = submittal.created_by.id + 100
+    submittal_date_created = str(submittal.created_on).replace('-', '')[2:8]
+    return submittal_date_created + str(submittal_long_id) + str(submittal.id).zfill(3)
 
 
 @register.simple_tag
@@ -102,6 +112,13 @@ def estimate_total_calculator(estimate_id):
     return estimate_total
 
 
+@register.simple_tag
+def estimate_total_minus_predemo_calculator(estimate_id):
+    estimate_total = estimate_total_calculator(estimate_id)
+    pre_demo_total = estimate_predemo_calculator(estimate_id)
+    return estimate_total - pre_demo_total
+
+
 @register.filter
 def in_setting(things, key):
     return things.filter(key=key)
@@ -132,3 +149,24 @@ def random_int(a, b=None):
     if b is None:
         a, b = 0, a
     return random.randint(a, b)
+
+
+@register.simple_tag
+def get_s3_file_url(key, pdf_type):
+    s3 = S3()
+    if pdf_type == 'estimate':
+        return s3.get_bucket_object(key='media/pdfs/estimate/' + pdf_filename_generator(key, 'E') + '.pdf')
+    if pdf_type == 'quote':
+        return s3.get_bucket_object(key='media/pdfs/quote/' + pdf_filename_generator(key, 'Q') + '.pdf')
+    if pdf_type == 'proposal':
+        return s3.get_bucket_object(key='media/pdfs/proposal/' + pdf_filename_generator(key, 'P') + '.pdf')
+    if pdf_type == 'invoice':
+        return s3.get_bucket_object(key='media/pdfs/invoice/' + key + '.pdf')
+    if pdf_type == 'account_summary':
+        return s3.get_bucket_object(key='media/pdfs/accountsummary/AccountSummary-' + key + '.pdf')
+    if pdf_type == 'submittal':
+        return s3.get_bucket_object(key='media/pdfs/submittal/submittal-' + submittal_number_generator(key) + '.pdf')
+    if pdf_type == 'report':
+        return s3.get_bucket_object(key='media/pdfs/report/FINAL SHEET ' + key.project.proposal.quote.estimate.project.name.upper() + '-' + str(key.project.project_number) + '.pdf')
+    else:
+        return s3.get_bucket_object(key='media/' + str(key))

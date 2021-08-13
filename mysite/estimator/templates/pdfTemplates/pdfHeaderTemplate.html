@@ -1,11 +1,13 @@
+{% load estimator_tags %}
+{% load static %}
         <div id="header_content" style="margin-bottom: -10px;">
              <table class="proposal_header">
                 <tbody>
                     <tr>
-                        <td style="padding: 4px 0 0 0; width: 90%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ pdf_header_logo }}" /></td>
+                        <td style="padding: 4px 0 0 0; width: 90%;"><img alt="owner logo" style="height: 70px; width: auto;" src="{% get_s3_file_url pdf_header_logo '' %}" /></td>
                         <td style="padding: 4px 0 0 0; width: 10%; vertical-align: bottom;"><b>{{ pdf_header_text }}</b></td>
                     </tr>
                 </tbody>
             </table>
-            <img alt="owner logo" style="position: absolute; top: -10px; margin-top: -20px; height: 10px; width: 100%;" src="{{ WEB_URL }}{{ STATIC_URL }}images/header-line.jpg" />
+            <img alt="owner logo" style="position: absolute; top: -10px; margin-top: -20px; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
         </div>

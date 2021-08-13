@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load submittal_tags %}
 {% load estimator_tags %}
 
 {% block content %}
@@ -66,7 +65,7 @@
                             <td><a href="{% url 'submittalPages' submittal_id=submittal.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit PDF"></div></a></td>
                             <td>
                                 <a href="{% url 'submittalDelete' submittal_id=submittal.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
-                                <a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/submittal/submittal-{% submittal_number_generator submittal.id %}.pdf" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <a href="{% get_s3_file_url submittal.id 'submittal' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                                 <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% submittal_number_generator submittal.id %}" data-id="{{ submittal.id }}" data-project="{{ submittal.project }} - Submittal"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
                             </td>
                         </tr>

@@ -17,6 +17,8 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 from .templatetags.estimator_tags import *
 from django.db.models import Count
+import requests
+import os
 
 # Create your views here.
 
@@ -54,8 +56,14 @@ def estimate_list(request):
                     cc=cc,
                 )
                 msg.content_subtype = "html"
+                s3 = S3()
+                response = requests.get(s3.get_bucket_object('media/pdfs/estimate/' + pdf_filename_generator(email_id, 'E') + '.pdf'))
+                f = open('media/pdfs/estimate/' + pdf_filename_generator(email_id, 'E') + '.pdf', 'wb')
+                f.write(response.content)
+                f.close()
                 msg.attach_file('media/pdfs/estimate/' + pdf_filename_generator(email_id, 'E') + '.pdf')
                 msg.send()
+                os.remove('media/pdfs/estimate/' + pdf_filename_generator(email_id, 'E') + '.pdf')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             return redirect('estimatorHome')
@@ -138,8 +146,14 @@ def quotation_list(request):
                     cc=cc,
                 )
                 msg.content_subtype = "html"
+                s3 = S3()
+                response = requests.get(s3.get_bucket_object('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf'))
+                f = open('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf', 'wb')
+                f.write(response.content)
+                f.close()
                 msg.attach_file('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf')
                 msg.send()
+                os.remove('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             return redirect('quotationHome')
@@ -217,8 +231,14 @@ def proposal_list(request):
                     cc=cc,
                 )
                 msg.content_subtype = "html"
+                s3 = S3()
+                response = requests.get(s3.get_bucket_object('media/pdfs/proposal/' + pdf_filename_generator(email_id, 'P') + '.pdf'))
+                f = open('media/pdfs/proposal/' + pdf_filename_generator(email_id, 'P') + '.pdf', 'wb')
+                f.write(response.content)
+                f.close()
                 msg.attach_file('media/pdfs/proposal/' + pdf_filename_generator(email_id, 'P') + '.pdf')
                 msg.send()
+                os.remove('media/pdfs/proposal/' + pdf_filename_generator(email_id, 'P') + '.pdf')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             return redirect('proposalHome')

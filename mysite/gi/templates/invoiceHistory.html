@@ -14,7 +14,7 @@
             <br />Total Invoiced: <b>${{ invoice_history.total_invoiced }} </b>
             <br />Total Paid: <b>${{ invoice_history.total_paid }} </b>
             <br />Balance: <b>${{ invoice_history.balance_due }} </b>
-            <br />PDF File: <b><a href="{{ WEB_URL }}{{ MEDIA_URL }}pdfs/invoice/{{ invoice_history.pdf_filename }}.pdf?{% random_int 100000 999999 %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></b>
+            <br />PDF File: <b><a href="{% get_s3_file_url invoice_history.pdf_filename 'invoice' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></b>
         </li>
     {%  endfor %}
     </ul>

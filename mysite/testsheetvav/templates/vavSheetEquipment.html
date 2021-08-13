@@ -44,7 +44,7 @@
         <li class="list-group-item">
             Equipment Name: <b>{{ sheet_equipment }} </b>
             - Quantity: <b>{{ equipments_count|get_item:sheet_equipment }} </b>
-            <a href="{% url 'vavSheetEquipmentDelete' sheet.id sheet_equipment %}" id="estimate_equipment_delete"><img src = "{% static '/admin/img/icon-deletelink.svg' %}"></a>
+            <a href="{% url 'vavSheetEquipmentDelete' sheet.id sheet_equipment %}" id="estimate_equipment_delete"><img src = "{% static 'admin/img/icon-deletelink.svg' %}"></a>
         </li>
     {%  endfor %}
     </ul>

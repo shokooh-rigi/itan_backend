@@ -16,7 +16,7 @@
                             <option value="{{ contractor.id }}" data-companyname="{{ contractor.company.name }}" data-companyaddress="{{ contractor.company.city }}, {{ contractor.company.state }}, {{ contractor.company.zip }}" data-contractorname="{{ contractor.name }}" data-contractoremail="{{ contractor.mail }}">{{ contractor }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-icon"><a href="{% url 'estimatorAdd' %}" id="add_customer"><img src = "{% static '/admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'estimatorAdd' %}" id="add_customer"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
                 </div>
             </div>
             <div class="row form-line">

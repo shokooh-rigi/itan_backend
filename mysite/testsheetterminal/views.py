@@ -16,6 +16,7 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
 from django.db.models import Count
 from django.db.models.functions import Cast, Coalesce
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -177,15 +178,19 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     eq_type = ''
     eq_name = ''
     i = 0
-    equipment_in_page = 21
+    equipment_in_page = 29
     supply_lines = 0
     return_lines = 0
     outside_lines = 0
+    other_lines = 0
+
 
     for air_equipment in air_sheet_equipments:
-        if air_equipment.air_equipment.id != last_air_equipment or air_equipment.type != last_air_equipment_type:
+        if air_equipment.air_equipment.id != last_air_equipment or air_equipment.type != last_air_equipment_type or air_equipment.type == 4:
             if last_air_equipment != 0:
-                circle_time = equipment_in_page - i - supply_lines - return_lines - outside_lines
+                group_total_pages = int((i + supply_lines + return_lines + outside_lines + other_lines) / equipment_in_page) + 1
+                circle_time = equipment_in_page - ((i + supply_lines + return_lines + outside_lines + other_lines + (
+                    group_total_pages * 2) + 5) % equipment_in_page)
                 if air_equipment.air_equipment.id == last_air_equipment:
                     circle_time = 0
                 else:
@@ -193,6 +198,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                     supply_lines = 0
                     return_lines = 0
                     outside_lines = 0
+                    other_lines = 0
                 previous_general_data = {
                     'eq_name': eq_name,
                     'eq_type': eq_type,
@@ -225,10 +231,11 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 eq_type = 'SUPPLY'
             elif air_equipment.type == 2:
                 eq_type = 'RETURN'
-            else:
+            elif air_equipment.type == 3:
                 eq_type = 'OUTSIDE'
-            eq_name = air_equipment.air_equipment.sheetequipmentcommondata_set.get(
-                key__column_title__icontains='fan no.').value
+            else:
+                eq_type = air_equipment.equipment_name
+            eq_name = air_equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
         else:
             d_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
                                                                       sheet_field__field_name__iexact='cfm').value)
@@ -248,11 +255,15 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
             supply_lines = 3
         elif air_equipment.type == 2:
             return_lines = 3
+        elif air_equipment.type == 3:
+            return_lines = 3
         else:
-            outside_lines = 3
+            other_lines += 3
 
     if air_sheet_equipments:
-        circle_time = equipment_in_page - i - supply_lines - return_lines - outside_lines
+        group_total_pages = int((i + supply_lines + return_lines + outside_lines + other_lines) / equipment_in_page) + 1
+        circle_time = equipment_in_page - ((i + supply_lines + return_lines + outside_lines + other_lines + (
+                    group_total_pages * 2) + 5) % equipment_in_page)
         last_general_data = {
             'eq_name': eq_name,
             'eq_type': eq_type,
@@ -360,7 +371,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
             'my_sheet': my_sheet,
             'data': data,
         },
-        'file_name': 'Air Terminal Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': 'Air Terminal Test Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                           my_sheet.project.project_number,
                                                           '' if is_report_pdf else ' TECH').upper(),
         'license_owner': license_owner,
@@ -386,32 +397,45 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 @login_required
 def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTechTemplate.html', parameters,
-                                                  'terminalEquipmentReport')
-    if os.path.exists(pdf_path):
-        with open(pdf_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name
-            return response
-    else:
-        return 'error'
+    pdf_type = 'terminalEquipmentReport'
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTechTemplate.html', parameters, pdf_type)
+    # if os.path.exists(pdf_path):
+    #     with open(pdf_path, 'rb') as fh:
+    #         response = HttpResponse(fh.read(), content_type="application/pdf")
+    #         response['Content-Disposition'] = 'inline; filename=' + pdf_name
+    #         return response
+    # else:
+    #     return 'error'
+    sending_parameters = {
+        'pdf_type': pdf_type,
+        'pdf_name': pdf_name,
+        'pdf_path': pdf_path,
+    }
+    return JsonResponse(sending_parameters)
 
 
 @login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
+    pdf_type = 'terminalEquipmentReport'
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTemplate.html', parameters,
                                                   'terminalEquipmentReport')
 
-    if os.path.exists(pdf_path):
-        with open(pdf_path, 'rb') as fh:
-            my_file = fh.read()
-            response = HttpResponse(my_file, content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name
-            response['Content-Length'] = len(my_file)
-            return response
-    else:
-        return 'error'
+    # if os.path.exists(pdf_path):
+    #     with open(pdf_path, 'rb') as fh:
+    #         my_file = fh.read()
+    #         response = HttpResponse(my_file, content_type="application/pdf")
+    #         response['Content-Disposition'] = 'inline; filename=' + pdf_name
+    #         response['Content-Length'] = len(my_file)
+    #         return response
+    # else:
+    #     return 'error'
+    sending_parameters = {
+        'pdf_type': pdf_type,
+        'pdf_name': pdf_name,
+        'pdf_path': pdf_path,
+    }
+    return JsonResponse(sending_parameters)
 
 
 def split(value: str, sep: str):
@@ -648,29 +672,29 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
     if is_air_moving:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          air_equipment=this_sheet_equipment,
-                                                                         type=1)
+                                                                         type=1).order_by('outlet_no')
         return_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          air_equipment=this_sheet_equipment,
-                                                                         type=2)
+                                                                         type=2).order_by('outlet_no')
         outside_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                           air_equipment=this_sheet_equipment,
-                                                                          type=3)
+                                                                          type=3).order_by('outlet_no')
         other_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                           air_equipment=this_sheet_equipment,
-                                                                          type=4)
+                                                                          type=4).order_by('outlet_no')
     else:
         supply_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
-                                                                         type=1)
+                                                                         type=1).order_by('outlet_no')
         return_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
-                                                                         type=2)
+                                                                         type=2).order_by('outlet_no')
         outside_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                          vav_equipment=this_sheet_equipment,
-                                                                         type=3)
+                                                                         type=3).order_by('outlet_no')
         other_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
                                                                           vav_equipment=this_sheet_equipment,
-                                                                          type=4)
+                                                                          type=4).order_by('outlet_no')
 
     if request.method == 'POST':
         if request.POST.get("cancel"):

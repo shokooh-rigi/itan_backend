@@ -46,7 +46,7 @@
                             {% if design_field.field_name|lower != 'size' %}
                                 <input style="width: 100%;" {% get_field_type design_field %}
                                        {% if design_field.required_in_design %}required=""{% endif %}
-                                       name="{{ field_name }}" maxlength="50"
+                                       name="{{ field_name }}"
                                        class="form-control eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                        value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field supply_terminal_equipment.id %}{% endif %}"
                                        {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
@@ -55,7 +55,7 @@
                                     <input style="width: 100%;" {% get_field_type design_field %}
                                            {% if design_field.required_in_design %}required=""{% endif %}
                                            data-eqid="{{ supply_terminal_equipment.id }}"
-                                           name="{{ field_name }}" maxlength="50"
+                                           name="{{ field_name }}"
                                            class="size-split has_inch form-control size_eq_supply size_{{ supply_terminal_equipment.id }} eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
                                            value="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
                                     <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
@@ -65,12 +65,12 @@
                                 <div class="related_to_xy_{{ supply_terminal_equipment.id }}">
                                     <input style="width: 46%;" {% get_field_type design_field %}
                                            {% if design_field.required_in_design %}required=""{% endif %}
-                                           name="{{ field_name }}-x" maxlength="50"
+                                           name="{{ field_name }}-x"
                                            class="form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
                                            value="" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
                                             X
                                     <input style="width: 46%;" {% get_field_type design_field %}
-                                            name="{{ field_name }}-y" maxlength="50"
+                                            name="{{ field_name }}-y"
                                            class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
                                            value="" />
                                 </div>

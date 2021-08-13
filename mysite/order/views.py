@@ -12,6 +12,8 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MAX_UPLOAD_SIZE, UPLOAD_U
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file
 from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
+from ..s3_file_manager import S3
+import urllib.request as url_request
 
 
 # Create your views here.
@@ -245,6 +247,7 @@ def tech_label(request, order_id):
                     has_pre_demo = 1
                 else:
                     has_pre_demo = 0
+                file_name = 'techlabel-' + str(this_order.project_number) + '.pdf'
                 parameters = {'form': form,
                               'datenow': datetime.datetime.now().date(),
                               'file_name': 'techlabel-' + str(this_order.project_number),
@@ -266,13 +269,13 @@ def tech_label(request, order_id):
                 # if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
                 #     techlabel_extra_pdf = TechLabel.create_techlabel_extra_pdf(parameters)
                 #     parameters['techlabel_extra_pdf'] = techlabel_extra_pdf[1]
-                file_path = os.path.join(settings.MEDIA_ROOT, parameters['techlabel_pdf'])
-                if os.path.exists(file_path):
-                    with open(file_path, 'rb') as fh:
-                        response = HttpResponse(fh.read(), content_type="application/pdf")
-                        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
-                        return response
-                raise Http404
+
+                s3 = S3()
+                response = url_request.urlretrieve(s3.get_bucket_object('media/pdfs/techlabel/' + file_name))
+                with open(response[0], 'rb') as fh:
+                    response = HttpResponse(fh.read(), content_type="application/pdf")
+                    response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_name)
+                    return response
     parameters = {'form': form,
                   'this_order': this_order,
                   }
@@ -306,6 +309,9 @@ def order_equipment_submittal(request, order_id):
         if form.is_valid():
             if request.POST.get("save"):
 
+                if request.POST.get("equipment_submittal-clear"):
+                    Order.objects.filter(id=order_id).update(equipment_submittal=None)
+                    return redirect('orderEdit', order_id=order_id)
                 temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_equipment_submittal")
                 if not os.path.exists(temp_path):
                     os.makedirs(temp_path)
@@ -337,8 +343,8 @@ def order_equipment_submittal(request, order_id):
                     .replace("/", '')
                 zip_file_name = project_clean_name + '-Equipment-Submittal.zip'
                 create_zip_file(files, temp_path, zip_file_name)
-                # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
-                Order.objects.filter(id=order_id).update(equipment_submittal=UPLOAD_URL + 'order_equipment_submittal/' + zip_file_name)
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                Order.objects.get(id=order_id).equipment_submittal.save(zip_file_name, file)
 
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
@@ -390,7 +396,8 @@ def order_colored_drawing(request, order_id):
                 zip_file_name = project_clean_name + '-Colored-Drawing.zip'
                 create_zip_file(files, temp_path, zip_file_name)
                 # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
-                Order.objects.filter(id=order_id).update(colored_drawing=UPLOAD_URL + 'order_colored_drawing/' + zip_file_name)
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                Order.objects.get(id=order_id).colored_drawing.save(zip_file_name, file)
 
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
@@ -442,7 +449,8 @@ def order_site_pictures(request, order_id):
                 zip_file_name = project_clean_name + '-Site-Pictures.zip'
                 create_zip_file(files, temp_path, zip_file_name)
                 # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
-                Order.objects.filter(id=order_id).update(site_pictures=UPLOAD_URL + 'order_site_pictures/' + zip_file_name)
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                Order.objects.get(id=order_id).site_pictures.save(zip_file_name, file)
 
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
@@ -494,7 +502,8 @@ def order_test_sheets(request, order_id):
                 zip_file_name = project_clean_name + '-Test-Sheets.zip'
                 create_zip_file(files, temp_path, zip_file_name)
                 # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
-                Order.objects.filter(id=order_id).update(test_sheets=UPLOAD_URL + 'order_test_sheets/' + zip_file_name)
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                Order.objects.get(id=order_id).test_sheets.save(zip_file_name, file)
 
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,

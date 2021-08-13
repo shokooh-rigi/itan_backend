@@ -14,6 +14,12 @@ from .render import Render as PDFRender
 from ..sheetcreator.models import *
 from itertools import chain
 from django.http import JsonResponse
+import requests
+import pickle
+from django.template.loader import get_template
+import time
+from rest_framework import status
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -384,15 +390,35 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 @login_required
 def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTechTemplate.html', parameters,
-                                                  'vavEquipmentReport')
-    if os.path.exists(pdf_path):
-        with open(pdf_path, 'rb') as fh:
+    url = 'http://127.0.0.1:7000/AddTask/'
+    temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "mysite/testsheetvav/templates/pdfTemplates/vavSheetEquipmentTechTemplate.html")
+    template = get_template(temp_path)
+    html = template.render(parameters)
+    print(type(html))
+    string_payload = {
+        'html': html,
+        'params'
+        'PDF_Type': 'vavEquipmentReport'
+    }
+    response = requests.post(url, data=string_payload)
+    print(response)
+    if response.status_code == 200:
+        with open(response, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'inline; filename=' + pdf_name
+            response['Content-Disposition'] = 'inline; filename=test.pdf'
             return response
     else:
-        return 'error'
+        return response.status_code
+    # parameters = get_pdf_parameters(sheet_id, False)
+    # pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/vavSheetEquipmentTechTemplate.html', parameters,
+    #                                               'vavEquipmentReport')
+    # if os.path.exists(pdf_path):
+    #     with open(pdf_path, 'rb') as fh:
+    #         response = HttpResponse(fh.read(), content_type="application/pdf")
+    #         response['Content-Disposition'] = 'inline; filename=' + pdf_name
+    #         return response
+    # else:
+    #     return 'error'
 
 
 @login_required

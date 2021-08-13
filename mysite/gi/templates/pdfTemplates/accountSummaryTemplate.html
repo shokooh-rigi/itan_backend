@@ -89,7 +89,7 @@
                   <tbody>
                     <tr style="text-align: center;">
                         <td style="padding: 5px; font-weight: bold;">Signature:</td>
-                        <td style="padding: 5px;"><img alt="" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_signature }}" class="signature" style="height: 50px;" /></td>
+                        <td style="padding: 5px;"><img alt="" src="{% get_s3_file_url owner_signature '' %}" class="signature" style="height: 50px;" /></td>
                         <td style="padding: 5px; font-weight: bold;"> </td>
                         <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
                         <td style="padding: 5px;"><span style="text-decoration: underline;">{{ license_owner }}</span>, <span style="text-decoration: underline;">{{ owner_title }}</span></td>

@@ -202,11 +202,17 @@ def submittal_view(request, submittal_id):
             merger.append(fileobj=temp_file)
     if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal"))
-    output = open(MEDIA_URL_NOSLASH + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(submittal_id) + ".pdf",
-                  "wb")
+    file_name = 'submittal-' + pdf_filename_generator(submittal_id) + ".pdf"
+    file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal", file_name)
+    s3_path = os.path.join("media/pdfs/submittal", file_name)
+    output = open(file_path, "wb")
     merger.write(output)
-    parameters['submittal_url'] = MEDIA_URL + "pdfs/submittal/" + 'submittal-' + pdf_filename_generator(
-        submittal_id) + ".pdf"
+    output.close()
+
+    s3 = S3()
+    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
+
+    parameters['submittal_url'] = s3.get_bucket_object(key=s3_path)
     return render(request, "submittalView.html", parameters)
 
 

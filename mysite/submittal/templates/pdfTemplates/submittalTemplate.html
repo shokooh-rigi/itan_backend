@@ -79,7 +79,7 @@
             <div class="col-sm-12">
                 Should you have any questions and/or require additional information please contact me at {{ owner_tel }}
                 <br /><br />Respectfully
-                <br /><div style="width: 100px; margin: 10px 0px auto;"><img alt="owner signature" class="img-fluid" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_signature }}" /></div>
+                <br /><div style="width: 100px; margin: 10px 0px auto;"><img alt="owner signature" class="img-fluid" src="{% get_s3_file_url owner_signature '' %}" /></div>
                 {{ owner_name }}, T.B.E
                 <br />{{ owner_title }}
             </div>

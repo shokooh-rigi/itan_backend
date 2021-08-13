@@ -30,7 +30,7 @@
                         </td>
                         <td style="font-weight: bold; width: 15%;">
                             <div style="padding: 5px; font-weight: bold;">{{ invoice.created_on|date:'m/d/Y' }}</div>
-                            <div style="padding: 0px; font-weight: bold;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}-{{ total_count|stringformat:"03d" }}</div>
+                            <div style="padding: 0px; font-weight: bold;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}-{{ total_count }}</div>
                         </td>
                     </tr>
                   </tbody>
@@ -86,17 +86,19 @@
                     </tr>
                     <tr style="border: 1px solid #000;">
                         <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
-                        <td style="padding: 5px 0 0 0;">${% estimate_total_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }} </td>
+                        <td style="padding: 5px 0 0 0;">{% if invoice.invoice_type == 1 %}${% estimate_total_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 2 %}${% estimate_predemo_calculator estimate.id as epc %}{{ epc|floatformat:2|intcomma }}{% else %}${% estimate_total_minus_predemo_calculator estimate.id as etmpc %}{{ etmpc|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
-                    {% for change_order in change_orders %}
-                    <tr style="border: 1px solid #000;">
-                        <td style="padding: 5px 0 0 0;">Change Order #{{ change_order.co_number }}{% if change_order.description %} - {{ change_order.description }}{% endif %} </td>
-                        <td style="padding: 5px 0 0 0;">${{ change_order.amount|floatformat:2|intcomma }} </td>
-                    </tr>
-                    {% endfor %}
+                    {% if invoice.invoice_type != 2 %}
+                        {% for change_order in change_orders %}
+                        <tr style="border: 1px solid #000;">
+                            <td style="padding: 5px 0 0 0;">Change Order #{{ change_order.co_number }}{% if change_order.description %} - {{ change_order.description }}{% endif %} </td>
+                            <td style="padding: 5px 0 0 0;">${{ change_order.amount|floatformat:2|intcomma }} </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Sub Total: </td>
-                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% order_total_calculator estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }} </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">{% if invoice.invoice_type == 1 %}${% order_total_calculator estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 2 %}${% order_predemo_calculator estimate.id invoice.order as opc %}{{ opc|floatformat:2|intcomma }}{% else %}${% order_final_calculator estimate.id invoice.order as ofc %}{{ ofc|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
                     <tr style="text-align: right;">
                         <td style="padding: 5px 5px 0 5px;">Percent of performance completed: </td>
@@ -126,7 +128,7 @@
                   <tbody>
                     <tr style="text-align: center;">
                         <td style="padding: 5px; font-weight: bold;">Signature:</td>
-                        <td style="padding: 5px;"><img alt="" src="{{ WEB_URL }}{{ MEDIA_URL }}{{ owner_signature }}" class="signature" style="height: 50px;" /></td>
+                        <td style="padding: 5px;"><img alt="" src="{% get_s3_file_url owner_signature '' %}" class="signature" style="height: 50px;" /></td>
                         <td style="padding: 5px; font-weight: bold;"> </td>
                         <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
                         <td style="padding: 5px;"><span style="text-decoration: underline;">{{ license_owner }}</span>, <span style="text-decoration: underline;">{{ owner_title }}</span></td>
