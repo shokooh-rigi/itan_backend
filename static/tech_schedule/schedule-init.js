@@ -168,6 +168,7 @@
                                             'control_system': (order.control_system === 'None' ? '' : order.control_system),
                                             'special_instruction': order.special_instruction,
                                             'tech_note': order.tech_note,
+                                            'price': order.price,
                                             'equipment_submittals_link': order.equipment_submittals_link,
                                             'test_sheets_link': order.test_sheets_link,
                                             'tech_marked_drawing_link': order.tech_marked_drawing_link,
@@ -204,6 +205,7 @@
                                             'control_system': (order.control_system === 'None' ? '' : order.control_system),
                                             'special_instruction': order.special_instruction,
                                             'tech_note': order.tech_note,
+                                            'price': order.price,
                                             'equipment_submittals_link': order.equipment_submittals_link,
                                             'test_sheets_link': order.test_sheets_link,
                                             'tech_marked_drawing_link': order.tech_marked_drawing_link,
@@ -338,6 +340,7 @@
                         $("#schedule-edit .modal-body #tech_note").text(info.event.extendedProps.tech_note)
                         $('#schedule-edit .modal-body #start_date').text(dateFormat(info.event.start, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
+                        $('#schedule-edit .modal-body #price').text('$' + info.event.extendedProps.price);
 
                         let url_mask = '#'
                         if (info.event.extendedProps.test_sheet_id == '') {
@@ -403,6 +406,7 @@
                         $("#schedule-edit .modal-body #tech_note").text(info.event.extendedProps.tech_note)
                         $('#schedule-edit .modal-body #start_date').text(dateFormat(info.event.start, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
+                        $('#schedule-edit .modal-body #price').text('$' + info.event.extendedProps.price);
                         $('#schedule-edit .modal-body #equipment_submittal').attr('href', info.event.extendedProps.equipment_submittals_link);
                         let url_mask = ''
                         if (info.event.extendedProps.test_sheet_id == '') {

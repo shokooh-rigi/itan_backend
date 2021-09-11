@@ -7,9 +7,14 @@
 {% block content %}
     <div class="text-center">
         <a href="{% url 'invoiceAdd' %}"><button type="button" class="btn btn-primary big">Generate Invoice</button></a>
-        <br /><br /><hr />
-
-
+        <br /><br />
+        <h3>Select Invoices Filtered By:</h3>
+        <div class="btn-group type-select" style="margin: 10px auto;">
+            <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
+            <a class="btn btn-primary fully-paid" href="?{% url_replace request 'type' 'fully-paid' %}">Fully Paid</a>
+            <a class="btn btn-primary partial-paid" href="?{% url_replace request 'type' 'partial-paid' %}">Partial Paid</a>
+            <a class="btn btn-primary not-paid" href="?{% url_replace request 'type' 'not-paid' %}">Not Paid</a>
+        </div>
         <form method="get" action="">
             <div class="row form-line">
                 <div class="col-lg-12">
@@ -231,6 +236,20 @@
 </div>
 <script>
     $(document).ready(function() {
+
+        if (window.location.href.indexOf('type=all') > 0) {
+            $(".type-select a.allselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=fully-paid') > 0) {
+            $(".type-select a.fully-paid").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=partial-paid') > 0) {
+            $(".type-select a.partial-paid").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=not-paid') > 0) {
+            $(".type-select a.not-paid").addClass("active");
+        }
+
         $(".alert").css('display', 'none');
         $(document).on("click", ".email_modal", function () {
              $(".modal-body #id_email_id").val( $(this).data('id') );

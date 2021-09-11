@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
-from .render import Render as PDFRender
+from ..render import Render as PDFRender
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
 from django.db.models import Count
@@ -24,7 +24,7 @@ from django.http import JsonResponse
 
 @login_required
 def terminal_sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):

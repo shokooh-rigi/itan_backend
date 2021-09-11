@@ -13,6 +13,7 @@ class ReportForm(ModelForm):
             'order',
             'report_date',
             'created_by',
+            'report_file'
         ]
 
     def __init__(self, *args, **kwargs):

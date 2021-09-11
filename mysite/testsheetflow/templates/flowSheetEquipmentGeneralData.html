@@ -37,6 +37,20 @@
                     {{ form.model_number }}
                 </div>
             </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="equipment_group" class="control-label">Equipment Group <span class="required">*</span></label>
+                    <select required="" name="equipment_group" class="form-control" id="equipment_group" style="max-width:206px;">
+                        <option value="" selected="">---------</option>
+
+                        {% for group in equipment_groups %}
+                            <option value="{{ group }}" {% if flow_equipment.equipment_group == group %}selected="selected"{% endif %}>
+                                {{ group }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <input type="submit" class="btn btn-success" value="Save" name="save" />

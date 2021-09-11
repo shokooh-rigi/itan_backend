@@ -609,9 +609,9 @@
                         Notes:
                     </td>
                     <td class="pdf-table-cell" colspan="21" style="text-align: left">
-                        {% for induction_unit_equipment in form.induction_unit_equipment_data %}
+                        {% for equipment in form.equipment_data %}
                             {% if forloop.counter == forloop.parentloop.counter %}
-                                {% for eq in induction_unit_equipment %}
+                                {% for eq in equipment %}
                                     {% with eq|get_item:'Note-2' as note %}
                                         {% if note != '' %}{{ note }} | {% endif %}
                                     {% endwith %}

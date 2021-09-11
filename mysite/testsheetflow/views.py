@@ -24,7 +24,7 @@ from .models import FlowEquipment, FlowSheetData
 
 @login_required
 def flow_sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):
@@ -151,32 +151,39 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     total_pdf_row = 22
     my_sheet = DataSheet.objects.get(id=sheet_id)
+    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
     flow_equipments = FlowEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
     if is_report_pdf:
         flow_equipments = flow_equipments.filter(actual_data_entry_completed=True)
     total_pages = int(flow_equipments.count() / total_pdf_row) + 1
     flow_equipment_data = []
     i = 1
-    flow_equipment_page = []
-    for flow_equipment in flow_equipments:
-        flow_equipment_obj = {}
-        flow_equipment_obj['id'] = flow_equipment.id
-        flow_equipment_obj['br_no'] = flow_equipment.br_number
-        flow_equipment_obj['location'] = flow_equipment.location
-        flow_equipment_obj['unit_number'] = flow_equipment.unit_number
-        flow_equipment_obj['model_number'] = flow_equipment.model_number
-        if is_report_pdf:
-            flowsheetdatas = flow_equipment.flowsheetdata_set.all()
-        else:
-            flowsheetdatas = flow_equipment.flowsheetdata_set.filter(data_type=1)
-        for flow_data in flowsheetdatas:
-            flow_equipment_obj[flow_data.sheet_field.field_name] = flow_data.value
-        flow_equipment_page.append(flow_equipment_obj)
-        if i % total_pdf_row == 0:
-            flow_equipment_data.append(flow_equipment_page)
-            flow_equipment_page = []
-        i += 1
-    flow_equipment_data.append(flow_equipment_page)
+    for group in equipment_groups:
+        group_equipments = flow_equipments.filter(equipment_group=group)
+        len_equipments = group_equipments.count()
+        flow_equipment_page = {'rows': []}
+        for flow_equipment in group_equipments:
+            flow_equipment_obj = {}
+            flow_equipment_obj['id'] = flow_equipment.id
+            flow_equipment_obj['fmf_no'] = i % total_pdf_row
+            flow_equipment_obj['br_no'] = flow_equipment.br_number
+            flow_equipment_obj['location'] = flow_equipment.location
+            flow_equipment_obj['unit_number'] = flow_equipment.unit_number
+            flow_equipment_obj['model_number'] = flow_equipment.model_number
+            if is_report_pdf:
+                flowsheetdatas = flow_equipment.flowsheetdata_set.all()
+            else:
+                flowsheetdatas = flow_equipment.flowsheetdata_set.filter(data_type=1)
+            for flow_data in flowsheetdatas:
+                flow_equipment_obj[flow_data.sheet_field.field_name] = flow_data.value
+            flow_equipment_page['rows'].append(flow_equipment_obj)
+            if i % total_pdf_row == 0:
+                flow_equipment_data.append(flow_equipment_page)
+                flow_equipment_page = {'rows': []}
+            i += 1
+        for j in range(total_pdf_row - (len_equipments % total_pdf_row)):
+            flow_equipment_page['rows'].append({})
+        flow_equipment_data.append(flow_equipment_page)
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
@@ -190,7 +197,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 
     return {
         'total_pdf_row': total_pdf_row,
-        'empty_row_range': range(total_pdf_row - (flow_equipments.count() % total_pdf_row)),
         'form': {
             'total_pages_range': range(total_pages),
             'total_pages': total_pages,
@@ -271,6 +277,7 @@ def manual_replace(s, char, index):
 def flow_common_data(request, flow_equipment_id):
     flow_equipment = get_object_or_404(FlowEquipment, id=flow_equipment_id)
     form = FlowSheetEquipmentForm(request.POST or None, request.FILES or None, instance=flow_equipment)
+    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + flow_equipment.sheet.number_of_equipment_groups)))
 
     if request.method == 'POST':
         if request.POST.get("cancel"):
@@ -279,6 +286,7 @@ def flow_common_data(request, flow_equipment_id):
             if request.POST.get("save"):
                 form.cleaned_data['sheet'] = flow_equipment.sheet
                 saving_obj = form.save(commit=False)
+                saving_obj.equipment_group = request.POST.get('equipment_group')
                 saving_obj.main_data_entry_completed = True
                 saving_obj.save()
                 return redirect('flowSheetEquipmentList', flow_equipment.sheet.id)
@@ -286,6 +294,7 @@ def flow_common_data(request, flow_equipment_id):
     parameters = {
         'form': form,
         'flow_equipment': flow_equipment,
+        'equipment_groups': equipment_groups,
     }
     return render(request, "flowSheetEquipmentGeneralData.html", parameters)
 

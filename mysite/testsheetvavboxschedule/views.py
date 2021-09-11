@@ -26,7 +26,7 @@ SHEET_TYPE_NAME = 'V.A.V. Box Schedule'
 
 @login_required
 def sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):

@@ -15,6 +15,7 @@ import zipfile
 from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file, addto_zip_file
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from ..order.templatetags.order_tags import order_tech_price_calculator
 
 # Create your views here.
 
@@ -139,6 +140,7 @@ def schedule_list(request):
             'control_system': str(schedule.order.control_system),
             'special_instruction': special_instruction,
             'tech_note': this_schedule_tech.note,
+            'price': order_tech_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order),
             'equipment_submittals_link': equipment_submittal,
             'test_sheets_link': test_sheets,
             'tech_marked_drawing_link': tech_marked_drawing,
@@ -269,6 +271,7 @@ def schedule_list(request):
             'control_system': str(maintenance.order.control_system) if maintenance.order else '',
             'special_instruction': special_instruction,
             'tech_note': maintenance.note,
+            'price': 0,
             'equipment_submittals_link': equipment_submittal,
             'test_sheets_link': test_sheets,
             'tech_marked_drawing_link': tech_marked_drawing,

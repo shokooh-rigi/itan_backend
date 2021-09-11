@@ -14,6 +14,7 @@ from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 from ..s3_file_manager import S3
 import urllib.request as url_request
+from .templatetags.order_tags import order_tech_price_calculator
 
 
 # Create your views here.
@@ -40,6 +41,8 @@ def order_list(request):
         object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=True)
     if request.GET.get('type') == 'invoiced':
         object_list = object_list.filter(invoice__isnull=False)
+    if request.GET.get('type') == 'notinvoiced':
+        object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=False)
     if request.GET.get('type') == 'reported':
         object_list = object_list.filter(report__isnull=False)
 
@@ -376,7 +379,7 @@ def order_colored_drawing(request, order_id):
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
-                        'page_title': 'Tech Marked Drawing',
+                        'page_title': 'As Built Mechanical Plan',
                         'error_msg': error_msg
                     }
                     return render(request, "ColoredDrawing.html", parameters)
@@ -402,7 +405,7 @@ def order_colored_drawing(request, order_id):
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
-                  'page_title': 'Tech Marked Drawing',
+                  'page_title': 'As built mechanical plan',
                   }
     return render(request, "ColoredDrawing.html", parameters)
 

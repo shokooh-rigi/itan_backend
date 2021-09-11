@@ -128,6 +128,7 @@
                             <td>{{ report.order.proposal.quote.estimate.project }}</td>
                             <td>{{ report.report_date|date:"DATE_FORMAT" }}</td>
                             <td>
+                                <a href="{% if report.report_file %}{{ report.report_file.url }}{% else %}#{% endif %}" style="display: inline-block; margin-right: 5px;"><div class="icon downloadicon{% if not report.report_file %} disableicon{% endif %}" data-toggle="tooltip" data-placement="bottom" {% if report.report_file %}title="Download Report"{% else %}title="No Report File Uploaded."{% endif %}></div>{% if report.report_file %}</a>{% endif %}
                                 <a href="{% url 'reportEdit' report_id=report.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'reportDelete' report_id=report.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                             </td>

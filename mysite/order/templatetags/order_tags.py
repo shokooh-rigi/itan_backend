@@ -21,6 +21,14 @@ def order_total_calculator(estimate_id, order):
 
 
 @register.simple_tag
+def order_tech_price_calculator(estimate_id, order):
+    otc = order_total_calculator(estimate_id, order)
+    order_offset = order.invoice_adjustment
+    tech_price = float(otc) - float(order_offset)
+    return tech_price
+
+
+@register.simple_tag
 def order_predemo_calculator(estimate_id, order):
     predemo_calc = estimate_predemo_calculator(estimate_id)
     return predemo_calc

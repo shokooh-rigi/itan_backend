@@ -355,9 +355,9 @@
                         Notes:
                     </td>
                     <td class="pdf-table-cell" colspan="19" style="text-align: left">
-                        {% for vbfhs_equipment in form.vbfhs_equipment_data %}
+                        {% for vbs_equipment in form.vbs_equipment_data %}
                             {% if forloop.counter == forloop.parentloop.counter %}
-                                {% for eq in vbfhs_equipment %}
+                                {% for eq in vbs_equipment %}
                                     {% with eq|get_item:'Note' as note %}
                                         {% if note != '' %}{{ note }} | {% endif %}
                                     {% endwith %}

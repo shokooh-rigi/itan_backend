@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+
+{% block content %}
+    <h2>Edit Report</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="reportEdit-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.order.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_report_date" class="control-label">Report Date <span class="required">*</span></label>
+                    {{ form.report_date }}
+                </div>
+            </div>
+            {{ form.created_by.as_hidden }}
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $(function () {
+            $("#id_report_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+		scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -9,12 +9,15 @@
         <h2>DEFINED AIR TERMINAL EQUIPMENT LIST
             FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
         <br>
-        <a href="{% url 'TerminalGenerateTechPDF' sheet_id %}" target="_blank" download="">
-            <button type="button" class="btn btn-primary">Generate Tech PDF</button>
-        </a>
-        <a href="{% url 'TerminalGenerateReportPDF' sheet_id %}" target="_blank" download="">
-            <button type="button" class="btn btn-primary">Generate Report PDF</button>
-        </a>
+        <form method="post">
+        {% csrf_token %}
+            <a id="tech_pdf_generate_btn" href="{% url 'TerminalGenerateTechPDF' sheet_id %}" target="_blank" download="">
+                <button type="button" class="btn btn-primary position-relative"><span class="button__text">Generate Tech PDF</span></button>
+            </a>
+            <a id="report_pdf_generate_btn" href="{% url 'TerminalGenerateReportPDF' sheet_id %}" target="_blank" download="">
+                <button type="button" class="btn btn-primary position-relative"><span class="button__text">Generate Report PDF</span></button>
+            </a>
+        </form>
         <br>
 
         <br>
@@ -113,6 +116,54 @@
     </div>
 <script>
     $(document).ready(function() {
+
+        const TECH_GENERATE_URL = $('#tech_pdf_generate_btn').attr('href')
+        const REPORT_GENERATE_URL = $('#report_pdf_generate_btn').attr('href')
+
+        $('#tech_pdf_generate_btn').click(function(e){
+
+            if ( $(this).attr('href') === TECH_GENERATE_URL ) {
+                e.preventDefault()
+                $(this).find('button').addClass('button--loading').prop('disabled', true);
+                const current_url = $(this).attr('href')
+                $.ajax({
+                    url: current_url,
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data)
+                        $('#tech_pdf_generate_btn').attr('href', data.pdf_path)
+                        $('#tech_pdf_generate_btn').find('button').text('DOWNLOAD TECH PDF')
+                        $('#tech_pdf_generate_btn').find('button').removeClass('button--loading').prop('disabled', false);
+                    }
+                });
+            }
+        });
+
+        $('#report_pdf_generate_btn').click(function(e){
+
+            if ( $(this).attr('href') === REPORT_GENERATE_URL ) {
+                e.preventDefault()
+                $(this).find('button').addClass('button--loading').prop('disabled', true);
+                const current_url = $(this).attr('href')
+                $.ajax({
+                    url: current_url,
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data)
+                        $('#report_pdf_generate_btn').attr('href', data.pdf_path)
+                        $('#report_pdf_generate_btn').find('button').text('DOWNLOAD REPORT PDF')
+                        $('#report_pdf_generate_btn').find('button').removeClass('button--loading').prop('disabled', false);
+                    }
+                });
+            }
+        });
+
+
+
+
+
+
+
         var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {

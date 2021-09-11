@@ -15,6 +15,7 @@ from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from .models import *
 from .render import Render as PDFRender
 from django.http import JsonResponse
+import numbers
 
 
 # Create your views here.
@@ -739,20 +740,24 @@ def check_actual_values(request, this_sheet_equipment, equipment_type_custom_fie
                 actual_value = custom_fields.get(key__equipment_value_name=field_name)
                 related_id = actual_value.id
                 design_value = actual_value.key
-            if '-' in design_value.company_value:
-                spliced_design_values = design_value.company_value.replace(' ', '').split('-')
-                correct_design_value = min(spliced_design_values, key=lambda x: abs(float(x)-eval(request.POST.get('actual_value_' + str(related_id)))))
+
+            if isinstance((request.POST.get('actual_value_' + str(related_id))), numbers.Number):
+                if '-' in design_value.company_value:
+                    spliced_design_values = design_value.company_value.replace(' ', '').split('-')
+                    correct_design_value = min(spliced_design_values, key=lambda x: abs(float(x)-eval(request.POST.get('actual_value_' + str(related_id)))))
+                else:
+                    correct_design_value = design_value.company_value
+                fields = [
+                    ('[field-{}-design]'.format(equipment_type_custom_field.id), correct_design_value),
+                    ('[field-{}-actual]'.format(equipment_type_custom_field.id), request.POST.get('actual_value_' + str(related_id))),
+                ]
+                for name, value in fields:
+                    left_side = left_side.replace(name, value)
+                    right_side = right_side.replace(name, value)
+                    left_side_msg = left_side_msg.replace(name, field_name)
+                    right_side_msg = right_side_msg.replace(name, field_name)
             else:
-                correct_design_value = design_value.company_value
-            fields = [
-                ('[field-{}-design]'.format(equipment_type_custom_field.id), correct_design_value),
-                ('[field-{}-actual]'.format(equipment_type_custom_field.id), request.POST.get('actual_value_' + str(related_id))),
-            ]
-            for name, value in fields:
-                left_side = left_side.replace(name, value)
-                right_side = right_side.replace(name, value)
-                left_side_msg = left_side_msg.replace(name, field_name)
-                right_side_msg = right_side_msg.replace(name, field_name)
+                return None
 
         left_side = eval(left_side)
         right_side = eval(right_side)

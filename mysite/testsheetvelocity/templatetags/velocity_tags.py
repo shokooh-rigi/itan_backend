@@ -22,7 +22,7 @@ def get_velocity_actual_value(request, actual_field, equipment):
 
 @register.simple_tag
 def get_velocity_table_value(request, equipment):
-    table_datas = VelocitySheetTableData.objects.filter(velocity_equipment=equipment)
+    table_datas = VelocitySheetTableData.objects.filter(velocity_equipment=equipment).order_by('row', 'col')
     if table_datas.count() > 0:
         return_value = []
         row_num = 0

@@ -180,8 +180,8 @@
                 <tbody>
                 <!-- Table title -->
                 <tr class="pdf-table-title">
-                    <td class="pdf-table-title-td" colspan="11">VELOCITY TRAVERSE TEST SHEET</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="3">Page {{ forloop.counter }}</td>
+                    <td class="pdf-table-title-td" colspan="13">VELOCITY TRAVERSE TEST SHEET</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="1">Page {{ forloop.counter }}</td>
                 </tr>
 
                 <!-- Project specifications -->
@@ -304,22 +304,21 @@
             </table>
             <table class="table pdf-table" style="margin-top: 8px;">
                 <tbody>
-                {% for i in max_row %}
-                    <tr class="pdf-table-row-thick section-middle-row" style="border-bottom-width: 0; {% if i == 0 %}border-top-width: 2px;{% else %}border-top-width: 1px;{% endif %}">
-                        {% for j in max_col %}
-                            <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">{% get_velocity_cell_value velocity_equipment|get_list:'equipment_id' i j %}</td>
-                        {% endfor %}
+                    {% for i in max_row %}
+                        <tr class="pdf-table-row-thick section-middle-row" style="border-bottom-width: 0; {% if i == 0 %}border-top-width: 2px;{% else %}border-top-width: 1px;{% endif %}">
+                            {% for j in max_col %}
+                                <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">{% get_velocity_cell_value velocity_equipment|get_list:'equipment_id' i j %}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
+                        <td class="pdf-table-cell note-title" colspan="4">
+                            Notes:
+                        </td>
+                        <td class="pdf-table-cell" colspan="65" style="text-align: left;">
+                            {{ velocity_equipment|get_list:'Note' }}
+                        </td>
                     </tr>
-                {% endfor %}
-                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
-                    <td></td>
-                    <td class="pdf-table-cell note-title">
-                        Notes:
-                    </td>
-                    <td class="pdf-table-cell" colspan="13">
-                        {{ velocity_equipment|get_list:'Note' }}
-                    </td>
-                </tr>
                 </tbody>
             </table>
         </div>

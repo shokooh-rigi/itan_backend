@@ -372,15 +372,15 @@
                     {{ dalt_equipment|get_item:'leakage-2' }}
                 </td>
                 <td colspan="1" style="border-left-width: 0" class="pdf-table-cell center-title border">
-                    CFM
+                    {% if dalt_equipment|get_item:'leakage-2' != '*' %}CFM{% endif %}
                 </td>
                 <td colspan="3" style="border-left-width: 0; border-bottom-width: 0; border-right: 2px solid black;" class="pdf-table-cell center-title no-border">
 
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row">
-                <td colspan="5" style="vertical-align: bottom; height: 150px; border-right-width: 0;" class="pdf-table-cell pdf-table-title-cell">
-
+                <td colspan="5" style="vertical-align: center; height: 150px; border-right-width: 0;" class="pdf-table-cell pdf-table-title-cell">
+                    {% if dalt_equipment|get_item:'Remarks-2' != '' %}Note: {{ dalt_equipment|get_item:'Remarks-2' }}{% endif %}
                 </td>
                 <td style="border-left-width: 0;" colspan="13" class="pdf-table-cell pdf-table-title-cell pdf-table-center-cell center-title">
                     Certified By: <img alt="tbe-signature" src="{% get_s3_file_url stamp_signature '' %}" class="signature" style="height: 140px;"/>
@@ -396,8 +396,8 @@
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row bottom-row-thick">
-                <td style="height: 70px;" colspan="18" class="pdf-table-cell">
-                     {{ dalt_equipment|get_item:'note-2' }}
+                <td style="height: 70px; text-align: left;" colspan="18" class="pdf-table-cell">
+                     {{ dalt_equipment|get_item:'Remarks-2' }}
                 </td>
             </tr>
             </tbody>

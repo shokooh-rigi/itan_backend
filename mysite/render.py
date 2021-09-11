@@ -36,6 +36,7 @@ class Render:
         s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
         if delete_file:
             os.remove(file_path)
+        file_path = s3.get_bucket_object(s3_path)
         return [file_name, file_path]
 
     @staticmethod

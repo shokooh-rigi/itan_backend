@@ -24,7 +24,7 @@ from .models import DaltEquipment, DaltSheetData
 
 @login_required
 def dalt_sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):
@@ -118,7 +118,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 leak_factor = dalt_data.value
             dalt_equipment_obj[dalt_data.sheet_field.field_name + '-' + str(dalt_data.data_type)] = dalt_data.value
         if is_report_pdf:
-            dalt_equipment_obj['mal'] = int((int(leak_factor)/float(duct_area))*(float(duct_area)))
+            dalt_equipment_obj['mal'] = leak_factor
         dalt_equipment_data.append(dalt_equipment_obj)
 
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
@@ -255,6 +255,7 @@ def dalt_actual_data(request, dalt_equipment_id):
         if request.POST.get("next"):
 
             for actual_field in actual_fields:
+
                 new_value = request.POST.get(f'supply_actual_value_{actual_field.id}').strip()
 
                 num_results = DaltSheetData.objects.filter(data_type=2, dalt_equipment=dalt_equipment,

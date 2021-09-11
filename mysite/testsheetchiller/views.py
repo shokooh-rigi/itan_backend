@@ -24,7 +24,7 @@ from .models import ChillerEquipment, ChillerSheetData
 
 @login_required
 def chiller_sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):

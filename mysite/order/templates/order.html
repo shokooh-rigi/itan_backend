@@ -13,6 +13,7 @@
             <a class="btn btn-primary allselected" href="?{% url_replace request 'type' 'all' %}">All</a>
             <a class="btn btn-primary inprogressselected" href="?{% url_replace request 'type' 'inprogress' %}">In Progress</a>
             <a class="btn btn-primary reportedselected" href="?{% url_replace request 'type' 'reported' %}">Reported</a>
+            <a class="btn btn-primary notinvoicedselected" href="?{% url_replace request 'type' 'notinvoiced' %}">Not Invoiced</a>
             <a class="btn btn-primary invoicedselected" href="?{% url_replace request 'type' 'invoiced' %}">Invoiced</a>
         </div>
         <div class="row" style="margin: 10px auto; position: relative;">
@@ -201,6 +202,9 @@ function updateURLParameter(url, param, paramVal)
         }
         else if (window.location.href.indexOf('type=invoiced') > 0) {
             $(".type-select a.invoicedselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=notinvoiced') > 0) {
+            $(".type-select a.notinvoicedselected").addClass("active");
         }
         else if (window.location.href.indexOf('type=reported') > 0) {
             $(".type-select a.reportedselected").addClass("active");

@@ -13,7 +13,8 @@ class FlowSheetForm(ModelForm):
             'project',
             'sheet_date',
             'system',
-            'equipment_quantity'
+            'equipment_quantity',
+            'number_of_equipment_groups'
         ]
 
     def __init__(self, *args, **kwargs):

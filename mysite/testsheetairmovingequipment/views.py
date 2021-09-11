@@ -27,7 +27,7 @@ SHEET_TYPE_NAME = 'Air Moving Equipment'
 @login_required
 def air_moving_equipment_sheet_list(request):
 
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):

@@ -171,7 +171,7 @@
 
 
 <div id="content_frame">
-    {% for page in form.total_pages_range %}
+    {% for page in form.flow_equipment_data %}
         <div class="content pdf-page-content">
             <table class="table pdf-table">
                 <!-- Table head section -->
@@ -257,15 +257,13 @@
                         G.P.M.
                     </th>
                 </tr>
-                {% for flow_equipment in form.flow_equipment_data %}
-                    {% if forloop.counter == forloop.parentloop.counter %}
-                    {% for eq in flow_equipment %}
-                    <tr class="pdf-table-row">
+                {% for eq in page.rows %}
+                    <tr class="pdf-table-row" style="height: 30px;">
                         <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
                             {{ eq|get_item:'br_no' }}
                         </td>
                         <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
-                            {{ forloop.counter }}
+                            {{ eq|get_item:'fmf_no' }}
                         </td>
                         <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
                             {{ eq|get_item:'location' }}
@@ -295,61 +293,16 @@
                             {{ eq|get_item:'Final G.P.M.' }}
                         </td>
                     </tr>
-                    {% endfor %}
-                    {% endif %}
                 {% endfor %}
-                {% if forloop.counter == form.total_pages %}
-                {% for empty_row in empty_row_range %}
-                    <tr class="section-first-row pdf-table-row" style="height: 28px;">
-                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
-
-                        </td>
-                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
-
-                        </td>
-                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell" style="border-right-width: 2px;">
-
-                        </td>
-                    </tr>
-                {% endfor %}
-                {% endif %}
                 <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
                     <td class="pdf-table-cell" colspan="1">
                         Notes:
                     </td>
                     <td class="pdf-table-cell" colspan="19" style="text-align: left">
-                        {% for flow_equipment in form.flow_equipment_data %}
-                            {% if forloop.counter == forloop.parentloop.counter %}
-                                {% for eq in flow_equipment %}
-                                    {% with eq|get_item:'Note' as note %}
-                                        {% if note != '' %}{{ note }} | {% endif %}
-                                    {% endwith %}
-                                {% endfor %}
-                            {% endif %}
+                        {% for eq in page.rows %}
+                            {% with eq|get_item:'Note' as note %}
+                                {% if note != '' %}{{ note }} | {% endif %}
+                            {% endwith %}
                         {% endfor %}
                     </td>
                 </tr>

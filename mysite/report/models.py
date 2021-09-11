@@ -1,3 +1,5 @@
+import os
+
 from mysite.order.models import *
 
 
@@ -5,8 +7,13 @@ from mysite.order.models import *
 
 
 class Report(models.Model):
+    def _(self, filename):
+        return os.path.join(
+            r'ReportFiles/{date}/{file}'.format(date=str(self.report_date).replace('/', '_'), file=filename))
+
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False)
     report_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=False)
+    report_file = models.FileField(upload_to=_, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 

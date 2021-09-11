@@ -6,59 +6,73 @@
 
 {% block content %}
     <h2>Record Report</h2>
-    <form method = 'POST' action= '' enctype = "multipart/form-data" id="reportAdd-form">
+    <form method='POST' action='' enctype="multipart/form-data" id="reportAdd-form">
         <div class="form-group">
             {% csrf_token %}
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_order" class="control-label">Project # <span class="required">*</span></label>
                     <select name="order" class="form-control" required="" id="id_order">
-                        <option value="" selected="" data-customer="" data-project="" data-totalamount="">---------</option>
+                        <option value="" selected="" data-customer="" data-project="" data-totalamount="">---------
+                        </option>
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-project="{{ order.proposal.quote.estimate.project }}" data-totalamount="${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}">{{ order.project_number }}</option>
+                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}"
+                                    data-project="{{ order.proposal.quote.estimate.project }}" data-totalamount="$
+                                    {% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}">{{ order.project_number }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-icon"><a href="{% url 'orderAdd' %}" id="add_order"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
+                    <div class="form-icon"><a href="{% url 'orderAdd' %}" id="add_order"><img
+                            src="{% static 'admin/img/icon-addlink.svg' %}"></a></div>
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="customer" class="control-label">Customer</label>
-                    <span class="form-control" id="customer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                    <span class="form-control" id="customer"
+                          style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="project" class="control-label">Project Name</label>
-                    <span class="form-control" id="project" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                    <span class="form-control" id="project"
+                          style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="total_amount" class="control-label">Total Amount</label>
-                    <span class="form-control" id="total_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                    <span class="form-control" id="total_amount"
+                          style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_report_date" class="control-label">Report Date <span class="required">*</span></label>
+                    <label for="id_report_date" class="control-label">Report Date <span
+                            class="required">*</span></label>
                     {{ form.report_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 26px;">
+                    <label for="id_report_files" class="control-label">Report Files</label>
+                    {{ form.report_file }}
                 </div>
             </div>
             {{ form.created_by.as_hidden }}
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Create" name="next" />
-                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                    <input type="submit" class="btn btn-success" value="Create" name="next"/>
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate/>
                 </div>
             </div>
         </div>
-	</form>
+    </form>
     <script>
         $("#customer").text($("#id_order").find(':selected').data('customer'));
         $("#project").text($("#id_order").find(':selected').data('project'));
         $("#total_amount").text($("#id_order").find(':selected').data('totalamount'));
-        $('#id_order').on('change', function() {
+        $('#id_order').on('change', function () {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#project").text($(this).find(':selected').data('project'));
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
@@ -69,7 +83,7 @@
             $("#id_report_date").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
-		scrollInput: false,
+                scrollInput: false,
             });
         });
     </script>

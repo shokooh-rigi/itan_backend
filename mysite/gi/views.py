@@ -110,6 +110,21 @@ def invoice_list(request):
                                              | Q(order__project_number__icontains=search)) \
             .order_by(ordering)
 
+    if request.GET.get('type') == 'fully-paid':
+        to_be_deleted = []
+        for invoice in object_list:
+            if calculate_remaining_invoice_due(invoice) == 0:
+                to_be_deleted.append(invoice.id)
+        object_list = object_list.filter(id__in=to_be_deleted).distinct()
+    if request.GET.get('type') == 'partial-paid':
+        to_be_deleted = []
+        for invoice in object_list:
+            if calculate_remaining_invoice_due(invoice) != 0:
+                to_be_deleted.append(invoice.id)
+        object_list = object_list.filter(id__in=to_be_deleted).filter(invoicetransaction__isnull=False).distinct()
+    if request.GET.get('type') == 'not-paid':
+        object_list = object_list.filter(invoicetransaction__isnull=True)
+
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     invoices = paginator.get_page(page)

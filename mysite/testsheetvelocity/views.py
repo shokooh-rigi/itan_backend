@@ -18,13 +18,15 @@ from ..sheetcreator.models import *
 from django.db.models import Count
 from .models import VelocitySheetData, VelocitySheetTableData, VelocityEquipment
 
+from multiprocessing import Pool
+
 
 # Create your views here.
 
 
 @login_required
 def velocity_sheet_list(request):
-    search = request.GET.get('search', '')
+    search = request.GET.get('project_name', '')
 
     pagination = 20
     if request.GET.get('paginate_by'):
@@ -141,8 +143,10 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 @login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
+    print('gereft data ro')
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/velocitySheetEquipmentTemplate.html', parameters,
                                                   'velocityEquipmentReport')
+    print('tamum shod')
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:

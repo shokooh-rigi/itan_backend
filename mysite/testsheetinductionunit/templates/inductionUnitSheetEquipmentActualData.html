@@ -57,7 +57,7 @@
                                           {% if actual_field.required_in_actual %}required=""{% endif %}
                                           name="{{ field_name }}"
                                           class="form-control"
-                                          id="{{ field_name }}"></textarea>
+                                          id="{{ field_name }}">{% get_induction_unit_actual_value request actual_field equipment %}</textarea>
                             {% endif %}
                         </label>
                         <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
