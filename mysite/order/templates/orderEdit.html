@@ -36,10 +36,18 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Tech Offset</label>
-                    {{ form.invoice_adjustment }}
+                    <label for="id_validity" class="control-label">Final Tech Offset</label>
+                    {{ form.final_offset }}
                 </div>
             </div>
+            {% if this_order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Predemo Tech Offset</label>
+                    {{ form.predemo_offset }}
+                </div>
+            </div>
+            {% endif %}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label">Note</label>

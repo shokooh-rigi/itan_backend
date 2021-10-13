@@ -14,7 +14,6 @@ from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 from ..s3_file_manager import S3
 import urllib.request as url_request
-from .templatetags.order_tags import order_tech_price_calculator
 
 
 # Create your views here.
@@ -33,7 +32,8 @@ def order_list(request):
         ordering = request.GET.get('ordering')
 
     object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
-                                       Q(project_number__icontains=project_name)).order_by(ordering)
+                                       Q(project_number__icontains=project_name) |
+                                       Q(proposal__quote__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
 
     if request.GET.get('type') == 'all' or request.GET.get('type') is None:
         object_list = object_list
@@ -63,6 +63,7 @@ def order_add(request, proposal_id=None):
         proposals = Proposal.objects.filter(id=proposal_id)
     else:
         proposals = Proposal.objects.filter(archive=False).exclude(id__in=Order.objects.all().values_list('proposal_id')).order_by('-created_on')
+
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderHome')
@@ -269,9 +270,6 @@ def tech_label(request, order_id):
                               }
                 techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
                 parameters['techlabel_pdf'] = techlabel_pdf[1]
-                # if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
-                #     techlabel_extra_pdf = TechLabel.create_techlabel_extra_pdf(parameters)
-                #     parameters['techlabel_extra_pdf'] = techlabel_extra_pdf[1]
 
                 s3 = S3()
                 response = url_request.urlretrieve(s3.get_bucket_object('media/pdfs/techlabel/' + file_name))

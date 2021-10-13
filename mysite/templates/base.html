@@ -201,6 +201,47 @@ $(document).ready(function() {
     });
 });
 </script>
+<script type="text/javascript">
+
+    function connectToWebsocket() {
+
+        let user_id = "{{ user.id }}";
+
+        let email = "{{ user.email }}";
+
+        let websocket_url = "wss://usertracker.sassan.us:19002/ws/userTrack/" + window.location.href.toString() + "?email=" + email + ",user_id=" + user_id;
+
+        const chatSocket = new WebSocket(websocket_url);
+
+
+
+        chatSocket.onopen = function (event) {
+
+        };
+
+
+
+        chatSocket.onmessage = function (event) {
+
+        };
+
+
+
+        chatSocket.onclose = function (event) {
+
+            console.log('Socket is closed. Reconnect will be attempted in 1 second.', event.reason);
+
+            console.log(event);
+
+        };
+
+    }
+
+
+
+    connectToWebsocket();
+
+</script>
 {% endblock %}
   </body>
 </html>

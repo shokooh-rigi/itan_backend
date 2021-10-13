@@ -33,10 +33,11 @@
                     <span>{% if tech_label.order.proposal.quote.estimate.project.address_line_1 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ tech_label.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.address_line_2 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ tech_label.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if tech_label.order.proposal.quote.estimate.project.city %}{{ tech_label.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.state %}, {{ tech_label.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.zip %} {{ tech_label.order.proposal.quote.estimate.project.zip }}{% endif %}</span>
                 </div>
                 <br />
+                <br />
+                <br />
                 <div style="margin: 3px 0 auto;"><b>DATE PACKAGE CREATED: </b>{{ datenow }}</div>
                 <div style="margin: 3px 0 auto;"><b>ESTIMATED DATE PROJECT START: </b>{% if tech_label.order.estimated_date_of_project %}{{ tech_label.order.estimated_date_of_project }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>SCHEDULED DATE: </b>{% if tech_label.schedule_date %}{{ tech_label.schedule_date }}{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><b>DATE PROJECT COMPLETED: </b></div>
                 <br />
                 <div style="margin: 3px 0 auto;"><b>MC INFO: </b>{{ tech_label.order.proposal.quote.estimate.customer.company.name|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>ARCH INFO: </b>{% if tech_label.order.architect_name %}{{ tech_label.order.architect_name|upper }}{% endif %}</div>
@@ -78,8 +79,10 @@
                     </table>
                     <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
+                <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
+                <div style="margin: 3px 0 auto;"><b>TAB Date: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
             </div>
         </div>
@@ -103,6 +106,8 @@
                 <div style="margin: 3px 0 auto;"><b>PROJECT ADDRESS: </b>
                     <span>{% if tech_label.order.proposal.quote.estimate.project.address_line_1 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ tech_label.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.address_line_2 %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ tech_label.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if tech_label.order.proposal.quote.estimate.project.city %}{{ tech_label.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.state %}, {{ tech_label.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.zip %} {{ tech_label.order.proposal.quote.estimate.project.zip }}{% endif %}</span>
                 </div>
+                <br />
+                <br />
                 <br />
                 <div style="margin: 3px 0 auto;"><b>DATE PACKAGE CREATED: </b>{{ datenow }}</div>
                 <div style="margin: 3px 0 auto;"><b>ESTIMATED DATE PROJECT START: </b>{% if tech_label.order.estimated_date_of_project %}{{ tech_label.order.estimated_date_of_project }}{% endif %}</div>
@@ -150,8 +155,10 @@
                     </table>
                     <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
+                <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
+                <div style="margin: 3px 0 auto;"><b>TAB Date: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
             </div>
         </div>

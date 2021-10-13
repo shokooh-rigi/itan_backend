@@ -15,7 +15,9 @@ import zipfile
 from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file, addto_zip_file
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
-from ..order.templatetags.order_tags import order_tech_price_calculator
+from ..order.templatetags.order_tags import order_tech_final_price_calculator, order_tech_predemo_price_calculator
+from ..core.models import Setting
+
 
 # Create your views here.
 
@@ -35,12 +37,14 @@ def tech_calendar(request):
 
 @login_required
 def schedule_list(request):
+    schedule_start_date = Setting.objects.get(key='Schedule Start Date')
+    schedule_start_date = datetime.datetime.strptime(schedule_start_date, "%m/%d/%Y").date()
     if request.user.profile.status == 1:
-        maintenance_list = Maintenance.objects.filter(assigned_to_employee=request.user)
-        scheduled = Schedule.objects.filter(scheduletech__assigned_to_employee=request.user)
+        maintenance_list = Maintenance.objects.filter(assigned_to_employee=request.user).filter(schedule_start__gte=schedule_start_date)
+        scheduled = Schedule.objects.filter(scheduletech__assigned_to_employee=request.user).filter(schedule_start__gte=schedule_start_date)
     elif request.user.profile.status == 2:
-        maintenance_list = Maintenance.objects.filter(assigned_to_contractor=request.user)
-        scheduled = Schedule.objects.filter(scheduletech__assigned_to_contractor=request.user)
+        maintenance_list = Maintenance.objects.filter(assigned_to_contractor=request.user).filter(schedule_start__gte=schedule_start_date)
+        scheduled = Schedule.objects.filter(scheduletech__assigned_to_contractor=request.user).filter(schedule_start__gte=schedule_start_date)
     else:
         maintenance_list = None
         scheduled = None
@@ -140,7 +144,7 @@ def schedule_list(request):
             'control_system': str(schedule.order.control_system),
             'special_instruction': special_instruction,
             'tech_note': this_schedule_tech.note,
-            'price': order_tech_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order),
+            'price': order_tech_predemo_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order) if schedule.pre_demo else order_tech_final_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order),
             'equipment_submittals_link': equipment_submittal,
             'test_sheets_link': test_sheets,
             'tech_marked_drawing_link': tech_marked_drawing,

@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'mysite.testsheetvavboxtemperatureschedule',
     'mysite.testsheetvavboxschedule',
     'mysite.testsheetpitottraversesummary',
+    'mysite.testsheethotwaterboiler',
     'mysite.generatereport',
     'mysite.projectprocess',
     'mysite.masspayment',

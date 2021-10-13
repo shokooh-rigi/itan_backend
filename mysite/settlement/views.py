@@ -153,16 +153,18 @@ def settlement_orders(request, settlement_id):
                         else:
                             if schedule.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
                                 if schedule.pre_demo:
-                                    quoted_price = estimate_predemo_calculator(
-                                        schedule.order.proposal.quote.estimate.id)
+                                    quoted_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+                                    predemo_offset = float(schedule.order.predemo_offset)
+                                    quoted_price = quoted_price - predemo_offset
                                 else:
-                                    pre_demo_price = estimate_predemo_calculator(
-                                        schedule.order.proposal.quote.estimate.id)
-                                    order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id,
-                                                                         schedule.order)
-                                    quoted_price = order_price - pre_demo_price
+                                    pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+                                    order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order)
+                                    final_offset = float(schedule.order.final_offset)
+                                    quoted_price = order_price - pre_demo_price - final_offset
                             else:
                                 quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
+                                offset = float(schedule.order.final_offset)
+                                quoted_price = quoted_price - offset
                         settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100 * completion_percentage/100
                         total_settled_value = total_settled_value + round(settle_value, 2)
                         if prev_payment:
@@ -182,13 +184,18 @@ def settlement_orders(request, settlement_id):
                         if schedule.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
                             if schedule.pre_demo:
                                 quoted_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+                                predemo_offset = float(schedule.order.predemo_offset)
+                                quoted_price = quoted_price - predemo_offset
                             else:
                                 pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
                                 order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id,
                                                                      schedule.order)
-                                quoted_price = order_price - pre_demo_price
+                                final_offset = float(schedule.order.final_offset)
+                                quoted_price = order_price - pre_demo_price - final_offset
                         else:
                             quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
+                            offset = float(schedule.order.final_offset)
+                            quoted_price = quoted_price - offset
                         settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(schedule_duration_in_hours)
                         total_settled_value = total_settled_value + round(settle_value, 2)
                         if prev_payment:

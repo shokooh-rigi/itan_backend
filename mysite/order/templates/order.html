@@ -20,7 +20,7 @@
             <form action="?{% url_replace request 'project_name' '' %}">
                 <div class="form-group" style="display: inline-block; transform: translateY(2px);">
                     <label for="project_name"></label>
-                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project Name/Number..." value="{{ request.GET.project_name }}" />
+                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project/Customer..." value="{{ request.GET.project_name }}" />
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>

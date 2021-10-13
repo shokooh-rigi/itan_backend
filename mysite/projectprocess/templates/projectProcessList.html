@@ -95,7 +95,7 @@
                         <td>{{ project.project_number }}</td>
                         <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
                         <td>{{ project.proposal.quote.estimate.project.name }}</td>
-                        <td>${% order_total_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>${% order_tech_final_price_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
                         <td>{% if project.projectprocess.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
@@ -109,7 +109,7 @@
                         <td>{{ project.project_number }}-PREDEMO</td>
                         <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
                         <td>{{ project.proposal.quote.estimate.project.name }}</td>
-                        <td>${% order_total_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>${% order_tech_predemo_price_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
                         <td>{% if project.projectprocesspredemo.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocesspredemo.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocesspredemo.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>

@@ -56,6 +56,7 @@ urlpatterns = [
     path('vbs/', include('mysite.testsheetvavboxschedule.urls')),
     path('primary-heat-exchanger-2/', include('mysite.testsheetprimaryheatexchanger2.urls')),
     path('pitot-traverse-summary/', include('mysite.testsheetpitottraversesummary.urls')),
+    path('hot-water-boiler/', include('mysite.testsheethotwaterboiler.urls')),
     path('', include('mysite.generatereport.urls')),
     path('', include('mysite.projectprocess.urls')),
     path('', include('mysite.masspayment.urls')),
