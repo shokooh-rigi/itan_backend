@@ -65,9 +65,10 @@ def vav_sheet_add(request):
                 sheet.test_sheet_type = TestSheet.objects.get(name__iexact='vav')
                 sheet.save()
                 return redirect('vavSheetEquipment', sheet.id)
-    parameters = {'form': form,
-                  'orders': orders,
-                  }
+    parameters = {
+        'form': form,
+        'orders': orders,
+    }
     return render(request, "vavSheetAdd.html", parameters)
 
 

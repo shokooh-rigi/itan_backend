@@ -9,7 +9,7 @@ class Invoice(models.Model):
     date_started = models.DateField(blank=True, null=True)
     date_completed = models.DateField(blank=True, null=True)
     terms = models.CharField(max_length=255, blank=True, default='Due upon Receipt')
-    description = models.TextField(max_length=255, blank=True, default='Testing and Balancing')
+    description = models.TextField(max_length=255, blank=True, default='TESTING AND BALANCING')
     percent_of_performance_completed = models.FloatField(default=100, validators=[MaxValueValidator(100),
                                                                                           MinValueValidator(0)])
     # 1: FUll invoice  2: Pre-Demo Invoice  3: Rest Invoice

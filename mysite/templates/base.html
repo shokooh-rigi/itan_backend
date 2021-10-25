@@ -213,12 +213,9 @@ $(document).ready(function() {
 
         const chatSocket = new WebSocket(websocket_url);
 
-
-
         chatSocket.onopen = function (event) {
 
         };
-
 
 
         chatSocket.onmessage = function (event) {
@@ -237,10 +234,22 @@ $(document).ready(function() {
 
     }
 
+    if (!window.location.href.toString().startsWith("http://127.0.0.1")) {
+        connectToWebsocket();
+    }
 
 
-    connectToWebsocket();
+</script>
+<script type="text/javascript">
+    const field_capitalizer = "{{ field_capitalizer }}";
 
+    if (parseInt(field_capitalizer)) {
+        $("body").on('input', 'input[type=text]:not(#id_username)', function() {
+            const old_value = $(this).val()
+            const new_value = old_value.toUpperCase()
+            $(this).val(new_value)
+        });
+    }
 </script>
 {% endblock %}
   </body>

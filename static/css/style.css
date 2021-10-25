@@ -538,6 +538,10 @@ input[type=text][readonly] {
     background-image: url("../images/icons/fax_blue.png");
 }
 
+.icon.duplicateicon {
+    background-image: url("../images/icons/duplicate.svg");
+}
+
 .main .pagination {
     text-align: center;
     margin-top: 1em;

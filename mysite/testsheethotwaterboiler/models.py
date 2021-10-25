@@ -28,10 +28,10 @@ class HotWaterBoilerEquipment(models.Model):
 
 class HotWaterBoilerSheetData(models.Model):
     data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
-    pump_equipment = models.ForeignKey(HotWaterBoilerEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    hot_water_boiler_equipment = models.ForeignKey(HotWaterBoilerEquipment, on_delete=models.CASCADE, blank=False, null=False)
     sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
     value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
-        return str(self.sheet_field) + ' ' + str(self.pump_equipment)
+        return str(self.sheet_field) + ' ' + str(self.hot_water_boiler_equipment)
 

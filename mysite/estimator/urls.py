@@ -43,4 +43,5 @@ urlpatterns = [
          name='estimateEquipmentDelete'),
     path('estimator/details/<int:estimate_id>/', views.estimate_details, name='estimateDetails'),
     path('estimator/estimate/<int:estimate_id>/', views.estimate_bid, name='estimateBid'),
+    path('estimate/duplicate/<int:estimate_id>/', views.estimate_duplicate, name='estimateDuplicate'),
 ]

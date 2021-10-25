@@ -19,6 +19,7 @@ from .templatetags.estimator_tags import *
 from django.db.models import Count
 import requests
 import os
+from copy import deepcopy
 
 # Create your views here.
 
@@ -592,6 +593,47 @@ def estimate_archive(request, estimate_id):
     parameters = {'this_estimate': this_estimate
                   }
     return render(request, "estimateArchive.html", parameters)
+
+
+@login_required
+def estimate_duplicate(request, estimate_id):
+    this_estimate = get_object_or_404(Estimate, id=estimate_id)
+    form = EstimateForm(request.POST or None, instance=this_estimate)
+    form.fields['project'].widget = forms.HiddenInput()
+    form.fields['engineer'].widget = forms.HiddenInput()
+    form.fields['service'].widget = forms.HiddenInput()
+    form.fields['due_date'].widget = forms.HiddenInput()
+    form.fields['drawing_date'].widget = forms.HiddenInput()
+    form.fields['predemo'].widget = forms.HiddenInput()
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('estimatorHome')
+        if request.POST.get("next"):
+            duplicated_obj = deepcopy(this_estimate)
+            duplicated_obj.id = None
+            duplicated_obj.customer = Person.objects.get(id=request.POST.get("customer"))
+            duplicated_obj.save()
+            duplicated_obj.service.add(*this_estimate.service.all())
+
+            all_equipments = EstimateEquipment.objects.filter(estimate=this_estimate)
+            for equipment in all_equipments:
+                equipment.pk = None
+                equipment.estimate = duplicated_obj
+                equipment.save()
+
+            EstimateDetails.objects.get(estimate=duplicated_obj.pk).delete()
+            estimate_detail = deepcopy(EstimateDetails.objects.get(estimate=this_estimate.pk))
+            estimate_detail.id = None
+            estimate_detail.estimate = duplicated_obj
+            estimate_detail.save()
+            return redirect('estimatorHome')
+        else:
+            print(form)
+    parameters = {
+        'form': form,
+        'page_action': 'Duplicate',
+    }
+    return render(request, "estimatorDuplicate.html", parameters)
 
 
 @login_required

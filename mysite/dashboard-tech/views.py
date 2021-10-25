@@ -37,7 +37,7 @@ def tech_calendar(request):
 
 @login_required
 def schedule_list(request):
-    schedule_start_date = Setting.objects.get(key='Schedule Start Date')
+    schedule_start_date = Setting.objects.get(key='Schedule Start Date').value
     schedule_start_date = datetime.datetime.strptime(schedule_start_date, "%m/%d/%Y").date()
     if request.user.profile.status == 1:
         maintenance_list = Maintenance.objects.filter(assigned_to_employee=request.user).filter(schedule_start__gte=schedule_start_date)

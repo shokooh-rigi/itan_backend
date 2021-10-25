@@ -183,29 +183,29 @@
                 <tbody>
                 <!-- Table title -->
                 <tr class="pdf-table-title">
-                    <td colspan="12" class="pdf-table-title-td text-uppercase">{{ SHEET_TYPE_NAME }} DATA</td>
-                    <td colspan="2" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
+                    <td colspan="24" class="pdf-table-title-td text-uppercase">{{ SHEET_TYPE_NAME }} DATA</td>
+                    <td colspan="4" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
                 </tr>
 
                 <!-- Project specifications -->
                 <tr class="pdf-table-project-tr">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="padding: 0 2px 0;">PROJECT NO:</td>
-                    <td colspan="6" class="pdf-table-cell border">
+                    <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="padding: 0 2px 0;">PROJECT NO:</td>
+                    <td colspan="12" class="pdf-table-cell border">
                         &nbsp;{{ form.my_sheet.project.project_number }}
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">DATE:</td>
-                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    <td colspan="4" class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+                    <td colspan="8" class="pdf-table-cell pdf-table-center-cell border">
                         &nbsp;{{ form.my_sheet.sheet_date | date }}
                     </td>
                 </tr>
                 <tr class="pdf-table-project-tr">
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
-                    <td colspan="6" class="pdf-table-cell border">
+                    <td colspan="4" class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+                    <td colspan="12" class="pdf-table-cell border">
                         &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
                     </td>
-                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+                    <td colspan="4" class="pdf-table-cell pdf-table-title-cell">SYSTEM:
                     </td>
-                    <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    <td colspan="8" class="pdf-table-cell pdf-table-center-cell border">
                         &nbsp;{{ form.my_sheet.system }}
                     </td>
                 </tr>
@@ -213,391 +213,439 @@
                 {% for equipment in form.equipment_data %}
                     {% if forloop.counter == forloop.parentloop.counter %}
                         <tr class="section-first-row pdf-table-row top-row-thick">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Unit Number
                             </td>
-                            <td colspan="4" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'unit_number' }}
                             </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Unit Number
                             </td>
-                            <td colspan="4" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'unit_number' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Location
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'location' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Location
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'location' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Service
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'service' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Service
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'service' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Rating BTU hour
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'rating_btu_hour' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Rating BTU hour
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'rating_btu_hour' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Manufacturer
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'manufacturer' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Manufacturer
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'manufacturer' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Model Number
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'model_number' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Model Number
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'model_number' }}
                             </td>
                         </tr>
                         <tr class="section-first-row pdf-table-row">
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Serial Number
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.0|get_item:'serial_number' }}
                             </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
                                 Serial Number
                             </td>
-                            <td colspan="3" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
                                 {{ equipment.1|get_item:'serial_number' }}
                             </td>
                         </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Test Data
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                GPM
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                FT
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                BHP
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Test Data
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                GPM
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                FT
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                BHP
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Design
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Design GPM-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Design FT-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Design BHP-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Design
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Design GPM-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Design FT-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Design BHP-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row bottom-row-thick">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Actual
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Actual GPM-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Actual FT-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Actual BHP-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Actual
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Actual BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Actual BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Actual BHP-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Discharge
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Discharge GPM-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Discharge FT-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Discharge BHP-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Discharge
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Discharge BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Discharge BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Discharge BHP-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Suction
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Suction GPM-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Suction FT-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Suction BHP-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Suction
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Suction BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Suction BHP-2' }}
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Suction BHP-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row bottom-row-thick">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                P
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'P-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                P
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'P-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Shut-Off
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Shut-Off-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Shut-Off
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Shut-Off-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Discharge / Suction
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Discharge / Suction-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Discharge / Suction
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Discharge / Suction-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row bottom-row-thick">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                P
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'P2-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                P
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'P2-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Motor Mfg.
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Motor Mfg.-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Motor Mfg.
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'Motor Mfg.-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                H.P. / Frame
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'H.P.-1' }} / {{ equipment.0|get_item:'Frame-1' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                H.P. / Frame
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'H.P.-1' }} / {{ equipment.1|get_item:'Frame-1' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                S.F. / Code
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'S.F.-1' }} / {{ equipment.0|get_item:'Code-1' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                S.F. / Code
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'S.F.-1' }} / {{ equipment.1|get_item:'Code-1' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                RPM / Phase / Hz
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'RPM-1' }} / {{ equipment.0|get_item:'Phase-1' }} / {{ equipment.0|get_item:'Hz-1' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                RPM / Phase / Hz
-                            </td>
-                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                {{ equipment.1|get_item:'RPM-1' }} / {{ equipment.1|get_item:'Phase-1' }} / {{ equipment.1|get_item:'Hz-1' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Amps
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Amps-1' }}
+                        <tr class="section-first-row pdf-table-row top-row-thick">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                SECONDARY HOT WATER
                             </td>
                             <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
-                                ACT: {{ equipment.0|get_item:'Amps-2' }}
-                            </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Amps
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Amps-1' }}
-                            </td>
-                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                ACT: {{ equipment.1|get_item:'Amps-2' }}
-                            </td>
-                        </tr>
-                        <tr class="section-first-row pdf-table-row bottom-row-thick">
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Volts
-                            </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.0|get_item:'Volts-1' }}
+                                Design
                             </td>
                             <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
-                                ACT: {{ equipment.0|get_item:'Volts-2' }}
+                                Actual
                             </td>
-                            <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
-                                Volts
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                SECONDARY HOT WATER
                             </td>
-                            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                                {{ equipment.1|get_item:'Volts-1' }}
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                Design
                             </td>
                             <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
-                                ACT: {{ equipment.1|get_item:'Volts-2' }}
+                                Actual
                             </td>
                         </tr>
-                        <tr class="section-first-row pdf-table-row bottom-row-thick" style="height: 60px;">
-                            <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top;">
-                                Remarks: {{ equipment.0|get_item:'Note-2' }}
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Entering Temperature
                             </td>
-                            <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top; border-right-width: 2px;">
-                                Remarks: {{ equipment.1|get_item:'Note-2' }}
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Entering Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Entering Temperature-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Design
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.1|get_item:'Entering Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.1|get_item:'Entering Temperature-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Leaving Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Leaving Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Leaving Temperature-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Leaving Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.1|get_item:'Leaving Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.1|get_item:'Leaving Temperature-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Pressure Drop, Ft.
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Pressure Drop, Ft.-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Pressure Drop, Ft.-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Pressure Drop, Ft.
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.1|get_item:'Pressure Drop, Ft.-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.1|get_item:'Pressure Drop, Ft.-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Flow GPM
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Flow GPM-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.0|get_item:'Flow GPM-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Flow GPM
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.1|get_item:'Flow GPM-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.1|get_item:'Flow GPM-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; border-bottom: 1px solid #000;">
+                                Control Setting
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.0|get_item:'Control Setting-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.0|get_item:'Control Setting-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; border-bottom: 1px solid #000;">
+                                Control Setting
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.1|get_item:'Control Setting-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px; border-bottom: 1px solid #000;">
+                                {{ equipment.1|get_item:'Control Setting-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row top-row-thick">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Unit Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'unit_number' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Unit Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'unit_number' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Location
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'location' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Location
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'location' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Service
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'service' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Service
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'service' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Rating BTU hour
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'rating_btu_hour' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Rating BTU hour
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'rating_btu_hour' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Manufacturer
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'manufacturer' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Manufacturer
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'manufacturer' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Model Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'model_number' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Model Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'model_number' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Serial Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.2|get_item:'serial_number' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Serial Number
+                            </td>
+                            <td colspan="8" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'serial_number' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row top-row-thick">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                SECONDARY HOT WATER
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                Design
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                Actual
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                SECONDARY HOT WATER
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                Design
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                Actual
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Entering Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Entering Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Entering Temperature-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Entering Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.3|get_item:'Entering Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'Entering Temperature-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Leaving Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Leaving Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Leaving Temperature-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Leaving Temperature
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.3|get_item:'Leaving Temperature-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'Leaving Temperature-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Pressure Drop, Ft.
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Pressure Drop, Ft.-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Pressure Drop, Ft.-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Pressure Drop, Ft.
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.3|get_item:'Pressure Drop, Ft.-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'Pressure Drop, Ft.-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Flow GPM
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Flow GPM-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.2|get_item:'Flow GPM-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                                Flow GPM
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                                {{ equipment.3|get_item:'Flow GPM-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                                {{ equipment.3|get_item:'Flow GPM-2' }}
+                            </td>
+                        </tr>
+                        <tr class="section-first-row pdf-table-row">
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; border-bottom: 1px solid #000;">
+                                Control Setting
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.2|get_item:'Control Setting-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.2|get_item:'Control Setting-2' }}
+                            </td>
+                            <td colspan="6" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; border-bottom: 1px solid #000;">
+                                Control Setting
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-bottom: 1px solid #000;">
+                                {{ equipment.3|get_item:'Control Setting-1' }}
+                            </td>
+                            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px; border-bottom: 1px solid #000;">
+                                {{ equipment.3|get_item:'Control Setting-2' }}
                             </td>
                         </tr>
                     {% endif %}

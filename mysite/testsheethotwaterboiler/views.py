@@ -70,8 +70,8 @@ def hot_water_boiler_sheet_add(request):
                 sheet.test_sheet_type = TestSheet.objects.get(name__iexact=SHEET_TYPE_NAME)
                 sheet.save()
                 equipment_type = None
-                if Equipment.objects.filter(name__iexact='PUMP').exists():
-                    equipment_type = Equipment.objects.get(name__iexact='PUMP')
+                if Equipment.objects.filter(name__iexact=SHEET_TYPE_NAME).exists():
+                    equipment_type = Equipment.objects.get(name__iexact=SHEET_TYPE_NAME)
                 for n in range(form.cleaned_data['equipment_quantity']):
                     hot_water_boiler_equipment = HotWaterBoilerEquipment(sheet=sheet, equipment_type=equipment_type)
                     hot_water_boiler_equipment.save()
@@ -105,7 +105,7 @@ def hot_water_boiler_sheet_equipment_list(request, sheet_id):
 @login_required
 def hot_water_boiler_equipment_add(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    equipment_type = Equipment.objects.get(name__iexact='PUMP')
+    equipment_type = Equipment.objects.get(name__iexact=SHEET_TYPE_NAME)
     equipment = HotWaterBoilerEquipment(sheet=my_sheet, equipment_type=equipment_type)
     equipment.save()
     return redirect('hotWaterBoilerSheetEquipmentList', sheet_id)

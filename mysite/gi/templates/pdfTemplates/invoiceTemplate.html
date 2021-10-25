@@ -85,7 +85,7 @@
                         <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 20%;">AMOUNT in USD</td>
                     </tr>
                     <tr style="border: 1px solid #000;">
-                        <td style="padding: 5px 0 0 0;">{% if invoice.description %}{{ invoice.description }}{% else %}Testing and Balancing{% endif %} at {{ estimate.project.name }}</td>
+                        <td style="padding: 5px 0 0 0; text-transform: uppercase;">{% if invoice.description %}{{ invoice.description }}{% else %}TESTING AND BALANCING{% endif %} AT {{ estimate.project.name }}</td>
                         <td style="padding: 5px 0 0 0;">{% if invoice.invoice_type == 1 %}${% estimate_total_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 2 %}${% estimate_predemo_calculator estimate.id as epc %}{{ epc|floatformat:2|intcomma }}{% else %}${% estimate_total_minus_predemo_calculator estimate.id as etmpc %}{{ etmpc|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
                     {% if invoice.invoice_type != 2 %}

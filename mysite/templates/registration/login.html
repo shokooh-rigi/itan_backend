@@ -14,6 +14,9 @@
       <p>
         {{ field.label_tag }}<br>
         {{ field }}<br>
+        {% if field.auto_id == 'id_password' %}
+            Show Password? <input type="checkbox" id="pass_reveal" onclick ="reveal()">
+        {% endif %}
         {% for error in field.errors %}
           <p style="color: red">{{ error }}</p>
         {% endfor %}
@@ -26,5 +29,14 @@
     <br /><br /><a href="{% url 'password_reset' %}">Forgot your Password? click here</a>
     <br /><br /><a href="{% url 'signup' %}">New to Site? Register</a>
   </form>
+
+<script type="text/javascript">
+    function reveal() {
+        if(document.getElementById('pass_reveal').checked)
+           document.getElementById("id_password").type='text';
+        else
+        document.getElementById("id_password").type='password';
+    }
+</script>
 
 {% endblock %}
