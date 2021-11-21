@@ -32,80 +32,97 @@
         {% for supply_terminal_equipment in supply_terminal_equipments %}
         <div class="row form-line">
                 {% for design_field in design_fields %}
-                    {% with 'supply_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:supply_terminal_equipment.id as field_name %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                                {{ design_field.field_name }}
-                                {% if design_field.required_in_design %}
-                                    <span class="required">*</span>
-                                {% endif %}
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="{{ field_name }}" class="control-label equal_fields_supply" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
-                            {% if design_field.field_name|lower != 'size' %}
-                                <input style="width: 100%;" {% get_field_type design_field %}
-                                       {% if design_field.required_in_design %}required=""{% endif %}
-                                       name="{{ field_name }}"
-                                       class="form-control eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                       value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field supply_terminal_equipment.id %}{% endif %}"
-                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
-                            {% else %}
-                                <div class="related_to_inch_{{ supply_terminal_equipment.id }}">
+                    {% if design_field.field_name|lower != 'cfm info' %}
+                        {% with 'supply_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:supply_terminal_equipment.id as field_name %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                    {{ design_field.field_name }}
+                                    {% if design_field.required_in_design %}
+                                        <span class="required">*</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="{{ field_name }}" class="control-label equal_fields_supply" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if design_field.field_name|lower != 'size' %}
                                     <input style="width: 100%;" {% get_field_type design_field %}
                                            {% if design_field.required_in_design %}required=""{% endif %}
-                                           data-eqid="{{ supply_terminal_equipment.id }}"
                                            name="{{ field_name }}"
-                                           class="size-split has_inch form-control size_eq_supply size_{{ supply_terminal_equipment.id }} eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                           value="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
-                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                        <label style="width: 100%; text-align: right;">inch</label>
+                                           class="form-control field_{{ design_field.field_name|normalize_string }} eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                           value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field supply_terminal_equipment.id %}{% endif %}"
+                                           {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                    <div class="related_to_inch_{{ supply_terminal_equipment.id }}">
+                                        <input style="width: 100%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               data-eqid="{{ supply_terminal_equipment.id }}"
+                                               name="{{ field_name }}"
+                                               class="size-split has_inch form-control size_eq_supply size_{{ supply_terminal_equipment.id }} eq_supply{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                               value="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">inch</label>
+                                        </div>
                                     </div>
+                                    <div class="related_to_xy_{{ supply_terminal_equipment.id }}">
+                                        <input style="width: 46%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               name="{{ field_name }}-x"
+                                               class="form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                               value="" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
+                                                X
+                                        <input style="width: 46%;" {% get_field_type design_field %}
+                                                name="{{ field_name }}-y"
+                                               class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                               value="" />
+                                    </div>
+                                {% endif %}
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                                 </div>
-                                <div class="related_to_xy_{{ supply_terminal_equipment.id }}">
-                                    <input style="width: 46%;" {% get_field_type design_field %}
-                                           {% if design_field.required_in_design %}required=""{% endif %}
-                                           name="{{ field_name }}-x"
-                                           class="form-control size_eq_supply_x size_{{ supply_terminal_equipment.id }}_x eq_supply{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
-                                           value="" data-orgval="{% get_terminal_design_value request design_field supply_terminal_equipment.id %}" />
-                                            X
-                                    <input style="width: 46%;" {% get_field_type design_field %}
-                                            name="{{ field_name }}-y"
-                                           class="form-control size_eq_supply_y size_{{ supply_terminal_equipment.id }}_y eq_supply{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
-                                           value="" />
+                            </div>
+
+
+                            {% if forloop.counter == 2 %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="supply_code_select_{{ supply_terminal_equipment.id }}" class="control-label">
+                                    Code <span class="required">*</span>
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="supply_code_select_{{ supply_terminal_equipment.id }}" class="control-label" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
+                                    <select data-eqid="{{ supply_terminal_equipment.id }}" name="supply_code_select_{{ supply_terminal_equipment.id }}" id="supply_code_select_{{ supply_terminal_equipment.id }}" class="form-control select_eq_supply" style="width: 100%;">
+                                    {% get_terminal_code_value request supply_terminal_equipment.id as code_value %}
+                                        <option value="" data-default="" data-sizetype="1" disabled selected>-</option>
+                                        {% for code in codes %}
+                                            {{ code.id }}{{ code_value }}
+                                        <option value="{{ code.id }}" data-default="{{ code.default }}" data-sizetype="{{ code.size_type }}" {% if code.id == code_value %}selected{% endif %}>{{ code.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                                 </div>
+                            </div>
                             {% endif %}
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-
-
-                        {% if forloop.counter == 2 %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="supply_code_select_{{ supply_terminal_equipment.id }}" class="control-label">
-                                Code <span class="required">*</span>
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="supply_code_select_{{ supply_terminal_equipment.id }}" class="control-label" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
-                                <select data-eqid="{{ supply_terminal_equipment.id }}" name="supply_code_select_{{ supply_terminal_equipment.id }}" id="supply_code_select_{{ supply_terminal_equipment.id }}" class="form-control select_eq_supply" style="width: 100%;">
-                                {% get_terminal_code_value request supply_terminal_equipment.id as code_value %}
-                                    <option value="" data-default="" data-sizetype="1" disabled selected>-</option>
-                                    {% for code in codes %}
-                                        {{ code.id }}{{ code_value }}
-                                    <option value="{{ code.id }}" data-default="{{ code.default }}" data-sizetype="{{ code.size_type }}" {% if code.id == code_value %}selected{% endif %}>{{ code.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endwith %}
+                        {% endwith %}
+                    {% endif %}
                 {% endfor %}
+                <div class="col-lg-3 d-none">
+                    <label style="width: 100%;" for="supply_company_value_34_183" class="control-label">
+                        More Details Indicator
+                    </label>
+                </div>
+                <div class="col-lg-3 d-none">
+                    <label class="control-label equal_fields_supply" data-fieldid="34" data-loopid="1" data-defaultval="" style="width: 100%;">
+                        <select class="form-control select-more-details-indicator">
+                            <option value="">---</option>
+                            <option value="1">**</option>
+                            <option value="2">N/A</option>
+                        </select>
+                    </label>
+                </div>
+
             <br />
         </div>
         {% endfor %}
@@ -115,78 +132,80 @@
         {% for return_terminal_equipment in return_terminal_equipments %}
         <div class="row form-line">
                 {% for design_field in design_fields %}
-                    {% with 'return_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:return_terminal_equipment.id as field_name %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                                {{ design_field.field_name }}
-                                {% if design_field.required_in_design %}
-                                    <span class="required">*</span>
-                                {% endif %}
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="{{ field_name }}" class="control-label equal_fields_return" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
-                            {% if design_field.field_name|lower != 'size' %}
-                                <input style="width: 100%;" {% get_field_type design_field %}
-                                       {% if design_field.required_in_design %}required=""{% endif %}
-                                       name="{{ field_name }}" maxlength="50"
-                                       class="form-control eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                       value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field return_terminal_equipment.id %}{% endif %}"
-                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
-                            {% else %}
-                                <div class="related_to_inch_{{ return_terminal_equipment.id }}">
+                    {% if design_field.field_name|lower != 'cfm info' %}
+                        {% with 'return_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:return_terminal_equipment.id as field_name %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                    {{ design_field.field_name }}
+                                    {% if design_field.required_in_design %}
+                                        <span class="required">*</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="{{ field_name }}" class="control-label equal_fields_return" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if design_field.field_name|lower != 'size' %}
                                     <input style="width: 100%;" {% get_field_type design_field %}
                                            {% if design_field.required_in_design %}required=""{% endif %}
-                                           data-eqid="{{ return_terminal_equipment.id }}"
                                            name="{{ field_name }}" maxlength="50"
-                                           class="size-split has_inch form-control size_eq_return size_{{ return_terminal_equipment.id }} eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                           value="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
-                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                        <label style="width: 100%; text-align: right;">inch</label>
+                                           class="form-control eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                           value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field return_terminal_equipment.id %}{% endif %}"
+                                           {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                    <div class="related_to_inch_{{ return_terminal_equipment.id }}">
+                                        <input style="width: 100%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               data-eqid="{{ return_terminal_equipment.id }}"
+                                               name="{{ field_name }}" maxlength="50"
+                                               class="size-split has_inch form-control size_eq_return size_{{ return_terminal_equipment.id }} eq_return{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                               value="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">inch</label>
+                                        </div>
                                     </div>
+                                    <div class="related_to_xy_{{ return_terminal_equipment.id }}">
+                                        <input style="width: 46%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               name="{{ field_name }}-x" maxlength="50"
+                                               class="size-split form-control size_eq_return_x size_{{ return_terminal_equipment.id }}_x eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
+                                               value="" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
+                                                X
+                                        <input style="width: 46%;" {% get_field_type design_field %}
+                                                name="{{ field_name }}-y" maxlength="50"
+                                               class="form-control size_eq_return_y size_{{ return_terminal_equipment.id }}_y eq_return{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
+                                               value="" />
+                                    </div>
+                                {% endif %}
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                                 </div>
-                                <div class="related_to_xy_{{ return_terminal_equipment.id }}">
-                                    <input style="width: 46%;" {% get_field_type design_field %}
-                                           {% if design_field.required_in_design %}required=""{% endif %}
-                                           name="{{ field_name }}-x" maxlength="50"
-                                           class="size-split form-control size_eq_return_x size_{{ return_terminal_equipment.id }}_x eq_return{{ design_field.id }}_x {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-x"
-                                           value="" data-orgval="{% get_terminal_design_value request design_field return_terminal_equipment.id %}" />
-                                            X
-                                    <input style="width: 46%;" {% get_field_type design_field %}
-                                            name="{{ field_name }}-y" maxlength="50"
-                                           class="form-control size_eq_return_y size_{{ return_terminal_equipment.id }}_y eq_return{{ design_field.id }}_y {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}-y"
-                                           value="" />
+                            </div>
+
+
+                            {% if forloop.counter == 2 %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="return_code_select_{{ return_terminal_equipment.id }}" class="control-label">
+                                    Code <span class="required">*</span>
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="return_code_select_{{ return_terminal_equipment.id }}" class="control-label select_equal_fields" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
+                                    <select data-eqid="{{ return_terminal_equipment.id }}" name="return_code_select_{{ return_terminal_equipment.id }}" id="return_code_select_{{ return_terminal_equipment.id }}" class="form-control select_eq_return" style="width: 100%;">
+                                    {% get_terminal_code_value request return_terminal_equipment.id as code_value %}
+                                        <option value="" data-default="" data-sizetype="1" disabled selected>-</option>
+                                        {% for code in codes %}
+                                        <option value="{{ code.id }}" data-default="{{ code.default }}" data-sizetype="{{ code.size_type }}" {% if code.id == code_value %}selected{% endif %}>{{ code.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                                 </div>
+                            </div>
                             {% endif %}
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-
-
-                        {% if forloop.counter == 2 %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="return_code_select_{{ return_terminal_equipment.id }}" class="control-label">
-                                Code <span class="required">*</span>
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="return_code_select_{{ return_terminal_equipment.id }}" class="control-label select_equal_fields" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
-                                <select data-eqid="{{ return_terminal_equipment.id }}" name="return_code_select_{{ return_terminal_equipment.id }}" id="return_code_select_{{ return_terminal_equipment.id }}" class="form-control select_eq_return" style="width: 100%;">
-                                {% get_terminal_code_value request return_terminal_equipment.id as code_value %}
-                                    <option value="" data-default="" data-sizetype="1" disabled selected>-</option>
-                                    {% for code in codes %}
-                                    <option value="{{ code.id }}" data-default="{{ code.default }}" data-sizetype="{{ code.size_type }}" {% if code.id == code_value %}selected{% endif %}>{{ code.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endwith %}
+                        {% endwith %}
+                    {% endif %}
                 {% endfor %}
             <br />
         </div>
@@ -197,61 +216,61 @@
         {% for outside_terminal_equipment in outside_terminal_equipments %}
         <div class="row form-line">
                 {% for design_field in design_fields %}
-                    {% with 'outside_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:outside_terminal_equipment.id as field_name %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                                {{ design_field.field_name }}
-                                {% if design_field.required_in_design %}
-                                    <span class="required">*</span>
+                    {% if design_field.field_name|lower != 'cfm info' %}
+                        {% with 'outside_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:outside_terminal_equipment.id as field_name %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                    {{ design_field.field_name }}
+                                    {% if design_field.required_in_design %}
+                                        <span class="required">*</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="{{ field_name }}" class="control-label equal_fields_outside" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
+                                {% if design_field.field_name|lower != 'size' %}
+                                    <input style="width: 100%;" {% get_field_type design_field %}
+                                           {% if design_field.required_in_design %}required=""{% endif %}
+                                           data-eqid="{{ outside_terminal_equipment.id }}"
+                                           name="{{ field_name }}" maxlength="50"
+                                           class="form-control {% if design_field.field_name|lower == 'ak factor' %}ak_factor ak_factor_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'fpm' %}fpm fpm_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'cfm' %}has_cfm{% endif %} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                           value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field outside_terminal_equipment.id %}{% endif %}"
+                                           {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
+                                {% else %}
+                                    <input style="width: 100%;" {% get_field_type design_field %}
+                                           {% if design_field.required_in_design %}required=""{% endif %}
+                                           data-eqid="{{ outside_terminal_equipment.id }}"
+                                           name="{{ field_name }}" maxlength="50"
+                                           class="size-split has_inch form-control size_eq_outside size_{{ outside_terminal_equipment.id }} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
+                                           value="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" />
+                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                        <label style="width: 100%; text-align: right;">inch</label>
+                                    </div>
                                 {% endif %}
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="{{ field_name }}" class="control-label equal_fields_outside" data-fieldid="{{ design_field.id }}" data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="{% if design_field.default_value %}{{ design_field.default_value }}{% endif %}" style="width: 100%;">
-                            {% if design_field.field_name|lower != 'size' %}
-                                <input style="width: 100%;" {% get_field_type design_field %}
-                                       {% if design_field.required_in_design %}required=""{% endif %}
-                                       data-eqid="{{ outside_terminal_equipment.id }}"
-                                       name="{{ field_name }}" maxlength="50"
-                                       class="form-control {% if design_field.field_name|lower == 'ak factor' %}ak_factor ak_factor_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'fpm' %}fpm fpm_{{ outside_terminal_equipment.id }}{% endif %} {% if design_field.field_name|lower == 'cfm' %}has_cfm{% endif %} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                       value="{% if design_field.field_name.lower == 'outlet no.' %}{{forloop.parentloop.counter}}{% else %}{% get_terminal_design_value request design_field outside_terminal_equipment.id %}{% endif %}"
-                                       {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %} />
-                            {% else %}
-                                <input style="width: 100%;" {% get_field_type design_field %}
-                                       {% if design_field.required_in_design %}required=""{% endif %}
-                                       data-eqid="{{ outside_terminal_equipment.id }}"
-                                       name="{{ field_name }}" maxlength="50"
-                                       class="size-split has_inch form-control size_eq_outside size_{{ outside_terminal_equipment.id }} eq_outside{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}" id="{{ field_name }}"
-                                       value="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" data-orgval="{% get_terminal_design_value request design_field outside_terminal_equipment.id %}" />
+                                </label>
                                 <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                    <label style="width: 100%; text-align: right;">inch</label>
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
                                 </div>
+                            </div>
+
+
+                            {% if forloop.counter == 2 %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label">
+                                    Code <span class="required">*</span>
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label select_equal_fields" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
+                                    <input data-eqid="{{ outside_terminal_equipment.id }}" name="outside_code_select_{{ outside_terminal_equipment.id }}" id="outside_code_select_{{ outside_terminal_equipment.id }}" class="form-control select_eq_outside" style="width: 100%;" value="{% if outside_terminal_equipment.code %}{{ outside_terminal_equipment.code }}{% endif %}" />
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                                </div>
+                            </div>
                             {% endif %}
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-
-
-                        {% if forloop.counter == 2 %}
-                        <div class="col-lg-3">
-                            <label style="width: 100%;" for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label">
-                                Code <span class="required">*</span>
-                            </label>
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="outside_code_select_{{ outside_terminal_equipment.id }}" class="control-label select_equal_fields" data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
-                                <input data-eqid="{{ outside_terminal_equipment.id }}" name="outside_code_select_{{ outside_terminal_equipment.id }}" id="outside_code_select_{{ outside_terminal_equipment.id }}" class="form-control select_eq_outside" style="width: 100%;" value="{% if outside_terminal_equipment.code %}{{ outside_terminal_equipment.code }}{% endif %}" />
-                            </label>
-                            <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
-                            </div>
-                        </div>
-                        {% endif %}
-
-
-                    {% endwith %}
+                        {% endwith %}
+                    {% endif %}
                 {% endfor %}
             <br />
         </div>
@@ -349,6 +368,17 @@
     }
 
         $(document).ready(function () {
+
+
+            $('.field_More_info_for_CFM').change(function (index) {
+                if ( $(this).is(':checked') ) {
+                    $(this).closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').removeClass('d-none')
+                    $(this).closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().removeClass('d-none')
+                } else {
+                    $(this).closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').addClass('d-none')
+                    $(this).closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().addClass('d-none')
+                }
+            });
 
             $('.has_inch').each(function (index) {
                 $(this).val($(this).val().replace('"', ''));

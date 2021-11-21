@@ -616,7 +616,7 @@ def account_summary_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    from_date = request.GET.get("fromDate", '01/01/2000')
+    from_date = request.GET.get("fromDate", '04/01/2020')
     to_date = request.GET.get("toDate", '01/01/2100')
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
@@ -638,7 +638,6 @@ def account_summary_list(request):
                   'MEDIA_URL': MEDIA_URL,
                   }
     return render(request, "accountSummary.html", parameters)
-
 
 
 @login_required
@@ -665,7 +664,7 @@ def account_summary_add(request, customer_id=None):
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
                 customer = form.cleaned_data['customer']
-                customer_invoices = Invoice.objects.filter(order__proposal__quote__estimate__customer__company=customer).order_by('created_on')
+                customer_invoices = Invoice.objects.filter(order__proposal__quote__estimate__customer__company=customer, order__proposal__quote__estimate__created_on__gt="2020-01-04").order_by('created_on')
                 this_total = 0
                 for invoice in customer_invoices:
                     this_total += float(calculate_remaining_invoice_due(invoice))

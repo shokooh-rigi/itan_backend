@@ -133,8 +133,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
 
-    print(vbfhs_equipment_data)
-
     return {
         'total_pdf_row': total_pdf_row,
         'empty_row_range': range(total_pdf_row - (vbfhs_equipments.count() % total_pdf_row)),

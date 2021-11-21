@@ -24,7 +24,7 @@ class SupplyorReturnChoices(Enum):
 class DataSheet(models.Model):
     test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
-    sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
+    sheet_date = models.DateField(blank=False, null=True)
     system = models.CharField(max_length=50, blank=False)
     number_of_equipment_groups = models.IntegerField(default=1, blank=False)
     archive = models.BooleanField(default=False)
@@ -88,7 +88,7 @@ class SheetActualDataCustomField(models.Model):
 class Sheet(models.Model):
     test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
-    sheet_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
+    sheet_date = models.DateField(blank=False, null=True)
     system = models.CharField(max_length=50, blank=False)
     archive = models.BooleanField(default=False)
 

@@ -8,7 +8,7 @@
     <div class="text-center">
     <h2>AIR MOVING EQUIPMENT SHEET LIST</h2>
 
-        <a href="{% url 'sheetAdd' %}"><button type="button" class="btn btn-primary">Generate Equipment Sheet</button></a>
+        <a href="{% url 'airMovingSheetAdd' %}"><button type="button" class="btn btn-primary">Generate Equipment Sheet</button></a>
         <br /><br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'project_name' '' %}">

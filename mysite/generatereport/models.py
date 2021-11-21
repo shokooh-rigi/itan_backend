@@ -8,7 +8,7 @@ from custom_user.models import User
 from django.db import models
 from tinymce.models import HTMLField
 from .validators import validate_file_extension, validate_img_extension
-from ..render import Render
+from .render import Render
 
 
 class ReportSheet(models.Model):
@@ -25,12 +25,12 @@ class ReportSheet(models.Model):
 
     @classmethod
     def create_cover_pdf(cls, parameters):
-        cover_pdf = Render.render_to_file('pdfTemplates/coverTemplate.html', parameters, 'report', False)
+        cover_pdf = Render.render_to_file('pdfTemplates/coverTemplate.html', parameters, 'report')
         return cover_pdf
 
     @classmethod
     def create_report_pdf(cls, parameters):
-        report_pdf = Render.render_to_file('pdfTemplates/reportTemplate.html', parameters, 'report', False)
+        report_pdf = Render.render_to_file('pdfTemplates/reportTemplate.html', parameters, 'report')
         return report_pdf
 
     @classmethod

@@ -311,7 +311,7 @@ def estimator_add(request, bfm_id=None):
 @login_required
 def estimator_edit(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
-    form = EstimateForm(request.POST or None, instance=this_estimate)
+    form = EstimateForm(request.POST or None, instance=this_estimate, initial={'predemo': this_estimate.estimatedetails.pre_demo if this_estimate.estimatedetails.pre_demo else 0})
     no_bfm = 1
     if this_estimate.bfm:
         bfms = BidFile.objects.filter(id=this_estimate.bfm.id)
@@ -610,6 +610,12 @@ def estimate_duplicate(request, estimate_id):
             return redirect('estimatorHome')
         if request.POST.get("next"):
             duplicated_obj = deepcopy(this_estimate)
+            if this_estimate.bfm:
+                # bfm = get_object_or_404(BidFile, id=this_estimate.bfm.id)
+                duplicated_bfm = deepcopy(this_estimate.bfm)
+                duplicated_bfm.id = None
+                duplicated_bfm.save()
+                duplicated_obj.bfm = duplicated_bfm
             duplicated_obj.id = None
             duplicated_obj.customer = Person.objects.get(id=request.POST.get("customer"))
             duplicated_obj.save()

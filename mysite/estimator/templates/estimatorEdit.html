@@ -6,6 +6,7 @@
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="estimatorAdd-form">
         <div class="form-group">
             {% csrf_token %}
+            {{ form.bfm.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12">
                     <label for="id_customer" class="control-label">Customer <span class="required">*</span></label>
