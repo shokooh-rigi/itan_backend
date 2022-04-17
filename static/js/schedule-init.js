@@ -506,8 +506,15 @@
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #employee_list').text('');
                         $('#schedule-edit .modal-body #contractor_list').text('');
+                        $('#schedule-edit .modal-body #tech_files').text('');
                         $('#schedule-edit .modal-body #estimated_total_hours').text((info.event.extendedProps.estimate/60).toFixed(1));
+
+
                         for (let tech of schedule_information.techs) {
+                            if (tech.tech_file) {
+                                $('#schedule-edit .modal-body #tech_files').append(`${tech.tech_name}: <a href="${tech.tech_file}" class="d-block px-2 py-0 mx-1 my-1">Download</a>`)
+                            }
+
                             if (tech.tech_type == 'employee') {
                                 $('#schedule-edit .modal-body #employee_list').append('<div id="' + tech.tech_id + '" class="an-assigned border rounded d-inline-block px-2 py-0 mx-1 my-1">' + tech.tech_name + '<div class="d-inline-block involvement_percentage mx-2 my-1"><input type="number" class="form-control involvement_percentage_input" value="' + tech.involvement_percentage + '" /></div> <a class="remove-assigned text-danger h5 text-decoration-none" href="">×</a></div>')
                             } else if (tech.tech_type == 'contractor') {

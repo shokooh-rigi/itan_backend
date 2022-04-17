@@ -170,6 +170,7 @@
                                             'tech_note': order.tech_note,
                                             'price': order.price,
                                             'equipment_submittals_link': order.equipment_submittals_link,
+                                            'tech_file': order.tech_file,
                                             'test_sheets_link': order.test_sheets_link,
                                             'tech_marked_drawing_link': order.tech_marked_drawing_link,
                                             'site_pictures_link': order.site_pictures_link,
@@ -207,6 +208,7 @@
                                             'tech_note': order.tech_note,
                                             'price': order.price,
                                             'equipment_submittals_link': order.equipment_submittals_link,
+                                            'tech_file': order.tech_file,
                                             'test_sheets_link': order.test_sheets_link,
                                             'tech_marked_drawing_link': order.tech_marked_drawing_link,
                                             'site_pictures_link': order.site_pictures_link,
@@ -342,6 +344,12 @@
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #price').text('$' + info.event.extendedProps.price);
 
+                        if (info.event.extendedProps.tech_file) {
+                            $('#upload_file_message').removeClass('d-none').html(`Previously Uploaded Files: <a href="${info.event.extendedProps.tech_file}">Download</a>`)
+                        } else {
+                            $('#upload_file_message').addClass('d-none')
+                        }
+
                         let url_mask = '#'
                         if (info.event.extendedProps.test_sheet_id == '') {
                             $('#schedule-edit .modal-body #test_sheet_link').html('The Desired Test Sheet are not Available, Contact Your Supervisor.');
@@ -408,6 +416,13 @@
                         $('#schedule-edit .modal-body #end_date').text(dateFormat(info.event.end, 'mediumDateTime'));
                         $('#schedule-edit .modal-body #price').text('$' + info.event.extendedProps.price);
                         $('#schedule-edit .modal-body #equipment_submittal').attr('href', info.event.extendedProps.equipment_submittals_link);
+
+                        if (info.event.extendedProps.tech_file) {
+                            $('#upload_file_message').removeClass('d-none').html(`Previously Uploaded Files: <a href="${info.event.extendedProps.tech_file}">Download</a>`)
+                        } else {
+                            $('#upload_file_message').addClass('d-none')
+                        }
+
                         let url_mask = ''
                         if (info.event.extendedProps.test_sheet_id == '') {
                             $('#schedule-edit .modal-body #test_sheet_link').html('The Desired Test Sheet are not Available, Contact Your Supervisor.');

@@ -322,7 +322,7 @@
                                     &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.cfm }}
+                                    &nbsp;{{ equipment.design.cfm }}{% if equipment.design.cfm_more %} {{ cfm_indicator }}{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;{% if equipment.actual.initial_fpm != '' %}{{ equipment.actual.initial_fpm }}{% else %}*{% endif %}
@@ -334,7 +334,7 @@
                                     &nbsp;{% if equipment.actual.final_fpm != '' %}{{ equipment.actual.final_fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.actual.final_cfm }}
+                                    &nbsp;{{ equipment.actual.final_cfm }}{% if equipment.actual.cfm_more %} {{ cfm_indicator }}{% endif %}
                                 </td>
                             </tr>
                         {% endif %}
@@ -394,6 +394,12 @@
                             {% for one_row in row %}
                                 {% if one_row.actual.note %}
                                     | {{ one_row.actual.note }}
+                                {% endif %}
+                                {% if one_row.design.cfm_note %}
+                                    | {{ one_row.design.cfm_indicator }} {{ one_row.design.cfm_note }}
+                                {% endif %}
+                                {% if one_row.actual.cfm_note %}
+                                    | {{ one_row.actual.cfm_indicator }} {{ one_row.actual.cfm_note }}
                                 {% endif %}
                             {% endfor %}
                         {% endfor %}

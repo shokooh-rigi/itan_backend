@@ -165,7 +165,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         for flow_equipment in group_equipments:
             flow_equipment_obj = {}
             flow_equipment_obj['id'] = flow_equipment.id
-            flow_equipment_obj['fmf_no'] = i % total_pdf_row
+            flow_equipment_obj['fmf_no'] = i
             flow_equipment_obj['br_no'] = flow_equipment.br_number
             flow_equipment_obj['location'] = flow_equipment.location
             flow_equipment_obj['unit_number'] = flow_equipment.unit_number

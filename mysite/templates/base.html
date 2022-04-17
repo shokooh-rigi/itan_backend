@@ -196,9 +196,12 @@ function closePopup(win, newID, newRepr, id, edit) {
 {{ form.media.js }}
 <script>
 $(document).ready(function() {
-    $('select.select2').djangoSelect2({
-        minimumInputLength: 1
-    });
+    if ($('select.select2').length > 0) {
+        $('select.select2').djangoSelect2({
+            minimumInputLength: 1
+        });
+    }
+
 });
 </script>
 <script type="text/javascript">
@@ -244,7 +247,7 @@ $(document).ready(function() {
     const field_capitalizer = "{{ field_capitalizer }}";
 
     if (parseInt(field_capitalizer)) {
-        $("body").on('input', 'input[type=text]:not(#id_username)', function() {
+        $("body").on('input', 'input[type=text]:not(#id_username):not(#id_web)', function() {
             const old_value = $(this).val()
             const new_value = old_value.toUpperCase()
             $(this).val(new_value)

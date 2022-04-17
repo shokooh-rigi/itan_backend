@@ -17,6 +17,9 @@ from ..bidfilemgm.views import handle_uploaded_file, create_zip_file, addto_zip_
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..order.templatetags.order_tags import order_tech_final_price_calculator, order_tech_predemo_price_calculator
 from ..core.models import Setting
+from ..s3_file_manager import S3
+import requests
+import os
 
 
 # Create your views here.
@@ -76,8 +79,15 @@ def schedule_list(request):
         assigned_to_employees_names = []
         assigned_to_contractors = []
         assigned_to_contractors_names = []
+        tech_file = None
         for schedule_tech in ScheduleTech.objects.filter(schedule=schedule).all():
+
             if schedule_tech.assigned_to_employee:
+
+                if schedule_tech.assigned_to_employee.id == request.user.id:
+                    if schedule_tech.tech_upload:
+                        tech_file = schedule_tech.tech_upload.url
+
                 assigned_to_employees.append(schedule_tech.assigned_to_employee.id)
                 if schedule_tech.assigned_to_employee.last_name:
                     assigned_to_employees_names.append(
@@ -85,6 +95,11 @@ def schedule_list(request):
                 else:
                     assigned_to_employees_names.append(schedule_tech.assigned_to_employee.email)
             elif schedule_tech.assigned_to_contractor:
+
+                if schedule_tech.assigned_to_contractor.id == request.user.id:
+                    if schedule_tech.tech_upload:
+                        tech_file = schedule_tech.tech_upload.url
+
                 assigned_to_contractors.append(schedule_tech.assigned_to_contractor.id)
                 if schedule_tech.assigned_to_contractor.last_name:
                     assigned_to_contractors_names.append(schedule_tech.assigned_to_contractor.first_name + ' ' + schedule_tech.assigned_to_contractor.last_name)
@@ -133,6 +148,7 @@ def schedule_list(request):
             'assigned_to_contractors': assigned_to_contractors,
             'assigned_to_employees_names': assigned_to_employees_names,
             'assigned_to_contractors_names': assigned_to_contractors_names,
+            'tech_file': tech_file,
             'project_number': schedule.order.project_number,
             'project_name': str(schedule.order.proposal.quote.estimate.project),
             'customer': str(schedule.order.proposal.quote.estimate.customer.company.name),
@@ -362,12 +378,24 @@ def upload_tech(request):
                 zip_file_name = str(schedule_update.schedule.id) + '. ' + str(request.user.first_name) + ' ' + str(request.user.last_name) + '.zip'
             else:
                 zip_file_name = str(schedule_update.schedule.id) + '. ' + str(request.user.email) + '.zip'
+
             if schedule_update.tech_upload:
+                s3 = S3()
+                response = requests.get(s3.get_bucket_object('media/' + str(schedule_update.tech_upload.file)))
+                f = open(os.path.join(temp_path, zip_file_name), 'wb')
+                f.write(response.content)
+                f.close()
                 addto_zip_file(files, temp_path, zip_file_name)
+                s3.delete_file_from_bucket(key=MEDIA_URL + str(schedule_update.tech_upload))
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                schedule_update.tech_upload.save(zip_file_name, file)
+                os.remove(temp_path + '/' + zip_file_name)
             else:
                 create_zip_file(files, temp_path, zip_file_name)
-                schedule_update.tech_upload = UPLOAD_URL + 'techfiles/' + zip_file_name
-                schedule_update.save()
+                s3 = S3()
+                file = open(temp_path + '/' + zip_file_name, 'rb')
+                schedule_update.tech_upload.save(zip_file_name, file)
+                os.remove(temp_path + '/' + zip_file_name)
 
             return JsonResponse({
                 'result': True,

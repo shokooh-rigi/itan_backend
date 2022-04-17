@@ -19,6 +19,11 @@ from django.db.models.functions import Cast, Coalesce
 from django.http import JsonResponse
 
 
+footnote_indicator_choices = [
+    ['1', '**'],
+    ['2', 'N/A'],
+]
+
 # Create your views here.
 
 
@@ -108,6 +113,9 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
         ('ak_factor', 'ak factor'),
         ('fpm', 'fpm'),
         ('cfm', 'cfm'),
+        ('cfm_more', 'More info for CFM'),
+        ('cfm_indicator', 'CFM Indicator'),
+        ('cfm_note', 'CFM Note'),
     ]
 
     equipment_data['design'] = {}
@@ -124,6 +132,9 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
             ('initial_cfm', 'initial cfm'),
             ('final_fpm', 'final fpm'),
             ('final_cfm', 'final cfm'),
+            ('cfm_more', 'More info for CFM'),
+            ('cfm_indicator', 'CFM Indicator'),
+            ('cfm_note', 'CFM Note'),
             ('note', 'note'),
         ]
         equipment_data['actual'] = {}
@@ -215,15 +226,14 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 page['system'] = eq_name
                 data.append(page)
                 page = {'rows': []}
-            d_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
-                                                                     sheet_field__field_name__iexact='cfm').value)
+            cfm_value = air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value, sheet_field__field_name__iexact='cfm').value
+            if cfm_value:
+                d_total = int(cfm_value)
             if is_report_pdf:
                 if air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value != '':
-                    i_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                         sheet_field__field_name__iexact='initial cfm').value)
+                    i_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value)
                 if air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='final cfm').value != '':
-                    f_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                         sheet_field__field_name__iexact='final cfm').value)
+                    f_total = int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='final cfm').value)
             page['rows'].append([])
             last_air_equipment = air_equipment.air_equipment.id
             last_air_equipment_type = air_equipment.type
@@ -237,17 +247,16 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
                 eq_type = air_equipment.equipment_name
             eq_name = air_equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
         else:
-            d_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value,
-                                                                      sheet_field__field_name__iexact='cfm').value)
+            cfm_value = air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value, sheet_field__field_name__iexact='cfm').value
+            if cfm_value:
+                d_total += int(cfm_value)
             if is_report_pdf:
-                if air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                          sheet_field__field_name__iexact='initial cfm').value != '':
+                if air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value != '':
                     i_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
                                                                               sheet_field__field_name__iexact='initial cfm').value)
                 if air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
                                                               sheet_field__field_name__iexact='final cfm').value != '':
-                    f_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value,
-                                                                          sheet_field__field_name__iexact='final cfm').value)
+                    f_total += int(air_equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='final cfm').value)
 
         page['rows'][len(page['rows']) - 1].append(fetch_sheet_equipment_data(air_equipment, is_report_pdf))
         i += 1
@@ -580,6 +589,7 @@ def manual_replace(s, char, index):
 
 @login_required
 def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
+
     my_sheet = DataSheet.objects.get(id=sheet_id)
     is_air_moving = SheetEquipment.objects.filter(id=sheet_equipment_id, sheet__project_id=my_sheet.project.id)
     if is_air_moving:
@@ -700,7 +710,6 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
         if request.POST.get("cancel"):
             return redirect('terminalSheetEquipmentList', my_sheet.id)
         if request.POST.get("next"):
-            # error_msg = check_form_values(request, new_terminal_equipment, True)
             error_msg = None
             if error_msg is not None:
                 parameters = {
@@ -714,6 +723,7 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                     'outside_repeat_list': outside_repeat_list,
                     'other_repeat_list': other_repeat_list,
                     'codes': codes,
+                    'indicator_choices': footnote_indicator_choices,
                 }
                 return render(request, "terminalSheetEquipmentDesignData.html", parameters)
 
@@ -732,7 +742,14 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                             new_val_y = str(request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}-y'))
                             new_value = new_val_x + ' X ' + new_val_y
                     else:
-                        new_value = request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}').strip()
+                        if design_field.field_type == 4:
+                            if request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}'):
+                                new_value = True
+                            else:
+                                new_value = False
+                        else:
+                            new_value = request.POST.get(f'supply_company_value_{design_field.id}_{supply_terminal_equipment.id}').strip()
+                            print(new_value)
                     num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                       air_terminal_equipment=supply_terminal_equipment,
                                                                       sheet_field=design_field).count()
@@ -763,8 +780,15 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                                 new_val_y = request.POST.get(f'return_company_value_{design_field.id}_{return_terminal_equipment.id}-y').strip()
                                 new_value = new_val_x + ' X ' + new_val_y
                         else:
-                            new_value = request.POST.get(
-                                f'return_company_value_{design_field.id}_{return_terminal_equipment.id}').strip()
+                            if design_field.field_type == 4:
+                                if request.POST.get(
+                                        f'return_company_value_{design_field.id}_{return_terminal_equipment.id}'):
+                                    new_value = True
+                                else:
+                                    new_value = False
+                            else:
+                                new_value = request.POST.get(
+                                    f'return_company_value_{design_field.id}_{return_terminal_equipment.id}').strip()
 
                         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                           air_terminal_equipment=return_terminal_equipment,
@@ -796,8 +820,15 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                                 f'outside_company_value_{design_field.id}_{outside_terminal_equipment.id}').strip()
                             new_value = new_value + '"'
                         else:
-                            new_value = request.POST.get(
-                                f'outside_company_value_{design_field.id}_{outside_terminal_equipment.id}').strip()
+                            if design_field.field_type == 4:
+                                if request.POST.get(
+                                        f'outside_company_value_{design_field.id}_{outside_terminal_equipment.id}'):
+                                    new_value = True
+                                else:
+                                    new_value = False
+                            else:
+                                new_value = request.POST.get(
+                                    f'outside_company_value_{design_field.id}_{outside_terminal_equipment.id}').strip()
 
                         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                           air_terminal_equipment=outside_terminal_equipment,
@@ -826,7 +857,14 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                     AirTerminalEquipment.objects.filter(id=other_equipment.id).update(code=new_code.pk)
                     AirTerminalEquipment.objects.filter(id=other_equipment.id).update(equipment_name=eq_name)
                     for design_field in design_fields:
-                        new_value = request.POST.get(f'other_company_value_{design_field.id}_{other_equipment.id}').strip()
+                        if design_field.field_type == 4:
+                            if request.POST.get(
+                                    f'other_company_value_{design_field.id}_{other_equipment.id}'):
+                                new_value = True
+                            else:
+                                new_value = False
+                        else:
+                            new_value = request.POST.get(f'other_company_value_{design_field.id}_{other_equipment.id}').strip()
 
                         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
                                                                           air_terminal_equipment=other_equipment,
@@ -861,6 +899,7 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
         'return_terminal_equipments': return_terminal_equipments,
         'outside_terminal_equipments': outside_terminal_equipments,
         'other_equipments': other_equipments,
+        'indicator_choices': footnote_indicator_choices,
     }
     return render(request, "terminalSheetEquipmentDesignData.html", parameters)
 
@@ -953,6 +992,7 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                     'return_terminal_equipments': return_terminal_equipments,
                     'outside_terminal_equipments': outside_terminal_equipments,
                     'other_equipments': other_equipments,
+                    'indicator_choices': footnote_indicator_choices,
                     'error_msg': error_msg,
                 }
                 return render(request, "terminalSheetEquipmentActualData.html", parameters)
@@ -1056,7 +1096,8 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
         'return_terminal_equipments': return_terminal_equipments,
         'outside_terminal_equipments': outside_terminal_equipments,
         'other_equipments': other_equipments,
-        'ak_factor_field_id': ak_factor_field_id
+        'ak_factor_field_id': ak_factor_field_id,
+        'indicator_choices': footnote_indicator_choices,
     }
     return render(request, "terminalSheetEquipmentActualData.html", parameters)
 

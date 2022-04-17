@@ -314,7 +314,7 @@
                                     &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.cfm }}
+                                    &nbsp;{{ equipment.design.cfm }}{% if equipment.design.cfm_more %} {{ cfm_indicator }}{% endif %}
                                 </td>
                                 <td class="pdf-table-cell">
                                     &nbsp;
@@ -382,6 +382,13 @@
                     <td colspan="9">
                     <div id="note-div-actual" class="note-div">
                         * Not Applicable … Direct Reading Flow Hood
+                        {% for row in page.rows %}
+                            {% for one_row in row %}
+                                {% if one_row.design.cfm_note %}
+                                    | {{ one_row.design.cfm_indicator }} {{ one_row.design.cfm_note }}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
                     </div>
                     </td>
                 </tr>

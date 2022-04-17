@@ -232,54 +232,71 @@ def change_order(request, order_id):
 def tech_label(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     this_techlabel = TechLabel.objects.filter(order__id=order_id).first()
+    extra_fields = None
     if this_techlabel:
         form = TechLabelForm(request.POST or None, instance=this_techlabel)
+        extra_fields = TechLabelExtraFields.objects.filter(tech_label=this_techlabel)
     else:
         form = TechLabelForm(request.POST or None, initial={'order': order_id})
+
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderEdit', order_id=order_id)
         if form.is_valid():
-            if request.POST.get("save"):
-                form.cleaned_data['order'] = order_id
-                form.save()
-                return redirect('orderEdit', order_id=order_id)
-            if request.POST.get("savep"):
+            if request.POST.get("save") or request.POST.get("savep"):
                 form.cleaned_data['order'] = order_id
                 this_tech_label = form.save()
-                if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
-                    has_pre_demo = 1
-                else:
-                    has_pre_demo = 0
-                file_name = 'techlabel-' + str(this_order.project_number) + '.pdf'
-                parameters = {'form': form,
-                              'datenow': datetime.datetime.now().date(),
-                              'file_name': 'techlabel-' + str(this_order.project_number),
-                              'tech_label': this_tech_label,
-                              'has_pre_demo': has_pre_demo,
-                              'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
-                              'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
-                              'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
-                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-                              'company_name': LicenseInfo.objects.get(key='CompanyName').value,
-                              'WEB_URL': WEB_URL,
-                              'STATIC_URL': STATIC_URL,
-                              'MEDIA_URL': MEDIA_URL,
-                              'os': system(),
-                              }
-                techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
-                parameters['techlabel_pdf'] = techlabel_pdf[1]
+                extra_fields_count = int(request.POST.get("extra-fields-count"))-1
+                if extra_fields_count > 0:
+                    for extra_field in range(extra_fields_count):
+                        extra_field_title = request.POST.get("extra-field-title-" + str(extra_field+1))
+                        extra_field_content = request.POST.get("extra-field-content-" + str(extra_field+1))
+                        if extra_field_title and extra_field_content:
+                            if TechLabelExtraFields.objects.filter(tech_label=this_tech_label, title=extra_field_title).count() > 0:
+                                previously_built_field = TechLabelExtraFields.objects.get(tech_label=this_tech_label, title=extra_field_title)
+                                previously_built_field.content = extra_field_content
+                                previously_built_field.save()
+                            else:
+                                TechLabelExtraFields.objects.create(tech_label=this_tech_label, title=extra_field_title, content=extra_field_content)
+                if request.POST.get("save"):
+                    return redirect('orderEdit', order_id=order_id)
+                if request.POST.get("savep"):
+                    if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                        has_pre_demo = 1
+                    else:
+                        has_pre_demo = 0
+                    file_name = 'techlabel-' + str(this_order.project_number) + '.pdf'
+                    parameters = {'form': form,
+                                  'datenow': datetime.datetime.now().date(),
+                                  'file_name': 'techlabel-' + str(this_order.project_number),
+                                  'tech_label': this_tech_label,
+                                  'extra_fields': TechLabelExtraFields.objects.filter(tech_label=this_tech_label),
+                                  'has_pre_demo': has_pre_demo,
+                                  'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                                  'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                                  'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                                  'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                                  'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                                  'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                                  'WEB_URL': WEB_URL,
+                                  'STATIC_URL': STATIC_URL,
+                                  'MEDIA_URL': MEDIA_URL,
+                                  'os': system(),
+                                  }
+                    techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
+                    parameters['techlabel_pdf'] = techlabel_pdf[1]
 
-                s3 = S3()
-                response = url_request.urlretrieve(s3.get_bucket_object('media/pdfs/techlabel/' + file_name))
-                with open(response[0], 'rb') as fh:
-                    response = HttpResponse(fh.read(), content_type="application/pdf")
-                    response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_name)
-                    return response
-    parameters = {'form': form,
-                  'this_order': this_order,
-                  }
+                    s3 = S3()
+                    response = url_request.urlretrieve(s3.get_bucket_object('media/pdfs/techlabel/' + file_name))
+                    with open(response[0], 'rb') as fh:
+                        response = HttpResponse(fh.read(), content_type="application/pdf")
+                        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_name)
+                        return response
+    parameters = {
+        'form': form,
+        'this_order': this_order,
+        'extra_fields': extra_fields
+    }
     return render(request, "techLabel.html", parameters)
 
 

@@ -184,8 +184,8 @@
                 <tbody>
                 <!-- Table title -->
                 <tr class="pdf-table-title">
-                    <td colspan="18" class="pdf-table-title-td">VAV BOX FAN HEAT SCHEDULE TEST SHEET</td>
-                    <td colspan="3" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
+                    <td colspan="21" class="pdf-table-title-td">VAV BOX FAN HEAT SCHEDULE TEST SHEET</td>
+                    <td colspan="2" class="pdf-table-title-td pdf-page-number">Page {{ forloop.counter }}</td>
                 </tr>
 
                 <!-- Project specifications -->
@@ -257,7 +257,7 @@
                 {% for vbfhs_equipment in form.vbfhs_equipment_data %}
                     {% if forloop.counter == forloop.parentloop.counter %}
                     {% for eq in vbfhs_equipment %}
-                    <tr class="pdf-table-row">
+                    <tr class="pdf-table-row" style="height: 35px;">
                         <td colspan="3" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
                             {{ eq|get_item:'Address-1' }}
                         </td>

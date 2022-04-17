@@ -113,7 +113,10 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         else:
             vbfhssheetdatas = vbfhs_equipment.vbfhssheetdata_set.filter(data_type=1)
         for vbfhs_data in vbfhssheetdatas:
-            vbfhs_equipment_obj[vbfhs_data.sheet_field.field_name + '-' + str(vbfhs_data.data_type)] = vbfhs_data.value
+            if vbfhs_data.value != '':
+                vbfhs_equipment_obj[vbfhs_data.sheet_field.field_name + '-' + str(vbfhs_data.data_type)] = vbfhs_data.value
+            else:
+                vbfhs_equipment_obj[vbfhs_data.sheet_field.field_name + '-' + str(vbfhs_data.data_type)] = '----'
         vbfhs_equipment_page.append(vbfhs_equipment_obj)
         i += 1
         if i == total_pdf_row:

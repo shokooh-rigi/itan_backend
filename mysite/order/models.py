@@ -113,3 +113,12 @@ class TechLabel(models.Model):
     # def delete_techlabel_pdf(cls, parameters):
     #     delete_pdf = Render.delete_file(parameters, 'techlabel')
     #     return delete_pdf
+
+
+class TechLabelExtraFields(models.Model):
+    tech_label = models.ForeignKey(TechLabel, on_delete=models.CASCADE, blank=False, null=False)
+    title = models.CharField(max_length=50, blank=False, null=False)
+    content = models.CharField(max_length=50, blank=False, null=False)
+
+    def __str__(self):
+        return str(self.title) + ": " + str(self.tech_label)

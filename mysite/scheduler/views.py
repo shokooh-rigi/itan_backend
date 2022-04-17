@@ -887,6 +887,11 @@ def get_schedule_info(request, schedule_id):
         techs_array = []
         schedule_techs = ScheduleTech.objects.filter(schedule=this_schedule)
         for schedule_tech in schedule_techs:
+
+            tech_file = None
+            if schedule_tech.tech_upload:
+                tech_file = schedule_tech.tech_upload.url
+
             if schedule_tech.assigned_to_employee:
                 if schedule_tech.assigned_to_employee.last_name:
                     tech_name = schedule_tech.assigned_to_employee.first_name + ' ' + schedule_tech.assigned_to_employee.last_name
@@ -896,6 +901,7 @@ def get_schedule_info(request, schedule_id):
                     'tech_id': schedule_tech.assigned_to_employee.id,
                     'tech_name': tech_name,
                     'tech_type': 'employee',
+                    'tech_file': tech_file,
                     'involvement_percentage': schedule_tech.involvement_percentage
                 })
             elif schedule_tech.assigned_to_contractor:
@@ -907,6 +913,7 @@ def get_schedule_info(request, schedule_id):
                     'tech_id': schedule_tech.assigned_to_contractor.id,
                     'tech_name': tech_name,
                     'tech_type': 'contractor',
+                    'tech_file': tech_file,
                     'involvement_percentage': schedule_tech.involvement_percentage
                 })
         return JsonResponse({

@@ -82,7 +82,7 @@
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><b>TAB Date: </b></div>
+                <div style="margin: 3px 0 auto;"><b>TAB DATE: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
             </div>
         </div>
@@ -158,8 +158,11 @@
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><b>TAB Date: </b></div>
+                <div style="margin: 3px 0 auto;"><b>TAB DATE: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
+                {% for extra_field in extra_fields %}
+                    <div style="margin: 3px 0 auto;"><b>{{ extra_field.title }}: </b><div style="padding: 0 10px;">{{ extra_field.content }}</div></div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}

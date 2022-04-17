@@ -64,6 +64,32 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
+                    <label class="control-label text-center">Extra Fields</label>
+                    <input class="d-none" name="extra-fields-count" value="" />
+                    <table class="table col-6 offset-3 extra-fields-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Content</th>
+                            </tr>
+                        </thead>
+                        <tbody id="extra-fields-table-tbody">
+                            {% for extra_field in extra_fields %}
+                                <tr>
+                                    <td><input class="form-control extra-field-title" name="extra-field-title-{{ forloop.counter }}" value="{{ extra_field.title }}" /></td>
+                                    <td><input class="form-control extra-field-content" name="extra-field-content-{{ forloop.counter }}" value="{{ extra_field.content }}" /></td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td><input class="form-control extra-field-title" /></td>
+                                <td><input class="form-control extra-field-content" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
                     <label for="id_tech_notes" class="control-label">Tech Notes</label>
                     {{ form.tech_notes }}
                 </div>
@@ -78,12 +104,51 @@
         </div>
 	</form>
         <script>
+
+        function prepareExtraFields() {
+            $('#extra-fields-table-tbody tr').each(function () {
+                let rowIndex = $(this).index();
+                rowIndex += 1;
+                $(this).find('.extra-field-title').attr('name', 'extra-field-title-' + rowIndex);
+                $(this).find('.extra-field-content').attr('name', 'extra-field-content-' + rowIndex);
+
+                $('input[name=extra-fields-count]').val($('#extra-fields-table-tbody tr').length)
+            });
+        }
+
+        prepareExtraFields();
+
         $(function () {
             $("#id_schedule_date").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
                 scrollInput: false,
             });
+
+            $("body").on('input', '#extra-fields-table-tbody input', function () {
+                const this_row = $(this).closest('tr');
+                if ( this_row.is(':last-child') ) {
+                    if (this_row.is(':last-child') && $(this).val()) {
+                        $('#extra-fields-table-tbody tr:last').clone().appendTo("#extra-fields-table-tbody");
+                        $('#extra-fields-table-tbody tr:last input').removeClass('is-invalid').val('');
+                    }
+                }
+
+                if (this_row.is(':last-child'))
+                    return
+
+                let allAreEmpty = true
+                this_row.find('input').each(function () {
+                    if ($(this).val().trim() !== '')
+                        allAreEmpty = false
+                });
+
+                if (allAreEmpty) {
+                    this_row.detach();
+                }
+                prepareExtraFields();
+            });
+
         });
     </script>
 

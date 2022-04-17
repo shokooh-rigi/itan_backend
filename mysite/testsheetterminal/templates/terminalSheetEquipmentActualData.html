@@ -45,40 +45,106 @@
                     </div>
                     {% for actual_field in actual_fields %}
                         {% with 'supply_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:supply_terminal_equipment.id as field_name %}
-                            <div class="col-lg-3">
-                                <label style="width: 100%;" for="{{ field_name }}" class="control-label">
-                                    {{ actual_field.field_name }}
-                                    {% if actual_field.required_in_actual %}
-                                        <span class="required">*</span>
-                                    {% endif %}
-                                </label>
-                            </div>
-                            <div class="col-lg-3">
-                                <label for="{{ field_name }}" class="control-label equal_fields_supply"
-                                       data-fieldid="{{ actual_field.id }}"
-                                       data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
-                                        {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
-                                       style="width: 100%;">
-                                    {% if actual_field.field_name|lower != 'note' %}
-                                        <input style="width: 100%;" {% get_field_type actual_field %}
-                                               {% if actual_field.required_in_actual %}required=""{% endif %}
-                                               name="{{ field_name }}" maxlength="50"
-                                               class="form-control eq_supply{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
-                                               id="{{ field_name }}"
-                                               value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}{% endif %}"
-                                               {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
-                                    {% else %}
-                                        <textarea style="width: 100%;"
-                                                  {% if actual_field.required_in_actual %}required=""{% endif %}
-                                                  name="{{ field_name }}"
-                                                  class="form-control"
-                                                  id="{{ field_name }}">{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}</textarea>
-                                    {% endif %}
-                                </label>
-                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
-                                    <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                            {% get_terminal_actual_value request actual_field supply_terminal_equipment.id as field_prev_value %}
+                            {% if actual_field.field_name|lower != 'cfm indicator' and actual_field.field_name|lower != 'cfm note' %}
+                                <div class="col-lg-3">
+                                    <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                        {{ actual_field.field_name }}
+                                        {% if actual_field.required_in_actual %}
+                                            <span class="required">*</span>
+                                        {% endif %}
+                                    </label>
                                 </div>
-                            </div>
+                                <div class="col-lg-3">
+                                    <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                           data-fieldid="{{ actual_field.id }}"
+                                           data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+                                            {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                           style="width: 100%;">
+                                        {% if actual_field.field_name|lower != 'note' %}
+                                            <input style="width: 100%;" {% get_field_type actual_field %}
+                                                   {% if actual_field.required_in_actual %}required=""{% endif %}
+                                                   name="{{ field_name }}" maxlength="50"
+                                                   class="form-control field_{{ actual_field.field_name|normalize_string }} eq_supply{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                                   id="{{ field_name }}"
+                                                   value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}{% endif %}"
+                                                   {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
+                                        {% else %}
+                                            <textarea style="width: 100%;"
+                                                      {% if actual_field.required_in_actual %}required=""{% endif %}
+                                                      name="{{ field_name }}"
+                                                      class="form-control"
+                                                      id="{{ field_name }}">{% get_terminal_actual_value request actual_field supply_terminal_equipment.id %}</textarea>
+                                        {% endif %}
+                                    </label>
+                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                        <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% if actual_field.field_name|lower == 'cfm indicator' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <select style="width: 100%;" {% get_field_type actual_field %}
+                                                    {% if actual_field.required_in_design %}required=""{% endif %}
+                                                    name="{{ field_name }}"
+                                                    class="form-control select-more-details-indicator field_{{ actual_field.field_name|normalize_string }}"
+                                                    id="{{ field_name }}">
+                                                <option value="">---</option>
+                                                {% for indicator in indicator_choices %}
+                                                    <option value="{{ indicator.0 }}"
+                                                            {% if field_prev_value == indicator.0 %}selected{% endif %}>{{ indicator.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% elif actual_field.field_name|lower == 'cfm note' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <input style="width: 100%;" {% get_field_type actual_field %}
+                                                   {% if actual_field.required_in_design %}required=""{% endif %}
+                                                   name="{{ field_name }}"
+                                                   value="{{ field_prev_value }}"
+                                                   class="form-control define-cfm-note field_{{ actual_field.field_name|normalize_string }}"
+                                                   id="{{ field_name }}"/>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         {% endwith %}
                     {% endfor %}
                     <br/>
@@ -103,6 +169,8 @@
                     </div>
                     {% for actual_field in actual_fields %}
                         {% with 'return_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:return_terminal_equipment.id as field_name %}
+                            {% get_terminal_actual_value request actual_field return_terminal_equipment.id as field_prev_value %}
+                            {% if actual_field.field_name|lower != 'cfm indicator' and actual_field.field_name|lower != 'cfm note' %}
                             <div class="col-lg-3">
                                 <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                                     {{ actual_field.field_name }}
@@ -121,7 +189,7 @@
                                         <input style="width: 100%;" {% get_field_type actual_field %}
                                                {% if actual_field.required_in_actual %}required=""{% endif %}
                                                name="{{ field_name }}" maxlength="50"
-                                               class="form-control eq_return{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                               class="form-control field_{{ actual_field.field_name|normalize_string }} eq_return{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
                                                value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field return_terminal_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
@@ -137,6 +205,68 @@
                                     <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
                                 </div>
                             </div>
+                            {% else %}
+                                {% if actual_field.field_name|lower == 'cfm indicator' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <select style="width: 100%;" {% get_field_type actual_field %}
+                                                    {% if actual_field.required_in_design %}required=""{% endif %}
+                                                    name="{{ field_name }}"
+                                                    class="form-control select-more-details-indicator field_{{ actual_field.field_name|normalize_string }}"
+                                                    id="{{ field_name }}">
+                                                <option value="">---</option>
+                                                {% for indicator in indicator_choices %}
+                                                    <option value="{{ indicator.0 }}"
+                                                            {% if field_prev_value == indicator.0 %}selected{% endif %}>{{ indicator.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% elif actual_field.field_name|lower == 'cfm note' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <input style="width: 100%;" {% get_field_type actual_field %}
+                                                   {% if actual_field.required_in_design %}required=""{% endif %}
+                                                   name="{{ field_name }}"
+                                                   value="{{ field_prev_value }}"
+                                                   class="form-control define-cfm-note field_{{ actual_field.field_name|normalize_string }}"
+                                                   id="{{ field_name }}"/>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         {% endwith %}
                     {% endfor %}
                     <br/>
@@ -161,6 +291,8 @@
                     </div>
                     {% for actual_field in actual_fields %}
                         {% with 'outside_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:outside_terminal_equipment.id as field_name %}
+                            {% get_terminal_actual_value request actual_field outside_terminal_equipment.id as field_prev_value %}
+                            {% if actual_field.field_name|lower != 'cfm indicator' and actual_field.field_name|lower != 'cfm note' %}
                             <div class="col-lg-3">
                                 <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                                     {{ actual_field.field_name }}
@@ -176,10 +308,17 @@
                                         {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
                                        style="width: 100%;">
                                     {% if actual_field.field_name|lower != 'note' %}
+{#                                        <input style="width: 100%;" {% get_field_type actual_field %}#}
+{#                                               {% if actual_field.required_in_actual %}required=""{% endif %}#}
+{#                                               name="{{ field_name }}" maxlength="50" {% if actual_field.field_name|lower == 'final cfm' %}data-akfactor="{% get_terminal_actual_value request ak_factor_field_id outside_terminal_equipment.id %}"{% endif %}#}
+{#                                               class="form-control {% if actual_field.field_name|lower == 'final fpm' %}final_fpm final_fpm_{{ outside_terminal_equipment.id }}{% endif %} {% if actual_field.field_name|lower == 'final cfm' %}final_cfm final_cfm_{{ outside_terminal_equipment.id }}{% endif %} eq_outside{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"#}
+{#                                               id="{{ field_name }}"#}
+{#                                               value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field outside_terminal_equipment.id %}{% endif %}"#}
+{#                                               {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>#}
                                         <input style="width: 100%;" {% get_field_type actual_field %}
                                                {% if actual_field.required_in_actual %}required=""{% endif %}
-                                               name="{{ field_name }}" maxlength="50" {% if actual_field.field_name|lower == 'final cfm' %}data-akfactor="{% get_terminal_design_value request ak_factor_field_id outside_terminal_equipment.id %}"{% endif %}
-                                               class="form-control {% if actual_field.field_name|lower == 'final fpm' %}final_fpm final_fpm_{{ outside_terminal_equipment.id }}{% endif %} {% if actual_field.field_name|lower == 'final cfm' %}final_cfm final_cfm_{{ outside_terminal_equipment.id }}{% endif %} eq_outside{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                               name="{{ field_name }}" maxlength="50"
+                                               class="form-control field_{{ actual_field.field_name|normalize_string }} eq_return{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
                                                value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field outside_terminal_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
@@ -195,6 +334,75 @@
                                     <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
                                 </div>
                             </div>
+                            {% else %}
+                                {% if actual_field.field_name|lower == 'cfm indicator' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <select style="width: 100%;" {% get_field_type actual_field %}
+                                                    {% if actual_field.required_in_design %}required=""{% endif %}
+                                                    name="{{ field_name }}"
+                                                    class="form-control select-more-details-indicator field_{{ actual_field.field_name|normalize_string }}"
+                                                    id="{{ field_name }}">
+                                                <option value="">---</option>
+                                                {% for indicator in indicator_choices %}
+                                                    <option value="{{ indicator.0 }}"
+                                                            {% if field_prev_value == indicator.0 %}selected{% endif %}>{{ indicator.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+
+
+
+                                {% elif actual_field.field_name|lower == 'cfm note' %}
+
+
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <input style="width: 100%;" {% get_field_type actual_field %}
+                                                   {% if actual_field.required_in_design %}required=""{% endif %}
+                                                   name="{{ field_name }}"
+                                                   value="{{ field_prev_value }}"
+                                                   class="form-control define-cfm-note field_{{ actual_field.field_name|normalize_string }}"
+                                                   id="{{ field_name }}"/>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         {% endwith %}
                     {% endfor %}
                     <br/>
@@ -231,6 +439,8 @@
                     </div>
                     {% for actual_field in actual_fields %}
                         {% with 'other_actual_value_'|concatenate:actual_field.id|concatenate:'_'|concatenate:other_equipment.id as field_name %}
+                            {% get_terminal_actual_value request actual_field other_equipment.id as field_prev_value %}
+                            {% if actual_field.field_name|lower != 'cfm indicator' and actual_field.field_name|lower != 'cfm note' %}
                             <div class="col-lg-3">
                                 <label style="width: 100%;" for="{{ field_name }}" class="control-label">
                                     {{ actual_field.field_name }}
@@ -249,7 +459,7 @@
                                         <input style="width: 100%;" {% get_field_type actual_field %}
                                                {% if actual_field.required_in_actual %}required=""{% endif %}
                                                name="{{ field_name }}" maxlength="50"
-                                               class="form-control eq_other{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
+                                               class="form-control field_{{ actual_field.field_name|normalize_string }} eq_other{{ actual_field.id }} {% if actual_field.show_parentheses >= 3 %}show_parentheses{% endif %}"
                                                id="{{ field_name }}"
                                                value="{% if actual_field.field_name.lower == 'outlet no.' %}{{ forloop.parentloop.counter }}{% else %}{% get_terminal_actual_value request actual_field other_equipment.id %}{% endif %}"
                                                {% if actual_field.field_name.lower == 'outlet no.' %}readonly{% endif %}/>
@@ -265,6 +475,73 @@
                                     <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
                                 </div>
                             </div>
+                            {% else %}
+                                {% if actual_field.field_name|lower == 'cfm indicator' %}
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+                                            {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <select style="width: 100%;" {% get_field_type actual_field %}
+                                                    {% if actual_field.required_in_design %}required=""{% endif %}
+                                                    name="{{ field_name }}"
+                                                    class="form-control select-more-details-indicator field_{{ actual_field.field_name|normalize_string }}"
+                                                    id="{{ field_name }}">
+                                                <option value="">---</option>
+                                                {% for indicator in indicator_choices %}
+                                                    <option value="{{ indicator.0 }}"
+                                                            {% if field_prev_value == indicator.0 %}selected{% endif %}>{{ indicator.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+
+
+
+                                {% elif actual_field.field_name|lower == 'cfm note' %}
+
+
+                                    <div class="col-lg-3 d-none">
+                                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                            {{ actual_field.field_name }}
+                                            {% if actual_field.required_in_design %}
+                                                <span class="required">*</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-3 d-none">
+                                        <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                               data-fieldid="{{ actual_field.id }}"
+                                               data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+                                                {% if actual_field.default_value %}{{ actual_field.default_value }}{% endif %}"
+                                               style="width: 100%;">
+                                            <input style="width: 100%;" {% get_field_type actual_field %}
+                                                   {% if actual_field.required_in_design %}required=""{% endif %}
+                                                   name="{{ field_name }}"
+                                                   value="{{ field_prev_value }}"
+                                                   class="form-control define-cfm-note field_{{ actual_field.field_name|normalize_string }}"
+                                                   id="{{ field_name }}"/>
+                                        </label>
+                                        <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                            <label style="width: 100%; text-align: right;">{{ actual_field.field_postfix }}</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         {% endwith %}
                     {% endfor %}
                     <br/>
@@ -279,17 +556,52 @@
         </div>
     </form>
     <script>
+
+
+    function checkCFMInfo(checkbox_field) {
+            if (checkbox_field.is(':checked')) {
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').removeClass('d-none')
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().removeClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').removeClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').prev().removeClass('d-none')
+            } else {
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').addClass('d-none')
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().addClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').addClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').prev().addClass('d-none')
+            }
+        }
+
+
+
+
+
+
+
+
         $(document).ready(function () {
+
+
+            $('.field_More_info_for_CFM').each(function (index) {
+                checkCFMInfo($(this))
+            });
+
+            $('.field_More_info_for_CFM').change(function (index) {
+                checkCFMInfo($(this))
+            });
+
+
+
             $('.final_fpm').each(function (index) {
                 $(this).attr('readonly', 'readonly');
             });
-            $('.final_cfm').each(function (index) {
+            $('.field_Final_CFM').each(function (index) {
                 let new_val = $(this).val() / parseFloat($(this).data('akfactor'));
                 new_val = new_val.toFixed(0)
                 $(this).closest('.form-line').find('.final_fpm').val(new_val)
             });
 
-            $('.final_cfm').on('input', function () {
+            $('.field_Final_CFM').on('input', function () {
                 let new_val = $(this).val() / parseFloat($(this).data('akfactor'));
                 new_val = new_val.toFixed(0)
                 $(this).closest('.form-line').find('.final_fpm').val(new_val)
