@@ -58,7 +58,7 @@
                         <td>{{ sheet_equipment.number_of_supply_air_terminal }}</td>
                         <td>{{ sheet_equipment.number_of_return_air_terminal }}</td>
                         <td>{{ sheet_equipment.number_of_outside_air_terminal }}</td>
-                        <td>{{ sheet_equipment.number_of_any_other }}</td>
+                        <td>-</td>
                         <td><a href="{% url 'sheetEquipmentCommonDataEdit' sheet_equipment.id %}?next={{ request.path }}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.terminal_main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Change Air Terminal Quantity"></div></a></td>
                         <td>{% if sheet_equipment.terminal_design_data_entry_completed == 0 %}<a href="{% url 'terminalSheetEquipmentDesignData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.terminal_main_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a></td>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'terminalSheetEquipmentDesignData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}
                         <td>{% if sheet_equipment.terminal_actual_data_entry_completed == 0 %}<a href="{% url 'terminalSheetEquipmentActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.terminal_design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'terminalSheetEquipmentActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
@@ -82,6 +82,18 @@
                         <td>{% if sheet_equipment.terminal_actual_data_entry_completed == 0 %}<a href="{% url 'terminalSheetEquipmentActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px; {% if sheet_equipment.terminal_design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'terminalSheetEquipmentActualData' sheet_id sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td>
+                        Rogue Air Terminals
+                    </td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>{{ rogue_air_terminal_equipments }}</td>
+                    <td><a href="{% url 'terminalSheetOthers' sheet_id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Change Rogue Air Terminals"></div></a></td>
+                    <td>{% if my_sheet.rogue_design_data_entry_completed == 0 %}<a href="{% url 'rogueDesignData' sheet_id %}" style="display: inline-block; margin-left: 5px;"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Check Design Values"></div></a></td>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'rogueDesignData' sheet_id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Design Values"></div></a>{% endif %}
+                    <td>{% if my_sheet.rogue_actual_data_entry_completed == 0 %}<a href="{% url 'rogueActualData' sheet_id %}" style="display: inline-block; margin-left: 5px; {% if my_sheet.rogue_design_data_entry_completed == 0 %}opacity: 0.5; pointer-events: none;{% endif %}"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Enter Actual Data"></div></a>{% else %}<div style="display: inline-block; margin-left: 5px;" class="icon completedicon" data-toggle="tooltip" data-placement="bottom" title="Completed"></div><a href="{% url 'rogueActualData' sheet_id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Actual Data"></div></a>{% endif %}</td>
+                </tr>
             </tbody>
         </table>
         <div class="pagination">

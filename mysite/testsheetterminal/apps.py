@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class OrderConfig(AppConfig):
+class TestSheetTerminalConfig(AppConfig):
     name = 'mysite.testsheetterminal'

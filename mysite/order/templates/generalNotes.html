@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% block extra_head %}
+    {% include 'django_quill/media.html' %}
+{%  endblock %}
+
+
+{% block content %}
+    <h2>Assign {{ page_title }} for Project Number #{{ this_order.project_number }}</h2>
+    <form method = 'POST' action= '' enctype = "multipart/form-data" id="coloredDrawing-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.proposal.as_hidden }}
+            {{ form.po_number.as_hidden }}
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+{#                    <label for="id_general_notes_and_comments" class="control-label">General Notes & Comments</label>#}
+                    {{ form.general_notes_and_comments }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-warning" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                    <input type="submit" class="btn btn-success" value="Finalize" name="finalize" />
+                </div>
+            </div>
+        </div>
+	</form>
+    <script>
+        $('#id_proposal').on('change', function() {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#engineer").text($(this).find(':selected').data('engineer'));
+            $("#tab_amount").text($(this).find(':selected').data('tabamount'));
+            $("#pre_amount").text($(this).find(':selected').data('preamount'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#id_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

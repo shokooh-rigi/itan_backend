@@ -1,4 +1,5 @@
 {% load static %}
+{% load sheet_tags %}
 
 <html>
 <head>
@@ -56,7 +57,7 @@
             font-weight: normal;
             border: 1px solid black;
             padding: 5px 2px 1px;
-            height: 30px;
+            height: 31px;
         }
 
         .pdf-table .pdf-table-cell.pdf-table-title-cell {
@@ -155,7 +156,7 @@
 
 
 <div id="content_frame">
-    {% for page in form.data %}
+    {% for page in pages %}
         <div class="content pdf-page-content">
             <table class="table pdf-table">
                 <!-- Table head section -->
@@ -255,15 +256,14 @@
                 </tr>
 
                 <!-- Data rows -->
-                {% for equipment_group in page.rows %}
-                    {% for equipment in equipment_group %}
-                        {% if forloop.last %}
+                {% for row in page.rows %}
+                        {% if row == 'title' %}
                             <tr class="pdf-table-row section-middle-row">
                                 <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">
-                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}
-                                        {{ equipment.eq_type }}
+                                    {% if page.type != 'SUPPLY' and page.type != 'RETURN' and page.type != 'OUTSIDE' %}
+                                        {{ page.type }}
                                     {% else %}
-                                        {{ equipment.eq_name }} {{ equipment.eq_type }}
+                                        {{ page.system }} {{ page.type }}
                                     {% endif %}
                                 </td>
                                 <td class="pdf-table-cell">&nbsp;</td>
@@ -276,72 +276,26 @@
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                             </tr>
-                        {% endif %}
-                    {% endfor %}
-                    {% for equipment in equipment_group %}
-                        {% if forloop.last %}
+                        {% elif row.d_cfm_total or row.d_cfm_total == 0 %}
                             <tr class="pdf-table-row section-middle-row">
-                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">
-                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}
-                                        TOTAL {{ equipment.eq_type }}
+                                <td colspan="3" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">
+                                    {% if page.type != 'SUPPLY' and page.type != 'RETURN' and page.type != 'OUTSIDE' %}
+                                        TOTAL {{ page.type }}
                                     {% else %}
-                                        TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}
+                                        TOTAL {{ page.type }} {{ page.system }}
                                     {% endif %}
                                 </td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if row.d_cfm_total != 0 %}{{ row.d_cfm_total }}{% endif %}</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.d_cfm_total != 0 %}{{ equipment.d_cfm_total }}{% endif %}</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if row.i_cfm_total != 0 %}{{ row.i_cfm_total }}{% endif %}</td>
                                 <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.i_cfm_total != 0 %}{{ equipment.i_cfm_total }}{% endif %}</td>
-                                <td class="pdf-table-cell">&nbsp;</td>
-                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.f_cfm_total != 0 %}{{ equipment.f_cfm_total }}{% endif %}</td>
+                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if row.f_cfm_total != 0 %}{{ row.f_cfm_total }}{% endif %}</td>
                             </tr>
-                            <tr class="pdf-table-row section-middle-row">
-                                <td colspan="11" class="pdf-table-cell">&nbsp;</td>
-                            </tr>
-                        {% else %}
-                            <tr class="pdf-table-row section-middle-row">
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.room_no }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.outlet_no }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.code }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.size }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.ak_factor }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.design.cfm }}{% if equipment.design.cfm_more %} {{ cfm_indicator }}{% endif %}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{% if equipment.actual.initial_fpm != '' %}{{ equipment.actual.initial_fpm }}{% else %}*{% endif %}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.actual.initial_cfm }}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{% if equipment.actual.final_fpm != '' %}{{ equipment.actual.final_fpm }}{% else %}*{% endif %}
-                                </td>
-                                <td class="pdf-table-cell">
-                                    &nbsp;{{ equipment.actual.final_cfm }}{% if equipment.actual.cfm_more %} {{ cfm_indicator }}{% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                    {% for equipment in equipment_group %}
-                        {% if forloop.last %}
-                            {% for em_row in equipment.empty_rows %}
+
+                            {% for em_row in row.empty_rows %}
                                 <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">
                                 <td class="pdf-table-cell">
                                     &nbsp;
@@ -378,8 +332,45 @@
                                 </td>
                             </tr>
                             {% endfor %}
+                        {% else %}
+                            {% for equipment in row %}
+                                <tr class="pdf-table-row section-middle-row">
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.design.room_no }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.outlet_no }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.code }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.design.size }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.design.ak_factor }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.design.cfm }}{% if equipment.design.cfm_more %} {{ cfm_indicator }}{% endif %}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{% if equipment.actual.initial_fpm != '' %}{{ equipment.actual.initial_fpm }}{% else %}*{% endif %}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.actual.initial_cfm }}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{% if equipment.actual.final_fpm != '' %}{{ equipment.actual.final_fpm }}{% else %}*{% endif %}
+                                    </td>
+                                    <td class="pdf-table-cell">
+                                        &nbsp;{{ equipment.actual.final_cfm }}{% if equipment.actual.cfm_more %} {{ cfm_indicator }}{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
                         {% endif %}
-                    {% endfor %}
                 {% endfor %}
 
                 <!-- Note section -->
@@ -410,6 +401,264 @@
             </table>
         </div>
     {% endfor %}
+
+
+
+
+{#    {% for page in form.data %}#}
+{#        <div class="content pdf-page-content">#}
+{#            <table class="table pdf-table">#}
+{#                <!-- Table head section -->#}
+{#                <thead>#}
+{#                <tr class="pdf-head-tr">#}
+{#                    <th scope="col" class="wide-th"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                    <th scope="col"></th>#}
+{#                </tr>#}
+{#                </thead>#}
+{##}
+{#                <tbody>#}
+{#                <!-- Table title -->#}
+{#                <tr class="pdf-table-title">#}
+{#                    <td></td>#}
+{#                    <td class="pdf-table-title-td" colspan="8">Air Terminal Sheet</td>#}
+{#                    <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>#}
+{#                </tr>#}
+{##}
+{#                <!-- Project specifications -->#}
+{#                <tr class="pdf-table-project-tr">#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>#}
+{#                    <td class="pdf-table-cell" colspan="5">#}
+{#                        &nbsp;{{ form.my_sheet.project.project_number }}#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>#}
+{#                    <td class="pdf-table-cell pdf-table-center-cell" colspan="4">#}
+{#                        &nbsp;{{ form.my_sheet.sheet_date | date }}#}
+{#                    </td>#}
+{#                </tr>#}
+{#                <tr class="pdf-table-project-tr">#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>#}
+{#                    <td class="pdf-table-cell" colspan="5">#}
+{#                        &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-center-cell" colspan="4">#}
+{#                        &nbsp;{{ page.system }}#}
+{#                    </td>#}
+{#                </tr>#}
+{##}
+{#                <!-- Title rows -->#}
+{#                <tr class="pdf-table-row section-first-row">#}
+{#                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        Room No.#}
+{#                    </td>#}
+{#                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 85px">#}
+{#                        Outlet No.#}
+{#                    </td>#}
+{#                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        Code#}
+{#                    </td>#}
+{#                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 100px">#}
+{#                        Size#}
+{#                    </td>#}
+{#                    <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        AK Factor#}
+{#                    </td>#}
+{#                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        Design#}
+{#                    </td>#}
+{#                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        Initial#}
+{#                    </td>#}
+{#                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        Final#}
+{#                    </td>#}
+{#                </tr>#}
+{#                <tr class="pdf-table-row section-middle-row">#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">#}
+{#                        FPM#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">#}
+{#                        CFM#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">#}
+{#                        FPM#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell center-title">#}
+{#                        CFM#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">#}
+{#                        FPM#}
+{#                    </td>#}
+{#                    <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">#}
+{#                        CFM#}
+{#                    </td>#}
+{#                </tr>#}
+{##}
+{#                <!-- Data rows -->#}
+{#                {% for equipment_group in page.rows %}#}
+{#                    {% for equipment in equipment_group %}#}
+{#                        {% if forloop.last %}#}
+{#                            <tr class="pdf-table-row section-middle-row">#}
+{#                                <td colspan="2" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">#}
+{#                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}#}
+{#                                        {{ equipment.eq_type }}#}
+{#                                    {% else %}#}
+{#                                        {{ equipment.eq_name }} {{ equipment.eq_type }}#}
+{#                                    {% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                            </tr>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                    {% for equipment in equipment_group %}#}
+{#                        {% if forloop.last %}#}
+{#                            <tr class="pdf-table-row section-middle-row">#}
+{#                                <td colspan="3" class="pdf-table-cell" style="text-align: left; font-weight: bold; font-size: 12px;">#}
+{#                                    {% if equipment.eq_type != 'SUPPLY' and equipment.eq_type != 'RETURN' and equipment.eq_type != 'OUTSIDE' %}#}
+{#                                        TOTAL {{ equipment.eq_type }}#}
+{#                                    {% else %}#}
+{#                                        TOTAL {{ equipment.eq_type }} {{ equipment.eq_name }}#}
+{#                                    {% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.d_cfm_total != 0 %}{{ equipment.d_cfm_total }}{% endif %}</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.i_cfm_total != 0 %}{{ equipment.i_cfm_total }}{% endif %}</td>#}
+{#                                <td class="pdf-table-cell">&nbsp;</td>#}
+{#                                <td class="pdf-table-cell" style="font-weight: bold;">&nbsp;{% if equipment.f_cfm_total != 0 %}{{ equipment.f_cfm_total }}{% endif %}</td>#}
+{#                            </tr>#}
+{#                            <tr class="pdf-table-row section-middle-row">#}
+{#                                <td colspan="11" class="pdf-table-cell">&nbsp;</td>#}
+{#                            </tr>#}
+{#                        {% else %}#}
+{#                            <tr class="pdf-table-row section-middle-row">#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.design.room_no }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.outlet_no }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.code }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.design.size }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.design.ak_factor }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{% if equipment.design.fpm != '' %}{{ equipment.design.fpm }}{% else %}*{% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.design.cfm }}{% if equipment.design.cfm_more %} {{ cfm_indicator }}{% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{% if equipment.actual.initial_fpm != '' %}{{ equipment.actual.initial_fpm }}{% else %}*{% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.actual.initial_cfm }}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{% if equipment.actual.final_fpm != '' %}{{ equipment.actual.final_fpm }}{% else %}*{% endif %}#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;{{ equipment.actual.final_cfm }}{% if equipment.actual.cfm_more %} {{ cfm_indicator }}{% endif %}#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                    {% for equipment in equipment_group %}#}
+{#                        {% if forloop.last %}#}
+{#                            {% for em_row in equipment.empty_rows %}#}
+{#                                <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                                <td class="pdf-table-cell">#}
+{#                                    &nbsp;#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                            {% endfor %}#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                {% endfor %}#}
+{##}
+{#                <!-- Note section -->#}
+{#                <tr class="pdf-table-note-section">#}
+{#                    <td class="note-title">#}
+{#                        Notes:#}
+{#                    </td>#}
+{#                    <td colspan="9">#}
+{#                    <div id="note-div-actual" class="note-div">#}
+{#                    * Not Applicable … Direct Reading Flow Hood#}
+{#                        {% for row in page.rows %}#}
+{#                            {% for one_row in row %}#}
+{#                                {% if one_row.actual.note %}#}
+{#                                    | {{ one_row.actual.note }}#}
+{#                                {% endif %}#}
+{#                                {% if one_row.design.cfm_note %}#}
+{#                                    | {{ one_row.design.cfm_indicator }} {{ one_row.design.cfm_note }}#}
+{#                                {% endif %}#}
+{#                                {% if one_row.actual.cfm_note %}#}
+{#                                    | {{ one_row.actual.cfm_indicator }} {{ one_row.actual.cfm_note }}#}
+{#                                {% endif %}#}
+{#                            {% endfor %}#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{#                    </td>#}
+{#                </tr>#}
+{#                </tbody>#}
+{#            </table>#}
+{#        </div>#}
+{#    {% endfor %}#}
 </div>
 </body>
 </html>

@@ -11,21 +11,28 @@
             {{ form.po_number.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_amount" class="control-label">Upload {{ page_title }}</label>
+                    <label for="id_colored_drawing" class="control-label">Upload {{ page_title }}</label>
                     {{ form.colored_drawing }}
                 </div>
             </div>
-            {% if this_order.colored_drawing %}
             <div class="row form-line">
-                <div class="col-lg-12">
-                    {{ this_order.colored_drawing }}
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_report_colored_drawing" class="control-label">Upload Report Drawing</label>
+                    {{ form.report_colored_drawing }}
                 </div>
             </div>
-            {% endif %}
+{#            {% if this_order.colored_drawing %}#}
+{#            <div class="row form-line">#}
+{#                <div class="col-lg-12">#}
+{#                    {{ this_order.colored_drawing }}#}
+{#                </div>#}
+{#            </div>#}
+{#            {% endif %}#}
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Save" name="save" />
-                    <input type="submit" class="btn btn-danger" value="Back to Order" name="cancel" formnovalidate />
+                    <input type="submit" class="btn btn-warning" value="Save" name="save" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                    <input type="submit" class="btn btn-success" value="Finalize" name="finalize" {% if not this_order.colored_drawing and not this_order.report_colored_drawing %}disabled{% endif %} />
                 </div>
             </div>
         </div>

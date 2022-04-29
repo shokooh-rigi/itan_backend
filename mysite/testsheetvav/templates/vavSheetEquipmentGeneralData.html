@@ -108,6 +108,20 @@
                     </select>
                 </div>
             </div>
+            <div class="row form-line text-left">
+                <div class="col-lg-3">
+                    <label for="id_equipment" class="control-label">Inherited From</label>
+                </div>
+                <div class="col-lg-3">
+                    <select name="id_inherit" class="form-control" id="id_inherit" style="max-width:206px;">
+                        <option value="" selected="">---------</option>
+
+                        {% for air_moving_eq in air_moving_eqs %}
+                            <option value="{{ air_moving_eq.id }}" {% if sheet_equipment.inherited_from_air_moving.id == air_moving_eq.id %}selected="selected"{% endif %}>{% for sheet_eq_custom_data in air_moving_eq.sheetequipmentcommondata_set.all %}{% if 'fan' in sheet_eq_custom_data.key.column_title|lower %}{{ sheet_eq_custom_data.value }}{% endif %}{% endfor %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <input type="submit" class="btn btn-success" value="Save General Information" name="next" />

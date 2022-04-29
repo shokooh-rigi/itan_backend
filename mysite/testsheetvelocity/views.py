@@ -143,10 +143,10 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 @login_required
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
-    print('gereft data ro')
+
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/velocitySheetEquipmentTemplate.html', parameters,
                                                   'velocityEquipmentReport')
-    print('tamum shod')
+
 
     if os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as fh:

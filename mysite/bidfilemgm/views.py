@@ -193,6 +193,19 @@ def bidfiles_edit(request, bidfiles_id):
 
 
 @login_required
+def bidfiles_duplicate(request, bidfiles_id):
+    this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
+    new_duplicated_record = BidFile(customer=this_bidfile.customer,
+                                    project=this_bidfile.project,
+                                    due_date=this_bidfile.due_date,
+                                    note=this_bidfile.note,
+                                    created_by=this_bidfile.created_by)
+    new_duplicated_record.save()
+
+    return redirect('bidFilesHome')
+
+
+@login_required
 def bidfiles_archive(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
     if request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by == request.user:

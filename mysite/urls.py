@@ -1,5 +1,12 @@
+"""
+Copyright (C) Airdec, Inc - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+Written by Reza Dadashian rdadashian@airdec.net
+"""
+
 from django.conf import settings
-from django.conf.urls import url, include
+from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
@@ -14,12 +21,12 @@ admin.site.enable_nav_sidebar = False
 urlpatterns = [
     path('select2/', include("django_select2.urls")),
     path('admin/', admin.site.urls),
-    url(r'^accounts/password_change/$', core_views.change_password, name='password_change'),
+    path('accounts/password_change/', core_views.change_password, name='password_change'),
     path('accounts/', include('django.contrib.auth.urls')),
-    url(r'^$', core_views.home, name='home'),
-    url(r'^accounts/signup/$', core_views.signup, name='signup'),
+    path('', core_views.home, name='home'),
+    path('accounts/signup/', core_views.signup, name='signup'),
     path('login/', views.LoginView.as_view(template_name="registration/login.html", authentication_form=UserLoginForm), name='login'),
-    url(r'^account_activation_sent/$', core_views.account_activation_sent, name='account_activation_sent'),
+    path('account_activation_sent/', core_views.account_activation_sent, name='account_activation_sent'),
     path('activate/<slug:uidb64>/<slug:token>/', core_views.activate, name='activate'),
     path('license/upload/', core_views.model_form_upload, name='LicenseInfoFiles'),
     path('profile/', core_views.profile_edit, name='ProfileEdit'),
@@ -40,6 +47,7 @@ urlpatterns = [
     path('', include('mysite.scheduler.urls')),
     path('', include('mysite.settlement.urls')),
     path('', include('mysite.techupload.urls')),
+    path('ts-setup/', include('mysite.testsheetsetup.urls')),
     path('', include('mysite.sheetcreator.urls')),
     path('', include('mysite.testsheetvav.urls')),
     path('', include('mysite.testsheetterminal.urls')),
@@ -65,13 +73,13 @@ urlpatterns = [
     path('', include('mysite.revenueperformance.urls')),
     path('management/db/', include('mysite.dbmanagement.urls')),
     path('api/', include('api.urls')),
-    url(r'^section/tech/$', core_views.tech, name='Tech'),
-    url(r'^section/estimate/$', core_views.estimate, name='Estimate'),
-    url(r'^section/data/$', core_views.data, name='Data'),
-    url(r'^section/accounting/$', core_views.accounting, name='Accounting'),
-    url(r'^section/customer/$', core_views.customer, name='Customer'),
-    url(r'^section/management/$', core_views.management, name='Management'),
-    path('tech/', include('mysite.dashboard-tech.urls'), name='techPanel'),
+    path('section/tech/', core_views.tech, name='Tech'),
+    path('section/estimate/', core_views.estimate, name='Estimate'),
+    path('section/data/', core_views.data, name='Data'),
+    path('section/accounting/', core_views.accounting, name='Accounting'),
+    path('section/customer/', core_views.customer, name='Customer'),
+    path('section/management/', core_views.management, name='Management'),
+    path('tech/', include('mysite.dashboardtech.urls'), name='techPanel'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

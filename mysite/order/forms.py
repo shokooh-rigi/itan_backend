@@ -12,6 +12,12 @@ class ProposalWidget(s2forms.ModelSelect2Widget):
     ]
 
 
+class ArchitectWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "company__name__icontains",
+    ]
+
+
 class OrderForm(ModelForm):
     equipment_submittal = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     colored_drawing = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
@@ -30,16 +36,21 @@ class OrderForm(ModelForm):
             'control_system',
             'equipment_submittal',
             'colored_drawing',
+            'report_colored_drawing',
+            'general_notes_and_comments',
+            'field_draw',
             'site_pictures',
             'test_sheets',
             'note',
         ]
         widgets = {
             'proposal': ProposalWidget,
+            'architect_name': ArchitectWidget,
         }
 
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
+        self.fields['architect_name'].queryset = Person.objects.filter(company__company_type__name__iexact='architect')
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

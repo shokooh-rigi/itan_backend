@@ -449,6 +449,8 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__iexact='vav',
                                               equipment_type=sheet_equipment.equipment_type)
 
+    air_moving_eqs = SheetEquipment.objects.filter(sheet__project=sheet_equipment.sheet.project)
+
     sat = sheet_equipment.number_of_supply_air_terminal
 
     equipments = Equipment.objects.filter(test_sheet__name__iexact='vav')
@@ -472,6 +474,12 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
                     value=request.POST.get('showing_field_value_' + str(value_field.id)))
             if request.POST.get('id_equipment'):
                 sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+
+            if request.POST.get('id_inherit'):
+                sheet_equipment.inherited_from_air_moving = SheetEquipment.objects.get(id=request.POST.get('id_inherit'))
+            else:
+                sheet_equipment.inherited_from_air_moving = None
+
             sheet_equipment.equipment_group = request.POST.get('equipment_group')
             old_supply_number = sheet_equipment.number_of_supply_air_terminal
             sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
@@ -480,6 +488,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
                     AirTerminalEquipment.objects.filter(vav_equipment=sheet_equipment).delete()
                 sheet_equipment.terminal_design_data_entry_completed = False
                 sheet_equipment.terminal_actual_data_entry_completed = False
+            sheet_equipment.main_data_entry_completed = True
             sheet_equipment.save()
             if next_url:
                 return redirect(WEB_URL + next_url)
@@ -493,6 +502,12 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             new_update = DataSheetEquipment.objects.get(id=sheet_equipment_id)
             if request.POST.get('id_equipment'):
                 new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+
+            if request.POST.get('id_inherit'):
+                sheet_equipment.inherited_from_air_moving = SheetEquipment.objects.get(id=request.POST.get('id_inherit'))
+            else:
+                sheet_equipment.inherited_from_air_moving = None
+
             new_update.equipment_group = request.POST.get('equipment_group')
             new_update.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             new_update.main_data_entry_completed = True
@@ -508,6 +523,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
         'manufacturers': manufacturers,
         'Equipment_db': Equipment_db,
         'edit_page': edit_page,
+        'air_moving_eqs': air_moving_eqs
     }
 
     return render(request, "vavSheetEquipmentGeneralData.html", parameters)

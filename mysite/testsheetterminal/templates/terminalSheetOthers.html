@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load sheet_tags %}
+
+{% block content %}
+    <h2>Define Rogue (other) Terminal Equipments for
+        {{ my_sheet.project.project_number }}
+        {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method='POST' action='' enctype="multipart/form-data" id="other-air-terminals-form">
+        <div class="form-group">
+            {% csrf_token %}
+        </div>
+        <div class="row form-line" style="font-weight: bold;">
+            <table class="table col-6 offset-3 extra-fields-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="extra-fields-table-tbody">
+                    {% for rogue_equipment in rogue_equipments %}
+                        <tr>
+                            <td><input class="form-control extra-field-title" name="extra-field-title-{{ forloop.counter }}" value="{{ rogue_equipment.equipment_name }}"></td>
+                            <td><input type="number" class="form-control extra-field-content" name="extra-field-content-{{ forloop.counter }}" value="{{ rogue_equipment.dcount }}"></td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td><input class="form-control extra-field-title" name="extra-field-title-1"></td>
+                        <td><input type="number" class="form-control extra-field-content" name="extra-field-content-1"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input id="submit-form-btn" type="submit" class="btn btn-success" value="Save" name="next" />
+                <input type="submit" class="btn btn-info" value="Back" name="cancel" formnovalidate />
+            </div>
+        </div>
+    </form>
+    <script>
+
+        function prepareExtraFields() {
+            $('#extra-fields-table-tbody tr').each(function () {
+                let rowIndex = $(this).index();
+                rowIndex += 1;
+                $(this).find('.extra-field-title').attr('name', 'extra-field-title-' + rowIndex);
+                $(this).find('.extra-field-content').attr('name', 'extra-field-content-' + rowIndex);
+
+            });
+        }
+
+        $(document).ready(function () {
+
+            prepareExtraFields();
+
+            $(function () {
+                $("body").on('input', '#extra-fields-table-tbody input', function () {
+                    $(this).removeClass('border-danger');
+                    const this_row = $(this).closest('tr');
+                    if ( this_row.is(':last-child') ) {
+                        if (this_row.is(':last-child') && $(this).val()) {
+                            $('#extra-fields-table-tbody tr:last').clone().appendTo("#extra-fields-table-tbody");
+                            $('#extra-fields-table-tbody tr:last input').removeClass('border-danger').val('');
+                        }
+                    }
+
+                    if (this_row.is(':last-child'))
+                        return
+
+                    let allAreEmpty = true
+                    this_row.find('input').each(function () {
+                        if ($(this).val().trim() !== '')
+                            allAreEmpty = false
+                    });
+
+                    if (allAreEmpty) {
+                        this_row.detach();
+                    }
+                    prepareExtraFields();
+
+                    $('#extra-fields-table-tbody tr:not(:last)').each(function () {
+                        if ( !$(this).find('.extra-field-content').val() || isNaN($(this).find('.extra-field-content').val()) ) {
+                            $(this).find('.extra-field-content').addClass('border-danger');
+                        }
+                        if ( !$(this).find('.extra-field-title').val() ) {
+                            $(this).find('.extra-field-title').addClass('border-danger');
+                        }
+                        if ( $('#extra-fields-table-tbody input.border-danger').length )
+                            $('#submit-form-btn').prop('disabled', true);
+                        else
+                            $('#submit-form-btn').prop('disabled', false);
+                    });
+                });
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

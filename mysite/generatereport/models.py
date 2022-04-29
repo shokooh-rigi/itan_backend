@@ -14,10 +14,10 @@ from .render import Render
 class ReportSheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
     report_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=False)
-    general_notes_and_comments = models.TextField(default="The systems described here in this report are operating per design intent.")
-    upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=False, null=False, validators=[validate_file_extension])
-    upload_test_sheets = models.FileField(upload_to='uploads/testsheet_reports', blank=False, null=False, validators=[validate_file_extension])
-    upload_drawing_pdf = models.FileField(upload_to='uploads/drawing_pdfs', blank=False, null=False, validators=[validate_file_extension])
+    upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=True, null=True, validators=[validate_file_extension])
+    upload_test_sheets = models.FileField(upload_to='uploads/testsheet_reports', blank=True, null=True, validators=[validate_file_extension])
+    upload_drawing_pdf = models.FileField(upload_to='uploads/drawing_pdfs', blank=True, null=True, validators=[validate_file_extension])
+    automatic = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

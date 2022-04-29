@@ -111,3 +111,8 @@ def concatenate(value, arg):
 @register.filter
 def normalize_string(value):
     return value.replace(" ", "_").replace(".", "").replace("(", "").replace(")", "")
+
+
+@register.simple_tag
+def add_to_counter(x):
+    return ++x

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <div class="text-center">
+        <h2 class="text-uppercase">TEST SHEET {{ order.project_number }} SETUP</h2>
+        <div class="py-4">
+            <h3 class="pb-3">Air Moving</h3>
+            <div id="air-moving-list" class="border p-4 mb-4 rounded"></div>
+            <button id="add-air-moving" class="btn btn-primary">Add Air Moving</button>
+        </div>
+        <div class="py-4">
+            <h3 class="pb-3">VAV</h3>
+            <div id="vav-list" class="border p-4 mb-4 rounded"></div>
+            <button id="add-vav" class="btn btn-primary">Add VAV</button>
+        </div>
+        <div class="py-4">
+            <h3 class="pb-3">RGD</h3>
+            <div id="rgd-list" class="border p-4 mb-4 rounded"></div>
+            <button id="add-rgd" class="btn btn-primary">Add RGD</button>
+        </div>
+    </div>
+<script>
+    let amcounter = 0, vavcounter = 0, rgdcounter = 0;
+    const AIR_MOVING_EQ = () => {
+        return `<div class="p-3 border my-2 text-left">Air Moving ${amcounter}
+                    <div class="px-2">
+                        <div class="border p-1 m-1">
+                            <button class="btn btn-primary d-block my-2 add-air-vav">Add VAV</button>
+                        </div>
+                    </div>
+                </div>`
+    }
+    const VAV_EQ = () => {
+        return `<div class="p-3 border my-2 text-left">VAV ${vavcounter}
+                </div>`
+    }
+    const RGD_EQ = () => {
+        return `<div class="p-3 border my-2 text-left">RGD ${rgdcounter}</div>`
+    }
+    $(document).ready(function() {
+        $(document).on("click", "#add-air-moving", function () {
+            amcounter++;
+            $('#air-moving-list').append(AIR_MOVING_EQ)
+        });
+        $(document).on("click", ".add-air-vav", function () {
+            vavcounter++;
+            $(this).before(VAV_EQ)
+        });
+        $(document).on("click", ".add-air-vav-rgd", function () {
+            rgdcounter++;
+            $(this).before(RGD_EQ)
+        });
+        $(document).on("click", ".add-vav-rgd", function () {
+            rgdcounter++;
+            $(this).before(RGD_EQ)
+        });
+        $(document).on("click", "#add-vav", function () {
+            vavcounter++;
+            $('#vav-list').append(VAV_EQ)
+        });
+        $(document).on("click", "#add-rgd", function () {
+            rgdcounter++;
+            $('#rgd-list').append(RGD_EQ)
+        });
+    });
+</script>
+{% endblock %}

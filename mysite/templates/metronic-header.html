@@ -1,5 +1,4 @@
 {% load custom_tags %}
-{% load recaptcha2 %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -32,7 +31,6 @@
         {% endif %}
         }
         </style>
-        {% recaptcha_init %}
           <script>
               $(document).ready(function() {
                   $('.django-select2').data('minimum-input-length', '1');

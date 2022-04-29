@@ -18,74 +18,76 @@
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
-                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></div>
+                    <a id="dlink_href" href="" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                 </div>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="customer" class="control-label">Customer</label>
-                    <span class="form-control" id="customer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="customer" class="control-label">Customer</label>
+                <span class="form-control" id="customer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="engineer" class="control-label">Engineer</label>
-                    <span class="form-control" id="engineer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="engineer" class="control-label">Engineer</label>
+                <span class="form-control" id="engineer" style="min-height: 36px; height: auto; background-color: #eee;"></span>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="total_amount" class="control-label">Total Amount</label>
-                    <span class="form-control" id="total_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="total_amount" class="control-label">Total Amount</label>
+                <span class="form-control" id="total_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
             </div>
+        </div>
+        <div class="form-group">
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_architect_name" class="control-label">Architect Name</label>
                     {{ form.architect_name }}
                 </div>
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">PO #<span class="required">*</span></label>
-                    {{ form.po_number }}
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_validity" class="control-label">PO #<span class="required">*</span></label>
+                {{ form.po_number }}
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Date PO Received</label>
-                    {{ form.date_po_received }}
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_validity" class="control-label">Date PO Received</label>
+                {{ form.date_po_received }}
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Estimated Date of Project</label>
-                    {{ form.estimated_date_of_project }}
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_validity" class="control-label">Estimated Date of Project</label>
+                {{ form.estimated_date_of_project }}
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_final_offset" class="control-label">Final Tech Offset</label>
-                    {{ form.final_offset }}
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_final_offset" class="control-label">Final Tech Offset</label>
+                {{ form.final_offset }}
             </div>
-            <div class="row form-line" id="predemo-offset-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_predemo_offset" class="control-label">Predemo Tech Offset</label>
-                    {{ form.predemo_offset }}
-                </div>
+        </div>
+        <div class="row form-line" id="predemo-offset-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_predemo_offset" class="control-label">Predemo Tech Offset</label>
+                {{ form.predemo_offset }}
             </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label align-top">Note</label>
-                    {{ form.note }}
-                </div>
+        </div>
+        <div class="row form-line">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <label for="id_validity" class="control-label align-top">Note</label>
+                {{ form.note }}
             </div>
-            <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Create" name="next" />
-                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
-                </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-success" value="Create" name="next" />
+                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
             </div>
         </div>
 	</form>

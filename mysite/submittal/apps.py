@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class SubmittalConfig(AppConfig):
-    name = 'submittal'
+    name = 'mysite.submittal'

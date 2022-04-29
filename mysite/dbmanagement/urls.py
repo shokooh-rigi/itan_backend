@@ -1,5 +1,4 @@
 from django.urls import path
-from django.conf.urls import url
 
 from mysite.dbmanagement import views
 
@@ -13,6 +12,6 @@ urlpatterns = [
     path('vavequipments/values/<int:equipment_id>/', views.vav_equipment_values, name='VavEquipmentsValues'),
     path('equipments/get_values/<equipment_id>/', views.get_equipment_values, name='EquipmentsGetValues'),
     path('equipments/delete/<int:equipment_id>/', views.equipment_delete, name='EquipmentsDelete'),
-    url(r'^manufacturer/create', views.manufacturer_create_popup, name="manufacturerCreate"),
-    url(r'^manufacturer/(?P<pk>\d+)/edit', views.manufacturer_edit_popup, name="manufacturerEdit"),
+    path('manufacturer/create/', views.manufacturer_create_popup, name="manufacturerCreate"),
+    path('manufacturer/<int:pk>/edit/', views.manufacturer_edit_popup, name="manufacturerEdit"),
 ]

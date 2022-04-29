@@ -12,6 +12,12 @@ from ..settings import MEDIA_URL, WEB_URL
 def equipments_list(request):
     equipments = Equipment.objects.all().order_by('service', 'name')
 
+    # Archive company
+
+    # if request.method == 'POST':
+    #     delete_request = request.POST[0]
+    #     deleting_record = delete_request[3:]
+
     parameters = {'equipments': equipments,
                   }
     return render(request, "equipmentslist.html", parameters)
@@ -21,8 +27,9 @@ def equipments_list(request):
 def company_list(request):
     contacts = Person.objects.order_by('company__company_type', 'company')
 
-    parameters = {'contacts': contacts
-                  }
+    parameters = {
+        'contacts': contacts
+    }
     return render(request, "companylist.html", parameters)
 
 

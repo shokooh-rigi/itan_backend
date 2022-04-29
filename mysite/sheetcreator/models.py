@@ -21,70 +21,6 @@ class SupplyorReturnChoices(Enum):
 # Create your models here.
 
 
-class DataSheet(models.Model):
-    test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
-    project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
-    sheet_date = models.DateField(blank=False, null=True)
-    system = models.CharField(max_length=50, blank=False)
-    number_of_equipment_groups = models.IntegerField(default=1, blank=False)
-    archive = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.test_sheet_type.name + " " + self.project.project_number
-
-    class Meta:
-        verbose_name = 'VAV & Air Terminal Sheets'
-        verbose_name_plural = 'VAV & Air Terminal Sheets'
-
-
-class DataSheetEquipment(models.Model):
-    sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
-    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
-    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
-    equipment_group = models.CharField(max_length=50, default='A', blank=False)
-    number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
-    main_data_entry_completed = models.BooleanField(default=False)
-    design_data_entry_completed = models.BooleanField(default=False)
-    actual_data_entry_completed = models.BooleanField(default=False)
-    terminal_design_data_entry_completed = models.BooleanField(default=False)
-    terminal_actual_data_entry_completed = models.BooleanField(default=False)
-
-    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
-
-    def __str__(self):
-        return str(self.sheet) + ": " + self.equipment_type.name
-
-    class Meta(object):
-        ordering = ['field_order']
-
-
-class TestSheetGeneralData(models.Model):
-    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
-    key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=500, blank=False)
-
-    def __str__(self):
-        return str(self.sheet_equipment) + " " + self.key.column_title
-
-
-class TestSheetData(models.Model):
-    data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
-    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
-    sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
-    value = models.CharField(max_length=500, blank=False)
-
-    def __str__(self):
-        return str(self.data_type) + ' ' + str(self.sheet_equipment)
-
-
-class SheetActualDataCustomField(models.Model):
-    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
-    column_title = models.CharField(max_length=50, blank=False)
-
-    def __str__(self):
-        return self.test_sheet.name + " " + self.column_title
-
-
 class Sheet(models.Model):
     test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
@@ -124,6 +60,73 @@ class SheetEquipment(models.Model):
         ordering = ['field_order']
 
 
+class DataSheet(models.Model):
+    test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
+    sheet_date = models.DateField(blank=False, null=True)
+    system = models.CharField(max_length=50, blank=False)
+    number_of_equipment_groups = models.IntegerField(default=1, blank=False)
+    archive = models.BooleanField(default=False)
+    rogue_design_data_entry_completed = models.BooleanField(default=False)
+    rogue_actual_data_entry_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.test_sheet_type.name + " " + self.project.project_number
+
+    class Meta:
+        verbose_name = 'VAV & Air Terminal Sheets'
+        verbose_name_plural = 'VAV & Air Terminal Sheets'
+
+
+class DataSheetEquipment(models.Model):
+    sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
+    equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False, null=False)
+    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
+    equipment_group = models.CharField(max_length=50, default='A', blank=False)
+    number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    main_data_entry_completed = models.BooleanField(default=False)
+    design_data_entry_completed = models.BooleanField(default=False)
+    actual_data_entry_completed = models.BooleanField(default=False)
+    terminal_design_data_entry_completed = models.BooleanField(default=False)
+    terminal_actual_data_entry_completed = models.BooleanField(default=False)
+    inherited_from_air_moving = models.ForeignKey(SheetEquipment, on_delete=models.PROTECT, blank=True, null=True)
+
+    field_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    def __str__(self):
+        return str(self.sheet) + ": " + self.equipment_type.name
+
+    class Meta(object):
+        ordering = ['field_order']
+
+
+class TestSheetGeneralData(models.Model):
+    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=500, blank=False)
+
+    def __str__(self):
+        return str(self.sheet_equipment) + " " + self.key.column_title
+
+
+class TestSheetData(models.Model):
+    data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
+    sheet_equipment = models.ForeignKey(DataSheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
+    sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
+    value = models.CharField(max_length=500, blank=False)
+
+    def __str__(self):
+        return str(self.data_type) + ' ' + str(self.sheet_equipment)
+
+
+class SheetActualDataCustomField(models.Model):
+    test_sheet = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
+    column_title = models.CharField(max_length=50, blank=False)
+
+    def __str__(self):
+        return self.test_sheet.name + " " + self.column_title
+
+
 class SheetEquipmentCommonData(models.Model):
     sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
@@ -159,6 +162,7 @@ class AirTerminalEquipment(models.Model):
     outlet_no = models.SmallIntegerField(blank=False, null=False)
     type = models.PositiveSmallIntegerField(choices=SupplyorReturnChoices.get_items(), default=1, null=False)
     equipment_name = models.CharField(max_length=255, blank=False, null=True)
+    other_group = models.SmallIntegerField(blank=True, null=True)
 
     def __str__(self):
         return str(self.sheet) + ": " + str(self.air_equipment) + ": " + str(self.vav_equipment)
