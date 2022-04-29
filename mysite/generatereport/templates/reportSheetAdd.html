@@ -31,35 +31,35 @@
                     {{ form.report_date }}
                 </div>
             </div>
-            <div class="row form-line">
+            <div id="fgnac-row" class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label text-center">General Notes & Comments</label>
+                    <label for="id_general_notes_and_comments" class="control-label text-center">General Notes & Comments</label>
                     {{ form.general_notes_and_comments }}
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label class="switch-toggle auto_manual m-0" style="width: 60px;">
-                        <input class="or_toggle" type="checkbox" name="or-toggle" disabled />
+                        <input class="or_toggle" type="checkbox" name="or-toggle" />
                         <span class="slider round"></span>
                     </label>
                 </div>
             </div>
-            <div class="row form-line">
+            <div id="futoc-row" class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label text-center">Table of Content (PDF) <span class="required">*</span></label>
+                    <label for="id_upload_table_of_content" class="control-label text-center">Table of Content (PDF) <span class="required">*</span></label>
                     {{ form.upload_table_of_content }}
                 </div>
             </div>
-            <div class="row form-line">
+            <div id="futs-row" class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label text-center">Test Sheets (PDF) <span class="required">*</span></label>
+                    <label for="id_upload_test_sheets" class="control-label text-center">Test Sheets (PDF) <span class="required">*</span></label>
                     {{ form.upload_test_sheets }}
                 </div>
             </div>
-            <div class="row form-line">
+            <div id="fudp-row" class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label text-center">Drawing Files (PDF) <span class="required">*</span></label>
+                    <label for="id_upload_drawing_pdf" class="control-label text-center">Drawing Files (PDF) <span class="required">*</span></label>
                     {{ form.upload_drawing_pdf }}
                 </div>
             </div>
@@ -92,6 +92,19 @@
                 else {
                     $("#project_name").text($(this).find(':selected').data('projectname'));
 
+                }
+            });
+            $('[name=or-toggle]').on('change', function() {
+                if ( $(this).prop('checked') ) {
+                    $('#futoc-row').hide();
+                    $('#futs-row').hide();
+                    $('#fudp-row').hide();
+                    $('#fgnac-row').hide();
+                } else {
+                    $('#futoc-row').show();
+                    $('#futs-row').show();
+                    $('#fudp-row').show();
+                    $('#fgnac-row').show();
                 }
             });
         });

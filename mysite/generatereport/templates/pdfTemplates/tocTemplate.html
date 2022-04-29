@@ -1,0 +1,62 @@
+{% load static %}
+{% load estimator_tags %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Report Sheet</title>
+    {% include "pdfTemplates/headStyle.html" %}
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    <div class="content pdf-page-content">
+        <table class="table" style="font-size: 14pt;">
+            <!-- Table head section -->
+            <thead>
+                <tr>
+                    <th colspan="8"></th>
+                    <th colspan="2" style="text-align: right;"></th>
+                </tr>
+            </thead>
+        </table>
+        <div style="text-align: center; font-size: 17pt; padding: 0;">
+            <span style="font-weight: bold;">TABLE OF CONTENTS</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
+            <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+        </div>
+        <table class="table" style="font-size: 12pt; border: 0;">
+            <tbody>
+                <tr class="pdf-table-title" style="padding: 0 0;">
+                    <td class="pdf-table-title-td" colspan="5" style="font-weight: bold;">ITEM</td>
+                    <td class="pdf-table-title-td" style="font-weight: bold; text-align: center;">PAGE NO.</td>
+                </tr>
+                <tr class="pdf-table-title" style="padding: 0 0;">
+                    <td class="pdf-table-title-td" colspan="5">INSTRUMENTATION</td>
+                    <td class="pdf-table-title-td" style="text-align: center;">i</td>
+                </tr>
+                <tr class="pdf-table-title" style="padding: 0 0;">
+                    <td class="pdf-table-title-td" colspan="5">GENERAL NOTES</td>
+                    <td class="pdf-table-title-td" style="text-align: center;">ii</td>
+                </tr>
+                <tr class="pdf-table-title" style="padding: 3px 0;">
+                    <td class="pdf-table-title-td" colspan="5">ABBREVIATIONS</td>
+                    <td class="pdf-table-title-td" style="text-align: center;">iii</td>
+                </tr>
+                {% for line in table_of_content %}
+                    <tr class="pdf-table-title" style="{% if line.level == 0 %}padding: 5px 0 0 0; text-decoration: underline;{% endif %}">
+                        <td class="pdf-table-title-td" colspan="5" style="padding-left: {% widthratio line.level 1 6 %}px;">{{ line.name }}</td>
+                        <td class="pdf-table-title-td" style="text-align: center;">{% if line.pages %}{{ line.pages }}{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

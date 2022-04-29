@@ -95,7 +95,7 @@ def order_edit(request, order_id):
         if request.POST.get("tl"):
             return redirect('techLabel', order_id=order_id)
         if request.POST.get("ucd"):
-            return redirect('coloredDrawing', order_id=order_id)
+            return redirect('fieldDrawing', order_id=order_id)
         if request.POST.get("usp"):
             return redirect('sitePictures', order_id=order_id)
         if request.POST.get("uts"):
@@ -378,14 +378,113 @@ def order_colored_drawing(request, order_id):
     form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
     if request.method == 'POST':
         if request.POST.get("cancel"):
+            return redirect('orderHome')
+        if form.is_valid():
+            if request.POST.get("finalize"):
+                this_order.colored_drawing_finalize = True
+                this_order.save()
+                return redirect('orderHome')
+            elif request.POST.get("save"):
+                if request.POST.get("colored_drawing-clear") or request.POST.get("report_colored_drawing-clear"):
+                    if request.POST.get("colored_drawing-clear"):
+                        Order.objects.get(id=order_id).colored_drawing.delete()
+                    if request.POST.get("report_colored_drawing-clear"):
+                        Order.objects.get(id=order_id).report_colored_drawing.delete()
+                else:
+                    print(request.FILES)
+                    if request.FILES.getlist('colored_drawing'):
+                        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_colored_drawing")
+                        if not os.path.exists(temp_path):
+                            os.makedirs(temp_path)
+                        files_list = request.FILES.getlist('colored_drawing')
+                        files = []
+                        size_sum = 0
+                        for f in files_list:
+                            size_sum = size_sum + f.size
+                        if size_sum > MAX_UPLOAD_SIZE:
+                            error_msg = "Selected files exceeded maximum upload size!"
+                            parameters = {
+                                'form': form,
+                                'page_title': 'Colored Drawing',
+                                'error_msg': error_msg
+                            }
+                            return render(request, "ColoredDrawing.html", parameters)
+                        for f in files_list:
+                            files.append(os.path.join(temp_path, f.name))
+                            handle_uploaded_file(f, files[-1])
+                        project_clean_name = this_order.project_number.replace(' ', '_') \
+                            .replace('!', '') \
+                            .replace('@', '') \
+                            .replace('#', '') \
+                            .replace('$', '') \
+                            .replace('%', '') \
+                            .replace('^', '') \
+                            .replace('&', '') \
+                            .replace('*', '') \
+                            .replace("/", '')
+                        zip_file_name = project_clean_name + '-Colored-Drawing.zip'
+                        create_zip_file(files, temp_path, zip_file_name)
+                        # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                        file = open(temp_path + '/' + zip_file_name, 'rb')
+                        Order.objects.get(id=order_id).colored_drawing.save(zip_file_name, file)
+
+                    if request.FILES.getlist('report_colored_drawing'):
+                        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_colored_drawing/report")
+                        if not os.path.exists(temp_path):
+                            os.makedirs(temp_path)
+                        files_list = request.FILES.getlist('report_colored_drawing')
+                        files = []
+                        size_sum = 0
+                        for f in files_list:
+                            size_sum = size_sum + f.size
+                        if size_sum > MAX_UPLOAD_SIZE:
+                            error_msg = "Selected files exceeded maximum upload size!"
+                            parameters = {
+                                'form': form,
+                                'page_title': 'Colored Drawing',
+                                'error_msg': error_msg
+                            }
+                            return render(request, "ColoredDrawing.html", parameters)
+                        for f in files_list:
+                            files.append(os.path.join(temp_path, f.name))
+                            handle_uploaded_file(f, files[-1])
+                        project_clean_name = this_order.project_number.replace(' ', '_') \
+                            .replace('!', '') \
+                            .replace('@', '') \
+                            .replace('#', '') \
+                            .replace('$', '') \
+                            .replace('%', '') \
+                            .replace('^', '') \
+                            .replace('&', '') \
+                            .replace('*', '') \
+                            .replace("/", '')
+                        zip_file_name = project_clean_name + '-Report-Colored-Drawing.zip'
+                        create_zip_file(files, temp_path, zip_file_name)
+                        # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
+                        file = open(temp_path + '/' + zip_file_name, 'rb')
+                        Order.objects.get(id=order_id).report_colored_drawing.save(zip_file_name, file)
+
+                return redirect('orderHome')
+    parameters = {'form': form,
+                  'this_order': this_order,
+                  'page_title': 'Colored Drawing',
+                  }
+    return render(request, "ColoredDrawing.html", parameters)
+
+
+@login_required
+def order_field_drawing(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
             return redirect('orderEdit', order_id=order_id)
         if form.is_valid():
             if request.POST.get("save"):
-
-                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/order_colored_drawing")
+                temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/field_draw")
                 if not os.path.exists(temp_path):
                     os.makedirs(temp_path)
-                files_list = request.FILES.getlist('colored_drawing')
+                files_list = request.FILES.getlist('field_drawing')
                 files = []
                 size_sum = 0
                 for f in files_list:
@@ -397,7 +496,7 @@ def order_colored_drawing(request, order_id):
                         'page_title': 'As Built Mechanical Plan',
                         'error_msg': error_msg
                     }
-                    return render(request, "ColoredDrawing.html", parameters)
+                    return render(request, "fmd.html", parameters)
                 for f in files_list:
                     files.append(os.path.join(temp_path, f.name))
                     handle_uploaded_file(f, files[-1])
@@ -411,18 +510,42 @@ def order_colored_drawing(request, order_id):
                     .replace('&', '') \
                     .replace('*', '') \
                     .replace("/", '')
-                zip_file_name = project_clean_name + '-Colored-Drawing.zip'
+                zip_file_name = project_clean_name + '-Field-Drawing.zip'
                 create_zip_file(files, temp_path, zip_file_name)
                 # os.remove(Order.objects.get(id=order_id).equipment_submittal.path)
                 file = open(temp_path + '/' + zip_file_name, 'rb')
-                Order.objects.get(id=order_id).colored_drawing.save(zip_file_name, file)
+                Order.objects.get(id=order_id).field_draw.save(zip_file_name, file)
 
                 return redirect('orderEdit', order_id=order_id)
-    parameters = {'form': form,
-                  'this_order': this_order,
-                  'page_title': 'As built mechanical plan',
-                  }
-    return render(request, "ColoredDrawing.html", parameters)
+    parameters = {
+        'form': form,
+        'this_order': this_order,
+        'page_title': 'Field mechanical plan',
+    }
+    return render(request, "fmd.html", parameters)
+
+
+@login_required
+def order_general_notes(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('orderHome')
+        if form.is_valid():
+            if request.POST.get('finalize'):
+                this_order.general_notes_and_comments_finalize = True
+                this_order.save()
+                return redirect('orderHome')
+            if request.POST.get("save"):
+                form.save()
+                return redirect('orderHome')
+    parameters = {
+        'form': form,
+        'this_order': this_order,
+        'page_title': 'General Notes & Comments',
+    }
+    return render(request, "generalNotes.html", parameters)
 
 
 @login_required

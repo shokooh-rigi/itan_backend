@@ -9,7 +9,6 @@ class ReportSheetForm(ModelForm):
         fields = [
             'project',
             'report_date',
-            'general_notes_and_comments',
             'upload_table_of_content',
             'upload_test_sheets',
             'upload_drawing_pdf'

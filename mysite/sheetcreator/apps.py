@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class OrderConfig(AppConfig):
-    name = 'mysite.order'
+class SheetCreatorConfig(AppConfig):
+    name = 'mysite.sheetcreator'

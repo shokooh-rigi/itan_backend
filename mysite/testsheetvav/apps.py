@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class OrderConfig(AppConfig):
+class TestSheetVavConfig(AppConfig):
     name = 'mysite.testsheetvav'

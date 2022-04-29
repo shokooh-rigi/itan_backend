@@ -7,6 +7,7 @@ urlpatterns = [
     path('bfm/add', views.bidfiles_add, name='bidFilesAdd'),
     path('bfm/addfile/<int:bidfiles_id>', views.bidfiles_addfile, name='bidFilesAddFile'),
     path('bfm/edit/<int:bidfiles_id>', views.bidfiles_edit, name='bidFilesEdit'),
+    path('bfm/duplicate/<int:bidfiles_id>', views.bidfiles_duplicate, name='bidFilesDuplicate'),
     path('bfm/archive/<int:bidfiles_id>/', views.bidfiles_archive, name='bidFilesArchive'),
     path('bfm/delete/<int:bidfiles_id>/', views.bidfiles_delete, name='bidFilesDelete'),
 ]

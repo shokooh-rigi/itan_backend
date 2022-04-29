@@ -1,12 +1,11 @@
 from django.contrib.auth.forms import *
-from snowpenguin.django.recaptcha2.fields import ReCaptchaField
-from snowpenguin.django.recaptcha2.widgets import ReCaptchaWidget
+from captcha.fields import ReCaptchaField
 
 from mysite.core.models import *
 
 
 class UserLoginForm(AuthenticationForm):
-    captcha = ReCaptchaField(widget=ReCaptchaWidget())
+    captcha = ReCaptchaField()
 
     class Meta:
         model = User
@@ -18,7 +17,7 @@ class UserLoginForm(AuthenticationForm):
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
-    captcha = ReCaptchaField(widget=ReCaptchaWidget())
+    captcha = ReCaptchaField()
 
     class Meta:
         model = User

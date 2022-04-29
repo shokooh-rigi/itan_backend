@@ -1,6 +1,7 @@
 from mysite.estimator.models import *
 from ..core.models import *
 from ..dbmanagement.models import *
+from django_quill.fields import QuillField
 
 # Create your models here.
 
@@ -34,7 +35,7 @@ class ControlSystem(models.Model):
 class Order(models.Model):
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE, blank=False)
     project_number = models.CharField(max_length=10, blank=False, null=False)
-    architect_name = models.CharField(max_length=100, blank=True, null=True)
+    architect_name = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
     po_number = models.CharField(max_length=30, blank=False)
     date_po_received = models.DateField(blank=True, null=True)
     estimated_date_of_project = models.DateField(blank=True, null=True)
@@ -43,6 +44,11 @@ class Order(models.Model):
     control_system = models.ForeignKey(ControlSystem, on_delete=models.SET_NULL, blank=True, null=True)
     equipment_submittal = models.FileField(upload_to='uploads/order_equipment_submittal', blank=True, null=True)
     colored_drawing = models.FileField(upload_to='uploads/order_colored_drawing', blank=True, null=True)
+    report_colored_drawing = models.FileField(upload_to='uploads/order_colored_drawing/report', blank=True, null=True)
+    colored_drawing_finalize = models.BooleanField(default=False)
+    field_draw = models.FileField(upload_to='uploads/field_draw', blank=True, null=True)
+    general_notes_and_comments = QuillField(blank=True, null=True)
+    general_notes_and_comments_finalize = models.BooleanField(default=False)
     site_pictures = models.FileField(upload_to='uploads/order_site_pictures', blank=True, null=True)
     test_sheets = models.FileField(upload_to='uploads/order_test_sheets', blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)

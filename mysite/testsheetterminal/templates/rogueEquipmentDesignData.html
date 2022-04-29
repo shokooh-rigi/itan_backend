@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load sheet_tags %}
+
+{% block content %}
+    <h2>Confirm Rogue Air Terminal Design Values for
+        {{ this_sheet_equipment.sheet.project.project_number }}
+        {{ this_sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
+        <strong>Error!</strong> {{ error_msg }}
+    </div>
+    <form method='POST' action='' enctype="multipart/form-data" id="equipmentValues-form">
+        <div class="form-group">
+            {% csrf_token %}
+        </div>
+        <div class="row form-line" style="font-weight: bold;">
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Design Value
+            </div>
+            <div class="col-lg-3">
+                Field Title
+            </div>
+            <div class="col-lg-3">
+                Design Value
+            </div>
+        </div>
+        {% for other_equipment in rogue_equipments %}
+            <h2 class="my-4">{{ other_equipment.equipment_name }}</h2>
+            <div class="row form-line">
+                <div class="col-lg-3">
+                    <label style="width: 100%;" for="other_name_{{ other_equipment.id }}" class="control-label">
+                        Equipment Name
+                        <span class="required">*</span>
+                    </label>
+                </div>
+                <div class="col-lg-3">
+                    <input style="width: 100%;" type="text"
+                           required=""
+                           data-eqid="{{ other_equipment.id }}"
+                           name="other_name_{{ other_equipment.id }}" maxlength="50"
+                           class="form-control" id="other_name_{{ other_equipment.id }}"
+                           value="{% if other_equipment.equipment_name %}{{ other_equipment.equipment_name }}{% endif %}" />
+                </div>
+                {% for design_field in design_fields %}
+                    {% with 'other_company_value_'|concatenate:design_field.id|concatenate:'_'|concatenate:other_equipment.id as field_name %}
+                        {% get_terminal_design_value request design_field other_equipment.id as field_prev_value %}
+                        {% if design_field.field_name|lower != 'cfm indicator' and design_field.field_name|lower != 'cfm note' %}
+                            <div class="col-lg-3">
+                                <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                    {{ design_field.field_name }}
+                                    {% if design_field.required_in_design %}
+                                        <span class="required">*</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="{{ field_name }}" class="control-label equal_fields_other"
+                                       data-fieldid="{{ design_field.id }}"
+                                       data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+                                    {% if design_field.default_value %}{{ design_field.default_value }}{% endif %}"
+                                       style="width: 100%;">
+                                    {% if design_field.field_name|lower != 'size' %}
+                                        <input style="width: 100%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               data-eqid="{{ other_equipment.id }}"
+                                               name="{{ field_name }}" maxlength="50"
+                                               class="form-control field_{{ design_field.field_name|normalize_string }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}"
+                                               id="{{ field_name }}"
+                                               value="{% if design_field.field_name.lower == 'outlet no.' %}{{ other_equipment.outlet_no }}{% else %}{{ field_prev_value }}{% endif %}"
+                                               {% if design_field.field_name.lower == 'outlet no.' %}readonly{% endif %}
+                                        {% if design_field.field_type == 4 and field_prev_value == 'True' %}checked="checked"{% endif %} />
+                                    {% else %}
+                                        <input style="width: 100%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               data-eqid="{{ other_equipment.id }}"
+                                               name="{{ field_name }}" maxlength="50"
+                                               class="size-split has_inch form-control size_eq_other size_{{ other_equipment.id }} eq_other{{ design_field.id }} {% if design_field.show_parentheses == 2 %}show_parentheses{% endif %}{% if design_field.show_parentheses == 4 %}show_parentheses{% endif %}"
+                                               id="{{ field_name }}"
+                                               value="{{ field_prev_value }}"
+                                               data-orgval="{{ field_prev_value }}"/>
+                                    {% endif %}
+                                </label>
+                                <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                    <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                                </div>
+                            </div>
+
+
+                            {% if forloop.counter == 2 %}
+                                <div class="col-lg-3">
+                                    <label style="width: 100%;" for="other_code_select_{{ other_equipment.id }}"
+                                           class="control-label">
+                                        Code <span class="required">*</span>
+                                    </label>
+                                </div>
+                                <div class="col-lg-3">
+                                    <label for="other_code_select_{{ other_equipment.id }}"
+                                           class="control-label select_equal_fields"
+                                           data-loopid="{{ forloop.parentloop.counter }}" style="width: 100%;">
+                                        <input data-eqid="{{ other_equipment.id }}"
+                                               name="other_code_select_{{ other_equipment.id }}"
+                                               id="other_code_select_{{ other_equipment.id }}"
+                                               class="form-control select_eq_other" style="width: 100%;" value="{% if other_equipment.code %}{{ other_equipment.code }}{% endif %}" />
+                                    </label>
+                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                        <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            {% if design_field.field_name|lower == 'cfm indicator' %}
+                                <div class="col-lg-3 d-none">
+                                    <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                        {{ design_field.field_name }}
+                                        {% if design_field.required_in_design %}
+                                            <span class="required">*</span>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                <div class="col-lg-3 d-none">
+                                    <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                           data-fieldid="{{ design_field.id }}"
+                                           data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+                                        {% if design_field.default_value %}{{ design_field.default_value }}{% endif %}"
+                                           style="width: 100%;">
+                                        <select style="width: 100%;" {% get_field_type design_field %}
+                                                {% if design_field.required_in_design %}required=""{% endif %}
+                                                name="{{ field_name }}"
+                                                class="form-control select-more-details-indicator field_{{ design_field.field_name|normalize_string }}"
+                                                id="{{ field_name }}">
+                                            <option value="">---</option>
+                                            {% for indicator in indicator_choices %}
+                                                <option value="{{ indicator.0 }}"
+                                                        {% if field_prev_value == indicator.0 %}selected{% endif %}>{{ indicator.1 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                        <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                                    </div>
+                                </div>
+
+
+
+                            {% elif design_field.field_name|lower == 'cfm note' %}
+
+
+                                <div class="col-lg-3 d-none">
+                                    <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                                        {{ design_field.field_name }}
+                                        {% if design_field.required_in_design %}
+                                            <span class="required">*</span>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                <div class="col-lg-3 d-none">
+                                    <label for="{{ field_name }}" class="control-label equal_fields_supply"
+                                           data-fieldid="{{ design_field.id }}"
+                                           data-loopid="{{ forloop.parentloop.counter }}" data-defaultval="
+
+                                            {% if design_field.default_value %}{{ design_field.default_value }}{% endif %}"
+                                           style="width: 100%;">
+                                        <input style="width: 100%;" {% get_field_type design_field %}
+                                               {% if design_field.required_in_design %}required=""{% endif %}
+                                               name="{{ field_name }}"
+                                               value="{{ field_prev_value }}"
+                                               class="form-control define-cfm-note field_{{ design_field.field_name|normalize_string }}"
+                                               id="{{ field_name }}"/>
+                                    </label>
+                                    <div style="position: absolute; opacity: 0.5; top: 5px; right: 20px; pointer-events: none;">
+                                        <label style="width: 100%; text-align: right;">{{ design_field.field_postfix }}</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+                <br/>
+            </div>
+        {% endfor %}
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-primary" value="It's all good" name="next"/>
+                <input type="submit" class="btn btn-info" value="Back" name="cancel" formnovalidate/>
+            </div>
+        </div>
+    </form>
+    <script>
+
+        function trunc2decimal(num) {
+            var with2Decimals = num.toString().match(/^-?\d+(?:\.\d{0,2})?/)[0];
+            return with2Decimals;
+        }
+
+        function checkCFMInfo(checkbox_field) {
+            if (checkbox_field.is(':checked')) {
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').removeClass('d-none')
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().removeClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').removeClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').prev().removeClass('d-none')
+            } else {
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').addClass('d-none')
+                checkbox_field.closest('.row').find('.select-more-details-indicator').closest('.col-lg-3').prev().addClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').addClass('d-none')
+                checkbox_field.closest('.row').find('.define-cfm-note').closest('.col-lg-3').prev().addClass('d-none')
+            }
+        }
+
+        $(document).ready(function () {
+
+            $('.field_More_info_for_CFM').each(function (index) {
+                checkCFMInfo($(this))
+            });
+
+            $('.field_More_info_for_CFM').change(function (index) {
+                checkCFMInfo($(this))
+            });
+
+            $('.has_inch').each(function (index) {
+                $(this).val($(this).val().replace('"', ''));
+            });
+
+            $('.ak_factor, .fpm').each(function (index) {
+                $(this).attr('readonly', 'readonly');
+            });
+
+            // we might have to calculate supply for DUCTed same as outside air
+            $('.has_inch').each(function (index) {
+                if ($(this).parent().hasClass('equal_fields_outside')) {
+                    let loop_id = $(this).parent().data('loopid');
+                    let new_val = (($(this).val() / 24) ** 2) * 3.14;
+                    new_val = trunc2decimal(new_val);
+                    if (loop_id == 1) {
+                        $('.ak_factor').val(new_val);
+                    } else {
+                        $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                    }
+                }
+            });
+
+            $('.has_inch').on('change', function () {
+                if ($(this).parent().hasClass('equal_fields_outside')) {
+                    let loop_id = $(this).parent().data('loopid');
+                    let new_val = (($(this).val() / 24) ** 2) * 3.14
+                    new_val = trunc2decimal(new_val);
+                    if (loop_id == 1) {
+                        $('.ak_factor').val(new_val);
+                    } else {
+                        $('.ak_factor_' + $(this).data('eqid')).val(new_val);
+                    }
+                    $('.has_cfm').each(function (index) {
+                        if ($(this).val() != '') {
+                            let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
+                            let new_val = $(this).val() / size_val;
+                            new_val = trunc2decimal(new_val);
+                            $('.fpm_' + $(this).data('eqid')).val(new_val);
+                        }
+                    });
+                }
+            });
+
+            $('.has_cfm').each(function (index) {
+                if ($(this).val() != '') {
+                    let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
+                    let new_val = $(this).val() / size_val;
+                    new_val = trunc2decimal(new_val);
+                    $('.fpm_' + $(this).data('eqid')).val(new_val);
+                }
+            });
+
+            $('.has_cfm').on('change', function () {
+                if ($(this).val() != '') {
+                    let loop_id = $(this).parent().data('loopid');
+                    let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
+                    let new_val = $(this).val() / size_val;
+                    new_val = trunc2decimal(new_val);
+                    if (loop_id == 1) {
+                        $('.has_cfm').each(function (index) {
+                            if ($(this).val() != '' && $('.size_' + $(this).data('eqid')).val() != '') {
+                                let size_val = (($('.size_' + $(this).data('eqid')).val() / 24) ** 2) * 3.14;
+                                let new_val = $(this).val() / size_val;
+                                new_val = trunc2decimal(new_val);
+                                $('.fpm_' + $(this).data('eqid')).val(new_val);
+                            }
+                        });
+                    } else {
+                        if ($('.size_' + $(this).data('eqid')).val() != '') {
+                            $('.fpm_' + $(this).data('eqid')).val(new_val);
+                        }
+                    }
+                }
+            });
+        });
+
+        $("form input[type=submit][name=cancel]").click(function () {
+            $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
+            $(this).attr("clicked", "true");
+        });
+        $("form").submit(function () {
+            const val = $("input[type=submit][clicked=true]").val();
+            if (!val) {
+                $('.select_eq').each(function (index) {
+                    if ($(this).children("option:selected").val() == '') {
+                        event.preventDefault();
+                        $(this).focus();
+                    }
+                });
+            }
+        });
+        $('.equal_fields_supply').each(function (index) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq_supply' + field_id + '_x').on('change', function () {
+                    if ($(this).parent().parent().is(':nth-child(2)') == false) {
+                        let first_value = $(this).val();
+                        $('.eq_supply' + field_id + '_x').val(first_value);
+                    }
+                });
+                $(this).find('.eq_supply' + field_id + '_y').on('change', function () {
+                    if ($(this).parent().parent().is(':nth-child(2)') == false) {
+                        let first_value = $(this).val();
+                        $('.eq_supply' + field_id + '_y').val(first_value);
+                    }
+                });
+            }
+        });
+        $('.equal_fields_return').each(function (index) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq_return' + field_id + '_x').on('change', function () {
+                    if ($(this).parent().parent().is(':nth-child(2)') == false) {
+                        let first_value = $(this).val();
+                        $('.eq_return' + field_id + '_x').val(first_value);
+                    }
+                });
+                $(this).find('.eq_return' + field_id + '_y').on('change', function () {
+                    if ($(this).parent().parent().is(':nth-child(2)') == false) {
+                        let first_value = $(this).val();
+                        $('.eq_return' + field_id + '_y').val(first_value);
+                    }
+                });
+            }
+        });
+        $('.equal_fields_outside').each(function (index) {
+            let field_id = $(this).data('fieldid');
+            let loop_id = $(this).data('loopid');
+            if (loop_id == 1) {
+                $(this).find('.eq_outside' + field_id).on('change', function () {
+                    if ($(this).parent().parent().is(':nth-child(2)') == false) {
+                        let first_value = $(this).val();
+                        $('.eq_outside' + field_id).val(first_value);
+                    }
+                });
+            }
+        });
+
+        function size_match(el, edit) {
+            const selected_default = el.children("option:selected").data('default');
+            const selected_sizetype = el.children("option:selected").data('sizetype');
+            const size_input_inch = '.size_' + el.data('eqid');
+            const size_input_x = '.size_' + el.data('eqid') + '_x';
+            const size_input_y = '.size_' + el.data('eqid') + '_y';
+            const inch_related = '.related_to_inch_' + el.data('eqid');
+            const xy_related = '.related_to_xy_' + el.data('eqid');
+            if (edit) {
+                if (selected_default != '') {
+                    if (selected_sizetype == 1) {
+                        $(size_input_inch).val(selected_default);
+                    } else {
+                        const selected_default_splited = selected_default.split("X");
+                        const selected_default_x = selected_default_splited[0].trim();
+                        const selected_default_y = selected_default_splited[1].trim();
+                        $(size_input_inch).val(selected_default);
+                        $(size_input_x).val(selected_default_x);
+                        $(size_input_y).val(selected_default_y);
+                    }
+
+                } else {
+                    $(size_input_inch).val('');
+                    $(size_input_x).val('');
+                    $(size_input_y).val('');
+                }
+            } else {
+                if ($(size_input_inch).val() != '') {
+                    if (selected_sizetype == 1) {
+                        const full_size = $(size_input_inch).val();
+                        const size_inch = full_size.slice(0, -1);
+                        $(size_input_inch).val(size_inch);
+                    } else {
+                        const full_size = $(size_input_inch).val();
+                        const size_splited = full_size.split("X");
+                        const size_inch = full_size
+                        const size_x = size_splited[0].trim();
+                        const size_y = size_splited[1].trim();
+                        $(size_input_inch).val(size_inch);
+                        $(size_input_x).val(size_x);
+                        $(size_input_y).val(size_y);
+                    }
+
+                }
+            }
+            if (el.children("option:selected").data('sizetype') == 1) {
+                $(xy_related).hide();
+                $(xy_related).find('input').prop("disabled", true);
+                $(inch_related).show();
+                $(inch_related).find('input').prop("disabled", false);
+            } else if (el.children("option:selected").data('sizetype') == 2) {
+                $(inch_related).hide();
+                $(inch_related).find('input').prop("disabled", true);
+                $(xy_related).show();
+                $(xy_related).find('input').prop("disabled", false);
+            }
+        }
+
+        $('.select_eq_supply').each(function (index) {
+            size_match($(this), false);
+        });
+
+
+        $('.select_eq_supply').on('change', function () {
+            if ($(this).parent().data('loopid') == 1) {
+                $('.select_eq_supply').val($(this).val());
+                $('.select_eq_supply').each(function (index) {
+                    size_match($(this), true);
+                });
+            } else {
+                size_match($(this), true);
+            }
+        });
+
+        $('.select_eq_return').each(function (index) {
+            size_match($(this), false);
+        });
+
+        $('.select_eq_return').on('change', function () {
+            if ($(this).parent().data('loopid') == 1) {
+                $('.select_eq_return').val($(this).val());
+                $('.select_eq_return').each(function (index) {
+                    size_match($(this), true);
+                });
+            } else {
+                size_match($(this), true);
+            }
+        });
+
+
+    </script>
+
+    <script>
+        /*
+        * Set the parentheses for the fields that need parentheses.
+        * */
+
+        $(".show_parentheses").each(function (index) {
+            const input = $(this);
+            const defaultValue = $(this).parent().data('defaultval').trim();
+            const loop_id = $(this).parent().data('loopid');
+            const field_id = $(this).parent().data('fieldid');
+            const onInputChange = () => {
+                const value = input.val().trim();
+                let rawValue = '';
+                for (const ch of value) {
+                    if (ch !== '(' && ch !== ')') {
+                        rawValue += ch;
+                    }
+                }
+                if (!rawValue || rawValue.toLowerCase() === defaultValue.toLowerCase()) {
+                    input.val(defaultValue);
+                } else {
+                    input.val('(' + rawValue + ')');
+                    if (loop_id == 1) {
+                        $('.eq' + field_id).val('(' + rawValue + ')');
+                    }
+                }
+            };
+            onInputChange();
+            input.on('change', onInputChange);
+        });
+    </script>
+
+{% endblock %}

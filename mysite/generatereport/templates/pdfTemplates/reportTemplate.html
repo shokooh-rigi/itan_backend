@@ -51,7 +51,7 @@
         </div>
         <br />
         <div style="font-size: 13pt;">
-            {{ report_sheet.general_notes_and_comments }}
+            {{ report_sheet.project.general_notes_and_comments.html|safe }}
         </div>
     </div>
     <pdf:nextpage/>

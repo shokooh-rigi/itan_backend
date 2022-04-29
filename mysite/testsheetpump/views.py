@@ -99,12 +99,7 @@ def pump_equipment_add(request, sheet_id):
     return redirect('pumpSheetEquipmentList', sheet_id)
 
 
-def get_pdf_parameters(sheet_id, is_report_pdf: bool):
-    total_pdf_row = 2
-    my_sheet = DataSheet.objects.get(id=sheet_id)
-    pump_equipments = PumpEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
-    if is_report_pdf:
-        pump_equipments = pump_equipments.filter(actual_data_entry_completed=True)
+def prepare_pump_equipments_data(pump_equipments, total_pdf_row, is_report_pdf):
     total_pages = math.ceil(pump_equipments.count() / total_pdf_row)
     pump_equipment_data = []
     pump_equipment_page = []
@@ -128,6 +123,19 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     if pump_equipment_page:
         pump_equipment_data.append(pump_equipment_page)
 
+    return pump_equipment_data
+
+
+def get_pdf_parameters(sheet_id, is_report_pdf: bool):
+    total_pdf_row = 2
+    my_sheet = DataSheet.objects.get(id=sheet_id)
+    pump_equipments = PumpEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
+    if is_report_pdf:
+        pump_equipments = pump_equipments.filter(actual_data_entry_completed=True)
+
+    total_pages = math.ceil(pump_equipments.count() / total_pdf_row)
+    pump_equipment_data = prepare_pump_equipments_data(pump_equipments, total_pdf_row, is_report_pdf)
+
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
     owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
@@ -137,8 +145,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     company_name = LicenseInfo.objects.get(key='CompanyName').value
-
-    print(pump_equipment_data)
 
     return {
         'total_pdf_row': total_pdf_row,

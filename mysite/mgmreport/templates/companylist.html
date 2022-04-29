@@ -3,8 +3,10 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <div class="text-center">
+    <form method="post" class="text-center">
+        {% csrf_token %}
         <br />
+        <a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><button class="btn btn-primary" style="margin: 5px auto 20px auto;">New Vendor</button></a>
         <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
         <table class="table table-striped" id="printThis">
             <thead>
@@ -14,11 +16,12 @@
                     <th>Name</th>
                     <th>Contact Persons</th>
                     <th>Address line 1</th>
-                    <th>Address line 2</th>
-                    <th>City</th>
-                    <th>State</th>
-                    <th>Zip Code</th>
-                    <th>Phone #</th>
+{#                    <th>Address line 2</th>#}
+{#                    <th>City</th>#}
+{#                    <th>State</th>#}
+{#                    <th>Zip Code</th>#}
+{#                    <th>Phone #</th>#}
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,21 +29,50 @@
                         <tr>
                             <td>{% if contact.company.customer_id %}{{ contact.company.customer_id }}{% else %}{% endif %}</td>
                             <td>{{ contact.company.company_type }}</td>
-                            <td>{{ contact.company.name }}</td>
+                            <td>{{ contact.company.name }} <a class="edit_company" data-company="{{ contact.company.id }}" style="display:inline-block; cursor: pointer; cursor: hand;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Archive"></div></a></td>
                             <td>{{ contact.name }}</td>
                             <td>{{ contact.company.address_line_1 }}</td>
-                            <td>{{ contact.company.address_line_2 }}</td>
-                            <td>{{ contact.company.city }}</td>
-                            <td>{{ contact.company.state }}</td>
-                            <td>{{ contact.company.zip }}</td>
-                            <td>{{ contact.company.tel }}</td>
+{#                            <td>{{ contact.company.address_line_2 }}</td>#}
+{#                            <td>{{ contact.company.city }}</td>#}
+{#                            <td>{{ contact.company.state }}</td>#}
+{#                            <td>{{ contact.company.zip }}</td>#}
+{#                            <td>{{ contact.company.tel }}</td>#}
+                            <td>
+                                <a class="edit_customer" data-customer="{{ contact.id }}" style="display:inline-block; cursor: pointer; cursor: hand;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Edit"></div></a>
+                                <button name="dl_{{ contact.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Delete"></div></button>
+                            </td>
                         </tr>
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+    </form>
     <script>
     $(document).ready(function() {
+
+        $(".edit_customer").click(function(){
+            const person_id = $(this).attr('data-customer');
+            if(person_id != '') {
+                var url = "/customer_person/" + person_id + "/edit/";
+                showEditPopup(url);
+            }
+            else {
+                alert("Something Went Wrong");
+            }
+        });
+
+        $(".edit_company").click(function(){
+            const person_id = $(this).attr('data-company');
+            if(person_id != '') {
+                var url = "/company/customer/" + person_id + "/edit/";
+                showEditPopup(url);
+            }
+            else {
+                alert("Something Went Wrong");
+            }
+        });
+
+
+
         $('#printbtn').click(function() {
             $('#printThis').printThis({
                 importCSS: true,

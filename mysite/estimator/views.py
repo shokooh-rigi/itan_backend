@@ -81,19 +81,21 @@ def estimate_list(request):
 
     from_date = request.GET.get("fromDate", '01/01/2000')
     to_date = request.GET.get("toDate", '01/01/2100')
+
+    if search:
+        object_list = Estimate.objects.filter(Q(id=search)
+                                              | Q(project__name__icontains=search)
+                                              | Q(customer__company__name__icontains=search)).filter(archive=False)
+    else:
+        object_list = Estimate.objects.filter(archive=False)
+
     if from_date and to_date:
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Estimate.objects.filter(Q(project__name__icontains=search)
-                                              | Q(customer__company__name__icontains=search)) \
-            .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False)
+        object_list = object_list.filter(due_date__range=(from_date_obj, to_date_obj))
 
-    else:
-        object_list = Estimate.objects.filter(Q(project__name__icontains=search)
-                                              | Q(customer__company__name__icontains=search)) \
-            .filter(archive=False)
 
     object_list = object_list.annotate(null_count=Count('quote')).order_by('null_count', ordering)
 
@@ -169,6 +171,13 @@ def quotation_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
+    if search:
+        object_list = Quote.objects.filter(Q(estimate__id=search)
+                                              | Q(estimate__project__name__icontains=search)
+                                              | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
+    else:
+        object_list = Quote.objects.filter(archive=False)
+
     from_date = request.GET.get("fromDate", '01/01/2000')
     to_date = request.GET.get("toDate", '01/01/2100')
     if from_date and to_date:
@@ -176,14 +185,10 @@ def quotation_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
-                                           | Q(estimate__customer__company__name__icontains=search)) \
-            .filter(estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
+        object_list = object_list.filter(estimate__due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
-                                           | Q(estimate__customer__company__name__icontains=search)) \
-            .filter(archive=False).order_by(ordering)
+        object_list = object_list.order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -253,6 +258,13 @@ def proposal_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
+    if search:
+        object_list = Proposal.objects.filter(Q(quote__estimate__id=search)
+                                              | Q(quote__estimate__project__name__icontains=search)
+                                              | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
+    else:
+        object_list = Proposal.objects.filter(archive=False)
+
     from_date = request.GET.get("fromDate", '01/01/2000')
     to_date = request.GET.get("toDate", '01/01/2100')
     if from_date and to_date:
@@ -260,15 +272,10 @@ def proposal_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
-                                              | Q(quote__estimate__customer__company__name__icontains=search)) \
-            .filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(
-            ordering)
+        object_list = object_list.filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
-                                              | Q(quote__estimate__customer__company__name__icontains=search)) \
-            .filter(archive=False).order_by(ordering)
+        object_list = object_list.order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
@@ -700,6 +707,19 @@ def company_customer_create_popup(request):
 
 @login_required
 def company_customer_edit_popup(request, pk=None):
+    instance = get_object_or_404(ContactInfo, pk=pk)
+    form = CompanyCustomerForm(request.POST or None, instance=instance)
+    form.fields['created_by'].widget = forms.HiddenInput()
+    if form.is_valid():
+        instance = form.save()
+        return HttpResponse(
+            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
+
+    return render(request, "company_form.html", {"form": form})
+
+
+@login_required
+def company_customer_archive(request, pk=None):
     instance = get_object_or_404(ContactInfo, pk=pk)
     form = CompanyCustomerForm(request.POST or None, instance=instance)
     form.fields['created_by'].widget = forms.HiddenInput()

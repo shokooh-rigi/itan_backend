@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from adminsortable2.admin import SortableInlineAdminMixin
+from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
 
 from .models import *
 
@@ -67,7 +67,7 @@ class TestSheetOperationAdmin(SortableInlineAdminMixin, admin.TabularInline):
     model = TestSheetOperation
 
 
-class TestSheetAdmin(ImportExportModelAdmin):
+class TestSheetAdmin(ImportExportModelAdmin, SortableAdminBase):
     inlines = [TestSheetFieldAdmin, TestSheetOperationAdmin, ]
 
     class Media:

@@ -106,10 +106,11 @@ class Proposal(models.Model):
 class EstimateEquipment(models.Model):
     estimate = models.ForeignKey(Estimate, on_delete=models.CASCADE, blank=False, null=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=False)
-    quantity = models.IntegerField(blank=False)
+    quantity = models.FloatField(blank=False)
     price_override = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     # if flag is True means it counts in estimate price (its service is in the estimate services)
+    # ENHANCEMENT: differentiate between Quantity (integer) and Number of Days (float) (flag)
     flag = models.BooleanField(default=True)
 
     class Meta:

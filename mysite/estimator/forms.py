@@ -82,10 +82,8 @@ class EstimateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EstimateForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(
-            company__company_type__name__iexact='mechanical contractor')
-        self.fields['engineer'].queryset = Person.objects.filter(
-            company__company_type__name__iexact='mechanical engineer')
+        self.fields['customer'].queryset = Person.objects.all()
+        self.fields['engineer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
@@ -129,9 +127,8 @@ class EstimateFullForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EstimateFullForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Person.objects.filter(company__company_type__name__iexact='mechanical contractor')
-        self.fields['engineer'].queryset = Person.objects.filter(
-            company__company_type__name__iexact='mechanical engineer')
+        self.fields['customer'].queryset = Person.objects.all()
+        self.fields['engineer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
         self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
@@ -204,7 +201,7 @@ class CustomerForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CustomerForm, self).__init__(*args, **kwargs)
-        self.fields['company'].queryset = ContactInfo.objects.filter(company_type__name__iexact='mechanical contractor')
+        self.fields['company'].queryset = ContactInfo.objects.all()
 
         self.fields['tel'].widget.attrs['placeholder'] = 'XXX-XXX-XXXX'
         self.fields['tel'].widget.attrs['pattern'] = '\d{3}[\-]\d{3}[\-]\d{4}'
@@ -356,7 +353,7 @@ class CompanyCustomerForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(CompanyCustomerForm, self).__init__(*args, **kwargs)
 
-        self.fields['company_type'].queryset = CompanyType.objects.filter(name__iexact='mechanical contractor')
+        self.fields['company_type'].queryset = CompanyType.objects.all()
 
         self.fields['tel'].widget.attrs['placeholder'] = 'XXX-XXX-XXXX'
         self.fields['tel'].widget.attrs['pattern'] = '\d{3}[\-]\d{3}[\-]\d{4}'
