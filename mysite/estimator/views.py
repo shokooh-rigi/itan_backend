@@ -1010,6 +1010,9 @@ def estimate_details(request, estimate_id):
             return redirect('estimatorHome')
         if form.is_valid():
             if request.POST.get("save"):
+                if estimate.quote:
+                    new_history = EstimateHistory(estimate=estimate, total=estimate_total_calculator(estimate.id))
+                    new_history.save()
                 form.cleaned_data['estimate'] = estimate
                 form.cleaned_data['saved_flag'] = True
                 form.save()
