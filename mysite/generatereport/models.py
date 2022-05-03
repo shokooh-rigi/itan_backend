@@ -24,7 +24,7 @@ class ReportSheet(models.Model):
     upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=True, null=True, validators=[validate_file_extension])
     upload_test_sheets = models.FileField(upload_to='uploads/testsheet_reports', blank=True, null=True, validators=[validate_file_extension])
     upload_drawing_pdf = models.FileField(upload_to='uploads/drawing_pdfs', blank=True, null=True, validators=[validate_file_extension])
-    report_type = models.PositiveSmallIntegerField(choices=REPORT_TYPE_CHOICES, default=3)
+    report_type = models.PositiveSmallIntegerField(choices=REPORT_TYPE_CHOICES, default=1)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

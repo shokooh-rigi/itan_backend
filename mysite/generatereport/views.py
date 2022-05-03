@@ -71,8 +71,6 @@ def report_sheet_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 report_sheet = form.save()
-                report_sheet.report_type = request.POST.get("report_type")
-                report_sheet.save()
                 return redirect('reportSheetHome')
     parameters = {
         'form': form,
@@ -82,24 +80,20 @@ def report_sheet_add(request):
 
 
 @login_required
-def report_sheet_edit(request, report_id):
-    form = ReportSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(id__in=ReportSheet.objects.values_list('project_id')).order_by('project_number')
+def report_sheet_edit(request, sheet_id):
+    this_report = get_object_or_404(ReportSheet, id=sheet_id)
+    form = ReportSheetForm(request.POST or None, request.FILES or None, instance=this_report)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('reportSheetHome')
         if form.is_valid():
             if request.POST.get("next"):
                 report_sheet = form.save()
-                if request.POST.get("or-toggle"):
-                    report_sheet.automatic = True
-                    report_sheet.save()
                 return redirect('reportSheetHome')
     parameters = {
         'form': form,
-        'orders': orders,
     }
-    return render(request, "reportSheetAdd.html", parameters)
+    return render(request, "reportSheetEdit.html", parameters)
 
 
 @login_required

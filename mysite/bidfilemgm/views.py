@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import BidFileForm, BidFileEditForm
+from .forms import BidFileForm, BidFileEditForm, Person
 from .models import BidFile
 from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from django.core.files import File
@@ -16,6 +16,7 @@ from io import BytesIO
 from ..s3_file_manager import S3
 import requests
 import os
+from copy import deepcopy
 
 # Create your views here.
 
@@ -195,14 +196,27 @@ def bidfiles_edit(request, bidfiles_id):
 @login_required
 def bidfiles_duplicate(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
-    new_duplicated_record = BidFile(customer=this_bidfile.customer,
-                                    project=this_bidfile.project,
-                                    due_date=this_bidfile.due_date,
-                                    note=this_bidfile.note,
-                                    created_by=this_bidfile.created_by)
-    new_duplicated_record.save()
+    form = BidFileForm(request.POST or None, instance=this_bidfile)
+    form.fields['project'].widget = forms.HiddenInput()
+    form.fields['uploaded_file'].widget = forms.HiddenInput()
+    form.fields['due_date'].widget = forms.HiddenInput()
+    form.fields['note'].widget = forms.HiddenInput()
 
-    return redirect('bidFilesHome')
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('bidFilesHome')
+        if request.POST.get("next"):
+            duplicated_bfm = deepcopy(this_bidfile)
+            duplicated_bfm.id = None
+            duplicated_bfm.uploaded_file = None
+            duplicated_bfm.customer = Person.objects.get(id=request.POST.get("customer"))
+            duplicated_bfm.save()
+            return redirect('bidFilesHome')
+
+    parameters = {
+        'form': form,
+    }
+    return render(request, "bfmDuplicate.html", parameters)
 
 
 @login_required

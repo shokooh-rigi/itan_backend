@@ -3,28 +3,11 @@
 {% load estimator_tags %}
 
 {% block content %}
-    <h2>Generate Report</h2>
+    <h2>Edit Report</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="sheetAdd-form">
         <div class="form-group">
             {% csrf_token %}
-            <div class="row form-line">
-                <div class="col-lg-12">
-                    <label for="id_project" class="control-label">Project <span class="required">*</span></label>
-                    <select name="project" class="form-control" required="" id="id_project" style="transform: translateX(-9px);">
-                        <option value="" selected="" data-projectname="">---------</option>
-                        {% for order in orders %}
-                            <option value="{{ order.id }}" data-projectname="{{ order.proposal.quote.estimate.project.name }}">
-                                {{ order.project_number }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="total_amount" class="control-label">Project Name</label>
-                    <span class="form-control" id="project_name" style="max-width:230px;min-height: 36px; height: auto; background-color: #eee;"></span>
-                </div>
-            </div>
+            {{ form.project.as_hidden }}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_report_date" class="control-label">Report Date <span class="required">*</span></label>
@@ -40,7 +23,11 @@
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_upload_table_of_content" class="control-label">Report Type <span class="required">*</span></label>
-                    {{ form.report_type }}
+                    <select name="report_type" class="custom-select" id="report_type">
+                        <option value="1" selected>Automatic</option>
+                        <option value="2">Manual</option>
+                        <option value="3">Import</option>
+                      </select>
                 </div>
             </div>
             <div id="futoc-row" class="row form-line">

@@ -12,7 +12,8 @@ class ReportSheetForm(ModelForm):
             'last_report_date',
             'upload_table_of_content',
             'upload_test_sheets',
-            'upload_drawing_pdf'
+            'upload_drawing_pdf',
+            'report_type'
         ]
 
     def __init__(self, *args, **kwargs):

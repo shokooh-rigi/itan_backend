@@ -93,6 +93,7 @@
                         <td>
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
                             {% if not sheet.project.projectprocess.report_out %}<a href="{% url 'reportSheetFinalize' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon finalicon" data-toggle="tooltip" data-placement="bottom" title="Finalization"></div></a>{% else %}<div class="icon d-inline-block finalicon disableicon" data-toggle="tooltip" data-placement="bottom" title="Report Out"></div>{% endif %}
+                            <a href="{% url 'reportSheetEdit' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit Report"></div></a>
                             <a href="{% url 'reportSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                         </td>
                     </tr>
