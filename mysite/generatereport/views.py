@@ -511,10 +511,6 @@ def report_sheet_recreate(request, sheet_id):
 
             pages = pages + add_vav_pages_using_air_moving([air_moving_equipments[0]])
 
-
-
-
-
         while len(exhaust_equipments) > 2:
             current_exhaust_equipments = exhaust_equipments[:2]
             exhaust_equipments = exhaust_equipments[2:]
@@ -576,8 +572,6 @@ def report_sheet_recreate(request, sheet_id):
 
             pages = pages + add_vav_pages_using_air_moving([exhaust_equipments[0]])
 
-
-
         if len(indipendent_vav_equipments) > 0:
             toc_line_maker('VAV\'S', 0, 0, False)
             pages = pages + add_independent_vav_pages(indipendent_vav_equipments)
@@ -585,17 +579,6 @@ def report_sheet_recreate(request, sheet_id):
         pages = pages + add_rogue_terminal_pages()
 
         pages = pages + add_pump_pages()
-
-        if report_sheet.project.colored_drawing_finalize:
-            if report_sheet.project.report_colored_drawing:
-                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.report_colored_drawing.file)))
-                drawings = open(response[0], "rb")
-                merger.append(fileobj=drawings)
-            else:
-                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.colored_drawing.file)))
-                drawings = open(response[0], "rb")
-                merger.append(fileobj=drawings)
-
 
         parameters = {
             'report_sheet': report_sheet,
@@ -655,7 +638,7 @@ def report_sheet_recreate(request, sheet_id):
         merger.append(fileobj=toc_pdf)
 
         parameters = {
-            'file_name': ('COVER SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
+            'file_name': ('INSTRUMENT SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
                                                      report_sheet.project.project_number)).upper(),
             'report_sheet': report_sheet,
             'report_stamp': report_stamp,
@@ -681,12 +664,22 @@ def report_sheet_recreate(request, sheet_id):
             'os': system()
         }
 
-        report_pdf = ReportSheet.create_report_pdf(parameters)
-        parameters['report_pdf'] = report_pdf[1]
-        report = open(report_pdf[1], "rb")
-        merger.append(fileobj=report)
+        instrument_pdf = ReportSheet.create_report_pdf(parameters)
+        parameters['instrument_pdf'] = instrument_pdf[1]
+        instrument = open(instrument_pdf[1], "rb")
+        merger.append(fileobj=instrument)
 
         merger.append(fileobj=full_pdf)
+
+        if report_sheet.project.colored_drawing_finalize:
+            if report_sheet.project.report_colored_drawing:
+                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.report_colored_drawing.file)))
+                drawings = open(response[0], "rb")
+                merger.append(fileobj=drawings)
+            else:
+                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.colored_drawing.file)))
+                drawings = open(response[0], "rb")
+                merger.append(fileobj=drawings)
 
     if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report"))
