@@ -55,16 +55,16 @@ class Estimate(models.Model):
 class EstimateHistory(models.Model):
     estimate = models.ForeignKey(Estimate, on_delete=models.CASCADE, blank=False)
     total = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0)], blank=False, null=False)
-    pdf_filename = models.CharField(max_length=50, blank=False, null=False)
+    version = models.IntegerField(blank=False, null=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_on"]
+        ordering = ["created_on"]
         verbose_name = 'Estimate History'
         verbose_name_plural = 'Estimate History'
 
     def __str__(self):
-        return str(self.estimate) + ': History ' + str(self.pdf_filename)
+        return str(self.estimate) + ': History ' + str(self.version)
 
 
 class Quote(models.Model):

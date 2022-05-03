@@ -16,6 +16,10 @@ from ..coi.models import *
 from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
 
 
+def error_handler(request, exception):
+    return render(request, 'error.html')
+
+
 @login_required
 def tech(request):
     return render(request, 'iconbase-tech.html')

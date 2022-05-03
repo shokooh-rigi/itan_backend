@@ -542,6 +542,18 @@ input[type=text][readonly] {
     background-image: url("../images/icons/duplicate.svg");
 }
 
+.icon.finalreporticon {
+    background-image: url("../images/icons/iconset/report-01.svg");
+}
+
+.icon.defreporticon {
+    background-image: url("../images/icons/iconset/report-02.svg");
+}
+
+.icon.prereporticon {
+    background-image: url("../images/icons/iconset/report-03.svg");
+}
+
 .main .pagination {
     text-align: center;
     margin-top: 1em;

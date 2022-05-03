@@ -9,6 +9,7 @@ urlpatterns = [
     path('estimate/add/', views.estimator_add, name='estimatorAdd'),
     path('estimate/edit/<int:estimate_id>/', views.estimator_edit, name='estimatorEdit'),
     path('estimate/add/<int:bfm_id>/', views.estimator_add, name='estimateAddUsingBFM'),
+    path('estimate/history/<int:estimate_id>/', views.estimate_history, name='estimateHistory'),
     path('quote/add/', views.quote_add, name='quoteAdd'),
     path('quote/add/<int:estimate_id>/', views.quote_add, name='quoteAddUsingEstimate'),
     path('proposal/add/', views.proposal_add, name='proposalAdd'),

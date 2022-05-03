@@ -14,6 +14,7 @@ from django.urls import path
 from mysite.core import views as core_views
 from django.contrib.auth import views
 from .core.forms import UserLoginForm
+from django.conf.urls import handler404, handler500
 
 admin.autodiscover()
 admin.site.enable_nav_sidebar = False
@@ -83,3 +84,5 @@ urlpatterns = [
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = core_views.error_handler

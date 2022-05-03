@@ -83,9 +83,13 @@ def estimate_list(request):
     to_date = request.GET.get("toDate", '01/01/2100')
 
     if search:
-        object_list = Estimate.objects.filter(Q(id=search)
-                                              | Q(project__name__icontains=search)
-                                              | Q(customer__company__name__icontains=search)).filter(archive=False)
+        if search.isnumeric():
+            object_list = Estimate.objects.filter(Q(id=search)
+                                                  | Q(project__name__icontains=search)
+                                                  | Q(customer__company__name__icontains=search)).filter(archive=False)
+        else:
+            object_list = Estimate.objects.filter(Q(project__name__icontains=search)
+                                                  | Q(customer__company__name__icontains=search)).filter(archive=False)
     else:
         object_list = Estimate.objects.filter(archive=False)
 
@@ -172,9 +176,13 @@ def quotation_list(request):
         ordering = request.GET.get('ordering')
 
     if search:
-        object_list = Quote.objects.filter(Q(estimate__id=search)
+        if search.isnumeric():
+            object_list = Quote.objects.filter(Q(estimate__id=search)
                                               | Q(estimate__project__name__icontains=search)
                                               | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
+        else:
+            object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
+                                               | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
     else:
         object_list = Quote.objects.filter(archive=False)
 
@@ -259,9 +267,13 @@ def proposal_list(request):
         ordering = request.GET.get('ordering')
 
     if search:
-        object_list = Proposal.objects.filter(Q(quote__estimate__id=search)
-                                              | Q(quote__estimate__project__name__icontains=search)
-                                              | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
+        if search.isnumeric():
+            object_list = Proposal.objects.filter(Q(quote__estimate__id=search)
+                                                  | Q(quote__estimate__project__name__icontains=search)
+                                                  | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
+        else:
+            object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
+                                                  | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
     else:
         object_list = Proposal.objects.filter(archive=False)
 
@@ -510,25 +522,26 @@ def proposal_add(request, quote_id=None):
 @login_required
 def estimate_delete(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
-    if request.method == "POST" and request.user.is_authenticated and this_estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            if this_estimate.bfm:
-                this_estimate.bfm.archive = False
-                this_estimate.bfm.save()
-            this_estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(this_estimate.id, 'E')})
-            this_estimate.delete()
-        return redirect('estimatorHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_estimate': this_estimate,
-                'error_msg': error_msg
-            }
-            return render(request, "estimateDelete.html", parameters)
-        return redirect('estimatorHome')
-    parameters = {'this_estimate': this_estimate
-                  }
+    if request.method == "POST" and request.POST.get("confirm"):
+        if request.user.is_authenticated:
+            if this_estimate.created_by == request.user or request.user.profile.user_type == 2:
+                if this_estimate.bfm:
+                    this_estimate.bfm.archive = False
+                    this_estimate.bfm.save()
+                this_estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(this_estimate.id, 'E')})
+                this_estimate.delete()
+                return redirect('estimatorHome')
+            else:
+                error_msg = "This record was created by another user, you are not authorized to delete this record."
+                parameters = {
+                    'this_estimate': this_estimate,
+                    'error_msg': error_msg
+                }
+                return render(request, "estimateDelete.html", parameters)
+
+    parameters = {
+        'this_estimate': this_estimate
+    }
     return render(request, "estimateDelete.html", parameters)
 
 
@@ -1030,9 +1043,13 @@ def estimate_details(request, estimate_id):
             return redirect('estimatorHome')
         if form.is_valid():
             if request.POST.get("save"):
-                if estimate.quote:
-                    new_history = EstimateHistory(estimate=estimate, total=estimate_total_calculator(estimate.id))
+
+                existing_estimate_history = EstimateHistory.objects.filter(estimate=estimate)
+                if len(Quote.objects.filter(estimate=estimate)) > 0:
+                    new_history = EstimateHistory(estimate=estimate, total=estimate_total_calculator(estimate.id),
+                                                  version=len(existing_estimate_history))
                     new_history.save()
+
                 form.cleaned_data['estimate'] = estimate
                 form.cleaned_data['saved_flag'] = True
                 form.save()
@@ -1098,7 +1115,12 @@ def estimate_bid(request, estimate_id):
     else:
         user_cell = request.user.profile.cell
 
-    parameters = {'file_name': pdf_filename_generator(estimate.id, 'E'),
+    estimate_file_name = pdf_filename_generator(estimate.id, 'E')
+    existing_estimate_history = EstimateHistory.objects.filter(estimate=estimate)
+    if len(Quote.objects.filter(estimate=estimate)) > 0:
+        estimate_file_name = pdf_filename_generator(estimate.id, 'E', len(existing_estimate_history))
+
+    parameters = {'file_name': estimate_file_name,
                   'estimate': estimate,
                   'estimate_equipments_pricing': estimate_equipments_pricing,
                   'estimate_sub': estimate_sub,
@@ -1159,6 +1181,7 @@ def estimate_bid(request, estimate_id):
         change_orders = ChangeOrder.objects.filter(order=estimate.quote.proposal.order)
         parameters['change_orders'] = change_orders
         parameters['total_amount_due'] = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
+        parameters['revision_date'] = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).order_by('-id')[0]
         Invoice.create_invoice_pdf(parameters)
 
         total_invoiced = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
@@ -1170,6 +1193,19 @@ def estimate_bid(request, estimate_id):
     except:
         pass
     return render(request, "estimateBid.html", parameters)
+
+
+@login_required
+def estimate_history(request, estimate_id):
+    estimate_histories = EstimateHistory.objects.filter(estimate__id=estimate_id)
+    estimate = Estimate.objects.get(id=estimate_id)
+    parameters = {
+        'estimate_histories': estimate_histories,
+        'estimate': estimate,
+        'WEB_URL': WEB_URL,
+        'MEDIA_URL': MEDIA_URL,
+    }
+    return render(request, "estimateHistory.html", parameters)
 
 
 def estimate_total_work(estimate_id):

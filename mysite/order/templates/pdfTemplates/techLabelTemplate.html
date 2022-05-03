@@ -54,15 +54,16 @@
                 </tr></tbody></table></div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date|upper }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING INCLUDED: </b>{% if tech_label.detailed_drawing %}DETAIL{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}SCHEDULE{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}MECHANICAL{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><table><tbody><tr>
-                    <td style="width: 30%;"><b>TEST SHEETS: </b></td>
-                    <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
-                    <td style="width: 5%;">YES</td>
-                    <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
-                    <td style="width: 5%;">NO</td>
-                </tr></tbody></table></div>
+{#                <div style="margin: 3px 0 auto;"><table><tbody><tr>#}
+{#                    <td style="width: 30%;"><b>TEST SHEETS: </b></td>#}
+{#                    <td style="width: 10%;"> </td>#}
+{#                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>#}
+{#                    <td style="width: 5%;">YES</td>#}
+{#                    <td style="width: 10%;"> </td>#}
+{#                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>#}
+{#                    <td style="width: 5%;">NO</td>#}
+{#                </tr></tbody></table></div>#}
+                <div style="margin: 3px 0 auto;"><b>REQUIRED SERVICES: </b>{% for estimate_service in tech_label.order.proposal.quote.estimate.service.all %}{{ estimate_service }}{%if not forloop.last%}, {%endif%}{% endfor %}</div>
             </div>
         </div>
         <pdf:nextframe />
@@ -81,6 +82,9 @@
                 </div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
+                {% for extra_field in extra_fields %}
+                    <div style="margin: 3px 0 auto;"><b>{{ extra_field.title }}: </b>{{ extra_field.content }}</div>
+                {% endfor %}
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>TAB DATE: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
@@ -129,15 +133,16 @@
                 </tr></tbody></table></div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date|upper }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING INCLUDED: </b>{% if tech_label.detailed_drawing %}DETAIL{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}SCHEDULE{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}MECHANICAL{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><table><tbody><tr>
-                    <td style="width: 30%;"><b>TEST SHEETS: </b></td>
-                    <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
-                    <td style="width: 5%;">YES</td>
-                    <td style="width: 10%;"> </td>
-                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>
-                    <td style="width: 5%;">NO</td>
-                </tr></tbody></table></div>
+{#                <div style="margin: 3px 0 auto;"><table><tbody><tr>#}
+{#                    <td style="width: 30%;"><b>TEST SHEETS: </b></td>#}
+{#                    <td style="width: 10%;"> </td>#}
+{#                    <td style="width: 5%;">{% if tech_label.tech_test_sheets == 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>#}
+{#                    <td style="width: 5%;">YES</td>#}
+{#                    <td style="width: 10%;"> </td>#}
+{#                    <td style="width: 5%;">{% if tech_label.tech_test_sheets != 0 %}<img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% else %}<img src="{% static 'images/xhtml2pdf/circle2.png' %}" style="width: 16px; height: 16px; display: inline-block;"/>{% endif %}</td>#}
+{#                    <td style="width: 5%;">NO</td>#}
+{#                </tr></tbody></table></div>#}
+                <div style="margin: 3px 0 auto;"><b>REQUIRED SERVICES: </b>{% for estimate_service in tech_label.order.proposal.quote.estimate.service.all %}{{ estimate_service }}{%if not forloop.last%}, {%endif%}{% endfor %}</div>
 
             </div>
         </div>
@@ -157,12 +162,12 @@
                 </div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>SITE POC INFO: </b>{% if tech_label.point_of_contact_name %}{{ tech_label.point_of_contact_name|upper }} {% endif %}{% if tech_label.point_of_contact_cell_phone %}{{ tech_label.point_of_contact_cell_phone }} {% endif %}{% if tech_label.point_of_contact_office_phone %}{{ tech_label.point_of_contact_office_phone }} {% endif %}</div>
+                {% for extra_field in extra_fields %}
+                    <div style="margin: 3px 0 auto;"><b>{{ extra_field.title }}: </b>{{ extra_field.content }}</div>
+                {% endfor %}
                 <div style="margin: 3px 0 auto;"><b>CONTROL SYSTEM: </b>{% if tech_label.order.control_system %}{{ tech_label.order.control_system|upper }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>TAB DATE: </b></div>
                 <div style="margin: 3px 0 auto;"><b>TECH NOTES: </b><div style="padding: 0 10px;">{% if tech_label.tech_notes %}{{ tech_label.tech_notes|upper }}{% endif %}</div></div>
-                {% for extra_field in extra_fields %}
-                    <div style="margin: 3px 0 auto;"><b>{{ extra_field.title }}: </b><div style="padding: 0 10px;">{{ extra_field.content }}</div></div>
-                {% endfor %}
             </div>
         </div>
         {% endif %}

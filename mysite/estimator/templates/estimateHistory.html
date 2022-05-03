@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <h2>Estimate {{ estimate.id }} History</h2>
+    {% if estimate_histories %}
+    <ul class="list-group">
+    {% for estimate_history in estimate_histories %}
+        <li class="list-group-item">
+            Revision Was made on: <b>{{ estimate_history.created_on | date }}</b>
+{#            <br />Estimated Total: <b>${{ estimate_history.total }} </b>#}
+            <br />Download Estimated PDF File: <b><a href="{% get_s3_file_url estimate_history.estimate.id 'estimate' estimate_history.version %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a></b>
+        </li>
+    {%  endfor %}
+    </ul>
+    {% endif %}
+    <script>
+    $(document).ready(function() {
+        $("#customer").text($('#id_order').find(':selected').data('customer'));
+        $("#project").text($('#id_order').find(':selected').data('project'));
+        $("#total_amount").text($('#id_order').find(':selected').data('totalamount'));
+        $('#id_order').on('change', function () {
+            $("#customer").text($(this).find(':selected').data('customer'));
+            $("#project").text($(this).find(':selected').data('project'));
+            $("#total_amount").text($(this).find(':selected').data('totalamount'));
+        });
+    });
+    </script>
+
+    <script>
+        $(function () {
+            $("#id_payment_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+        });
+    </script>
+
+{% endblock %}

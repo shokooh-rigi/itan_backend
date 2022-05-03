@@ -130,42 +130,7 @@ def terminal_sheet_others(request, sheet_id):
                     new_terminal_equipment.save()
                 field = field + 1
             return redirect('terminalSheetEquipmentList', my_sheet.id)
-            # for other_equipment in other_equipments:
-            #     new_code_text = request.POST.get(f'other_code_select_{other_equipment.id}')
-            #     eq_name = request.POST.get(f'other_name_{other_equipment.id}')
-            #     code_result = AirTerminalCode.objects.filter(name=new_code_text, is_custom=True).count()
-            #     if code_result > 0:
-            #         new_code = AirTerminalCode.objects.get(name=new_code_text, is_custom=True)
-            #     else:
-            #         new_code = AirTerminalCode(name=new_code_text, is_custom=True)
-            #         new_code.save()
-            #     AirTerminalEquipment.objects.filter(id=other_equipment.id).update(code=new_code.pk)
-            #     AirTerminalEquipment.objects.filter(id=other_equipment.id).update(equipment_name=eq_name)
-            #     for design_field in design_fields:
-            #         if design_field.field_type == 4:
-            #             if request.POST.get(
-            #                     f'other_company_value_{design_field.id}_{other_equipment.id}'):
-            #                 new_value = True
-            #             else:
-            #                 new_value = False
-            #         else:
-            #             new_value = request.POST.get(
-            #                 f'other_company_value_{design_field.id}_{other_equipment.id}').strip()
-            #
-            #         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
-            #                                                           air_terminal_equipment=other_equipment,
-            #                                                           sheet_field=design_field).count()
-            #
-            #         if num_results > 0:
-            #             AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
-            #                                                 air_terminal_equipment=other_equipment,
-            #                                                 sheet_field=design_field).update(value=new_value)
-            #         else:
-            #             new_object = AirTerminalSheetData(data_type=DataTypeChoices.Design.value,
-            #                                               air_terminal_equipment=other_equipment,
-            #                                               sheet_field=design_field,
-            #                                               value=new_value)
-            #             new_object.save()
+
 
     parameters = {
         'rogue_equipments': rogue_equipments,
@@ -274,6 +239,9 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
         cfm = equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Design.value, sheet_field__field_name__iexact='cfm').value
         if cfm:
             design_total += int(cfm)
+        else:
+            if airOrVav == 1:
+                design_total = equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
         if is_report_pdf:
             if equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value != '':
                 initial_total += int(equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value)
@@ -374,7 +342,6 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 
     pages = []
 
-
     last_air_equipment_id = 0
     value_list = air_sheet_equipments.values_list('air_equipment_id', flat=True).distinct()
     for value in value_list:
@@ -386,13 +353,19 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
             for terminal_type in type_list:
                 group_by_terminal_type[terminal_type] = all_air_equipment_terminals.filter(type=terminal_type)
 
-            all_supply_terminals = group_by_terminal_type[1]
-            all_return_terminals = group_by_terminal_type[2]
-            all_outside_terminals = group_by_terminal_type[3]
-
-            pages = pages + prepare_pdf_pages(all_supply_terminals, 'SUPPLY', 1, is_report_pdf, equipment_in_page)
-            pages = pages + prepare_pdf_pages(all_return_terminals, 'RETURN', 1, is_report_pdf, equipment_in_page)
-            pages = pages + prepare_pdf_pages(all_outside_terminals, 'OUTSIDE', 1, is_report_pdf, equipment_in_page)
+            done_types = []
+            for terminal_type in type_list:
+                if terminal_type not in done_types:
+                    if terminal_type == 1:
+                        pages = pages + prepare_pdf_pages(group_by_terminal_type[1], 'SUPPLY', 1, is_report_pdf,
+                                                          equipment_in_page)
+                    elif terminal_type == 2:
+                        pages = pages + prepare_pdf_pages(group_by_terminal_type[2], 'RETURN', 1, is_report_pdf,
+                                                          equipment_in_page)
+                    elif terminal_type == 3:
+                        pages = pages + prepare_pdf_pages(group_by_terminal_type[3], 'OUTSIDE', 1, is_report_pdf,
+                                                          equipment_in_page)
+                    done_types.append(terminal_type)
 
     last_vav_equipment_id = 0
     value_list = vav_sheet_equipments.values_list('vav_equipment_id', flat=True).distinct()
@@ -1042,41 +1015,6 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                                                               value=new_value)
                             new_object.save()
 
-                for other_equipment in other_equipments:
-                    new_code_text = request.POST.get(f'other_code_select_{other_equipment.id}')
-                    eq_name = request.POST.get(f'other_name_{other_equipment.id}')
-                    code_result = AirTerminalCode.objects.filter(name=new_code_text, is_custom=True).count()
-                    if code_result > 0:
-                        new_code = AirTerminalCode.objects.get(name=new_code_text, is_custom=True)
-                    else:
-                        new_code = AirTerminalCode(name=new_code_text, is_custom=True)
-                        new_code.save()
-                    AirTerminalEquipment.objects.filter(id=other_equipment.id).update(code=new_code.pk)
-                    AirTerminalEquipment.objects.filter(id=other_equipment.id).update(equipment_name=eq_name)
-                    for design_field in design_fields:
-                        if design_field.field_type == 4:
-                            if request.POST.get(
-                                    f'other_company_value_{design_field.id}_{other_equipment.id}'):
-                                new_value = True
-                            else:
-                                new_value = False
-                        else:
-                            new_value = request.POST.get(f'other_company_value_{design_field.id}_{other_equipment.id}').strip()
-
-                        num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
-                                                                          air_terminal_equipment=other_equipment,
-                                                                          sheet_field=design_field).count()
-
-                        if num_results > 0:
-                            AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
-                                                                air_terminal_equipment=other_equipment,
-                                                                sheet_field=design_field).update(value=new_value)
-                        else:
-                            new_object = AirTerminalSheetData(data_type=DataTypeChoices.Design.value,
-                                                              air_terminal_equipment=other_equipment,
-                                                              sheet_field=design_field,
-                                                              value=new_value)
-                            new_object.save()
             this_sheet_equipment.terminal_design_data_entry_completed = True
             this_sheet_equipment.save()
 
@@ -1284,7 +1222,7 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                     for actual_field in actual_fields:
                         if actual_field.field_type == 4:
                             new_value = True if request.POST.get(
-                                f'supply_actual_value_{actual_field.id}_{supply_terminal_equipment.id}') else False
+                                f'return_actual_value_{actual_field.id}_{return_terminal_equipment.id}') else False
                         else:
                             new_value = request.POST.get(
                                 f'return_actual_value_{actual_field.id}_{return_terminal_equipment.id}').strip()
@@ -1334,7 +1272,10 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                             new_value = True if request.POST.get(
                                 f'supply_actual_value_{actual_field.id}_{supply_terminal_equipment.id}') else False
                         else:
-                            new_value = request.POST.get(f'other_actual_value_{actual_field.id}_{other_equipment.id}').strip()
+                            if request.POST.get(f'other_actual_value_{actual_field.id}_{other_equipment.id}'):
+                                new_value = request.POST.get(f'other_actual_value_{actual_field.id}_{other_equipment.id}').strip()
+                            else:
+                                new_value = ''
 
                         num_results = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
                                                                           air_terminal_equipment=other_equipment,

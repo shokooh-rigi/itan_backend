@@ -31,10 +31,14 @@ def url_replace(request, field, value):
 
 
 @register.simple_tag
-def pdf_filename_generator(estimate_id, pdf_type):
+def pdf_filename_generator(estimate_id, pdf_type, version=None):
     estimate = Estimate.objects.get(id=estimate_id)
     longidname = estimate_number_generator(estimate_id)
-    return pdf_type + longidname + '_' + estimate.project.name \
+    estimate_version = ''
+    if version:
+        estimate_version = '_' + str(version)
+    estimate_filename = pdf_type + longidname + '_' + estimate.project.name + estimate_version
+    return estimate_filename \
         .replace(' ', '_') \
         .replace('!', '') \
         .replace('@', '') \
@@ -152,10 +156,10 @@ def random_int(a, b=None):
 
 
 @register.simple_tag
-def get_s3_file_url(key, pdf_type):
+def get_s3_file_url(key, pdf_type, version=None):
     s3 = S3()
     if pdf_type == 'estimate':
-        return s3.get_bucket_object(key='media/pdfs/estimate/' + pdf_filename_generator(key, 'E') + '.pdf')
+        return s3.get_bucket_object(key='media/pdfs/estimate/' + pdf_filename_generator(key, 'E', version) + '.pdf')
     if pdf_type == 'quote':
         return s3.get_bucket_object(key='media/pdfs/quote/' + pdf_filename_generator(key, 'Q') + '.pdf')
     if pdf_type == 'proposal':

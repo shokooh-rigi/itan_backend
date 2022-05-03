@@ -15,5 +15,5 @@ urlpatterns = [
     path('invoice/history/<int:invoice_id>/', views.invoice_history, name='invoiceHistory'),
     path('account_summary/', views.account_summary_list, name='accountSummaryHome'),
     path('account_summary/add/', views.account_summary_add, name='accountSummaryAdd'),
-    path('account_summary/delete/<int:account_summary_id>/', views.accout_summary_delete, name='accountSummaryDelete'),
+    path('account_summary/delete/<int:account_summary_id>/', views.account_summary_delete, name='accountSummaryDelete'),
 ]

@@ -103,7 +103,7 @@ class InvoiceHistory(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_on"]
+        ordering = ["created_on"]
         verbose_name = 'Invoice History'
         verbose_name_plural = 'Invoice History'
 

@@ -8,8 +8,8 @@
     <div class="text-center">
     <h2>REPORT LIST</h2>
 
-        <a href="{% url 'reportSheetAdd' %}"><button type="button" class="btn btn-primary">Generate TAB Report</button></a>
-        <button type="button" class="btn btn-primary" disabled>Generate Deficiency Report</button>
+        <a href="{% url 'reportSheetAdd' %}"><button type="button" class="btn btn-primary">Initiate TAB Report</button></a>
+{#        <button type="button" class="btn btn-primary" disabled>Generate Deficiency Report</button>#}
         <br /><br />
         <div class="row" style="margin: 10px auto; position: relative;">
             <form action="?{% url_replace request 'search' '' %}">
@@ -65,6 +65,7 @@
                     <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
                     <th data-sortable="project__proposal__quote__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
                     <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
+                    <th>Reports</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -77,10 +78,21 @@
                         <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
                         <td>{{ sheet.report_date }}</td>
                         <td>
+                            <div class="">
+                                <button class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon finalreporticon" data-toggle="tooltip" data-placement="bottom" title="Final Report"></div></button>
+                                <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                            </div>
+                            <div class="">
+                                <button disabled class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon defreporticon" data-toggle="tooltip" data-placement="bottom" title="Preliminary Report"></div></button>
+                                <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                            </div>
+                            <div class="">
+                                <button disabled class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon prereporticon" data-toggle="tooltip" data-placement="bottom" title="Deficiency Report"></div></button>
+                                <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                        </td>
+                        <td>
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
-                            <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
-                            <button class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon refreshicon" data-toggle="tooltip" data-placement="bottom" title="Create PDF"></div></button>
-                            {% if not sheet.project.projectprocess.report_out %}<a href="{% url 'reportSheetFinalize' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon finalicon" data-toggle="tooltip" data-placement="bottom" title="Finalization"></div></a>{% else %}<div class="icon d-inline-block finalicon disableicon" data-toggle="tooltip" data-placement="bottom" title="Project Finalized"></div>{% endif %}
+                            {% if not sheet.project.projectprocess.report_out %}<a href="{% url 'reportSheetFinalize' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon finalicon" data-toggle="tooltip" data-placement="bottom" title="Finalization"></div></a>{% else %}<div class="icon d-inline-block finalicon disableicon" data-toggle="tooltip" data-placement="bottom" title="Report Out"></div>{% endif %}
                             <a href="{% url 'reportSheetDelete' sheet_id=sheet.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                         </td>
                     </tr>

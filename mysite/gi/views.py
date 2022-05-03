@@ -276,9 +276,11 @@ def invoice_edit(request, invoice_id):
                 total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                         invoice.id).zfill(3) + '-' + str(total_count)
+
                 parameters = {
                     'file_name': new_file_name,
                     'total_count': total_count,
+                    'revision_date': InvoiceHistory.objects.filter(invoice=invoice).order_by('-id')[0],
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
@@ -336,10 +338,13 @@ def invoice_view(request, invoice_id):
         user_signature = request.user.profile.e_sign
         change_orders = ChangeOrder.objects.filter(order=invoice.order)
         total_amount_due = calculate_total_amount_due(invoice)
+        total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
         parameters = {
             'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
-                invoice.id).zfill(3) + '-1',
+                invoice.id).zfill(3) + '-' + str(total_count),
             'invoice': invoice,
+            'total_count': total_count,
+            'revision_date': InvoiceHistory.objects.filter(invoice=invoice).order_by('-id')[0],
             'change_orders': change_orders,
             'total_amount_due': total_amount_due,
             'estimate': invoice.order.proposal.quote.estimate,
@@ -472,6 +477,7 @@ def invoice_payment(request, invoice_id):
                     'nowww': nowww,
                     'file_name': new_file_name,
                     'total_count': total_count,
+                    'revision_date': InvoiceHistory.objects.filter(invoice=invoice).order_by('-id')[0],
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
@@ -726,7 +732,7 @@ def account_summary_add(request, customer_id=None):
 
 
 @login_required
-def accout_summary_delete(request, account_summary_id):
+def account_summary_delete(request, account_summary_id):
     this_account_summary = get_object_or_404(AccountSummary, id=account_summary_id)
     if request.method == "POST" and request.user.is_authenticated and this_account_summary.created_by == request.user:
         if request.POST.get("confirm"):
