@@ -392,7 +392,6 @@ def report_sheet_recreate(request, sheet_id):
 
         def add_independent_vav_pages(vav_equipments):
             vav_pages = []
-            equipment_in_page = 22
             is_report_pdf = True
 
             my_sheet = DataSheet.objects.get(test_sheet_type__name__iexact='vav', project=report_sheet.project)
@@ -436,13 +435,19 @@ def report_sheet_recreate(request, sheet_id):
 
                 if len(air_terminal_equipments) > 0:
 
-                    air_terminal_pages = prepare_terminal_pages(air_terminal_equipments, 'SUPPLY', 2,
-                                                                   is_report_pdf,
-                                                                   equipment_in_page)
+                    last_vav_equipment_id = 0
+                    value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
+                    for value in value_list:
+                        if last_vav_equipment_id != value:
+                            last_vav_equipment_id = value
+                            all_vav_equipment_terminals = air_terminal_equipments.filter(vav_equipment_id=value)
 
-                    toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 1)
-
-                    vav_pages = vav_pages + air_terminal_pages
+                            if len(all_vav_equipment_terminals) > 0:
+                                air_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
+                                                                            is_report_pdf,
+                                                                            equipment_in_page)
+                                toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 2)
+                                vav_pages = vav_pages + air_terminal_pages
 
             return vav_pages
 
