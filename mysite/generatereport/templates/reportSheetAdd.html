@@ -27,22 +27,24 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_sheet_date" class="control-label">Report Date <span class="required">*</span></label>
+                    <label for="id_report_date" class="control-label">Report Date <span class="required">*</span></label>
                     {{ form.report_date }}
-                </div>
-            </div>
-            <div id="fgnac-row" class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_general_notes_and_comments" class="control-label text-center">General Notes & Comments</label>
-                    {{ form.general_notes_and_comments }}
                 </div>
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <label class="switch-toggle auto_manual m-0" style="width: 60px;">
-                        <input class="or_toggle" type="checkbox" name="or-toggle" />
-                        <span class="slider round"></span>
-                    </label>
+                    <label for="id_report_end_date" class="control-label">Report End Date</label>
+                    {{ form.last_report_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <select name="report_type" class="custom-select" id="report_type">
+                        <option selected>Choose...</option>
+                        <option value="1" selected>Automatic</option>
+                        <option value="2">Manual</option>
+                        <option value="3">Import</option>
+                      </select>
                 </div>
             </div>
             <div id="futoc-row" class="row form-line">
@@ -112,6 +114,11 @@
     <script>
         $(function () {
             $("#id_report_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+            $("#id_last_report_date").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
                 scrollInput: false,

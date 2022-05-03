@@ -71,6 +71,27 @@ def report_sheet_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 report_sheet = form.save()
+                if request.POST.get("report_type"):
+                    report_sheet.automatic = True
+                    report_sheet.save()
+                return redirect('reportSheetHome')
+    parameters = {
+        'form': form,
+        'orders': orders,
+    }
+    return render(request, "reportSheetAdd.html", parameters)
+
+
+@login_required
+def report_sheet_edit(request, report_id):
+    form = ReportSheetForm(request.POST or None, request.FILES or None)
+    orders = Order.objects.exclude(id__in=ReportSheet.objects.values_list('project_id')).order_by('project_number')
+    if request.method == 'POST':
+        if request.POST.get("cancel"):
+            return redirect('reportSheetHome')
+        if form.is_valid():
+            if request.POST.get("next"):
+                report_sheet = form.save()
                 if request.POST.get("or-toggle"):
                     report_sheet.automatic = True
                     report_sheet.save()
@@ -84,6 +105,7 @@ def report_sheet_add(request):
 
 @login_required
 def report_sheet_recreate(request, sheet_id):
+    s3 = S3()
     report_sheet = get_object_or_404(ReportSheet, id=sheet_id)
     license_owner = LicenseInfo.objects.get(key='OwnerName').value
     report_stamp = LicenseFiles.objects.get(key='ReportStamp').value
@@ -133,22 +155,20 @@ def report_sheet_recreate(request, sheet_id):
     cover = open(cover_pdf[1], "rb")
     merger.append(fileobj=cover)
 
-    s3 = S3()
-
-    if report_sheet.automatic:
-        print('1')
-    else:
+    if not report_sheet.automatic:
         response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_table_of_content.file)))
         table_of_content_file = open(response[0], "rb")
         merger.append(fileobj=table_of_content_file)
 
+        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_test_sheets.file)))
+        test_sheets = open(response[0], "rb")
+        merger.append(fileobj=test_sheets)
 
+        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
+        drawings = open(response[0], "rb")
+        merger.append(fileobj=drawings)
 
     if report_sheet.automatic:
-
-
-        sheet_id = Sheet.objects.get(project=report_sheet.project).id
-        parameters = {}
 
         air_moving_equipments = SheetEquipment.objects.filter(sheet__project=report_sheet.project,
                                                               main_data_entry_completed=True,
@@ -574,10 +594,6 @@ def report_sheet_recreate(request, sheet_id):
         pages = pages + add_pump_pages()
 
 
-
-
-
-
         parameters = {
             'report_sheet': report_sheet,
             'form': {
@@ -607,9 +623,6 @@ def report_sheet_recreate(request, sheet_id):
         pdf_name, pdf_path = Render.render_to_file('pdfTemplates/fullTemplate.html', parameters, 'FinalReport')
         full_pdf = open(pdf_path, "rb")
 
-
-
-
         # Append table of content
         parameters = {
             'table_of_content': table_of_content,
@@ -637,8 +650,6 @@ def report_sheet_recreate(request, sheet_id):
         pdf_name, pdf_path = Render.render_to_file('pdfTemplates/tocTemplate.html', parameters, 'TocReport')
         toc_pdf = open(pdf_path, "rb")
         merger.append(fileobj=toc_pdf)
-
-
 
         parameters = {
             'file_name': ('COVER SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
@@ -672,23 +683,9 @@ def report_sheet_recreate(request, sheet_id):
         report = open(report_pdf[1], "rb")
         merger.append(fileobj=report)
 
-
         merger.append(fileobj=full_pdf)
 
-    else:
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_test_sheets.file)))
-        test_sheets = open(response[0], "rb")
-        merger.append(fileobj=test_sheets)
-
-    if report_sheet.automatic:
-        print('drawing')
-    else:
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
-        drawings = open(response[0], "rb")
-        merger.append(fileobj=drawings)
-
-    if not os.path.exists(
-            os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
+    if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report"))
     file_name = ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper() + '.pdf'
     file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report", file_name)
@@ -703,8 +700,8 @@ def report_sheet_recreate(request, sheet_id):
         drawings.close()
     s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
 
-    return JsonResponse({'url':MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                     report_sheet.project.project_number)).upper()}, safe=False)
+    return JsonResponse({'reload': True}, safe=False)
+    # return JsonResponse({'url': MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper()}, safe=False)
 
 
 @login_required
@@ -720,31 +717,6 @@ def report_sheet_finalize(request, sheet_id):
     report_sheet.project.pre_demo_completion_percentage = 100
     report_sheet.project.save()
     return redirect('reportSheetHome')
-
-# @login_required
-# def report_sheet_drawing(request, sheet_id):
-#     form = ReportSheetDrawingForm(request.POST or None, request.FILES or None, initial={'report_sheet': sheet_id})
-#     drawings = ReportDrawing.objects.filter(report_sheet_id=sheet_id).order_by('created_on')
-#     if request.method == 'POST':
-#         if request.POST.get("cancel"):
-#             return redirect('reportSheetHome')
-#         if request.POST.get("reset"):
-#             for drawing in drawings:
-#                 drawing.drawing_file.delete()
-#                 drawing.delete()
-#             return redirect('reportSheetDrawing', sheet_id)
-#         if form.is_valid():
-#             if request.POST.get("add"):
-#                 form.cleaned_data['report_sheet'] = sheet_id
-#                 form.save()
-#                 return redirect('reportSheetDrawing', sheet_id)
-#     parameters = {
-#         'form': form,
-#         'drawings': drawings,
-#         'WEB_URL': WEB_URL,
-#         'MEDIA_URL': MEDIA_URL,
-#     }
-#     return render(request, "reportSheetDrawing.html", parameters)
 
 
 @login_required

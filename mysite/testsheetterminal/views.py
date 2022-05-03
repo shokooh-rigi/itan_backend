@@ -58,7 +58,7 @@ def terminal_sheet_list(request):
 @login_required
 def terminal_sheet_add(request):
     form = TerminalSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.filter(Q(datasheet__datasheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_supply_air_terminal__gt=0) | Q(sheet__sheetequipment__number_of_return_air_terminal__gt=0)).exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='terminal').values_list('project_id')).order_by('-project_number').distinct()
+    orders = Order.objects.exclude(id__in=DataSheet.objects.filter(test_sheet_type__name__icontains='terminal').values_list('project_id')).order_by('-project_number').distinct()
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('terminalSheetHome')
@@ -587,13 +587,7 @@ def equipments_generate_tech_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, False)
     pdf_type = 'terminalEquipmentReport'
     pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTechTemplate.html', parameters, pdf_type)
-    # if os.path.exists(pdf_path):
-    #     with open(pdf_path, 'rb') as fh:
-    #         response = HttpResponse(fh.read(), content_type="application/pdf")
-    #         response['Content-Disposition'] = 'inline; filename=' + pdf_name
-    #         return response
-    # else:
-    #     return 'error'
+
     sending_parameters = {
         'pdf_type': pdf_type,
         'pdf_name': pdf_name,
@@ -606,8 +600,7 @@ def equipments_generate_tech_pdf(request, sheet_id):
 def equipments_generate_report_pdf(request, sheet_id):
     parameters = get_pdf_parameters(sheet_id, True)
     pdf_type = 'terminalEquipmentReport'
-    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTemplate.html', parameters,
-                                                  'terminalEquipmentReport')
+    pdf_name, pdf_path = PDFRender.render_to_file('pdfTemplates/terminalSheetEquipmentTemplate.html', parameters, pdf_type)
 
     sending_parameters = {
         'pdf_type': pdf_type,

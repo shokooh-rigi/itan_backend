@@ -83,12 +83,12 @@
                                 <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                             </div>
                             <div class="">
-                                <button disabled class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon defreporticon" data-toggle="tooltip" data-placement="bottom" title="Preliminary Report"></div></button>
-                                <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon defreporticon" data-toggle="tooltip" data-placement="bottom" title="Preliminary Report"></div></button>
+                                <div class="icon downloadicon d-inline-block" data-toggle="tooltip" data-placement="bottom" title="Download"></div>
                             </div>
                             <div class="">
-                                <button disabled class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon prereporticon" data-toggle="tooltip" data-placement="bottom" title="Deficiency Report"></div></button>
-                                <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon prereporticon" data-toggle="tooltip" data-placement="bottom" title="Deficiency Report"></div></button>
+                                <div class="icon downloadicon d-inline-block" data-toggle="tooltip" data-placement="bottom" title="Download"></div>
                         </td>
                         <td>
 {#                            <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>#}
@@ -167,7 +167,10 @@
             postData('/reportsheet/recreate/' + $(this).attr('data-id') + '/', {}).then(data => {
                 console.log(data);
                 $(this).removeClass('disabled').prop('disabled', false).find('.icon').attr('data-original-title', 'Create PDF');
-                 window.open('/' + data.url + '.pdf');
+                if (data.url)
+                    window.open('/' + data.url + '.pdf');
+                else
+                    location.reload();
             });
         });
 

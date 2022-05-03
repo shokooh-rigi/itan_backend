@@ -6,16 +6,6 @@
         <div class="container">
             <div class="pt-3 d-flex flex-wrap">
                 <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-16.svg" %}" alt="Import/Export" style="height: 117px; display: block;" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Import/Export Data</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
                     <div class="card pt-1"><a href="{% url 'EquipmentsHome' %}">
                         <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
                             <img class="card-img-top" src="{% static "images/icons/iconset/tech-00.svg" %}" alt="Card image" />
@@ -25,16 +15,6 @@
                         </div>
                     </a></div>
                 </div>
-{#                <div class="col col-sm-2">#}
-{#                    <div class="card pt-1"><a href="{% url 'tsSetupHome' %}">#}
-{#                        <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">#}
-{#                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-000.svg" %}" alt="Card image" />#}
-{#                        </div>#}
-{#                        <div class="card-body">#}
-{#                            <h6 class="card-title text-uppercase">Test Sheet Setup</h6>#}
-{#                        </div>#}
-{#                    </a></div>#}
-{#                </div>#}
                 <div class="col col-sm-2">
                     <div class="card pt-1"><a href="{% url 'sheetHome' %}">
                         <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 18px;">
@@ -90,56 +70,6 @@
                     </div>
                 </div>
                 <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-06.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Sound Test</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-07.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Fume Hood Test</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-08.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Vibration Test</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-09.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">IAQ</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                        <div class="col-sm-12 rounded-circle mx-auto d-block">
-                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-10.svg" %}" alt="Card image" />
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-uppercase">Cooling</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col col-sm-2">
                     <div class="card pt-1"><a href="{% url 'velocitySheetHome' %}">
                         <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 10px;">
                             <img class="card-img-top" src="{% static "images/icons/iconset/tech-11.svg" %}" alt="Card image" />
@@ -148,16 +78,6 @@
                             <h6 class="card-title text-uppercase">Velocity Travers</h6>
                         </div>
                     </a></div>
-                </div>
-                <div class="col col-sm-2">
-                    <div class="card pt-1 coming-soon">
-                            <div class="col-sm-12 rounded-circle mx-auto d-block">
-                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-12.svg" %}" alt="Card image" />
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title text-uppercase">Duct Heater</h6>
-                            </div>
-                    </div>
                 </div>
                 <div class="col col-sm-2">
                     <div class="card pt-1">
@@ -272,6 +192,76 @@
                             <h6 class="card-title text-uppercase">Hot Water Boiler</h6>
                         </div>
                     </a></div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-16.svg" %}" alt="Import/Export" style="height: 117px; display: block;" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">Import/Export Data</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-06.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">Sound Test</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-07.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">Fume Hood Test</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-08.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">Vibration Test</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-09.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">IAQ</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                        <div class="col-sm-12 rounded-circle mx-auto d-block">
+                            <img class="card-img-top" src="{% static "images/icons/iconset/tech-10.svg" %}" alt="Card image" />
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase">Cooling</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card pt-1 coming-soon">
+                            <div class="col-sm-12 rounded-circle mx-auto d-block">
+                                <img class="card-img-top" src="{% static "images/icons/iconset/tech-12.svg" %}" alt="Card image" />
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-uppercase">Duct Heater</h6>
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
