@@ -302,27 +302,29 @@ def report_sheet_recreate(request, sheet_id):
                         for terminal_type in type_list:
                             group_by_terminal_type[terminal_type] = all_air_equipment_terminals.filter(type=terminal_type)
 
-                        all_supply_terminals = group_by_terminal_type[1]
-                        all_return_terminals = group_by_terminal_type[2]
-                        all_outside_terminals = group_by_terminal_type[3]
+                        done_types = []
+                        for terminal_type in type_list:
+                            if terminal_type not in done_types:
+                                if terminal_type == 1:
+                                    adding_supply_pages = prepare_terminal_pages(group_by_terminal_type[1], 'SUPPLY', 1,
+                                                                      is_report_pdf,
+                                                                      equipment_in_page)
+                                    terminal_pages = terminal_pages + adding_supply_pages
+                                    number_of_total_pages = number_of_total_pages + len(adding_supply_pages)
+                                elif terminal_type == 2:
+                                    adding_return_pages = prepare_terminal_pages(group_by_terminal_type[2], 'RETURN', 1,
+                                                                                 is_report_pdf,
+                                                                                 equipment_in_page)
+                                    terminal_pages = terminal_pages + adding_return_pages
+                                    number_of_total_pages = number_of_total_pages + len(adding_return_pages)
+                                elif terminal_type == 3:
+                                    adding_outside_pages = prepare_terminal_pages(group_by_terminal_type[3], 'OUTSIDE', 1,
+                                                                                 is_report_pdf,
+                                                                                 equipment_in_page)
+                                    terminal_pages = terminal_pages + adding_outside_pages
+                                    number_of_total_pages = number_of_total_pages + len(adding_outside_pages)
+                                done_types.append(terminal_type)
 
-                        adding_supply_pages = prepare_terminal_pages(all_supply_terminals, 'SUPPLY', 1,
-                                                                     is_report_pdf,
-                                                                     equipment_in_page)
-
-                        adding_return_pages = prepare_terminal_pages(all_return_terminals, 'RETURN', 1,
-                                                                     is_report_pdf,
-                                                                     equipment_in_page)
-
-                        adding_outside_pages = prepare_terminal_pages(all_outside_terminals, 'OUTSIDE', 1,
-                                                                     is_report_pdf,
-                                                                     equipment_in_page)
-
-                        number_of_total_pages = number_of_total_pages + len(adding_supply_pages) + len(adding_return_pages) + len(adding_outside_pages)
-
-                        terminal_pages = terminal_pages + adding_supply_pages
-                        terminal_pages = terminal_pages + adding_return_pages
-                        terminal_pages = terminal_pages + adding_outside_pages
 
             toc_line_maker('AIR TERMINAL TEST SHEET', number_of_total_pages, 1, True)
             return terminal_pages
