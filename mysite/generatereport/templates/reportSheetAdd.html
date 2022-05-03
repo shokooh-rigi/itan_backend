@@ -109,6 +109,17 @@
                     $('#fgnac-row').show();
                 }
             });
+            if ( $('#report_type').val() !== '3' ) {
+                    $('#futoc-row').hide();
+                    $('#futs-row').hide();
+                    $('#fudp-row').hide();
+                    $('#fgnac-row').hide();
+                } else {
+                    $('#futoc-row').show();
+                    $('#futs-row').show();
+                    $('#fudp-row').show();
+                    $('#fgnac-row').show();
+                }
         });
     </script>
     <script>
