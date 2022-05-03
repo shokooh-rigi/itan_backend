@@ -367,7 +367,6 @@ def report_sheet_recreate(request, sheet_id):
                         page['empty_rows'] = range(empty_rows)
                         if page['rows']:
                             vav_pages.append(page)
-                            print(page)
 
                     if len_equipments > 0:
                         toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1)
