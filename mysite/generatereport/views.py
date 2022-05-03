@@ -339,59 +339,60 @@ def report_sheet_recreate(request, sheet_id):
                                                                    design_data_entry_completed=True,
                                                                    actual_data_entry_completed=True)
 
-                my_sheet = DataSheet.objects.get(test_sheet_type__name__iexact='vav', project=report_sheet.project)
+                if len(vav_equipments) > 0:
+                    my_sheet = DataSheet.objects.get(test_sheet_type__name__iexact='vav', project=report_sheet.project)
 
-                equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
-                equipment_in_page = 21
-                last_loop = 0
-                for group in equipment_groups:
-                    group_equipments = vav_equipments.filter(equipment_group=group)
-                    len_equipments = group_equipments.count()
-                    for i in range(math.ceil(len_equipments / equipment_in_page)):
-                        last_loop += 1
-                        empty_rows = 0
-                        page = {
-                            'type': 'VAV',
-                            'system': 'VAVS ' + air_moving_equipment.sheetequipmentcommondata_set.get(
-                                key__column_title__icontains='fan no.').value,
-                            'rows': [],
-                            'notes': [],
-                            'vavp_available': 0,
-                        }
-                        for j in range(equipment_in_page):
-                            index = i * equipment_in_page + j
-                            if index < len_equipments:
-                                page['rows'].append(fetch_vav_equipment_data(group_equipments[index], is_report_pdf))
-                                if group_equipments[index].equipment_type.test_sheet.inheritance:
-                                    page['vavp_available'] = 1
-                            else:
-                                empty_rows += 1
-                        page['empty_rows'] = range(empty_rows)
-                        if page['rows']:
-                            vav_pages.append(page)
+                    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
+                    equipment_in_page = 21
+                    last_loop = 0
+                    for group in equipment_groups:
+                        group_equipments = vav_equipments.filter(equipment_group=group)
+                        len_equipments = group_equipments.count()
+                        for i in range(math.ceil(len_equipments / equipment_in_page)):
+                            last_loop += 1
+                            empty_rows = 0
+                            page = {
+                                'type': 'VAV',
+                                'system': 'VAVS ' + air_moving_equipment.sheetequipmentcommondata_set.get(
+                                    key__column_title__icontains='fan no.').value,
+                                'rows': [],
+                                'notes': [],
+                                'vavp_available': 0,
+                            }
+                            for j in range(equipment_in_page):
+                                index = i * equipment_in_page + j
+                                if index < len_equipments:
+                                    page['rows'].append(fetch_vav_equipment_data(group_equipments[index], is_report_pdf))
+                                    if group_equipments[index].equipment_type.test_sheet.inheritance:
+                                        page['vavp_available'] = 1
+                                else:
+                                    empty_rows += 1
+                            page['empty_rows'] = range(empty_rows)
+                            if page['rows']:
+                                vav_pages.append(page)
 
-                    if len_equipments > 0:
-                        toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1)
+                        if len_equipments > 0:
+                            toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1)
 
-                    air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                                  vav_equipment__terminal_design_data_entry_completed=True,
-                                                                                  vav_equipment__terminal_actual_data_entry_completed=True,
-                                                                                  vav_equipment__in=group_equipments.all()) \
-                        .order_by('air_equipment__field_order', 'vav_equipment_id', 'type', 'outlet_no')
+                        air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
+                                                                                      vav_equipment__terminal_design_data_entry_completed=True,
+                                                                                      vav_equipment__terminal_actual_data_entry_completed=True,
+                                                                                      vav_equipment__in=group_equipments.all()) \
+                            .order_by('air_equipment__field_order', 'vav_equipment_id', 'type', 'outlet_no')
 
-                    last_vav_equipment_id = 0
-                    value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
-                    for value in value_list:
-                        if last_vav_equipment_id != value:
-                            last_vav_equipment_id = value
-                            all_vav_equipment_terminals = air_terminal_equipments.filter(vav_equipment_id=value)
+                        last_vav_equipment_id = 0
+                        value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
+                        for value in value_list:
+                            if last_vav_equipment_id != value:
+                                last_vav_equipment_id = value
+                                all_vav_equipment_terminals = air_terminal_equipments.filter(vav_equipment_id=value)
 
-                            if len(all_vav_equipment_terminals) > 0:
-                                vav_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
-                                                       is_report_pdf,
-                                                       equipment_in_page)
-                                toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2)
-                                vav_pages = vav_pages + vav_terminal_pages
+                                if len(all_vav_equipment_terminals) > 0:
+                                    vav_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
+                                                           is_report_pdf,
+                                                           equipment_in_page)
+                                    toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2)
+                                    vav_pages = vav_pages + vav_terminal_pages
 
             return vav_pages
 
@@ -480,8 +481,7 @@ def report_sheet_recreate(request, sheet_id):
 
             pages = pages + add_velocity([current_air_moving_equipments[0], current_air_moving_equipments[1]])
 
-            pages = pages + add_vav_pages_using_air_moving(
-                [current_air_moving_equipments[0], current_air_moving_equipments[1]])
+            pages = pages + add_vav_pages_using_air_moving([current_air_moving_equipments[0], current_air_moving_equipments[1]])
         if len(air_moving_equipments) == 2:
             pages.append({
                 'type': 'AIRMOVING',
