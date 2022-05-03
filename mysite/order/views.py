@@ -527,7 +527,7 @@ def order_field_drawing(request, order_id):
 @login_required
 def order_general_notes(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
-    form = OrderForm(request.POST or None, request.FILES or None, instance=this_order)
+    form = GeneralNoteForm(request.POST or None, request.FILES or None, instance=this_order)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('orderHome')

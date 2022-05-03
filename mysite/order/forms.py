@@ -37,7 +37,6 @@ class OrderForm(ModelForm):
             'equipment_submittal',
             'colored_drawing',
             'report_colored_drawing',
-            'general_notes_and_comments',
             'field_draw',
             'site_pictures',
             'test_sheets',
@@ -56,6 +55,21 @@ class OrderForm(ModelForm):
         for field in self.fields.values():
             field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
         self.fields['proposal'].widget.attrs['class'] = 'select2'
+
+
+class GeneralNoteForm(ModelForm):
+    class Meta:
+        model = Order
+        fields = [
+            'general_notes_and_comments',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(GeneralNoteForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+        for field in self.fields.values():
+            field.error_messages = {'required': '{fieldname} field is required'.format(fieldname=field.label)}
 
 
 class ChangeOrderForm(ModelForm):
