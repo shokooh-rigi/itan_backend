@@ -64,7 +64,7 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Design C.F.M.' }}
+                    {% if velocity_equipment|get_list:'Design C.F.M.' %}{{ velocity_equipment|get_list:'Design C.F.M.' }}{% else %}N.S.{% endif %}
                 </td>
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                     Actual C.F.M.:
