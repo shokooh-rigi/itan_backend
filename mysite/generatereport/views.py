@@ -434,7 +434,7 @@ def report_sheet_recreate(request, sheet_id):
                     .order_by('air_equipment__field_order', 'air_equipment_id', 'type', 'outlet_no')
 
                 if len(air_terminal_equipments) > 0:
-
+                    total_air_equipment_pages = 0
                     vav_air_terminal_equipment_list = []
                     value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
                     for value in value_list:
@@ -445,9 +445,10 @@ def report_sheet_recreate(request, sheet_id):
                                 air_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
                                                                             is_report_pdf,
                                                                             equipment_in_page)
-                                toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 2)
+                                total_air_equipment_pages = total_air_equipment_pages + len(air_terminal_pages)
                                 vav_pages = vav_pages + air_terminal_pages
                         vav_air_terminal_equipment_list.append(value)
+                    toc_line_maker('AIR TERMINAL TEST SHEET', total_air_equipment_pages, 2)
 
             return vav_pages
 
