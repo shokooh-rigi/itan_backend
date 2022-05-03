@@ -694,7 +694,7 @@ def report_sheet_recreate(request, sheet_id):
         table_of_content_file.close()
         test_sheets.close()
         drawings.close()
-    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
+    # s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
 
     return JsonResponse({'reload': True}, safe=False)
     # return JsonResponse({'url': MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper()}, safe=False)
