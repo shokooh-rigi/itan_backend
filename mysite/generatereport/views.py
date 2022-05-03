@@ -244,6 +244,8 @@ def report_sheet_recreate(request, sheet_id):
                     'system': 'PUMP TEST SHEET',
                     'pump_equipment': pump_equipment_data
                 })
+
+            print(len(pump_equipments))
             if len(pump_equipments) > 0:
                 toc_line_maker('PUMP TEST SHEET', total_pages, 0)
 
