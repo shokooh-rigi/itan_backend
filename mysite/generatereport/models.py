@@ -10,6 +10,12 @@ from tinymce.models import HTMLField
 from .validators import validate_file_extension, validate_img_extension
 from .render import Render
 
+REPORT_TYPE_CHOICES = (
+        (1, 'Automatic'),
+        (2, 'Manual'),
+        (3, 'Import'),
+    )
+
 
 class ReportSheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
@@ -18,7 +24,7 @@ class ReportSheet(models.Model):
     upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=True, null=True, validators=[validate_file_extension])
     upload_test_sheets = models.FileField(upload_to='uploads/testsheet_reports', blank=True, null=True, validators=[validate_file_extension])
     upload_drawing_pdf = models.FileField(upload_to='uploads/drawing_pdfs', blank=True, null=True, validators=[validate_file_extension])
-    automatic = models.BooleanField(default=False)
+    report_type = models.PositiveSmallIntegerField(choices=REPORT_TYPE_CHOICES, default=3)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

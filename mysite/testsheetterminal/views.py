@@ -376,6 +376,21 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
 
             pages = pages + prepare_pdf_pages(all_supply_terminals, 'SUPPLY', 2, is_report_pdf, equipment_in_page)
 
+    air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet,
+                                                                  air_equipment__isnull=True,
+                                                                  vav_equipment__isnull=True,
+                                                                  type=4).order_by('type', 'other_group', 'outlet_no')
+    last_air_equipment_group = 0
+    value_list = air_terminal_equipments.values_list('other_group', flat=True).distinct()
+
+    for value in value_list:
+        if last_air_equipment_group != value:
+            last_air_equipment_group = value
+            all_air_equipment_terminals = air_terminal_equipments.filter(other_group=value)
+
+            if len(all_air_equipment_terminals) > 0:
+                pages = pages + prepare_pdf_pages(all_air_equipment_terminals, 'OTHER', 0, is_report_pdf, equipment_in_page)
+
 
     # for air_equipment in air_sheet_equipments:
     #     if air_equipment.air_equipment.id != last_air_equipment or air_equipment.type != last_air_equipment_type:

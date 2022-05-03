@@ -71,9 +71,8 @@ def report_sheet_add(request):
         if form.is_valid():
             if request.POST.get("next"):
                 report_sheet = form.save()
-                if request.POST.get("report_type"):
-                    report_sheet.automatic = True
-                    report_sheet.save()
+                report_sheet.report_type = request.POST.get("report_type")
+                report_sheet.save()
                 return redirect('reportSheetHome')
     parameters = {
         'form': form,

@@ -35,7 +35,7 @@
 $("#edit_person").click(function(){
 	person_id = $("#id_customer option:selected").val();
 	if(person_id != '') {
-        var url = "/custromer_person/" + person_id + "/edit/";
+        var url = "/customer_person/" + person_id + "/edit/";
 	    showEditPopup(url);
     }
 	else {
