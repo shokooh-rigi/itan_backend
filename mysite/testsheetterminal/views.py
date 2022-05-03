@@ -554,10 +554,10 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     company_name = LicenseInfo.objects.get(key='CompanyName').value
 
     return {
-        # 'form': {
-        #     'my_sheet': my_sheet,
-        #     'data': data,
-        # },
+        'form': {
+            'my_sheet': my_sheet,
+            # 'data': data,
+        },
         'pages': pages,
         'file_name': 'Air Terminal Test Sheet {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
                                                           my_sheet.project.project_number,
