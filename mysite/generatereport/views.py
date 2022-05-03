@@ -586,9 +586,15 @@ def report_sheet_recreate(request, sheet_id):
 
         pages = pages + add_pump_pages()
 
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
-        drawings = open(response[0], "rb")
-        merger.append(fileobj=drawings)
+        if report_sheet.project.colored_drawing_finalize:
+            if report_sheet.project.report_colored_drawing:
+                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.report_colored_drawing.file)))
+                drawings = open(response[0], "rb")
+                merger.append(fileobj=drawings)
+            else:
+                response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.colored_drawing.file)))
+                drawings = open(response[0], "rb")
+                merger.append(fileobj=drawings)
 
 
         parameters = {
