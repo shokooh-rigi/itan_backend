@@ -589,7 +589,7 @@ def report_sheet_recreate(request, sheet_id):
 
         pages = pages + add_pump_pages()
 
-        toc_line_maker('MECHANICAL PLAN', 1, 0)
+        toc_line_maker('AS BUILT MECHANICAL PLAN', 1, 0)
 
         parameters = {
             'report_sheet': report_sheet,
