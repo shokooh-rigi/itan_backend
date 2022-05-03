@@ -109,7 +109,7 @@
 
             <!-- Data rows -->
             {% for row in page.rows %}
-                <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">
+                <tr class="pdf-table-row section-middle-row">
                     <td class="pdf-table-cell">
                         &nbsp;{{ row.actual.address }}
                     </td>
@@ -318,7 +318,7 @@
             <!-- VAVP Data rows -->
             {% for row in page.rows %}
                 {% if row.vavp %}
-                <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">
+                <tr class="pdf-table-row section-middle-row">
                     <td class="pdf-table-cell">
                         &nbsp;{{ row.actual.address }}
                     </td>
