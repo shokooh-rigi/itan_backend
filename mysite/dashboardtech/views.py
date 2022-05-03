@@ -315,7 +315,7 @@ def schedule_list(request):
 
 @login_required
 def update_note(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         if request.POST.get('schedule_id'):
             schedule_id = request.POST.get('schedule_id')
             note = request.POST.get('note_text')
@@ -349,7 +349,7 @@ def update_note(request):
 
 @login_required
 def upload_tech(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         if request.POST.get('schedule_id'):
             schedule_id = request.POST.get('schedule_id')
             if request.user.profile.status == 1:

@@ -219,7 +219,7 @@ def sort_equipments_list(request, sheet_id):
 
 @login_required
 def update_sheet_equipments_positioning(request, sheet_id):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         sheet_equipments_array = request.POST.getlist('sheetEquipmentsArray[]')
         sheet_equipments = SheetEquipment.objects.filter(sheet=sheet_id)
         i = 1

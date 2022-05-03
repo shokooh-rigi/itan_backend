@@ -772,7 +772,7 @@ def company_engineer_edit_popup(request, pk=None):
 @login_required
 @csrf_exempt
 def get_company_id(request):
-    if request.is_ajax():
+    if request.accepts():
         company_name = request.GET['company_name']
         company_id = ContactInfo.objects.get(name=company_name).id
         data = {'company_id': company_id, }
@@ -858,7 +858,7 @@ def manufacturer_person_edit_popup(request, pk=None):
 @login_required
 @csrf_exempt
 def get_person_id(request):
-    if request.is_ajax():
+    if request.accepts():
         person_id = request.GET['person_id']
         person_id = Person.objects.get(name=person_id).id
         data = {'person_id': person_id, }
@@ -919,7 +919,7 @@ def engineer_edit_popup(request, pk=None):
 @login_required
 @csrf_exempt
 def get_engineer_id(request):
-    if request.is_ajax():
+    if request.accepts():
         engineer_id = request.GET['engineer_id']
         engineer_id = Person.objects.get(name=engineer_id).id
         data = {'person_id': engineer_id, }
@@ -930,7 +930,7 @@ def get_engineer_id(request):
 @login_required
 @csrf_exempt
 def get_project_id(request):
-    if request.is_ajax():
+    if request.accepts():
         project_name = request.GET['project_name']
         project_id = Project.objects.get(name=project_name).id
         data = {'project_id': project_id, }

@@ -395,7 +395,7 @@ def schedule_tech_list(request):
 
 @login_required
 def create_schedule(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         if request.POST.get('maintenance'):
             current_user = request.user
             schedule_date_start = request.POST.get('schedule_start')
@@ -442,7 +442,7 @@ def create_schedule(request):
 
 @login_required
 def update_schedule(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         update_type = request.POST.get('type')
         order_id = request.POST.get('org_order_id')
         schedule_id = request.POST.get('schedule_id')
@@ -696,7 +696,7 @@ def update_schedule(request):
 
 @login_required
 def update_maintenance(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         update_type = request.POST.get('type')
         order_id = request.POST.get('org_order_id')
         maintenance_id = request.POST.get('maintenance_id')
@@ -882,7 +882,7 @@ def update_maintenance(request):
 
 @login_required
 def get_schedule_info(request, schedule_id):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         this_schedule = Schedule.objects.get(id=schedule_id)
         techs_array = []
         schedule_techs = ScheduleTech.objects.filter(schedule=this_schedule)
@@ -927,7 +927,7 @@ def get_schedule_info(request, schedule_id):
 
 @login_required
 def get_maintenance_info(request, maintenance_id):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         this_maintenance = Maintenance.objects.get(id=maintenance_id)
         techs_array = []
         if this_maintenance.assigned_to_employee:
