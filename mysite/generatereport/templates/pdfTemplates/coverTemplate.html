@@ -97,7 +97,7 @@
                 </tr>
                 <tr style="border-top-color: white;">
                     <td colspan="2">DATE: <span
-                            style="text-decoration: underline;">{% if report_sheet.last_report_date %}{{ report_sheet.report_date|date:'M d, Y' }}{% else %}{{ report_sheet.report_date|date:'M d, Y' }}{% endif %}</span></td>
+                            style="text-decoration: underline;">{% if report_sheet.last_report_date %}{{ report_sheet.last_report_date|date:'F d, Y'|upper }}{% else %}{{ report_sheet.report_date|date:'F d, Y'|upper }}{% endif %}</span></td>
                 </tr>
                 </tbody>
             </table>
