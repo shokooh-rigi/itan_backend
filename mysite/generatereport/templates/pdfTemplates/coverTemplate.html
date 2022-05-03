@@ -49,8 +49,8 @@
             <tr class="pdf-table-title" style="padding: 3px 0;">
                 <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Architect:</td>
                 <td class="pdf-table-title-td pdf-page-number" colspan="7">
-                    {% if report_sheet.project.architect_name %}{{ report_sheet.project.architect_name|upper }}{% else %}
-                        N.S.{% endif %} </td>
+                    {% if report_sheet.project.architect_name %}{{ report_sheet.project.architect_name.company.name|upper }}{% else %}N.S.{% endif %}
+                </td>
             </tr>
             <tr class="pdf-table-title" style="padding: 3px 0;">
                 <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Engineer:</td>
