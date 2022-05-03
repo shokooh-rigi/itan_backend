@@ -148,7 +148,7 @@ def report_sheet_recreate(request, sheet_id):
     cover = open(cover_pdf[1], "rb")
     merger.append(fileobj=cover)
 
-    if not report_sheet.automatic:
+    if not report_sheet.report_type == 1:
         response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_table_of_content.file)))
         table_of_content_file = open(response[0], "rb")
         merger.append(fileobj=table_of_content_file)
@@ -161,7 +161,7 @@ def report_sheet_recreate(request, sheet_id):
         drawings = open(response[0], "rb")
         merger.append(fileobj=drawings)
 
-    if report_sheet.automatic:
+    if report_sheet.report_type == 1:
 
         air_moving_equipments = SheetEquipment.objects.filter(sheet__project=report_sheet.project,
                                                               main_data_entry_completed=True,
@@ -691,7 +691,7 @@ def report_sheet_recreate(request, sheet_id):
     merger.write(output)
     output.close()
     cover.close()
-    if not report_sheet.automatic:
+    if not report_sheet.report_type == 1:
         table_of_content_file.close()
         test_sheets.close()
         drawings.close()
