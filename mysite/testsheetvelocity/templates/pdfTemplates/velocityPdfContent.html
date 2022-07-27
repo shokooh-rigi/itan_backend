@@ -26,7 +26,7 @@
                 </td>
                 <td class="pdf-table-cell pdf-table-title-cell" colspan="2">DATE:</td>
                 <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
-                    &nbsp;{% if report_sheet %}{{ report_sheet.report_date | date }}{% else %}{{ form.my_sheet.sheet_date | date }}{% endif %}{% if report_sheet.last_report_date %} - {{ report_sheet.last_report_date | date }}{% endif %}
+                    &nbsp;{% if report_sheet %}{{ report_sheet.report_date|date:'m/d/Y' }}{% else %}{{ form.my_sheet.sheet_date|date:'m/d/Y' }}{% endif %}{% if report_sheet.last_report_date %} - {{ report_sheet.last_report_date|date:'m/d/Y' }}{% endif %}
                 </td>
             </tr>
             <tr class="pdf-table-project-tr">

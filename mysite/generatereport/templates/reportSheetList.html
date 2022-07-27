@@ -77,17 +77,17 @@
                         <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
                         <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
                         <td>{{ sheet.report_date }}</td>
-                        <td>
+                        <td style="width: 100px;">
                             <div class="">
-                                <button class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon finalreporticon" data-toggle="tooltip" data-placement="bottom" title="Final Report"></div></button>
+                                <button class="send-regenerate-request btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px; padding: 5px"><div class="icon finalreporticon" data-toggle="tooltip" data-placement="bottom" title="Final Report"></div></button>
                                 <a href="{% get_s3_file_url sheet 'report' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
                             </div>
                             <div class="">
-                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon defreporticon" data-toggle="tooltip" data-placement="bottom" title="Preliminary Report"></div></button>
+                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px; padding: 5px;"><div class="icon defreporticon" data-toggle="tooltip" data-placement="bottom" title="Preliminary Report"></div></button>
                                 <div class="icon downloadicon d-inline-block" data-toggle="tooltip" data-placement="bottom" title="Download"></div>
                             </div>
                             <div class="">
-                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon prereporticon" data-toggle="tooltip" data-placement="bottom" title="Deficiency Report"></div></button>
+                                <button disabled class="btn" data-id="{{ sheet.id }}" style="display: inline-block; margin-left: 5px; padding: 5px;"><div class="icon prereporticon" data-toggle="tooltip" data-placement="bottom" title="Deficiency Report"></div></button>
                                 <div class="icon downloadicon d-inline-block" data-toggle="tooltip" data-placement="bottom" title="Download"></div>
                         </td>
                         <td>

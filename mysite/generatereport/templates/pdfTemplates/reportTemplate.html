@@ -25,8 +25,8 @@
                 </tr>
             </thead>
         </table>
-        <div style="text-align: center; font-size: 17pt; padding: 0;">
-            <span style="font-weight: bold;">INSTRUMENTATION</span><br />
+        <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="cambria" style="font-weight: bold;">INSTRUMENTATION</span><br />
             <span style="font-size: 13pt;">AIR BALANCE</span><br />
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
             <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
@@ -34,7 +34,7 @@
         <div style="text-align: center;"><img src="{% get_s3_file_url instruction_image '' %}" style="height: 620px; width: 530pt;" /></div>
     </div>
     <pdf:nextpage/>
-    <div class="content pdf-page-content">
+    <div class="content pdf-page-content calibri">
         <table class="table" style="font-size: 14pt;">
             <!-- Table head section -->
             <thead>
@@ -45,13 +45,17 @@
             </thead>
         </table>
         <div style="text-align: center; font-size: 17pt; padding: 0;">
-            <span style="font-weight: bold;">GENERAL NOTES AND COMMENTS</span><br />
+            <span class="calbria" style="font-weight: bold;">GENERAL NOTES AND COMMENTS</span><br />
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
         <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
         </div>
         <br />
         <div style="font-size: 13pt;">
-            {{ report_sheet.project.general_notes_and_comments.html|safe }}
+            {% if report_sheet.project.general_notes_and_comments.html != '' %}
+                {{ report_sheet.project.general_notes_and_comments.html|safe }}
+            {% else %}
+                The systems described here in this report are operating per design intent.
+            {% endif %}
         </div>
     </div>
     <pdf:nextpage/>
@@ -65,8 +69,8 @@
                 </tr>
             </thead>
         </table>
-        <div style="text-align: center; font-size: 17pt; padding: 0;">
-            <span style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
+        <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="cambria" style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}<br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
         </div>
         <div style="text-align: center;"><img src="{% get_s3_file_url abbreviation_image '' %}" style="height: 540pt; width: 530pt;" /></div>

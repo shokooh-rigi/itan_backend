@@ -20,18 +20,31 @@
 
             {% if os != "Windows" %}
             @font-face {
-                font-family: customfont;
+                font-family: cambria;
                 font-weight: normal;
                 src: url({% static 'fonts/cambria.ttf' %});
             }
             @font-face {
-                font-family: customfont;
+                font-family: cambria;
                 font-weight: bold;
                 src: url({% static 'fonts/cambriab.ttf' %});
             }
+            @font-face {
+                font-family: calibri;
+                font-weight: normal;
+                src: url({% static 'fonts/Calibri.ttf' %});
+            }
 
             body {
-                font-family: customfont;
+                font-family: cambria;
+            }
+
+            .cambria {
+                font-family: cambria;
+            }
+
+            .calibri {
+                font-family: calibri;
             }
             {% endif %}
 

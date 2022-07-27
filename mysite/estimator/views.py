@@ -596,10 +596,21 @@ def proposal_delete(request, proposal_id):
 @login_required
 def estimate_archive(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
-    if request.method == "POST" and request.user.is_authenticated and this_estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_estimate.archive = True
-            this_estimate.save()
+    if request.method == "POST" and request.POST.get("confirm"):
+        if request.user.is_authenticated:
+            if this_estimate.created_by == request.user or request.user.profile.user_type == 2:
+                if this_estimate.bfm:
+                    this_estimate.bfm.archive = False
+                    this_estimate.bfm.save()
+                this_estimate.archive = True
+                this_estimate.save()
+            else:
+                error_msg = "This record was created by another user, you are not authorized to delete this record."
+                parameters = {
+                    'this_estimate': this_estimate,
+                    'error_msg': error_msg
+                }
+                return render(request, "estimateDelete.html", parameters)
         return redirect('estimatorHome')
     elif request.method == "POST" and request.user.is_authenticated and this_estimate.created_by != request.user:
         if request.POST.get("confirm"):
@@ -610,8 +621,9 @@ def estimate_archive(request, estimate_id):
             }
             return render(request, "estimateArchive.html", parameters)
         return redirect('estimatorHome')
-    parameters = {'this_estimate': this_estimate
-                  }
+    parameters = {
+        'this_estimate': this_estimate
+    }
     return render(request, "estimateArchive.html", parameters)
 
 

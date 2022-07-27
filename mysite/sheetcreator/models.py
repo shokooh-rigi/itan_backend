@@ -43,7 +43,7 @@ class SheetEquipment(models.Model):
     number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     number_of_return_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     number_of_outside_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
-    number_of_any_other = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_exhaust_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)

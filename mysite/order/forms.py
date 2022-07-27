@@ -20,7 +20,6 @@ class ArchitectWidget(s2forms.ModelSelect2Widget):
 
 class OrderForm(ModelForm):
     equipment_submittal = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
-    colored_drawing = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     site_pictures = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     test_sheets = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
     class Meta:

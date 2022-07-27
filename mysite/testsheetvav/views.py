@@ -156,6 +156,7 @@ def vav_sheet_equipment_list(request, sheet_id):
     return render(request, "vavSheetEquipmentsList.html", parameters)
 
 
+# View SORT EQUIPMENTS Page
 @login_required
 def sort_vav_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
@@ -193,6 +194,7 @@ def sort_vav_sheet_equipment_list(request, sheet_id):
     return render(request, "sortVavSheetEquipmentsList.html", parameters)
 
 
+# Handle AJAX Request for updating Equipments Positions
 @login_required
 def update_sheet_equipments_positioning(request, sheet_id):
     if request.method == "POST":
@@ -213,6 +215,8 @@ def update_sheet_equipments_positioning(request, sheet_id):
         return JsonResponse(status, safe=False)
 
 
+# Create arrays of data for an equiment
+@login_required
 def fetch_sheet_equipment_data(this_sheet_equipment: DataSheetEquipment, is_report_pdf: bool):
     general_fields = TestSheetColumn.objects.filter(test_sheet__name__iexact='vav')
     general_data = TestSheetGeneralData.objects.filter(sheet_equipment=this_sheet_equipment)

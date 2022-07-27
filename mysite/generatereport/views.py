@@ -48,23 +48,24 @@ def report_sheet_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = ReportSheet.objects.all()
+    object_list = ReportSheet.objects.filter(project__project_number__icontains=search).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     sheets = paginator.get_page(page)
 
-    parameters = {'sheets': sheets,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  }
+    parameters = {
+        'sheets': sheets,
+        'WEB_URL': WEB_URL,
+        'MEDIA_URL': MEDIA_URL,
+    }
     return render(request, "reportSheetList.html", parameters)
 
 
 @login_required
 def report_sheet_add(request):
     form = ReportSheetForm(request.POST or None, request.FILES or None)
-    orders = Order.objects.exclude(id__in=ReportSheet.objects.values_list('project_id')).order_by('project_number')
+    orders = Order.objects.exclude(id__in=ReportSheet.objects.values_list('project_id')).order_by('-project_number')
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('reportSheetHome')
@@ -183,20 +184,23 @@ def report_sheet_recreate(request, sheet_id):
         request.session['continues'] = 0
         table_of_content = []
 
-        def toc_line_maker(title, number_of_pages, level, show_page_number=True):
+        def toc_line_maker(title, number_of_pages, level, show_page_number=True, underline=False):
             if show_page_number:
                 request.session['toc_counter'] = request.session.get('toc_counter') + 1
                 table_of_content.append({
                     'name': title,
-                    'pages': str(request.session['toc_counter']) + ('-' + str(request.session['toc_counter']+number_of_pages+request.session['continues']-1)) if number_of_pages+request.session['continues'] > 1 else str(request.session['toc_counter']),
-                    'level': level
+                    # 'pages': str(request.session['toc_counter']) + ('-' + str(request.session['toc_counter']+number_of_pages+request.session['continues']-1)) if number_of_pages+request.session['continues'] > 1 else str(request.session['toc_counter']),
+                    'pages': str(request.session['toc_counter']),
+                    'level': level,
+                    'underline': underline
                 })
                 request.session['toc_counter'] = request.session.get('toc_counter') + number_of_pages - 1
             else:
                 table_of_content.append({
                     'name': title,
                     'pages': '',
-                    'level': level
+                    'level': level,
+                    'underline': underline
                 })
             request.session['continues'] = 0
 
@@ -227,7 +231,8 @@ def report_sheet_recreate(request, sheet_id):
                         'max_col': range(14),
                     })
 
-            toc_line_maker('VELOCITY TRAVERSE TEST SHEET', number_of_total_pages, 1)
+            if number_of_total_pages > 0:
+                toc_line_maker('VELOCITY TRAVERSE TEST SHEET', number_of_total_pages, 1, True, False)
 
             return velocity_pages
 
@@ -247,7 +252,7 @@ def report_sheet_recreate(request, sheet_id):
 
             print(len(pump_equipments))
             if len(pump_equipments) > 0:
-                toc_line_maker('PUMP TEST SHEET', total_pages, 0)
+                toc_line_maker('PUMP TEST SHEET', total_pages, 0, True, False)
 
             return pump_pages
 
@@ -273,8 +278,8 @@ def report_sheet_recreate(request, sheet_id):
                         terminal_pdf_pages = prepare_terminal_pages(all_air_equipment_terminals, 'OTHER', 0,
                                                                              is_report_pdf,
                                                                              equipment_in_page)
-                        toc_line_maker(all_air_equipment_terminals[0].equipment_name, 0, 0, False)
-                        toc_line_maker('AIR TERMINAL TEST SHEET', len(terminal_pdf_pages), 1)
+                        toc_line_maker(all_air_equipment_terminals[0].equipment_name, 0, 0, False, True)
+                        toc_line_maker('AIR TERMINAL TEST SHEET', len(terminal_pdf_pages), 1, True, False)
                         terminal_pages = terminal_pages + terminal_pdf_pages
 
             return terminal_pages
@@ -326,7 +331,7 @@ def report_sheet_recreate(request, sheet_id):
                                 done_types.append(terminal_type)
 
 
-            toc_line_maker('AIR TERMINAL TEST SHEET', number_of_total_pages, 1, True)
+            toc_line_maker('AIR TERMINAL TEST SHEET', number_of_total_pages, 1, True, False)
             return terminal_pages
 
         def add_vav_pages_using_air_moving(air_moving_equipments):
@@ -372,7 +377,7 @@ def report_sheet_recreate(request, sheet_id):
                                 vav_pages.append(page)
 
                         if len_equipments > 0:
-                            toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1)
+                            toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1, True, False)
 
                         air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
                                                                                       vav_equipment__terminal_design_data_entry_completed=True,
@@ -391,7 +396,7 @@ def report_sheet_recreate(request, sheet_id):
                                     vav_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
                                                            is_report_pdf,
                                                            equipment_in_page)
-                                    toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2)
+                                    toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2, True, False)
                                     vav_pages = vav_pages + vav_terminal_pages
 
             return vav_pages
@@ -431,13 +436,13 @@ def report_sheet_recreate(request, sheet_id):
                         vav_pages.append(page)
 
                 if len_equipments > 0:
-                    toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1)
+                    toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1, True, False)
 
                 air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
                                                                               vav_equipment__terminal_design_data_entry_completed=True,
                                                                               vav_equipment__terminal_actual_data_entry_completed=True,
                                                                               vav_equipment__in=group_equipments.all()) \
-                    .order_by('air_equipment__field_order', 'air_equipment_id', 'type', 'outlet_no')
+                    .order_by('vav_equipment__field_order', 'vav_equipment_id', 'type', 'outlet_no')
 
                 if len(air_terminal_equipments) > 0:
                     total_air_equipment_pages = 0
@@ -454,7 +459,7 @@ def report_sheet_recreate(request, sheet_id):
                                 total_air_equipment_pages = total_air_equipment_pages + len(air_terminal_pages)
                                 vav_pages = vav_pages + air_terminal_pages
                         vav_air_terminal_equipment_list.append(value)
-                    toc_line_maker('AIR TERMINAL TEST SHEET', total_air_equipment_pages, 2)
+                    toc_line_maker('AIR TERMINAL TEST SHEET', total_air_equipment_pages, 2, True, False)
 
             return vav_pages
 
@@ -474,8 +479,8 @@ def report_sheet_recreate(request, sheet_id):
             toc_line_maker(current_air_moving_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + current_air_moving_equipments[
                                1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving(
                 [current_air_moving_equipments[0], current_air_moving_equipments[1]])
 
@@ -496,8 +501,8 @@ def report_sheet_recreate(request, sheet_id):
             toc_line_maker(air_moving_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + air_moving_equipments[
                                1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([air_moving_equipments[0], air_moving_equipments[1]])
 
             pages = pages + add_velocity([air_moving_equipments[0], air_moving_equipments[1]])
@@ -514,8 +519,8 @@ def report_sheet_recreate(request, sheet_id):
             })
             toc_line_maker(air_moving_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([air_moving_equipments[0]])
 
             pages = pages + add_velocity([air_moving_equipments[0]])
@@ -536,8 +541,8 @@ def report_sheet_recreate(request, sheet_id):
             toc_line_maker(current_exhaust_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + current_exhaust_equipments[
                                1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([current_exhaust_equipments[0], current_exhaust_equipments[1]])
 
             pages = pages + add_velocity([current_exhaust_equipments[0], current_exhaust_equipments[1]])
@@ -557,8 +562,8 @@ def report_sheet_recreate(request, sheet_id):
             toc_line_maker(exhaust_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + exhaust_equipments[
                                1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([exhaust_equipments[0], exhaust_equipments[1]])
 
             pages = pages + add_velocity([exhaust_equipments[0], exhaust_equipments[1]])
@@ -575,8 +580,8 @@ def report_sheet_recreate(request, sheet_id):
             })
             toc_line_maker(exhaust_equipments[0].sheetequipmentcommondata_set.get(
                 key__column_title__icontains='fan no.').value,
-                           0, 0, False)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1)
+                           0, 0, False, True)
+            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([exhaust_equipments[0]])
 
             pages = pages + add_velocity([exhaust_equipments[0]])
@@ -584,14 +589,16 @@ def report_sheet_recreate(request, sheet_id):
             pages = pages + add_vav_pages_using_air_moving([exhaust_equipments[0]])
 
         if len(indipendent_vav_equipments) > 0:
-            toc_line_maker('VAV\'S', 0, 0, False)
+            toc_line_maker('VAV\'S', 0, 0, False, True)
             pages = pages + add_independent_vav_pages(indipendent_vav_equipments)
 
         pages = pages + add_rogue_terminal_pages()
 
         pages = pages + add_pump_pages()
 
-        toc_line_maker('AS BUILT MECHANICAL PLAN', 1, 0)
+        if report_sheet.project.colored_drawing_finalize:
+            if report_sheet.project.colored_drawing or report_sheet.project.report_colored_drawing:
+                toc_line_maker('AS BUILT MECHANICAL PLAN', 1, 0, True, False)
 
         parameters = {
             'report_sheet': report_sheet,
@@ -707,7 +714,7 @@ def report_sheet_recreate(request, sheet_id):
         table_of_content_file.close()
         test_sheets.close()
         drawings.close()
-    # s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
+    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
 
     return JsonResponse({'reload': True}, safe=False)
     # return JsonResponse({'url': MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper()}, safe=False)

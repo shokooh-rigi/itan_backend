@@ -22,6 +22,12 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_cover_report_date" class="control-label">Report Date (for Cover Page)</label>
+                    {{ form.cover_report_date }}
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_upload_table_of_content" class="control-label">Report Type <span class="required">*</span></label>
                     {{ form.report_type }}
                 </div>
@@ -98,6 +104,11 @@
                 scrollInput: false,
             });
             $("#id_last_report_date").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+                scrollInput: false,
+            });
+            $("#id_cover_report_date").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
                 scrollInput: false,

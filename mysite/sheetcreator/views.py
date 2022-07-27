@@ -435,7 +435,7 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
         new_update.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
         new_update.number_of_outside_air_terminal = request.POST.get('number_of_outside_air_terminal')
-        new_update.number_of_any_other = 0
+        new_update.number_of_exhaust_air_terminal = request.POST.get('number_of_exhaust_air_terminal')
         new_update.save()
         return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
 
@@ -460,7 +460,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     sat = this_sheet_equipment.number_of_supply_air_terminal
     rat = this_sheet_equipment.number_of_return_air_terminal
     oat = this_sheet_equipment.number_of_outside_air_terminal
-    ao = this_sheet_equipment.number_of_any_other
+    eat = this_sheet_equipment.number_of_exhaust_air_terminal
 
     equipments = Equipment.objects.filter(test_sheet__name__icontains=this_sheet_equipment)
 
@@ -480,7 +480,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
             this_sheet_equipment.number_of_return_air_terminal = request.POST.get('number_of_return_air_terminal')
             this_sheet_equipment.number_of_supply_air_terminal = request.POST.get('number_of_supply_air_terminal')
             this_sheet_equipment.number_of_outside_air_terminal = request.POST.get('number_of_outside_air_terminal')
-            this_sheet_equipment.number_of_any_other = 0
+            this_sheet_equipment.number_of_exhaust_air_terminal = request.POST.get('number_of_exhaust_air_terminal')
             if int(old_supply_number) != int(request.POST.get('number_of_supply_air_terminal')) or int(
                     old_return_number) != int(request.POST.get('number_of_return_air_terminal')) or int(
                     old_outside_number) != int(request.POST.get('number_of_outside_air_terminal')):
@@ -514,7 +514,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                   'rat': rat,
                   'sat': sat,
                   'oat': oat,
-                  'ao': ao,
+                  'eat': eat,
                   'showing_fields': showing_fields,
                   'manufacturers': manufacturers,
                   'value_fields': value_fields,

@@ -27,12 +27,14 @@
         </table>
         <div style="text-align: center; font-size: 17pt; padding: 0;">
             <span style="font-weight: bold;">TABLE OF CONTENTS</span><br />
+            <span class="calibri">
             TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
             <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+            </span>
         </div>
-        <table class="table" style="font-size: 12pt; border: 0;">
+        <table class="table calibri" style="font-size: 12pt; border: 0;">
             <tbody>
-                <tr class="pdf-table-title" style="padding: 0 0;">
+                <tr class="pdf-table-title cambria" style="padding: 0 0;">
                     <td class="pdf-table-title-td" colspan="5" style="font-weight: bold;">ITEM</td>
                     <td class="pdf-table-title-td" style="font-weight: bold; text-align: center;">PAGE NO.</td>
                 </tr>
@@ -49,7 +51,7 @@
                     <td class="pdf-table-title-td" style="text-align: center;">iii</td>
                 </tr>
                 {% for line in table_of_content %}
-                    <tr class="pdf-table-title" style="{% if line.level == 0 %}padding: 5px 0 0 0; text-decoration: underline;{% endif %}">
+                    <tr class="pdf-table-title" style="{% if line.underline %}padding: 5px 0 0 0; text-decoration: underline;{% endif %}">
                         <td class="pdf-table-title-td" colspan="5" style="padding-left: {% widthratio line.level 1 6 %}px;">{{ line.name }}</td>
                         <td class="pdf-table-title-td" style="text-align: center;">{% if line.pages %}{{ line.pages }}{% endif %}</td>
                     </tr>
