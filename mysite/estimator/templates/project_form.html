@@ -15,6 +15,12 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12">
+                    <label for="id_address_lookup" class="control-label">Address Lookup</label>
+                    <input placeholder="Find Address" id="id_address_lookup" name="id_address_lookup" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
                     <label for="id_company" class="control-label">Address Line 1</label>
                     {{ form.address_line_1 }}
                 </div>
@@ -76,4 +82,91 @@
         </div>
 	</form>
 </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAf53piN86HOtPfy-Z_umFOwza1druXZg&libraries=places"></script>
+    <script>
+        {#function formatRepo(repo) {#}
+        {#    if (repo.loading) {#}
+        {#        return repo.text;#}
+        {#    }#}
+        {##}
+        {#    var $container = $(#}
+        {#        "<div class='select2-result-repository clearfix'>" +#}
+        {#        "<div class='select2-result-repository__meta'>" +#}
+        {#        "<div class='select2-result-repository__title'></div>" +#}
+        {#        "<div class='select2-result-repository__description'></div>" +#}
+        {#        "</div>" +#}
+        {#        "</div>"#}
+        {#    );#}
+        {##}
+        {#    $container.find(".select2-result-repository__title").text(repo.street_line);#}
+        {#    $container.find(".select2-result-repository__description").text(repo.secondary + ' / ' + repo.city + ' / ' + repo.state + ' / ' + repo.zipcode);#}
+        {##}
+        {#    return $container;#}
+        {# }#}
+        {##}
+        {#function formatRepoSelection(repo) {#}
+        {#    $('#id_address_line_1').val(repo.street_line);#}
+        {#    $('#id_address_line_2').val(repo.secondary);#}
+        {#    $('#id_city').val(repo.city);#}
+        {#    $('#id_state').val(repo.state);#}
+        {#    $('#id_zip').val(repo.zipcode);#}
+        {#    return repo.street_line || repo.text;#}
+        {# }#}
+        {#$(document).ready(function() {#}
+        {#    $('#id_address_lookup').select2({#}
+        {#        ajax: {#}
+        {#            url: 'https://us-autocomplete-pro.api.smartystreets.com/lookup?key=131976749096293664&prefer_states=DC',#}
+        {#            dataType: 'json',#}
+        {#            delay: 250,#}
+        {#            data: function (params) {#}
+        {#                return {#}
+        {#                    search: params.term,#}
+        {#                };#}
+        {#            },#}
+        {#            processResults: function (data, params) {#}
+        {#              params.page = params.page || 1;#}
+        {#              let results = [];#}
+        {#                $.each(data.suggestions, function(k, v) {#}
+        {#                    results.push({#}
+        {#                        id: v.zipcode,#}
+        {#                        street_line: v.street_line,#}
+        {#                        secondary: v.secondary,#}
+        {#                        city: v.city,#}
+        {#                        state: v.state,#}
+        {#                        zipcode: v.zipcode,#}
+        {#                    });#}
+        {#                });#}
+        {#              return {#}
+        {#                results: results,#}
+        {#                pagination: {#}
+        {#                  more: (params.page * 30) < 10#}
+        {#                }#}
+        {#              };#}
+        {#            },#}
+        {#            cache: true#}
+        {#        },#}
+        {#        templateResult: formatRepo,#}
+        {#        templateSelection: formatRepoSelection,#}
+        {#        minimumInputLength: 4,#}
+        {#        placeholder: 'Find Address',#}
+        {#    });#}
+        {# });#}
+        const center = { lat: 50.064192, lng: -130.605469 };
+        // Create a bounding box with sides ~10km away from the center point
+        const defaultBounds = {
+          north: center.lat + 0.1,
+          south: center.lat - 0.1,
+          east: center.lng + 0.1,
+          west: center.lng - 0.1,
+        };
+        const input = document.getElementById("id_address_lookup");
+        const options = {
+          bounds: defaultBounds,
+          componentRestrictions: { country: "us" },
+          fields: ["address_components", "geometry", "icon", "name"],
+          strictBounds: false,
+          types: ["establishment"],
+        };
+        const autocomplete = new google.maps.places.Autocomplete(input, options);
+    </script>
 {% endblock %}

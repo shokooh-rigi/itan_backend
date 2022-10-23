@@ -1,3 +1,14 @@
+# Specifies intentionally untracked files to ignore when using Git
+# http://git-scm.com/docs/gitignore
+
+.vscode/
+.idea/
+sent_emails/
+
+.DS_Store
+Thumbs.db
+UserInterfaceState.xcuserstate
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -12,6 +23,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+media/
 eggs/
 .eggs/
 lib/
@@ -102,7 +114,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+mysite/.env
 .venv
 env/
 venv/
@@ -127,3 +139,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+static/customer/
+
+# pdf analyzer
+/mysite/pdf_analyzer/src/address_extraction/
+/mysite/pdf_analyzer/pdf_analyzer.py
