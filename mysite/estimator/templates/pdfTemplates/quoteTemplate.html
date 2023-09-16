@@ -66,12 +66,20 @@
               <tbody>
                 <tr style="text-align: left;">
                     <td style="padding: 5px; width: 300px;">TAB Services:<br />
-                        {% for estimate_service in quote.estimate.service.all %}
-                        {{ estimate_service }}{%if not forloop.last%}, {%endif%}
+                        {% for estimate_service in other_than_dalt_services %}
+                            {{ estimate_service }}{%if not forloop.last%}, {%endif%}
                         {% endfor %}
                     </td>
-                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_exclude_dalt_calculator quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
                 </tr>
+                {% if has_dalt %}
+                <tr style="text-align: left;">
+                    <td style="padding: 5px; width: 300px;">
+                        DALT
+                    </td>
+                    <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_dalt_calculator quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endif %}
                 {% if predemo_calculated > 0 %}
                 <tr>
                     <td style="padding: 5px;">Pre Demo Test:</td>
@@ -85,17 +93,25 @@
               </tbody>
             </table>
         </div>
-           <div style="height: 10px;"></div>
+        {% if quote.note %}
+            <div class="row form-line">
+                <div style="font-size: 14px;">
+                    <div style="padding: 5px; font-weight: bold;">Note:</div>
+                    <div style="padding: 5px; background-color: #f1e740;">{{ quote.note }}</div>
+                </div>
+            </div>
+        {% endif %}
+       <div style="height: 10px;"></div>
         <div class="row form-line">
             <div class="col-sm-12">
                 <p>The above quotation includes:</p>
                 <p>
                     <ul>
-                        <li>All Work to be preformed in strict accordance with project specifications and mechanical drawings.</li>
+                        <li>All Work to be performed in strict accordance with project specifications and mechanical drawings.</li>
                         <li>All labor and certified instruments.</li>
                         <li>Necessary insurance and compensation certificated when required.</li>
                         <li>Provide electronic copies of final certified test report.</li>
-                        <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work preformed after this date will be subject to incurred labor rate increases.</li>
+                        <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work performed after this date will be subject to incurred labor rate increases.</li>
                     </ul>
                 </p>
             </div>
@@ -110,11 +126,6 @@
                         <li>Any necessary test cocks to affect proper water balance.</li>
                     </ul>
                 </p>
-            </div>
-        </div>
-        <div class="row form-line">
-            <div class="col-sm-12">
-                <p>{{ quote.note }}</p>
             </div>
         </div>
         <div class="row form-line">

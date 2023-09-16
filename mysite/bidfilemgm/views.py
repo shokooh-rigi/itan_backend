@@ -210,6 +210,7 @@ def bidfiles_duplicate(request, bidfiles_id):
             duplicated_bfm.id = None
             duplicated_bfm.uploaded_file = None
             duplicated_bfm.customer = Person.objects.get(id=request.POST.get("customer"))
+            duplicated_bfm.created_by = request.user
             duplicated_bfm.save()
             return redirect('bidFilesHome')
 
@@ -222,43 +223,50 @@ def bidfiles_duplicate(request, bidfiles_id):
 @login_required
 def bidfiles_archive(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
-    if request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by == request.user:
+    if request.method == "POST":
         if request.POST.get("confirm"):
-            this_bidfile.archive = True
-            this_bidfile.save()
-        return redirect('bidFilesHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_bidfile': this_bidfile,
-                'error_msg': error_msg
-            }
-            return render(request, "bfmArchive.html", parameters)
-        return redirect('bidFilesHome')
-    parameters = {'this_bidfile': this_bidfile
-                  }
+            if request.user.is_authenticated:
+                if this_bidfile.created_by == request.user or request.user.profile.user_type == 2:
+                    this_bidfile.archive = True
+                    this_bidfile.save()
+                    return redirect('bidFilesHome')
+                else:
+                    error_msg = "This record was created by another user, you are not authorized to delete this record."
+                    parameters = {
+                        'this_bidfile': this_bidfile,
+                        'error_msg': error_msg
+                    }
+                    return render(request, "bfmArchive.html", parameters)
+            return redirect('bidFilesHome')
+        else:
+            return redirect('bidFilesHome')
+    parameters = {
+        'this_bidfile': this_bidfile
+    }
     return render(request, "bfmArchive.html", parameters)
 
 
 @login_required
 def bidfiles_delete(request, bidfiles_id):
     this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
-    if request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by == request.user:
+    if request.method == "POST":
         if request.POST.get("confirm"):
-            s3 = S3()
-            s3.delete_file_from_bucket(key=MEDIA_URL + str(this_bidfile.uploaded_file))
-            this_bidfile.delete()
-        return redirect('bidFilesHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_bidfile.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_bidfile': this_bidfile,
-                'error_msg': error_msg
-            }
-            return render(request, "bfmDelete.html", parameters)
-        return redirect('bidFilesHome')
+            if request.user.is_authenticated:
+                if this_bidfile.created_by == request.user or request.user.profile.user_type == 2:
+                    s3 = S3()
+                    s3.delete_file_from_bucket(key=MEDIA_URL + str(this_bidfile.uploaded_file))
+                    this_bidfile.delete()
+                    return redirect('bidFilesHome')
+                else:
+                    error_msg = "This record was created by another user, you are not authorized to delete this record."
+                    parameters = {
+                        'this_bidfile': this_bidfile,
+                        'error_msg': error_msg
+                    }
+                    return render(request, "bfmDelete.html", parameters)
+            return redirect('bidFilesHome')
+        else:
+            return redirect('bidFilesHome')
     parameters = {'this_bidfile': this_bidfile
                   }
     return render(request, "bfmDelete.html", parameters)

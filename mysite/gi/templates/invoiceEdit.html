@@ -10,15 +10,24 @@
             {% csrf_token %}
             {{ form.order.as_hidden }}
             {% order_predemo_calculator invoice.order.proposal.quote.estimate.id invoice.order as opc %}
+            {% order_dalt_calculator invoice.order.proposal.quote.estimate.id invoice.order as odc %}
             <div class="row form-line {% if opc|floatformat:"0" == '0' %}d-none{% endif %}">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="predemo_selected" class="control-label">Pre-Demo Select</label>
                     <div class="d-inline-block" style="width: 230px;">
-                        <input id="predemo_selected" name="predemo_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" {% if invoice.invoice_type == 1 or invoice.invoice_type == 2 %}checked{% endif %} />
+                        <input id="predemo_selected" name="predemo_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" {% if invoice.invoice_type == 2 %}checked{% endif %} />
                     </div>
                 </div>
             </div>
-            <div class="row form-line {% if opc|floatformat:"0" == '0' %}d-none{% endif %}">
+        <div class="row form-line {% if odc|floatformat:"0" == '0' %}d-none{% endif %}">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="dalt_selected" class="control-label">DALT Select</label>
+                    <div class="d-inline-block" style="width: 230px;">
+                        <input id="dalt_selected" name="dalt_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" {% if invoice.invoice_type == 4 %}checked{% endif %} />
+                    </div>
+                </div>
+            </div>
+            <div class="row form-line {% if opc|floatformat:"0" == '0' and odc|floatformat:"0" == '0' %}d-none{% endif %}">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="final_selected" class="control-label">Final Select</label>
                     <div class="d-inline-block" style="width: 230px;">
@@ -62,6 +71,12 @@
                     {{ form.attention }}
                 </div>
             </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_attention" class="control-label">Created/Edited On: (This will change PDF date)</label>
+                    {{ form.edited_on }}
+                </div>
+            </div>
             {{ form.created_by.as_hidden }}
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
@@ -78,11 +93,25 @@
             }
         });
 
+        $("#dalt_selected").change(function(){
+            if(this.checked && $("#final_selected").prop('checked') === false) {
+                $('#id_description').val('DALT Testing')
+            }
+        });
+
         $("#final_selected").change(function(){
             if(this.checked) {
                 $('#id_description').val('TESTING AND BALANCING')
+            } else {
+                if ($("#predemo_selected").prop('checked')) {
+                    $('#id_description').val('Pre-Demo Testing')
+                } else if ($("#dalt_selected").prop('checked')) {
+                    $('#id_description').val('DALT Testing')
+                }
             }
         });
+
+
         $('#id_order').on('change', function() {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#engineer").text($(this).find(':selected').data('engineer'));
@@ -91,7 +120,7 @@
     </script>
     <script>
         $(function () {
-            $("#id_date_started, #id_date_completed").datetimepicker({
+            $("#id_date_started, #id_date_completed, #id_edited_on").datetimepicker({
                 format: 'm/d/Y',
                 timepicker: false,
                 scrollInput: false,

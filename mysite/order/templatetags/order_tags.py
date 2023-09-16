@@ -1,7 +1,7 @@
 from django import template
 
-from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator, estimate_predemo_calculator
-from ..models import ChangeOrder, EstimateEquipment
+from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator, estimate_predemo_calculator, estimate_sub_total_dalt_calculator
+from ..models import ChangeOrder, EstimateEquipment, ChangeOrderService
 from ...gi.models import InvoiceTransaction, InvoiceHistory
 from ...scheduler.models import Schedule, Maintenance
 
@@ -9,13 +9,24 @@ register = template.Library()
 
 
 @register.simple_tag
+def change_order_total_calculator(change_order_id):
+    change_order = ChangeOrder.objects.get(id=change_order_id)
+    change_order_services = ChangeOrderService.objects.filter(change_order=change_order)
+    co_total = 0
+    for change_order_service in change_order_services:
+        co_total += change_order_service.amount
+    return co_total
+
+
+@register.simple_tag
 def order_total_calculator(estimate_id, order):
     estimate_total = estimate_total_calculator(estimate_id)
     change_orders = ChangeOrder.objects.filter(order=order)
-    co_total = 0
-    for change_order in change_orders:
-        co_total = co_total + change_order.amount
-    order_total = float(estimate_total) + float(co_total)
+    approved_change_orders = change_orders.filter(confirmed=True)
+    cos_total = 0
+    for change_order in approved_change_orders:
+        cos_total += change_order_total_calculator(change_order.id)
+    order_total = float(estimate_total) + float(cos_total)
     order_total = round(order_total, 2)
     return order_total
 
@@ -24,6 +35,12 @@ def order_total_calculator(estimate_id, order):
 def order_predemo_calculator(estimate_id, order):
     predemo_calc = estimate_predemo_calculator(estimate_id)
     return predemo_calc
+
+
+@register.simple_tag
+def order_dalt_calculator(estimate_id, order):
+    dalt_calc = estimate_sub_total_dalt_calculator(estimate_id)
+    return dalt_calc
 
 
 @register.simple_tag
@@ -55,6 +72,8 @@ def calculate_total_amount_due(invoice):
         sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
     elif invoice.invoice_type == 2:
         sub_total = order_predemo_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+    elif invoice.invoice_type == 4:
+        sub_total = order_dalt_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
     else:
         sub_total = order_final_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
     completed_percentage = invoice.percent_of_performance_completed
@@ -87,3 +106,29 @@ def calculate_remaining_invoice_due(invoice):
 def get_last_invoice_history(invoice):
     lih = InvoiceHistory.objects.filter(invoice=invoice).order_by('created_on').last
     return lih
+
+
+@register.simple_tag
+def get_full_address(project):
+    full_address = ''
+    if project.address_line_1:
+        full_address += project.address_line_1
+    if project.address_line_2:
+        full_address += ' ' + project.address_line_2
+    if project.city:
+        full_address += ' ' + project.city
+    if project.state:
+        full_address += ' ' + project.state
+    if project.zip:
+        full_address += ' ' + project.zip
+    return full_address
+
+
+@register.simple_tag
+def co_total_amount(co):
+    all_services = ChangeOrderService.objects.filter(change_order=co)
+    total = 0
+    for service in all_services:
+        total += service.amount
+    return total
+

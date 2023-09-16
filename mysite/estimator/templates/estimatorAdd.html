@@ -105,47 +105,51 @@
                 }
                 else {
                     $('#id_customer option, #id_project option').attr('disabled', false);
-                    $.ajax({
-                        type: 'GET',
-                        async: false,
-                        url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')
-                    }).then(function (data) {
-                        for(x in data.results) {
-                            if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {
-                                break;
-                            }
-                        }
-                        var option = new Option(data.results[x].text, data.results[x].id, true, true);
-                        $('#id_customer').append(option).trigger('change');
-
-                        $('#id_customer').trigger({
-                            type: 'select2:select',
-                            params: {
-                                data: data
-                            }
-                        });
-                    });
+                    const customer_select = new Option($(this).find(':selected').data('customer'), $(this).find(':selected').data('customer-id'), true, true);
+                    $("#id_customer").append(customer_select).trigger('change');
+                    {#$.ajax({#}
+                    {#    type: 'GET',#}
+                    {#    async: false,#}
+                    {#    url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('customer')) + '&field_id=' + $('#id_customer').data('field_id')#}
+                    {# }).then(function (data) { #}
+                    {#    for(x in data.results) {#}
+                    {#        if (data.results[x].id == $('#id_bfm').find(':selected').data('customer-id')) {#}
+                    {#            break;#}
+                    {#        }#}
+                    {#    }#}
+                    {#    var option = new Option(data.results[x].text, data.results[x].id, true, true);#}
+                    {#    $('#id_customer').append(option).trigger('change');#}
+                    {##}
+                    {#    $('#id_customer').trigger({#}
+                    {#        type: 'select2:select',#}
+                    {#        params: {#}
+                    {#            data: data#}
+                    {#        }#}
+                    {#    });#}
+                    {# }); #}
                     {#$("#id_customer").val($(this).find(':selected').data('customer')).trigger('change');#}
-                    $.ajax({
-                        type: 'GET',
-                        async: false,
-                        url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')
-                    }).then(function (data) {
-                        for(x in data.results) {
-                            if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {
-                                break;
-                            }
-                        }
-                        var option = new Option(data.results[x].text, data.results[x].id, true, true);
-                        $('#id_project').append(option).trigger('change');
-
-                        $('#id_project').trigger({
-                            type: 'select2:select',
-                            params: {
-                                data: data
-                            }
-                        });
-                    });
+                    const project_select = new Option($(this).find(':selected').data('project'), $(this).find(':selected').data('project-id'), true, true);
+                    $("#id_project").append(project_select).trigger('change');
+                    {#$.ajax({#}
+                    {#    type: 'GET',#}
+                    {#    async: false,#}
+                    {#    url: '/select2/fields/auto.json?term=' + encodeURIComponent($('#id_bfm').find(':selected').data('project')) + '&field_id=' + $('#id_project').data('field_id')#}
+                    {# }).then(function (data) { #}
+                    {#    for(x in data.results) {#}
+                    {#        if (data.results[x].id == $('#id_bfm').find(':selected').data('project-id')) {#}
+                    {#            break;#}
+                    {#        }#}
+                    {#    }#}
+                    {#    var option = new Option(data.results[x].text, data.results[x].id, true, true);#}
+                    {#    $('#id_project').append(option).trigger('change');#}
+                    {# #}
+                    {#    $('#id_project').trigger({#}
+                    {#        type: 'select2:select',#}
+                    {#        params: {#}
+                    {#            data: data#}
+                    {#        }#}
+                    {#    });#}
+                    {# }); #}
                     {#$("#id_project").val($(this).find(':selected').data('project')).trigger('change');#}
                     $("#id_due_date").attr('readonly', true).val($(this).find(':selected').data('duedate'));
                     $('#id_customer option:not(:selected), #id_project option:not(:selected)').attr('disabled', true);

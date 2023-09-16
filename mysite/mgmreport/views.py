@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.core.paginator import Paginator
 from django.shortcuts import render
 
 from mysite.estimator.models import *
@@ -102,3 +104,29 @@ def bids_list(request, bid_type):
         'bid_type': bid_type
     }
     return render(request, "bidslist.html", parameters)
+
+
+@login_required
+def detailed_orders_list(request):
+    project_name = request.GET.get('project_name', '')
+
+    pagination = 20
+    if request.GET.get('paginate_by'):
+        pagination = request.GET.get('paginate_by')
+
+    ordering = '-created_on'
+    if request.GET.get('ordering'):
+        ordering = request.GET.get('ordering')
+
+    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
+                                       Q(project_number__icontains=project_name) |
+                                       Q(proposal__quote__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
+
+    paginator = Paginator(object_list, pagination)
+    page = request.GET.get('page')
+    orders = paginator.get_page(page)
+    parameters = {'orders': orders,
+                  'WEB_URL': WEB_URL,
+                  'MEDIA_URL': MEDIA_URL,
+                  }
+    return render(request, "detailedorder.html", parameters)

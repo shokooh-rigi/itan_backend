@@ -35,6 +35,7 @@ class BidFileForm(ModelForm):
         self.fields['customer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['due_date'].widget.attrs['autocomplete'] = 'off'
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
@@ -64,6 +65,7 @@ class BidFileEditForm(ModelForm):
         self.fields['customer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['due_date'].widget.attrs['autocomplete'] = 'off'
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():

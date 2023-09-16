@@ -166,63 +166,57 @@ def change_order(request, order_id):
         if form.is_valid():
             if request.POST.get("save"):
                 form.cleaned_data['order'] = order_id
-                form.save()
-                try:
-                    if request.user.last_name == '' or request.user.last_name is None:
-                        user_name = 'TAB Technologies, INC. Operator'
-                    else:
-                        user_name = request.user.first_name + " " + request.user.last_name
-                    if request.user.profile.title == '' or request.user.profile.title is None:
-                        user_title = 'Estimator'
-                    else:
-                        user_title = request.user.profile.title
-                    user_signature = request.user.profile.e_sign
-                    change_orders = ChangeOrder.objects.filter(order=this_order.invoice.order)
-                    total_amount_due = calculate_total_amount_due(this_order.invoice)
-                    transactions_count = InvoiceTransaction.objects.filter(invoice=this_order.invoice).count()
-                    change_orders_count = ChangeOrder.objects.filter(order=this_order).count()
-                    total_count = InvoiceHistory.objects.filter(invoice=this_order.invoice).count() + 1
-                    new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
-                        this_order.id).zfill(3) + '-' + str(total_count)
-                    pdf_parameters = {
-                        'file_name': new_file_name,
-                        'total_count': total_count,
-                        'revision_date': InvoiceHistory.objects.filter(invoice=this_order.invoice).order_by('-id')[0],
-                        'invoice': this_order.invoice,
-                        'change_orders': change_orders,
-                        'total_amount_due': total_amount_due,
-                        'estimate': this_order.invoice.order.proposal.quote.estimate,
-                        'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
-                        'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
-                        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-                        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-                        'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
-                        'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
-                        'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
-                        'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
-                        'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
-                        'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
-                        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-                        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-                        'company_name': LicenseInfo.objects.get(key='CompanyName').value,
-                        'user_name': user_name,
-                        'user_title': user_title,
-                        'user_signature': user_signature,
-                        'WEB_URL': WEB_URL,
-                        'STATIC_URL': STATIC_URL,
-                        'MEDIA_URL': MEDIA_URL,
-                        'os': system(),
-                    }
-                    Invoice.create_invoice_pdf(pdf_parameters)
-                    total_invoiced = calculate_total_amount_due(this_order.invoice)
-                    total_paid = calculate_total_paid(this_order.invoice)
-                    balance_due = calculate_remaining_invoice_due(this_order.invoice)
-                    new_object = InvoiceHistory(invoice=this_order.invoice, total_invoiced=total_invoiced,
-                                                total_paid=total_paid,
-                                                balance_due=balance_due, pdf_filename=new_file_name)
-                    new_object.save()
-                except:
-                    pass
+                new_change_order = form.save()
+                new_change_order.confirmed = False
+                index = 0
+                while request.POST.get(f"service[{index}][amount]"):
+                    new_service = ChangeOrderService(change_order=new_change_order,
+                                                     amount=request.POST.get(f"service[{index}][amount]"),
+                                                     description=request.POST.get(f"service[{index}][description]"))
+                    new_service.save()
+                    index += 1
+
+                # Create Change Order PDF here
+                if request.user.last_name == '' or request.user.last_name is None:
+                    user_name = 'TAB Technologies, INC. Operator'
+                else:
+                    user_name = request.user.first_name + " " + request.user.last_name
+                if request.user.profile.title == '' or request.user.profile.title is None:
+                    user_title = 'Estimator'
+                else:
+                    user_title = request.user.profile.title
+                user_signature = request.user.profile.e_sign
+                new_file_name = 'ChangeOrder-' + str(this_order.project_number[3:]).zfill(3) + '-' + new_change_order.co_number
+
+                pdf_parameters = {
+                    'file_name': new_file_name,
+                    'change_order': new_change_order,
+                    'change_order_services': new_change_order.changeorderservice_set.all(),
+                    'order': this_order,
+                    'estimate': this_order.proposal.quote.estimate,
+                    'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+                    'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+                    'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+                    'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+                    'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+                    'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+                    'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+                    'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+                    'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+                    'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+                    'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+                    'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+                    'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+                    'user_name': user_name,
+                    'user_title': user_title,
+                    'user_signature': user_signature,
+                    'WEB_URL': WEB_URL,
+                    'STATIC_URL': STATIC_URL,
+                    'MEDIA_URL': MEDIA_URL,
+                    'os': system(),
+                }
+                new_change_order.create_change_order_pdf(pdf_parameters)
+
                 return redirect('orderEdit', order_id=order_id)
     parameters = {'form': form,
                   'this_order': this_order,
@@ -659,6 +653,10 @@ def change_order_delete(request, order_id, change_order_id):
     this_order = get_object_or_404(Order, id=order_id)
     if request.method == "POST" and request.user.is_authenticated:
         if request.POST.get("confirm"):
+            parameter = {
+                'file_name': 'ChangeOrder-' + str(this_order.project_number[3:]).zfill(3) + '-' + this_change_order.co_number
+            }
+            this_change_order.delete_change_order_pdf(parameter)
             this_change_order.delete()
             if request.user.last_name == '' or request.user.last_name is None:
                 user_name = 'TAB Technologies, INC. Operator'
@@ -669,10 +667,8 @@ def change_order_delete(request, order_id, change_order_id):
             else:
                 user_title = request.user.profile.title
             user_signature = request.user.profile.e_sign
-            change_orders = ChangeOrder.objects.filter(order=this_order.invoice.order)
+            change_orders = ChangeOrder.objects.filter(order=this_order.invoice.order, confirmed=True)
             total_amount_due = calculate_total_amount_due(this_order.invoice)
-            transactions_count = InvoiceTransaction.objects.filter(invoice=this_order.invoice).count()
-            change_orders_count = ChangeOrder.objects.filter(order=this_order).count()
             total_count = InvoiceHistory.objects.filter(invoice=this_order.invoice).count() + 1
             new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
                 this_order.id).zfill(3) + '-' + str(total_count)
@@ -717,6 +713,72 @@ def change_order_delete(request, order_id, change_order_id):
     parameters = {'this_change_order': this_change_order
                   }
     return render(request, "changeOrderDelete.html", parameters)
+
+
+@login_required
+def approve_change_order(request, change_order_id, action):
+    this_change_order = get_object_or_404(ChangeOrder, id=change_order_id)
+    this_order = this_change_order.order
+    if request.method == "GET" and request.user.is_authenticated:
+        if action == 1:
+            this_change_order.confirmed = True
+        else:
+            this_change_order.confirmed = False
+
+        this_change_order.save()
+        if request.user.last_name == '' or request.user.last_name is None:
+            user_name = 'TAB Technologies, INC. Operator'
+        else:
+            user_name = request.user.first_name + " " + request.user.last_name
+        if request.user.profile.title == '' or request.user.profile.title is None:
+            user_title = 'Estimator'
+        else:
+            user_title = request.user.profile.title
+        user_signature = request.user.profile.e_sign
+        change_orders = ChangeOrder.objects.filter(order=this_order.invoice.order, confirmed=True)
+        total_amount_due = calculate_total_amount_due(this_order.invoice)
+        total_count = InvoiceHistory.objects.filter(invoice=this_order.invoice).count() + 1
+        new_file_name = 'Invoice-' + str(this_order.project_number[3:]).zfill(3) + '-' + str(
+            this_order.id).zfill(3) + '-' + str(total_count)
+        pdf_parameters = {
+            'file_name': new_file_name,
+            'total_count': total_count,
+            'revision_date': InvoiceHistory.objects.filter(invoice=this_order.invoice).order_by('-id')[0],
+            'invoice': this_order.invoice,
+            'change_orders': change_orders,
+            'total_amount_due': total_amount_due,
+            'estimate': this_order.invoice.order.proposal.quote.estimate,
+            'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+            'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+            'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+            'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+            'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+            'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+            'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+            'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+            'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+            'user_name': user_name,
+            'user_title': user_title,
+            'user_signature': user_signature,
+            'WEB_URL': WEB_URL,
+            'STATIC_URL': STATIC_URL,
+            'MEDIA_URL': MEDIA_URL,
+            'os': system(),
+        }
+        Invoice.create_invoice_pdf(pdf_parameters)
+        total_invoiced = calculate_total_amount_due(this_order.invoice)
+        total_paid = calculate_total_paid(this_order.invoice)
+        balance_due = calculate_remaining_invoice_due(this_order.invoice)
+        new_object = InvoiceHistory(invoice=this_order.invoice, total_invoiced=total_invoiced,
+                                    total_paid=total_paid,
+                                    balance_due=balance_due, pdf_filename=new_file_name)
+        new_object.save()
+        return redirect('orderEdit', order_id=this_order.id)
+    return redirect('orderEdit', order_id=this_order.id)
 
 
 @login_required

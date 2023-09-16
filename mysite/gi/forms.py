@@ -22,6 +22,7 @@ class InvoiceForm(ModelForm):
             'description',
             'percent_of_performance_completed',
             'attention',
+            'edited_on',
             'created_by',
         ]
         widgets = {

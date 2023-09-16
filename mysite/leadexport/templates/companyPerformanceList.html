@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load humanize %}
+{% load performance_tags %}
+{% load order_tags %}
+
+{% block content %}
+    <div class="text-center">
+    <form id="filter_by_date" method="get" action="">
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <h5>Filter By <span class="filter_by_type">Date</span></h5>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_fromDate" class="control-label">Date From:</label>
+                    <input type="text" name="fromDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_fromDate" value="{{ request.GET.fromDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <label for="id_toDate" class="control-label">Date To:</label>
+                    <input type="text" name="toDate" placeholder="mm/dd/YYYY" pattern="\d{2}[\/]\d{2}[\/]\d{4}" class="form-control" required="" id="id_toDate" value="{{ request.GET.toDate }}" />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12">
+                    <button type="submit" class="btn btn-success">submit</button>
+                    <div id="date_filter_clear" class="btn btn-primary">clear filter</div>
+                </div>
+            </div>
+            <input type="hidden" name="type" value="{{ request.GET.type }}" />
+        </form>
+    {% if from_date_is_greater %}
+        <div class="alert alert-danger">
+          <strong>Error!</strong> To Date must be greater or equal to Form Date.
+        </div>
+    {% endif %}
+
+        {% if request.GET.fromDate %}
+            <br />Estimates Due Date Filtered From <b>{{ request.GET.fromDate }}</b> To <b>{{ request.GET.toDate }}</b><br /><br />
+        {% endif %}
+
+        {% if request.GET.fromDate %}
+            <form action="?{% url_replace request 'search' '' %}">
+                <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                    <label for="search"></label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Customer Name/Number..." value="{{ request.GET.search }}" />
+                    <input type="hidden" name="fromDate" value="{{ request.GET.fromDate }}" />
+                    <input type="hidden" name="toDate" value="{{ request.GET.toDate }}" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+            <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
+            <table class="table table-striped" id="printThis">
+                <thead>
+                    <tr>
+                        <th>Customer #</th>
+                        <th>Customer Name</th>
+                        <th>Total Quoted Count</th>
+                        <th>Total Quoted Price</th>
+                        <th>Total Ordered Count</th>
+                        <th>Total Ordered Price</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in object_list %}
+                            <tr>
+                                <td>{% if customer.customer_id %}{{ customer.customer_id }}{% else %}{% endif %}</td>
+                                <td>{{ customer.name }}</td>
+                                <td>{% total_quoted_count customer from_date_obj to_date_obj as tqc %}{{ tqc }}</td>
+                                <td>{% total_quoted_price customer from_date_obj to_date_obj as tqp %}${{ tqp|floatformat:2|intcomma }}</td>
+                                <td>{% total_ordered_count customer from_date_obj to_date_obj as toc %}{{ toc }}</td>
+                                <td>{% total_ordered_price customer from_date_obj to_date_obj as top %}${{ top|floatformat:2|intcomma }}</td>
+                                <td>{% performance customer from_date_obj to_date_obj as performance %}%{{ performance }}</td>
+                            </tr>
+                    {% endfor %}
+    {#                <tr style="font-weight: bold;">#}
+    {#                    <td>#}
+    {#                        Total#}
+    {#                    </td>#}
+    {#                    <td>#}
+    {#                        {{ total_rows }}#}
+    {#                    </td>#}
+    {#                    <td>#}
+    {#                        ${{ total_of_all|floatformat:2|intcomma }}#}
+    {#                    </td>#}
+    {#                </tr>#}
+                </tbody>
+            </table>
+    {% endif %}
+
+    </div>
+
+    <script>
+
+
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
+
+
+
+    $(document).ready(function() {
+        $('#date_filter_clear').click(function() {
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "fromDate", ""));
+            window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
+            location.reload();
+        });
+    });
+</script>
+
+    <script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').hide();
+                    $('#printThis').css('margin-top','100px');
+                },
+                afterPrint: function(){
+                    $('#topnav').show();
+                    $('#printThis').css('margin-top','0px');
+                },
+            });
+        });
+    });
+    </script>
+    <script>
+        $(function () {
+            $("#id_fromDate, #id_toDate").datetimepicker({
+                format: 'm/d/Y',
+                timepicker: false,
+		        scrollInput: false,
+            });
+        });
+    </script>
+{% endblock %}

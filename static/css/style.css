@@ -554,6 +554,10 @@ input[type=text][readonly] {
     background-image: url("../images/icons/iconset/report-03.svg");
 }
 
+.icon.checkicon {
+    background-image: url("../images/icons/completed.svg");
+}
+
 .main .pagination {
     text-align: center;
     margin-top: 1em;

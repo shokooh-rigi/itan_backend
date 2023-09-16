@@ -20,7 +20,7 @@ from ..estimator.views import estimate_total_calculator
 
 def order_total_calculator(estimate_id, order):
     estimate_total = estimate_total_calculator(estimate_id)
-    change_orders = ChangeOrder.objects.filter(order=order)
+    change_orders = ChangeOrder.objects.filter(order=order, confirmed=True)
     co_total = 0
     for change_order in change_orders:
         co_total = co_total + change_order.amount

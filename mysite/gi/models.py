@@ -12,10 +12,11 @@ class Invoice(models.Model):
     description = models.TextField(max_length=255, blank=True, default='TESTING AND BALANCING')
     percent_of_performance_completed = models.FloatField(default=100, validators=[MaxValueValidator(100),
                                                                                           MinValueValidator(0)])
-    # 1: FUll invoice  2: Pre-Demo Invoice  3: Rest Invoice
+    # 1: FUll invoice  2: Pre-Demo Invoice  3: Rest Invoice 4: DALT
     invoice_type = models.SmallIntegerField(default=1)
     attention = models.CharField(max_length=255, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    edited_on = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     mark_as_paid = models.BooleanField(default=False)
     times_estimate_changed = models.PositiveSmallIntegerField(default=0)

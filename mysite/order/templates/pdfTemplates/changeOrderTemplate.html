@@ -1,0 +1,163 @@
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load custom_tags %}
+{% load humanize %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Change Order Ticket</title>
+        {% include "pdfTemplates/headStyle.html" %}
+    </head>
+    <body>
+
+        {% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+        {% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    <div class="content">
+            <div class="row form-line" style="text-align: center; padding: 0; font-size: 9pt;">
+                <table style="padding: 0;">
+                  <tbody>
+                    <tr style="text-align: center;">
+                        <td style="font-weight: bold; text-align: left; vertical-align: bottom; width: 70%; color: #aaa; font-size: 34px; padding-top: 12px;">CHANGE ORDER</td>
+                        <td style="padding: 2px; font-weight: bold; width: 15%;">
+                            <div style="padding: 5px; font-weight: bold;">Date:</div>
+                            <div style="padding: 0px; font-weight: bold;">Ticket No:</div>
+                        </td>
+                        <td style="font-weight: bold; width: 15%;">
+                            <div style="padding: 5px; font-weight: bold;">{{ change_order.created_on|date:'m/d/Y' }}</div>
+                            <div style="padding: 0px; font-weight: bold;">{{ order.project_number|slice:"3:" }}-{{ change_order.co_number }}</div>
+                        </td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line" style="font-size: 9pt;">
+               <table style="padding: 0 0 5px 0;">
+                  <tbody>
+                    <tr style="text-align: left; border: none;">
+                        <td style="padding: 5px 0 0 0; font-weight: bold;">Bill To: </td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold;">Project: </td>
+                    </tr>
+                    <tr style="text-align: left;">
+                        <td style="padding: 0px;"><b>{{ estimate.customer.company.name }}</b>
+                        {% if estimate.customer.company.address_line_1 %}<br />{{ estimate.customer.company.address_line_1 }}{% endif %}
+                        {% if estimate.customer.company.address_line_2 %}<br />{{ estimate.customer.company.address_line_2 }}{% endif %}
+                        {% if estimate.customer.company.city %}<br />{{ estimate.customer.company.city }}{% endif %}{% if estimate.customer.company.state %}, {{ estimate.customer.company.state }}{% endif %}
+                        {% if estimate.customer.company.zip %} {{ estimate.customer.company.zip }}{% endif %}
+                        {% if invoice.attention %}<br />Attention: {{ invoice.attention }}{% endif %}</td>
+                        <td style="padding: 0px;"><b>{{ estimate.project }}</b>
+                        {% if estimate.project.address_line_1 %}<br />{{ estimate.project.address_line_1 }}{% endif %}
+                        {% if estimate.project.address_line_2 %}<br />{{ estimate.project.address_line_2 }}{% endif %}
+                        {% if estimate.project.city %}<br />{{ estimate.project.city }}{% endif %}{% if estimate.project.state %}, {{ estimate.project.state }}{% endif %}
+                        {% if estimate.project.zip %} {{ estimate.project.zip }}{% endif %}</td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line" style="font-size: 9pt;">
+               <table style="padding: 10px; border: 1px solid #000; text-align: center;">
+                  <tbody>
+                    <tr style="">
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Project No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">PO/Contract No.</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc;">Terms</td>
+                    </tr>
+                    <tr style="">
+                        <td style="padding: 5px 0 0 0;">{{ order.project_number }} </td>
+                        <td style="padding: 5px 0 0 0;">{{ order.po_number }} </td>
+                        <td style="padding: 5px 0 0 0;">Due Upon Receipt </td>
+                    </tr>
+                  </tbody>
+               </table>
+               <table style="padding: 20px;">
+                  <tbody style="text-align: center;">
+                    <tr style="border: 1px solid #000;">
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 80%;">Description</td>
+                        <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 20%;">AMOUNT in USD</td>
+                    </tr>
+                    {% for change_order_service in change_order_services %}
+                        <tr style="border: 1px solid #000;">
+                            <td style="padding: 5px 0 0 0; text-transform: uppercase;">{{ change_order_service.description }}</td>
+                            <td style="padding: 5px 0 0 0;">${{ change_order_service.amount|floatformat:2|intcomma }} </td>
+                        </tr>
+                    {% endfor %}
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-size: 11pt;">Total Amount: </td>
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold; border: 1px solid #000; text-align: center;">${% change_order_total_calculator change_order.id as cotc %}{{ cotc|floatformat:2|intcomma }} </td>
+                    </tr>
+
+
+                  </tbody>
+               </table>
+               <br />
+            </div>
+            <div class="row form-line text-center" style="font-size: 9pt; text-align: center;">
+                If you have any questions concerning this invoice, feel free to contact us at any time.
+                <table style="padding: 20px; font-size: 8pt;">
+                  <tbody>
+                    <tr style="text-align: center;">
+                        <td style="padding: 5px; font-weight: bold;">Signature:</td>
+                        <td style="padding: 5px;"><img alt="" src="{% get_s3_file_url owner_signature '' %}" class="signature" style="height: 50px;" /></td>
+                        <td style="padding: 5px; font-weight: bold;"> </td>
+                        <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
+                        <td style="padding: 5px;"><span style="text-decoration: underline;">{{ license_owner }}</span>, <span style="text-decoration: underline;">{{ owner_title }}</span></td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line text-center" style="text-align: center; font-size: 10pt;">
+                THANK YOU FOR YOUR BUSINESS!
+            </div>
+            <hr />
+            <div class="row form-line text-center" style="font-size: 8pt;">
+                <h3 style="text-align: center; font-size: 10pt; padding: 2px 0 0 0;">Endorsement</h3>
+                Payment is recommended as follows:
+            </div>
+            <div class="row form-line" style="font-size: 8pt;">
+                <table style="padding: 5px 0 10px 0; border: 1px solid #000;">
+                  <tbody>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold;">Amount of work completed to due date:</td>
+                        <td style="padding: 5px 5px 0 5px;"> </td>
+                    </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold;">Less retention:</td>
+                        <td style="padding: 5px 5px 0 5px;"> </td>
+                    </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold;">Subtotal:</td>
+                        <td style="padding: 5px 5px 0 5px;"> </td>
+                    </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold;">Previous payment:</td>
+                        <td style="padding: 5px 5px 0 5px;"> </td>
+                    </tr>
+                    <tr style="text-align: right;">
+                        <td style="padding: 5px 5px 0 5px; font-weight: bold;">Total payment amount recommended:</td>
+                        <td style="padding: 5px 5px 0 5px;"> </td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+            <div class="row form-line" style="font-size: 8pt;">
+                <table style="padding: 5px;">
+                  <tbody>
+                    <tr style="text-align: center;">
+                        <td style="padding: 5px; font-weight: bold;">Signature:</td>
+                        <td style="padding: 5px; width: 100px;"> <br /> </td>
+                        <td style="padding: 5px; font-weight: bold;"> <br /> </td>
+                        <td style="padding: 5px; font-weight: bold;">Name/Title:</td>
+                        <td style="padding: 5px; width: 100px;"><span style="text-decoration: underline; width: 60px;"></span><br /><span style="text-decoration: underline; width: 60px;"></span></td>
+                    </tr>
+                  </tbody>
+               </table>
+            </div>
+    </div>
+</div>
+    </body>
+</html>

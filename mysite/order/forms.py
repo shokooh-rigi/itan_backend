@@ -77,9 +77,8 @@ class ChangeOrderForm(ModelForm):
         fields = [
             'order',
             'co_number',
+            'confirmed',
             'date',
-            'amount',
-            'description',
         ]
 
     def __init__(self, *args, **kwargs):

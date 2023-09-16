@@ -8,7 +8,7 @@
         <br />
         <a href="{% url 'customerPersonCreate' %}" id="add_customer" onclick="return showAddPopup(this);"><button class="btn btn-primary" style="margin: 5px auto 20px auto;">New Vendor</button></a>
         <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print This Table</button>
-        <table class="table table-striped" id="printThis">
+        <table class="table table-striped table-responsive" id="printThis">
             <thead>
                 <tr>
                     <th>Customer #</th>
@@ -16,11 +16,11 @@
                     <th>Name</th>
                     <th>Contact Persons</th>
                     <th>Address line 1</th>
-{#                    <th>Address line 2</th>#}
-{#                    <th>City</th>#}
-{#                    <th>State</th>#}
-{#                    <th>Zip Code</th>#}
-{#                    <th>Phone #</th>#}
+                    <th>Address line 2</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Zip Code</th>
+                    <th>Phone #</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -32,11 +32,11 @@
                             <td>{{ contact.company.name }} <a class="edit_company" data-company="{{ contact.company.id }}" style="display:inline-block; cursor: pointer; cursor: hand;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Archive"></div></a></td>
                             <td>{{ contact.name }}</td>
                             <td>{{ contact.company.address_line_1 }}</td>
-{#                            <td>{{ contact.company.address_line_2 }}</td>#}
-{#                            <td>{{ contact.company.city }}</td>#}
-{#                            <td>{{ contact.company.state }}</td>#}
-{#                            <td>{{ contact.company.zip }}</td>#}
-{#                            <td>{{ contact.company.tel }}</td>#}
+                            <td>{{ contact.company.address_line_2 }}</td>
+                            <td>{{ contact.company.city }}</td>
+                            <td>{{ contact.company.state }}</td>
+                            <td>{{ contact.company.zip }}</td>
+                            <td>{{ contact.company.tel }}</td>
                             <td>
                                 <a class="edit_customer" data-customer="{{ contact.id }}" style="display:inline-block; cursor: pointer; cursor: hand;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Edit"></div></a>
                                 <button name="dl_{{ contact.id }}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Delete"></div></button>

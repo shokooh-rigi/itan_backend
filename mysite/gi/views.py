@@ -1,3 +1,4 @@
+from datetime import timedelta
 from platform import system
 import os
 from django.contrib.auth.decorators import login_required
@@ -135,15 +136,30 @@ def invoice_list(request):
             .filter(order__proposal__quote__estimate__due_date__lte=datetime.datetime.strptime('04/01/2020', '%m/%d/%Y'))\
             .filter(id__in=to_be_deleted).distinct().order_by(ordering)
 
+    overdue_days = Setting.objects.get(key='Overdue Days').value
+
+    overdue_result = False
+    if request.GET.get('overdue') == '1':
+        overdue_result = True
+        object_list = object_list.filter(created_on__lte=datetime.datetime.now()-timedelta(days=int(overdue_days)))
+        to_be_deleted = []
+        for invoice in object_list:
+            if calculate_remaining_invoice_due(invoice) != 0:
+                to_be_deleted.append(invoice.id)
+        object_list = Invoice.objects.filter(id__in=to_be_deleted).order_by(ordering)
+
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     invoices = paginator.get_page(page)
 
-    parameters = {'invoices': invoices,
-                  'form': form,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  }
+    parameters = {
+        'invoices': invoices,
+        'form': form,
+        'WEB_URL': WEB_URL,
+        'MEDIA_URL': MEDIA_URL,
+        'overdue_days': overdue_days,
+        'overdue_result': overdue_result
+    }
     return render(request, "invoice.html", parameters)
 
 
@@ -163,15 +179,14 @@ def invoice_add(request, order_id=None):
                 form.cleaned_data['created_by'] = request.user
 
                 invoice = form.save()
-                if invoice.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
-                    if request.POST.get("predemo_selected") and request.POST.get("final_selected"):
-                        invoice_type = 1
-                    elif request.POST.get("predemo_selected"):
-                        invoice_type = 2
-                    else:
-                        invoice_type = 3
-                    invoice.invoice_type = invoice_type
-                    invoice.save()
+                if request.POST.get("predemo_selected") and not request.POST.get("final_selected"):
+                    invoice_type = 2
+                elif request.POST.get("dalt_selected") and not request.POST.get("final_selected"):
+                    invoice_type = 4
+                else:
+                    invoice_type = 1
+                invoice.invoice_type = invoice_type
+                invoice.save()
                 if request.user.last_name == '' or request.user.last_name is None:
                     user_name = 'TAB Technologies, INC. Operator'
                 else:
@@ -181,7 +196,7 @@ def invoice_add(request, order_id=None):
                 else:
                     user_title = request.user.profile.title
                 user_signature = request.user.profile.e_sign
-                change_orders = ChangeOrder.objects.filter(order=invoice.order)
+                change_orders = ChangeOrder.objects.filter(order=invoice.order, confirmed=True)
                 total_amount_due = calculate_total_amount_due(invoice)
                 parameters = {
                     'file_name': 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
@@ -253,15 +268,14 @@ def invoice_edit(request, invoice_id):
         if form.is_valid():
             if request.POST.get("save"):
                 invoice = form.save()
-                if invoice.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
-                    if request.POST.get("predemo_selected") and request.POST.get("final_selected"):
-                        invoice_type = 1
-                    elif request.POST.get("predemo_selected"):
-                        invoice_type = 2
-                    else:
-                        invoice_type = 3
-                    invoice.invoice_type = invoice_type
-                    invoice.save()
+                if request.POST.get("predemo_selected") and not request.POST.get("final_selected"):
+                    invoice_type = 2
+                elif request.POST.get("dalt_selected") and not request.POST.get("final_selected"):
+                    invoice_type = 4
+                else:
+                    invoice_type = 1
+                invoice.invoice_type = invoice_type
+                invoice.save()
                 if request.user.last_name == '' or request.user.last_name is None:
                     user_name = 'TAB Technologies, INC. Operator'
                 else:
@@ -271,7 +285,7 @@ def invoice_edit(request, invoice_id):
                 else:
                     user_title = request.user.profile.title
                 user_signature = request.user.profile.e_sign
-                change_orders = ChangeOrder.objects.filter(order=invoice.order)
+                change_orders = ChangeOrder.objects.filter(order=invoice.order, confirmed=True)
                 total_amount_due = calculate_total_amount_due(invoice)
                 total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
@@ -336,7 +350,7 @@ def invoice_view(request, invoice_id):
         else:
             user_title = request.user.profile.title
         user_signature = request.user.profile.e_sign
-        change_orders = ChangeOrder.objects.filter(order=invoice.order)
+        change_orders = ChangeOrder.objects.filter(order=invoice.order, confirmed=True)
         total_amount_due = calculate_total_amount_due(invoice)
         total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
         parameters = {
@@ -466,10 +480,8 @@ def invoice_payment(request, invoice_id):
                 else:
                     user_title = request.user.profile.title
                 user_signature = request.user.profile.e_sign
-                change_orders = ChangeOrder.objects.filter(order=invoice.order)
+                change_orders = ChangeOrder.objects.filter(order=invoice.order, confirmed=True)
                 total_amount_due = calculate_total_amount_due(invoice)
-                transactions_count = InvoiceTransaction.objects.filter(invoice=invoice_id).count()
-                change_orders_count = ChangeOrder.objects.filter(order=invoice.order).count()
                 total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
                 new_file_name = 'Invoice-' + str(invoice.order.project_number[3:]).zfill(3) + '-' + str(
                         invoice.id).zfill(3) + '-' + str(total_count)

@@ -86,8 +86,10 @@ class EstimateForm(ModelForm):
         self.fields['engineer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['due_date'].widget.attrs['autocomplete'] = 'off'
         self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['drawing_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['drawing_date'].widget.attrs['autocomplete'] = 'off'
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
@@ -131,8 +133,10 @@ class EstimateFullForm(ModelForm):
         self.fields['engineer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['due_date'].widget.attrs['autocomplete'] = 'off'
         self.fields['drawing_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['drawing_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
+        self.fields['drawing_date'].widget.attrs['autocomplete'] = 'off'
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
         for field in self.fields.values():
@@ -440,7 +444,7 @@ class ProjectForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
 
-        self.fields['name'].widget.attrs['pattern'] = '[^/:?,]+'
+        # self.fields['name'].widget.attrs['pattern'] = '[^/:?,]+'
 
         self.fields['zip'].widget.attrs['placeholder'] = 'Only numbers allowed'
         self.fields['zip'].widget.attrs['pattern'] = '(\d{5}([\-]\d{4})?)'

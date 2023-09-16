@@ -68,8 +68,7 @@ admin.site.register(LicenseFiles, LicenseFilesAdmin)
 
 
 class SettingAdmin(ImportExportModelAdmin):
-    readonly_fields = ('key',
-                       )
+    readonly_fields = ['key']
 
     def has_add_permission(self, request):
         return True

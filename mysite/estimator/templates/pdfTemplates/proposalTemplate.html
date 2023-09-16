@@ -62,12 +62,20 @@
                   <tbody>
                     <tr style="text-align: left;">
                         <td style="padding: 5px; width: 300px;">TAB Services:<br />
-                            {% for estimate_service in proposal.quote.estimate.service.all %}
-                            {{ estimate_service }}{%if not forloop.last%}, {%endif%}
+                            {% for estimate_service in other_than_dalt_services %}
+                                {{ estimate_service }}{%if not forloop.last%}, {%endif%}
                             {% endfor %}
                         </td>
-                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_calculator proposal.quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_exclude_dalt_calculator proposal.quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
                     </tr>
+                    {% if has_dalt %}
+                    <tr style="text-align: left;">
+                        <td style="padding: 5px; width: 300px;">
+                            DALT
+                        </td>
+                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_dalt_calculator proposal.quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
                     {% if predemo_calculated > 0 %}
                     <tr>
                         <td style="padding: 5px;">Pre Demo Test:</td>
@@ -82,16 +90,25 @@
                 </table>
             </div>
 
+            {% if proposal.note %}
+                <div class="row form-line">
+                    <div style="font-size: 14px;">
+                        <div style="padding: 5px; font-weight: bold;">Note:</div>
+                        <div style="padding: 5px; background-color: #f1e740;">{{ proposal.note }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="row form-line">
                 <div class="col-sm-12">
                     <p>The above quotation includes:</p>
                     <p style="margin-top: -5px;">
                         <ul>
-                            <li>All Work to be preformed in strict accordance with project specifications and mechanical drawings.</li>
+                            <li>All Work to be performed in strict accordance with project specifications and mechanical drawings.</li>
                             <li>All labor and certified instruments.</li>
                             <li>Necessary insurance and compensation certificated when required.</li>
                             <li>Provide electronic copies of final certified test report.</li>
-                            <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work preformed after this date will be subject to incurred labor rate increases.</li>
+                            <li>Contractor providing sufficient time to complete the proposed work on or before contract completion date. All work performed after this date will be subject to incurred labor rate increases.</li>
                         </ul>
                     </p>
                 </div>
@@ -107,37 +124,32 @@
                     </p>
                 </div>
             </div>
+            <br />
+        </div>
+        <div style="font-size: 13px; line-height: 18px;">
             <div class="row form-line">
-                <div class="col-sm-12">
-                    <p>{{ proposal.note }}</p>
-                </div>
+                This proposal is firm for {{ proposal.validity }} days from date of issuance.
             </div>
-                <br />
-            </div>
-            <div style="font-size: 13px; line-height: 18px;">
-                <div class="row form-line">
-                    This proposal is firm for {{ proposal.validity }} days from date of issuance.
-                </div>
-                <div class="row form-line" style="margin: 5px 0 0 0;">
-                    <table>
-                        <tbody>
-                            <tr style="margin: 0px auto;">
-                                <td style="padding: 2px;">By:</td>
-                                <td style="padding: 2px;">Accepted By:</td>
-                            </tr>
+            <div class="row form-line" style="margin: 5px 0 0 0;">
+                <table>
+                    <tbody>
+                        <tr style="margin: 0px auto;">
+                            <td style="padding: 2px;">By:</td>
+                            <td style="padding: 2px;">Accepted By:</td>
+                        </tr>
 
-                            <tr style="margin: 0px auto;">
-                                <td style="padding: 2px;">{{ user_name }}, {{ user_title }}</td>
-                                <td style="padding: 2px;"><b>Name, Title</b></td>
-                            </tr>
-                            <tr style="margin: 0px auto;">
-                                <td style="padding: 2px;"><img class="img-fluid" style="height: 50px;" src="{% get_s3_file_url user_signature '' %}" /><br /><b>Signature</b></td>
-                                <td style="padding: 2px;"><br /><br /><br /><b>Signature</b></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                        <tr style="margin: 0px auto;">
+                            <td style="padding: 2px;">{{ user_name }}, {{ user_title }}</td>
+                            <td style="padding: 2px;"><b>Name, Title</b></td>
+                        </tr>
+                        <tr style="margin: 0px auto;">
+                            <td style="padding: 2px;"><img class="img-fluid" style="height: 50px;" src="{% get_s3_file_url user_signature '' %}" /><br /><b>Signature</b></td>
+                            <td style="padding: 2px;"><br /><br /><br /><b>Signature</b></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+        </div>
     </div>
 </div>
     </body>

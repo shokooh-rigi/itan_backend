@@ -15,6 +15,9 @@ class ControlSystemManufacturer(models.Model):
     web = models.CharField(max_length=55, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["manufacturer_name"]
+
     def __str__(self):
         return self.manufacturer_name
 
@@ -27,6 +30,9 @@ class ControlSystem(models.Model):
     control_file_url = models.URLField(max_length=255, blank=True, null=True)
     documentation = models.FileField(upload_to='uploads/control_system_documentations', blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["manufacturer"]
 
     def __str__(self):
         return str(self.manufacturer) + ", " + str(self.version_number)
@@ -85,13 +91,28 @@ def update_project_number(sender, instance, created, **kwargs):
 class ChangeOrder(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=False, null=True)
     co_number = models.CharField(max_length=30, blank=False, null=False)
-    date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=True)
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0, blank=False)
+    date = models.DateField(blank=True, null=True)
+    confirmed = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(max_length=2000, blank=True, null=True)
 
     def __str__(self):
-        return "Change Order #" + str(self.co_number) + " - Amount $" + str(self.amount)
+        return "Change Order #" + str(self.co_number)
+
+    @classmethod
+    def create_change_order_pdf(cls, parameters):
+        change_order_pdf = Render.render_to_file('pdfTemplates/changeOrderTemplate.html', parameters, 'changeorder')
+        return change_order_pdf
+
+    @classmethod
+    def delete_change_order_pdf(cls, parameters):
+        delete_pdf = Render.delete_file(parameters, 'changeorder')
+        return delete_pdf
+
+
+class ChangeOrderService(models.Model):
+    change_order = models.ForeignKey(ChangeOrder, on_delete=models.CASCADE, blank=False, null=False)
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0, blank=False)
+    description = models.TextField(max_length=2000, blank=True, null=True)
 
 
 class TechLabel(models.Model):

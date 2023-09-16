@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+    <div class="text-center">
+        <br /><br />
+        <div class="row" style="margin: 10px auto; position: relative;">
+            <button class="btn btn-primary" id="printbtn" style="margin: 5px auto 20px auto;">Print/Export This Table</button>
+        </div>
+        <div class="row" style="margin: 10px auto; position: relative;">
+            <form action="?{% url_replace request 'project_name' '' %}">
+                <div class="form-group" style="display: inline-block; transform: translateY(2px);">
+                    <label for="project_name"></label>
+                    <input type="text" class="form-control" id="project_name" name="project_name" placeholder="Project/Customer..." value="{{ request.GET.project_name }}" />
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="pagination" style="position: absolute; left: 50%; bottom: 50%; transform: translate(-50%, 50%);">
+              {% if orders.has_previous %}
+                <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+                 <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' orders.previous_page_number %}">
+                  <i class="fa fa-angle-left" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+
+              {% for num in orders.paginator.page_range %}
+
+                {% if orders.number == num %}
+                <span class="pagination-number pagination-current">{{ num }}</span>
+                {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+                {% endif %}
+
+              {% endfor %}
+
+              {% if orders.has_next %}
+                <a class="pagination-action" href="?{% url_replace request 'page' orders.next_page_number %}">
+                  <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+                <a class="pagination-action" href="?{% url_replace request 'page' orders.paginator.num_pages %}">
+                  <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            </div>
+            <div class="pagination-select">
+                <header class="title">items per page</header>
+                <div class="btn-group">
+                    <button id="paginate_20" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '20' %}">20</a></button>
+                    <button id="paginate_50" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '50' %}">50</a></button>
+                    <button id="paginate_300" type="button" class="btn btn-default"><a href="?{% url_replace request 'paginate_by' '300' %}">300</a></button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-responsive" id="printThis">
+            <thead>
+                <tr>
+                    <th data-sortable="proposal__quote__estimate__id"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__id' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__id' %}{% endif %}">Proposal ID</a></th>
+                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">PO Date</a></th>
+                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Start Date</a></th>
+                    <th data-sortable="proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__project' %}{% endif %}">Project Name</a></th>
+                    <th>Project Number</th>
+                    <th>Project Address</th>
+                    <th>Control System</th>
+                    <th>Contact Info</th>
+{#                    <th>Total</th>#}
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    {% if order.archive == False %}
+                        <tr>
+                            <td>{% estimate_number_generator order.proposal.quote.estimate.id %}</td>
+                            <td>{{ order.proposal.quote.estimate.due_date }}</td>
+                            <td>{{ order.estimated_date_of_project }}</td>
+                            <td>{{ order.proposal.quote.estimate.customer.company.name }}</td>
+                            <td>{{ order.proposal.quote.estimate.project }}</td>
+                            <td>{{ order.project_number }}</td>
+                            <td>{% get_full_address order.proposal.quote.estimate.project %}</td>
+                            <td>{% if order.control_system %}{{ order.control_system }}{% endif %}</td>
+                            <td>{% if order.techlabel.point_of_contact_nam %}{{ order.techlabel.point_of_contact_name }}{% endif %}{% if order.techlabel.point_of_contact_cell_phone %} - {{ order.techlabel.point_of_contact_cell_phone }}{% endif %}{% if order.techlabel.point_of_contact_office_phone %} - {{ order.techlabel.point_of_contact_office_phone }}{% endif %}</td>
+{#                            <td>${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}</td>#}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+          {% if orders.has_previous %}
+            <a class="pagination-action" href="?{% url_replace request 'page' '1' %}">
+             <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.previous_page_number %}">
+              <i class="fa fa-angle-left" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+
+          {% for num in orders.paginator.page_range %}
+
+            {% if orders.number == num %}
+            <span class="pagination-number pagination-current">{{ num }}</span>
+            {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+            <a class="pagination-number" href="?{% url_replace request 'page' num %}">{{ num }}</a>
+            {% endif %}
+
+          {% endfor %}
+
+          {% if orders.has_next %}
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.next_page_number %}">
+              <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            <a class="pagination-action" href="?{% url_replace request 'page' orders.paginator.num_pages %}">
+              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
+    </div>
+
+
+    <script>
+
+
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL)
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}
+
+    $(document).ready(function() {
+        if (window.location.href.indexOf('type=all') > 0) {
+            $(".type-select a.allselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=inprogress') > 0) {
+            $(".type-select a.inprogressselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=invoiced') > 0) {
+            $(".type-select a.invoicedselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=notinvoiced') > 0) {
+            $(".type-select a.notinvoicedselected").addClass("active");
+        }
+        else if (window.location.href.indexOf('type=reported') > 0) {
+            $(".type-select a.reportedselected").addClass("active");
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#printbtn').click(function() {
+            $('#printThis').printThis({
+                importCSS: true,
+                importStyle: true,
+                header: $('.header'),
+                beforePrint: function(){
+                    $('#topnav').hide();
+                    $('#printThis').css('margin-top','100px');
+                },
+                afterPrint: function(){
+                    $('#topnav').show();
+                    $('#printThis').css('margin-top','0px');
+                },
+            });
+        });
+        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        for (const myConst of sortables) {
+            if (window.location.href.indexOf('ordering=' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test1);
+            }
+            if (window.location.href.indexOf('ordering=-' + myConst) > 0) {
+                $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-up'></i>");
+                //$("table th[data-sortable=" + myConst + "] a").attr("href", test2);
+            }
+        }
+        if (window.location.href.indexOf('paginate_by=') <= 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        if (window.location.href.indexOf('paginate_by=300') > 0) {
+            $(".pagination-select #paginate_300").addClass('selected');
+            $(".pagination-select #paginate_300 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=50') > 0) {
+            $(".pagination-select #paginate_50").addClass('selected');
+            $(".pagination-select #paginate_50 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=20') > 0) {
+            $(".pagination-select #paginate_20").addClass('selected');
+            $(".pagination-select #paginate_20 a").removeAttr("href");
+        }
+        else if (window.location.href.indexOf('paginate_by=') > 0) {
+            $(".pagination-select #paginate_all").addClass('selected');
+            $(".pagination-select #paginate_all a").removeAttr("href");
+        }
+    });
+</script>
+{% endblock %}

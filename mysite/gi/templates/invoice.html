@@ -109,12 +109,12 @@
         <div class="row" style="margin: 10px auto; text-align: left;">
             <div class="col-sm-12" style="text-align: center; margin: -7px 0 7px 0;">
                 <button class="btn btn-primary" id="printbtn">Print This Table</button>
+                <div class="custom-control custom-switch mt-4 mb-2">
+                    <input type="checkbox" class="custom-control-input" id="overdue-switch" {% if overdue_result %}checked{% endif %}>
+                    <label class="custom-control-label" for="overdue-switch">Show only invoices with {{ overdue_days }} days Overdue</label>
+                </div>
             </div>
         </div>
-
-
-
-
 
         <table class="table table-striped" id="printThis">
             <thead>
@@ -140,7 +140,7 @@
                             <td style="padding: .75rem .5rem;">{{ invoice.order.date_po_received }}</td>
                             <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
                             <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.project }}</td>
-                            <td style="padding: .75rem .5rem;">{{ invoice.created_on|date:"DATE_FORMAT" }}</td>
+                            <td style="padding: .75rem .5rem;">{% if invoice.edited_on %}{{ invoice.edited_on|date:"DATE_FORMAT" }}{% else %}{{ invoice.created_on|date:"DATE_FORMAT" }}{% endif %}</td>
                             <td style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice as ctad %}{{ ctad|floatformat:2|intcomma }}</td>
                             <td style="padding: .75rem .5rem;">${% calculate_total_paid invoice as ctp %}{{ ctp|floatformat:2|intcomma }}</td>
                             <td style="padding: .75rem .5rem;">${% calculate_remaining_invoice_due invoice as crid %}{{ crid|floatformat:2|intcomma }}</td>
@@ -313,6 +313,15 @@
                     $('#printThis tr th:nth-last-child(1), #printThis tr td:nth-last-child(1)').css('display','table-cell');
                 },
             });
+        });
+
+        $(document).on("change", "#overdue-switch", function (e) {
+            $(this).attr('disabled', true);
+            if ( $(this).prop('checked') ) {
+                location.replace('?overdue=1')
+            } else {
+                location.replace('?overdue=0')
+            }
         });
     });
 </script>

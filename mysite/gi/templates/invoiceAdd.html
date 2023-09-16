@@ -13,9 +13,19 @@
                 <div class="col-lg-12">
                     <label for="id_order" class="control-label">Project #<span class="required">*</span></label>
                     <select name="order" class="form-control select2" required="" id="id_order">
-                        <option value="" selected="" data-customer="" data-engineer="" data-project="" data-totalamount="" data-totalpre="" data-totalfinal="" data-haspre="0">---------</option>
+                        <option value="" selected="" data-customer="" data-engineer="" data-project="" data-totalamount="" data-totalpre="" data-totalfinal="" data-haspre="0" data-dalt="0">---------</option>
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-project="{{ order.proposal.quote.estimate.project }}" data-totalamount="${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}" data-totalpre="${% order_predemo_calculator order.proposal.quote.estimate.id order as opc %}{{ opc|floatformat:2|intcomma }}" data-totalfinal="${% order_final_calculator order.proposal.quote.estimate.id order as ofc %}{{ ofc|floatformat:2|intcomma }}" data-haspre="{% if opc|floatformat:"0" == '0' %}0{% else %}1{% endif %}"{% if orders.count == 1 %} selected="selected"{% endif %}>{{ order.project_number }}</option>
+                            <option value="{{ order.id }}"
+                                    data-customer="{{ order.proposal.quote.estimate.customer }}"
+                                    data-project="{{ order.proposal.quote.estimate.project }}"
+                                    data-totalamount="${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}"
+                                    data-totalpre="${% order_predemo_calculator order.proposal.quote.estimate.id order as opc %}{{ opc|floatformat:2|intcomma }}"
+                                    data-totaldalt="${% order_dalt_calculator order.proposal.quote.estimate.id order as odc %}{{ odc|floatformat:2|intcomma }}"
+                                    data-totalfinal="${% order_final_calculator order.proposal.quote.estimate.id order as ofc %}{{ ofc|floatformat:2|intcomma }}"
+                                    data-haspre="{% if opc|floatformat:"0" == '0' %}0{% else %}1{% endif %}"
+                                    data-hasdalt="{% if odc|floatformat:"0" == '0' %}0{% else %}1{% endif %}"
+                                    {% if orders.count == 1 %}selected="selected"{% endif %}>{{ order.project_number }}
+                            </option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'invoiceAdd' %}" id="add_invoice"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>
@@ -47,6 +57,12 @@
             </div>
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="dalt_amount" class="control-label">DALT Amount</label>
+                    <span class="form-control" id="dalt_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="final_amount" class="control-label">Final Amount</label>
                     <span class="form-control" id="final_amount" style="min-height: 36px; height: auto; background-color: #eee;"></span>
                 </div>
@@ -56,6 +72,15 @@
                     <label for="predemo_selected" class="control-label">Pre-Demo Select</label>
                     <div class="d-inline-block" style="width: 230px;">
                         <input id="predemo_selected" name="predemo_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-line d-none">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="dalt_selected" class="control-label">DALT Select</label>
+                    <div class="d-inline-block" style="width: 230px;">
+                        <input id="dalt_selected" name="dalt_selected" type="checkbox" class="form-control" style="margin-top: 8px; height: 20px;" />
                     </div>
                 </div>
             </div>
@@ -121,9 +146,21 @@
             }
         });
 
+        $("#dalt_selected").change(function(){
+            if(this.checked && $("#final_selected").prop('checked') === false) {
+                $('#id_description').val('DALT Testing')
+            }
+        });
+
         $("#final_selected").change(function(){
             if(this.checked) {
                 $('#id_description').val('TESTING AND BALANCING')
+            } else {
+                if ($("#predemo_selected").prop('checked')) {
+                    $('#id_description').val('Pre-Demo Testing')
+                } else if ($("#dalt_selected").prop('checked')) {
+                    $('#id_description').val('DALT Testing')
+                }
             }
         });
 
@@ -132,6 +169,7 @@
         $("#project").text($('#id_order').find(':selected').data('project'));
         $("#total_amount").text($('#id_order').find(':selected').data('totalamount'));
         $("#predemo_amount").text($('#id_order').find(':selected').data('totalpre'));
+        $("#dalt_amount").text($('#id_order').find(':selected').data('totaldalt'));
         $("#final_amount").text($('#id_order').find(':selected').data('totalfinal'));
         if ($('#id_order').find(':selected').data('haspre') != '0') {
             $('#predemo_selected').closest('.row').removeClass('d-none')
@@ -140,11 +178,19 @@
             $('#predemo_selected').closest('.row').addClass('d-none')
             $('#final_selected').closest('.row').addClass('d-none')
         }
+        if ($('#id_order').find(':selected').data('hasdalt') != '0') {
+            $('#dalt_selected').closest('.row').removeClass('d-none')
+            $('#final_selected').closest('.row').removeClass('d-none')
+        } else {
+            $('#dalt_selected').closest('.row').addClass('d-none')
+            $('#final_selected').closest('.row').addClass('d-none')
+        }
         $('#id_order').on('change', function () {
             $("#customer").text($(this).find(':selected').data('customer'));
             $("#project").text($(this).find(':selected').data('project'));
             $("#total_amount").text($(this).find(':selected').data('totalamount'));
             $("#predemo_amount").text($('#id_order').find(':selected').data('totalpre'));
+            $("#dalt_amount").text($('#id_order').find(':selected').data('totaldalt'));
             $("#final_amount").text($('#id_order').find(':selected').data('totalfinal'));
             if ($('#id_order').find(':selected').data('haspre') != '0') {
                 $('#predemo_selected').closest('.row').removeClass('d-none')
@@ -153,6 +199,13 @@
                 $('#predemo_selected').closest('.row').addClass('d-none')
                 $('#final_selected').closest('.row').addClass('d-none')
             }
+            if ($('#id_order').find(':selected').data('hasdalt') != '0') {
+            $('#dalt_selected').closest('.row').removeClass('d-none')
+            $('#final_selected').closest('.row').removeClass('d-none')
+        } else {
+            $('#dalt_selected').closest('.row').addClass('d-none')
+            $('#final_selected').closest('.row').addClass('d-none')
+        }
         });
     });
     </script>

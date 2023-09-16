@@ -410,6 +410,8 @@ def quote_add(request, estimate_id=None):
                     this_bfm.save()
                 predemo_calculated = quote.estimate.estimatedetails.pre_demo * 1200
                 parameters = {'form': form,
+                              'other_than_dalt_services': quote.estimate.service.exclude(name__iexact="DALT"),
+                              'has_dalt': quote.estimate.service.filter(name__iexact="DALT").exists(),
                               'file_name': pdf_filename_generator(quote.estimate.id, 'Q'),
                               'quote': quote,
                               'predemo_calculated': predemo_calculated,
@@ -485,6 +487,8 @@ def proposal_add(request, quote_id=None):
                 predemo_calculated = proposal.quote.estimate.estimatedetails.pre_demo * 1200
                 parameters = {'form': form,
                               'file_name': pdf_filename_generator(proposal.quote.estimate.id, 'P'),
+                              'other_than_dalt_services': proposal.quote.estimate.service.exclude(name__iexact="DALT"),
+                              'has_dalt': proposal.quote.estimate.service.filter(name__iexact="DALT").exists(),
                               'proposal': proposal,
                               'estimate': proposal.quote.estimate,
                               'predemo_calculated': predemo_calculated,
@@ -548,23 +552,24 @@ def estimate_delete(request, estimate_id):
 @login_required
 def quote_delete(request, quote_id):
     this_quote = get_object_or_404(Quote, id=quote_id)
-    if request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            if this_quote.estimate.bfm:
-                this_quote.estimate.bfm.archive = False
-                this_quote.estimate.bfm.save()
-            this_quote.delete_quote_pdf({'file_name': pdf_filename_generator(this_quote.estimate.id, 'Q')})
-            this_quote.delete()
-        return redirect('quotationHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_quote': this_quote,
-                'error_msg': error_msg
-            }
-            return render(request, "quoteDelete.html", parameters)
-        return redirect('quotationHome')
+    if request.method == "POST" and request.user.is_authenticated:
+        if this_quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
+            if request.POST.get("confirm"):
+                if this_quote.estimate.bfm:
+                    this_quote.estimate.bfm.archive = False
+                    this_quote.estimate.bfm.save()
+                this_quote.delete_quote_pdf({'file_name': pdf_filename_generator(this_quote.estimate.id, 'Q')})
+                this_quote.delete()
+            return redirect('quotationHome')
+        else:
+            if request.POST.get("confirm"):
+                error_msg = "This record was created by another user, you are not authorized to delete this record."
+                parameters = {
+                    'this_quote': this_quote,
+                    'error_msg': error_msg
+                }
+                return render(request, "quoteDelete.html", parameters)
+            return redirect('quotationHome')
     parameters = {'this_quote': this_quote
                   }
     return render(request, "quoteDelete.html", parameters)
@@ -573,21 +578,22 @@ def quote_delete(request, quote_id):
 @login_required
 def proposal_delete(request, proposal_id):
     this_proposal = get_object_or_404(Proposal, id=proposal_id)
-    if request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_proposal.delete_proposal_pdf(
-                {'file_name': pdf_filename_generator(this_proposal.quote.estimate.id, 'P')})
-            this_proposal.delete()
-        return redirect('proposalHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_proposal': this_proposal,
-                'error_msg': error_msg
-            }
-            return render(request, "proposalDelete.html", parameters)
-        return redirect('proposalHome')
+    if request.method == "POST" and request.user.is_authenticated:
+        if this_proposal.quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
+            if request.POST.get("confirm"):
+                this_proposal.delete_proposal_pdf(
+                    {'file_name': pdf_filename_generator(this_proposal.quote.estimate.id, 'P')})
+                this_proposal.delete()
+            return redirect('proposalHome')
+        else:
+            if request.POST.get("confirm"):
+                error_msg = "This record was created by another user, you are not authorized to delete this record."
+                parameters = {
+                    'this_proposal': this_proposal,
+                    'error_msg': error_msg
+                }
+                return render(request, "proposalDelete.html", parameters)
+            return redirect('proposalHome')
     parameters = {'this_proposal': this_proposal
                   }
     return render(request, "proposalDelete.html", parameters)
@@ -699,20 +705,21 @@ def quote_archive(request, quote_id):
 @login_required
 def proposal_archive(request, proposal_id):
     this_proposal = get_object_or_404(Proposal, id=proposal_id)
-    if request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_proposal.archive = True
-            this_proposal.save()
-        return redirect('proposalHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_proposal.quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_proposal': this_proposal,
-                'error_msg': error_msg
-            }
-            return render(request, "proposalArchive.html", parameters)
-        return redirect('proposalHome')
+    if request.method == "POST" and request.user.is_authenticated:
+        if this_proposal.quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
+            if request.POST.get("confirm"):
+                this_proposal.archive = True
+                this_proposal.save()
+            return redirect('proposalHome')
+        else:
+            if request.POST.get("confirm"):
+                error_msg = "This record was created by another user, you are not authorized to delete this record."
+                parameters = {
+                    'this_proposal': this_proposal,
+                    'error_msg': error_msg
+                }
+                return render(request, "proposalArchive.html", parameters)
+            return redirect('proposalHome')
     parameters = {'this_proposal': this_proposal
                   }
     return render(request, "proposalArchive.html", parameters)
@@ -1134,6 +1141,8 @@ def estimate_bid(request, estimate_id):
 
     parameters = {'file_name': estimate_file_name,
                   'estimate': estimate,
+                  'other_than_dalt_services': estimate.service.exclude(name__iexact="DALT"),
+                  'has_dalt': estimate.service.filter(name__iexact="DALT").exists(),
                   'estimate_equipments_pricing': estimate_equipments_pricing,
                   'estimate_sub': estimate_sub,
                   'estimate_total': estimate_total,
