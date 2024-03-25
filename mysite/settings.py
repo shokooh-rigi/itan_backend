@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'tinymce',
     'import_export',
     'rest_framework',
-    'captcha',
+    'django_recaptcha',
     'django_select2',
     'adminsortable2',
     'storages',

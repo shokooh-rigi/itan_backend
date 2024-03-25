@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import *
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 
 from mysite.core.models import *
 

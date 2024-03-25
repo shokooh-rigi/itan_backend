@@ -1,6 +1,6 @@
 django
 django-cors-headers
-django-recaptcha2
+django-recaptcha
 django-richtextfield
 django-use-email-as-username
 djangorestframework
@@ -19,3 +19,4 @@ img2pdf
 numpy
 opencv-python
 pdf2image
+boto3
