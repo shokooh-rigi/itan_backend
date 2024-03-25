@@ -95,6 +95,9 @@ class ChangeOrder(models.Model):
     confirmed = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ['co_number', 'order']
+
     def __str__(self):
         return "Change Order #" + str(self.co_number)
 

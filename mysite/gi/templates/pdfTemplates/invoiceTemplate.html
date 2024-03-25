@@ -7,7 +7,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Proposal</title>
+        <title>Invoice</title>
         {% include "pdfTemplates/headStyle.html" %}
     </head>
     <body>
@@ -30,8 +30,8 @@
                             <div style="padding: 0px; font-weight: bold;">Invoice No:</div>
                         </td>
                         <td style="font-weight: bold; width: 15%;">
-                            <div style="padding: 5px; font-weight: bold;">{% if invoice.edited_on %}{{ invoice.edited_on|date:'m/d/Y' }}{% else %}{{ invoice.created_on|date:'m/d/Y' }}{% endif %}</div>
-                            {% if total_count > 1 %}<div style="padding: 5px; font-weight: bold;">{{ revision_date.created_on|date:'m/d/Y' }}</div>{% endif %}
+                            <div style="padding: 5px; font-weight: bold;">{{ invoice.created_on|date:'m/d/Y' }}</div>
+                            {% if total_count > 1 %}<div style="padding: 5px; font-weight: bold;">{% if invoice.edited_on %}{{ invoice.edited_on|date:'m/d/Y' }}{% else %}{{ revision_date.created_on|date:'m/d/Y' }}{% endif %}</div>{% endif %}
                             <div style="padding: 0px; font-weight: bold;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}-{{ total_count }}</div>
                         </td>
                     </tr>
@@ -87,14 +87,14 @@
                         <td style="padding: 5px 0 0 0; font-weight: bold; background-color: #80c4fc; width: 20%;">AMOUNT in USD</td>
                     </tr>
                     <tr style="border: 1px solid #000;">
-                        <td style="padding: 5px 0 0 0; text-transform: uppercase;">{% if invoice.description %}{{ invoice.description }}{% else %}TESTING AND BALANCING{% endif %} AT {{ estimate.project.name }}</td>
+                        <td style="padding: 5px 0 0 0; text-transform: uppercase;">{% if invoice.description %}{{ invoice.description|title }}{% else %}TESTING AND BALANCING{% endif %} AT {{ estimate.project.name }}</td>
                         <td style="padding: 5px 0 0 0;">{% if invoice.invoice_type == 1 %}${% estimate_total_minus_predemo_minus_dalt_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 2 %}${% estimate_predemo_calculator estimate.id as epc %}{{ epc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 4 %}${% estimate_sub_total_dalt_calculator estimate.id as tdc %}{{ tdc|floatformat:2|intcomma }}{% else %}${% estimate_total_minus_predemo_minus_dalt_calculator estimate.id as etmpc %}{{ etmpc|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
                     {% if invoice.invoice_type == 1 %}
                         {% order_predemo_calculator invoice.order.proposal.quote.estimate.id order as opc %}
                         {% if opc|floatformat:"0" != '0' %}
                             <tr style="border: 1px solid #000;">
-                                <td style="padding: 5px 0 0 0; text-transform: uppercase;">Predemo</td>
+                                <td style="padding: 5px 0 0 0; text-transform: uppercase;">PREDEMO</td>
                                 <td style="padding: 5px 0 0 0;">${{ opc|floatformat:2|intcomma }} </td>
                             </tr>
                         {% endif %}
@@ -107,7 +107,7 @@
                         {% endif %}
                         {% for change_order in change_orders %}
                         <tr style="border: 1px solid #000;">
-                            <td style="padding: 5px 0 0 0;">CO #{{ change_order.co_number }}{% if change_order.description %} - {{ change_order.description }}{% endif %} - {{ change_order.date | date }}</td>
+                            <td style="padding: 5px 0 0 0;">CO #{{ change_order.co_number }}{% for change_order_service in change_order.changeorderservice_set.all %}{% if change_order_service.description %} - {{ change_order_service.description }}{% endif %}{% endfor %} - {{ change_order.date | date }}</td>
                             <td style="padding: 5px 0 0 0;">${% change_order_total_calculator change_order.id as cotc %}{{ cotc|floatformat:2|intcomma }} </td>
                         </tr>
                         {% endfor %}

@@ -94,7 +94,7 @@
 {#                                <td>{{ changeorder.description }}</td>#}
                                 <td>
                                     <a href="{% get_s3_file_url changeorder.id 'changeorder' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
-                                    <a href="{% url 'approveChangeOrder' change_order_id=changeorder.id action=changeorder.confirmed|yesno:"0,1" %}" style="display: inline-block; margin-left: 5px;"><div class="icon {% if changeorder.confirmed %}deleteicon{% else %}checkicon{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if changeorder.confirmed %}Disapprove{% else %}Approve{% endif %}"></div></a>
+                                    <a href="{% url 'approveChangeOrder' change_order_id=changeorder.id action=changeorder.confirmed|yesno:"0,1" %}" style="display: inline-block; margin-left: 5px;"><div class="icon {% if changeorder.confirmed %}cancelicon{% else %}checkicon{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if changeorder.confirmed %}Disapprove{% else %}Approve{% endif %}"></div></a>
                                     <a href="{% url 'deleteChangeOrder' order_id=order_id change_order_id=changeorder.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 </td>
                             </tr>
