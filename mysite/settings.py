@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 import environ
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 env = environ.Env()
 

@@ -2,8 +2,12 @@ from django import template
 
 from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator, estimate_predemo_calculator, estimate_sub_total_dalt_calculator
 from ..models import ChangeOrder, EstimateEquipment, ChangeOrderService
-from ...gi.models import InvoiceTransaction, InvoiceHistory
+from ...gi.models import InvoiceTransaction, InvoiceHistory, Setting, Invoice
 from ...scheduler.models import Schedule, Maintenance
+import datetime
+from django.utils import timezone
+from datetime import timedelta
+
 
 register = template.Library()
 
@@ -132,3 +136,14 @@ def co_total_amount(co):
         total += service.amount
     return total
 
+
+@register.simple_tag
+def past_30_days(order):
+    if len(Invoice.objects.filter(order=order)) > 0:
+        overdue_days = Setting.objects.get(key='Overdue Days').value
+        overdue_datetime = timezone.now() - timedelta(days=int(overdue_days))
+        created_on_aware = order.invoice.created_on
+        if created_on_aware < overdue_datetime:
+            return True
+        return False
+    return None

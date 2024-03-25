@@ -42,17 +42,19 @@ def order_list(request):
     if request.GET.get('type') == 'invoiced':
         object_list = object_list.filter(invoice__isnull=False)
     if request.GET.get('type') == 'notinvoiced':
-        object_list = object_list.filter(invoice__isnull=True).filter(report__isnull=False)
+        object_list = object_list.filter(invoice__isnull=True).filter(colored_drawing__isnull=False).filter(report_colored_drawing__isnull=False)
     if request.GET.get('type') == 'reported':
         object_list = object_list.filter(report__isnull=False)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
-    parameters = {'orders': orders,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  }
+    parameters = {
+        'orders': orders,
+        'WEB_URL': WEB_URL,
+        'MEDIA_URL': MEDIA_URL,
+        'now': datetime.datetime.now()
+    }
     return render(request, "order.html", parameters)
 
 

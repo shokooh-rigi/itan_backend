@@ -6,7 +6,7 @@ from .models import *
 
 class BidFileForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
-    uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}))
 
     class Meta:
         model = iBidFile
@@ -32,7 +32,7 @@ class BidFileForm(ModelForm):
 
 class BidFileEditForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
-    uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}))
 
     class Meta:
         model = iBidFile
