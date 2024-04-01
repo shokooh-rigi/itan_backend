@@ -145,3 +145,7 @@ static/customer/
 # pdf analyzer
 /mysite/pdf_analyzer/src/address_extraction/
 /mysite/pdf_analyzer/pdf_analyzer.py
+
+
+.envs/*
+!.envs/.dev/*
