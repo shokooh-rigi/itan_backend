@@ -4,13 +4,15 @@ volumes:
   postgres_data_prod_itab: {}
   postgres_data_backups_prod_itab: {}
   django_media_prod_itab: {}
+  traefik_prod_itab: {}
 
 services:
-  django: &django
+  django:
     build:
       context: .
       dockerfile: ./docker/prod/django/Dockerfile
-    image: replai-prod-django
+
+    image: django_prod_itab
     volumes:
       - django_media_prod_itab:/app/media
     depends_on:
@@ -24,9 +26,32 @@ services:
     build:
       context: .
       dockerfile: ./docker/prod/postgres/Dockerfile
-    image: replai-postgres-prod
+    image: postgres_prod_itab
     volumes:
       - postgres_data_prod_itab:/var/lib/postgresql/data
       - postgres_data_backups_prod_itab:/backups
     env_file:
       - ./.envs/.prod/.postgres
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./docker/prod/traefik/Dockerfile
+    image: traefik_prod_itab
+    depends_on:
+      - django
+    volumes:
+      - traefik_prod_itab:/etc/traefik/acme
+    ports:
+      - '0.0.0.0:80:80'
+      - '0.0.0.0:443:443'
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/prod/nginx/Dockerfile
+    image: nginx_dev_itab
+    depends_on:
+      - django
+    volumes:
+      - django_media_prod_itab:/usr/share/nginx/media:ro
