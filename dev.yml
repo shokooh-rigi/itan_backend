@@ -1,0 +1,35 @@
+version: '3'
+
+volumes:
+  postgres_data_dev_itab: {}
+  postgres_data_backups_dev_itab: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./docker/dev/django/Dockerfile
+    image: itab-django-dev
+    container_name: itab-django-dev
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.dev/.django
+      - ./.envs/.dev/.postgres
+    ports:
+      - '7100:8000'
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/prod/postgres/Dockerfile
+    image: itab-postgres-dev
+    container_name: itab-postgres-dev
+    volumes:
+      - postgres_data_dev_itab:/var/lib/postgresql/data
+      - postgres_data_backups_dev_itab:/backups
+    env_file:
+      - ./.envs/.dev/.postgres

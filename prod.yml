@@ -1,0 +1,32 @@
+version: '3'
+
+volumes:
+  postgres_data_prod_itab: {}
+  postgres_data_backups_prod_itab: {}
+  django_media_prod_itab: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./docker/prod/django/Dockerfile
+    image: replai-prod-django
+    volumes:
+      - django_media_prod_itab:/app/media
+    depends_on:
+      - postgres
+    env_file:
+      - ./.envs/.prod/.django
+      - ./.envs/.prod/.postgres
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/prod/postgres/Dockerfile
+    image: replai-postgres-prod
+    volumes:
+      - postgres_data_prod_itab:/var/lib/postgresql/data
+      - postgres_data_backups_prod_itab:/backups
+    env_file:
+      - ./.envs/.prod/.postgres
