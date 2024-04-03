@@ -57,12 +57,12 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
   && rm -rf /wheels/
 
 
-COPY --chown=django:django ./compose/prod/django/entrypoint /entrypoint
+COPY --chown=django:django ./docker/prod/django/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint
 RUN chmod +x /entrypoint
 
 
-COPY --chown=django:django ./compose/prod/django/start /start
+COPY --chown=django:django ./docker/prod/django/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 

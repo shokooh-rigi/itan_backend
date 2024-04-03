@@ -1,5 +1,3 @@
-version: '3'
-
 volumes:
   postgres_data_prod_itab: {}
   postgres_data_backups_prod_itab: {}

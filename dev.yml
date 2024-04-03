@@ -1,5 +1,3 @@
-version: '3'
-
 volumes:
   postgres_data_dev_itab: {}
   postgres_data_backups_dev_itab: {}
