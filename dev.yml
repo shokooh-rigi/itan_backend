@@ -32,9 +32,3 @@ services:
       - postgres_data_backups_dev_itab:/backups
     env_file:
       - ./.envs/.dev/.postgres
-
-  mailpit:
-    image: docker.io/axllent/mailpit:latest
-    container_name: mailpit_dev_itab
-    ports:
-      - "8025:8025"
