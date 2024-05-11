@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import AdministrativeForm
 from .models import Document
-from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
+from django.conf import settings
 
 
 # Create your views here.
@@ -28,8 +28,8 @@ def documents_list(request):
     documents = paginator.get_page(page)
 
     parameters = {'documents': documents,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "documentList.html", parameters)
 
@@ -48,7 +48,7 @@ def documents_add(request):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,

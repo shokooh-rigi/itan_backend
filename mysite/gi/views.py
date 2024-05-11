@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
 from ..core.forms import EmailForm
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from django.conf import settings
 from django import forms
 from ..projectprocess.models import ProjectProcess
 from ..order.templatetags.order_tags import *
@@ -67,7 +67,7 @@ def invoice_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -155,8 +155,8 @@ def invoice_list(request):
     parameters = {
         'invoices': invoices,
         'form': form,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'overdue_days': overdue_days,
         'overdue_result': overdue_result
     }
@@ -222,9 +222,9 @@ def invoice_add(request, order_id=None):
                     'user_name': user_name,
                     'user_title': user_title,
                     'user_signature': user_signature,
-                    'WEB_URL': WEB_URL,
-                    'STATIC_URL': STATIC_URL,
-                    'MEDIA_URL': MEDIA_URL,
+                    'WEB_URL': settings.WEB_URL,
+                    'STATIC_URL': settings.STATIC_URL,
+                    'MEDIA_URL': settings.MEDIA_URL,
                     'os': system(),
                     'invoice_view_page': True,
                 }
@@ -315,9 +315,9 @@ def invoice_edit(request, invoice_id):
                     'user_name': user_name,
                     'user_title': user_title,
                     'user_signature': user_signature,
-                    'WEB_URL': WEB_URL,
-                    'STATIC_URL': STATIC_URL,
-                    'MEDIA_URL': MEDIA_URL,
+                    'WEB_URL': settings.WEB_URL,
+                    'STATIC_URL': settings.STATIC_URL,
+                    'MEDIA_URL': settings.MEDIA_URL,
                     'os': system(),
                 }
                 Invoice.create_invoice_pdf(parameters)
@@ -378,9 +378,9 @@ def invoice_view(request, invoice_id):
             'user_name': user_name,
             'user_title': user_title,
             'user_signature': user_signature,
-            'WEB_URL': WEB_URL,
-            'STATIC_URL': STATIC_URL,
-            'MEDIA_URL': MEDIA_URL,
+            'WEB_URL': settings.WEB_URL,
+            'STATIC_URL': settings.STATIC_URL,
+            'MEDIA_URL': settings.MEDIA_URL,
             'os': system(),
             'invoice_view_page': True,
         }
@@ -396,9 +396,9 @@ def invoice_view(request, invoice_id):
         'latest_invoice_history': latest_invoice_history,
         'invoice': invoice,
         'estimate': invoice.order.proposal.quote.estimate,
-        'WEB_URL': WEB_URL,
-        'STATIC_URL': STATIC_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "invoiceView.html", parameters)
 
@@ -510,9 +510,9 @@ def invoice_payment(request, invoice_id):
                     'user_name': user_name,
                     'user_title': user_title,
                     'user_signature': user_signature,
-                    'WEB_URL': WEB_URL,
-                    'STATIC_URL': STATIC_URL,
-                    'MEDIA_URL': MEDIA_URL,
+                    'WEB_URL': settings.WEB_URL,
+                    'STATIC_URL': settings.STATIC_URL,
+                    'MEDIA_URL': settings.MEDIA_URL,
                     'os': system(),
                 }
                 Invoice.create_invoice_pdf(parameters)
@@ -572,8 +572,8 @@ def invoice_history(request, invoice_id):
     parameters = {
         'invoice_histories': invoice_histories,
         'invoice': invoice,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "invoiceHistory.html", parameters)
 
@@ -623,7 +623,7 @@ def account_summary_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     [to_email],
                     cc=[cc],
                 )
@@ -662,8 +662,8 @@ def account_summary_list(request):
 
     parameters = {'account_summaries': account_summaries,
                   'form': form,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "accountSummary.html", parameters)
 
@@ -729,9 +729,9 @@ def account_summary_add(request, customer_id=None):
                               'user_name': user_name,
                               'user_title': user_title,
                               'user_signature': user_signature,
-                              'WEB_URL': WEB_URL,
-                              'STATIC_URL': STATIC_URL,
-                              'MEDIA_URL': MEDIA_URL,
+                              'WEB_URL': settings.WEB_URL,
+                              'STATIC_URL': settings.STATIC_URL,
+                              'MEDIA_URL': settings.MEDIA_URL,
                               'os': system(),
                               }
                 account_summary_pdf = AccountSummary.create_account_summary_pdf(parameters)

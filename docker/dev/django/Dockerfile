@@ -1,5 +1,5 @@
 # define an alias for the specific python version used in this file.
-FROM docker.io/python:3.9-slim-bookworm as python
+FROM docker.io/python:3.10-slim-bookworm as python
 
 # Python build stage
 FROM python as python-build-stage
@@ -11,14 +11,18 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
   # psycopg dependencies
-  libpq-dev
+  libpq-dev \
+  # pycairo
+  libcairo2-dev pkg-config python3-dev \
+  # mysql
+  default-libmysqlclient-dev
 
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements.txt .
+COPY ./requirements .
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
-  -r requirements.txt
+  -r ${BUILD_ENVIRONMENT}.txt
 
 
 # Python 'run' stage
@@ -49,8 +53,12 @@ RUN groupadd --gid 1000 dev-user \
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
   libpq-dev \
+  # pycairo
+  libcairo2-dev pkg-config python3-dev \
   # Translations dependencies
   gettext \
+  # mysql
+  default-libmysqlclient-dev build-essential \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
@@ -63,7 +71,8 @@ COPY --from=python-build-stage /usr/src/app/wheels  /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
   && rm -rf /wheels/
 
-COPY ./docker/prod/django/entrypoint /entrypoint
+COPY ./docker/prod/postgres/entrypoint /entrypoint
+# COPY ./docker/prod/mysql/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint
 RUN chmod +x /entrypoint
 

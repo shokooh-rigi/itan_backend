@@ -13,12 +13,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from .models import *
 from .render import Render as PDFRender
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
 from django.db.models import Count
 from PyPDF2 import PdfFileMerger
 import random
-from ..settings import MEDIA_URL_NOSLASH
+from django.conf import settings
 import img2pdf
 from PIL import Image
 from ..s3_file_manager import S3
@@ -56,8 +55,8 @@ def report_sheet_list(request):
 
     parameters = {
         'sheets': sheets,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "reportSheetList.html", parameters)
 
@@ -134,9 +133,9 @@ def report_sheet_recreate(request, sheet_id):
         'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
         'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
         'company_name': company_name,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
-        'STATIC_URL': STATIC_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
+        'STATIC_URL': settings.STATIC_URL,
         'os': system()
     }
 
@@ -621,9 +620,9 @@ def report_sheet_recreate(request, sheet_id):
             'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
             'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
             'company_name': company_name,
-            'WEB_URL': WEB_URL,
-            'STATIC_URL': STATIC_URL,
-            'MEDIA_URL': MEDIA_URL,
+            'WEB_URL': settings.WEB_URL,
+            'STATIC_URL': settings.STATIC_URL,
+            'MEDIA_URL': settings.MEDIA_URL,
             'os': system(),
         }
         pdf_name, pdf_path = Render.render_to_file('pdfTemplates/fullTemplate.html', parameters, 'FinalReport')
@@ -648,9 +647,9 @@ def report_sheet_recreate(request, sheet_id):
             'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
             'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
             'company_name': company_name,
-            'WEB_URL': WEB_URL,
-            'STATIC_URL': STATIC_URL,
-            'MEDIA_URL': MEDIA_URL,
+            'WEB_URL': settings.WEB_URL,
+            'STATIC_URL': settings.STATIC_URL,
+            'MEDIA_URL': settings.MEDIA_URL,
             'os': system(),
         }
         pdf_name, pdf_path = Render.render_to_file('pdfTemplates/tocTemplate.html', parameters, 'TocReport')
@@ -678,9 +677,9 @@ def report_sheet_recreate(request, sheet_id):
             'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
             'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
             'company_name': company_name,
-            'WEB_URL': WEB_URL,
-            'MEDIA_URL': MEDIA_URL,
-            'STATIC_URL': STATIC_URL,
+            'WEB_URL': settings.WEB_URL,
+            'MEDIA_URL': settings.MEDIA_URL,
+            'STATIC_URL': settings.STATIC_URL,
             'os': system()
         }
 

@@ -14,7 +14,7 @@ from .forms import SettlementForm, SettledScheduleForm
 from .models import Settlement, SettledSchedule, ModulesToEmailTemplateRelation, SettledMaintenances
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from django.conf import settings
 from ..scheduler.models import *
 import datetime
 from ..gi.views import order_total_calculator, estimate_predemo_calculator
@@ -51,7 +51,7 @@ def settlement_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -83,8 +83,8 @@ def settlement_list(request):
     # must_go.delete()
 
     parameters = {'settlements': settlements,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   'form': form,
                   }
     return render(request, "settlement.html", parameters)
@@ -360,9 +360,9 @@ def settlement_view(request, settlement_id):
                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                   'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                   'company_name': company_name,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  'STATIC_URL': STATIC_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
+                  'STATIC_URL': settings.STATIC_URL,
                   'os': system(),
                   'settlement_id_prefix': settlement_id_prefix,
                   }
@@ -404,9 +404,9 @@ def generate_pdf(request, settlement_id):
                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                   'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                   'company_name': company_name,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  'STATIC_URL': STATIC_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
+                  'STATIC_URL': settings.STATIC_URL,
                   'os': system(),
                   'settlement_id_prefix': settlement_id_prefix,
                   }

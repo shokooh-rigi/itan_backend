@@ -13,7 +13,7 @@ from .forms import *
 from ..gi.models import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from django.conf import settings
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 from .templatetags.estimator_tags import *
 from django.db.models import Count
@@ -52,7 +52,7 @@ def estimate_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -111,8 +111,8 @@ def estimate_list(request):
 
     parameters = {'estimates': estimates,
                   'form': form,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   'total_rows': total_rows,
                   }
     return render(request, "estimator.html", parameters)
@@ -148,7 +148,7 @@ def quotation_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -204,8 +204,8 @@ def quotation_list(request):
 
     parameters = {'quotes': quotes,
                   'form': form,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "quotation.html", parameters)
 
@@ -240,7 +240,7 @@ def proposal_list(request):
                 msg = EmailMessage(
                     subject,
                     message,
-                    DEFAULT_FROM_EMAIL,
+                    settings.DEFAULT_FROM_EMAIL,
                     to_email,
                     cc=cc,
                 )
@@ -293,8 +293,8 @@ def proposal_list(request):
     page = request.GET.get('page')
     proposals = paginator.get_page(page)
     parameters = {'proposals': proposals,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   'form': form,
                   }
     return render(request, "proposal.html", parameters)
@@ -432,9 +432,9 @@ def quote_add(request, estimate_id=None):
                               'user_title': user_title,
                               'user_signature': user_signature,
                               'user_cell': user_cell,
-                              'WEB_URL': WEB_URL,
-                              'STATIC_URL': STATIC_URL,
-                              'MEDIA_URL': MEDIA_URL,
+                              'WEB_URL': settings.WEB_URL,
+                              'STATIC_URL': settings.STATIC_URL,
+                              'MEDIA_URL': settings.MEDIA_URL,
                               'os': system(),
                               }
                 quote_pdf = Quote.create_quote_pdf(parameters)
@@ -509,9 +509,9 @@ def proposal_add(request, quote_id=None):
                               'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                               'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                               'company_name': company_name,
-                              'WEB_URL': WEB_URL,
-                              'STATIC_URL': STATIC_URL,
-                              'MEDIA_URL': MEDIA_URL,
+                              'WEB_URL': settings.WEB_URL,
+                              'STATIC_URL': settings.STATIC_URL,
+                              'MEDIA_URL': settings.MEDIA_URL,
                               'os': system(),
                               }
                 proposal_pdf = Proposal.create_proposal_pdf(parameters)
@@ -1169,9 +1169,9 @@ def estimate_bid(request, estimate_id):
                   'user_title': user_title,
                   'user_signature': user_signature,
                   'user_cell': user_cell,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  'STATIC_URL': STATIC_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
+                  'STATIC_URL': settings.STATIC_URL,
                   'os': system(),
                   }
     estimate_pdf = Estimate.create_estimate_pdf(parameters)
@@ -1223,8 +1223,8 @@ def estimate_history(request, estimate_id):
     parameters = {
         'estimate_histories': estimate_histories,
         'estimate': estimate,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "estimateHistory.html", parameters)
 

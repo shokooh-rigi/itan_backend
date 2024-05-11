@@ -5,7 +5,7 @@ from mysite.estimator.models import *
 from mysite.estimator.views import estimate_total_calculator
 from mysite.order.models import Order
 from ..companyperformance.views import is_num
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 from ..scheduler.models import Schedule, Maintenance
 from django.db.models import Q
 
@@ -36,8 +36,8 @@ def lead_export(request):
             if Quote.objects.filter(estimate__customer__company=this_object, created_on__range=(from_date_obj, to_date_obj)).count() == 0:
                 object_list = object_list.exclude(id=this_object.id)
     parameters = {
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'object_list': object_list,
         'from_date_is_greater': from_date_is_greater,
         'from_date_obj': from_date_obj,

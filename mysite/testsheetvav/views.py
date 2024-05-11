@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from .render import Render as PDFRender
 from ..sheetcreator.models import *
 from itertools import chain
@@ -46,8 +46,8 @@ def vav_sheet_list(request):
     sheets = paginator.get_page(page)
 
     parameters = {'sheets': sheets,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "vavList.html", parameters)
 
@@ -150,8 +150,8 @@ def vav_sheet_equipment_list(request, sheet_id):
     parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "vavSheetEquipmentsList.html", parameters)
 
@@ -188,8 +188,8 @@ def sort_vav_sheet_equipment_list(request, sheet_id):
     parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "sortVavSheetEquipmentsList.html", parameters)
 
@@ -385,9 +385,9 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
         'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
         'company_name': company_name,
-        'WEB_URL': WEB_URL,
-        'STATIC_URL': STATIC_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'os': system(),
     }
 
@@ -469,7 +469,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
     if request.method == 'POST':
         if request.POST.get("cancel"):
             if next_url:
-                return redirect(WEB_URL + next_url)
+                return redirect(settings.WEB_URL + next_url)
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         if edit_page:
             for value_field in value_fields:
@@ -495,7 +495,7 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
             sheet_equipment.main_data_entry_completed = True
             sheet_equipment.save()
             if next_url:
-                return redirect(WEB_URL + next_url)
+                return redirect(settings.WEB_URL + next_url)
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
         else:
             for every_field in showing_fields:

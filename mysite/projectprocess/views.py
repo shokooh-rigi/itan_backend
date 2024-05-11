@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from ..sheetcreator.models import *
 from ..estimator.views import estimate_total_calculator
 
@@ -81,8 +81,8 @@ def project_process_list(request):
 
 
     parameters = {'projects': projects,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "projectProcessList.html", parameters)
 

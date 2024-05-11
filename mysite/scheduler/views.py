@@ -11,10 +11,9 @@ import random
 from mysite.order.models import Order
 from .forms import ScheduleForm
 from .models import *
-from ..settings import MEDIA_URL, WEB_URL, TIME_ZONE
+from django.conf import settings
 from datetime import timedelta
 from django.utils.timezone import activate
-import mysite.settings
 from ..estimator.views import estimate_total_work
 from ..core.models import *
 import json
@@ -61,8 +60,8 @@ def schedule_list(request):
     schedules = paginator.get_page(page)
 
     parameters = {'schedules': schedules,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "schedule.html", parameters)
 

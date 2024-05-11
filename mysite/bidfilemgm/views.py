@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import BidFileForm, BidFileEditForm, Person
 from .models import BidFile
-from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
+from django.conf import settings
 from django.core.files import File
 from io import BytesIO
 from ..s3_file_manager import S3
@@ -54,8 +54,8 @@ def bid_files_list(request):
     bidfiles = paginator.get_page(page)
 
     parameters = {'bidfiles': bidfiles,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   'total_rows': total_rows,
                   }
     return render(request, "bfmList.html", parameters)
@@ -78,7 +78,7 @@ def bidfiles_add(request):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -107,7 +107,7 @@ def bidfiles_add(request):
                 zf = create_zip_file(files, temp_path, zip_file_name)
                 s3 = S3()
                 if BidFile.objects.get(id=entry.pk).uploaded_file:
-                    s3.delete_file_from_bucket(key=MEDIA_URL + str(BidFile.objects.get(id=entry.pk).uploaded_file))
+                    s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(BidFile.objects.get(id=entry.pk).uploaded_file))
                 file = open(temp_path + '/' + zip_file_name, 'rb')
                 BidFile.objects.get(id=entry.pk).uploaded_file.save(zip_file_name, file)
                 os.remove(temp_path + '/' + zip_file_name)
@@ -133,7 +133,7 @@ def bidfiles_addfile(request, bidfiles_id):
             size_sum = 0
             for f in files_list:
                 size_sum = size_sum + f.size
-            if size_sum > MAX_UPLOAD_SIZE:
+            if size_sum > settings.MAX_UPLOAD_SIZE:
                 error_msg = "Selected files exceeded maximum upload size!"
                 parameters = {
                     'form': form,
@@ -164,7 +164,7 @@ def bidfiles_addfile(request, bidfiles_id):
             f.close()
             addto_zip_file(files, temp_path, zip_file_name)
             if BidFile.objects.get(id=this_bfm.pk).uploaded_file:
-                s3.delete_file_from_bucket(key=MEDIA_URL + str(BidFile.objects.get(id=this_bfm.pk).uploaded_file))
+                s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(BidFile.objects.get(id=this_bfm.pk).uploaded_file))
             file = open(temp_path + '/' + zip_file_name, 'rb')
             BidFile.objects.get(id=this_bfm.pk).uploaded_file.save(zip_file_name, file)
             os.remove(temp_path + '/' + zip_file_name)
@@ -254,7 +254,7 @@ def bidfiles_delete(request, bidfiles_id):
             if request.user.is_authenticated:
                 if this_bidfile.created_by == request.user or request.user.profile.user_type == 2:
                     s3 = S3()
-                    s3.delete_file_from_bucket(key=MEDIA_URL + str(this_bidfile.uploaded_file))
+                    s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(this_bidfile.uploaded_file))
                     this_bidfile.delete()
                     return redirect('bidFilesHome')
                 else:

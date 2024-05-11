@@ -10,13 +10,13 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 
-from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
+# from mysite.pdf_analyzer.pdf_analyzer import start_find_project_address
 from mysite.pdf_analyzer.models import AddressExtractionRun, AddressExtractionDebug
 from mysite.pdf_analyzer.src.logger.logger_models import ADDRESS_RUN_STEPS
 
 from .forms import BidFileForm, BidFileEditForm
 from .models import iBidFile
-from ..settings import MEDIA_URL, WEB_URL, MAX_UPLOAD_SIZE
+from django.conf import settings
 
 
 # Create your views here.
@@ -55,8 +55,8 @@ def bid_files_list(request):
     bidfiles = paginator.get_page(page)
 
     parameters = {'bidfiles': bidfiles,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   'total_rows': total_rows,
                   }
     return render(request, "ibfmList.html", parameters)
@@ -76,7 +76,7 @@ def bidfiles_add(request):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -163,6 +163,8 @@ def pdf_analyzer_project_address_run(request, bidfile_id):
     active_runs = AddressExtractionRun.objects.filter(file=bidfile, is_finished=False)
     if active_runs.exists():
         return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', active_runs.first().pk)
+
+    return None
 
     run_id = start_find_project_address(bidfile, bidfile.project.name)
     return redirect('ibidFilesPDFAnalyzerProjectAddressProgress', run_id)

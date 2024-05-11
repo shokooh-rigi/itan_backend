@@ -4,7 +4,7 @@ from django.shortcuts import render
 from mysite.estimator.models import *
 from mysite.estimator.views import estimate_total_calculator
 from mysite.order.models import Order
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 from ..scheduler.models import Schedule, Maintenance
 
 
@@ -13,8 +13,8 @@ def job_costing_list(request):
     object_list = Order.objects.filter(invoice__isnull=False).order_by('created_on')
 
     parameters = {
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'object_list': object_list,
     }
     return render(request, "jobCostsList.html", parameters)

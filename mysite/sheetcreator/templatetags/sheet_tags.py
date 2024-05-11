@@ -1,6 +1,5 @@
 from django import template
 from mysite.dbmanagement.models import EquipmentTypeCustomField, EquipmentCustomField, FieldTypeChoices, DataTypeChoices
-from ...settings import MEDIA_URL
 from django.shortcuts import get_object_or_404
 
 from mysite.sheetcreator.models import *

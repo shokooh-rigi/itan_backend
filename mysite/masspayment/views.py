@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from ..sheetcreator.models import *
 from ..estimator.views import estimate_total_calculator
 from ..gi.models import *
@@ -58,8 +58,8 @@ def customer_list(request):
     customers = paginator.get_page(page)
 
     parameters = {'customers': customers,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "customerList.html", parameters)
 
@@ -129,9 +129,9 @@ def mass_payment(request, contact_id):
                         'user_name': user_name,
                         'user_title': user_title,
                         'user_signature': user_signature,
-                        'WEB_URL': WEB_URL,
-                        'STATIC_URL': STATIC_URL,
-                        'MEDIA_URL': MEDIA_URL,
+                        'WEB_URL': settings.WEB_URL,
+                        'STATIC_URL': settings.STATIC_URL,
+                        'MEDIA_URL': settings.MEDIA_URL,
                         'os': system(),
                     }
                     Invoice.create_invoice_pdf(parameters)
@@ -148,7 +148,7 @@ def mass_payment(request, contact_id):
         'total_invoiced': total_invoiced,
         'total_paid': total_paid,
         'total_balance_due': total_balance_due,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "massPayment.html", parameters)

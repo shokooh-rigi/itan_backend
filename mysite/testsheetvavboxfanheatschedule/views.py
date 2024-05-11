@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
 from .render import Render as PDFRender
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from ..sheetcreator.models import *
 from django.db.models import Count
 from .models import VbfhsEquipment, VbfhsSheetData
@@ -43,8 +43,8 @@ def vbfhs_sheet_list(request):
     sheets = paginator.get_page(page)
 
     parameters = {'sheets': sheets,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "vbfhsList.html", parameters)
 
@@ -82,8 +82,8 @@ def vbfhs_sheet_equipment_list(request, sheet_id):
     parameters = {'equipments': vbfhs_equipments,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "vbfhsSheetEquipmentsList.html", parameters)
 
@@ -162,9 +162,9 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
         'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
         'company_name': company_name,
-        'WEB_URL': WEB_URL,
-        'STATIC_URL': STATIC_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'os': system(),
     }
 

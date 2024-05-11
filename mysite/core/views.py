@@ -13,7 +13,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from mysite.core.tokens import account_activation_token
 from .forms import *
 from ..coi.models import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, DEFAULT_FROM_EMAIL
+from django.conf import settings
 
 
 def error_handler(request, exception):
@@ -131,7 +131,7 @@ def activate(request, uidb64, token):
             msg = EmailMessage(
                 subject,
                 message,
-                DEFAULT_FROM_EMAIL,
+                settings.DEFAULT_FROM_EMAIL,
                 ['info@tabtechinc.com'],
             )
             msg.send()

@@ -12,9 +12,8 @@ from ..scheduler.models import Maintenance, Schedule, ScheduleTech, LicenseFiles
 from ..sheetcreator.models import Sheet
 import os
 import zipfile
-from ..settings import MEDIA_URL, WEB_URL, UPLOAD_URL, MAX_UPLOAD_SIZE
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file, addto_zip_file
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from ..order.templatetags.order_tags import order_tech_final_price_calculator, order_tech_predemo_price_calculator
 from ..core.models import Setting
 from ..s3_file_manager import S3
@@ -30,10 +29,10 @@ def tech_calendar(request):
     owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
     parameters = {
         'current_user': request.user,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'owner_logo': owner_logo,
-        'STATIC_URL': STATIC_URL,
+        'STATIC_URL': settings.STATIC_URL,
     }
     return render(request, "schedule2.html", parameters)
 
@@ -365,7 +364,7 @@ def upload_tech(request):
             size_sum = 0
             for f in files_list:
                 size_sum = size_sum + f.size
-            if size_sum > MAX_UPLOAD_SIZE:
+            if size_sum > settings.MAX_UPLOAD_SIZE:
                 error_msg = "Selected files exceeded maximum upload size!"
                 return JsonResponse({
                     'result': False,
@@ -386,7 +385,7 @@ def upload_tech(request):
                 f.write(response.content)
                 f.close()
                 addto_zip_file(files, temp_path, zip_file_name)
-                s3.delete_file_from_bucket(key=MEDIA_URL + str(schedule_update.tech_upload))
+                s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(schedule_update.tech_upload))
                 file = open(temp_path + '/' + zip_file_name, 'rb')
                 schedule_update.tech_upload.save(zip_file_name, file)
                 os.remove(temp_path + '/' + zip_file_name)
@@ -416,7 +415,7 @@ def upload_tech(request):
             size_sum = 0
             for f in files_list:
                 size_sum = size_sum + f.size
-            if size_sum > MAX_UPLOAD_SIZE:
+            if size_sum > settings.MAX_UPLOAD_SIZE:
                 msg = "Selected files exceeded maximum upload size!"
                 return JsonResponse({
                     'result': False,
@@ -433,7 +432,7 @@ def upload_tech(request):
                 addto_zip_file(files, temp_path, zip_file_name)
             else:
                 create_zip_file(files, temp_path, zip_file_name)
-                maintenance_update.tech_upload = UPLOAD_URL + 'techfiles/' + zip_file_name
+                maintenance_update.tech_upload = settings.UPLOAD_URL + 'techfiles/' + zip_file_name
                 maintenance_update.save()
 
             return JsonResponse({

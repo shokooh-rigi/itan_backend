@@ -7,7 +7,7 @@ from mysite.estimator.models import *
 from mysite.estimator.views import estimate_total_calculator
 from mysite.gi.models import Invoice
 from mysite.order.models import Order
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 
 
 @login_required
@@ -95,8 +95,8 @@ def bids_list(request, bid_type):
         total_rows += 1
         total_of_all += estimate_total_calculator(rowfromestimate.id)
     parameters = {
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'customer_rows': customer_rows,
         'total_of_all': total_of_all,
         'total_rows': total_rows,
@@ -126,7 +126,7 @@ def detailed_orders_list(request):
     page = request.GET.get('page')
     orders = paginator.get_page(page)
     parameters = {'orders': orders,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "detailedorder.html", parameters)

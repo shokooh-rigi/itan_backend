@@ -1,6 +1,6 @@
 from django import template
 from mysite.dbmanagement.models import EquipmentTypeCustomField, EquipmentCustomField, FieldTypeChoices
-from ...settings import MEDIA_URL
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from mysite.sheetcreator.models import SheetEquipmentActualData
@@ -15,7 +15,7 @@ def in_setting(things, key):
 
 @register.simple_tag
 def media_url():
-    return MEDIA_URL
+    return settings.MEDIA_URL
 
 
 @register.filter(name='has_group')

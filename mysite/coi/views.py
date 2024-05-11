@@ -7,7 +7,7 @@ from mysite.core.models import Person, ModulesToEmailTemplateRelation
 from .forms import CoiForm
 from .models import Coi
 from ..core.views import htmlbodytemplate_tag_converter
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 
 
 # Create your views here.
@@ -28,8 +28,8 @@ def coi_list(request):
     cois = paginator.get_page(page)
 
     parameters = {'cois': cois,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "coi.html", parameters)
 

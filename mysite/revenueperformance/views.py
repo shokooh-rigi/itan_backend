@@ -6,7 +6,7 @@ from ..order.templatetags.order_tags import *
 from mysite.estimator.views import estimate_total_calculator
 from mysite.order.models import Order
 from mysite.gi.models import *
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 from ..scheduler.models import Schedule, Maintenance
 from django.db.models import Q
 
@@ -104,8 +104,8 @@ def revenue_list(request):
 
 
     parameters = {
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'from_date_is_greater': from_date_is_greater,
         'from_date_obj_1': from_date_obj_1,
         'to_date_obj_1': to_date_obj_1,

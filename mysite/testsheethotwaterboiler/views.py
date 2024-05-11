@@ -14,7 +14,7 @@ from django.urls import reverse
 
 from .forms import *
 from .render import Render as PDFRender
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from ..sheetcreator.models import *
 from django.db.models import Count
 from .models import HotWaterBoilerEquipment, HotWaterBoilerSheetData
@@ -51,8 +51,8 @@ def hot_water_boiler_sheet_list(request):
         'equipment_list_url': '/hot-water-boiler/equipments_list/',
         'sheet_delete_url': '/hot-water-boiler/delete/',
         'sheets': sheets,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "sheetList.html", parameters)
 
@@ -96,8 +96,8 @@ def hot_water_boiler_sheet_equipment_list(request, sheet_id):
         'equipments': equipments,
         'my_sheet': my_sheet,
         'sheet_id': sheet_id,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, "hotWaterBoilerSheetEquipmentsList.html", parameters)
 
@@ -182,9 +182,9 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
         'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
         'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
         'company_name': company_name,
-        'WEB_URL': WEB_URL,
-        'STATIC_URL': STATIC_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'os': system(),
     }
 

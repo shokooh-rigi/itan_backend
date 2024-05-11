@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from ..order.models import *
 from ..dbmanagement.models import FieldTypeChoices, FieldRangeOrSelectiveChoices, OperandChoices, ShowParenthesesChoices
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
+from django.conf import settings
 from .models import *
 from .render import Render as PDFRender
 from django.http import JsonResponse
@@ -42,8 +42,8 @@ def sheet_list(request):
     sheets = paginator.get_page(page)
 
     parameters = {'sheets': sheets,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "airMovingSheetList.html", parameters)
 
@@ -174,8 +174,8 @@ def equipments_list(request, sheet_id):
     parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "sheetEquipmentsList.html", parameters)
 
@@ -211,8 +211,8 @@ def sort_equipments_list(request, sheet_id):
     parameters = {'sheet_equipments': sheets,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "sortEquipmentsList.html", parameters)
 
@@ -375,9 +375,9 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
         'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
         'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
         'company_name': company_name,
-        'WEB_URL': WEB_URL,
-        'STATIC_URL': STATIC_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'os': system(),
     }
 
@@ -467,7 +467,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     if request.method == 'POST':
         if request.POST.get("cancel"):
             if next_url:
-                return redirect(WEB_URL + next_url)
+                return redirect(settings.WEB_URL + next_url)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
             for value_field in value_fields:
@@ -507,7 +507,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                 this_sheet_equipment.terminal_actual_data_entry_completed = False
             this_sheet_equipment.save()
             if next_url:
-                return redirect(WEB_URL + next_url)
+                return redirect(settings.WEB_URL + next_url)
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
 
     parameters = {'this_sheet_equipment': this_sheet_equipment,

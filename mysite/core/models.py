@@ -60,6 +60,12 @@ def update_customer_id(sender, instance, created, **kwargs):
         instance.customer_id = Setting.objects.get(key='Customer ID Last Digit').value
         instance.save()
 
+        new_number = Setting.objects.get(key=0)
+        new_number.value = int(Setting.objects.get(key=0).value) + 1
+        new_number.save()
+        instance.customer_id = Setting.objects.get(key=0).value
+        instance.save()
+
 
 class Person(models.Model):
     company = models.ForeignKey(ContactInfo, on_delete=models.CASCADE, blank=False)

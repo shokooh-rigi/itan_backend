@@ -8,12 +8,17 @@ from django import forms
 from platform import system
 import os
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MAX_UPLOAD_SIZE, UPLOAD_URL
+from django.conf import settings
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file
 from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 from ..s3_file_manager import S3
 import urllib.request as url_request
+from django.http import HttpResponse
+from mysite.sheetcreator.models import DataSheet
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -51,8 +56,8 @@ def order_list(request):
     orders = paginator.get_page(page)
     parameters = {
         'orders': orders,
-        'WEB_URL': WEB_URL,
-        'MEDIA_URL': MEDIA_URL,
+        'WEB_URL': settings.WEB_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         'now': datetime.datetime.now()
     }
     return render(request, "order.html", parameters)
@@ -212,9 +217,9 @@ def change_order(request, order_id):
                     'user_name': user_name,
                     'user_title': user_title,
                     'user_signature': user_signature,
-                    'WEB_URL': WEB_URL,
-                    'STATIC_URL': STATIC_URL,
-                    'MEDIA_URL': MEDIA_URL,
+                    'WEB_URL': settings.WEB_URL,
+                    'STATIC_URL': settings.STATIC_URL,
+                    'MEDIA_URL': settings.MEDIA_URL,
                     'os': system(),
                 }
                 new_change_order.create_change_order_pdf(pdf_parameters)
@@ -272,9 +277,9 @@ def tech_label(request, order_id):
                                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                                   'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                                   'company_name': LicenseInfo.objects.get(key='CompanyName').value,
-                                  'WEB_URL': WEB_URL,
-                                  'STATIC_URL': STATIC_URL,
-                                  'MEDIA_URL': MEDIA_URL,
+                                  'WEB_URL': settings.WEB_URL,
+                                  'STATIC_URL': settings.STATIC_URL,
+                                  'MEDIA_URL': settings.MEDIA_URL,
                                   'os': system(),
                                   }
                     techlabel_pdf = TechLabel.create_techlabel_pdf(parameters)
@@ -332,7 +337,7 @@ def order_equipment_submittal(request, order_id):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -484,7 +489,7 @@ def order_field_drawing(request, order_id):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -561,7 +566,7 @@ def order_site_pictures(request, order_id):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -614,7 +619,7 @@ def order_test_sheets(request, order_id):
                 size_sum = 0
                 for f in files_list:
                     size_sum = size_sum + f.size
-                if size_sum > MAX_UPLOAD_SIZE:
+                if size_sum > settings.MAX_UPLOAD_SIZE:
                     error_msg = "Selected files exceeded maximum upload size!"
                     parameters = {
                         'form': form,
@@ -698,9 +703,9 @@ def change_order_delete(request, order_id, change_order_id):
                 'user_name': user_name,
                 'user_title': user_title,
                 'user_signature': user_signature,
-                'WEB_URL': WEB_URL,
-                'STATIC_URL': STATIC_URL,
-                'MEDIA_URL': MEDIA_URL,
+                'WEB_URL': settings.WEB_URL,
+                'STATIC_URL': settings.STATIC_URL,
+                'MEDIA_URL': settings.MEDIA_URL,
                 'os': system(),
             }
             Invoice.create_invoice_pdf(pdf_parameters)
@@ -766,9 +771,9 @@ def approve_change_order(request, change_order_id, action):
             'user_name': user_name,
             'user_title': user_title,
             'user_signature': user_signature,
-            'WEB_URL': WEB_URL,
-            'STATIC_URL': STATIC_URL,
-            'MEDIA_URL': MEDIA_URL,
+            'WEB_URL': settings.WEB_URL,
+            'STATIC_URL': settings.STATIC_URL,
+            'MEDIA_URL': settings.MEDIA_URL,
             'os': system(),
         }
         Invoice.create_invoice_pdf(pdf_parameters)
@@ -827,4 +832,103 @@ def manufacturer_edit_popup(request, pk=None):
             '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "cs_manufacturer_form.html", {"form": form})
+ 
+@login_required
+def order_uppdate(request, order_id):
+    this_order = get_object_or_404(Order, id=order_id)
+    dsq = this_order.datasheet_set.all()
+    estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
+
+    # if request.method == "POST":
+    #     form = DataSheetEquipmentForm(request.POST)
+    #     if form.is_valid():
+    #         if this_order.datasheet_set.all().exists():
+    #             sheet_data_instance = this_order.datasheet_set.all().first()
+    #         else:
+    #             sheet_data_instance = DataSheet(
+    #                 test_sheet_type = test_sheet_instance,
+    #                 project = this_order,
+    #                 system = form.cleaned_data['system'],
+    #                 number_of_equipment_groups = form.cleaned_data['number_of_equipments'],
+    #             )
+    #             sheet_data_instance.save()
+
+    #         new_dse_instance = DataSheetEquipment(
+    #             datasheet = sheet_data_instance,
+    #             equipment = form.cleaned_data['equipment'],
+    #             equipment_group = form.cleaned_data['equipment_group'],
+    #             equipment_type = form.cleaned_data['equipment_type'],
+    #             equipment_description = form.cleaned_data['equipment_description'],
+    #             equipment_manufacturer = form.cleaned_data['equipment_manufacturer'],
+    #             equipment_model = form.cleaned_data['equipment_model'],
+    #             equipment_serial = form.cleaned_data['equipment_serial'],
+    #             equipment_location = form.cleaned_data['equipment_location'],
+    #             equipment_installation_date = form.cleaned_data['equipment_installation_date'],
+    #             equipment_warranty = form.cleaned_data['equipment_warranty'],
+    #             equipment_notes = form.cleaned_data['equipment_notes'],
+    #         )
+
+    #         return redirect("order_update" , order_id = order_id)
+    #     else:
+    #         return redirect("order_update" , order_id = order_id)
+    #         # return HttpResponse(form.errors.as_text())
+
+    ـequipments = []
+    if not dsq.exists():
+        if estimate.exists():
+            for eq in estimate:
+                # try:
+                #     ـequipments.append({
+                #         'id': eq.id,
+                #         'equipment': eq.equipment.test_sheet.name,
+                #         'qty': int(eq.quantity),
+                #     })
+                # except Exception as e:
+                #     ـequipments.append({
+                #         'id': eq.id,
+                #         'equipment': eq.equipment.name,
+                #         'qty': int(eq.quantity),
+                #     })
+                ـequipments.append({
+                    'id': eq.id,
+                    'equipment': eq.equipment.name,
+                    'qty': int(eq.quantity),
+                })
+    else:
+        ـequipments = []
+        for ds in dsq:
+            # equipments = ds.datasheetequipment_set.all()
+            # for eq in equipments:
+            #     # general
+            #     # general_info = eq.testsheetgeneralinfo_set.all()
+            #     # test_sheet_data = eq.testsheetdata_set.all()
+            #     ـequipments.append({
+            #         'id': eq.id,
+            #         'equipment': eq.equipment_type.name,
+            #         # 'equipment': eq.equipment_type.test_sheet.name,
+            #         'qty': 1,
+            #     })
+            # NOTE: This is OK
+            ـequipments.append({
+                'id': ds.id,
+                'equipment': ds.test_sheet_type.name,
+                'qty': ds.number_of_equipment_groups,
+            })
+
+    context = {
+        "order": this_order,
+        "equipments": ـequipments,
+    }
+    return render(request, "order_edit_new.html", context)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_datasheet(request, order_id, datasheet_id):
+    try:
+        datasheet = get_object_or_404(DataSheet, id=datasheet_id)
+        datasheet.delete()
+        return JsonResponse({'status': 'success'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 

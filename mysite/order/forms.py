@@ -1,9 +1,23 @@
 from django.contrib.auth.forms import *
 from django.forms import ModelForm
 from django_select2 import forms as s2forms
-
+from django import forms
 from .models import *
 
+
+class DataSheetForm(forms.Form):
+    selectedItem_project = forms.CharField()
+    selectedItem = forms.CharField()
+    project_name = forms.CharField(required=False , empty_value=None)
+    sheet_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y' , attrs={'type': 'date'}))
+    system = forms.CharField(max_length=50)
+    number_of_equipments = forms.IntegerField()
+    facilitytype = forms.CharField()
+
+
+class DataSheetEquipmentForm(forms.Form):
+    equipment = forms.CharField()
+    count = forms.IntegerField()
 
 class ProposalWidget(s2forms.ModelSelect2Widget):
     search_fields = [

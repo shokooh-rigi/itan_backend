@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6">
+        
+        <h3 class="text-uppercase">Project: {{ order.project_number }}</h3>
+        <h4 class="text-uppercase">Modules</h4>
+
+        <!-- Modal -->
+        <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modulesModalLabel">DATA</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div id="sectionpanel">
+                  <div class="container">
+                      <div class="pt-3 d-flex flex-wrap"  data-item-name="Air Moving Equipment I">
+                        <div class="col col-sm-3 module-item">
+                            <div class="card pt-1">
+                                <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                    <img class="card-img-top" src="{% static "images/icons/iconset/tech-01.svg" %}" alt="Card image" />
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-title text-uppercase">Air Moving Equipment I</h6>
+                                </div>
+                            </div>
+                        </div>
+                          <div class="col col-sm-3 module-item" data-item-name="V.A.V Box">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">V.A.V Box</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Air Terminal">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/tech-03.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Air Terminal</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Chiller">
+                              <div class="card pt-1">
+                                      <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                          <img class="card-img-top" src="{% static "images/icons/iconset/tech-04.svg" %}" alt="Card image" />
+                                      </div>
+                                      <div class="card-body">
+                                          <h6 class="card-title text-uppercase">Chiller</h6>
+                                      </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Pump">
+                              <div class="card pt-1">
+                                      <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                          <img class="card-img-top" src="{% static "images/icons/iconset/tech-05.svg" %}" alt="Card image" />
+                                      </div>
+                                      <div class="card-body">
+                                          <h6 class="card-title text-uppercase">Pump</h6>
+                                      </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Velocity Travers">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/tech-11.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Velocity Travers</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Dalt">
+                              <div class="card pt-1">
+                                      <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                          <img class="card-img-top" src="{% static "images/icons/iconset/tech-13.svg" %}" alt="Card image" />
+                                      </div>
+                                      <div class="card-body">
+                                          <h6 class="card-title text-uppercase">Dalt</h6>
+                                      </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Flow Measuring">
+                              <div class="card pt-1">
+                                      <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                          <img class="card-img-top" src="{% static "images/icons/iconset/tech-14.svg" %}" alt="Card image" />
+                                      </div>
+                                      <div class="card-body">
+                                          <h6 class="card-title text-uppercase">Flow Measuring</h6>
+                                      </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Primary Heat Exchanger">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-05.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Primary Heat Exchanger</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="Air Moving Equipment II">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-02.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Air Moving Equipment II</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="V.A.V Box Fan Heat Schedule">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-01.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">V.A.V Box Fan Heat Schedule</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 module-item" data-item-name="V.A.V Box Temperature Schedule">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-03.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">V.A.V Box Temperature Schedule</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 class="col col-sm-3 module-item" data-item-name="V.A.V Box Schedule">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">V.A.V Box Schedule</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 class="col col-sm-3 module-item" data-item-name="Induction Unit">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-06.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Induction Unit</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 class="col col-sm-3 module-item" data-item-name="Primary Heat Exchanger 2">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-05.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Primary Heat Exchanger 2</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 class="col col-sm-3 module-item" data-item-name="Pitot Traverse Summary">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/data-04.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Pitot Traverse Summary</h6>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-sm-3 class="col col-sm-3 module-item" data-item-name="Hot Water Boiler">
+                              <div class="card pt-1">
+                                  <div class="col-sm-12 rounded-circle mx-auto d-block" style="padding: 16px;">
+                                      <img class="card-img-top" src="{% static "images/icons/iconset/tech-17.svg" %}" alt="Card image" />
+                                  </div>
+                                  <div class="card-body">
+                                      <h6 class="card-title text-uppercase">Hot Water Boiler</h6>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+                <script>
+                  $(document).ready(function() {
+                      $(".main").addClass('nobg');
+                  });
+                </script>
+                <!-- The div that contains modules will be shown here -->
+                <div id="modules" style="display: none">
+                  <!-- Your hidden content here -->
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>               
+
+        <div class="mb-5" style="display: flex; justify-content: flex-end;">
+          <button id="show_modules" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modulesModal">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+
+        {% for eq in equipments %}
+        <div class="collapse-section" data-toggle="collapse" data-target="#section{{ eq.id }}" aria-expanded="false" aria-controls="section{{ eq.id }}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                {% if eq.equipment == "VAV" %}
+                    <img src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Air Terminal" %}
+                    <img src="{% static "images/icons/iconset/tech-03.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Chiller" %}
+                    <img src="{% static "images/icons/iconset/tech-04.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Pump" %}
+                    <img src="{% static "images/icons/iconset/tech-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Velocity Travers" %}
+                    <img src="{% static "images/icons/iconset/tech-11.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Dalt" %}
+                    <img src="{% static "images/icons/iconset/tech-13.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Flow Measuring" %}
+                    <img src="{% static "images/icons/iconset/tech-14.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Primary Heat Exchanger" %}
+                    <img src="{% static "images/icons/iconset/data-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Air Moving Equipment" %}
+                    <img src="{% static "images/icons/iconset/data-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "VAV Box Fan Heat Schedule" %}
+                    <img src="{% static "images/icons/iconset/data-01.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "V.A.V. Box Temperature Schedule" %}
+                    <img src="{% static "images/icons/iconset/data-03.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "V.A.V. Box Schedule" %}
+                    <img src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Induction Unit" %}
+                    <img src="{% static "images/icons/iconset/data-06.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Primary Heat Exchanger 2" %}
+                    <img src="{% static "images/icons/iconset/data-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Pitot Traverse Summary" %}
+                    <img src="{% static "images/icons/iconset/data-04.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% elif eq.equipment == "Hot Water Boiler" %}
+                    <img src="{% static "images/icons/iconset/tech-17.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
+                {% endif %}
+                <h5 class="mb-0">{{ eq.equipment }} - {{ eq.qty }}</h5>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm add-btn" onclick="addSection(event, {{ eq.id }})"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteDataSheet(event, {{ eq.id }})"  data-id="{{ datasheet.id }}" ><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="collapse" id="section{{ counter }}" style="text-align: left;">
+
+        </div>
+      {% endfor %}
+      
+       </div>
+
+       <div class="col-md-6">
+            <div class="slideshow-container">
+                <div id="carouselExample" class="carousel slide">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img class="fixed-image zoom" src="https://www.building-maps.com/wp-content/uploads/2018/08/BuildingMaps_School_Sample.jpg" data-magnify-src="https://www.building-maps.com/wp-content/uploads/2018/08/BuildingMaps_School_Sample.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img class="fixed-image zoom" src="https://www.building-maps.com/wp-content/uploads/2021/02/School-Evacuation-Map-Sample.jpg" data-magnify-src="https://www.building-maps.com/wp-content/uploads/2021/02/School-Evacuation-Map-Sample.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img class="fixed-image zoom" src="https://www.building-maps.com/wp-content/uploads/2020/10/severe-weather-shelters-map.jpg" data-magnify-src="https://www.building-maps.com/wp-content/uploads/2020/10/severe-weather-shelters-map.jpg">
+                        </div>
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">❮</a>
+                    <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">❯</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Optional CSS for styling collapsible sections */
+    .collapse-section {
+        cursor: pointer;
+    }
+    #system {
+        text-transform: none!important;
+    }
+    .slideshow-container {
+    max-width: 1000px; 
+    position: relative;
+    margin: auto;
+    }
+    .carousel-control-prev, .carousel-control-next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px; 
+        color: rgb(255, 255, 255);
+        font-weight: bold;
+        font-size: 14px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 60%;
+        transition: 0.3s ease;
+    }
+    .carousel-control-prev {
+        left: 0;
+    }
+    .carousel-control-next {
+        right: 0;
+    }
+    .carousel-control-prev:hover, .carousel-control-next:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    .fixed-image {
+        width: 100%;
+        height: 600px;
+        object-fit: contain;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $('.zoom').magnify();
+
+        $('#carouselExample').carousel({
+            interval: false
+        });
+
+        $('#carouselExample').on('slid.bs.carousel', function() {
+            $('.zoom').magnify();
+        });
+    });
+
+    $(function () {
+        $("#sheet_date").val('')
+        $("#sheet_date").datetimepicker({
+            format: 'm/d/Y',
+            timepicker: false,
+            scrollInput: false,
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        applyZoom();
+        var showModulesButton = document.getElementById('show_modules');
+
+        showModulesButton.addEventListener('click', function() {
+        var modules = document.getElementById('modules');
+        var modulesModalContent = document.getElementById('modulesContent');
+
+        if (modules && modulesModalContent) {
+            modulesModalContent.innerHTML = modules.innerHTML; // Copy content into the modal
+            $('#modulesModal').modal('show'); // Show the modal
+        } else {
+            console.error('The required DOM elements are not found.');
+        }
+        });
+    });
+
+    $('#id_project').on('change', function() {
+        if($(this).val() === '') {
+            $("#project_name").text('');
+        }
+        else {
+            $("#project_name").text($(this).find(':selected').data('projectname'));
+
+        }
+    });
+
+    // The form that you want to display in the modal, with an additional text field pre-filled with the item's name
+    var formHtml = `
+    <form id="modal-form" method="POST">
+    <!-- Your existing form fields -->
+    <div class="form-group">
+        {% csrf_token %}
+            <input type="hidden" id="facilitytype" name="facilitytype" / >
+            <div class="row">
+                <div class="col">
+                    <label class="control-label">Project</label>
+                    <input class="form-control" type="text" name="selectedItem_project" id="selectedItem_project" value="{{ order.project_number }}" readonly />
+                </div>
+                <div class="col">
+                    <label class="control-label">Module</label>
+                    <input class="form-control" type="text" name="selectedItem" id="selectedItem" value="" readonly />
+                </div>
+            </div>
+            <div class="row form-line">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <label for="id_validity" class="control-label">Number of Equipments<span class="required">*</span></label>
+                    <input class="form-control" type="text" name="number_of_equipments" id="number_of_equipments" value="" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12" style="padding-right: 36px;">
+                    <input type="submit" class="btn btn-success" value="Generate" name="next" />
+                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                </div>
+            </div>
+        </div>
+    <!-- The rest of your form fields -->
+    </form>
+    `;
+
+    // The JavaScript to handle the click event on your modal items
+    $(document).ready(function() {
+
+        $('.module-item').on('click', function() {
+            // Get the name of the item from the data attribute
+            var itemName = $(this).data('itemName');
+            // Update the modal's body with the form HTML
+            $('#modulesModal .modal-body').html(formHtml);
+            // Set the value of the additional text field to the item's name
+            $('#modal-form #selectedItem').val(itemName);
+            $('#facilitytype').val(itemName);
+            // You may want to update the modal's title as well
+            $('#modulesModalLabel').text('Selected Item: ' + itemName);
+            // Since you're changing the content, reinitialize any plugins or UI elements here
+            // Example: If you're using a datepicker on any of the form's fields, initialize it here
+            // Finally, you might want to hide or show certain buttons
+            $('#modulesModal .modal-footer .btn').hide(); // hides all buttons
+            // Or show a specific button
+            // $('#modulesModal .modal-footer .btn-save').show(); // assumes you have a save button
+        });
+
+        // Function to remove both the collapse-section and the corresponding collapse div
+        // $('.btn-danger').click(function() {
+        //     var parentSection = $(this).closest('.collapse-section'); // Finds the nearest parent collapse-section div
+        //     var targetID = parentSection.data('target'); // Gets the data-target attribute, which is the ID of the collapse div
+
+        //     $(targetID).remove(); // Removes the collapse div with the corresponding ID
+        //     parentSection.remove(); // Removes the collapse-section div
+        // });
+    });
+
+    // API call to delete a DataSheet
+    function deleteDataSheet(event, datasheetId) {
+        event.stopPropagation(); // Stop the event from propagating to parent elements
+        $.ajax({
+            url: window.location.pathname + 'delete-datasheet/' + datasheetId + '/',
+            type: 'DELETE',
+            success: function(result) {
+                // alert("DataSheet deleted successfully!");
+                $('[data-id="' + datasheetId + '"]').closest('div').remove();
+                location.reload(); // reload the page if successful, moved inside success callback
+            },
+            error: function(error) {
+                alert("Error deleting DataSheet!");
+            }
+        });
+    }
+
+    function addSection(event, counter) {
+        event.stopPropagation(); // Stop the event from propagating to parent elements
+        // Find the section where new content will be added
+        var sectionContent = document.getElementById('sectionContent' + counter);
+        // Assuming you want to clone the entire set of forms (which is the first child of the section content)
+        var contentToClone = sectionContent.getElementsByClassName('content-set')[0];
+        // Clone the content
+        var clone = contentToClone.cloneNode(true); // true means clone all child nodes and event handlers
+        // Modify cloned IDs to ensure they are unique
+        var count = sectionContent.getElementsByClassName('content-set').length;
+        var newIdSuffix = count + 1;
+        Array.from(clone.querySelectorAll('input, select, textarea')).forEach(function(input) {
+            input.id += newIdSuffix; // Append new suffix to make the id unique
+            input.value = ''; // Reset the value if you don't want to clone the data
+            input.name += newIdSuffix; // Append new suffix to make the name unique
+        });
+        Array.from(clone.querySelectorAll('label')).forEach(function(label) {
+            if (label.htmlFor) {
+                label.htmlFor += newIdSuffix; // Append new suffix to update 'for' attribute
+            }
+        });
+        // Append the cloned set to the section content
+        sectionContent.appendChild(clone);
+    }
+
+    function deleteSection(element) {
+        // This will remove the closest parent .content-item div to the delete button that was clicked
+        element.closest('.content-set').remove();
+    }
+</script>
+      
+{% endblock %}

@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect, get_object_or_404, reverse
 from .forms import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL, MEDIA_URL_NOSLASH
+from django.conf import settings
 
 
 def submittal_list(request):
@@ -71,8 +71,8 @@ def submittal_list(request):
 
     parameters = {'submittals': submittals,
                   'form': form,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "submittal.html", parameters)
 
@@ -175,9 +175,9 @@ def submittal_view(request, submittal_id):
                   'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
                   'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
                   'request': request,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
-                  'STATIC_URL': STATIC_URL
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
+                  'STATIC_URL': settings.STATIC_URL
                   }
 
     letterhead_output = CompanySubmittal.create_letterhead_pdf(parameters)
@@ -188,17 +188,17 @@ def submittal_view(request, submittal_id):
         attachment_number = random.randint(100000, 999999)
         name, extension = os.path.splitext(attachment.submittal_form.form_file.name)
         if extension == '.pdf':
-            pdf_file = open(MEDIA_URL_NOSLASH + attachment.submittal_form.form_file.name, "rb")
+            pdf_file = open(settings.MEDIA_URL + attachment.submittal_form.form_file.name, "rb")
             merger.append(fileobj=pdf_file)
         elif extension == '.jpg' or '.png' or '.jpeg':
-            img_path = MEDIA_URL_NOSLASH + attachment.submittal_form.form_file.name
+            img_path = settings.MEDIA_URL + attachment.submittal_form.form_file.name
             image = Image.open(img_path)
             pdf_bytes = img2pdf.convert(image.filename)
             if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/imgtopdf")):
                 os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/imgtopdf"))
-            temp_file = open(MEDIA_URL_NOSLASH + "imgtopdf/temp" + str(attachment_number) + ".pdf", "wb")
+            temp_file = open(settings.MEDIA_URL + "imgtopdf/temp" + str(attachment_number) + ".pdf", "wb")
             temp_file.write(pdf_bytes)
-            temp_file = open(MEDIA_URL_NOSLASH + "imgtopdf/temp" + str(attachment_number) + ".pdf", "rb")
+            temp_file = open(settings.MEDIA_URL + "imgtopdf/temp" + str(attachment_number) + ".pdf", "rb")
             merger.append(fileobj=temp_file)
     if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal")):
         os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/submittal"))

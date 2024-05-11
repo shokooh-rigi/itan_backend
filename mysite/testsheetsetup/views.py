@@ -13,7 +13,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
 from .forms import *
-from ..settings import MEDIA_URL, WEB_URL, STATIC_URL
 from ..sheetcreator.models import *
 from django.db.models import Count
 

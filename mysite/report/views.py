@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from mysite.order.models import Order
 from .forms import ReportForm
 from .models import Report
-from ..settings import MEDIA_URL, WEB_URL
+from django.conf import settings
 
 
 # Create your views here.
@@ -48,8 +48,8 @@ def report_list(request):
     reports = paginator.get_page(page)
 
     parameters = {'reports': reports,
-                  'WEB_URL': WEB_URL,
-                  'MEDIA_URL': MEDIA_URL,
+                  'WEB_URL': settings.WEB_URL,
+                  'MEDIA_URL': settings.MEDIA_URL,
                   }
     return render(request, "report.html", parameters)
 

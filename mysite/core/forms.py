@@ -5,11 +5,11 @@ from mysite.core.models import *
 
 
 class UserLoginForm(AuthenticationForm):
-    captcha = ReCaptchaField()
+    # captcha = ReCaptchaField()
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'captcha')
+        fields = ('username', 'password')#, 'captcha')
 
     def __init__(self, *args, **kwargs):
         super(UserLoginForm, self).__init__(*args, **kwargs)
