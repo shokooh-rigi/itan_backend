@@ -27,7 +27,7 @@ class AirMovingEquipmentSheetForm(ModelForm):
 
 class AirMovingEquipmentSheetEquipmentForm(ModelForm):
     class Meta:
-        model = AirMovingEquipmentEquipment
+        model = AirMovingEquipment
         fields = [
             'sheet',
             'equipment',

@@ -17,7 +17,7 @@ from .render import Render as PDFRender
 from django.conf import settings
 from ..sheetcreator.models import *
 from django.db.models import Count
-from .models import AirMovingEquipmentEquipment, AirMovingEquipmentSheetData
+from .models import AirMovingEquipment, AirMovingSheetData
 
 
 # Create your views here.
@@ -74,7 +74,7 @@ def air_moving_equipment_sheet_add(request):
                 if Equipment.objects.filter(test_sheet__name=SHEET_TYPE_NAME).count() > 0:
                     equipment_type = Equipment.objects.filter(test_sheet__name=SHEET_TYPE_NAME).first()
                 for n in range(form.cleaned_data['equipment_quantity']):
-                    air_moving_equipment_equipment = AirMovingEquipmentEquipment(sheet=sheet, equipment_type=equipment_type)
+                    air_moving_equipment_equipment = AirMovingEquipment(sheet=sheet, equipment_type=equipment_type)
                     air_moving_equipment_equipment.save()
                 return redirect('airMovingEquipmentSheetEquipmentList', sheet.id)
     parameters = {
@@ -89,7 +89,7 @@ def air_moving_equipment_sheet_add(request):
 def air_moving_equipment_sheet_equipment_list(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
     project_name = request.GET.get('project_name', '')
-    air_moving_equipment_equipments = AirMovingEquipmentEquipment.objects.filter(sheet=my_sheet).order_by('id')
+    air_moving_equipment_equipments = AirMovingEquipment.objects.filter(sheet=my_sheet).order_by('id')
     if project_name:
         air_moving_equipment_equipments = air_moving_equipment_equipments.filter(Q(model_number__icontains=project_name)).distinct()
     parameters = {
@@ -106,7 +106,7 @@ def air_moving_equipment_sheet_equipment_list(request, sheet_id):
 @login_required
 def air_moving_equipment_equipment_add(request, sheet_id):
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    air_moving_equipment_equipment = AirMovingEquipmentEquipment(sheet=my_sheet)
+    air_moving_equipment_equipment = AirMovingEquipment(sheet=my_sheet)
     air_moving_equipment_equipment.save()
     return redirect('airMovingEquipmentSheetEquipmentList', sheet_id)
 
@@ -114,7 +114,7 @@ def air_moving_equipment_equipment_add(request, sheet_id):
 def get_pdf_parameters(sheet_id, is_report_pdf: bool):
     total_pdf_row = 4
     my_sheet = DataSheet.objects.get(id=sheet_id)
-    air_moving_equipment_equipments = AirMovingEquipmentEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
+    air_moving_equipment_equipments = AirMovingEquipment.objects.filter(sheet=my_sheet, design_data_entry_completed=True).order_by('id')
     if is_report_pdf:
         air_moving_equipment_equipments = air_moving_equipment_equipments.filter(actual_data_entry_completed=True)
     total_pages = math.ceil(air_moving_equipment_equipments.count() / total_pdf_row)
@@ -237,7 +237,7 @@ def manual_replace(s, char, index):
 
 @login_required
 def air_moving_equipment_common_data(request, air_moving_equipment_equipment_id):
-    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipmentEquipment, id=air_moving_equipment_equipment_id)
+    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipment, id=air_moving_equipment_equipment_id)
     this_equipment = None
     if air_moving_equipment_equipment.equipment:
         this_equipment = air_moving_equipment_equipment.equipment
@@ -271,7 +271,7 @@ def air_moving_equipment_common_data(request, air_moving_equipment_equipment_id)
 
 @login_required
 def air_moving_equipment_design_data(request, air_moving_equipment_equipment_id):
-    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipmentEquipment, id=air_moving_equipment_equipment_id)
+    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipment, id=air_moving_equipment_equipment_id)
 
     design_fields = TestSheetField.objects.filter(show_in_design=True, test_sheet__name__icontains=SHEET_TYPE_NAME)
 
@@ -292,14 +292,14 @@ def air_moving_equipment_design_data(request, air_moving_equipment_equipment_id)
                         new_data = EquipmentDbDesignData(equipment=air_moving_equipment_equipment.equipment.id, key=design_field.id, value=new_value)
                         new_data.save()
 
-                num_results = AirMovingEquipmentSheetData.objects.filter(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                num_results = AirMovingSheetData.objects.filter(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                            sheet_field=design_field).count()
 
                 if num_results > 0:
-                    AirMovingEquipmentSheetData.objects.filter(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                    AirMovingSheetData.objects.filter(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                  sheet_field=design_field).update(value=new_value)
                 else:
-                    new_object = AirMovingEquipmentSheetData(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                    new_object = AirMovingSheetData(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                sheet_field=design_field,
                                                value=new_value)
                     new_object.save()
@@ -318,7 +318,7 @@ def air_moving_equipment_design_data(request, air_moving_equipment_equipment_id)
 
 @login_required
 def air_moving_equipment_actual_data(request, air_moving_equipment_equipment_id):
-    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipmentEquipment, id=air_moving_equipment_equipment_id)
+    air_moving_equipment_equipment = get_object_or_404(AirMovingEquipment, id=air_moving_equipment_equipment_id)
 
     actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains=SHEET_TYPE_NAME)
 
@@ -340,14 +340,14 @@ def air_moving_equipment_actual_data(request, air_moving_equipment_equipment_id)
                     else:
                         new_value = 0
 
-                num_results = AirMovingEquipmentSheetData.objects.filter(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                num_results = AirMovingSheetData.objects.filter(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                            sheet_field=actual_field).count()
 
                 if num_results > 0:
-                    AirMovingEquipmentSheetData.objects.filter(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                    AirMovingSheetData.objects.filter(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                  sheet_field=actual_field).update(value=new_value)
                 else:
-                    new_object = AirMovingEquipmentSheetData(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
+                    new_object = AirMovingSheetData(data_type=2, air_moving_equipment_equipment=air_moving_equipment_equipment,
                                                sheet_field=actual_field,
                                                value=new_value)
                     new_object.save()
@@ -356,9 +356,9 @@ def air_moving_equipment_actual_data(request, air_moving_equipment_equipment_id)
             air_moving_equipment_equipment.save()
             return redirect('airMovingEquipmentSheetEquipmentList', air_moving_equipment_equipment.sheet.id)
 
-    design_hp = AirMovingEquipmentSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='H.P.').value
-    design_voltage = AirMovingEquipmentSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='Voltage').value
-    design_amperage = AirMovingEquipmentSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='Amperage').value
+    design_hp = AirMovingSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='H.P.').value
+    design_voltage = AirMovingSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='Voltage').value
+    design_amperage = AirMovingSheetData.objects.get(data_type=1, air_moving_equipment_equipment=air_moving_equipment_equipment, sheet_field__field_name__iexact='Amperage').value
     parameters = {
         'design_hp': design_hp,
         'design_voltage': design_voltage,

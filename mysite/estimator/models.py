@@ -94,7 +94,7 @@ class Quote(models.Model):
 
 class Proposal(models.Model):
     quote = models.OneToOneField(Quote, on_delete=models.CASCADE, blank=False)
-    validity = models.IntegerField(blank=False, default=30)
+    validity = models.IntegerField(blank=False, default=180)
     note = models.TextField(max_length=255, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)

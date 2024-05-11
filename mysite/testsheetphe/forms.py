@@ -27,7 +27,7 @@ class PrimaryHeatExchangerSheetForm(ModelForm):
 
 class PrimaryHeatExchangerSheetEquipmentForm(ModelForm):
     class Meta:
-        model = PrimaryHeatExchangerEquipment
+        model = PHEEquipment
         fields = [
             'sheet',
             'equipment',

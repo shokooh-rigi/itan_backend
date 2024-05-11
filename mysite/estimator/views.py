@@ -440,9 +440,10 @@ def quote_add(request, estimate_id=None):
                 quote_pdf = Quote.create_quote_pdf(parameters)
                 parameters['quote_pdf'] = quote_pdf[1]
                 return redirect('quotationHome')
-    parameters = {'form': form,
-                  'estimates': estimates
-                  }
+    parameters = {
+        'form': form,
+        'estimates': estimates
+    }
     return render(request, "quoteAdd.html", parameters)
 
 
@@ -517,9 +518,10 @@ def proposal_add(request, quote_id=None):
                 proposal_pdf = Proposal.create_proposal_pdf(parameters)
                 parameters['proposal_pdf'] = proposal_pdf[1]
                 return redirect('proposalHome')
-    parameters = {'form': form,
-                  'quotes': quotes
-                  }
+    parameters = {
+        'form': form,
+        'quotes': quotes
+    }
     return render(request, "proposalAdd.html", parameters)
 
 

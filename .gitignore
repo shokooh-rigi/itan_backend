@@ -2,6 +2,7 @@
 # http://git-scm.com/docs/gitignore
 
 .vscode/
+.history/
 .idea/
 sent_emails/
 

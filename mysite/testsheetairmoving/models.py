@@ -4,16 +4,14 @@ from mysite.sheetcreator.models import *
 # Create your models here.
 
 
-class PrimaryHeatExchanger2Equipment(models.Model):
+class AirMovingEquipment(models.Model):
     sheet = models.ForeignKey(DataSheet, on_delete=models.CASCADE, blank=False, null=False)
     equipment_type = models.ForeignKey(Equipment, on_delete=models.CASCADE, blank=True, null=True)
+    equipment = models.ForeignKey(EquipmentDb, on_delete=models.CASCADE, blank=True, null=True)
+    fan_no = models.CharField(max_length=30, blank=True, null=True)
     location = models.CharField(max_length=30, blank=True, null=True)
-    service = models.CharField(max_length=30, blank=True, null=True)
-    rating_btu_hour = models.CharField(max_length=30, blank=True, null=True)
-    manufacturer = models.CharField(max_length=50, blank=True, null=True)
-    model_number = models.CharField(max_length=50, blank=True, null=True)
+    area_served = models.CharField(max_length=30, blank=True, null=True)
     serial_number = models.CharField(max_length=20, blank=True, null=True)
-    unit_number = models.CharField(max_length=20, blank=True, null=True)
     main_data_entry_completed = models.BooleanField(default=False)
     design_data_entry_completed = models.BooleanField(default=False)
     actual_data_entry_completed = models.BooleanField(default=False)
@@ -26,11 +24,11 @@ class PrimaryHeatExchanger2Equipment(models.Model):
         ordering = ['field_order']
 
 
-class PrimaryHeatExchanger2SheetData(models.Model):
+class AirMovingSheetData(models.Model):
     data_type = models.PositiveSmallIntegerField(choices=DataTypeChoices.get_items(), default=1, null=False)
-    primary_heat_exchanger_2_equipment = models.ForeignKey(PrimaryHeatExchanger2Equipment, on_delete=models.CASCADE, blank=False, null=False)
+    air_moving_equipment_equipment = models.ForeignKey(AirMovingEquipment, on_delete=models.CASCADE, blank=False, null=False)
     sheet_field = models.ForeignKey(TestSheetField, on_delete=models.CASCADE, blank=False, null=False)
     value = models.CharField(max_length=500, blank=False)
 
     def __str__(self):
-        return str(self.sheet_field) + ' ' + str(self.primary_heat_exchanger_2_equipment)
+        return str(self.sheet_field) + ' ' + str(self.air_moving_equipment_equipment)
