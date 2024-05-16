@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -12,16 +13,16 @@ from django.conf import settings
 from ..bidfilemgm.views import handle_uploaded_file, create_zip_file
 from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
-from ..s3_file_manager import S3
 import urllib.request as url_request
 from django.http import HttpResponse
 from mysite.sheetcreator.models import DataSheet
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
-
-# Create your views here.
+from mysite.sheetcreator.models import DataSheetEquipment
+from mysite.utils.pdf_to_img import pdf_to_image_bytes
+from base64 import b64encode
+from mysite.s3_file_manager import S3
 
 
 @login_required
@@ -837,98 +838,155 @@ def manufacturer_edit_popup(request, pk=None):
 def order_uppdate(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     dsq = this_order.datasheet_set.all()
-    estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
-
-    # if request.method == "POST":
-    #     form = DataSheetEquipmentForm(request.POST)
-    #     if form.is_valid():
-    #         if this_order.datasheet_set.all().exists():
-    #             sheet_data_instance = this_order.datasheet_set.all().first()
-    #         else:
-    #             sheet_data_instance = DataSheet(
-    #                 test_sheet_type = test_sheet_instance,
-    #                 project = this_order,
-    #                 system = form.cleaned_data['system'],
-    #                 number_of_equipment_groups = form.cleaned_data['number_of_equipments'],
-    #             )
-    #             sheet_data_instance.save()
-
-    #         new_dse_instance = DataSheetEquipment(
-    #             datasheet = sheet_data_instance,
-    #             equipment = form.cleaned_data['equipment'],
-    #             equipment_group = form.cleaned_data['equipment_group'],
-    #             equipment_type = form.cleaned_data['equipment_type'],
-    #             equipment_description = form.cleaned_data['equipment_description'],
-    #             equipment_manufacturer = form.cleaned_data['equipment_manufacturer'],
-    #             equipment_model = form.cleaned_data['equipment_model'],
-    #             equipment_serial = form.cleaned_data['equipment_serial'],
-    #             equipment_location = form.cleaned_data['equipment_location'],
-    #             equipment_installation_date = form.cleaned_data['equipment_installation_date'],
-    #             equipment_warranty = form.cleaned_data['equipment_warranty'],
-    #             equipment_notes = form.cleaned_data['equipment_notes'],
-    #         )
-
-    #         return redirect("order_update" , order_id = order_id)
-    #     else:
-    #         return redirect("order_update" , order_id = order_id)
-    #         # return HttpResponse(form.errors.as_text())
+    _eq_types = Equipment.objects.all()
+    modules_type = "Equipments"
+    eq_types = []
+    for eq in _eq_types:
+        eq_types.append({
+            'id': eq.id,
+            'name': eq.name,
+            'test_sheet': eq.test_sheet.name if eq.test_sheet else None,
+            'test_sheet_id': eq.test_sheet.id if eq.test_sheet else None,
+        })
+    _test_sheets = TestSheet.objects.all()
+    test_sheets = []
+    for ts in _test_sheets:
+        test_sheets.append({
+            'id': ts.id,
+            'name': ts.name,
+        })
 
     ـequipments = []
     if not dsq.exists():
+        estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
         if estimate.exists():
+            modules_type = "Estimate"
             for eq in estimate:
-                # try:
-                #     ـequipments.append({
-                #         'id': eq.id,
-                #         'equipment': eq.equipment.test_sheet.name,
-                #         'qty': int(eq.quantity),
-                #     })
-                # except Exception as e:
-                #     ـequipments.append({
-                #         'id': eq.id,
-                #         'equipment': eq.equipment.name,
-                #         'qty': int(eq.quantity),
-                #     })
                 ـequipments.append({
                     'id': eq.id,
                     'equipment': eq.equipment.name,
+                    'eq_id': eq.equipment.id,
+                    'test_sheet': eq.equipment.test_sheet.name if eq.equipment.test_sheet else None,
+                    'test_sheet_id': eq.equipment.test_sheet.id if eq.equipment.test_sheet else None,
                     'qty': int(eq.quantity),
                 })
     else:
-        ـequipments = []
+        equipments_dict = {}
         for ds in dsq:
-            # equipments = ds.datasheetequipment_set.all()
-            # for eq in equipments:
-            #     # general
-            #     # general_info = eq.testsheetgeneralinfo_set.all()
-            #     # test_sheet_data = eq.testsheetdata_set.all()
-            #     ـequipments.append({
-            #         'id': eq.id,
-            #         'equipment': eq.equipment_type.name,
-            #         # 'equipment': eq.equipment_type.test_sheet.name,
-            #         'qty': 1,
-            #     })
-            # NOTE: This is OK
-            ـequipments.append({
-                'id': ds.id,
-                'equipment': ds.test_sheet_type.name,
-                'qty': ds.number_of_equipment_groups,
-            })
+            equipments = ds.datasheetequipment_set.all()
+            for eq in equipments:
+                key = (eq.equipment_type.id, eq.sheet.test_sheet_type.id)
+                if key in equipments_dict:
+                    equipments_dict[key]['qty'] += 1
+                else:
+                    equipments_dict[key] = {
+                        'id': eq.id,
+                        'equipment': eq.equipment_type.name,
+                        'eq_id': eq.equipment_type.id,
+                        'test_sheet': eq.sheet.test_sheet_type.name,
+                        'test_sheet_id': eq.sheet.test_sheet_type.id,
+                        'qty': 1,
+                    }
+        ـequipments = list(equipments_dict.values())
+
+    # _s3 = S3()
+    image_data_list = []
+    # for _fl in [
+    #     this_order.equipment_submittal, this_order.colored_drawing, 
+    #     this_order.report_colored_drawing, this_order.field_draw, this_order.site_pictures,
+    #     this_order.test_sheets
+    # ]:
+    #     if not _fl:
+    #         continue
+    #     _fl_path = _s3.get_bucket_object(_fl.name)
+    #     print("===" * 10)
+    #     print(_fl_path)
+    #     if _fl.name.endswith('.pdf'):
+    #         pdf_path = os.path.join(settings.MEDIA_URL, _fl.name)
+    #         image_bytes_list = pdf_to_image_bytes(pdf_path)
+    #         image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
+    #     else:
+    #         image_data_list.append(settings.MEDIA_URL + _fl.url)
 
     context = {
         "order": this_order,
         "equipments": ـequipments,
+        "eq_types": eq_types,
+        "test_sheets": test_sheets,
+        "maps": image_data_list,
+        "modules_type": modules_type,
     }
     return render(request, "order_edit_new.html", context)
 
 @csrf_exempt
+@require_http_methods(["POST"])
+def create_datasheets(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    data = json.loads(request.body)['data']
+    for item in data:
+        if order.datasheet_set.filter(test_sheet_type__name=item['test_sheet']).exists():
+            datasheet = order.datasheet_set.get(test_sheet_type__name=item['test_sheet'])
+            datasheet.number_of_equipment_groups += int(item['qty'])
+            datasheet.save()
+            eq = DataSheetEquipment.objects.create(
+                sheet=datasheet,
+                equipment_type=Equipment.objects.get(name=item['equipment']),
+            )
+        else:
+            test_sheet_instance = TestSheet.objects.get(name=item['test_sheet'])
+            datasheet = DataSheet.objects.create(
+                test_sheet_type=test_sheet_instance,
+                project=order,
+                number_of_equipment_groups=int(item['qty']),
+            )
+            for i in range(int(item['qty'])):
+                eq = DataSheetEquipment.objects.create(
+                    sheet=datasheet,
+                    equipment_type=Equipment.objects.get(name=item['equipment']),
+                )
+    return JsonResponse({'status': 'success'}, status=200)
+
+
+@csrf_exempt
 @require_http_methods(["DELETE"])
 def delete_datasheet(request, order_id, datasheet_id):
-    try:
-        datasheet = get_object_or_404(DataSheet, id=datasheet_id)
-        datasheet.delete()
-        return JsonResponse({'status': 'success'}, status=200)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    equipment = get_object_or_404(DataSheetEquipment, id=datasheet_id)
+    equipment.delete()
+    return JsonResponse({'status': 'success'}, status=200)
 
 
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def clear_datasheets(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    datasheets = order.datasheet_set.all().delete()
+    return JsonResponse({'status': 'success'}, status=200)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_datasheet(request, order_id):
+    data = json.loads(request.body)['data']
+    order = get_object_or_404(Order, id=order_id)
+    equipment = get_object_or_404(Equipment, id=data['eq'])
+    datasheet = order.datasheet_set.filter(test_sheet_type__id=data['eq_type'])
+    if datasheet.exists():
+        if datasheet.filter(datasheetequipment__equipment_type=equipment).exists():
+            return JsonResponse({'status': 'error', 'message': 'Equipment already exists in the datasheet'}, status=400)
+        for i in range(int(data['eq_count'])):
+            eq = DataSheetEquipment.objects.create(
+                sheet=datasheet.first(),
+                equipment_type=equipment,
+            )
+    else:
+        test_sheet_instance = TestSheet.objects.get(id=data['eq_type'])
+        datasheet = DataSheet.objects.create(
+            test_sheet_type=test_sheet_instance,
+            project=order,
+            number_of_equipment_groups=int(data['eq_count']),
+        )
+        for i in range(int(data['eq_count'])):
+            eq = DataSheetEquipment.objects.create(
+                sheet=datasheet,
+                equipment_type=equipment,
+            )
+    return JsonResponse({'status': 'success'}, status=200)

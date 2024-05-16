@@ -10,7 +10,7 @@
       <div class="col-md-6">
         
         <h3 class="text-uppercase">Project: {{ order.project_number }}</h3>
-        <h4 class="text-uppercase">Modules</h4>
+        <h4 class="text-uppercase">Module</h4>
 
         <!-- Modal -->
         <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -23,8 +23,8 @@
                 </button>
               </div>
               <div class="modal-body">
-                <div id="sectionpanel">
-                  <div class="container">
+                <!-- <div id="sectionpanel"> -->
+                  <!-- <div class="container">
                       <div class="pt-3 d-flex flex-wrap"  data-item-name="Air Moving Equipment I">
                         <div class="col col-sm-3 module-item">
                             <div class="card pt-1">
@@ -197,20 +197,13 @@
                               </div>
                           </div>
                       </div>
-                  </div>
-                </div>
-                <script>
-                  $(document).ready(function() {
-                      $(".main").addClass('nobg');
-                  });
-                </script>
-                <!-- The div that contains modules will be shown here -->
+                  </div> -->
+                <!-- </div> -->
+
                 <div id="modules" style="display: none">
-                  <!-- Your hidden content here -->
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -221,54 +214,44 @@
             <i class="fas fa-plus"></i>
           </button>
         </div>
+        
+
+        <h5 style="text-align: left;">{{ modules_type }}:</h5>
 
         {% for eq in equipments %}
-        <div class="collapse-section" data-toggle="collapse" data-target="#section{{ eq.id }}" aria-expanded="false" aria-controls="section{{ eq.id }}">
+        <div class="collapse-section ml-5" data-toggle="collapse" data-target="#section{{ eq.id }}" aria-expanded="false" aria-controls="section{{ eq.id }}">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                {% if eq.equipment == "VAV" %}
-                    <img src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Air Terminal" %}
-                    <img src="{% static "images/icons/iconset/tech-03.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Chiller" %}
-                    <img src="{% static "images/icons/iconset/tech-04.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Pump" %}
-                    <img src="{% static "images/icons/iconset/tech-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Velocity Travers" %}
-                    <img src="{% static "images/icons/iconset/tech-11.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Dalt" %}
-                    <img src="{% static "images/icons/iconset/tech-13.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Flow Measuring" %}
-                    <img src="{% static "images/icons/iconset/tech-14.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Primary Heat Exchanger" %}
-                    <img src="{% static "images/icons/iconset/data-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Air Moving Equipment" %}
-                    <img src="{% static "images/icons/iconset/data-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "VAV Box Fan Heat Schedule" %}
-                    <img src="{% static "images/icons/iconset/data-01.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "V.A.V. Box Temperature Schedule" %}
-                    <img src="{% static "images/icons/iconset/data-03.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "V.A.V. Box Schedule" %}
-                    <img src="{% static "images/icons/iconset/tech-02.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Induction Unit" %}
-                    <img src="{% static "images/icons/iconset/data-06.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Primary Heat Exchanger 2" %}
-                    <img src="{% static "images/icons/iconset/data-05.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Pitot Traverse Summary" %}
-                    <img src="{% static "images/icons/iconset/data-04.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% elif eq.equipment == "Hot Water Boiler" %}
-                    <img src="{% static "images/icons/iconset/tech-17.svg" %}" alt="Icon" style="vertical-align: middle; margin-right: 5px; width: 20px; height: 20px;">
-                {% endif %}
-                <h5 class="mb-0">{{ eq.equipment }} - {{ eq.qty }}</h5>
+                <div class="mb-0 eq-wrapper">
+                    <span class="es-{{ eq.eq_id }}-{{ eq.test_sheet_id }}">{{ eq.equipment }} ({{ eq.test_sheet }})</span>
+                    &nbsp;-&nbsp;
+                    <span class="qty-container">
+                        <span class="qty mr-5">{{ eq.qty }}</span>
+                        {% if modules_type == "Estimate" %}
+                            <button onclick="decreaseQty(this)" class="btn btn-secondary">-</button>
+                            <button onclick="increaseQty(this)" class="btn btn-secondary">+</button>
+                        {% endif %}
+                    </span>
+                </div>
                 <div>
-                    <button type="button" class="btn btn-success btn-sm add-btn" onclick="addSection(event, {{ eq.id }})"><i class="fas fa-plus"></i></button>
-                    <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteDataSheet(event, {{ eq.id }})"  data-id="{{ datasheet.id }}" ><i class="fas fa-times"></i></button>
+                    {% if modules_type == "Estimate" %}
+                        <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteSection(event, {{ eq.id }})"  data-id="{{ eq.id }}" ><i class="fas fa-times"></i></button>
+                    
+                    {% comment %} {% elif modules_type == "Equipments" %} {% endcomment %}
+                        <!-- <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteDataSheet(event, {{ eq.id }})"  data-id="{{ eq.id }}" ><i class="fas fa-times"></i></button> -->
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="collapse" id="section{{ counter }}" style="text-align: left;">
-
-        </div>
       {% endfor %}
+      {% if modules_type == "Estimate" %}
+        <div class="d-flex justify-content-end m-5">
+            <button type="submit" class="btn btn-primary" onclick="createDataSheets(event)">Save</button>
+        </div>
+      {% elif modules_type == "Equipments" %}
+        <div class="d-flex justify-content-end m-5">
+            <button type="submit" class="btn btn-danger" onclick="clearDataSheets(event)">Clear</button>
+        </div>
+      {% endif %}
       
        </div>
 
@@ -295,6 +278,63 @@
 </div>
 
 <style>
+    .mb-0 {
+        display: flex;
+        align-items: center;
+    }
+    .qty-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .qty-container input {
+        width: 60px;
+        text-align: center;
+        margin-right: 5px;
+    }
+
+    .qty-container button {
+        width: 35px;
+        height: 35px;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        margin-right: 5px;
+        border-radius: 50%;
+        border: none;
+        background-color: #007bff;
+        color: white;
+    }
+
+    .qty-container button:focus {
+        outline: none;
+    }
+
+    .qty-container button:hover {
+        background-color: #0056b3;
+    }
+
+    select {
+        margin-right: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+    }
+
+    .equipment-container {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .equipment-container > * {
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .equipment-container img {
+        margin-right: 10px;
+    }
     /* Optional CSS for styling collapsible sections */
     .collapse-section {
         cursor: pointer;
@@ -338,6 +378,7 @@
 </style>
 <script>
     $(document).ready(function() {
+        $(".main").addClass('nobg');
         $('.zoom').magnify();
 
         $('#carouselExample').carousel({
@@ -348,6 +389,20 @@
             $('.zoom').magnify();
         });
     });
+
+    function decreaseQty(button) {
+        let span = button.previousElementSibling;
+        let qty = parseInt(span.innerText);
+        if (qty > 0) {
+            span.innerText = qty - 1;
+        }
+    }
+
+    function increaseQty(button) {
+        let span = button.previousElementSibling.previousElementSibling;
+        let qty = parseInt(span.innerText);
+        span.innerText = qty + 1;
+    }
 
     $(function () {
         $("#sheet_date").val('')
@@ -385,72 +440,55 @@
         }
     });
 
-    // The form that you want to display in the modal, with an additional text field pre-filled with the item's name
-    var formHtml = `
-    <form id="modal-form" method="POST">
-    <!-- Your existing form fields -->
-    <div class="form-group">
-        {% csrf_token %}
-            <input type="hidden" id="facilitytype" name="facilitytype" / >
-            <div class="row">
-                <div class="col">
-                    <label class="control-label">Project</label>
-                    <input class="form-control" type="text" name="selectedItem_project" id="selectedItem_project" value="{{ order.project_number }}" readonly />
-                </div>
-                <div class="col">
-                    <label class="control-label">Module</label>
-                    <input class="form-control" type="text" name="selectedItem" id="selectedItem" value="" readonly />
-                </div>
-            </div>
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <label for="id_validity" class="control-label">Number of Equipments<span class="required">*</span></label>
-                    <input class="form-control" type="text" name="number_of_equipments" id="number_of_equipments" value="" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Generate" name="next" />
-                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
-                </div>
-            </div>
-        </div>
-    <!-- The rest of your form fields -->
-    </form>
-    `;
-
-    // The JavaScript to handle the click event on your modal items
     $(document).ready(function() {
-
-        $('.module-item').on('click', function() {
-            // Get the name of the item from the data attribute
-            var itemName = $(this).data('itemName');
-            // Update the modal's body with the form HTML
-            $('#modulesModal .modal-body').html(formHtml);
-            // Set the value of the additional text field to the item's name
-            $('#modal-form #selectedItem').val(itemName);
-            $('#facilitytype').val(itemName);
-            // You may want to update the modal's title as well
-            $('#modulesModalLabel').text('Selected Item: ' + itemName);
-            // Since you're changing the content, reinitialize any plugins or UI elements here
-            // Example: If you're using a datepicker on any of the form's fields, initialize it here
-            // Finally, you might want to hide or show certain buttons
-            $('#modulesModal .modal-footer .btn').hide(); // hides all buttons
-            // Or show a specific button
-            // $('#modulesModal .modal-footer .btn-save').show(); // assumes you have a save button
+        // The form that you want to display in the modal, with an additional text field pre-filled 
+        $('#show_modules').on('click', function() {
+            var formHtml = `
+            <form id="modal-form" method="POST">
+                <div class="form-group">
+                    {% csrf_token %}
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label class="control-label">Equipment type<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq-type" id="select-eq-type">
+                                <option value="">---------</option>
+                                {% for ts in test_sheets %}
+                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label for="id_validity" class="control-label">Equipment<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq" id="select-eq">
+                                <option value="">---------</option>
+                                {% for eqt in eq_types %}
+                                <option value="{{ eqt.id }}">{{ eqt.name }} ({{ eqt.test_sheet }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label for="id_validity" class="control-label">Count<span class="required">*</span></label>
+                            <input class="form-control" type="text" name="eq_count" id="eq_count" value="" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <input type="submit" class="btn btn-success" value="Create" name="next" onclick="createDataSheet(this)" />
+                            <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                        </div>
+                    </div>
+                </div>
+            </form>
+            `;
+            $('#modulesModal .modal-body').html(formHtml); 
+            $('#modulesModal').modal('show'); 
         });
-
-        // Function to remove both the collapse-section and the corresponding collapse div
-        // $('.btn-danger').click(function() {
-        //     var parentSection = $(this).closest('.collapse-section'); // Finds the nearest parent collapse-section div
-        //     var targetID = parentSection.data('target'); // Gets the data-target attribute, which is the ID of the collapse div
-
-        //     $(targetID).remove(); // Removes the collapse div with the corresponding ID
-        //     parentSection.remove(); // Removes the collapse-section div
-        // });
     });
 
-    // API call to delete a DataSheet
     function deleteDataSheet(event, datasheetId) {
         event.stopPropagation(); // Stop the event from propagating to parent elements
         $.ajax({
@@ -462,39 +500,91 @@
                 location.reload(); // reload the page if successful, moved inside success callback
             },
             error: function(error) {
-                alert("Error deleting DataSheet!");
+                // alert("Error deleting DataSheet!");
+                console.log(error);
             }
         });
     }
-
-    function addSection(event, counter) {
-        event.stopPropagation(); // Stop the event from propagating to parent elements
-        // Find the section where new content will be added
-        var sectionContent = document.getElementById('sectionContent' + counter);
-        // Assuming you want to clone the entire set of forms (which is the first child of the section content)
-        var contentToClone = sectionContent.getElementsByClassName('content-set')[0];
-        // Clone the content
-        var clone = contentToClone.cloneNode(true); // true means clone all child nodes and event handlers
-        // Modify cloned IDs to ensure they are unique
-        var count = sectionContent.getElementsByClassName('content-set').length;
-        var newIdSuffix = count + 1;
-        Array.from(clone.querySelectorAll('input, select, textarea')).forEach(function(input) {
-            input.id += newIdSuffix; // Append new suffix to make the id unique
-            input.value = ''; // Reset the value if you don't want to clone the data
-            input.name += newIdSuffix; // Append new suffix to make the name unique
+    function deleteSection(element, sectionId) {
+        $('[data-target="#section' + sectionId + '"]').closest('div').remove();
+    }
+    function createDataSheets(event) {
+        event.preventDefault();
+        var data = [];
+        $('.collapse-section').each(function() {
+            var equipment = $(this).find('.eq-wrapper span:first').text().split('(')[0].trim();
+            // var equipment_id = $(this).find('.eq-wrapper span:first').attr('class').split(' ')[1].split('-')[1];
+            // var test_sheet_id = $(this).find('.eq-wrapper span:first').attr('class').split(' ')[1].split('-')[2];
+            var test_sheet = $(this).find('.eq-wrapper span:first').text().split('(')[1].split(')')[0];
+            var qty = $(this).find('.qty-container span:first').text();
+            data.push({
+                equipment: equipment,
+                // equipment_id: equipment_id,
+                test_sheet: test_sheet,
+                // test_sheet_id: test_sheet_id,
+                qty: qty
+            });
         });
-        Array.from(clone.querySelectorAll('label')).forEach(function(label) {
-            if (label.htmlFor) {
-                label.htmlFor += newIdSuffix; // Append new suffix to update 'for' attribute
+        $.ajax({
+            url: window.location.pathname + 'create-datasheets/',
+            type: 'POST',
+            contentType: 'application/json', // Set contentType to application/json
+            data: JSON.stringify({ data: data }), // Send data as JSON string
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
             }
         });
-        // Append the cloned set to the section content
-        sectionContent.appendChild(clone);
     }
-
-    function deleteSection(element) {
-        // This will remove the closest parent .content-item div to the delete button that was clicked
-        element.closest('.content-set').remove();
+    function clearDataSheets(event) {
+        event.preventDefault();
+        $.ajax({
+            url: window.location.pathname + 'clear-datasheets/',
+            type: 'DELETE',
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    function createDataSheet(button) {
+        button.disabled = true;
+        var eq_type = $('#select-eq-type').val();
+        var eq = $('#select-eq').val();
+        var eq_count = $('#eq_count').val();
+        if (eq_type === '' || eq === '' || eq_count === '') {
+            alert('Please fill all fields!');
+            button.disabled = false;
+            return;
+        }
+        $.ajax({
+            url: window.location.pathname + 'create-datasheet/',
+            type: 'POST',
+            contentType: 'application/json', // Set contentType to application/json
+            data: JSON.stringify({ data: {
+                eq_type: eq_type,
+                eq: eq,
+                eq_count: eq_count,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            } }), // Send data as JSON string
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+                alert('Error creating DataSheet!');
+            }
+        });
     }
 </script>
       

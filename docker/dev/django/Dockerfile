@@ -15,7 +15,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # pycairo
   libcairo2-dev pkg-config python3-dev \
   # mysql
-  default-libmysqlclient-dev
+  default-libmysqlclient-dev \
+  # pdf2image
+  poppler-utils
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
@@ -59,6 +61,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   gettext \
   # mysql
   default-libmysqlclient-dev build-essential \
+  # pdf2image
+  poppler-utils \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*

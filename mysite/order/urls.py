@@ -26,4 +26,7 @@ urlpatterns = [
     path('manufacturer/<int:pk>/edit/', views.manufacturer_edit_popup, name="manufacturerEdit"),
     path('order/update/<int:order_id>/', views.order_uppdate, name="order_update"),
     path('order/update/<int:order_id>/delete-datasheet/<int:datasheet_id>/', views.delete_datasheet, name='delete_datasheet'),
+    path('order/update/<int:order_id>/create-datasheets/', views.create_datasheets, name='create_datasheets'),
+    path('order/update/<int:order_id>/create-datasheet/', views.create_datasheet, name='create_datasheet'),
+    path('order/update/<int:order_id>/clear-datasheets/', views.clear_datasheets, name='clear_datasheets'),
 ]

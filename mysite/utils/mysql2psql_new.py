@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.INFO, filename='migration_errors.log', filemod
 
 mysql_conn = MySQLdb.connect(
     host="64.251.19.223",
-    user="dtabtech_dev",
-    password="qxjf@sXK)Fy0",
-    database="dtabtech_maindb2"
+    user="dtabtech_testusr",
+    password="L[SP+hbSl!J{",
+    database="dtabtech_testdb"
 )
 
 # Connect to PostgreSQL
@@ -307,5 +307,3 @@ mysql_cursor.close()
 pg_cursor.close()
 mysql_conn.close()
 pg_conn.close()
-
-

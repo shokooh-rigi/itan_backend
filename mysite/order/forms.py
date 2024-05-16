@@ -6,11 +6,31 @@ from .models import *
 
 
 class DataSheetForm(forms.Form):
+    ITEM_CHOICES = [
+        ('', '---------'),
+        ('option1', 'Air Moving Equipment 1'),
+        ('option2', 'V.A.V Box'),
+        ('option3', 'Air Terminal'),
+        ('option4', 'Chiller'),
+        ('option5', 'Pump'),
+        ('option6', 'Velocity'),
+        ('option7', 'Dalt'),
+        ('option8', 'Flow Measuring'),
+        ('option9', 'Primary Heat Exchanger'),
+        ('option10', 'Air Moving Equipment 2'),
+        ('option11', 'V.A.V Box Fan Heat Schedule'),
+        ('option12', 'V.A.V Box Temperature Schedule'),
+        ('option13', 'V.A.V Box Schedule'),
+        ('option14', 'Induction Unit'),
+        ('option15', 'Primary Heat Exchanger 2'),
+        ('option16', 'Pitot Traverse Summary'),
+        ('option17', 'Hot Water Boiler'),
+    ]
     selectedItem_project = forms.CharField()
-    selectedItem = forms.CharField()
-    project_name = forms.CharField(required=False , empty_value=None)
+    selectedItem = forms.ChoiceField(choices=ITEM_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
+    # project_name = forms.CharField(required=False , empty_value=None)
     sheet_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y' , attrs={'type': 'date'}))
-    system = forms.CharField(max_length=50)
+    # system = forms.CharField(max_length=50)
     number_of_equipments = forms.IntegerField()
     facilitytype = forms.CharField()
 
