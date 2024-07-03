@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
+# from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
 
 from .models import *
 
@@ -24,6 +24,7 @@ class EqCustomFieldAdmin(admin.TabularInline):
 
 class EquipmentDbAdmin(ImportExportModelAdmin):
     inlines = [EqCustomFieldAdmin, ]
+    list_display = ('id', 'equipment_type', 'manufacturer', 'model_number',)
 
 
 admin.site.register(EquipmentDb, EquipmentDbAdmin)
@@ -59,15 +60,18 @@ class EquipmentTypeAdmin(ImportExportModelAdmin):
 admin.site.register(Equipment, EquipmentTypeAdmin)
 
 
-class TestSheetFieldAdmin(SortableInlineAdminMixin, admin.TabularInline):
+# class TestSheetFieldAdmin(SortableInlineAdminMixin, admin.TabularInline):
+class TestSheetFieldAdmin(admin.TabularInline):
     model = TestSheetField
 
 
-class TestSheetOperationAdmin(SortableInlineAdminMixin, admin.TabularInline):
+# class TestSheetOperationAdmin(SortableInlineAdminMixin, admin.TabularInline):
+class TestSheetOperationAdmin(admin.TabularInline):
     model = TestSheetOperation
 
 
-class TestSheetAdmin(ImportExportModelAdmin, SortableAdminBase):
+# class TestSheetAdmin(ImportExportModelAdmin, SortableAdminBase):
+class TestSheetAdmin(ImportExportModelAdmin):
     inlines = [TestSheetFieldAdmin, TestSheetOperationAdmin, ]
 
     class Media:

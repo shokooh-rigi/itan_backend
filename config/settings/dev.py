@@ -55,7 +55,7 @@ AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default=None)
 # AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default=None)
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.wasabisys.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
 # AWS_S3_DOMAIN = AWS_S3_CUSTOM_DOMAIN or f"s3.{AWS_STORAGE_BUCKET_NAME}.wasabisys.com"
-AWS_S3_DOMAIN = f"s3.{AWS_S3_REGION_NAME}.wasabisys.com"
+AWS_S3_DOMAIN = f"s3.{AWS_S3_REGION_NAME}.wasabisys.com/{AWS_STORAGE_BUCKET_NAME}"
 
 # STATIC & MEDIA
 # ------------------------

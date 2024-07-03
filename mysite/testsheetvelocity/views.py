@@ -77,7 +77,7 @@ def velocity_sheet_equipment_list(request, sheet_id):
     project_name = request.GET.get('project_name', '')
     my_project = my_sheet.project
     air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project)
-    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).distinct().order_by('-velocity_data').distinct()
+    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(secd__value__icontains=project_name).distinct().order_by('-velocity_data').distinct()
     parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
                   'my_sheet': my_sheet,
                   'sheet_id': sheet_id,
@@ -191,7 +191,7 @@ def velocity_actual_data(request, sheet_id, velocity_equipment_id):
 
     equipment_type = 1
     this_sheet_equipment = get_object_or_404(SheetEquipment, id=velocity_equipment.air_moving_equipment.id)
-    sheet_code = this_sheet_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
+    sheet_code = this_sheet_equipment.secd_set.get(key__column_title__icontains='fan no.').value
 
     actual_fields = TestSheetField.objects.filter(show_in_actual=True, test_sheet__name__icontains='traverse')
 

@@ -16,6 +16,7 @@ from .models import *
 from .render import Render as PDFRender
 from django.http import JsonResponse
 import numbers
+from django.db import connection
 
 
 # Create your views here.
@@ -162,9 +163,9 @@ def equipments_list(request, sheet_id):
     search_contains_letters = search_lowercase.islower()
     if project_name:
         if search_contains_letters:
-            object_list = object_list.filter(sheetequipmentcommondata__value__icontains=project_name)
+            object_list = object_list.filter(secd__value__icontains=project_name)
         else:
-            object_list = object_list.filter(Q(sheetequipmentcommondata__value__icontains=project_name) | Q(id=project_name))
+            object_list = object_list.filter(Q(secd__value__icontains=project_name) | Q(id=project_name))
     object_list = object_list.order_by('main_data_entry_completed', 'design_data_entry_completed', 'actual_data_entry_completed', 'field_order')
 
     paginator = Paginator(object_list, pagination)
@@ -199,9 +200,9 @@ def sort_equipments_list(request, sheet_id):
     search_contains_letters = search_lowercase.islower()
     if project_name:
         if search_contains_letters:
-            object_list = object_list.filter(sheetequipmentcommondata__value__icontains=project_name)
+            object_list = object_list.filter(secd__value__icontains=project_name)
         else:
-            object_list = object_list.filter(Q(sheetequipmentcommondata__value__icontains=project_name) | Q(id=project_name))
+            object_list = object_list.filter(Q(secd__value__icontains=project_name) | Q(id=project_name))
     object_list = object_list.order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -253,7 +254,7 @@ def fetch_sheet_equipment_data(equipment: SheetEquipment):
             return default_value
 
     equipment_data = {}
-    se_common_data_set = equipment.sheetequipmentcommondata_set
+    se_common_data_set = equipment.secd_set
     e_custom_field_set = equipment.equipment.equipmentcustomfield_set
     se_actual_data_set = equipment.sheetequipmentactualdata_set
     data_fields = [
@@ -426,7 +427,12 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         for every_field in showing_fields:
             key = every_field
             field_value = request.POST.get('showing_field_value_'+str(every_field.id))
-            new_record = SheetEquipmentCommonData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
+            # new_record = SheetEquipmentCommonData(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
+            # TODO: Remove this FK check
+            with connection.cursor() as cursor:
+                cursor.execute("SET foreign_key_checks = 0;")
+                new_record = SECD.objects.create(sheet_equipment_id=sheet_equipment_id, key=key, value=field_value)
+                cursor.execute("SET foreign_key_checks = 1;")
             new_record.save()
         new_update = SheetEquipment.objects.get(id=sheet_equipment_id)
         new_update.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
@@ -437,6 +443,68 @@ def sheet_equipment_common_data(request, sheet_equipment_id):
         new_update.number_of_outside_air_terminal = request.POST.get('number_of_outside_air_terminal')
         new_update.number_of_exhaust_air_terminal = request.POST.get('number_of_exhaust_air_terminal')
         new_update.save()
+
+        eqdb = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+        eqdb.main_data_entry_confirmed = True
+        eqdb.save()
+
+        # create a datasheet for air terminals
+        if (
+            int(request.POST.get('number_of_supply_air_terminal')) > 0 or
+            int(request.POST.get('number_of_return_air_terminal')) > 0 or
+            int(request.POST.get('number_of_outside_air_terminal')) > 0 or
+            int(request.POST.get('number_of_exhaust_air_terminal')) > 0
+        ):
+            total = int(request.POST.get('number_of_supply_air_terminal')) + int(request.POST.get('number_of_return_air_terminal')) + int(request.POST.get('number_of_outside_air_terminal')) + int(request.POST.get('number_of_exhaust_air_terminal'))
+            ts = TestSheet.objects.get(name__icontains='Air Terminal')
+            ds = DataSheet.objects.get_or_create(
+                project=sheet_equipment.sheet.project,
+                test_sheet_type=ts,
+                sheet_date=datetime.datetime.now().date(),
+                number_of_equipment_groups=total,
+            )[0]
+            # TODO: Remove this FK check
+            for i in range(int(request.POST.get('number_of_supply_air_terminal'))):
+                with connection.cursor() as cursor:
+                    cursor.execute("SET foreign_key_checks = 0;")
+                    at = AirTerminalEquipment.objects.get_or_create(
+                        sheet=ds,
+                        air_equipment=sheet_equipment,
+                        type=1,
+                        outlet_no=i+1,
+                    )
+                    cursor.execute("SET foreign_key_checks = 1;")
+            for i in range(int(request.POST.get('number_of_return_air_terminal'))):
+                with connection.cursor() as cursor:
+                    cursor.execute("SET foreign_key_checks = 0;")
+                    at = AirTerminalEquipment.objects.get_or_create(
+                        sheet=ds,
+                        air_equipment=sheet_equipment,
+                        type=2,
+                        outlet_no=i+1,
+                    )
+                    cursor.execute("SET foreign_key_checks = 1;")
+            for i in range(int(request.POST.get('number_of_outside_air_terminal'))):
+                with connection.cursor() as cursor:
+                    cursor.execute("SET foreign_key_checks = 0;")
+                    at = AirTerminalEquipment.objects.get_or_create(
+                        sheet=ds,
+                        air_equipment=sheet_equipment,
+                        type=3,
+                        outlet_no=i+1,
+                    )
+                    cursor.execute("SET foreign_key_checks = 1;")
+            for i in range(int(request.POST.get('number_of_exhaust_air_terminal'))):
+                with connection.cursor() as cursor:
+                    cursor.execute("SET foreign_key_checks = 0;")
+                    at = AirTerminalEquipment.objects.get_or_create(
+                        sheet=ds,
+                        air_equipment=sheet_equipment,
+                        type=4,
+                        outlet_no=i+1,
+                    )
+                    cursor.execute("SET foreign_key_checks = 1;")
+
         return redirect('sheetEquipmentsList', sheet_equipment.sheet.id)
 
     parameters = {'sheet_equipment': sheet_equipment,
@@ -453,7 +521,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
     next_url = request.GET.get("next")
     this_sheet_equipment = SheetEquipment.objects.get(id=sheet_equipment_id)
     showing_fields = TestSheetColumn.objects.filter(test_sheet__name__icontains='air mov')
-    value_fields = SheetEquipmentCommonData.objects.filter(sheet_equipment_id=sheet_equipment_id)
+    value_fields = SECD.objects.filter(sheet_equipment_id=sheet_equipment_id)
     manufacturers = EquipmentManufacturer.objects.filter(equipmentdb__equipment_type=this_sheet_equipment.equipment_type).distinct()
     Equipment_db = EquipmentDb.objects.filter(equipment_type__test_sheet__name__icontains='air mov', equipment_type=this_sheet_equipment.equipment_type)
     this_equipment = EquipmentDb.objects.get(id=this_sheet_equipment.equipment.id)
@@ -471,7 +539,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
         if request.POST.get("next"):
             for value_field in value_fields:
-                SheetEquipmentCommonData.objects.filter(key=value_field.key,
+                SECD.objects.filter(key=value_field.key,
                                                         sheet_equipment=this_sheet_equipment).update(value=request.POST.get('showing_field_value_' + str(value_field.id)))
             this_sheet_equipment.equipment = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
             old_supply_number = this_sheet_equipment.number_of_supply_air_terminal
@@ -504,7 +572,7 @@ def sheet_equipment_common_data_edit(request, sheet_equipment_id):
                         air_terminal_equipment.delete()
 
                 this_sheet_equipment.terminal_design_data_entry_completed = False
-                this_sheet_equipment.terminal_actual_data_entry_completed = False
+            this_sheet_equipment.main_data_entry_completed = True
             this_sheet_equipment.save()
             if next_url:
                 return redirect(settings.WEB_URL + next_url)
@@ -671,6 +739,7 @@ def review_equipment_values(request, sheet_equipment_id):
                     new_object = EquipmentCustomField(equipment_value_name=custom_field.field_name, company_value=new_value, equipment=this_equipment)
                     new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
+            this_sheet_equipment.main_data_entry_confirmed = True
             this_sheet_equipment.save()
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_equipment': this_equipment,
@@ -896,7 +965,8 @@ def equipment_actual_values(request, sheet_equipment_id):
             for other_custom_field in other_custom_fields:
                 new_object = SheetEquipmentCustomData(key=other_custom_field, value=request.POST.get(
                     'other_value_' + str(other_custom_field.id)), sheet_equipment=this_sheet_equipment)
-                new_object.save()
+                # TODO: FIX
+                # new_object.save()
             for custom_field in custom_fields:
                 new_value = request.POST.get('actual_value_' + str(custom_field.id)).strip()
                 if not new_value:
@@ -912,9 +982,12 @@ def equipment_actual_values(request, sheet_equipment_id):
                                                             sheet_equipment=this_sheet_equipment).update(value=new_value)
                 else:
                     new_object_key = EquipmentCustomField.objects.get(equipment=this_sheet_equipment.equipment, equipment_value_name=custom_field.equipment_value_name)
-                    new_object = SheetEquipmentActualData(key=new_object_key, value=new_value, sheet_equipment=this_sheet_equipment)
-                    new_object.save()
+                    new_object = SheetEquipmentActualData(key=new_object_key, value=new_value, sheet_equipment=this_sheet_equipment)                    
+                    # TODO: FIX
+                    # new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
+            this_sheet_equipment.design_data_entry_confirmed = True
+            this_sheet_equipment.actual_data_entry_confirmed = True
             this_sheet_equipment.save()
             return redirect('sheetEquipmentsList', this_sheet_equipment.sheet.id)
     parameters = {'this_sheet_equipment': this_sheet_equipment,

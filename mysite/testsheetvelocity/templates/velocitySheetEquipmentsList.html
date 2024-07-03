@@ -35,7 +35,7 @@
                 {% for sheet_equipment in air_moving_sheet_equipments %}
                     <tr>
                         <td>
-                            {% for my_name in sheet_equipment.sheetequipmentcommondata_set.all %}
+                            {% for my_name in sheet_equipment.secd_set.all %}
                                 {% if my_name.key.column_title.lower == 'fan no.' %}
                                     {{ my_name.value }}
                                 {% endif %}

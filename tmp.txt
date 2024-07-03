@@ -1,0 +1,101 @@
+TestSheet(check effect on others)
+Equipment
+EquipmentDb
+AirTerminalCode
+
+EstimateEquipment
+
+Sheet
+SheetEquipment
+DataSheet
+DataSheetEquipment
+TestSheetGeneralData
+TestSheetData
+SheetActualDataCustomField
+SheetEquipmentCommonData
+SheetEquipmentActualData
+SheetEquipmentCustomData
+AirTerminalEquipment
+AirTerminalSheetData
+
+
+for simplicity we can replace current form system and all its relatives classes with json field
+
+
+New classes
+=================
+TestSheet
+DataSheet (Merged with Sheet)
+Equipment (Air Terminal, Air Moving, VAV)
+Replace all form data with simple Json
+
+Relations
+==================
+equipments -> datasheet -> test_sheet
+
+classDiagram
+class TestSheet {
+    + name CharField
+    + inheritance ForeignKey (self)
+    + priority IntegerField
+    + created_on DateTimeField
+    + sheet_generator BooleanField
+    + flag BooleanField
+}
+class DataSheet {
+    + test_sheet_type ForeignKey(TestSheet)
+    + project ForeignKey(Order)
+    + sheet_date DateField
+    + system CharField
+    + number_of_equipment_groups IntegerField
+    + archive BooleanField
+    + rogue_design_data_entry_completed BooleanField
+    + rogue_actual_data_entry_completed BooleanField
+
+    + type CharField (between sheet & data sheet)
+}
+class Equipment Type {
+    + service ForeignKey(Service)
+    + test_sheet ForeignKey(TestSheet)
+    + name CharField
+    + price DecimalField
+    + estimate_work IntegerField
+    + created_on DateTimeField
+    + flag BooleanField
+    + form_fields JsonField
+}
+class Equipment {
+    + sheet ForeignKey(DataSheet)
+    + equipment_type ForeignKey(Equipment Type)
+    + number_of_supply_air_terminal SmallIntegerField
+    + number_of_return_air_terminal SmallIntegerField
+    + number_of_outside_air_terminal SmallIntegerField
+    + number_of_exhaust_air_terminal SmallIntegerField
+
+    + velocity_data BooleanField
+    + form_fields JsonField
+
+    + created_on DateTimeField
+    + flag BooleanField
+    + manufacturer ForeignKey(EquipmentManufacturer)
+    + model_number CharField
+    + equipment_submittal FileField
+    + image FileField
+
+    + terminal_design_data_entry_completed BooleanField
+    + terminal_actual_data_entry_completed BooleanField
+    + main_data_entry_completed BooleanField
+    + design_data_entry_completed BooleanField
+    + actual_data_entry_completed BooleanField
+    + main_data_entry_confirmed BooleanField
+    + design_data_entry_confirmed BooleanField
+    + actual_data_entry_confirmed BooleanField
+
+}
+class EquipmentManufacturer{
+    + name CharField
+}
+Equipment "*" o-- "1" DataSheet
+DataSheet "*" o-- "1" TestSheet
+Equipment "*" o-- "1" Equipment Type
+Equipment "*" o-- "1" EquipmentManufacturer

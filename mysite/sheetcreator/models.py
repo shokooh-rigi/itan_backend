@@ -18,8 +18,6 @@ class SupplyorReturnChoices(Enum):
             (SupplyorReturnChoices.Other.value, 'Other'),
         )
 
-# Create your models here.
-
 
 class Sheet(models.Model):
     test_sheet_type = models.ForeignKey(TestSheet, on_delete=models.CASCADE, blank=False, null=False)
@@ -127,7 +125,8 @@ class SheetActualDataCustomField(models.Model):
         return self.test_sheet.name + " " + self.column_title
 
 
-class SheetEquipmentCommonData(models.Model):
+# class SheetEquipmentCommonData(models.Model):
+class SECD(models.Model):
     sheet_equipment = models.ForeignKey(SheetEquipment, on_delete=models.CASCADE, blank=False, null=False)
     key = models.ForeignKey(TestSheetColumn, on_delete=models.CASCADE, blank=False, null=False)
     value = models.CharField(max_length=500, blank=False)

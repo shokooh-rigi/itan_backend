@@ -147,3 +147,9 @@ def past_30_days(order):
             return True
         return False
     return None
+
+
+@register.filter
+def enumerate_list(value):
+    return enumerate(value)
+

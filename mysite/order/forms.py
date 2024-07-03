@@ -4,7 +4,23 @@ from django_select2 import forms as s2forms
 from django import forms
 from .models import *
 
+class EquipmentDbForm(forms.ModelForm):
+    serial_number = forms.CharField(required=False, max_length=100, label='Serial Number')
+    fan_data = forms.CharField(required=False, max_length=100, label='Fan Data')
 
+    class Meta:
+        model = EquipmentDb
+        fields = ['manufacturer', 'model_number', 'serial_number', 'fan_data']
+
+    def __init__(self, *args, **kwargs):
+        sheet_equipment = kwargs.pop('sheet_equipment', None)
+        super().__init__(*args, **kwargs)
+        if sheet_equipment:
+            custom_data = sheet_equipment.sheetequipmentcustomdata_set.filter(key__column_title__icontains='serial').first()
+            common_data = sheet_equipment.secd_set.filter(key__column_title__icontains='fan').first()
+            self.fields['serial_number'].initial = custom_data.value if custom_data else ''
+            self.fields['fan_data'].initial = common_data.value if common_data else ''
+                  
 class DataSheetForm(forms.Form):
     ITEM_CHOICES = [
         ('', '---------'),

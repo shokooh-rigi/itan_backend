@@ -54,17 +54,18 @@ class ContactInfo(models.Model):
 @receiver(post_save, sender=ContactInfo)
 def update_customer_id(sender, instance, created, **kwargs):
     if created:
-        new_number = Setting.objects.get(key='Customer ID Last Digit')
-        new_number.value = int(Setting.objects.get(key='Customer ID Last Digit').value) + 1
-        new_number.save()
-        instance.customer_id = Setting.objects.get(key='Customer ID Last Digit').value
-        instance.save()
+        # new_number = Setting.objects.get(key='Customer ID Last Digit')
+        # new_number.value = int(Setting.objects.get(key='Customer ID Last Digit').value) + 1
+        # new_number.save()
+        # instance.customer_id = Setting.objects.get(key='Customer ID Last Digit').value
+        # instance.save()
 
-        new_number = Setting.objects.get(key=0)
-        new_number.value = int(Setting.objects.get(key=0).value) + 1
-        new_number.save()
-        instance.customer_id = Setting.objects.get(key=0).value
-        instance.save()
+        # new_number = Setting.objects.get(key=0)
+        # new_number.value = int(Setting.objects.get(key=0).value) + 1
+        # new_number.save()
+        # instance.customer_id = Setting.objects.get(key=0).value
+        # instance.save()
+        pass
 
 
 class Person(models.Model):

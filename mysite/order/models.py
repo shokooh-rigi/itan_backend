@@ -80,13 +80,13 @@ class Order(models.Model):
 @receiver(post_save, sender=Order)
 def update_project_number(sender, instance, created, **kwargs):
     if created:
-        new_number = Setting.objects.get(key='Project Number Last Digit')
-        new_number.value = int(Setting.objects.get(key='Project Number Last Digit').value) + 1
-        new_number.save()
-        instance.project_number = Setting.objects.get(key='Project Number Pre Text').value + \
-                                  Setting.objects.get(key='Project Number Last Digit').value.zfill(3)
-        instance.save()
-
+        # new_number = Setting.objects.get(key='Project Number Last Digit')
+        # new_number.value = int(Setting.objects.get(key='Project Number Last Digit').value) + 1
+        # new_number.save()
+        # instance.project_number = Setting.objects.get(key='Project Number Pre Text').value + \
+        #                           Setting.objects.get(key='Project Number Last Digit').value.zfill(3)
+        # instance.save()
+        pass
 
 class ChangeOrder(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=False, null=True)

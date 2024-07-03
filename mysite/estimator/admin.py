@@ -56,6 +56,7 @@ class EstimateEquipmentResource(resources.ModelResource):
 
 class EstimateEquipmentAdmin(ImportExportModelAdmin):
     resource_class = EstimateEquipmentResource
+    list_display = ('id', 'estimate', 'equipment')
 
 
 admin.site.register(EstimateEquipment, EstimateEquipmentAdmin)

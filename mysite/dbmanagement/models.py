@@ -202,6 +202,10 @@ class EquipmentDb(models.Model):
     image = models.FileField(upload_to='uploads/equipmentDb/image', blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
+    
+    main_data_entry_confirmed = models.BooleanField(default=False)
+    design_data_entry_confirmed = models.BooleanField(default=False)
+    actual_data_entry_confirmed = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('manufacturer', 'model_number',)

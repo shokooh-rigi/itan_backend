@@ -223,7 +223,7 @@ def report_sheet_recreate(request, sheet_id):
                     number_of_total_pages = number_of_total_pages + 1
                     velocity_pages.append({
                         'type': 'VELOCITY',
-                        'system': 'VELOCITY ' + air_moving_equipment.sheetequipmentcommondata_set.get(
+                        'system': 'VELOCITY ' + air_moving_equipment.secd_set.get(
                             key__column_title__icontains='fan no.').value,
                         'rows': [velocity_equipment],
                         'max_row': range(14),
@@ -357,7 +357,7 @@ def report_sheet_recreate(request, sheet_id):
                             empty_rows = 0
                             page = {
                                 'type': 'VAV',
-                                'system': 'VAVS ' + air_moving_equipment.sheetequipmentcommondata_set.get(
+                                'system': 'VAVS ' + air_moving_equipment.secd_set.get(
                                     key__column_title__icontains='fan no.').value,
                                 'rows': [],
                                 'notes': [],
@@ -467,17 +467,17 @@ def report_sheet_recreate(request, sheet_id):
             air_moving_equipments = air_moving_equipments[2:]
             pages.append({
                 'type': 'AIRMOVING',
-                'system': current_air_moving_equipments[0].sheetequipmentcommondata_set.get(
+                'system': current_air_moving_equipments[0].secd_set.get(
                     key__column_title__icontains='fan no.').value + ' & ' + current_air_moving_equipments[
-                              1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                              1].secd_set.get(key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(current_air_moving_equipments[0]),
                     fetch_air_moving_equipment_data(current_air_moving_equipments[1]),
                 ]
             })
-            toc_line_maker(current_air_moving_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(current_air_moving_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + current_air_moving_equipments[
-                               1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                               1].secd_set.get(key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving(
@@ -489,17 +489,17 @@ def report_sheet_recreate(request, sheet_id):
         if len(air_moving_equipments) == 2:
             pages.append({
                 'type': 'AIRMOVING',
-                'system': air_moving_equipments[0].sheetequipmentcommondata_set.get(
+                'system': air_moving_equipments[0].secd_set.get(
                     key__column_title__icontains='fan no.').value + ' & ' + air_moving_equipments[
-                              1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                              1].secd_set.get(key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(air_moving_equipments[0]),
                     fetch_air_moving_equipment_data(air_moving_equipments[1]),
                 ]
             })
-            toc_line_maker(air_moving_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(air_moving_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + air_moving_equipments[
-                               1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                               1].secd_set.get(key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([air_moving_equipments[0], air_moving_equipments[1]])
@@ -510,13 +510,13 @@ def report_sheet_recreate(request, sheet_id):
         elif len(air_moving_equipments) == 1:
             pages.append({
                 'type': 'AIRMOVING',
-                'system': air_moving_equipments[0].sheetequipmentcommondata_set.get(
+                'system': air_moving_equipments[0].secd_set.get(
                     key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(air_moving_equipments[0]),
                 ]
             })
-            toc_line_maker(air_moving_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(air_moving_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
@@ -531,15 +531,15 @@ def report_sheet_recreate(request, sheet_id):
             exhaust_equipments = exhaust_equipments[2:]
             pages.append({
                 'type': 'AIRMOVING',
-                'system': current_exhaust_equipments[0].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value + ' & ' + current_exhaust_equipments[1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                'system': current_exhaust_equipments[0].secd_set.get(key__column_title__icontains='fan no.').value + ' & ' + current_exhaust_equipments[1].secd_set.get(key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(current_exhaust_equipments[0]),
                     fetch_air_moving_equipment_data(current_exhaust_equipments[1]),
                 ]
             })
-            toc_line_maker(current_exhaust_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(current_exhaust_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + current_exhaust_equipments[
-                               1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                               1].secd_set.get(key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([current_exhaust_equipments[0], current_exhaust_equipments[1]])
@@ -550,17 +550,17 @@ def report_sheet_recreate(request, sheet_id):
         if len(exhaust_equipments) == 2:
             pages.append({
                 'type': 'AIRMOVING',
-                'system': exhaust_equipments[0].sheetequipmentcommondata_set.get(
+                'system': exhaust_equipments[0].secd_set.get(
                     key__column_title__icontains='fan no.').value + ' & ' + exhaust_equipments[
-                              1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                              1].secd_set.get(key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(exhaust_equipments[0]),
                     fetch_air_moving_equipment_data(exhaust_equipments[1]),
                 ]
             })
-            toc_line_maker(exhaust_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(exhaust_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value + ' & ' + exhaust_equipments[
-                               1].sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+                               1].secd_set.get(key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             pages = pages + add_terminal_pages_for_air_moving([exhaust_equipments[0], exhaust_equipments[1]])
@@ -571,13 +571,13 @@ def report_sheet_recreate(request, sheet_id):
         elif len(exhaust_equipments) == 1:
             pages.append({
                 'type': 'AIRMOVING',
-                'system': exhaust_equipments[0].sheetequipmentcommondata_set.get(
+                'system': exhaust_equipments[0].secd_set.get(
                     key__column_title__icontains='fan no.').value,
                 'rows': [
                     fetch_air_moving_equipment_data(exhaust_equipments[0]),
                 ]
             })
-            toc_line_maker(exhaust_equipments[0].sheetequipmentcommondata_set.get(
+            toc_line_maker(exhaust_equipments[0].secd_set.get(
                 key__column_title__icontains='fan no.').value,
                            0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)

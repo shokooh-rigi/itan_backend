@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load estimator_tags %}
+{% load order_tags %}
+{% load estimator_tags %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6">
+        
+        <h3 class="text-uppercase">Project: {{ order.project_number }}</h3>
+        <h4 class="text-uppercase">{{ order.proposal.quote.estimate.project.name }}</h4>
+
+        <!-- Modal -->
+        <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="modulesModalLabel">DATA</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+
+                <div id="modules" style="display: none">
+                </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+            </div>
+        </div>               
+
+        <div class="mb-5" style="display: flex; justify-content: flex-end;">
+            <button id="show_modules" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modulesModal">
+            <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <h5 style="text-align: left;">
+            {{ modules_type }}{% if modules_type == "Estimate" %}({% estimate_number_generator order.proposal.quote.estimate.id %}){% endif %}:
+        </h5>
+
+        {% if modules_type == "Estimate" %}
+            {% for eq in equipments %}
+                <div class="d-flex justify-content-between align-items-center mb-2 estimate-wrapper" data-id="section{{ eq.id }}">
+                    <div class="mb-0 eq-wrapper">
+                        <span class="es-{{ eq.eq_id }}-{{ eq.test_sheet_id }}">{{ eq.equipment }} ({{ eq.test_sheet }})</span>
+                        &nbsp;-&nbsp;
+                        <span class="qty-container">
+                            <span class="qty mr-5 inner-qty">{{ eq.qty }}</span>
+                        </span>
+                    </div>
+                    <div>
+                        <button onclick="decreaseQty(this, '{{ eq.id }}')" type="button" class="btn btn-primary btn-sm">-</button>
+                        <button onclick="increaseQty(this, '{{ eq.id }}')" type="button" class="btn btn-primary btn-sm">+</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteSection(event, '{{ eq.id }}')" data-id="{{ eq.id }}" ><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="d-flex justify-content-end m-5">
+                <button type="submit" class="btn btn-primary" onclick="createDataSheets(event)">Save & Create</button>
+            </div>
+            {% elif modules_type == "Equipments" %}
+                {% for service, service_data in equipments.items %}
+                    <div>
+                        <h5>{{ service }}</h5>
+                    </div>
+                    {% for eq_type, eq_type_data in service_data.items %}
+                        <div>
+                            <h6>{{ eq_type }}</h6>
+                        </div>
+                        {% for eq_id, eq_name in eq_type_data.items %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 estimate-wrapper" data-id="section{{ eq.id }}">
+                                <div class="mb-0 eq-wrapper">
+                                    <span>{{ eq_id }} - {{ eq_name }}</span>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteDataSheet(event, '{{ eq_id }}')" data-id="{{ eq_id }}"><i class="fas fa-times"></i></button>
+                                </div>
+                                <!-- Info links -->
+                            </div>
+                            <div class="mb-2" style="text-align: left;">
+                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_update' eq_id %}" target="_blank">General Info</a>
+                                </br>
+                                <a class="es-{{ eq_id }} pl-3" href="#" target="_blank">Design Data</a>
+                                </br>
+                                <a class="es-{{ eq_id }} pl-3" href="#" target="_blank">Actual Data</a>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+                <div class="d-flex justify-content-end m-5">
+                    <button type="submit" class="btn btn-danger" onclick="clearDataSheets(event)">Cancel</button>
+                </div>
+            {% endif %}
+        
+      
+
+       </div>
+       
+       <div class="col-md-6">
+            <div class="slideshow-container">
+                <div id="carouselExample" class="carousel slide">
+                    <div class="carousel-inner">
+                        {% for map in maps %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img class="fixed-image zoom" src="data:image/png;base64,{{ map }}" data-magnify-src="data:image/png;base64,{{ map }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselExample" role="button" data-slide="prev">❮</a>
+                    <a class="carousel-control-next" href="#carouselExample" role="button" data-slide="next">❯</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .mb-0 {
+        display: flex;
+        align-items: center;
+    }
+    .qty-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .qty-container input {
+        width: 60px;
+        text-align: center;
+        margin-right: 5px;
+    }
+
+    .qty-container button {
+        width: 35px;
+        height: 35px;
+        text-align: center;
+        line-height: 20px;
+        cursor: pointer;
+        margin-right: 5px;
+        border-radius: 50%;
+        border: none;
+        background-color: #007bff;
+        color: white;
+    }
+
+    .qty-container button:focus {
+        outline: none;
+    }
+
+    .qty-container button:hover {
+        background-color: #0056b3;
+    }
+
+    select {
+        margin-right: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+    }
+
+    .equipment-container {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .equipment-container > * {
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .equipment-container img {
+        margin-right: 10px;
+    }
+    /* Optional CSS for styling collapsible sections */
+    .collapse-section {
+        cursor: pointer;
+    }
+    #system {
+        text-transform: none!important;
+    }
+    .slideshow-container {
+    max-width: 1000px; 
+    position: relative;
+    margin: auto;
+    }
+    .carousel-control-prev, .carousel-control-next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px; 
+        color: rgb(255, 255, 255);
+        font-weight: bold;
+        font-size: 14px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 60%;
+        transition: 0.3s ease;
+    }
+    .carousel-control-prev {
+        left: 0;
+    }
+    .carousel-control-next {
+        right: 0;
+    }
+    .carousel-control-prev:hover, .carousel-control-next:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    .fixed-image {
+        width: 100%;
+        height: 600px;
+        object-fit: contain;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $(".main").addClass('nobg');
+        $('.zoom').magnify();
+
+        $('#carouselExample').carousel({
+            interval: false
+        });
+
+        $('#carouselExample').on('slid.bs.carousel', function() {
+            $('.zoom').magnify();
+        });
+
+        // $('.disabled-link').removeAttr('href');
+
+    });
+
+    function decreaseQty(button, id) {
+        let span = $('div[data-id="section' + id + '"] .inner-qty');
+        let qty = parseInt(span.text());
+        if (qty > 0) {
+            span.text(qty - 1);
+        }
+    }
+    function increaseQty(button, id) {
+        let span = $('div[data-id="section' + id + '"] .inner-qty');
+        let qty = parseInt(span.text());
+        span.text(qty + 1);
+    }
+    function deleteSection(element, id) {
+        $('div[data-id="section' + id + '"]').remove();
+    }
+
+    $(function () {
+        $("#sheet_date").val('')
+        $("#sheet_date").datetimepicker({
+            format: 'm/d/Y',
+            timepicker: false,
+            scrollInput: false,
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        applyZoom();
+        var showModulesButton = document.getElementById('show_modules');
+
+        showModulesButton.addEventListener('click', function() {
+        var modules = document.getElementById('modules');
+        var modulesModalContent = document.getElementById('modulesContent');
+
+        if (modules && modulesModalContent) {
+            modulesModalContent.innerHTML = modules.innerHTML; // Copy content into the modal
+            $('#modulesModal').modal('show'); // Show the modal
+        } else {
+            console.error('The required DOM elements are not found.');
+        }
+        });
+    });
+
+    $('#id_project').on('change', function() {
+        if($(this).val() === '') {
+            $("#project_name").text('');
+        }
+        else {
+            $("#project_name").text($(this).find(':selected').data('projectname'));
+
+        }
+    });
+
+    $(document).ready(function() {
+        // The form that you want to display in the modal, with an additional text field pre-filled 
+        $('#show_modules').on('click', function() {
+            var formHtml = `
+            <form id="modal-form" method="POST">
+                <div class="form-group">
+                    {% csrf_token %}
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label class="control-label">Equipment type<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq-type" id="select-eq-type">
+                                <option value="">---------</option>
+                                {% for ts in test_sheets %}
+                                <option value="{{ ts.name }}">{{ ts.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label for="id_validity" class="control-label">Equipment<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq" id="select-eq">
+                                <option value="">---------</option>
+                                {% for eqt in eq_types %}
+                                <option value="{{ eqt.name }}">{{ eqt.name }} ({{ eqt.test_sheet }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-line">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <label for="id_validity" class="control-label">Count<span class="required">*</span></label>
+                            <input class="form-control" type="text" name="eq_count" id="eq_count" value="" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12" style="padding-right: 36px;">
+                            <input type="submit" class="btn btn-success" value="Create" name="next" onclick="createDataSheet(this)" />
+                            <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                        </div>
+                    </div>
+                </div>
+            </form>
+            `;
+            $('#modulesModal .modal-body').html(formHtml); 
+            $('#modulesModal').modal('show'); 
+        });
+    });
+
+    function deleteDataSheet(event, eq_id) {
+        event.stopPropagation(); // Stop the event from propagating to parent elements
+        var pathname = window.location.pathname;
+        var parts = pathname.split('/');
+        var id = parts[parts.length - 2];
+        var index = parts.indexOf('equipments');
+        var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/' + eq_id + '/delete/';
+        $.ajax({
+            url: newPathname,
+            type: 'DELETE',
+            contentType: 'application/json', // Set contentType to application/json
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    function createDataSheets(event) {
+        event.preventDefault();
+        var data = [];
+        $('.estimate-wrapper').each(function() {
+            var text = $(this).find('.eq-wrapper span:first').text();
+            var matches = text.match(/\(([^)]+)\)/g);
+            var test_sheet = '';
+            var equipment = text.trim();
+
+            if (matches) {
+                // Extract the content of the last set of parentheses
+                test_sheet = matches[matches.length - 1].slice(1, -1); // Removing the parentheses
+
+                // Remove the last set of parentheses and its content from the text
+                var lastParenIndex = text.lastIndexOf('(');
+                equipment = text.substring(0, lastParenIndex).trim();
+            }
+            // var equipment_id = $(this).find('.eq-wrapper span:first').attr('class').split(' ')[1].split('-')[1];
+            // var test_sheet_id = $(this).find('.eq-wrapper span:first').attr('class').split(' ')[1].split('-')[2];
+            var qty = $(this).find('.qty-container span:first').text();
+            data.push({
+                equipment: equipment,
+                // equipment_id: equipment_id,
+                test_sheet: test_sheet,
+                // test_sheet_id: test_sheet_id,
+                qty: qty,
+                project: '{{ order }}',
+            });
+        });
+
+        var pathname = window.location.pathname;
+        var parts = pathname.split('/');
+        var index = parts.indexOf('equipments');
+        var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/';
+        $.ajax({
+            url: newPathname,
+            type: 'POST',
+            contentType: 'application/json', // Set contentType to application/json
+            data: JSON.stringify({ data: data }), // Send data as JSON string
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    function clearDataSheets(event) {
+        event.preventDefault();
+        var pathname = window.location.pathname;
+        var parts = pathname.split('/');
+        var id = parts[parts.length - 2];
+        var index = parts.indexOf('equipments');
+        var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/order/' + id + '/delete/';
+        $.ajax({
+            url: newPathname,
+            type: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    function createDataSheet(button) {
+        button.disabled = true;
+        var eq_type = $('#select-eq-type').val();
+        var eq = $('#select-eq').val();
+        var eq_count = $('#eq_count').val();
+        if (eq_type === '' || eq === '' || eq_count === '') {
+            alert('Please fill all fields!');
+            button.disabled = false;
+            return;
+        }
+        var pathname = window.location.pathname;
+        var parts = pathname.split('/');
+        var index = parts.indexOf('equipments');
+        var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/';
+        $.ajax({
+            url: newPathname,
+            type: 'POST',
+            contentType: 'application/json', // Set contentType to application/json
+            data: JSON.stringify({ data: [{
+                equipment: eq,
+                test_sheet: eq_type,
+                qty: eq_count,
+                project: '{{ order }}',
+                // csrfmiddlewaretoken: '{{ csrf_token }}'
+            }] }), // Send data as JSON string
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+            },
+            success: function(result) {
+                location.reload();
+            },
+            error: function(error) {
+                console.log(error);
+                alert('Error creating DataSheet!');
+            }
+        });
+    }
+</script>
+      
+{% endblock %}

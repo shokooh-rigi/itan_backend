@@ -102,7 +102,7 @@ def flow_equipment_add(request, sheet_id):
 def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_report_pdf: bool):
     if this_sheet_equipment.air_equipment:
         equipment_data = {
-            'name': this_sheet_equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+            'name': this_sheet_equipment.air_equipment.secd_set.get(key__column_title__icontains='fan no.').value,
             'outlet_no': this_sheet_equipment.outlet_no,
             'code': this_sheet_equipment.code
         }

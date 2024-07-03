@@ -31,12 +31,12 @@
             {% for design_field in design_fields %}
                 {% with 'company_value_'|concatenate:design_field.id as field_name %}
                     <div class="col-lg-3">
-                        <label style="width: 100%;" for="{{ field_name }}" class="control-label">
+                        <label for="{{ field_name }}" class="control-label" style="display: inline-flex; vertical-align: middle;">
                             {{ design_field.field_name }}
-                            {% if design_field.required_in_design %}
-                                <span class="required">*</span>
-                            {% endif %}
                         </label>
+                        {% if design_field.required_in_design %}
+                            <span class="required">*</span>
+                        {% endif %}
                     </div>
                     <div class="col-lg-3">
                         <label for="{{ field_name }}" class="control-label" style="width: 100%;">
@@ -136,4 +136,52 @@
         $('form').on('change', evalAssignmentOperations);
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // The value from the template should be rendered into a hidden element or directly into a JavaScript variable
+            var equipmentTypeName = "{{ this_sheet_equipment.equipment_type.name }}";
+
+            // List of keywords to check for
+            var outletKeywords = ['SERIES FAN', 'OUTSIDER INTAKE', 'STAIR PRESSURIZATION', 'Outside Air Unit', 'Apartment Unit'];
+            var inletKeywords = ['EXHAUST FAN', 'KITCHEN EXHAUST', 'TOILET EXHAUST'];
+
+            // Get the label element
+            var labelElement = document.querySelector('label[for="company_value_127"]');
+
+            // Function to check if the equipmentTypeName contains any of the keywords
+            function containsKeyword(keywords) {
+                return keywords.some(function(keyword) {
+                    return equipmentTypeName.includes(keyword);
+                });
+            }
+
+            // Update the label text based on the equipment type name
+            if (containsKeyword(outletKeywords)) {
+                labelElement.textContent = 'Total C.F.M. Outlets';
+            } else if (containsKeyword(inletKeywords)) {
+                labelElement.textContent = 'Total C.F.M. Inlets';
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to clear inputs if their value is 'None'
+            function clearNoneInputs() {
+                // Get all input elements within the row form-line class
+                var inputs = document.querySelectorAll('.row.form-line input');
+
+                inputs.forEach(function(input) {
+                    if (input.value === 'None') {
+                        input.value = '';
+                    }
+                    else if (input.value === '(None)') {
+                        input.value = '';
+                    }
+                });
+            }
+
+            // Call the function to clear the inputs
+            clearNoneInputs();
+        });
+    </script>
 {% endblock %}

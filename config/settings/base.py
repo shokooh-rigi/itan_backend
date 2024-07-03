@@ -48,13 +48,13 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES = {
     'default': {
-        # # psql
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': 'test',
-        # 'USER': 'debug',
-        # 'PASSWORD': 'debug',
-        # 'HOST': 'postgres',
-        # 'PORT': '5432',
+        # psql
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'test',
+        'USER': 'debug',
+        'PASSWORD': 'debug',
+        'HOST': 'postgres',
+        'PORT': '5432',
         # # mysql
         # 'ENGINE': 'django.db.backends.mysql',
         # 'NAME': 'test',
@@ -65,13 +65,13 @@ DATABASES = {
         # sqlite
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
-        # mysql
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dtabtech_testdb',
-        'USER': 'dtabtech_testusr',
-        'PASSWORD': 'L[SP+hbSl!J{',
-        'HOST': '64.251.19.223',
-        'PORT': '3306',
+        # # mysql
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': 'dtabtech_testdb',
+        # 'USER': 'dtabtech_testusr',
+        # 'PASSWORD': 'L[SP+hbSl!J{',
+        # 'HOST': '64.251.19.223',
+        # 'PORT': '3306',
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -123,6 +123,7 @@ LOCAL_APPS = [
     'mysite.submittal',
     'mysite.mgmreport',
     'mysite.order',
+    'mysite.equipments',
     'mysite.coi',
     'mysite.gi',
     'mysite.report',
@@ -239,7 +240,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-                "mysite.core.context_processors.settings.get_settings",
+                # "mysite.core.context_processors.settings.get_settings",
             ],
         },
     },

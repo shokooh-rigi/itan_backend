@@ -39,6 +39,7 @@ urlpatterns = [
     path('section/customer/', core_views.customer, name='Customer'),
     path('section/management/', core_views.management, name='Management'),
     path('tech/', include('mysite.dashboardtech.urls'), name='techPanel'),
+    path('equipments/', include('mysite.equipments.urls')),
     path('', core_views.home, name='home'),
     path('', include('mysite.estimator.urls')),
     path('', include('mysite.submittal.urls')),

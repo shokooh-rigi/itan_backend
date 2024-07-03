@@ -20,6 +20,7 @@ from django.template.loader import get_template
 import time
 from rest_framework import status
 from rest_framework.response import Response
+from django.db import connection
 
 
 # Create your views here.
@@ -494,6 +495,32 @@ def vav_sheet_equipment_general_data(request, sheet_equipment_id):
                 sheet_equipment.terminal_actual_data_entry_completed = False
             sheet_equipment.main_data_entry_completed = True
             sheet_equipment.save()
+
+            eqdb = EquipmentDb.objects.get(id=request.POST.get('id_equipment'))
+            eqdb.main_data_entry_confirmed = True
+            eqdb.save()
+
+            if int(request.POST.get('number_of_supply_air_terminal')) > 0:
+                ts = TestSheet.objects.get(name__icontains='Air Terminal')
+                ds = DataSheet.objects.get_or_create(
+                    project=sheet_equipment.sheet.project,
+                    test_sheet_type=ts,
+                    sheet_date=datetime.datetime.now().date(),
+                    number_of_equipment_groups=int(request.POST.get('number_of_supply_air_terminal')),
+                )[0]
+                # TODO: Remove this FK check
+                for i in range(int(request.POST.get('number_of_supply_air_terminal'))):
+                    with connection.cursor() as cursor:
+                        cursor.execute("SET foreign_key_checks = 0;")
+                        at = AirTerminalEquipment.objects.get_or_create(
+                            sheet=ds,
+                            vav_equipment=sheet_equipment,
+                            type=1,
+                            outlet_no=i+1,
+                        )
+                        cursor.execute("SET foreign_key_checks = 1;")
+
+
             if next_url:
                 return redirect(settings.WEB_URL + next_url)
             return redirect('vavSheetEquipmentList', sheet_equipment.sheet.id)
@@ -778,6 +805,7 @@ def check_form_values(request, this_sheet_equipment: DataSheetEquipment, is_desi
 def vav_sheet_equipment_design_data(request, sheet_equipment_id):
     this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
     design_fields = this_sheet_equipment.sheet.test_sheet_type.testsheetfield_set.filter(show_in_design=True)
+
     show_parentheses_fields = get_show_parentheses_fields(this_sheet_equipment, True)
     assignment_operations = get_assigment_operations(this_sheet_equipment, True)
 
@@ -828,6 +856,7 @@ def vav_sheet_equipment_design_data(request, sheet_equipment_id):
                                                    value=new_value)
                         new_object.save()
             this_sheet_equipment.design_data_entry_completed = True
+            this_sheet_equipment.main_data_entry_confirmed = True
             this_sheet_equipment.save()
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
     parameters = {
@@ -883,6 +912,8 @@ def vav_sheet_equipment_actual_data(request, sheet_equipment_id):
                                                sheet_equipment=this_sheet_equipment, value=new_value)
                     new_object.save()
             this_sheet_equipment.actual_data_entry_completed = True
+            this_sheet_equipment.design_data_entry_confirmed = True
+            this_sheet_equipment.actual_data_entry_confirmed = True
             this_sheet_equipment.save()
             return redirect('vavSheetEquipmentList', this_sheet_equipment.sheet.id)
 

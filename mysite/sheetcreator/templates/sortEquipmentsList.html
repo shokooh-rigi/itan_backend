@@ -38,7 +38,7 @@
                         <td class="disable-drag">{{ sheet_equipment.equipment.manufacturer }}</td>
                         <td class="disable-drag">{{ sheet_equipment.equipment.model_number }}</td>
                         <td class="disable-drag">{% for sheet_eq_custom_data in sheet_equipment.sheetequipmentcustomdata_set.all %}{% if 'serial' in sheet_eq_custom_data.key.column_title|lower %}{{ sheet_eq_custom_data.value }}{% endif %}{% endfor %}</td>
-                        <td class="disable-drag">{% for sheet_eq_custom_data in sheet_equipment.sheetequipmentcommondata_set.all %}{% if 'fan' in sheet_eq_custom_data.key.column_title|lower %}{{ sheet_eq_custom_data.value }}{% endif %}{% endfor %}</td>
+                        <td class="disable-drag">{% for sheet_eq_custom_data in sheet_equipment.secd_set.all %}{% if 'fan' in sheet_eq_custom_data.key.column_title|lower %}{{ sheet_eq_custom_data.value }}{% endif %}{% endfor %}</td>
 {#                        <td>#}
 {#                            {% if sheet_equipment.main_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentCommonData' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon starticon" data-toggle="tooltip" data-placement="bottom" title="Begin Data Entry"></div></a>#}
 {#                            {% elif sheet_equipment.actual_data_entry_completed == 0 %}<a href="{% url 'sheetEquipmentDesignValue' sheet_equipment.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon continueicon" data-toggle="tooltip" data-placement="bottom" title="Continue Data Entry"></div></a>#}

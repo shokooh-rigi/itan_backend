@@ -1,6 +1,7 @@
 from rest_framework import routers
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
+from django.urls import path, include
 
 from .views import views
 
@@ -24,6 +25,8 @@ urlpatterns = [
     path('projects/hide/<int:project_id>/', views.hide_project),
     path('session/', views.SessionAPIView.as_view()),
     path('users/', views.UsersAPIView.as_view()),
+
+    path('equipments/', include('mysite.equipments.api.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

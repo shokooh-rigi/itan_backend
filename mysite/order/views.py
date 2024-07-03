@@ -15,14 +15,16 @@ from ..gi.models import *
 from ..gi.views import calculate_total_amount_due, calculate_total_paid, calculate_remaining_invoice_due
 import urllib.request as url_request
 from django.http import HttpResponse
-from mysite.sheetcreator.models import DataSheet
+from mysite.sheetcreator.models import DataSheet, Sheet
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from mysite.sheetcreator.models import DataSheetEquipment
+from mysite.sheetcreator.models import DataSheetEquipment , SheetEquipment, SECD
 from mysite.utils.pdf_to_img import pdf_to_image_bytes
 from base64 import b64encode
 from mysite.s3_file_manager import S3
+from django.urls import reverse
+from collections import OrderedDict
 
 
 @login_required
@@ -835,10 +837,12 @@ def manufacturer_edit_popup(request, pk=None):
     return render(request, "cs_manufacturer_form.html", {"form": form})
  
 @login_required
-def order_uppdate(request, order_id):
+def order_update(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     dsq = this_order.datasheet_set.all()
+    sq = this_order.sheet_set.all()
     _eq_types = Equipment.objects.all()
+    manufacturers = EquipmentManufacturer.objects.all()
     modules_type = "Equipments"
     eq_types = []
     for eq in _eq_types:
@@ -856,8 +860,226 @@ def order_uppdate(request, order_id):
             'name': ts.name,
         })
 
+    # ـequipments = []
+    # if not dsq.exists() and not sq.exists():
+    #     estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
+    #     if estimate.exists():
+    #         modules_type = "Estimate"
+    #         for eq in estimate:
+    #             ـequipments.append({
+    #                 'id': eq.id,
+    #                 'equipment': eq.equipment.name,
+    #                 'eq_id': eq.equipment.id,
+    #                 'test_sheet': eq.equipment.test_sheet.name if eq.equipment.test_sheet else None,
+    #                 'test_sheet_id': eq.equipment.test_sheet.id if eq.equipment.test_sheet else None,
+    #                 'service': eq.estimate.service.name,
+    #                 'qty': int(eq.quantity),
+    #             })
+    # else:
+    #     equipments_dict = {}
+    #     for ds in dsq:
+    #         equipments = ds.datasheetequipment_set.all()
+    #         for eq in equipments:
+    #             key = (eq.equipment_type.id, eq.sheet.test_sheet_type.id)
+    #             if key in equipments_dict:
+    #                 equipments_dict[key]['qty'] += 1
+    #                 equipments_dict[key]['qty_range'] = range(equipments_dict[key]['qty'])
+    #                 equipments_dict[key]['eqdbs'].append(eq.equipment)
+    #                 equipments_dict[key]['eqs'].append(eq)
+    #             else:
+    #                 equipments_dict[key] = {
+    #                     'id': eq.id,
+    #                     'equipment': eq.equipment_type.name,
+    #                     'eq_id': eq.equipment_type.id,
+    #                     'test_sheet': eq.sheet.test_sheet_type.name,
+    #                     'test_sheet_id': eq.sheet.test_sheet_type.id,
+    #                     'eqdbs': [eq.equipment],
+    #                     'service': eq.equipment.equipment_type.service.name,
+    #                     'eqs': [eq],
+    #                     'qty': 1,
+    #                     'qty_range': range(1),
+    #                     'type': 'datasheetequipment',
+    #                     # 
+    #                     'general_url': None,
+    #                     'design_url': None,
+    #                     'actual_url': None,
+    #                     'general_colour': None,
+    #                     'design_colour': None,
+    #                     'actual_colour': None,
+    #                     'general_disabled': '',
+    #                     'design_disabled': '',
+    #                     'actual_disabled': ''
+    #                 }
+    #                 if eq.sheet.test_sheet_type.name.lower() == "air moving":
+    #                     equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonData', args=[eq.id])
+    #                     # equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonDataEdit', args=[eq.id])
+    #                     equipments_dict[key]['design_url'] = reverse('sheetEquipmentDesignValue', args=[eq.id])
+    #                     equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValue', args=[eq.id])
+    #                     # equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValueEdit', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "air moving equipment":
+    #                 #     equipments_dict[key]['general_url'] = reverse('airMovingEquipmentCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('airMovingEquipmentDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('airMovingEquipmentActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "chiller":
+    #                 #     equipments_dict[key]['general_url'] = reverse('chillerCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('chillerDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('chillerActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "dalt":
+    #                 #     equipments_dict[key]['design_url'] = reverse('daltDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('daltActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "flow measuring":
+    #                 #     equipments_dict[key]['general_url'] = reverse('flowCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('flowDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('flowActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "hot water boiler":
+    #                 #     equipments_dict[key]['general_url'] = reverse('hotWaterBoilerCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('hotWaterBoilerDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('hotWaterBoilerActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "induction unit":
+    #                 #     equipments_dict[key]['design_url'] = reverse('inductionUnitDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('inductionUnitActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "primary heat exchanger":
+    #                 #     equipments_dict[key]['general_url'] = reverse('primaryHeatExchangerCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('primaryHeatExchangerDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('primaryHeatExchangerActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "primary heat exchanger 2":
+    #                 #     equipments_dict[key]['general_url'] = reverse('primaryHeatExchanger2CommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('primaryHeatExchanger2DesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('primaryHeatExchanger2ActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "pitot traverse summary":
+    #                 #     equipments_dict[key]['design_url'] = reverse('pitotTraverseSummaryDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('pitotTraverseSummaryActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "pump":
+    #                 #     equipments_dict[key]['general_url'] = reverse('pumpCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('pumpDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('pumpActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "terminal":
+    #                 #     equipments_dict[key]['design_url'] = reverse('terminalSheetEquipmentDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('terminalSheetEquipmentActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "vav":
+    #                 #     equipments_dict[key]['general_url'] = reverse('vavSheetEquipmentGeneralData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('vavSheetEquipmentDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('vavSheetEquipmentActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "vav box fan heat schedule":
+    #                 #     equipments_dict[key]['design_url'] = reverse('vbfhsDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('vbfhsActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "v.a.v. box schedule":
+    #                 #     equipments_dict[key]['design_url'] = reverse('vbsCommonData', args=[eq.id])
+    #                 #     equipments_dict[key]['design_url'] = reverse('vbfhsDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('vbfhsActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "v.a.v. box temperature schedule":
+    #                 #     equipments_dict[key]['design_url'] = reverse('vbtsDesignData', args=[eq.id])
+    #                 #     equipments_dict[key]['actual_url'] = reverse('vbtsActualData', args=[eq.id])
+    #                 # elif eq.sheet.test_sheet_type.name.lower() == "velocity traverse":
+    #                 #     equipments_dict[key]['actual_url'] = reverse('velocityActualData', args=[eq.id])
+    #                 else:
+    #                     equipments_dict[key]['general_url'] = reverse('vavSheetEquipmentGeneralData', args=[eq.id])
+    #                     # equipments_dict[key]['design_url'] = reverse('terminalSheetEquipmentDesignData', args=[eq.sheet.id, eq.id])
+    #                     # equipments_dict[key]['actual_url'] = reverse('terminalSheetEquipmentActualData', args=[eq.sheet.id, eq.id])
+    #                     equipments_dict[key]['design_url'] = reverse('vavSheetEquipmentDesignData', args=[eq.id])
+    #                     equipments_dict[key]['actual_url'] = reverse('vavSheetEquipmentActualData', args=[eq.id])
+
+    #                 # if updated
+    #                 if eq.main_data_entry_completed:
+    #                     equipments_dict[key]['general_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['general_colour'] = '#0000FF'
+    #                 if eq.design_data_entry_completed:
+    #                     equipments_dict[key]['design_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['design_colour'] = '#0000FF'
+    #                 if eq.actual_data_entry_completed:
+    #                     equipments_dict[key]['actual_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['actual_colour'] = '#0000FF'
+    #                 # # if confirmed
+    #                 # if eq.main_data_entry_confirmed:
+    #                 #     equipments_dict[key]['general_colour'] = '#008000'
+    #                 #     equipments_dict[key]['general_disabled'] = 'disabled-link'
+    #                 # if eq.design_data_entry_confirmed:
+    #                 #     equipments_dict[key]['design_colour'] = '#008000'
+    #                 #     equipments_dict[key]['design_disabled'] = 'disabled-link'
+    #                 # if eq.actual_data_entry_confirmed:
+    #                 #     equipments_dict[key]['actual_colour'] = '#008000'
+    #                 #     equipments_dict[key]['actual_disabled'] = 'disabled-link'
+
+    #     for s in sq:
+    #         equipments = s.sheetequipment_set.all()
+    #         for eq in equipments:
+    #             key = (eq.equipment_type.id, eq.sheet.test_sheet_type.id)
+    #             if key in equipments_dict:
+    #                 equipments_dict[key]['qty'] += 1
+    #                 equipments_dict[key]['qty_range'] = range(equipments_dict[key]['qty'])
+    #                 equipments_dict[key]['eqdbs'].append(eq.equipment)
+    #                 equipments_dict[key]['eqs'].append(eq)
+    #             else:
+    #                 equipments_dict[key] = {
+    #                     'id': eq.id,
+    #                     'equipment': eq.equipment_type.name,
+    #                     'eq_id': eq.equipment_type.id,
+    #                     'test_sheet': eq.sheet.test_sheet_type.name,
+    #                     'test_sheet_id': eq.sheet.test_sheet_type.id,
+    #                     'eqdbs': [eq.equipment],
+    #                     'service': eq.equipment.equipment_type.service.name,
+    #                     'eqs': [eq],
+    #                     'qty': 1,
+    #                     'qty_range': range(1),
+    #                     'type': 'sheetequipment',
+    #                     # 
+    #                     'general_url': reverse('sheetEquipmentCommonData', args=[eq.id]),
+    #                     # 'general_url': reverse('sheetEquipmentCommonDataEdit', args=[eq.id]),
+    #                     'design_url': reverse('sheetEquipmentDesignValue', args=[eq.id]),
+    #                     'actual_url': reverse('sheetEquipmentActualValue', args=[eq.id]),
+    #                     # 'actual_url': reverse('sheetEquipmentActualValueEdit', args=[eq.id]),
+    #                     'general_colour': None,
+    #                     'design_colour': None,
+    #                     'actual_colour': None,
+    #                     'general_disabled': '',
+    #                     'design_disabled': '',
+    #                     'actual_disabled': ''
+    #                 }
+    #                 # if updated
+    #                 if eq.main_data_entry_completed:
+    #                     equipments_dict[key]['general_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['general_colour'] = '#0000FF'
+    #                 if eq.design_data_entry_completed:
+    #                     equipments_dict[key]['design_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['design_colour'] = '#0000FF'
+    #                 if eq.actual_data_entry_completed:
+    #                     equipments_dict[key]['actual_colour'] = '#FFA500'
+    #                 else:
+    #                     equipments_dict[key]['actual_colour'] = '#0000FF'
+    #                 # # if confirmed
+    #                 # if eq.main_data_entry_confirmed:
+    #                 #     equipments_dict[key]['general_colour'] = '#008000'
+    #                 #     equipments_dict[key]['general_disabled'] = 'disabled-link'
+    #                 # if eq.design_data_entry_confirmed:
+    #                 #     equipments_dict[key]['design_colour'] = '#008000'
+    #                 #     equipments_dict[key]['design_disabled'] = 'disabled-link'
+    #                 # if eq.actual_data_entry_confirmed:
+    #                 #     equipments_dict[key]['actual_colour'] = '#008000'
+    #                 #     equipments_dict[key]['actual_disabled'] = 'disabled-link'
+                    
+    #     ـequipments = list(equipments_dict.values())
+    # sorted_ـequipments = []
+    # for eq in ـequipments:
+    #     if not eq['service']:
+    #         continue
+    #     if 'air balancing' == eq['service'].lower():
+    #         sorted_ـequipments.append(eq)
+    # for eq in ـequipments:
+    #     if not eq['service']:
+    #         continue
+    #     if 'water balancing' == eq['service'].lower():
+    #         sorted_ـequipments.append(eq)
+    # for eq in ـequipments:
+    #     if eq not in sorted_ـequipments:
+    #         sorted_ـequipments.append(eq)
+
     ـequipments = []
-    if not dsq.exists():
+    if not dsq.exists() and not sq.exists():
         estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
         if estimate.exists():
             modules_type = "Estimate"
@@ -868,53 +1090,191 @@ def order_uppdate(request, order_id):
                     'eq_id': eq.equipment.id,
                     'test_sheet': eq.equipment.test_sheet.name if eq.equipment.test_sheet else None,
                     'test_sheet_id': eq.equipment.test_sheet.id if eq.equipment.test_sheet else None,
+                    'service': eq.estimate.service.name,
                     'qty': int(eq.quantity),
                 })
     else:
         equipments_dict = {}
+
+        air_terminal = DataSheet.objects.filter(project=this_order, test_sheet_type__name__icontains='terminal')
+        if air_terminal.exists():
+            air_terminal = air_terminal[0].id
+
         for ds in dsq:
             equipments = ds.datasheetequipment_set.all()
             for eq in equipments:
                 key = (eq.equipment_type.id, eq.sheet.test_sheet_type.id)
                 if key in equipments_dict:
                     equipments_dict[key]['qty'] += 1
+                    equipments_dict[key]['qty_range'] = range(equipments_dict[key]['qty'])
+                    # equipments_dict[key]['eqdbs'].append(eq.equipment)
+                    equipments_dict[key]['eqs'].append(eq)
                 else:
                     equipments_dict[key] = {
                         'id': eq.id,
                         'equipment': eq.equipment_type.name,
                         'eq_id': eq.equipment_type.id,
+                        'sheet': eq.sheet,
                         'test_sheet': eq.sheet.test_sheet_type.name,
                         'test_sheet_id': eq.sheet.test_sheet_type.id,
+                        'air_terminal_ds': air_terminal,
+                        # 'eqdbs': [eq.equipment],
+                        'service': eq.equipment.equipment_type.service.name,
+                        'eqs': [eq],
                         'qty': 1,
+                        'qty_range': range(1),
+                        'type': 'datasheetequipment',
+                        # 
+                        'general_url': None,
+                        'design_url': None,
+                        'actual_url': None,
+                        'general_colour': None,
+                        'design_colour': None,
+                        'actual_colour': None,
                     }
-        ـequipments = list(equipments_dict.values())
+                if eq.sheet.test_sheet_type.name.lower() == "air moving":
+                    if not eq.equipment.main_data_entry_confirmed:
+                        equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonData', args=[eq.id])
+                    else:
+                        equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonDataEdit', args=[eq.id])
+                    equipments_dict[key]['design_url'] = reverse('sheetEquipmentDesignValue', args=[eq.id])
+                    if not eq.equipment.actual_data_entry_confirmed:
+                        equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValue', args=[eq.id])
+                    else:
+                        equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValueEdit', args=[eq.id])
+                else:
+                    equipments_dict[key]['general_url'] = reverse('vavSheetEquipmentGeneralData', args=[eq.id])
+                    equipments_dict[key]['design_url'] = reverse('vavSheetEquipmentDesignData', args=[eq.id])
+                    equipments_dict[key]['actual_url'] = reverse('vavSheetEquipmentActualData', args=[eq.id])
+                # # if updated
+                # if eq.main_data_entry_completed:
+                #     equipments_dict[key]['general_colour'] = '#FFA500'
+                # else:
+                #     equipments_dict[key]['general_colour'] = '#0000FF'
+                # if eq.design_data_entry_completed:
+                #     equipments_dict[key]['design_colour'] = '#FFA500'
+                # else:
+                #     equipments_dict[key]['design_colour'] = '#0000FF'
+                # if eq.actual_data_entry_completed:
+                #     equipments_dict[key]['actual_colour'] = '#FFA500'
+                # else:
+                #     equipments_dict[key]['actual_colour'] = '#0000FF'
+                # if confirmed
+                if eq.equipment.main_data_entry_confirmed:
+                    equipments_dict[key]['general_colour'] = '#008000'
+                if eq.equipment.design_data_entry_confirmed:
+                    equipments_dict[key]['design_colour'] = '#008000'
+                if eq.equipment.actual_data_entry_confirmed:
+                    equipments_dict[key]['actual_colour'] = '#008000'
 
-    # _s3 = S3()
+        for s in sq:
+            equipments = s.sheetequipment_set.all()
+            for eq in equipments:
+                key = (eq.equipment_type.id, eq.sheet.test_sheet_type.id)
+                if key in equipments_dict:
+                    equipments_dict[key]['qty'] += 1
+                    equipments_dict[key]['qty_range'] = range(equipments_dict[key]['qty'])
+                    # equipments_dict[key]['eqdbs'].append(eq.equipment)
+                    equipments_dict[key]['eqs'].append(eq)
+                else:
+                    equipments_dict[key] = {
+                        'id': eq.id,
+                        'equipment': eq.equipment_type.name,
+                        'eq_id': eq.equipment_type.id,
+                        'sheet': eq.sheet,
+                        'test_sheet': eq.sheet.test_sheet_type.name,
+                        'test_sheet_id': eq.sheet.test_sheet_type.id,
+                        'air_terminal_ds': air_terminal,
+                        # 'eqdbs': [eq.equipment],
+                        'service': eq.equipment.equipment_type.service.name,
+                        'eqs': [eq],
+                        'qty': 1,
+                        'qty_range': range(1),
+                        'type': 'sheetequipment',
+                        # 
+                        'general_url': reverse('sheetEquipmentCommonData', args=[eq.id]),
+                        # 'general_url': reverse('sheetEquipmentCommonDataEdit', args=[eq.id]),
+                        'design_url': reverse('sheetEquipmentDesignValue', args=[eq.id]),
+                        'actual_url': reverse('sheetEquipmentActualValue', args=[eq.id]),
+                        'general_colour': None,
+                        'design_colour': None,
+                        'actual_colour': None,
+                    }
+                    # if updated
+                    if eq.main_data_entry_completed:
+                        equipments_dict[key]['general_colour'] = '#FFA500'
+                    else:
+                        equipments_dict[key]['general_colour'] = '#0000FF'
+                    if eq.design_data_entry_completed:
+                        equipments_dict[key]['design_colour'] = '#FFA500'
+                    else:
+                        equipments_dict[key]['design_colour'] = '#0000FF'
+                    if eq.actual_data_entry_completed:
+                        equipments_dict[key]['actual_colour'] = '#FFA500'
+                    else:
+                        equipments_dict[key]['actual_colour'] = '#0000FF'
+                    # # if confirmed
+                    # if eq.main_data_entry_confirmed:
+                    #     equipments_dict[key]['general_colour'] = '#008000'
+                    #     equipments_dict[key]['general_disabled'] = 'disabled-link'
+                    # if eq.design_data_entry_confirmed:
+                    #     equipments_dict[key]['design_colour'] = '#008000'
+                    #     equipments_dict[key]['design_disabled'] = 'disabled-link'
+                    # if eq.actual_data_entry_confirmed:
+                    #     equipments_dict[key]['actual_colour'] = '#008000'
+                    #     equipments_dict[key]['actual_disabled'] = 'disabled-link'
+                    
+        ـequipments = list(equipments_dict.values())
+    sorted_equipments = []
+    for eq in ـequipments:
+        if 'Air Balancing' == eq['service']:
+            sorted_equipments.append(eq)
+    for eq in ـequipments:
+        if 'Water Balancing' == eq['service']:
+            sorted_equipments.append(eq)
+    for eq in ـequipments:
+        if eq not in sorted_equipments:
+            sorted_equipments.append(eq)
+
+    # service_order = ['Air Balancing', 'Water Balancing']
+    # sorted_equipments = OrderedDict()
+    # for service in service_order:
+    #     sorted_equipments[service] = []
+    # for eq in ـequipments:
+    #     service = eq['service']
+    #     if service in sorted_equipments:
+    #         sorted_equipments[service].append(eq)
+    #     else:
+    #         if service not in sorted_equipments:
+    #             sorted_equipments[service] = [eq]
+
+    _s3 = S3()
     image_data_list = []
     # for _fl in [
-    #     this_order.equipment_submittal, this_order.colored_drawing, 
-    #     this_order.report_colored_drawing, this_order.field_draw, this_order.site_pictures,
+    #     this_order.equipment_submittal, 
+    #     this_order.colored_drawing, 
+    #     this_order.report_colored_drawing, 
+    #     this_order.field_draw, 
+    #     this_order.site_pictures,
     #     this_order.test_sheets
     # ]:
     #     if not _fl:
     #         continue
-    #     _fl_path = _s3.get_bucket_object(_fl.name)
-    #     print("===" * 10)
-    #     print(_fl_path)
     #     if _fl.name.endswith('.pdf'):
-    #         pdf_path = os.path.join(settings.MEDIA_URL, _fl.name)
-    #         image_bytes_list = pdf_to_image_bytes(pdf_path)
+    #         _fl_path = _s3.get_bucket_object("media/" + _fl.name)
+    #         image_bytes_list = pdf_to_image_bytes(_fl_path)
     #         image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
     #     else:
-    #         image_data_list.append(settings.MEDIA_URL + _fl.url)
+    #         image_data_list.append(_fl_path)
 
     context = {
         "order": this_order,
-        "equipments": ـequipments,
+        "equipments": sorted_equipments,
         "eq_types": eq_types,
         "test_sheets": test_sheets,
         "maps": image_data_list,
         "modules_type": modules_type,
+        "manufacturers": manufacturers,
     }
     return render(request, "order_edit_new.html", context)
 
@@ -923,35 +1283,98 @@ def order_uppdate(request, order_id):
 def create_datasheets(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     data = json.loads(request.body)['data']
+
     for item in data:
-        if order.datasheet_set.filter(test_sheet_type__name=item['test_sheet']).exists():
-            datasheet = order.datasheet_set.get(test_sheet_type__name=item['test_sheet'])
-            datasheet.number_of_equipment_groups += int(item['qty'])
-            datasheet.save()
-            eq = DataSheetEquipment.objects.create(
-                sheet=datasheet,
-                equipment_type=Equipment.objects.get(name=item['equipment']),
-            )
+        # check if it was RGD skip
+        if "RGD" in item['equipment']:
+            continue
+        equipment = get_object_or_404(Equipment, name=item['equipment'])
+        if item['test_sheet'] == 'None':
+            test_sheet_instance = get_object_or_404(TestSheet, name__iexact=item['equipment'].split()[0].lower())
         else:
-            test_sheet_instance = TestSheet.objects.get(name=item['test_sheet'])
-            datasheet = DataSheet.objects.create(
-                test_sheet_type=test_sheet_instance,
-                project=order,
-                number_of_equipment_groups=int(item['qty']),
+            test_sheet_instance = get_object_or_404(TestSheet, name=item['test_sheet'])
+        # if 'air moving' in test_sheet_instance.name.lower():
+        if test_sheet_instance.name.lower() == 'air moving':
+            if order.sheet_set.exists():
+                sheet = order.sheet_set.filter(test_sheet_type=test_sheet_instance)
+                if sheet.filter(sheetequipment__equipment_type=equipment).exists():
+                    return JsonResponse({'status': 'error', 'message': 'Equipment already exists in the datasheet'}, status=400)
+                sheet = sheet.first()
+            else:
+                sheet = Sheet.objects.create(
+                    project=order,
+                    test_sheet_type=test_sheet_instance,
+                    sheet_date=datetime.datetime.now().date(),
+                )
+        else:
+            datasheet = order.datasheet_set.filter(test_sheet_type=test_sheet_instance)
+            if datasheet.filter(datasheetequipment__equipment_type=equipment).exists():
+                return JsonResponse({'status': 'error', 'message': 'Equipment already exists in the datasheet'}, status=400)
+            if not datasheet.exists():
+                datasheet = DataSheet.objects.create(
+                    test_sheet_type=test_sheet_instance,
+                    project=order,
+                    number_of_equipment_groups=int(item['qty']),
+                    sheet_date=datetime.datetime.now().date(),
+                )
+            else:
+                datasheet = datasheet.first()
+                datasheet.number_of_equipment_groups += int(item['qty'])
+                datasheet.save()
+
+        for i in range(int(item['qty'])):
+            eqdb = EquipmentDb.objects.create(
+                equipment_type=equipment,
             )
-            for i in range(int(item['qty'])):
+            # if 'air moving' in test_sheet_instance.name.lower():
+            if test_sheet_instance.name.lower() == 'air moving':
+                eq = SheetEquipment.objects.create(
+                    sheet=sheet,
+                    equipment_type=equipment,
+                    equipment=eqdb,
+                )
+            else:
                 eq = DataSheetEquipment.objects.create(
                     sheet=datasheet,
-                    equipment_type=Equipment.objects.get(name=item['equipment']),
+                    equipment_type=equipment,
+                    equipment=eqdb,
                 )
     return JsonResponse({'status': 'success'}, status=200)
 
 
 @csrf_exempt
-@require_http_methods(["DELETE"])
-def delete_datasheet(request, order_id, datasheet_id):
-    equipment = get_object_or_404(DataSheetEquipment, id=datasheet_id)
-    equipment.delete()
+@require_http_methods(["POST"])
+def delete_datasheet(request, order_id):
+    data = json.loads(request.body)['data']
+    order = get_object_or_404(Order, id=order_id)
+    equipments = []
+
+    if data['type'] == 'datasheetequipment':
+        equipments = order.datasheet_set.filter(
+            test_sheet_type__id=data['test_sheet_id']).first().datasheetequipment_set.filter(
+            equipment_type__id=data['eq_type_id'],
+        )
+    if data['type'] == 'sheetequipment':
+        equipments = order.sheet_set.filter(
+            test_sheet_type__id=data['test_sheet_id']).first().sheetequipment_set.filter(
+            equipment_type__id=data['eq_type_id'],
+        )
+    for eq in equipments:
+        try:
+            eq.equipment.delete()
+        except Exception as e:
+            print(e)
+        eq.delete()
+    if data['type'] == 'datasheetequipment':
+        datasheets = DataSheet.objects.filter(test_sheet_type__id=data['test_sheet_id'])
+        for datasheet in datasheets:
+            if not datasheet.datasheetequipment_set.exists():
+                datasheet.delete()
+    if data['type'] == 'sheetequipment':
+        sheets = Sheet.objects.filter(test_sheet_type__id=data['test_sheet_id'])
+        for sheet in sheets:
+            if not sheet.sheetequipment_set.exists():
+                sheet.delete()
     return JsonResponse({'status': 'success'}, status=200)
 
 
@@ -959,7 +1382,20 @@ def delete_datasheet(request, order_id, datasheet_id):
 @require_http_methods(["DELETE"])
 def clear_datasheets(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    datasheets = order.datasheet_set.all().delete()
+    datasheets = order.datasheet_set.all()
+    for datasheet in datasheets:
+        equipments = datasheet.datasheetequipment_set.all()
+        for eq in equipments:
+            eq.equipment.delete()
+            eq.delete()
+        datasheet.delete()
+    sheetequipments = order.sheet_set.all()
+    for sheet in sheetequipments:
+        equipments = sheet.sheetequipment_set.all()
+        for eq in equipments:
+            eq.equipment.delete()
+            eq.delete()
+        sheet.delete()
     return JsonResponse({'status': 'success'}, status=200)
 
 @csrf_exempt
@@ -967,26 +1403,52 @@ def clear_datasheets(request, order_id):
 def create_datasheet(request, order_id):
     data = json.loads(request.body)['data']
     order = get_object_or_404(Order, id=order_id)
+    test_sheet = get_object_or_404(TestSheet, id=data['eq_type'])
     equipment = get_object_or_404(Equipment, id=data['eq'])
-    datasheet = order.datasheet_set.filter(test_sheet_type__id=data['eq_type'])
-    if datasheet.exists():
+
+    # if 'air moving' in test_sheet.name.lower():
+    if test_sheet.name.lower() == 'air moving':
+        sheet = order.sheet_set.filter(test_sheet_type=test_sheet)
+        if sheet.filter(sheetequipment__equipment_type=equipment).exists():
+            return JsonResponse({'status': 'error', 'message': 'Equipment already exists in the datasheet'}, status=400)
+        if not sheet.exists():
+            sheet = Sheet.objects.create(
+                project=order,
+                test_sheet_type=test_sheet,
+            )
+        else:
+            sheet = sheet.first()
+    else:
+        datasheet = order.datasheet_set.filter(test_sheet_type=test_sheet)
         if datasheet.filter(datasheetequipment__equipment_type=equipment).exists():
             return JsonResponse({'status': 'error', 'message': 'Equipment already exists in the datasheet'}, status=400)
-        for i in range(int(data['eq_count'])):
-            eq = DataSheetEquipment.objects.create(
-                sheet=datasheet.first(),
-                equipment_type=equipment,
+        if not datasheet.exists():
+            datasheet = DataSheet.objects.create(
+                test_sheet_type=test_sheet,
+                project=order,
+                number_of_equipment_groups=int(data['eq_count']),
+                sheet_date=datetime.datetime.now().date(),
             )
-    else:
-        test_sheet_instance = TestSheet.objects.get(id=data['eq_type'])
-        datasheet = DataSheet.objects.create(
-            test_sheet_type=test_sheet_instance,
-            project=order,
-            number_of_equipment_groups=int(data['eq_count']),
+        else:
+            datasheet = datasheet.first()
+            datasheet.number_of_equipment_groups += int(data['eq_count'])
+            datasheet.save()
+        
+    for i in range(int(data['eq_count'])):
+        eqdb = EquipmentDb.objects.create(
+            equipment_type=equipment,
         )
-        for i in range(int(data['eq_count'])):
+        # if 'air moving' in test_sheet.name.lower():
+        if test_sheet.name.lower() == 'air moving':
+            eq = SheetEquipment.objects.create(
+                sheet=sheet,
+                equipment_type=equipment,
+                equipment=eqdb,
+            )
+        else:
             eq = DataSheetEquipment.objects.create(
                 sheet=datasheet,
                 equipment_type=equipment,
+                equipment=eqdb,
             )
     return JsonResponse({'status': 'success'}, status=200)

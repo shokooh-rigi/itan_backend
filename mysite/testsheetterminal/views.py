@@ -18,6 +18,7 @@ from django.db.models import Count
 from django.db.models.functions import Cast, Coalesce
 from django.http import JsonResponse
 from django.db.models import Sum
+from django.db import connection
 
 
 footnote_indicator_choices = [
@@ -82,7 +83,7 @@ def terminal_sheet_equipment_list(request, sheet_id):
     vav_sheet_equipments = DataSheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='vav', sheet__project=my_project).filter(number_of_supply_air_terminal__gt=0)
     air_moving_sheet_equipments = SheetEquipment.objects.filter(sheet__test_sheet_type__name__icontains='air mov', sheet__project=my_project).filter(Q(number_of_supply_air_terminal__gt=0) | Q(number_of_return_air_terminal__gt=0) | Q(number_of_outside_air_terminal__gt=0) | Q(number_of_exhaust_air_terminal__gt=0))
     vav_sheet_equipments = vav_sheet_equipments.filter(testsheetgeneraldata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed', 'field_order').distinct()
-    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(sheetequipmentcommondata__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed', 'field_order').distinct()
+    air_moving_sheet_equipments = air_moving_sheet_equipments.filter(secd__value__icontains=project_name).order_by('terminal_design_data_entry_completed', 'terminal_actual_data_entry_completed', 'field_order').distinct()
     rogue_air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet=my_sheet, air_equipment__isnull=True, vav_equipment__isnull=True, type=4)
     parameters = {'air_moving_sheet_equipments': air_moving_sheet_equipments,
                   'vav_sheet_equipments': vav_sheet_equipments,
@@ -145,7 +146,7 @@ def terminal_sheet_others(request, sheet_id):
 def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_report_pdf: bool):
     if this_sheet_equipment.air_equipment:
         equipment_data = {
-            'name': this_sheet_equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value,
+            'name': this_sheet_equipment.air_equipment.secd_set.get(key__column_title__icontains='fan no.').value,
             'outlet_no': this_sheet_equipment.outlet_no,
             'code': this_sheet_equipment.code
         }
@@ -242,7 +243,7 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
             design_total += int(cfm)
         else:
             if airOrVav == 1:
-                design_total = equipment.air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
+                design_total = equipment.air_equipment.secd_set.get(key__column_title__icontains='fan no.').value
         if is_report_pdf:
             if equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value != '':
                 initial_total += int(equipment.airterminalsheetdata_set.get(data_type=DataTypeChoices.Actual.value, sheet_field__field_name__iexact='initial cfm').value)
@@ -255,7 +256,7 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
         pages.append({
             'type': page_type,
             'eq_name': equipment_list[0].equipment_name if airOrVav == 0 else '',
-            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
+            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.secd_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
             'rows': [
                 'title',
                 equipments_data
@@ -269,7 +270,7 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
             pages.append({
                 'type': page_type,
             'eq_name': equipment_list[0].equipment_name if airOrVav == 0 else '',
-                'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
+                'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.secd_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
                 'rows': [
                     equipments_data
                 ]
@@ -281,7 +282,7 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
         pages.append({
             'type': page_type,
             'eq_name': equipment_list[0].equipment_name if airOrVav == 0 else '',
-            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
+            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.secd_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
             'rows': [
                 equipments_data,
                 {
@@ -300,7 +301,7 @@ def prepare_pdf_pages(equipment_list, page_type, airOrVav, is_report_pdf, equipm
         pages.append({
             'type': page_type,
             'eq_name': equipment_list[0].equipment_name if airOrVav == 0 else '',
-            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
+            'system': 'Rogue Terminals' if airOrVav == 0 else equipment_list[0].air_equipment.secd_set.get(key__column_title__icontains='fan no.').value if airOrVav == 1 else equipment_list[0].vav_equipment.testsheetgeneraldata_set.get(key__column_title__icontains='code').value,
             'rows': [
                 'title',
                 equipments_data,
@@ -774,7 +775,7 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
     if is_air_moving:
         equipment_type = 1
         this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
-        sheet_code = this_sheet_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
+        sheet_code = this_sheet_equipment.secd_set.get(key__column_title__icontains='fan no.').value
     else:
         equipment_type = 2
         this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
@@ -1025,6 +1026,8 @@ def terminal_sheet_equipment_design_data(request, sheet_id, sheet_equipment_id):
                             new_object.save()
 
             this_sheet_equipment.terminal_design_data_entry_completed = True
+            this_sheet_equipment.design_data_entry_completed = True
+            this_sheet_equipment.main_data_entry_confirmed = True
             this_sheet_equipment.save()
 
             return redirect('terminalSheetEquipmentList', my_sheet.id)
@@ -1119,7 +1122,7 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
     if is_air_moving:
         equipment_type = 1
         this_sheet_equipment = get_object_or_404(SheetEquipment, id=sheet_equipment_id)
-        sheet_code = this_sheet_equipment.sheetequipmentcommondata_set.get(key__column_title__icontains='fan no.').value
+        sheet_code = this_sheet_equipment.secd_set.get(key__column_title__icontains='fan no.').value
     else:
         equipment_type = 2
         this_sheet_equipment = get_object_or_404(DataSheetEquipment, id=sheet_equipment_id)
@@ -1301,6 +1304,8 @@ def terminal_sheet_equipment_actual_data(request, sheet_id, sheet_equipment_id):
                                                               value=new_value)
                             new_object.save()
             this_sheet_equipment.terminal_actual_data_entry_completed = True
+            this_sheet_equipment.design_data_entry_confirmed = True
+            this_sheet_equipment.actual_data_entry_confirmed = True    
             this_sheet_equipment.save()
             return redirect('terminalSheetEquipmentList', my_sheet.id)
 

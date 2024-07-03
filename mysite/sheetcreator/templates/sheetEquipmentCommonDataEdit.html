@@ -79,48 +79,72 @@
                     <label for="id_manufacturer" class="control-label">Manufacturer <span class="required">*</span></label>
                 </div>
                 <div class="col-lg-3">
-                    <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer">
-                        <option value="">---------</option>
-
-                        {% for manufacturer in manufacturers %}
-                            <option value="{{ manufacturer.id }}" {% if this_equipment.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="input-group">
+                        <select name="id_manufacturer" class="form-control" required="" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                                <option value="{{ manufacturer.id }}" {% if this_equipment.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
             <div class="row form-line text-left">
                 <div class="col-lg-3">
                     <label for="id_equipment" class="control-label">Model No. <span class="required">*</span></label>
                 </div>
                 <div class="col-lg-3">
-                    <select name="id_equipment" class="form-control" required="" id="id_equipment">
-                        <option value="">---------</option>
-
-                        {% for equipment in Equipment_db %}
-                            <option style="display: none;" value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}" {% if this_equipment.id == equipment.id %}selected="selected"{% endif %}>{{ equipment }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="input-group">
+                        <select name="id_equipment" class="form-control" required="" id="id_equipment" onchange="updateEditLink('equipment')">
+                            <option value="">---------</option>
+                            {% for equipment in Equipment_db %}
+                                <option value="{{ equipment.id }}" data-manufacturer="{{ equipment.manufacturer.id }}" {% if this_equipment.id == equipment.id %}selected="selected"{% endif %}>{{ equipment }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-equipment-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Equipment">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'EquipmentsCreate' %}" class="btn btn-outline-secondary" title="Add Equipment">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-success" value="Save General Information" name="next" />
+                    <input type="submit" class="btn btn-success" value="Save" name="next" />
                     <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
                 </div>
             </div>
         </div>
 	</form>
-    	        <script>
-$("#edit_manufacturer").click(function(){
-	manufacturer_id = $("#id_manufacturer option:selected").val();
-	if(manufacturer_id != '') {
-        var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
-	    showEditPopup(url);
-    }
-	else {
-	    alert("Something Went Wrong");
-    }
-  	});
+    <script>
+        $("#edit_manufacturer").click(function(){
+            manufacturer_id = $("#id_manufacturer option:selected").val();
+            if(manufacturer_id != '') {
+                var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
+                showEditPopup(url);
+            }
+            else {
+                alert("Something Went Wrong");
+            }
+        });
     </script>
     <script>
         $('#id_manufacturer').on('change', function() {
@@ -145,5 +169,61 @@ $("#edit_manufacturer").click(function(){
             });
         });
     </script>
+
+<script>
+    function updateEditLink(type) {
+        var select, editLink, selectedValue;
+        if (type === 'manufacturer') {
+            select = document.getElementById("id_manufacturer");
+            editLink = document.getElementById("edit-manufacturer-link");
+            updateEquipmentOptions(select.value); // Update equipment dropdown based on manufacturer selection
+        } else if (type === 'equipment') {
+            select = document.getElementById("id_equipment");
+            editLink = document.getElementById("edit-equipment-link");
+        }
+        
+        selectedValue = select.options[select.selectedIndex].value;
+        
+        if (selectedValue) {
+            if (type === 'manufacturer') {
+                editLink.href = "/management/db{% url 'manufacturerEdit' 999 %}".replace('999', selectedValue);
+            } else if (type === 'equipment') {
+                editLink.href = "{% url 'EquipmentsEdit' 999 %}".replace('999', selectedValue);
+            }
+            editLink.classList.remove("disabled");
+        } else {
+            editLink.href = "#";
+            editLink.classList.add("disabled");
+        }
+    }
+
+    function updateEquipmentOptions(manufacturerId) {
+        var equipmentSelect = document.getElementById("id_equipment");
+        var equipmentOptions = equipmentSelect.options;
+        for (var i = 0; i < equipmentOptions.length; i++) {
+            if (manufacturerId && equipmentOptions[i].getAttribute("data-manufacturer") == manufacturerId) {
+                equipmentOptions[i].style.display = 'block'; // Show option
+            } else {
+                equipmentOptions[i].style.display = 'none'; // Hide option
+            }
+        }
+        equipmentSelect.value = ""; // Reset selection
+        document.getElementById("edit-equipment-link").classList.add("disabled"); // Disable edit link as no selection
+    }
+
+    // Initial call to set the correct link and dropdown states on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        updateEditLink('manufacturer');
+        updateEditLink('equipment');
+        updateEquipmentOptions(document.getElementById("id_manufacturer").value);
+    });
+</script>
+
+<style>
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+</style>
 
 {% endblock %}
