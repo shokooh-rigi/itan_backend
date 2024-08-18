@@ -1,0 +1,27 @@
+{
+    "general": {},
+    "design": {
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    }
+}

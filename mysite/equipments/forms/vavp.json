@@ -1,0 +1,107 @@
+{
+    "general": {},
+    "design": {
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Nameplate Fan Volt": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Nameplate Fan Amp": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Nameplate Heat V/A": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "T In": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "FAN V/A": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Heat V/A": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "T Out": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Model": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    }
+}

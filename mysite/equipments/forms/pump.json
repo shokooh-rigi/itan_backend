@@ -1,0 +1,367 @@
+{
+    "general": {},
+    "design": {
+        "Model": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Size": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Impeller": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "RPM": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Max. Wk. Pr.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Mfg. Date": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "H.P.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Frame": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "S.F.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Code": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Phase": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Hz": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 12,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Amps": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Volts": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 14,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 15,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Serial No.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Design GPM": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Design FT": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Design BHP": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Actual GPM": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Actual FT": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Actual BHP": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Discharge GPM": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Discharge FT": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Discharge BHP": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Suction GPM": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Suction FT": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 12,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Suction BHP": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "P": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 14,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Shut-Off": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 15,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Discharge / Suction": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 16,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "P2": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 17,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Motor Mfg.": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 18,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amps": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 19,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Volts": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 20,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 21,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    }
+}

@@ -205,6 +205,59 @@ def fetch_sheet_equipment_data(this_sheet_equipment: AirTerminalEquipment, is_re
     return equipment_data
 
 
+def fetch_sheet_equipment_data_new(this_sheet_equipment: DataSheet, is_report_pdf: bool):
+    if this_sheet_equipment.fan_no:
+        equipment_data = {
+            'name': this_sheet_equipment.fan_no,
+            'outlet_no': this_sheet_equipment.outlet_no,
+            'code': this_sheet_equipment.code
+        }
+    elif this_sheet_equipment.code:
+        equipment_data = {
+            'name': this_sheet_equipment.code,
+            'outlet_no': this_sheet_equipment.outlet_no,
+            'code': this_sheet_equipment.code
+        }
+    else:
+        equipment_data = {
+            'name': this_sheet_equipment.name,
+            'outlet_no': this_sheet_equipment.outlet_no,
+            'code': this_sheet_equipment.code
+        }
+
+    design_fields = this_sheet_equipment.form_fields['design']
+    design_data = [
+        ('room_no', 'Room No.'),
+        ('size', 'Size'),
+        ('ak_factor', 'AK Factor'),
+        ('fpm', 'FPM'),
+        ('cfm', 'CFM'),
+        # ('cfm_indicator', 'CFM Indicator'),
+    ]
+
+    equipment_data['design'] = {}
+    for key, val in design_data:
+        design_field = design_fields[val]["value"]
+        equipment_data['design'][key] = design_field
+
+    if is_report_pdf:
+        actual_fields = this_sheet_equipment.form_fields['actual']
+        actual_data = [
+            ('initial_fpm', 'Initial FPM'),
+            ('initial_cfm', 'Initial CFM'),
+            ('final_fpm', 'Final FPM'),
+            ('final_cfm', 'Final CFM'),
+            # ('cfm_indicator', 'CFM Indicator'),
+            # ('note', 'Note'),
+        ]
+        equipment_data['actual'] = {}
+        for key, val in actual_data:
+            actual_field = actual_fields[val]["value"]
+            equipment_data['actual'][key] = actual_field
+
+    return equipment_data
+
+
 def get_pdf_empty_row():
     return {
         'name': '',

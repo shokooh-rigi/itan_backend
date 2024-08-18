@@ -5,15 +5,24 @@
 {% block content %}
 <style>
     .form-label {
-        min-width: 180px;
+        width: 200px; /* Fixed width for labels */
+    }
+    .form-control, .form-control[type="text"], .form-control[type="number"], .form-control-textarea {
+        flex-grow: 1; /* Make input fields take up the remaining space */
     }
     .form-group {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        margin-bottom: 1rem;
+        margin-bottom: 10px;
     }
-    .form-control {
-        flex: 1;
+    .form-group > .form-control, .form-group > .form-control-textarea {
+        flex-basis: calc(100% - 220px); /* Adjust this value based on the label width and any potential margins */
+        max-width: calc(100% - 220px); /* Ensures that the input does not grow beyond the calculated width */
+    }
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
     }
 </style>
 
@@ -30,51 +39,247 @@
             {{ ds.project.proposal.quote.estimate.project.zip_code }}
         </h3>
     </div>
-        <form action="/path-to-your-post-method" method="post">
-        <div class="row">
-            <!-- DataSheet Info -->
-            <div class="col-md-6">
-                <h4>DataSheet Info</h4>
-                <div class="form-group">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ ds.name }}" required>
+    {% if ds.equipment_type.test_sheet.name == 'Air Moving' %}
+        <form action="/path-to-your-post-method" method="put">
+            <div class="row">
+                <!-- DataSheet Info -->
+                <div class="col-md-6">
+                    <!-- <h4>DataSheet Info</h4> -->
+                    <div class="form-group">
+                        <label for="fan_no" class="form-label">Fan No.</label>
+                        <input type="text" class="form-control" id="fan_no" name="fan_no" value="{{ ds.fan_no }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="area_served" class="form-label">Area Served</label>
+                        <input type="text" class="form-control" id="area_served" name="area_served" value="{{ ds.area_served }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" value="{{ ds.location }}" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="system" class="form-label">System</label>
-                    <input type="text" class="form-control" id="system" name="system" required>
-                </div>
-                <div class="form-group">
-                    <label for="sheet_date" class="form-label">Sheet Date</label>
-                    <input type="date" class="form-control" id="sheet_date" name="sheet_date" required>
-                </div>
-                <div class="form-group">
-                    <label for="equipment_group" class="form-label">Equipment Group</label>
-                    <input type="text" class="form-control" id="equipment_group" name="equipment_group" required>
+                <!-- Project Info -->
+                <div class="col-md-6">
+                    <!-- <h4>Project Info</h4> -->
+                    <div class="form-group">
+                        <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="number_of_outside_air_terminal" class="form-label">Number of Outside Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_outside_air_terminal" name="number_of_outside_air_terminal" value="{{ ds.number_of_outside_air_terminal }}" required>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="number_of_exhaust_air_terminal" class="form-label">Number of Exhaust Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_exhaust_air_terminal" name="number_of_exhaust_air_terminal" value="{{ ds.number_of_exhaust_air_terminal }}" required>
+                    </div> -->
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                            </div>
+                            <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                                <option value="">---------</option>
+                                {% for manufacturer in manufacturers %}
+                                <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="input-group-append">
+                                <!-- Edit icon -->
+                                <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                    <i class="fas fa-edit fa-sm"></i>
+                                </a>
+                                <!-- Add icon (plus) -->
+                                <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                    <i class="fas fa-plus fa-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="model_number" class="form-label">Model Number</label>
+                        <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                    </div>
                 </div>
             </div>
-            <!-- Project Info -->
-            <div class="col-md-6">
-                <h4>Project Info</h4>
-                <div class="form-group">
-                    <label for="project_name" class="form-label">Project Name</label>
-                    <input type="text" class="form-control" id="project_name" name="project_name">
+            <button type="submit" class="btn btn-primary m-5">Save</button>
+        </form>
+    {% else %}
+        <form action="/path-to-your-post-method" method="put">
+            <div class="row">
+                <!-- DataSheet Info -->
+                <div class="col-md-6">
+                    <!-- <h4>DataSheet Info</h4> -->
+                    <div class="form-group">
+                        <label for="code" class="form-label">Code</label>
+                        <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                            </div>
+                            <select name="equipment_group" class="form-control" id="equipment_group">
+                                <option value="">---------</option>
+                                <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                                <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                                <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                                <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address">
-                </div>
-                <div class="form-group">
-                    <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
-                    <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" required>
-                </div>
-                <div class="form-group">
-                    <label for="info" class="form-label">Additional Info (JSON)</label>
-                    <textarea class="form-control" id="info" name="info" rows="4"></textarea>
+                <!-- Project Info -->
+                <div class="col-md-6">
+                    <!-- <h4>Project Info</h4> -->
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                            </div>
+                            <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                                <option value="">---------</option>
+                                {% for manufacturer in manufacturers %}
+                                <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="input-group-append">
+                                <!-- Edit icon -->
+                                <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                    <i class="fas fa-edit fa-sm"></i>
+                                </a>
+                                <!-- Add icon (plus) -->
+                                <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                    <i class="fas fa-plus fa-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="model_number" class="form-label">Model Number</label>
+                        <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                    </div>
                 </div>
             </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+            <button type="submit" class="btn btn-primary m-5">Save</button>
+        </form>
+    {% endif %}
+
+
 </div>
-      
+
+
+<script>
+    $('#id_manufacturer').on('change', function() {
+        $("#id_equipment option").each(function() { $(this).hide(); });
+        $("#id_equipment option[value='']").show();
+        $("#id_equipment").val('');
+        if($(this).val() !== '') {
+            $("#id_equipment option").each(function() {
+                if($(this).data('manufacturer') == $('#id_manufacturer').find(':selected').val()) {
+                    $(this).show();
+                }
+            });
+        }
+    });
+
+    $("#edit_manufacturer").click(function(){
+        manufacturer_id = $("#id_manufacturer option:selected").val();
+        if(manufacturer_id != '') {
+            var url = "/management/db/manufacturer/" + manufacturer_id + "/edit/";
+            showEditPopup(url);
+        }
+        else {
+            alert("Something Went Wrong");
+        }
+    });
+
+    function updateEditLink(type) {
+        var select, editLink, selectedValue;
+        if (type === 'manufacturer') {
+            select = document.getElementById("id_manufacturer");
+            editLink = document.getElementById("edit-manufacturer-link");
+        } else if (type === 'equipment') {
+            select = document.getElementById("id_equipment");
+            editLink = document.getElementById("edit-equipment-link");
+        }
+        
+        selectedValue = select.options[select.selectedIndex].value;
+        
+        if (selectedValue) {
+            if (type === 'manufacturer') {
+                editLink.href = "/management/db{% url 'manufacturerEdit' 999 %}".replace('999', selectedValue);
+            } else if (type === 'equipment') {
+                editLink.href = "/management/db{% url 'EquipmentsEdit' 999 %}".replace('999', selectedValue);
+            }
+            editLink.classList.remove("disabled");
+        } else {
+            editLink.href = "#";
+            editLink.classList.add("disabled");
+        }
+    }
+
+    // Initial call to set the correct link on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        updateEditLink('manufacturer');
+        updateEditLink('equipment');
+    });
+
+    $(document).ready(function() {
+        $('form').on('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            var formData = $(this).serialize(); // Serialize the form data into a query string
+
+            var pathname = window.location.pathname;
+            var parts = pathname.split('/');
+            var id = parts[parts.length - 2];
+            var index = parts.indexOf('equipments');
+            var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/' + id + '/update/';
+
+            $.ajax({
+                url: newPathname,
+                type: 'PUT',
+                data: formData,
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+                },
+                success: function(response) {
+                    console.log('Success:', response);
+                    // Handle success here (e.g., showing a success message or redirecting)
+                    // window.location.reload();
+                    window.location.href = "{% url 'order_update_new' ds.project.id %}";
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    // Handle errors here (e.g., showing an error message)
+                }
+            });
+        });
+
+        // Empty the input fields if the value is 'None'
+        $('input, select').each(function() {
+            var value = $(this).val();
+            if (value === 'None') { // Checking for the string 'None'
+                $(this).val('');
+            }
+        });
+        // Optionally, if you have dynamic content or forms added after page load:
+        $(document).on('change', 'input, select', function() {
+            if ($(this).val() === 'None') {
+                $(this).val('');
+            }
+        });
+    });
+</script>
+
 {% endblock %}

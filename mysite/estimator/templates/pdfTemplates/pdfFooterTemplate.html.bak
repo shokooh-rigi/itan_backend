@@ -1,0 +1,67 @@
+{% load static %}
+<div id="footer_content">
+    <table style="padding: 20px; font-size: 14px;">
+        <tbody>
+        <tr>
+            <td style="padding: 0; text-align: center; width: 20pt;">
+                <img src="{% static 'images/icons/pin_blue.png' %}"
+                     style="width: 16px; height: 16px; display: inline-block;"/>
+            </td>
+            <td style="padding: 5px 2px 0; text-align: left; width: 154pt;">
+                {{ owner_address_line1 }}
+            </td>
+
+            <td rowspan="2" style="padding: 0; text-align: center; width: 5pt;">
+                <img src="{% static 'images/footer-vertical-line.png' %}"
+                     style="width: 100%; height: 50px; display: inline-block;">
+            </td>
+            <td rowspan="2" style="width: 40pt;"></td>
+
+            <td style="padding: 0; text-align: center; width: 20pt;">
+                <img src="{% static '' %}images/icons/phone_blue.png"
+                     style="width: 16px; height: 16px; display: inline-block;"/>
+            </td>
+            <td style="padding: 5px 2px 0; text-align: left; width: 114pt;">
+                {{ owner_tel }}
+            </td>
+
+            <td rowspan="2" style="padding: 0; text-align: center; width: 5pt;">
+                <img src="{% static 'images/footer-vertical-line.png' %}"
+                     style="width: 100%; height: 50px; display: inline-block;">
+            </td>
+            <td rowspan="2" style="width: 30pt;"></td>
+
+            <td style="padding: 0; text-align: center; width: 20pt;">
+                <img src="{% static 'images/icons/web_blue.png' %}"
+                     style="width: 16px; height: 16px; display: inline-block;"/>
+            </td>
+            <td style="padding: 5px 2px 0; text-align: left; width: 124pt;">
+                {{ owner_web }}
+            </td>
+        </tr>
+
+        <tr style="border: none;">
+            <td style="padding: 0; text-align: center;"></td>
+            <td style="padding: 0 2px; text-align: left;">
+                {{ owner_address_line2 }}
+            </td>
+
+            <td style="padding: 0; text-align: center;">
+                <img src="{% static 'images/icons/fax_blue.png' %}"
+                     style="width: 16px; height: 16px; display: inline-block;"/>
+            </td>
+            <td style="padding: 0 2px; text-align: left;">
+                {{ owner_fax }}
+            </td>
+
+            <td style="padding: 0; text-align: center;">
+                <img src="{% static 'images/icons/email_blue.png' %}"
+                     style="width: 16px; height: 16px; display: inline-block;"/>
+            </td>
+            <td style="padding: 0 2px; text-align: left;">
+                {{ owner_mail }}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

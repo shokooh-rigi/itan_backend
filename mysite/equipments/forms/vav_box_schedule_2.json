@@ -1,0 +1,205 @@
+{
+    "general": {},
+    "design": {
+        "Address": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Code": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Type": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Size / KW": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Min. CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Max. CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Fan %": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "textarea", 
+            "value": null,
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Min. CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Max. CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Fan CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "K.F.": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
+        "Min. / Fan CFM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan volt": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan Amp": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Heat V / A": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "T In": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan V / A": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Heat V / A Actual": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "T Out": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 12,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "textarea", 
+            "value": null,
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    }
+}

@@ -13,6 +13,14 @@
         <h3 class="text-uppercase">Project: {{ order.project_number }}</h3>
         <h4 class="text-uppercase">{{ order.proposal.quote.estimate.project.name }}</h4>
 
+        <div class="d-flex justify-content-between align-items-right mb-2" style="text-align: right;">
+            <div>
+                <button type="button" class="btn btn-primary" onclick="createReport('{{ order.id }}')">
+                    <i class="fas fa-file"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- Modal -->
         <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -73,22 +81,29 @@
                         <div>
                             <h6>{{ eq_type }}</h6>
                         </div>
-                        {% for eq_id, eq_name in eq_type_data.items %}
+                        {% for eq_id, eq in eq_type_data.items %}
                             <div class="d-flex justify-content-between align-items-center mb-2 estimate-wrapper" data-id="section{{ eq.id }}">
                                 <div class="mb-0 eq-wrapper">
-                                    <span>{{ eq_id }} - {{ eq_name }}</span>
+                                    <span>{{ eq_id }} - {% if eq.eq.fan_no %} {{ eq.eq.fan_no }} {% elif eq.eq.code %} {{ eq.eq.code }} {% else %} {{ eq.eq.equipment_type.name }} {% endif %} </span>
                                 </div>
                                 <div>
                                     <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteDataSheet(event, '{{ eq_id }}')" data-id="{{ eq_id }}"><i class="fas fa-times"></i></button>
                                 </div>
                                 <!-- Info links -->
                             </div>
+
                             <div class="mb-2" style="text-align: left;">
-                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_update' eq_id %}" target="_blank">General Info</a>
+                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_update' eq_id %}" style="color: {% if eq.eq.main_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">General Info</a>
                                 </br>
-                                <a class="es-{{ eq_id }} pl-3" href="#" target="_blank">Design Data</a>
+                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=design" style="color: {% if eq.eq.design_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Design Data</a>
                                 </br>
-                                <a class="es-{{ eq_id }} pl-3" href="#" target="_blank">Actual Data</a>
+                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=actual" style="color: {% if eq.eq.actual_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Actual Data</a>
+                                {% if eq.has_terminal %}
+                                    </br>
+                                    <a class="es-{{ eq_id }} pl-3" href="{% url 'terminals_update' eq_id %}?t=design" style="color: {% if eq.eq.terminal_design_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Terminals Design</a>
+                                    </br>
+                                    <a class="es-{{ eq_id }} pl-3" href="{% url 'terminals_update' eq_id %}?t=actual" style="color: {% if eq.eq.terminal_actual_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Terminals Actual</a>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     {% endfor %}
@@ -101,7 +116,7 @@
       
 
        </div>
-       
+
        <div class="col-md-6">
             <div class="slideshow-container">
                 <div id="carouselExample" class="carousel slide">
@@ -464,6 +479,40 @@
             error: function(error) {
                 console.log(error);
                 alert('Error creating DataSheet!');
+            }
+        });
+    }
+    function createReport(orderId) {
+        const url = `/api/equipments/reports/${orderId}`;
+
+        $.ajax({
+            url: url,
+            method: 'GET', // or 'POST' if your API endpoint expects a POST request
+            contentType: 'application/json',
+            success: function(response) {
+                // Log the response data to the console
+                console.log(response);
+                
+                // Check if the response has the report link
+                if (response.report) {
+                    // Create a temporary link element
+                    const a = document.createElement('a');
+                    a.href = response.report;
+                    a.download = ''; // Optional: specify a file name
+                    a.style.display = 'none'; // Make it invisible
+                    document.body.appendChild(a);
+                    a.click(); // Trigger the download
+                    document.body.removeChild(a); // Remove the element after download
+                } else {
+                    console.error('Report link not found in response');
+                }
+            },
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // Log any errors to the console
+                console.error('Error with AJAX request:', textStatus, errorThrown);
             }
         });
     }

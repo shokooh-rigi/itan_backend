@@ -19,7 +19,7 @@ REPORT_TYPE_CHOICES = (
 
 class ReportSheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
-    report_date = models.DateField(default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=False)
+    report_date = models.DateField(default=datetime.datetime.now(), blank=False, null=False)
     last_report_date = models.DateField(blank=True, null=True)
     cover_report_date = models.DateField(blank=True, null=True)
     upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=True, null=True, validators=[validate_file_extension])
@@ -45,6 +45,9 @@ class ReportSheet(models.Model):
     def delete_report_pdf(cls, parameters):
         delete_pdf = Render.delete_file(parameters, 'report')
         return delete_pdf
+    
+    class Meta:
+        ordering = ['-report_date', 'project']
 
 
 # class ReportDrawing(models.Model):

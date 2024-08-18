@@ -9,4 +9,10 @@ urlpatterns = [
     path('reportsheet/finalize/<int:sheet_id>/', views.report_sheet_finalize, name='reportSheetFinalize'),
     path('reportsheet/delete/<int:sheet_id>/', views.delete_report_sheet, name='reportSheetDelete'),
     # path('reportsheet/drawing/<int:sheet_id>/', views.report_sheet_drawing, name='reportSheetDrawing'),
+
+    # templates
+    path('reportsheet/templates/', views.report_cover_template, name='report-cover-template'),
+    path('reportsheet/templates/full/', views.report_full_template, name='report-full-template'),
+    path('reportsheet/templates/report/', views.report_report_template, name='report-report-template'),
+    path('reportsheet/templates/toc/', views.report_toc_template, name='report-toc-template'),
 ]

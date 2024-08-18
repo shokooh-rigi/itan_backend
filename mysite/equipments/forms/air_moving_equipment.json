@@ -1,0 +1,463 @@
+{
+    "general": {},
+    "design": {
+        "Total C.F.M. Outlets": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 1,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Return Air C.F.M.": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 2,
+            "validation": "^[0-9]*$",
+            "formula": "1_design - 3_design",
+            "required": false
+        },
+        "Outdoor Air C.F.M.": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 3,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Total SP (Ext. SP)": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 4,
+            "validation": "^(N.S.|\\([0-9]*\\))$",
+            "formula": "",
+            "required": false
+        },
+        "Fan (Unit) Suction Pressure": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 5,
+            "validation": "^(N.S.|\\([0-9]*\\))$",
+            "formula": "",
+            "required": false
+        },
+        "Discharge Pressure, Fan / Unit": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 6,
+            "validation": "^(N.S.|\\([0-9]*\\))$",
+            "formula": "",
+            "required": false
+        },
+        "Fan R.P.M.": {
+            "type": "number", 
+            "value": "D.D.",
+            "note": "",
+            "order": 7,
+            "validation": "^D.D.|\\([0-9]*\\)$",
+            "formula": "",
+            "required": false
+        },
+        "H.P.": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 8,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Voltage": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 9,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Phase": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 10,
+            "validation": "^(1|2|3)$",
+            "formula": "",
+            "required": true
+        },
+        "Amperage": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 11,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "B.H.P. (Calc.)": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 12,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Frame": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "S.F. / Code": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 14,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Motor RPM": {
+            "type": "number", 
+            "value": "D.D.",
+            "note": "",
+            "order": 15,
+            "validation": "^D.D.|\\([0-9]*\\)$",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "textarea", 
+            "value": null,
+            "note": "",
+            "order": 16,
+            "validation": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Total C.F.M. Outlets": {
+            "type": "number", 
+            "value": null,
+            "order": 1,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Return Air C.F.M.": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 2,
+            "validation": "^[0-9]*$",
+            "formula": "1_actual - 3_actual",
+            "required": true
+        },
+        "Outdoor Air C.F.M.": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 3,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Total SP (Ext. SP)": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 4,
+            "validation": "^(N.S.|\\([0-9]*\\))$",
+            "formula": "5_actual + 6_actual",
+            "required": false
+        },
+        "Fan (Unit) Suction Pressure": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 5,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Discharge Pressure, Fan / Unit": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 6,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Fan R.P.M.": {
+            "type": "number", 
+            "value": "D.D.",
+            "note": "",
+            "order": 7,
+            "validation": "^D.D.|\\([0-9]*\\)$",
+            "formula": "",
+            "required": false
+        },
+        "Voltage": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 8,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "Phase": {
+            "type": "number", 
+            "value": null,
+            "note": "",
+            "order": 9,
+            "validation": "^(1|2|3)$",
+            "formula": "",
+            "required": true
+        },
+        "Amperage": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 10,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": true
+        },
+        "B.H.P. (Calc.)": {
+            "type": "text", 
+            "value": "N.S.",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "(((8_actual * 10_actual * 8_design)/9_design)/11_design)",
+            "required": false
+        },
+        "Motor RPM": {
+            "type": "number", 
+            "value": "D.D.",
+            "note": "",
+            "order": 12,
+            "validation": "^D.D.|\\([0-9]*\\)$",
+            "formula": "",
+            "required": false
+        },
+        "Direct Drive": {
+            "type": "checkbox", 
+            "value": false,
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Belt Drive": {
+            "type": "checkbox", 
+            "value": false,
+            "note": "",
+            "order": 14,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Max Speed": {
+            "type": "checkbox", 
+            "value": false,
+            "note": "",
+            "order": 15,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Med Speed": {
+            "type": "checkbox", 
+            "value": false,
+            "note": "",
+            "order": 16,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Min Speed": {
+            "type": "checkbox", 
+            "value": false,
+            "note": "",
+            "order": 17,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temp. In Cooling": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 18,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Air Temp. Out Cooling": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 19,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "RH %": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 20,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temp. In Heating": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 21,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Air Temp. Out Heating": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 22,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "O.A. Damper Poss.": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 23,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "GPM": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 24,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "DX": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 25,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Belt Size": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 26,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Motor Pully": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 27,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan Pully": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 28,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "C to C": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 29,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Motor Shaft": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 30,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan Shaft" : {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 31,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "VFD / HZ": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 32,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Filter Size": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 33,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Filter Model": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 34,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "textarea", 
+            "value": null,
+            "note": "",
+            "order": 35,
+            "validation": "",
+            "required": false
+        }
+    }
+}

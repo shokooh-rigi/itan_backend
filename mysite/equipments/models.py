@@ -41,6 +41,8 @@ class TestSheet(models.Model):
 #         return self.name
 
 
+
+
 class Equipment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True, related_name='equipments')
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True, related_name='equipments')
@@ -97,18 +99,25 @@ class DataSheet(models.Model):
     # EQ
     equipment_group = models.CharField(max_length=50, default='A', blank=False)
     number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_return_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_outside_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
+    number_of_exhaust_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
 
     # Air terminal
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
-    # code = models.ForeignKey(AirTerminalCode, on_delete=models.CASCADE, blank=True, null=True)
+    code = models.CharField(max_length=128, blank=True, null=True)
     _default = models.CharField(max_length=10, blank=True)
     size_type = models.PositiveSmallIntegerField(default=2, null=False, verbose_name='No. of Size Fields')
     is_custom = models.BooleanField(default=False)
 
-    outlet_no = models.SmallIntegerField(blank=False, null=False, default=1)
+    outlet_no = models.SmallIntegerField(blank=False, null=False, default=0)
     _type = models.PositiveSmallIntegerField(default=1, null=False)
-    equipment_name = models.CharField(max_length=255, blank=False, null=True)
     other_group = models.SmallIntegerField(blank=True, null=True)
+
+    fan_no = models.CharField(max_length=30, blank=True, null=True)
+    location = models.CharField(max_length=30, blank=True, null=True)
+    area_served = models.CharField(max_length=30, blank=True, null=True)
+    serial_number = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.equipment_type.test_sheet.name + " " + self.project.project_number

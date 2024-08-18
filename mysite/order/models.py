@@ -68,6 +68,9 @@ class Order(models.Model):
     note = models.TextField(max_length=2000, blank=True, null=True)
     partial_job_done = models.BooleanField(default=False)
 
+    # 0: Not Started, 1: In Progress, 2: Completed
+    state = models.CharField(max_length=30, blank=True, null=True)
+
     class Meta:
         ordering = ["-proposal"]
         verbose_name = 'Order List'

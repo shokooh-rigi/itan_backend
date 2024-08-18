@@ -35,6 +35,8 @@ services:
       - postgres_data_backups_dev_itab:/backups
     env_file:
       - ./.envs/.dev/.postgres
+    ports:
+      - '5432:5432'
 
   # mysql:
   #   image: mysql:8.0.37

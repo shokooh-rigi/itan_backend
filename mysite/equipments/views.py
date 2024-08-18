@@ -66,10 +66,12 @@ def order_update(request, order_id):
                 'equipment': eq.equipment_type.name,
                 'eq_id': eq.equipment_type.id,
                 'service': eq.equipment_type.service.name,
-                'eqs': [eq],
+                'test_sheet': eq.equipment_type.test_sheet.name,
+                'eq': eq,
                 'qty': 1,
                 'qty_range': range(1),
                 'type': 'datasheetequipment',
+                'has_terminal': DataSheet.objects.filter(parent=eq, equipment_type__name='Air Terminal').exists(),
                 # 
                 'general_url': None,
                 'design_url': None,
@@ -81,50 +83,17 @@ def order_update(request, order_id):
         nested_dict = {}
         for eq in ـequipments:
             service = eq['service']
-            equipment_type = eq['equipment']
             equipment_id = eq['id']
+            test_sheet = eq['test_sheet']
             if service not in nested_dict:
                 nested_dict[service] = {}
-            if equipment_type not in nested_dict[service]:
-                nested_dict[service][equipment_type] = {}
-            nested_dict[service][equipment_type][equipment_id] = eq['equipment']
+            if test_sheet not in nested_dict[service]:
+                nested_dict[service][test_sheet] = {}
+            # nested_dict[service][test_sheet][equipment_id] = eq['equipment']
+            nested_dict[service][test_sheet][equipment_id] = eq
         ـequipments = nested_dict
-
-            # if eq.sheet.test_sheet_type.name.lower() == "air moving":
-            #     if not eq.equipment.main_data_entry_confirmed:
-            #         equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonData', args=[eq.id])
-            #     else:
-            #         equipments_dict[key]['general_url'] = reverse('sheetEquipmentCommonDataEdit', args=[eq.id])
-            #     equipments_dict[key]['design_url'] = reverse('sheetEquipmentDesignValue', args=[eq.id])
-            #     if not eq.equipment.actual_data_entry_confirmed:
-            #         equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValue', args=[eq.id])
-            #     else:
-            #         equipments_dict[key]['actual_url'] = reverse('sheetEquipmentActualValueEdit', args=[eq.id])
-            # else:
-            #     equipments_dict[key]['general_url'] = reverse('vavSheetEquipmentGeneralData', args=[eq.id])
-            #     equipments_dict[key]['design_url'] = reverse('vavSheetEquipmentDesignData', args=[eq.id])
-            #     equipments_dict[key]['actual_url'] = reverse('vavSheetEquipmentActualData', args=[eq.id])
-                # # if updated
-                # if eq.main_data_entry_completed:
-                #     equipments_dict[key]['general_colour'] = '#FFA500'
-                # else:
-                #     equipments_dict[key]['general_colour'] = '#0000FF'
-                # if eq.design_data_entry_completed:
-                #     equipments_dict[key]['design_colour'] = '#FFA500'
-                # else:
-                #     equipments_dict[key]['design_colour'] = '#0000FF'
-                # if eq.actual_data_entry_completed:
-                #     equipments_dict[key]['actual_colour'] = '#FFA500'
-                # else:
-                #     equipments_dict[key]['actual_colour'] = '#0000FF'
-                # if confirmed
-                # if eq.equipment.main_data_entry_confirmed:
-                #     equipments_dict[key]['general_colour'] = '#008000'
-                # if eq.equipment.design_data_entry_confirmed:
-                #     equipments_dict[key]['design_colour'] = '#008000'
-                # if eq.equipment.actual_data_entry_confirmed:
-                #     equipments_dict[key]['actual_colour'] = '#008000'
-
+        if 'Air Terminal' in ـequipments['Air Balancing']:
+            del ـequipments['Air Balancing']['Air Terminal']
 
         # service_order = ['Air Balancing', 'Water Balancing']
         # sorted_equipments = OrderedDict()
@@ -172,7 +141,48 @@ def order_update(request, order_id):
 @login_required
 def equipment_update(request, equipment_id):
     ds = get_object_or_404(DataSheet, pk=equipment_id)
+    manufacturers = EquipmentManufacturer.objects.all()
     context = {
         "ds": ds,
+        "manufacturers": manufacturers,
     }
     return render(request, "equipment_update.html", context)
+
+
+@login_required
+def equipment_forms_update(request, equipment_id):
+    t = request.GET.get('t', None)
+    ds = get_object_or_404(DataSheet, pk=equipment_id)
+    fields = ds.form_fields[t]
+    sorted_fields = dict(sorted(fields.items(), key=lambda item: item[1]['order']))
+    context = {
+        "ds": ds,
+        "fields": sorted_fields,
+    }
+    return render(request, "equipment_forms_update.html", context)
+
+
+@login_required
+def terminals_update(request, datasheet_id):
+    my_sheet = DataSheet.objects.filter(parent=datasheet_id, equipment_type__name='Air Terminal')
+    terminal_types = {
+        'supply_terminals': my_sheet.filter(_type=1),
+        'return_terminals': my_sheet.filter(_type=2),
+        'outside_terminals': my_sheet.filter(_type=3),
+        # 'other_terminals': my_sheet.filter(_type=4),
+    }
+
+    terminal_fields = {}
+    for key, terminals in terminal_types.items():
+        terminal_fields[key] = []
+        for terminal in terminals:
+            t = request.GET.get('t', None)  # This assumes 't' parameter tells which fields to load, may need adjustment based on actual use
+            form_fields = terminal.form_fields[t] if terminal and hasattr(terminal, 'form_fields') and t in terminal.form_fields else {}
+            form_fields = dict(sorted(form_fields.items(), key=lambda item: item[1]['order']))
+            terminal_fields[key].append((terminal, form_fields))
+
+    parameters = {
+        'terminal_types': terminal_fields,  # This now includes both terminals and their specific fields
+        'ds': my_sheet.first()
+    }
+    return render(request, "air_terminals_update.html", parameters)

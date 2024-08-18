@@ -1,0 +1,295 @@
+{% load static %}
+{% load estimator_tags %}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FINAL TEST SHEET</title>
+    {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .pdf-page-content {
+            page-break-after: always;
+        }
+
+        .pdf-table {
+            height: auto;
+            border: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Table head section ======================================================================================= */
+        .pdf-table thead .pdf-head-tr {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table thead .pdf-head-tr th {
+            width: 10%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 0;
+        }
+
+        .pdf-table thead .pdf-head-tr th.wide-th {
+            width: 20%;
+        }
+
+        /* Table title ============================================================================================== */
+        .pdf-table .pdf-table-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td {
+            padding-bottom: 8px;
+        }
+
+        .pdf-table .pdf-table-title .pdf-table-title-td.pdf-page-number {
+            text-align: right;
+        }
+
+        /* Table divider */
+        .pdf-table .pdf-table-section-divider {
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-section-divider td {
+            padding: 0;
+            margin: 0;
+            border: none;
+            height: 5px;
+        }
+
+        /* Table cell =============================================================================================== */
+        .pdf-table .pdf-table-cell {
+            font-weight: normal;
+            border: 1px solid black;
+            padding: 5px 2px 1px;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.long-title {
+            padding: 2px 2px 0;
+        }
+
+        .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .pdf-table .pdf-table-cell.df-value-cell {
+            text-align: right;
+            border-right: none;
+        }
+
+        .pdf-table .pdf-table-cell.df-title-cell {
+            border-left: none;
+        }
+
+        /* Table rows =============================================================================================== */
+        .pdf-table-row {
+            border: 2px solid black;
+        }
+
+        .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td {
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .note-div {
+            display: inline-block;
+        }
+
+        .note-div:after {
+            content: "-";
+        }
+
+        .note-div:last-child:after {
+            content: "";
+        }
+
+        .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .seperator {
+            -pdf-keep-with-next: false;
+        }
+
+        /* Velocity Table cell =============================================================================================== */
+        .velocity .pdf-table .pdf-table-cell {
+            padding: 5px 2px 1px;
+        }
+
+        .velocity .pdf-table .border {
+            border: 1px solid black;
+        }
+
+        .velocity .pdf-table .no-border {
+            border: 0px solid black;
+        }
+
+        .velocity .pdf-table .pdf-table-cell.pdf-table-title-cell {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .velocity .pdf-table .pdf-table-cell.pdf-table-title-cell.center-title {
+            text-align: center;
+        }
+
+        .velocity .pdf-table .pdf-table-cell.pdf-table-title-second-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .velocity .pdf-table .pdf-table-cell.pdf-table-title-third-row {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .velocity .pdf-table-row {
+            border: 1px solid black;
+        }
+
+        .velocity .pdf-table-row-thick {
+            border: 2px solid black;
+        }
+
+        .velocity .pdf-table-row.section-first-row {
+            border-bottom: none;
+        }
+
+        .velocity .pdf-table-row.section-middle-row {
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .velocity .pdf-table-row.section-last-row {
+            border-top: none;
+        }
+
+        /* Project specifications =================================================================================== */
+        .velocity .pdf-table .pdf-table-project-tr {
+            text-align: left;
+        }
+
+        .velocity .pdf-table .pdf-table-project-tr .pdf-table-title-cell {
+            border: none;
+        }
+
+        .velocity .pdf-table .pdf-table-project-tr .pdf-table-center-cell {
+            text-align: center;
+        }
+
+        /* Note section ============================================================================================= */
+        .velocity .pdf-table .pdf-table-note-section {
+            border: none;
+        }
+
+        .velocity .pdf-table .pdf-table-note-section td {
+            font-weight: normal;
+            padding: 5px 2px 1px;
+            text-align: left;
+            border: none;
+        }
+
+        .velocity .pdf-table .pdf-table-note-section td.note-title {
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .velocity .note-div {
+            display: inline-block;
+        }
+
+        .velocity .note-div:after {
+            content: "-";
+        }
+
+        .velocity .note-div:last-child:after {
+            content: "";
+        }
+
+        .velocity .keep_together {
+            -pdf-keep-with-next: true;
+        }
+
+        .velocity .seperator {
+            -pdf-keep-with-next: false;
+        }
+
+    </style>
+</head>
+<body>
+
+{% include "pdfTemplates/pdfHeaderTemplate.html" %}
+
+{% include "pdfTemplates/pdfFooterTemplate.html" %}
+
+
+<div id="content_frame">
+    {% for page in form.pages %}
+        {% if page.type == 'AIRMOVING' %}
+            {% include "pdfTemplates/airMovingPdfContent.html" %}
+        {% elif page.type == 'SUPPLY' or page.type == 'RETURN' or page.type == 'OUTSIDE' or page.type == 'OTHER' %}
+            {% include "pdfTemplates/terminalPdfContent.html" %}
+        {% elif page.type == 'TERMINAL' %}
+            {% include "pdfTemplates/terminalPdfContent.html" %}
+        {% elif page.type == 'VAV' %}
+            {% include "pdfTemplates/vavPdfContent.html" %}
+        {% elif page.type == 'VELOCITY' %}
+            {% include "pdfTemplates/velocityPdfContent.html" %}
+        {% elif page.type == 'PUMP' %}
+            {% include "pdfTemplates/pumpPdfContent.html" %}
+        {% endif %}
+    {% endfor %}
+</div>
+</body>
+</html>

@@ -1,12 +1,17 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from ..models import Equipment, DataSheet
+from ..models import Equipment, DataSheet, TestSheet
 from .serializers import EquipmentSerializer, DataSheetSerializer
 from ast import literal_eval
 from django.shortcuts import get_object_or_404
 from mysite.order.models import Order
 from datetime import datetime
+from mysite.dbmanagement.models import EquipmentManufacturer
+import copy
+from ..utils.calc_formula import calculate_formula
+
+from mysite.generatereport.views import report_sheet_recreate_call
 
 
 @api_view(['POST'])
@@ -54,14 +59,24 @@ def create_data_sheet(request):
     for i in request.data["data"]:
         order = get_object_or_404(Order, project_number=i["project"])
         eq = get_object_or_404(Equipment, name=i["equipment"])
+        test_sheet = get_object_or_404(TestSheet, name=i["test_sheet"])
+        if "RGD" in i["equipment"]:
+            continue
         for j in range(int(i["qty"])):
             obj = DataSheet.objects.create(
                 sheet_date=datetime.now().date(),
                 equipment_type=eq,
-                name=eq.name,
                 project=order,
-                form_fields=eq.form_fields,
+                form_fields=copy.deepcopy(test_sheet.form_fields),
             )
+            if eq.test_sheet.name == "Air Moving":
+                obj.fan_no = eq.name
+            # VAV
+            else:
+                obj.code = eq.name
+            obj.save()
+        order.state = "In Progress"
+        order.save()
     return Response({"data": "data sheet created"})
 
 @api_view(['GET'])
@@ -73,17 +88,135 @@ def retrieve_data_sheet(request, pk):
     serializer = DataSheetSerializer(data_sheet)
     return Response(serializer.data)
 
+# Model fields
 @api_view(['PUT', 'PATCH'])
 def update_data_sheet(request, pk):
-    try:
-        data_sheet = DataSheet.objects.get(pk=pk)
-    except DataSheet.DoesNotExist:
-        return Response({'error': 'Data Sheet not found.'}, status=status.HTTP_404_NOT_FOUND)
-    serializer = DataSheetSerializer(data_sheet, data=request.data, partial=request.method == 'PATCH')
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    data_sheet = get_object_or_404(DataSheet, pk=pk)
+    for key, value in request.data.items():
+        if key == "manufacturer":
+            value = get_object_or_404(EquipmentManufacturer, pk=value)
+        elif "_air_terminal" in key:
+            # compare with previous value
+            prev = getattr(data_sheet, key)
+            if int(prev) < int(value):
+                for i in range(int(value) - int(prev)):
+                    # create new datasheet (air terminal)
+                    eq = get_object_or_404(Equipment, name="Air Terminal")
+                    _type = 1
+                    _code = ""
+                    if key == "number_of_supply_air_terminal":
+                        _type = 1
+                    elif key == "number_of_return_air_terminal":
+                        _type = 2
+                        _code = "RG"
+                    elif key == "number_of_outside_air_terminal":
+                        _type = 3
+                    elif key == "number_of_exhaust_air_terminal":
+                        _type = 4
+                    form_fields = copy.deepcopy(eq.test_sheet.form_fields)
+                    outlet_no = DataSheet.objects.filter(
+                        parent=data_sheet, 
+                        equipment_type__name='Air Terminal',
+                        _type=_type
+                    ).count() + 1
+                    form_fields["design"]["Outlet No."]["value"] = outlet_no
+                    form_fields["design"]["Code"]["value"] = _code
+                    new_ds = DataSheet.objects.create(
+                        sheet_date=datetime.now().date(),
+                        equipment_type=eq,
+                        name=eq.name,
+                        project=data_sheet.project,
+                        form_fields=form_fields,
+                        parent=data_sheet,
+                        outlet_no=outlet_no,
+                        _type=_type,
+                        code=_code,
+                    )
+
+        setattr(data_sheet, key, value)
+    data_sheet.main_data_entry_completed = True
+    data_sheet.save()
+    return Response({"data": "data sheet updated"})
+
+# Form fields
+@api_view(['PUT', 'PATCH'])
+def update_data_sheet_form(request, pk):
+    form_type = request.query_params.get("t")
+    data_sheet = get_object_or_404(DataSheet, pk=pk)
+    form_fields = copy.deepcopy(data_sheet.form_fields)
+
+    errors = []
+    exclude_applied_formula = ["AK Factor"]
+
+    is_air_terminal = request.query_params.get("ds")
+    if is_air_terminal == "air-terminal":
+        if form_type == "design":
+            data_sheet.terminal_design_data_entry_completed = True
+        elif form_type == "actual":
+            data_sheet.terminal_actual_data_entry_completed = True
+        data_sheet.save()
+    
+        for key, value in request.data.items():
+            field_key = key.replace("_note", "")
+            data_sheet = get_object_or_404(DataSheet, pk=field_key.split("_")[-1])
+            field_key = field_key.split("_")[0]
+            form_fields = copy.deepcopy(data_sheet.form_fields)
+            if field_key in form_fields[form_type]:
+                field_data = form_fields[form_type][field_key]
+                # Update field note or value
+                if "_note" in key:
+                    field_data["note"] = value
+                else:
+                    field_data["value"] = value
+                    # Check and apply formula
+                    formula = field_data.get("formula")
+                    if formula and field_key not in exclude_applied_formula:
+                        computed_value = calculate_formula(formula, form_fields, request.data)
+                        # if computed_value is not None and field_data.get("type") == "number":
+                        if computed_value is not None:
+                            if value:
+                                if float(computed_value) != float(value):
+                                    # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
+                                    field_data["value"] = computed_value
+                            else:
+                                field_data["value"] = computed_value
+            data_sheet.form_fields = form_fields
+            data_sheet.save()
+    else:
+        for key, value in request.data.items():
+            field_key = key.replace("_note", "")
+            if field_key in form_fields[form_type]:
+                field_data = form_fields[form_type][field_key]
+                # Update field note or value
+                if "_note" in key:
+                    field_data["note"] = value
+                else:
+                    field_data["value"] = value
+                    # Check and apply formula
+                    formula = field_data.get("formula")
+                    if formula and field_key not in exclude_applied_formula:
+                        computed_value = calculate_formula(formula, form_fields, request.data)
+                        # if computed_value is not None and field_data.get("type") == "number":
+                        if computed_value is not None:
+                            if value:
+                                if "(" in value:
+                                    value = value.split("(")[1].split(")")[0]
+                                if float(computed_value) != float(value):
+                                    # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
+                                    field_data["value"] = computed_value
+                            else:
+                                field_data["value"] = computed_value
+        data_sheet.form_fields = form_fields
+        if form_type == "design":
+            data_sheet.design_data_entry_completed = True
+        elif form_type == "actual":
+            data_sheet.actual_data_entry_completed = True
+        data_sheet.save()
+    if errors:
+        return Response({"errors": errors}, status=400)
+
+    return Response({"data": "Data sheet updated successfully"})
+
 
 @api_view(['DELETE'])
 def delete_data_sheet(request, pk):
@@ -98,4 +231,12 @@ def delete_data_sheet(request, pk):
 def clear_data_sheet(request, pk):
     order = get_object_or_404(Order, pk=pk)
     order.data_sheets.all().delete()
+    order.state = "Not Started"
+    order.save()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def create_report(request, order_id):
+    report = report_sheet_recreate_call(request, order_id)
+    return Response({"report": report})
