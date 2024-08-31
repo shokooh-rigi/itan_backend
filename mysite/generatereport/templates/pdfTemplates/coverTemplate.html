@@ -1,5 +1,6 @@
 {% load static %}
 {% load estimator_tags %}
+{% load custom_date_format %}
 
 <html>
 <head>
@@ -94,9 +95,19 @@
                         <img alt="tbe-signature" src="{% get_s3_file_url report_stamp '' %}" class="signature" style="height: 500px;"/><br/>
                     </td>
                 </tr>
+                <tr style="border-top-color: white; border-bottom-color: white;">
+                    <td colspan="2">REVISED: <span style="text-decoration: underline;">
+                        {% if report_sheet.revised_date %}
+                            {{ report_sheet.revised_date|custom_date_format }}
+                        {% endif %}
+                    </span></td>
+                </tr>
                 <tr style="border-top-color: white;">
-                    <td colspan="2">DATE: <span
-                            style="text-decoration: underline;">{% if report_sheet.cover_report_date %}{{ report_sheet.cover_report_date|date:'F d, Y'|upper }}{% else %}{% if report_sheet.last_report_date %}{{ report_sheet.last_report_date|date:'F d, Y'|upper }}{% else %}{{ report_sheet.report_date|date:'F d, Y'|upper }}{% endif %}{% endif %}</span></td>
+                    <td colspan="2">DATE: <span style="text-decoration: underline;">
+                        {% if report_sheet.report_date %}
+                            {{ report_sheet.report_date|custom_date_format }}
+                        {% endif %}
+                    </span></td>
                 </tr>
                 </tbody>
             </table>

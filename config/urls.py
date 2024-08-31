@@ -72,12 +72,11 @@ urlpatterns = [
     path('', include('mysite.jobcosting.urls')),
     path('', include('mysite.companyperformance.urls')),
     path('', include('mysite.revenueperformance.urls')),
-    # Media files
-    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # API URLS
 urlpatterns += [

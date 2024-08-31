@@ -57,11 +57,11 @@ def delete_equipment(request, pk):
 @api_view(['POST'])
 def create_data_sheet(request):
     for i in request.data["data"]:
+        if "RGD" in i["equipment"]:
+            continue
         order = get_object_or_404(Order, project_number=i["project"])
         eq = get_object_or_404(Equipment, name=i["equipment"])
         test_sheet = get_object_or_404(TestSheet, name=i["test_sheet"])
-        if "RGD" in i["equipment"]:
-            continue
         for j in range(int(i["qty"])):
             obj = DataSheet.objects.create(
                 sheet_date=datetime.now().date(),
@@ -93,6 +93,8 @@ def retrieve_data_sheet(request, pk):
 def update_data_sheet(request, pk):
     data_sheet = get_object_or_404(DataSheet, pk=pk)
     for key, value in request.data.items():
+        if not value:
+            continue
         if key == "manufacturer":
             value = get_object_or_404(EquipmentManufacturer, pk=value)
         elif "_air_terminal" in key:
@@ -174,12 +176,15 @@ def update_data_sheet_form(request, pk):
                         computed_value = calculate_formula(formula, form_fields, request.data)
                         # if computed_value is not None and field_data.get("type") == "number":
                         if computed_value is not None:
-                            if value:
-                                if float(computed_value) != float(value):
-                                    # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
-                                    field_data["value"] = computed_value
-                            else:
-                                field_data["value"] = computed_value
+                            # if value:
+                            #     if float(computed_value) != float(value):
+                            #         # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
+                            #         field_data["value"] = computed_value
+                            # else:
+                            #     field_data["value"] = computed_value
+                            if ('Total SP' in field_key) and ('*' not in computed_value):
+                                computed_value = f"{float(computed_value):.2f}"
+                            field_data["value"] = computed_value
             data_sheet.form_fields = form_fields
             data_sheet.save()
     else:
@@ -198,14 +203,17 @@ def update_data_sheet_form(request, pk):
                         computed_value = calculate_formula(formula, form_fields, request.data)
                         # if computed_value is not None and field_data.get("type") == "number":
                         if computed_value is not None:
-                            if value:
-                                if "(" in value:
-                                    value = value.split("(")[1].split(")")[0]
-                                if float(computed_value) != float(value):
-                                    # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
-                                    field_data["value"] = computed_value
-                            else:
-                                field_data["value"] = computed_value
+                            # if value:
+                            #     if "(" in value:
+                            #         value = value.split("(")[1].split(")")[0]
+                            #     if float(computed_value) != float(value):
+                            #         # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
+                            #         field_data["value"] = computed_value
+                            # else:
+                            #     field_data["value"] = computed_value
+                            if ('Total SP' in field_key) and ('*' not in computed_value):
+                                computed_value = f"{float(computed_value):.2f}"
+                            field_data["value"] = computed_value
         data_sheet.form_fields = form_fields
         if form_type == "design":
             data_sheet.design_data_entry_completed = True
@@ -236,7 +244,22 @@ def clear_data_sheet(request, pk):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def create_report(request, order_id):
-    report = report_sheet_recreate_call(request, order_id)
+    report_type = request.data.get('report_type')
+    start_date = request.data.get('start_date')
+    end_date = request.data.get('end_date')
+    report_date = request.data.get('report_date')
+    revised_date = request.data.get('revised_date')
+
+    # Pass these parameters to your report generation logic
+    report = report_sheet_recreate_call(
+        request=request,
+        order_id=order_id,
+        report_type=report_type,
+        start_date=start_date,
+        end_date=end_date,
+        report_date=report_date,
+        revised_date=revised_date,
+    )
     return Response({"report": report})

@@ -25,7 +25,7 @@ from mysite.dbmanagement.models import EquipmentManufacturer
 def order_update(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
     dsq = this_order.data_sheets.all()
-    _eq_types = Equipment.objects.all()
+    _eq_types = Equipment.objects.exclude(test_sheet__isnull=True)
     manufacturers = EquipmentManufacturer.objects.all()
     modules_type = "Equipments"
     eq_types = []
@@ -109,22 +109,24 @@ def order_update(request, order_id):
 
     _s3 = S3()
     image_data_list = []
-    # for _fl in [
-    #     this_order.equipment_submittal, 
-    #     this_order.colored_drawing, 
-    #     this_order.report_colored_drawing, 
-    #     this_order.field_draw, 
-    #     this_order.site_pictures,
-    #     this_order.test_sheets
-    # ]:
-    #     if not _fl:
-    #         continue
-    #     if _fl.name.endswith('.pdf'):
-    #         _fl_path = _s3.get_bucket_object("media/" + _fl.name)
-    #         image_bytes_list = pdf_to_image_bytes(_fl_path)
-    #         image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
-    #     else:
-    #         image_data_list.append(_fl_path)
+    for _fl in [
+        # this_order.equipment_submittal, 
+        this_order.colored_drawing, 
+        # this_order.report_colored_drawing, 
+        # this_order.field_draw, 
+        # this_order.site_pictures,
+        # this_order.test_sheets
+    ]:
+        if not _fl:
+            continue
+        if _fl.name.endswith('.pdf'):
+            # _fl_path = _s3.get_bucket_object("media/" + _fl.name)
+            # DEBUG using local media
+            _fl_path = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + _fl.name
+            image_bytes_list = pdf_to_image_bytes(_fl_path)
+            image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
+        else:
+            image_data_list.append(_fl_path)
 
     context = {
         "order": this_order,
@@ -141,10 +143,24 @@ def order_update(request, order_id):
 @login_required
 def equipment_update(request, equipment_id):
     ds = get_object_or_404(DataSheet, pk=equipment_id)
+    order = get_object_or_404(Order, pk=ds.project.id)
+    parents = order.data_sheets.exclude(id=equipment_id)
+    _parents = []
+    for parent in parents:
+        title = parent.code
+        if not title:
+            title = parent.fan_no
+        if not title:
+            title = f"{parent.id} - " + parent.name
+        _parents.append({
+            'id': parent.id,
+            'title': title,
+        })
     manufacturers = EquipmentManufacturer.objects.all()
     context = {
         "ds": ds,
         "manufacturers": manufacturers,
+        "parents": _parents
     }
     return render(request, "equipment_update.html", context)
 
@@ -165,12 +181,15 @@ def equipment_forms_update(request, equipment_id):
 @login_required
 def terminals_update(request, datasheet_id):
     my_sheet = DataSheet.objects.filter(parent=datasheet_id, equipment_type__name='Air Terminal')
-    terminal_types = {
-        'supply_terminals': my_sheet.filter(_type=1),
-        'return_terminals': my_sheet.filter(_type=2),
-        'outside_terminals': my_sheet.filter(_type=3),
-        # 'other_terminals': my_sheet.filter(_type=4),
-    }
+    terminal_types = {}
+    if len(my_sheet.filter(_type=1)) > 0:
+        terminal_types['Supply Terminals'] = my_sheet.filter(_type=1)
+    if len(my_sheet.filter(_type=2)) > 0:
+        terminal_types['Return Terminals'] = my_sheet.filter(_type=2)
+    if len(my_sheet.filter(_type=3)) > 0:
+        terminal_types['Outside Terminals'] = my_sheet.filter(_type=3)
+    if len(my_sheet.filter(_type=4)) > 0:
+        terminal_types['Exhaust Terminals'] = my_sheet.filter(_type=4)
 
     terminal_fields = {}
     for key, terminals in terminal_types.items():

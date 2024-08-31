@@ -1,11 +1,21 @@
 {% load static %}
 {% load estimator_tags %}
+{% load dynamic_dots %}
 
 <html>
 <head>
     <meta charset="utf-8">
     <title>Report Sheet</title>
     {% include "pdfTemplates/headStyle.html" %}
+    <style>
+        .table th, .table td {
+            font-size: 16px; /* Adjust the font size as needed */
+        }
+        .left_align {
+            text-align: left;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -32,55 +42,242 @@
             <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
             </span>
         </div>
-        <table class="table calibri" style="font-size: 12pt; border: 0;">
+
+        <!-- <table class="table table-borderless" style="margin-left: 40px; margin-top: 20px;">
+            <thead>
+              <tr>
+                <th scope="col-6">ITEM</th>
+                <th scope="col-5"></th>
+                <th scope="col-1">PAGE NO.</th>
+              </tr>
+            </thead>
             <tbody>
-                <tr class="pdf-table-title cambria" style="padding: 0 0;">
-                    <td class="pdf-table-title-td" colspan="5" style="font-weight: bold;">ITEM</td>
-                    <td class="pdf-table-title-td" style="font-weight: bold; text-align: center;">PAGE NO.</td>
+              <tr class="pt-5">
+                <th scope="row" class="left_align">INSTRUMENTATION</th>
+                <td>...................................................................</td>
+                <td style="text-align: center;">I</td>
+              </tr>
+              <tr>
+                <th scope="row" class="left_align">GENERAL NOTES</th>
+                <td>...................................................................</td>
+                <td style="text-align: center;">II</td>
+              </tr>
+              <tr>
+                <th scope="row" class="left_align">ABBREVIATIONS</th>
+                <td>...................................................................</td>
+                <td style="text-align: center;">III</td>
+              </tr>
+              <tr>
+                <th scope="row" class="left_align">AABC NATIONAL PERFORMANCE GUARANTY</th>
+                <td>...................................................................</td>
+                <td style="text-align: center;">IV</td>
+              </tr>
+              {% for line in table_of_content %}
+                <tr>
+                    {% if line.pages %}
+                      {% if line.name == 'AS BUILT MECHANICAL PLAN' %}
+                        <th scope="row" class="left_align mt-2 pt-2" style="font-weight: normal;">{{ line.name }}</th>
+                        <td>...................................................................</td>
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                      {% else %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">• {{ line.name }}</th>
+                        <td>...................................................................</td>
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                      {% endif %}
+                    {% else %}
+                        <th scope="row" class="left_align" class="underline">{{ line.name }}</th>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
                 </tr>
-                <tr class="pdf-table-title" style="padding: 0 0;">
-                    <td class="pdf-table-title-td" colspan="5">
-                        INSTRUMENTATION
-                        <span style="float: right; margin-left: 20px; white-space: nowrap;">
-                            ............................................................................................
-                        </span>
-                    </td>
-                    <td class="pdf-table-title-td" style="text-align: center;">i</td>
+              {% endfor %}
+            </tbody>
+        </table> -->
+    
+
+        <!-- <div class="table-container" style="margin-left: 40px; margin-top: 20px;">
+            <div class="table-header" style="display: flex; border-bottom: 2px solid #000; padding: 10px;">
+                <div class="header-item" style="flex: 6;">ITEM</div>
+                <div class="header-item" style="flex: 5;"></div>
+                <div class="header-item" style="flex: 1; text-align: center;">PAGE NO.</div>
+            </div>
+            <div class="table-row" style="display: flex; padding: 10px;">
+                <div class="row-item" style="flex: 6; text-align: left;">INSTRUMENTATION</div>
+                <div class="row-item" style="flex: 5;">...................................................................</div>
+                <div class="row-item" style="flex: 1; text-align: center;">I</div>
+            </div>
+            <div class="table-row" style="display: flex; padding: 10px;">
+                <div class="row-item" style="flex: 6; text-align: left;">GENERAL NOTES</div>
+                <div class="row-item" style="flex: 5;">...................................................................</div>
+                <div class="row-item" style="flex: 1; text-align: center;">II</div>
+            </div>
+            <div class="table-row" style="display: flex; padding: 10px;">
+                <div class="row-item" style="flex: 6; text-align: left;">ABBREVIATIONS</div>
+                <div class="row-item" style="flex: 5;">...................................................................</div>
+                <div class="row-item" style="flex: 1; text-align: center;">III</div>
+            </div>
+            <div class="table-row" style="display: flex; padding: 10px;">
+                <div class="row-item" style="flex: 6; text-align: left;">AABC NATIONAL PERFORMANCE GUARANTY</div>
+                <div class="row-item" style="flex: 5;">...................................................................</div>
+                <div class="row-item" style="flex: 1; text-align: center;">IV</div>
+            </div>
+            {% for line in table_of_content %}
+                <div class="table-row" style="display: flex; padding: 10px;">
+                    {% if line.pages %}
+                        {% if line.name == 'AS BUILT MECHANICAL PLAN' %}
+                            <div class="row-item" style="flex: 6; text-align: left; font-weight: normal;">{{ line.name }}</div>
+                            <div class="row-item" style="flex: 5;">...................................................................</div>
+                            <div class="row-item" style="flex: 1; text-align: center;">{{ line.pages }}</div>
+                        {% else %}
+                            <div class="row-item" style="flex: 6; text-align: left; font-weight: normal;">• {{ line.name }}</div>
+                            <div class="row-item" style="flex: 5;">...................................................................</div>
+                            <div class="row-item" style="flex: 1; text-align: center;">{{ line.pages }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="row-item" style="flex: 6; text-align: left; text-decoration: underline;">{{ line.name }}</div>
+                        <div class="row-item" style="flex: 5;"></div>
+                        <div class="row-item" style="flex: 1;"></div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div> -->
+        
+
+        <!-- <table class="table table-borderless" style="margin-left: 40px; margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th scope="col-10">ITEM</th>
+                    <th scope="col-1" style="width: 15%;">&nbsp;</th>
+                    <th scope="col-1">PAGE NO.</th>
                 </tr>
-                <tr class="pdf-table-title" style="padding: 0 0;">
-                    <td class="pdf-table-title-td" colspan="5">
-                        GENERAL NOTES
-                        <span style="float: right; margin-left: 20px; white-space: nowrap;">
-                            ................................................................................................
-                        </span>
-                    </td>
-                    <td class="pdf-table-title-td" style="text-align: center;">ii</td>
+            </thead>
+            <tbody>
+                <tr class="pt-5">
+                    <th scope="row" class="left_align">INSTRUMENTATION</th>
+                    <td style="width: 15%;">..................................................</td>
+                    <td style="text-align: center;">I</td>
                 </tr>
-                <tr class="pdf-table-title" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td" colspan="5">
-                        ABBREVIATIONS
-                        <span style="float: right; margin-left: 20px; white-space: nowrap;">
-                            ..................................................................................................
-                        </span>
-                    </td>
-                    <td class="pdf-table-title-td" style="text-align: center;">iii</td>
+                <tr>
+                    <th scope="row" class="left_align">GENERAL NOTES</th>
+                    <td style="width: 15%;">..................................................</td>
+                    <td style="text-align: center;">II</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="left_align">ABBREVIATIONS</th>
+                    <td style="width: 15%;">..................................................</td>
+                    <td style="text-align: center;">III</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="left_align">AABC NATIONAL PERFORMANCE GUARANTY</th>
+                    <td style="width: 15%;">..................................................</td>
+                    <td style="text-align: center;">IV</td>
                 </tr>
                 {% for line in table_of_content %}
-                    <tr class="pdf-table-title" style="{% if line.underline %}padding: 5px 0 0 0; text-decoration: underline;{% endif %}">
-                        <td class="pdf-table-title-td" colspan="5" style="padding-left: {% widthratio line.level 1 6 %}px;">
-                            {{ line.name }}
-                            {% if line.pages %}
-                                <span style="float: right; margin-left: 20px; white-space: nowrap;">
-                                    .............................................................
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td class="pdf-table-title-td" style="text-align: center;">{% if line.pages %}{{ line.pages }}{% endif %}</td>
-                    </tr>
+                <tr>
+                    {% if line.pages %}
+                        {% if line.name == 'AS BUILT MECHANICAL PLAN' %}
+                        <th scope="row" class="left_align mt-2 pt-2" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 15%;">..................................................</td>
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% else %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">
+                            &nbsp;&nbsp;&nbsp;&nbsp;• {{ line.name }}
+                        </th>
+                        <td style="width: 15%;">..................................................</td>
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% endif %}
+                    {% else %}
+                        <th scope="row" class="left_align" style="text-decoration: underline;">{{ line.name }}</th>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
                 {% endfor %}
             </tbody>
-        </table>        
+        </table> -->
+        
+        <table class="table table-borderless" style="margin-left: 20px; margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 30%;">ITEM</th> <!-- Adjusted width for item names -->
+                    <th scope="col" style="width: 55%;">&nbsp;</th> <!-- Increased width for dots -->
+                    <th scope="col" style="width: 15%;">PAGE NO.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="pt-5">
+                    <th scope="row" class="left_align" style="width: 30%;">INSTRUMENTATION</th> <!-- Reduced width -->
+                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <td style="text-align: center;">I</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="left_align" style="width: 30%;">GENERAL NOTES</th> <!-- Reduced width -->
+                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <td style="text-align: center;">II</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="left_align" style="width: 30%;">ABBREVIATIONS</th> <!-- Reduced width -->
+                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <td style="text-align: center;">III</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="left_align" style="width: 100%;">AABC NATIONAL PERFORMANCE GUARANTY</th>
+                    <td style="width: 25%;">..................................................</td> <!-- Default dots width -->
+                    <td style="text-align: center;">IV</td>
+                </tr>
+                {% for line in table_of_content %}
+                <tr>
+                    {% if line.pages %}
+                        {% if 'AS BUILT MECHANICAL PLAN' in line.name %}
+                        <th scope="row" class="left_align mt-2 pt-2" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% elif 'SITE PHOTO' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% elif 'THIRD PARTY TEST SHEET' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% elif 'SPECIFIC DRAWING' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% elif 'CHART' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        % elif 'CERTIFICATE & CALIBRATION' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% elif 'SUBMITTAL DATA' in line.name %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% else %}
+                        <th scope="row" class="left_align" style="font-weight: normal;">
+                            &nbsp;&nbsp;&nbsp;&nbsp;• {{ line.name }}
+                        </th>
+                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">{{ line.pages }}</td>
+                        {% endif %}
+                    {% else %}
+                        <th scope="row" class="left_align" style="text-decoration: underline;">{{ line.name }}</th>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+
     </div>
 </div>
+
+
+
 </body>
 </html>

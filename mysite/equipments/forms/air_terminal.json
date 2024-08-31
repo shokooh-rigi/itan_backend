@@ -58,7 +58,7 @@
             "note": "",
             "order": 6,
             "validation": "",
-            "formula": "6_design / 4_design",
+            "formula": "7_design / 5_design",
             "required": false
         },
         "CFM": {
@@ -80,7 +80,7 @@
             "note": "",
             "order": 1,
             "validation": "",
-            "formula": "",
+            "formula": "2_actual / 5_design",
             "required": false
         },
         "Initial CFM": {
@@ -100,7 +100,7 @@
             "note": "",
             "order": 3,
             "validation": "",
-            "formula": "",
+            "formula": "4_actual / 5_design",
             "required": false
         },
         "Final CFM": {

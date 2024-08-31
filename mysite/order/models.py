@@ -71,6 +71,10 @@ class Order(models.Model):
     # 0: Not Started, 1: In Progress, 2: Completed
     state = models.CharField(max_length=30, blank=True, null=True)
 
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+
+    
     class Meta:
         ordering = ["-proposal"]
         verbose_name = 'Order List'

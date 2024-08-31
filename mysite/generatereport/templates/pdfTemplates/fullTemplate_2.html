@@ -291,5 +291,16 @@
         {% endif %}
     {% endfor %}
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('*').each(function() {
+            // Iterate through all the elements and replace NaN, null, or 'None' with an empty string
+            if ($(this).text() === 'NaN' || $(this).text() === 'null' || $(this).text() === 'None') {
+                $(this).text('');
+            }
+        });
+    });
+</script>
 </body>
 </html>

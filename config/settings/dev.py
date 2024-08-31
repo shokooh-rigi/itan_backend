@@ -67,9 +67,17 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-MEDIA_URL = f"https://{AWS_S3_DOMAIN}/media/"
-COLLECTFAST_STRATEGY = "collectfast.strategies.boto3.Boto3Strategy"
+# MEDIA_URL = f"https://{AWS_S3_DOMAIN}/media/"
+# COLLECTFAST_STRATEGY = "collectfast.strategies.boto3.Boto3Strategy"
 # STATIC_URL = f"https://{AWS_S3_DOMAIN}/static/"
+
+# MEDIA
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#media-root
+MEDIA_ROOT = str(BASE_DIR / "media")
+# https://docs.djangoproject.com/en/dev/ref/settings/#media-url
+MEDIA_URL = "/media/"
+
 
 # EMAIL
 # ------------------------------------------------------------------------------

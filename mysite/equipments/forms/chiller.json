@@ -1,8 +1,8 @@
 {
     "general": {},
     "design": {
-        "Note": {
-            "type": "text", 
+        "Capacity": {
+            "type": "text",
             "value": null,
             "placeholder": "",
             "note": "",
@@ -10,15 +10,205 @@
             "validation": "",
             "formula": "",
             "required": false
-        }
-    },
-    "actual": {
+        },
+        "G.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
         "Note": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Serial Number": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
             "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Entering Water Temperature, °F Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Entering Water Temperature, °F Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Leaving Water Temperature, °F Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Pressure Drop, Ft. Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Pressure Drop, Ft. Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "G.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T1 - T2 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T1 - T2 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T2 - T3 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T2 - T3 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T3 - T1 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 12,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Voltage: T3 - T1 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T1 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 14,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T2 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 15,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T3 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 16,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T1 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 17,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 18,
             "validation": "",
             "formula": "",
             "required": false

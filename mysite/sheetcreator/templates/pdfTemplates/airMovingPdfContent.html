@@ -1,3 +1,6 @@
+{% load static %}
+{% load custom_date_format %}
+
 <div class="content pdf-page-content">
     <table class="table pdf-table">
         <!-- Table head section -->
@@ -31,7 +34,7 @@
             </td>
             <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
             <td class="pdf-table-cell pdf-table-center-cell" colspan="3">
-                &nbsp;{% if report_sheet %}{{ report_sheet.report_date|date:"m/d/Y" }}{% else %}{{ form.my_sheet.sheet_date|date:"m/d/Y" }}{% endif %}{% if report_sheet.last_report_date %} - {{ report_sheet.last_report_date|date:"m/d/Y" }}{% endif %}
+                &nbsp;{{ form.my_sheet.project.start_date|custom_date_format }}{% if form.my_sheet.project.end_date %} - {{ form.my_sheet.project.end_date|custom_date_format }}{% endif %}
             </td>
         </tr>
         <tr class="pdf-table-project-tr">
@@ -54,8 +57,15 @@
             <td class="pdf-table-cell" colspan="4">
                 &nbsp;{{ page.rows.0.fan_no }}
             </td>
-            <td class="pdf-table-cell" colspan="2">&nbsp;</td>
-            <td class="pdf-table-cell" colspan="2">Direct Drive</td>
+            <td class="pdf-table-cell" colspan="2">
+                &nbsp;
+                {% if page.rows.0.direct_drive == 'on' %}
+                    <img src="http://localhost:8000/static/images/ck1.png" width="16" height="16" />
+                {% else %}
+                    <img src="http://localhost:8000/static/images/ck0.png" width="16" height="16" />
+                {% endif %}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Direct Drive</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -64,8 +74,15 @@
             <td class="pdf-table-cell" colspan="4">
                 &nbsp;{{ page.rows.0.location }}
             </td>
-            <td class="pdf-table-cell" colspan="2">&nbsp;</td>
-            <td class="pdf-table-cell" colspan="2">Belt Drive</td>
+            <td class="pdf-table-cell" colspan="2">
+                &nbsp;
+                {% if page.rows.0.belt_drive == 'on' %}
+                    <img src="http://localhost:8000/static/images/ck1.png" width="16" height="16" />
+                {% else %}
+                    <img src="http://localhost:8000/static/images/ck0.png" width="16" height="16" />
+                {% endif %}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Belt Drive</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -74,8 +91,15 @@
             <td class="pdf-table-cell" colspan="4">
                 &nbsp;{{ page.rows.0.area_served }}
             </td>
-            <td class="pdf-table-cell" colspan="2">&nbsp;</td>
-            <td class="pdf-table-cell" colspan="2">Max Speed</td>
+            <td class="pdf-table-cell" colspan="2">
+                &nbsp;
+                {% if page.rows.0.max_speed == 'on' %}
+                    <img src="http://localhost:8000/static/images/ck1.png" width="16" height="16" />
+                {% else %}
+                    <img src="http://localhost:8000/static/images/ck0.png" width="16" height="16" />
+                {% endif %}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Max Speed</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -84,8 +108,15 @@
             <td class="pdf-table-cell" colspan="4">
                 &nbsp;{{ page.rows.0.manufacturer }}
             </td>
-            <td class="pdf-table-cell" colspan="2">&nbsp;</td>
-            <td class="pdf-table-cell" colspan="2">Med Speed</td>
+            <td class="pdf-table-cell" colspan="2">
+                &nbsp;
+                {% if page.rows.0.med_speed == 'on' %}
+                    <img src="http://localhost:8000/static/images/ck1.png" width="16" height="16" />
+                {% else %}
+                    <img src="http://localhost:8000/static/images/ck0.png" width="16" height="16" />
+                {% endif %}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Med Speed</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -94,8 +125,15 @@
             <td class="pdf-table-cell" colspan="4">
                 &nbsp;{{ page.rows.0.model_no }}
             </td>
-            <td class="pdf-table-cell" colspan="2">&nbsp;</td>
-            <td class="pdf-table-cell" colspan="2">Min Speed</td>
+            <td class="pdf-table-cell" colspan="2">
+                &nbsp;
+                {% if page.rows.0.min_speed == 'on' %}
+                    <img src="http://localhost:8000/static/images/ck1.png" width="16" height="16" />
+                {% else %}
+                    <img src="http://localhost:8000/static/images/ck0.png" width="16" height="16" />
+                {% endif %}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Min Speed</td>
         </tr>
         <tr class="pdf-table-row section-last-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -114,10 +152,10 @@
 
 
         <tr class="pdf-table-row section-first-row">
-            <td class="pdf-table-cell pdf-table-title-cell center-title">Fan</td>
+            <td class="pdf-table-cell pdf-table-title-cell">Fan</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Design</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Actual</td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Supply Air Temp.</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Supply Air Temp.</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title">Design</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title">Actual</td>
         </tr>
@@ -132,7 +170,7 @@
                 &nbsp;{{ page.rows.0.total_cfm_fan.actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">
-                &nbsp;Air Temp. In Cooling
+                Air Temp. In Cooling
             </td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.air_temp_in_cooling.design }}
@@ -188,7 +226,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.outdoor_air_cfm.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Air Temp. In Heating</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Air Temp. In Heating</td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.air_temp_in_heating.design }}
             </td>
@@ -206,7 +244,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.total_sp_ext_sp.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Air Temp. Out Heating</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Air Temp. Out Heating</td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.air_temp_out_heating.design }}
             </td>
@@ -224,7 +262,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.fan_unit_suction_pressure.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Ambient Temp.</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Ambient Temp.</td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.ambient_temp.design }}
             </td>
@@ -242,7 +280,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.discharge_pressure_fan_unit.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">O.A. Damper Poss.</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">O.A. Damper Poss.</td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.oa_damper_poss.design }}
             </td>
@@ -260,7 +298,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.fan_rpm.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">GPM</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">GPM</td>
             <td class="pdf-table-cell">
                 &nbsp;{{ page.rows.0.gpm.design }}
             </td>
@@ -280,8 +318,8 @@
             </td>
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Rated</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Actual</td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Belt Size</td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">&nbsp;{{ page.rows.0.belt_size.actual }}</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Belt Size</td>
+            <td class="pdf-table-cell center-title" colspan="2">&nbsp;{{ page.rows.0.belt_size.actual }}</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
@@ -293,7 +331,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.hp.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">
                 Motor Pully 
             </td>
             <td class="pdf-table-cell" colspan="2">
@@ -310,7 +348,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.voltage.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Fan Pully</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Fan Pully</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.fan_pully.actual }}
             </td>
@@ -325,7 +363,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.phase.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">C to C</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">C to C</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.c_to_c.actual }}
             </td>
@@ -340,7 +378,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.amperage.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Motor Shaft</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Motor Shaft</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.motor_shaft.actual }}
             </td>
@@ -355,7 +393,7 @@
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.bhp_calc.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Fan Shaft</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Fan Shaft</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.fan_shaft.actual }}
             </td>
@@ -368,7 +406,7 @@
                 &nbsp;{{ page.rows.0.frame.design }}
             </td>
             <td class="pdf-table-cell" colspan="2">--------</td>
-            <td class="pdf-table-cell" colspan="2">VFD / HZ</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">VFD / HZ</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.vfd_hz.actual }}
             </td>
@@ -381,7 +419,7 @@
                 &nbsp;{{ page.rows.0.sf_code.design }}
             </td>
             <td class="pdf-table-cell"  colspan="2">--------</td>
-            <td class="pdf-table-cell" colspan="2">Filter Size</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Filter Size</td>
             <td class="pdf-table-cell"  colspan="2">
                 &nbsp;{{ page.rows.0.filter_size.actual }}
             </td>
@@ -396,7 +434,7 @@
             <td class="pdf-table-cell"  colspan="2">
                 &nbsp;{{ page.rows.0.motor_rpm.actual }}
             </td>
-            <td class="pdf-table-cell" colspan="2">Filter Model</td>
+            <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Filter Model</td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;{{ page.rows.0.filter_model.actual }}
             </td>

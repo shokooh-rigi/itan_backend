@@ -1,17 +1,7 @@
 {
     "general": {},
     "design": {
-        "Br No.": {
-            "type": "number", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 1,
-            "validation": "",
-            "formula": "",
-            "required": true
-        },
-        "Design Set / P.D.": {
+        "Unit Number": {
             "type": "text", 
             "value": null,
             "placeholder": "",
@@ -19,9 +9,9 @@
             "order": 1,
             "validation": "",
             "formula": "",
-            "required": true
+            "required": false
         },
-        "Design G.P.M.": {
+        "G.P.M.": {
             "type": "text", 
             "value": null,
             "placeholder": "",
@@ -43,12 +33,62 @@
         }
     },
     "actual": {
+        "Br No.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "FMF No.": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Location": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Model Number": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Set / P.D.": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": true
+        },
         "Initial Test Set / P.D.": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 1,
+            "order": 6,
             "validation": "",
             "formula": "",
             "required": false
@@ -58,7 +98,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 2,
+            "order": 7,
             "validation": "",
             "formula": "",
             "required": false
@@ -68,7 +108,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 3,
+            "order": 8,
             "validation": "",
             "formula": "",
             "required": true
@@ -78,7 +118,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 4,
+            "order": 9,
             "validation": "",
             "formula": "",
             "required": true
@@ -88,7 +128,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 5,
+            "order": 10,
             "validation": "",
             "formula": "",
             "required": false

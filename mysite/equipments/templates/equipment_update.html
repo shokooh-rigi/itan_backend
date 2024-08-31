@@ -57,6 +57,43 @@
                         <label for="location" class="form-label">Location</label>
                         <input type="text" class="form-control" id="location" name="location" value="{{ ds.location }}" required>
                     </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Parent</span>
+                            </div>
+                            <select name="parent" class="form-control" id="id_parent">
+                                <option value="">---------</option>
+                                {% for p in parents %}
+                                <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Refrence file select -->
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Reference File</span>
+                            </div>
+                            <select name="attach_type" class="form-control" id="id_attach_type">
+                                <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                                <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                                <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                                <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                                <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                                <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- File field -->
+                    <div class="form-group">
+                        <label for="attach" class="form-label">File</label>
+                        <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                    </div>
+
                 </div>
                 <!-- Project Info -->
                 <div class="col-md-6">
@@ -73,10 +110,10 @@
                         <label for="number_of_outside_air_terminal" class="form-label">Number of Outside Air Terminal</label>
                         <input type="number" class="form-control" id="number_of_outside_air_terminal" name="number_of_outside_air_terminal" value="{{ ds.number_of_outside_air_terminal }}" required>
                     </div>
-                    <!-- <div class="form-group">
+                    <div class="form-group">
                         <label for="number_of_exhaust_air_terminal" class="form-label">Number of Exhaust Air Terminal</label>
                         <input type="number" class="form-control" id="number_of_exhaust_air_terminal" name="number_of_exhaust_air_terminal" value="{{ ds.number_of_exhaust_air_terminal }}" required>
-                    </div> -->
+                    </div>
                     <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -123,6 +160,10 @@
                         <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
                     </div>
                     <div class="form-group">
+                        <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
+                        <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                    </div>
+                    <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="basic-addon1">Equipment Group</span>
@@ -136,6 +177,44 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Parent</span>
+                            </div>
+                            <select name="parent" class="form-control" id="id_parent">
+                                <option value="">---------</option>
+                                {% for p in parents %}
+                                <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Refrence file select -->
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Reference File</span>
+                            </div>
+                            <select name="attach_type" class="form-control" id="id_attach_type">
+                                <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                                <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                                <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                                <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                                <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                                <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- File field -->
+                    <div class="form-group">
+                        <label for="attach" class="form-label">File</label>
+                        <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                    </div>
+
                 </div>
                 <!-- Project Info -->
                 <div class="col-md-6">

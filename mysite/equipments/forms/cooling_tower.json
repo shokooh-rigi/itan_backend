@@ -1,0 +1,357 @@
+{
+    "general": {},
+    "design": {
+        "Rated Capacity": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Motor Manufacturer": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "H.P.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Volts": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "R.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "G.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan R.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Serial Number": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "H.P.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Volts": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "R.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Service Factor Rating Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Service Factor Rating Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Over Load Elements Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Over Load Elements Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Wet Bulb °F, CW On: Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Wet Bulb °F, CW On: Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Wet Bulb °F, CW Off: Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 12,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Wet Bulb °F, CW Off: Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F (Amb.) Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 14,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F (Amb.) Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 15,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F, CW On: Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 16,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F, CW On: Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 17,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F, CW Off: Specified": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 18,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Air Temperature Dry Bulb °F, CW Off: Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 19,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "G.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 20,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan R.P.M.": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 21,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Drive: Motor Sheave": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 22,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Fan Sheave": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 23,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Belt Size": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 24,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Gear Manufacturer": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 25,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 26,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    }
+}

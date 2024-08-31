@@ -25,4 +25,5 @@ def calculate_formula(formula, fields, new_data):
         return eval(formula)
     except Exception as e:
         print(f"Error evaluating formula: {e}")
-        return None
+        return "*"
+        # return None

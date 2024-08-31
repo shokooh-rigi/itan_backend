@@ -1,16 +1,6 @@
 {
     "general": {},
     "design": {
-        "Model": {
-            "type": "number", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 1,
-            "validation": "^[0-9]*$",
-            "formula": "",
-            "required": true
-        },
         "Size": {
             "type": "number", 
             "value": null,
@@ -71,17 +61,17 @@
             "formula": "",
             "required": false
         },
-        "Frame": {
-            "type": "text", 
+        "GPM": {
+            "type": "number", 
             "value": null,
             "placeholder": "",
             "note": "",
             "order": 8,
-            "validation": "",
+            "validation": "^[0-9]*$",
             "formula": "",
             "required": false
         },
-        "S.F.": {
+        "FT": {
             "type": "number", 
             "value": null,
             "placeholder": "",
@@ -91,27 +81,27 @@
             "formula": "",
             "required": false
         },
-        "Code": {
-            "type": "text", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 10,
-            "validation": "",
-            "formula": "",
-            "required": false
-        },
-        "Phase": {
+        "BHP": {
             "type": "number", 
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 11,
+            "order": 10,
             "validation": "^[0-9]*$",
             "formula": "",
             "required": false
         },
-        "Hz": {
+        "Frame": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "S.F.": {
             "type": "number", 
             "value": null,
             "placeholder": "",
@@ -121,12 +111,42 @@
             "formula": "",
             "required": false
         },
-        "Amps": {
+        "Code": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
             "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Phase": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 14,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Hz": {
+            "type": "number", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 15,
+            "validation": "^[0-9]*$",
+            "formula": "",
+            "required": false
+        },
+        "Amps": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 16,
             "validation": "",
             "formula": "",
             "required": true
@@ -136,7 +156,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 14,
+            "order": 17,
             "validation": "^[0-9]*$",
             "formula": "",
             "required": true
@@ -146,7 +166,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 15,
+            "order": 18,
             "validation": "",
             "formula": "",
             "required": false

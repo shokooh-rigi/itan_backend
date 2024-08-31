@@ -1,8 +1,8 @@
 {
     "general": {},
     "design": {
-        "Note": {
-            "type": "text", 
+        "Location": {
+            "type": "text",
             "value": null,
             "placeholder": "",
             "note": "",
@@ -10,15 +10,155 @@
             "validation": "",
             "formula": "",
             "required": false
-        }
-    },
-    "actual": {
+        },
+        "Service": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Flow GPM": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
         "Note": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        }
+    },
+    "actual": {
+        "Rating BTU hour": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
             "order": 1,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Serial Number": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 2,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Entering Temperature Design": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 3,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Entering Temperature Actual": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 4,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Leaving Temperature Design": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 5,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Leaving Temperature Actual": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Pressure Drop, Ft. Design": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 7,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Pressure Drop, Ft. Actual": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 8,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Flow GPM": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 9,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Control Setting Design": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 10,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Control Setting Actual": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Note": {
+            "type": "text", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 6,
             "validation": "",
             "formula": "",
             "required": false

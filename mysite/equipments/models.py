@@ -95,7 +95,6 @@ class DataSheet(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
 
-
     # EQ
     equipment_group = models.CharField(max_length=50, default='A', blank=False)
     number_of_supply_air_terminal = models.SmallIntegerField(default=0, blank=False, null=False)
@@ -117,7 +116,9 @@ class DataSheet(models.Model):
     fan_no = models.CharField(max_length=30, blank=True, null=True)
     location = models.CharField(max_length=30, blank=True, null=True)
     area_served = models.CharField(max_length=30, blank=True, null=True)
-    serial_number = models.CharField(max_length=20, blank=True, null=True)
+
+    attach = models.FileField(upload_to='uploads/equipments/attach', blank=True, null=True)
+    attach_type = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return self.equipment_type.test_sheet.name + " " + self.project.project_number

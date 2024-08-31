@@ -1,458 +1,242 @@
-{% if not page.vavp_available %}
-    <div class="content pdf-page-content">
-        <table class="table pdf-table">
-            <!-- Table head section -->
-            <thead>
-            <tr class="pdf-head-tr">
-                <th scope="col" class="wide-th"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
+{% load custom_date_format %}
 
-            <tbody>
-            <!-- Table title -->
-            <tr class="pdf-table-title">
-                <td></td>
-                <td class="pdf-table-title-td" colspan="7">V.A.V. BOX SCHEDULE</td>
-                <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
-            </tr>
+<div class="content pdf-page-content">
+    <table class="table pdf-table">
+        <!-- Table head section -->
+        <thead>
+        <tr class="pdf-head-tr">
+            <th scope="col" class="wide-th"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
 
-            <!-- Project specifications -->
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
-                <td class="pdf-table-cell" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.project_number }}
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
-                <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
-                    &nbsp;{% if report_sheet %}{{ report_sheet.report_date|date:'m/d/Y' }}{% else %}{{ form.my_sheet.sheet_date|date:'m/d/Y' }}{% endif %}{% if report_sheet.last_report_date %} - {{ report_sheet.last_report_date|date:'m/d/Y' }}{% endif %}
-                </td>
-            </tr>
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
-                <td class="pdf-table-cell" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
-                </td>
-                <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
-                    &nbsp;{{ page.system }}
-                </td>
-            </tr>
+        <tbody>
+        <!-- Table title -->
+        <tr class="pdf-table-title">
+            <td></td>
+            <td class="pdf-table-title-td" colspan="8">V.A.V. BOX SCHEDULE</td>
+            <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
+        </tr>
 
-            <!-- Title rows -->
-            <tr class="pdf-table-row section-first-row">
-                <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Address
-                </td>
-                <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Code
-                </td>
-                <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Type
-                </td>
-                <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Size/KW
-                </td>
-                <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Fan %
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Design
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Actual
-                </td>
-            </tr>
+        <!-- Project specifications -->
+        <tr class="pdf-table-project-tr">
+            <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
+            <td class="pdf-table-cell" colspan="5">
+                &nbsp;{{ form.my_sheet.project.project_number }}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
+            <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
+                &nbsp;{{ form.my_sheet.project.start_date|custom_date_format }}{% if form.my_sheet.project.end_date %} - {{ form.my_sheet.project.end_date|custom_date_format }}{% endif %}
+            </td>
+        </tr>
+        <tr class="pdf-table-project-tr">
+            <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
+            <td class="pdf-table-cell" colspan="5">
+                &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
+            </td>
+            <td class="pdf-table-cell pdf-table-center-cell" colspan="4">
+                &nbsp;{{ page.system }}
+            </td>
+        </tr>
+
+        <!-- Title rows -->
+        <tr class="pdf-table-row section-first-row">
+            <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                Address
+            </td>
+            <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                Code
+            </td>
+            <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                Type
+            </td>
+            <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                Size/KW
+            </td>
+            <td rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                Fan %
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
+                Design
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
+                Actual
+            </td>
+        </tr>
+        <tr class="pdf-table-row section-middle-row">
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Fan CFM
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Min. CFM
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Max. CFM
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="1">
+                K.F.
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Min./Fan CFM
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Max. CFM
+            </td>
+        </tr>
+        <!-- Data rows part 1 -->
+        {% for row in page.rows %}
             <tr class="pdf-table-row section-middle-row">
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
-                    Fan CFM
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.address }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
-                    Min. CFM
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.code }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
-                    Max. CFM
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.type }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="1">
-                    K.F.
+                <td class="pdf-table-cell" colspan="1">
+                    {{ row.size_kw }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
-                    Min./Fan CFM
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.fan }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
-                    Max. CFM
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.fan_cfm }}
                 </td>
-            </tr>
-            <!-- Data rows part 1 -->
-            {% for row in page.rows %}
-                <tr class="pdf-table-row section-middle-row">
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.address }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.code }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.type }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        {{ row.size_kw }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.fan }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.fan_cfm }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.min_cfm.design }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.max_cfm.design }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.kf }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.min_fan_cfm }}
-                    </td>
-                    <td class="pdf-table-cell" colspan="1">
-                        &nbsp;{{ row.max_cfm.actual }}
-                    </td>
-                </tr>
-            {% endfor %}
-
-
-            <tr class="pdf-table-section-divider">
-                <td></td>
-            </tr>
-
-
-            <!-- Title rows -->
-            <tr class="pdf-table-row section-first-row">
-                <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Make
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.min_cfm.design }}
                 </td>
-                <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 85px">
-                    Model#
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.max_cfm.design }}
                 </td>
-                <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Code
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.kf }}
                 </td>
-                <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
-                    HP
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.min_fan_cfm }}
                 </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Name plate
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Actual
+                <td class="pdf-table-cell" colspan="1">
+                    &nbsp;{{ row.max_cfm.actual }}
                 </td>
             </tr>
+        {% endfor %}
+
+
+        <tr class="pdf-table-section-divider">
+            <td></td>
+        </tr>
+
+
+        <!-- Title rows -->
+        <tr class="pdf-table-row section-first-row">
+            <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                Manufacturer
+            </td>
+            <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="width: 85px">
+                Model number
+            </td>
+            <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                Code
+            </td>
+            <td rowspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                HP
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
+                Name plate
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                Actual
+            </td>
+        </tr>
+        <tr class="pdf-table-row section-middle-row">
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Fan Volt
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Fan Amp
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Heat V/A
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="1">
+                T In
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Fan V/A
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                Heat V/A
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title" colspan="1">
+                T Out
+            </td>
+        </tr>
+        <!-- Data rows part 2 -->
+        {% for row in page.rows %}
             <tr class="pdf-table-row section-middle-row">
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan Volt
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.make }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan Amp
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.model_number }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Heat V/A
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.code }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title">
-                    T In
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.hp }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan V/A
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.fan_volt }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Heat V/A
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.fan_amp }}
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    T Out
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.heat_va.design }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.t_in }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.fan_va }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.heat_va.actual }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;{{ row.t_out }}
                 </td>
             </tr>
-            <!-- Data rows part 2 -->
-            {% for row in page.rows %}
-                <tr class="pdf-table-row section-middle-row">
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.make }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.model_number }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.code }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.hp }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.fan_volt }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.fan_amp }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.heat_va.design }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.t_in }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.fan_va }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.heat_va.actual }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.t_out }}
-                    </td>
-                </tr>
-            {% endfor %}
+        {% endfor %}
 
-            <!-- Note section -->
-            <tr class="pdf-table-note-section">
-                <td class="note-title">
-                    Notes:
-                </td>
-                <td colspan="9">
-                <div id="note-div-actual" class="note-div">
-                    {% for row in page.rows %}
-                        {% if row.actual.note %}
-                            {{ row.actual.note }} |
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-{% else %}
-    <div class="content pdf-page-content">
-        <table class="table pdf-table">
-            <!-- Table head section -->
-            <thead>
-            <tr class="pdf-head-tr">
-                <th scope="col" class="wide-th"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <!-- Table title -->
-            <tr class="pdf-table-title">
-                <td></td>
-                <td class="pdf-table-title-td" colspan="8">V.A.V. BOX SCHEDULE</td>
-                <td class="pdf-table-title-td pdf-page-number" colspan="2">Page {{ forloop.counter }}</td>
-            </tr>
-
-            <!-- Project specifications -->
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell">PROJECT NO:</td>
-                <td class="pdf-table-cell" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.project_number }}
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell">DATE:</td>
-                <td class="pdf-table-cell pdf-table-center-cell" colspan="5">
-                    &nbsp;{{ report_sheet.report_date | date }}
-                </td>
-            </tr>
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell">PROJECT:</td>
-                <td class="pdf-table-cell" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell">SYSTEM:
-                </td>
-                <td class="pdf-table-cell pdf-table-center-cell" colspan="5">
-                    &nbsp;{{ page.system }}
-                </td>
-            </tr>
-
-            <!-- Title rows -->
-            <tr class="pdf-table-row section-first-row">
-                <td rowspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Address
-                </td>
-                <td rowspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Model
-                </td>
-                <td rowspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Type
-                </td>
-                <td rowspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Size/KW
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Name plate
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
-                    Actual
-                </td>
-            </tr>
-            <tr class="pdf-table-row section-middle-row">
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Heat
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    T
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Fan
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    Heat
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell pdf-table-title-second-row center-title">
-                    T
-                </td>
-            </tr>
-            <tr class="pdf-table-row section-middle-row">
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    Volt
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    Amp
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    V / A
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    In
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    V / A
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    V / A
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell center-title pdf-table-title-third-row">
-                    Out
-                </td>
-            </tr>
-
-            <!-- VAVP Data rows -->
-            {% for row in page.rows %}
-                {% if row.vavp %}
-                <tr class="pdf-table-row section-middle-row">
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.actual.address }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.model }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.design.type }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{% if row.code %}{% if row.design.size %}{{ row.design.size }}{% else %}-{% endif %} / {% if row.design.kw %}{{ row.design.kw }}{% else %}-{% endif %}{% endif %}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.nameplate_fan_volt }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.nameplate_fan_amp }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.nameplate_heat_va }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.t_in }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.fan_va }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.heat_va }}
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;{{ row.vavp.t_out }}
-                    </td>
-                </tr>
-                {% endif %}
-            {% endfor %}
-
-            <!-- Set Empty Rows after VAVPs -->
-            {% for row in page.empty_rows %}
-                <tr class="pdf-table-row {% if forloop.last %}section-last-row{% else %}section-middle-row{% endif %}">
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                    <td class="pdf-table-cell">
-                        &nbsp;
-                    </td>
-                </tr>
-            {% endfor %}
-
-            <!-- Note section -->
-            <tr class="pdf-table-note-section">
-                <td class="note-title">
-                    Notes:
-                </td>
-                <td colspan="10">
-                <div id="note-div-vavp" class="note-div">
-                    {% for row in page.rows %}
-                        {% if row.vavp.note %}
-                            {{ row.vavp.note }} |
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-{% endif %}
+        <!-- Note section -->
+        <tr class="pdf-table-note-section">
+            <td class="note-title">
+                Notes:
+            </td>
+            <td colspan="9">
+            <div id="note-div-actual" class="note-div">
+                {% for row in page.rows %}
+                    {% if row.note %}
+                        {{ row.note }} |
+                    {% endif %}
+                {% endfor %}
+            </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

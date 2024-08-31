@@ -20,6 +20,7 @@ REPORT_TYPE_CHOICES = (
 class ReportSheet(models.Model):
     project = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
     report_date = models.DateField(default=datetime.datetime.now(), blank=False, null=False)
+    revised_date = models.DateField(blank=True, null=True)
     last_report_date = models.DateField(blank=True, null=True)
     cover_report_date = models.DateField(blank=True, null=True)
     upload_table_of_content = models.FileField(upload_to='uploads/table_of_contents', blank=True, null=True, validators=[validate_file_extension])

@@ -21,7 +21,7 @@
             <thead>
                 <tr>
                     <th colspan="8"></th>
-                    <th colspan="2" style="text-align: right;">PAGE i</th>
+                    <th colspan="2" style="text-align: right;">PAGE I</th>
                 </tr>
             </thead>
         </table>
@@ -40,7 +40,7 @@
             <thead>
                 <tr>
                     <th colspan="8"></th>
-                    <th colspan="2" style="text-align: right;">PAGE ii</th>
+                    <th colspan="2" style="text-align: right;">PAGE II</th>
                 </tr>
             </thead>
         </table>
@@ -65,7 +65,7 @@
             <thead>
                 <tr>
                     <th colspan="8"></th>
-                    <th colspan="2" style="text-align: right;">PAGE iii</th>
+                    <th colspan="2" style="text-align: right;">PAGE III</th>
                 </tr>
             </thead>
         </table>
@@ -75,6 +75,51 @@
         </div>
         <div style="text-align: center;"><img src="{% get_s3_file_url abbreviation_image '' %}" style="height: 540pt; width: 530pt;" /></div>
     </div>
+    <!-- GUARANTY -->
+    <pdf:nextpage/>
+    <div class="content pdf-page-content">
+        <table class="table" style="font-size: 14pt;">
+            <!-- Table head section -->
+            <thead>
+                <tr>
+                    <th colspan="8"></th>
+                    <th colspan="2" style="text-align: right;">PAGE IV</th>
+                </tr>
+            </thead>
+        </table>
+        <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="cambria" style="font-weight: bold;">AABC NATIONAL PERFORMANCE GUARANTY</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}<br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+        </div>
+        <!-- <div style="text-align: center;"><img src="http://localhost:8000/static/images/gauranty_template.jpg" style="width: 480px;" /></div> -->
+        <div style="text-align: center;"><img src="http://localhost:8000/static/images/gauranty_1.png" style="width: 480px;" /></div>
+
+        <!-- <div style="text-align: center; position: relative; width: 480px; margin: 0 auto;">
+            <img src="http://localhost:8000/static/images/gauranty_template.jpg" style="width: 480px;" />
+            <div style="position: absolute; top: 150px; left: 30px; text-align: left; width: 420px;">
+                <p>Pursuant to the agreement between</p>
+                <p>AABC Certified Testing & Balancing Agency: <input type="text" style="width: 350px;" /></p>
+                <p>and Client: <input type="text" style="width: 350px;" /></p>
+                <p>All systems shall be tested and balanced in accordance with the project plans and specifications and to the optimum performance capabilities of the equipment...</p>
+                <p>If the Agency listed above fails to comply with the specifications...</p>
+                <p>This Guaranty is valid for one year from the date of submission...</p>
+                <p>Project Name: <input type="text" style="width: 350px;" /></p>
+                <p>Address: <input type="text" style="width: 350px;" /></p>
+                <p>Name of Engineer: <input type="text" style="width: 350px;" /></p>
+                <p>Engineering Firm: <input type="text" style="width: 350px;" /></p>
+                <p>Email Address: <input type="text" style="width: 350px;" /></p>
+                <p>Address: <input type="text" style="width: 350px;" /></p>
+                <p>Date: <input type="text" style="width: 200px;" /></p>
+                <p>TBE #: <input type="text" style="width: 200px;" /></p>
+                <p>By: <input type="text" style="width: 350px;" /></p>
+            </div>
+        </div> -->
+
+
+    </div>
+
+
+
 </div>
 </body>
 </html>

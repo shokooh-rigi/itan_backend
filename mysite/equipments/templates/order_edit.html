@@ -15,13 +15,57 @@
 
         <div class="d-flex justify-content-between align-items-right mb-2" style="text-align: right;">
             <div>
-                <button type="button" class="btn btn-primary" onclick="createReport('{{ order.id }}')">
-                    <i class="fas fa-file"></i>
-                </button>
+                <button id="reportButton" type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Report" onclick="openReportModal('{{ order.id }}')">
+                    <i id="reportIcon" class="fas fa-file"></i>
+                </button>                
             </div>
-        </div>
+        </div>  
+        
+        <!-- Modal for Report -->
+        <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Create Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="reportForm">
+                  <div class="mb-3">
+                    <label for="reportType" class="form-label">Report Type</label>
+                    <select id="reportType" class="form-select" required>
+                      <option value="Final">Final</option>
+                      <option value="Preliminary">Preliminary</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="reportDate" class="form-label">Report Date</label>
+                    <input type="date" id="reportDate" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="revisedDate" class="form-label">Revised Date</label>
+                    <input type="date" id="revisedDate" class="form-control">
+                  </div>
+                  <input type="hidden" id="orderId">
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitReportForm()">Create Report</button>
+              </div>
+            </div>
+          </div>
+        </div>                  
 
-        <!-- Modal -->
+        <!-- Modal for Add -->
         <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -350,6 +394,12 @@
             $('#modulesModal .modal-body').html(formHtml); 
             $('#modulesModal').modal('show'); 
         });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
     });
 
     function deleteDataSheet(event, eq_id) {
@@ -482,17 +532,52 @@
             }
         });
     }
-    function createReport(orderId) {
+
+    function openReportModal(orderId) {
+        document.getElementById('orderId').value = orderId;
+        $('#reportModal').modal('show');
+    }
+
+    function submitReportForm() {
+        // Close the modal immediately
+        $('#reportModal').modal('hide');
+
+        // Proceed with form data submission
+        const orderId = document.getElementById('orderId').value;
+        const reportType = document.getElementById('reportType').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const reportDate = document.getElementById('reportDate').value;
+        const revisedDate = document.getElementById('revisedDate').value;
+
         const url = `/api/equipments/reports/${orderId}`;
+        const button = document.getElementById('reportButton');
+        const icon = document.getElementById('reportIcon');
+
+        // Change icon to a loading spinner
+        icon.className = 'fas fa-spinner fa-spin';
 
         $.ajax({
             url: url,
-            method: 'GET', // or 'POST' if your API endpoint expects a POST request
+            method: 'POST',
             contentType: 'application/json',
+            data: JSON.stringify({
+                report_type: reportType,
+                start_date: startDate,
+                end_date: endDate,
+                report_date: reportDate,
+                revised_date: revisedDate
+            }),
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
             success: function(response) {
+                // Revert the icon back to the file icon
+                icon.className = 'fas fa-file';
+
                 // Log the response data to the console
                 console.log(response);
-                
+
                 // Check if the response has the report link
                 if (response.report) {
                     // Create a temporary link element
@@ -507,15 +592,16 @@
                     console.error('Report link not found in response');
                 }
             },
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
             error: function(jqXHR, textStatus, errorThrown) {
+                // Revert the icon back to the file icon even if there's an error
+                icon.className = 'fas fa-file';
+
                 // Log any errors to the console
                 console.error('Error with AJAX request:', textStatus, errorThrown);
             }
         });
     }
+
 </script>
       
 {% endblock %}
