@@ -783,631 +783,294 @@ def report_toc_template(request):
 
 
 
-def fetch_sheet_equipment_data_2(equipment):
+def fetch_field_data(equipment, field_name, default_value='', is_dict=True, actual_field=None):
+    """Fetches design and actual data for a given field name, or returns default values."""
+    custom_fields = equipment.form_fields["design"]
+    actual_fields = equipment.form_fields["actual"]
+    
+    design_value = custom_fields.get(field_name, {}).get('value', default_value)
+    actual_value = actual_fields.get(field_name, {}).get('value', default_value if not is_dict else 'N.M.')
+    
+    if is_dict:
+        return {
+            'design': design_value if design_value else default_value,
+            'actual': actual_value if actual_value else default_value
+        }
+    else:
+        return design_value if design_value else default_value
 
+def fetch_air_mov_data(equipment):
+    """Fetches and returns equipment data."""
     equipment_data = {
         'fan_no': equipment.fan_no,
         'location': equipment.location,
         'area_served': equipment.area_served,
-        'manufacturer': equipment.manufacturer.name if equipment.manufacturer else '',
+        'manufacturer': equipment.manufacturer.name.upper() if equipment.manufacturer else '',
         'model_no': equipment.model_number,
+        'serial_no': fetch_field_data(equipment, 'Serial No.', is_dict=False),
+        'total_cfm_fan': fetch_field_data(equipment, 'Total C.F.M. Fan'),
+        'air_temp_in_cooling': fetch_field_data(equipment, 'Air Temp. In Cooling'),
+        'total_cfm_outlets': fetch_field_data(equipment, 'Total C.F.M. Outlets'),
+        'air_temp_out_cooling': fetch_field_data(equipment, 'Air Temp. Out Cooling'),
+        'return_air_cfm': fetch_field_data(equipment, 'Return Air C.F.M.'),
+        'rh': fetch_field_data(equipment, 'RH %'),
+        'outdoor_air_cfm': fetch_field_data(equipment, 'Outdoor Air C.F.M.'),
+        'air_temp_in_heating': fetch_field_data(equipment, 'Air Temp. In Heating'),
+        'total_sp_ext_sp': fetch_field_data(equipment, 'Total SP (Ext. SP)'),
+        'air_temp_out_heating': fetch_field_data(equipment, 'Air Temp. Out Heating'),
+        'fan_unit_suction_pressure': fetch_field_data(equipment, 'Fan (Unit) Suction Pressure'),
+        'ambient_temp': fetch_field_data(equipment, 'Ambient Temp.'),
+        'discharge_pressure_fan_unit': fetch_field_data(equipment, 'Discharge Pressure, Fan / Unit'),
+        'oa_damper_poss': fetch_field_data(equipment, 'O.A. Damper Poss.'),
+        'fan_rpm': fetch_field_data(equipment, 'Fan R.P.M.', default_value='D.D.'),
+        'gpm': fetch_field_data(equipment, 'GPM'),
+        'hp': fetch_field_data(equipment, 'H.P.', is_dict=False),
+        'belt_size': fetch_field_data(equipment, 'Belt Size', is_dict=False, default_value='N.A.'),
+        'motor_pully': fetch_field_data(equipment, 'Motor Pully', is_dict=False, default_value='N.A.'),
+        'voltage': fetch_field_data(equipment, 'Voltage'),
+        'fan_pully': fetch_field_data(equipment, 'Fan Pully', is_dict=False, default_value='N.A.'),
+        'phase': fetch_field_data(equipment, 'Phase'),
+        'c_to_c': fetch_field_data(equipment, 'C to C', is_dict=False, default_value='N.A.'),
+        'amperage': fetch_field_data(equipment, 'Amperage'),
+        'motor_shaft': fetch_field_data(equipment, 'Motor Shaft', is_dict=False, default_value='N.A.'),
+        'bhp': fetch_field_data(equipment, 'B.H.P. (Calc.)', default_value='N.S.'),
+        'fan_shaft': fetch_field_data(equipment, 'Fan Shaft', is_dict=False, default_value='N.A.'),
+        'frame': fetch_field_data(equipment, 'Frame', default_value='N.S.'),
+        'vfd_hz': fetch_field_data(equipment, 'VFD / HZ', is_dict=False),
+        'sf_code': fetch_field_data(equipment, 'S.F. / Code', default_value='N.S.'),
+        'filter_size': fetch_field_data(equipment, 'Filter Size', is_dict=False),
+        'motor_rpm': fetch_field_data(equipment, 'Motor RPM', default_value='D.D.'),
+        'filter_model': fetch_field_data(equipment, 'Filter Model', is_dict=False),
+        'direct_drive': fetch_field_data(equipment, 'Direct Drive', is_dict=False),
+        'belt_drive': fetch_field_data(equipment, 'Belt Drive', is_dict=False),
+        'max_speed': fetch_field_data(equipment, 'Max Speed', is_dict=False),
+        'med_speed': fetch_field_data(equipment, 'Med Speed', is_dict=False),
+        'min_speed': fetch_field_data(equipment, 'Min Speed', is_dict=False),
     }
 
-    # se_common_data_set = equipment
-    e_custom_field_set = equipment.form_fields["design"]
-    se_actual_data_set = equipment.form_fields["actual"]
-    if ('Serial No.' in e_custom_field_set) and e_custom_field_set['Serial No.']['value']:
-        equipment_data['serial_no'] = e_custom_field_set['Serial No.']['value'],
-    if 'Total C.F.M. Fan' in e_custom_field_set and e_custom_field_set['Total C.F.M. Fan']['value']:
-        equipment_data['total_cfm_fan'] = {
-            'design': e_custom_field_set['Total C.F.M. Fan']['value'],
-            'actual': se_actual_data_set['Total C.F.M. Fan']['value']
-        }
-    else:
-        equipment_data['total_cfm_fan'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Air Temp. In Cooling' in e_custom_field_set and e_custom_field_set['Air Temp. In Cooling']['value']:
-        equipment_data['air_temp_in_cooling'] = {
-            'design': e_custom_field_set['Air Temp. In Cooling']['value'],
-            'actual': se_actual_data_set['Air Temp. In Cooling']['value']
-        }
-    else:
-        equipment_data['air_temp_in_cooling'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Total C.F.M. Outlets' in e_custom_field_set and e_custom_field_set['Total C.F.M. Outlets']['value']:
-        equipment_data['total_cfm_outlets'] = {
-            'design': e_custom_field_set['Total C.F.M. Outlets']['value'],
-            'actual': se_actual_data_set['Total C.F.M. Outlets']['value']
-        }
-    else:
-        equipment_data['total_cfm_outlets'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Air Temp. Out Cooling' in e_custom_field_set and e_custom_field_set['Air Temp. Out Cooling']['value']:
-        equipment_data['air_temp_out_cooling'] = {
-            'design': e_custom_field_set['Air Temp. Out Cooling']['value'],
-            'actual': se_actual_data_set['Air Temp. Out Cooling']['value']
-        }
-    else:
-        equipment_data['air_temp_out_cooling'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Return Air C.F.M.' in e_custom_field_set and e_custom_field_set['Return Air C.F.M.']['value']:
-        equipment_data['return_air_cfm'] = {
-            'design': e_custom_field_set['Return Air C.F.M.']['value'],
-            'actual': se_actual_data_set['Return Air C.F.M.']['value']
-        }
-    else:
-        equipment_data['return_air_cfm'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'RH %' in e_custom_field_set and e_custom_field_set['RH %']['value']:
-        equipment_data['rh'] = {
-            'design': e_custom_field_set['RH %']['value'],
-            'actual': se_actual_data_set['RH %']['value']
-        }
-    else:
-        equipment_data['rh'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Outdoor Air C.F.M.' in e_custom_field_set and e_custom_field_set['Outdoor Air C.F.M.']['value']:
-        equipment_data['outdoor_air_cfm'] = {
-            'design': e_custom_field_set['Outdoor Air C.F.M.']['value'],
-            'actual': se_actual_data_set['Outdoor Air C.F.M.']['value']
-        }
-    else:
-        equipment_data['outdoor_air_cfm'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Air Temp. In Heating' in e_custom_field_set and e_custom_field_set['Air Temp. In Heating']['value']:
-        equipment_data['air_temp_in_heating'] = {
-            'design': e_custom_field_set['Air Temp. In Heating']['value'],
-            'actual': se_actual_data_set['Air Temp. In Heating']['value']
-        }
-    else:
-        equipment_data['air_temp_in_heating'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Total SP (Ext. SP)' in e_custom_field_set and e_custom_field_set['Total SP (Ext. SP)']['value']:
-        equipment_data['total_sp_ext_sp'] = {
-            'design': e_custom_field_set['Total SP (Ext. SP)']['value'] if e_custom_field_set['Total SP (Ext. SP)']['value'] else 'N.S.',
-            'actual': se_actual_data_set['Total SP (Ext. SP)']['value'] if se_actual_data_set['Total SP (Ext. SP)']['value'] else 'N.M.'
-        }
-    else:
-        equipment_data['total_sp_ext_sp'] = {
-            'design': 'N.S.',
-            'actual': 'N.M.'
-        }
-    if 'Air Temp. Out Heating' in e_custom_field_set and e_custom_field_set['Air Temp. Out Heating']['value']:
-        equipment_data['air_temp_out_heating'] = {
-            'design': e_custom_field_set['Air Temp. Out Heating']['value'],
-            'actual': se_actual_data_set['Air Temp. Out Heating']['value']
-        }
-    else:
-        equipment_data['air_temp_out_heating'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Fan (Unit) Suction Pressure' in e_custom_field_set and e_custom_field_set['Fan (Unit) Suction Pressure']['value']:
-        equipment_data['fan_unit_suction_pressure'] = {
-            'design': e_custom_field_set['Fan (Unit) Suction Pressure']['value'] if e_custom_field_set['Fan (Unit) Suction Pressure']['value'] else 'N.S.',
-            'actual': se_actual_data_set['Fan (Unit) Suction Pressure']['value'] if se_actual_data_set['Fan (Unit) Suction Pressure']['value'] else 'N.M.'
-        }
-    else:
-        equipment_data['fan_unit_suction_pressure'] = {
-            'design': 'N.S.',
-            'actual': 'N.M.'
-        }
-    if 'Ambient Temp.' in e_custom_field_set and e_custom_field_set['Ambient Temp.']['value']:
-        equipment_data['ambient_temp'] = {
-            'design': e_custom_field_set['Ambient Temp.']['value'],
-            'actual': se_actual_data_set['Ambient Temp.']['value']
-        }
-    else:
-        equipment_data['ambient_temp'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Discharge Pressure, Fan / Unit' in e_custom_field_set and e_custom_field_set['Discharge Pressure, Fan / Unit']['value']:
-        equipment_data['discharge_pressure_fan_unit'] = {
-            'design': e_custom_field_set['Discharge Pressure, Fan / Unit']['value'] if e_custom_field_set['Discharge Pressure, Fan / Unit']['value'] else 'N.S.',
-            'actual': se_actual_data_set['Discharge Pressure, Fan / Unit']['value'] if se_actual_data_set['Discharge Pressure, Fan / Unit']['value'] else 'N.M.'
-        }
-    else:
-        equipment_data['discharge_pressure_fan_unit'] = {
-            'design': 'N.S.',
-            'actual': 'N.M.'
-        }
-    if 'O.A. Damper Poss.' in e_custom_field_set and e_custom_field_set['O.A. Damper Poss.']['value']:
-        equipment_data['oa_damper_poss'] = {
-            'design': e_custom_field_set['O.A. Damper Poss.']['value'],
-            'actual': se_actual_data_set['O.A. Damper Poss.']['value']
-        }
-    else:
-        equipment_data['oa_damper_poss'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Fan R.P.M.' in e_custom_field_set and e_custom_field_set['Fan R.P.M.']['value']:
-        equipment_data['fan_rpm'] = {
-            'design': e_custom_field_set['Fan R.P.M.']['value'] if e_custom_field_set['Fan R.P.M.']['value'] else 'D.D.',
-            'actual': se_actual_data_set['Fan R.P.M.']['value'] if se_actual_data_set['Fan R.P.M.']['value'] else 'D.D.'
-        }
-    else:
-        equipment_data['fan_rpm'] = {
-            'design': 'D.D.',
-            'actual': 'D.D.'
-        }
-    if 'GPM' in e_custom_field_set and e_custom_field_set['GPM']['value']:
-        equipment_data['gpm'] = {
-            'design': e_custom_field_set['GPM']['value'],
-            'actual': se_actual_data_set['GPM']['value']
-        }
-    else:
-        equipment_data['gpm'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'H.P.' in e_custom_field_set and e_custom_field_set['H.P.']['value']:
-        equipment_data['hp'] = {
-            'design': e_custom_field_set['H.P.']['value'],
-            'actual': ''
-        }
-        if 'H.P.' in se_actual_data_set and se_actual_data_set['H.P.']['value']:
-            equipment_data['hp']['actual'] = se_actual_data_set['H.P.']['value']
-    else:
-        equipment_data['hp'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Belt Size' in e_custom_field_set and e_custom_field_set['Belt Size']['value']:
-        equipment_data['belt_size'] = {
-            'actual': se_actual_data_set['Belt Size']['value'] if se_actual_data_set['Belt Size']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['belt_size'] = {
-            'actual': 'N.A.'
-        }
-    if 'Motor Pully' in e_custom_field_set and e_custom_field_set['Motor Pully']['value']:
-        equipment_data['motor_pully'] = {
-            'actual': se_actual_data_set['Motor Pully']['value'] if se_actual_data_set['Motor Pully']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['motor_pully'] = {
-            'actual': 'N.A.'
-        }
-    if 'Voltage' in e_custom_field_set and e_custom_field_set['Voltage']['value']:
-        equipment_data['voltage'] = {
-            'design': e_custom_field_set['Voltage']['value'],
-            'actual': se_actual_data_set['Voltage']['value']
-        }
-    else:
-        equipment_data['voltage'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Fan Pully' in e_custom_field_set and e_custom_field_set['Fan Pully']['value']:
-        equipment_data['fan_pully'] = {
-            'actual': se_actual_data_set['Fan Pully']['value'] if se_actual_data_set['Fan Pully']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['fan_pully'] = {
-            'actual': 'N.A.'
-        }
-    if 'Phase' in e_custom_field_set and e_custom_field_set['Phase']['value']:
-        equipment_data['phase'] = {
-            'design': e_custom_field_set['Phase']['value'],
-            'actual': se_actual_data_set['Phase']['value']
-        }
-    else:
-        equipment_data['phase'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'C to C' in e_custom_field_set and e_custom_field_set['C to C']['value']:
-        equipment_data['c_to_c'] = {
-            'actual': se_actual_data_set['C to C']['value'] if se_actual_data_set['C to C']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['c_to_c'] = {
-            'actual': 'N.A.'
-        }
-    if 'Amperage' in e_custom_field_set and e_custom_field_set['Amperage']['value']:
-        equipment_data['amperage'] = {
-            'design': e_custom_field_set['Amperage']['value'],
-            'actual': se_actual_data_set['Amperage']['value']
-        }
-    else:
-        equipment_data['amperage'] = {
-            'design': '',
-            'actual': ''
-        }
-    if 'Motor Shaft' in e_custom_field_set and e_custom_field_set['Motor Shaft']['value']:
-        equipment_data['motor_shaft'] = {
-            'actual': se_actual_data_set['Motor Shaft']['value'] if se_actual_data_set['Motor Shaft']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['motor_shaft'] = {
-            'actual': 'N.A.'
-        }
-    if 'B.H.P. (Calc.)' in e_custom_field_set and e_custom_field_set['B.H.P. (Calc.)']['value']:
-        equipment_data['bhp'] = {
-            'design': e_custom_field_set['B.H.P. (Calc.)']['value'] if e_custom_field_set['B.H.P. (Calc.)']['value'] else 'N.S.',
-            'actual': se_actual_data_set['B.H.P. (Calc.)']['value']
-        }
-    else:
-        equipment_data['bhp'] = {
-            'design': 'N.S.',
-            'actual': ''
-        }
-    if 'Fan Shaft' in e_custom_field_set and e_custom_field_set['Fan Shaft']['value']:
-        equipment_data['fan_shaft'] = {
-            'actual': se_actual_data_set['Fan Shaft']['value'] if se_actual_data_set['Fan Shaft']['value'] else 'N.A.'
-        }
-    else:
-        equipment_data['fan_shaft'] = {
-            'actual': 'N.A.'
-        }
-    if 'Frame' in e_custom_field_set and e_custom_field_set['Frame']['value']:
-        equipment_data['frame'] = {
-            'design': e_custom_field_set['Frame']['value'] if e_custom_field_set['Frame']['value'] else 'N.S.',
-            'actual': ''
-        }
-        if 'Frame' in se_actual_data_set and se_actual_data_set['Frame']['value']:
-            equipment_data['frame']['actual'] = se_actual_data_set['Frame']['value']
-    else:
-        equipment_data['frame'] = {
-            'design': 'N.S.',
-            'actual': ''
-        }
-    if 'VFD / HZ' in e_custom_field_set and e_custom_field_set['VFD / HZ']['value']:
-        equipment_data['vfd_hz'] = {
-            'actual': se_actual_data_set['VFD / HZ']['value']
-        }
-    else:
-        equipment_data['vfd_hz'] = {
-            'actual': ''
-        }
-    if 'S.F. / Code' in e_custom_field_set and e_custom_field_set['S.F. / Code']['value']:
-        equipment_data['sf_code'] = {
-            'design': e_custom_field_set['S.F. / Code']['value'] if e_custom_field_set['S.F. / Code']['value'] else 'N.S.',
-            'actual': ''
-        }
-        if 'S.F. / Code' in se_actual_data_set and se_actual_data_set['S.F. / Code']['value']:
-            equipment_data['sf_code']['actual'] = se_actual_data_set['S.F. / Code']['value']
-    else:
-        equipment_data['sf_code'] = {
-            'design': 'N.S.',
-            'actual': ''
-        }
-    if 'Filter Size' in e_custom_field_set and e_custom_field_set['Filter Size']['value']:
-        equipment_data['filter_size'] = {
-            'actual': se_actual_data_set['Filter Size']['value']
-        }
-    else:
-        equipment_data['filter_size'] = {
-            'actual': ''
-        }
-    if 'Motor RPM' in e_custom_field_set and e_custom_field_set['Motor RPM']['value']:
-        equipment_data['motor_rpm'] = {
-            'design': e_custom_field_set['Motor RPM']['value'] if e_custom_field_set['Motor RPM']['value'] else 'D.D.',
-            'actual': se_actual_data_set['Motor RPM']['value'] if se_actual_data_set['Motor RPM']['value'] else 'D.D.'
-        }
-    else:
-        equipment_data['motor_rpm'] = {
-            'design': 'D.D.',
-            'actual': 'D.D.'
-        }
-    if 'Filter Model' in e_custom_field_set and e_custom_field_set['Filter Model']['value']:
-        equipment_data['filter_model'] = {
-            'actual': se_actual_data_set['Filter Model']['value']
-        }
-    else:
-        equipment_data['filter_model'] = {
-            'actual': ''
-        }
+    # Clean up empty values
+    for key, val in equipment_data.items():
+        if not val or val == 'None':
+            equipment_data[key] = ''
 
-    if 'Direct Drive' in e_custom_field_set and e_custom_field_set['Direct Drive']['value']:
-        equipment_data['direct_drive'] = e_custom_field_set['Direct Drive']['value']
-    else:
-        equipment_data['direct_drive'] = ''
-    if 'Belt Drive' in e_custom_field_set and e_custom_field_set['Belt Drive']['value']:
-        equipment_data['belt_drive'] = e_custom_field_set['Belt Drive']['value']
-    else:
-        equipment_data['belt_drive'] = ''
-    if 'Max Speed' in e_custom_field_set and e_custom_field_set['Max Speed']['value']:
-        equipment_data['max_speed'] = e_custom_field_set['Max Speed']['value']
-    else:
-        equipment_data['max_speed'] = ''
-    if 'Med Speed' in e_custom_field_set and e_custom_field_set['Med Speed']['value']:
-        equipment_data['med_speed'] = e_custom_field_set['Med Speed']['value']
-    else:
-        equipment_data['med_speed'] = ''
-    if 'Min Speed' in e_custom_field_set and e_custom_field_set['Min Speed']['value']:
-        equipment_data['min_speed'] = e_custom_field_set['Min Speed']['value']
-    else:
-        equipment_data['min_speed'] = ''
-    
-    # upper case all
+    # Convert all values to upper case
     for key, val in equipment_data.items():
         if isinstance(val, dict):
             for sub_key, sub_val in val.items():
-                if sub_val:
-                    equipment_data[key][sub_key] = str(sub_val).upper()
-        elif val:
+                equipment_data[key][sub_key] = str(sub_val).upper()
+        else:
             equipment_data[key] = str(val).upper()
 
-    equipment_data['note'] = ""
-    if 'Note' in e_custom_field_set:
-        equipment_data['note'] += " " + e_custom_field_set['Note']['value'] if e_custom_field_set['Note']['value'] else ""
-    if 'Note' in se_actual_data_set:
-        equipment_data['note'] += " " + se_actual_data_set['Note']['value'] if se_actual_data_set['Note']['value'] else ""
-
-    for key, val in equipment_data.items():
-        if (val is None) or (val == 'None') or (not val):
-            equipment_data[key] = ''
+    # Add notes
+    notes = []
+    if 'Note' in equipment.form_fields["design"]:
+        note_design = equipment.form_fields["design"]['Note']['value']
+        notes.append(note_design if note_design else "")
+    if 'Note' in equipment.form_fields["actual"]:
+        note_actual = equipment.form_fields["actual"]['Note']['value']
+        notes.append(note_actual if note_actual else "")
+    
+    equipment_data['note'] = " ".join(notes).strip()
 
     return equipment_data
 
+def fetch_vav_data(this_sheet_equipment):
+    def get_field_value(field_set, field_name, default=""):
+        return field_set.get(field_name, {}).get('value', default)
 
-def fetch_vavsheet_equipment_data_2(this_sheet_equipment, is_report_pdf: bool):
-    inherit = False
-    if this_sheet_equipment.equipment_type.test_sheet.inheritance:
-        inherit = True
+    def get_field_note_and_append(field_set, field_name, notes, note_count):
+        if field_name in field_set and field_set[field_name].get('note'):
+            note_count += 1
+            note_marker = str(note_count * "*")
+            notes.append(f"{note_marker} {field_set[field_name]['note']}")
+            return note_marker, note_count
+        return "", note_count
+
+    def populate_notes_and_fields(field_names, design_set, actual_set, equipment_data, notes, note_count):
+        for field_name, key in field_names.items():
+            equipment_data[key] = {
+                'design': get_field_value(design_set, field_name),
+                'actual': get_field_value(actual_set, field_name)
+            }
+            design_marker, note_count = get_field_note_and_append(design_set, field_name, notes, note_count)
+            actual_marker, note_count = get_field_note_and_append(actual_set, field_name, notes, note_count)
+            equipment_data[key]['design'] += f" {design_marker}".strip()
+            equipment_data[key]['actual'] += f" {actual_marker}".strip()
+        return note_count
+
     design_field_set = this_sheet_equipment.form_fields["design"]
     actual_field_set = this_sheet_equipment.form_fields["actual"]
+
     equipment_data = {
-        'inherit': inherit,
-        'address': design_field_set["Address"]["value"] if "Address" in design_field_set else "",
-        'code': design_field_set["Code"]["value"] if "Code" in design_field_set else "",
-        'type': design_field_set["Type"]["value"] if "Type" in design_field_set else "",
-        'size_kw': design_field_set["Size / KW"]["value"] if "Size / KW" in design_field_set else "",
-        'fan': design_field_set["Fan %"]["value"] if "Fan %" in design_field_set else "",
-        'fan_cfm': design_field_set["Fan CFM"]["value"] if "Fan CFM" in design_field_set else "",
-        'min_cfm': {
-            'design': design_field_set["Min. CFM"]["value"] if "Min. CFM" in design_field_set else "",
-            'actual': actual_field_set["Min. CFM"]["value"] if "Min. CFM" in actual_field_set else ""
-        },
-        'max_cfm': {
-            'design': design_field_set["Max. CFM"]["value"] if "Max. CFM" in design_field_set else "",
-            'actual': actual_field_set["Max. CFM"]["value"] if "Max. CFM" in actual_field_set else ""
-        },
-        'kf': actual_field_set["K.F."]["value"] if "K.F." in actual_field_set else "",
-        'min_fan_cfm': actual_field_set["Min. / Fan CFM"]["value"] if "Min. / Fan CFM" in actual_field_set else "",
+        'inherit': this_sheet_equipment.equipment_type.test_sheet.inheritance,
+        'address': get_field_value(design_field_set, "Address"),
+        'code': get_field_value(design_field_set, "Code"),
+        'type': get_field_value(design_field_set, "Type"),
+        'size_kw': get_field_value(design_field_set, "Size / KW"),
+        'fan': get_field_value(design_field_set, "Fan %"),
+        'fan_cfm': get_field_value(design_field_set, "Fan CFM"),
+        'kf': get_field_value(actual_field_set, "K.F."),
+        'min_fan_cfm': get_field_value(actual_field_set, "Min. / Fan CFM"),
         'model_number': this_sheet_equipment.model_number,
         'HP': "",
         'make': this_sheet_equipment.manufacturer,
-        'fan_volt': actual_field_set["Fan volt"]["value"] if "Fan volt" in actual_field_set else "",
-        'fan_amp': actual_field_set["Fan Amp"]["value"] if "Fan Amp" in actual_field_set else "",
-        't_in': actual_field_set["T In"]["value"] if "T In" in actual_field_set else "",
-        'fan_va': actual_field_set["Fan V / A"]["value"] if "Fan V / A" in actual_field_set else "",
-        'heat_va': {
-            'design': design_field_set["Heat V / A"]["value"] if "Heat V / A" in design_field_set else "",
-            'actual': actual_field_set["Heat V / A"]["value"] if "Heat V / A" in actual_field_set else ""
-        },
-        't_out': actual_field_set["T Out"]["value"] if "T Out" in actual_field_set else "",
+        'fan_volt': get_field_value(actual_field_set, "Fan volt"),
+        'fan_amp': get_field_value(actual_field_set, "Fan Amp"),
+        't_in': get_field_value(actual_field_set, "T In"),
+        'fan_va': get_field_value(actual_field_set, "Fan V / A"),
+        't_out': get_field_value(actual_field_set, "T Out"),
     }
-    # upper case all
+
+    notes = []
+    note_count = 0
+
+    # Process fields that need design and actual values
+    field_mappings = {
+        "Min. CFM": 'min_cfm',
+        "Max. CFM": 'max_cfm',
+        "Heat V / A": 'heat_va',
+    }
+    note_count = populate_notes_and_fields(field_mappings, design_field_set, actual_field_set, equipment_data, notes, note_count)
+
+    # Process single fields and notes
+    single_fields = {
+        'Address': 'address',
+        'Code': 'code',
+        'Type': 'type',
+        'Size / KW': 'size_kw',
+        'Fan %': 'fan',
+        'Fan CFM': 'fan_cfm',
+        'K.F.': 'kf',
+        'Min. / Fan CFM': 'min_fan_cfm',
+        'Fan volt': 'fan_volt',
+        'Fan Amp': 'fan_amp',
+        'T In': 't_in',
+        'Fan V / A': 'fan_va',
+        'T Out': 't_out',
+    }
+
+    for field_name, key in single_fields.items():
+        note_marker, note_count = get_field_note_and_append(design_field_set, field_name, notes, note_count)
+        equipment_data[key] += f" {note_marker}".strip()
+
+    # Convert all values to upper case
     for key, val in equipment_data.items():
         if isinstance(val, dict):
             for sub_key, sub_val in val.items():
-                if sub_val:
-                    equipment_data[key][sub_key] = str(sub_val).upper()
-        elif val:
+                equipment_data[key][sub_key] = str(sub_val).upper()
+        else:
             equipment_data[key] = str(val).upper()
 
-    equipment_data['note'] = ""
-    if 'Note' in design_field_set:
-        equipment_data['note'] += " | " + design_field_set['Note']['value'] if design_field_set['Note']['value'] else ""
-    if 'Note' in actual_field_set:
-        equipment_data['note'] += " | " + actual_field_set['Note']['value'] if actual_field_set['Note']['value'] else ""
-
-    note_count = 0
-    if "Address" in design_field_set:
-        if design_field_set["Address"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Address"]["note"]
-            equipment_data['address'] = equipment_data['address'] + " " + str(note_count * "*")
-    if "Code" in design_field_set:
-        if design_field_set["Code"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Code"]["note"]
-            equipment_data['code'] = equipment_data['code'] + " " + str(note_count * "*")
-    if "Type" in design_field_set:
-        if design_field_set["Type"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Type"]["note"]
-            equipment_data['type'] = equipment_data['type'] + " " + str(note_count * "*")
-    if "Size / KW" in design_field_set:
-        if design_field_set["Size / KW"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Size / KW"]["note"]
-            equipment_data['size_kw'] = equipment_data['size_kw'] + " " + str(note_count * "*")
-    if "Fan %" in design_field_set:
-        if design_field_set["Fan %"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Fan %"]["note"]
-            equipment_data['fan'] = equipment_data['fan'] + " " + str(note_count * "*")
-    if "Fan CFM" in design_field_set:
-        if design_field_set["Fan CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Fan CFM"]["note"]
-            equipment_data['fan_cfm'] = equipment_data['fan_cfm'] + " " + str(note_count * "*")
-    if "Min. CFM" in design_field_set:
-        if design_field_set["Min. CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Min. CFM"]["note"]
-            equipment_data['min_cfm'] = equipment_data['min_cfm'] + " " + str(note_count * "*")
-    if "Min. CFM" in actual_field_set:
-        if actual_field_set["Min. CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Min. CFM"]["note"]
-            equipment_data['min_cfm'] = equipment_data['min_cfm'] + " " + str(note_count * "*")
-    if "Max. CFM" in design_field_set:
-        if design_field_set["Max. CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Max. CFM"]["note"]
-            equipment_data['max_cfm'] = equipment_data['max_cfm'] + " " + str(note_count * "*")
-    if "Max. CFM" in actual_field_set:
-        if actual_field_set["Max. CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Max. CFM"]["note"]
-            equipment_data['max_cfm'] = equipment_data['max_cfm'] + " " + str(note_count * "*")
-    if "K.F." in actual_field_set:
-        if actual_field_set["K.F."]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["K.F."]["note"]
-            equipment_data['kf'] = equipment_data['kf'] + " " + str(note_count * "*")
-    if "Min. / Fan CFM" in actual_field_set:
-        if actual_field_set["Min. / Fan CFM"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Min. / Fan CFM"]["note"]
-            equipment_data['min_fan_cfm'] = equipment_data['min_fan_cfm'] + " " + str(note_count * "*")
-    if "Fan volt" in actual_field_set:
-        if actual_field_set["Fan volt"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Fan volt"]["note"]
-            equipment_data['fan_volt'] = equipment_data['fan_volt'] + " " + str(note_count * "*")
-    if "Fan Amp" in actual_field_set:
-        if actual_field_set["Fan Amp"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Fan Amp"]["note"]
-            equipment_data['fan_amp'] = equipment_data['fan_amp'] + " " + str(note_count * "*")
-    if "T In" in actual_field_set:
-        if actual_field_set["T In"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["T In"]["note"]
-            equipment_data['t_in'] = equipment_data['t_in'] + " " + str(note_count * "*")
-    if "Fan V / A" in actual_field_set:
-        if actual_field_set["Fan V / A"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Fan V / A"]["note"]
-            equipment_data['fan_va'] = equipment_data['fan_va'] + " " + str(note_count * "*")
-    if "Heat V / A" in design_field_set:
-        if design_field_set["Heat V / A"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + design_field_set["Heat V / A"]["note"]
-            equipment_data['heat_va'] = equipment_data['heat_va'] + " " + str(note_count * "*")
-    if "Heat V / A" in actual_field_set:
-        if actual_field_set["Heat V / A"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["Heat V / A"]["note"]
-            equipment_data['heat_va'] = equipment_data['heat_va'] + " " + str(note_count * "*")
-    if "T Out" in actual_field_set:
-        if actual_field_set["T Out"]["note"]:
-            note_count += 1
-            equipment_data['note'] += " | " + str(note_count * "*") + " " + actual_field_set["T Out"]["note"]
-            equipment_data['t_out'] = equipment_data['t_out'] + " " + str(note_count * "*")
+    equipment_data['note'] = " | ".join(notes)
 
     # Clean up any fields that are empty or None
     for key, val in equipment_data.items():
         if isinstance(val, dict):
             for sub_key, sub_val in val.items():
-                if not sub_val:
-                    equipment_data[key][sub_key] = ''
-        elif not val:
-            equipment_data[key] = ''
+                equipment_data[key][sub_key] = sub_val if sub_val else ''
+        else:
+            equipment_data[key] = val if val else ''
 
     return equipment_data
 
-
-def prepare_terminal_pages_new(terminals, _type):
-    if len(terminals) <= 0:
+def fetch_terminal_data(terminals, _type):
+    if not terminals:
         return []
-    pages = []
-    equipment_in_page = 21 - 3
-    equipments = []
 
-    if _type == 1:
-        _type = 'SUPPLY'
-    elif _type == 2:
-        _type = 'RETURN'
-    elif _type == 3:
-        _type = 'OTHER'
-    elif _type == 4:
-        _type = 'EXHAUST'
+    def map_type(_type):
+        return {
+            1: 'SUPPLY',
+            2: 'RETURN',
+            3: 'OTHER',
+            4: 'EXHAUST'
+        }.get(_type, '')
 
-    total_cfm_design = 0
-    total_cfm_initial = 0
-    total_cfm_final = 0
+    def get_field_value(field_set, field_name, default=""):
+        return field_set.get(field_name, {}).get('value', default)
 
-    for terminal in terminals:
+    def process_terminal_data(terminal, _type):
         design_field_set = terminal.form_fields["design"]
         actual_field_set = terminal.form_fields["actual"]
+
         equipment_data = {
-            'room_no': design_field_set["Room No."]["value"] if ("Room No." in design_field_set and design_field_set["Room No."]["value"]) else "",
-            'outlet_no': design_field_set["Outlet No."]["value"] if ("Outlet No." in design_field_set and design_field_set["Outlet No."]["value"]) else "",
-            'code': design_field_set["Code"]["value"] if ("Code" in design_field_set and design_field_set["Code"]["value"]) else "",
-            'size': design_field_set["Size"]["value"] if ("Size" in design_field_set and design_field_set["Size"]["value"]) else "",
-            'ak_factor': design_field_set["AK Factor"]["value"] if ("AK Factor" in design_field_set and design_field_set["AK Factor"]["value"]) else "",
+            'room_no': get_field_value(design_field_set, "Room No."),
+            'outlet_no': get_field_value(design_field_set, "Outlet No."),
+            'code': get_field_value(design_field_set, "Code"),
+            'size': get_field_value(design_field_set, "Size"),
+            'ak_factor': get_field_value(design_field_set, "AK Factor"),
             'fpm': {
-                'design': design_field_set["FPM"]["value"] if ("FPM" in design_field_set and design_field_set["FPM"]["value"]) else "*",
-                'initial': actual_field_set["Initial FPM"]["value"] if ("Initial FPM" in actual_field_set and actual_field_set["Initial FPM"]["value"]) else "*",
-                'final': actual_field_set["Final FPM"]["value"] if ("Final FPM" in actual_field_set and actual_field_set["Final FPM"]["value"]) else "*"
+                'design': get_field_value(design_field_set, "FPM", "*"),
+                'initial': get_field_value(actual_field_set, "Initial FPM", "*"),
+                'final': get_field_value(actual_field_set, "Final FPM", "*")
             },
             'cfm': {
-                'design': design_field_set["CFM"]["value"] if ("CFM" in design_field_set and design_field_set["CFM"]["value"]) else "",
-                'initial': actual_field_set["Initial CFM"]["value"] if ("Initial CFM" in actual_field_set and actual_field_set["Initial CFM"]["value"]) else "",
-                'final': actual_field_set["Final CFM"]["value"] if ("Final CFM" in actual_field_set and actual_field_set["Final CFM"]["value"]) else ""
+                'design': get_field_value(design_field_set, "CFM"),
+                'initial': get_field_value(actual_field_set, "Initial CFM"),
+                'final': get_field_value(actual_field_set, "Final CFM")
             },
             'note': "",
             'title': terminal.fan_no,
             'type': _type,
         }
-        # upper case all
+
+        # Convert all values to upper case
         for key, val in equipment_data.items():
             if isinstance(val, dict):
                 for sub_key, sub_val in val.items():
-                    if sub_val:
-                        equipment_data[key][sub_key] = str(sub_val).upper()
-            elif val:
-                equipment_data[key] = str(val).upper()
-        
-        # Summing the CFM values
-        total_cfm_design += int(equipment_data['cfm']['design']) if (equipment_data['cfm']['design'] and equipment_data['cfm']['design'] != "*") else 0
-        total_cfm_initial += int(equipment_data['cfm']['initial']) if (equipment_data['cfm']['initial'] and equipment_data['cfm']['initial'] != "*") else 0
-        total_cfm_final += int(equipment_data['cfm']['final']) if (equipment_data['cfm']['final'] and equipment_data['cfm']['final'] != "*") else 0
+                    equipment_data[key][sub_key] = str(sub_val).upper() if sub_val else ''
+            else:
+                equipment_data[key] = str(val).upper() if val else ''
 
-        equipments.append(equipment_data)
+        return equipment_data
 
-    # equipments.extend([{}] * (equipment_in_page - len(equipments)))
-    this_title = terminals[0].parent.name
-    if not this_title:
-        this_title = terminals[0].parent.fan_no
-    page = {
-        'type': 'TERMINAL',
-        'eq_name': "Terminal",
-        'system': this_title,
-        'rows': equipments,
-        # general
-        'title': f"{this_title} {_type}",
-        'total': {
-            'footer': f'TOTAL {_type} {this_title}',
-            'cfm_design': total_cfm_design,
-            'cfm_initial': total_cfm_initial,
-            'cfm_final': total_cfm_final,
+    def calculate_totals(equipments):
+        total_cfm_design = sum(int(e['cfm']['design']) for e in equipments if e['cfm']['design'] and e['cfm']['design'] != "*")
+        total_cfm_initial = sum(int(e['cfm']['initial']) for e in equipments if e['cfm']['initial'] and e['cfm']['initial'] != "*")
+        total_cfm_final = sum(int(e['cfm']['final']) for e in equipments if e['cfm']['final'] and e['cfm']['final'] != "*")
+        if total_cfm_design == 0:
+            total_cfm_design = ""
+        if total_cfm_initial == 0:
+            total_cfm_initial = ""
+        if total_cfm_final == 0:
+            total_cfm_final = ""
+        return total_cfm_design, total_cfm_initial, total_cfm_final
+
+    def create_page(terminals, equipments, _type, total_cfm_design, total_cfm_initial, total_cfm_final):
+        this_title = terminals[0].parent.name or terminals[0].parent.fan_no
+        page = {
+            'type': 'TERMINAL',
+            'eq_name': "Terminal",
+            'system': this_title,
+            'rows': equipments,
+            'title': f"{this_title} {_type}",
+            'total': {
+                'footer': f'TOTAL {_type} {this_title}',
+                'cfm_design': total_cfm_design,
+                'cfm_initial': total_cfm_initial,
+                'cfm_final': total_cfm_final,
+            }
         }
-    }
-    if 'V.A.V' in terminals[0].parent.equipment_type.test_sheet.name:
-        page['system'] = "Existing Supply".upper()
-        page['title'] = f"{terminals[0].parent.form_fields['design']['Code']['value']} {_type}".upper()
-        page['total']['footer'] = f'TOTAL {_type} {terminals[0].parent.form_fields["design"]["Code"]["value"]}'.upper()
 
-    # Add empty rows
-    page['empty_rows'] = [{} for _ in range(equipment_in_page - len(equipments))]
+        if 'V.A.V' in terminals[0].parent.equipment_type.test_sheet.name:
+            design_code = terminals[0].parent.form_fields['design']['Code']['value'].upper()
+            page['system'] = "Existing Supply".upper()
+            page['title'] = f"{design_code} {_type}".upper()
+            page['total']['footer'] = f'TOTAL {_type} {design_code}'.upper()
 
-    pages.append(page)
-    return pages
+        # Add empty rows to fill the page
+        equipment_in_page = 18  # 21 total rows - 3 header rows
+        page['empty_rows'] = [{} for _ in range(equipment_in_page - len(equipments))]
+
+        return page
+
+    _type = map_type(_type)
+    equipments = [process_terminal_data(terminal, _type) for terminal in terminals]
+
+    total_cfm_design, total_cfm_initial, total_cfm_final = calculate_totals(equipments)
+
+    page = create_page(terminals, equipments, _type, total_cfm_design, total_cfm_initial, total_cfm_final)
+    
+    return [page]
 
     
 @login_required
@@ -1517,10 +1180,11 @@ def report_sheet_recreate_call(
     if report_sheet.report_type == 1:
         datasheets = DataSheet.objects.filter(project=report_sheet.project)
         air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
-        indipendent_vav_equipments = datasheets.exclude(
-            equipment_type__test_sheet__name__iexact='Air Moving').exclude(
-            equipment_type__test_sheet__name__iexact='Air Terminal'
-        ).all()
+        # indipendent_vav_equipments = datasheets.exclude(
+        #     equipment_type__test_sheet__name__iexact='Air Moving').exclude(
+        #     equipment_type__test_sheet__name__iexact='Air Terminal'
+        # ).all()
+        indipendent_vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
 
         pages = []
         request.session['toc_counter'] = 0
@@ -1582,22 +1246,22 @@ def report_sheet_recreate_call(
             air_terminal_equipments = DataSheet.objects.filter(project=report_sheet.project, parent=air_moving_equipment.id).order_by('_type', 'outlet_no')
             if len(air_terminal_equipments) > 0:
 
-                air_terminal_pages = prepare_terminal_pages_new(
+                air_terminal_pages = fetch_terminal_data(
                     air_terminal_equipments.filter(_type=1), 1
                 )
                 terminal_pages.append(air_terminal_pages)
 
-                air_terminal_pages = prepare_terminal_pages_new(
+                air_terminal_pages = fetch_terminal_data(
                     air_terminal_equipments.filter(_type=2), 2
                 )
                 terminal_pages.append(air_terminal_pages)
                 
-                air_terminal_pages = prepare_terminal_pages_new(
+                air_terminal_pages = fetch_terminal_data(
                     air_terminal_equipments.filter(_type=3), 3
                 )
                 terminal_pages.append(air_terminal_pages)
 
-                air_terminal_pages = prepare_terminal_pages_new(
+                air_terminal_pages = fetch_terminal_data(
                     air_terminal_equipments.filter(_type=4), 4
                 )
                 terminal_pages.append(air_terminal_pages)
@@ -1677,14 +1341,13 @@ def report_sheet_recreate_call(
 
         def add_independent_vav_pages(vav_equipments):
             vav_pages = []
-            is_report_pdf = True
 
             equipment_in_page = 10  # Number of equipments per page
             total_equipments = vav_equipments.count()
 
             vav_eqs = []
             for eq in vav_equipments:
-                vav_eqs.append(fetch_vavsheet_equipment_data_2(eq, is_report_pdf))
+                vav_eqs.append(fetch_vav_data(eq))
 
             # Create VAV pages with 8 equipments each
             for i in range(math.ceil(total_equipments / equipment_in_page)):
@@ -1722,7 +1385,7 @@ def report_sheet_recreate_call(
             ).order_by('id', '_type', 'outlet_no')
 
             if len(air_terminal_equipments) > 0:
-                air_terminal_pages = prepare_terminal_pages_new(air_terminal_equipments, 1)
+                air_terminal_pages = fetch_terminal_data(air_terminal_equipments, 1)
                 vav_pages.extend(air_terminal_pages)
                 toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 2, True, False)
 
@@ -1735,14 +1398,15 @@ def report_sheet_recreate_call(
                 'type': 'AIRMOVING',
                 'system': current_air_moving_equipments.fan_no,
                 'rows': [
-                    fetch_sheet_equipment_data_2(current_air_moving_equipments),
+                    fetch_air_mov_data(current_air_moving_equipments),
                 ]
             })
             toc_line_maker(current_air_moving_equipments.fan_no, 0, 0, False, True)
             toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
             terminals = add_terminal_pages_for_air_moving(current_air_moving_equipments)
-            toc_line_maker('AIR TERMINAL TEST SHEET', len(terminals), 2, True, False)
-            pages.extend(terminals)
+            if terminals:
+                toc_line_maker('AIR TERMINAL TEST SHEET', len(terminals), 2, True, False)
+                pages.extend(terminals)
             # pages = pages + add_vav_pages_using_air_moving([air_moving_equipments[0]])
 
         if len(indipendent_vav_equipments) > 0:

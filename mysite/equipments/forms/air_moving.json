@@ -195,7 +195,7 @@
             "value": null,
             "note": "",
             "order": 22,
-            "validation": "",
+            "validation": "^[0-9]+(\\.[0-9]{1,3})?$",
             "formula": "",
             "required": false
         },
@@ -420,7 +420,7 @@
             "value": "SEE BHP",
             "note": "",
             "order": 17,
-            "validation": "",
+            "validation": "^[0-9]+(\\.[0-9]{1,3})?$",
             "formula": "",
             "required": false
         },
@@ -456,8 +456,8 @@
             "value": null,
             "note": "",
             "order": 21,
-            "validation": "(((20_actual * 18_actual * 17_actual) / 23_design) / 25_design)",
-            "formula": "",
+            "validation": "",
+            "formula": "(((20_actual * 18_actual * 17_actual) / 23_design) / 25_design)",
             "required": false
         },
         "Frame": {
