@@ -17,7 +17,7 @@
             "placeholder": "",
             "note": "",
             "order": 3,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9]+(\\.[0-9]{1,3})?$",
             "formula": "",
             "required": true
         },
@@ -42,12 +42,12 @@
             "required": false
         },
         "Mfg. Date": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
             "order": 6,
-            "validation": "^[0-9]*$",
+            "validation": "",
             "formula": "",
             "required": false
         },
@@ -102,12 +102,12 @@
             "required": false
         },
         "S.F.": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
             "order": 12,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9]+(\\.[0-9]{1,3})?$",
             "formula": "",
             "required": false
         },
@@ -152,12 +152,12 @@
             "required": true
         },
         "Volts": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
             "order": 17,
-            "validation": "^[0-9]*$",
+            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?)(?: - \\d{1,3}(?:\\.\\d+)?)?$",
             "formula": "",
             "required": true
         },
@@ -211,7 +211,7 @@
             "order": 4,
             "validation": "^[0-9]*$",
             "formula": "",
-            "required": true
+            "required": false
         },
         "Actual GPM": {
             "type": "text", 

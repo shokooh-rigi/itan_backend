@@ -133,12 +133,23 @@
             "formula": "",
             "required": true
         },
+        "Others": {
+            "type": "textarea", 
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 11,
+            "validation": "",
+            "formula": "",
+            "required": false,
+            "display": "none"
+        },
         "Note": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 11,
+            "order": 12,
             "validation": "",
             "formula": "",
             "required": false

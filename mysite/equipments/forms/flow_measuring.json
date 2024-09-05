@@ -1,17 +1,7 @@
 {
     "general": {},
     "design": {
-        "Unit Number": {
-            "type": "text", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 1,
-            "validation": "",
-            "formula": "",
-            "required": false
-        },
-        "G.P.M.": {
+        "Design G.P.M.": {
             "type": "text", 
             "value": null,
             "placeholder": "",

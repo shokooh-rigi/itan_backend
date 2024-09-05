@@ -1,5 +1,6 @@
 {% load estimator_tags %}
 {% load velocity_tags %}
+{% load custom_date_format %}
 
 {% for velocity_equipment in page.rows %}
     <div class="content pdf-page-content velocity">
@@ -26,7 +27,7 @@
                 </td>
                 <td class="pdf-table-cell pdf-table-title-cell" colspan="2">DATE:</td>
                 <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
-                    &nbsp;{% if report_sheet %}{{ report_sheet.report_date|date:'m/d/Y' }}{% else %}{{ form.my_sheet.sheet_date|date:'m/d/Y' }}{% endif %}{% if report_sheet.last_report_date %} - {{ report_sheet.last_report_date|date:'m/d/Y' }}{% endif %}
+                    &nbsp;{{ form.my_sheet.project.start_date|custom_date_format }}{% if form.my_sheet.project.end_date %} - {{ form.my_sheet.project.end_date|custom_date_format }}{% endif %}
                 </td>
             </tr>
             <tr class="pdf-table-project-tr">
@@ -39,6 +40,9 @@
                     &nbsp;{{ page.system }}
                 </td>
             </tr>
+
+            {{ rows }}
+
             <!-- Title rows -->
             <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0">
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="font-weight: bold;">
@@ -46,7 +50,7 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Fan No.' }}
+                    {{ rows.fan_no }}
                 </td>
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title no-border">
 
@@ -64,16 +68,16 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                     style="border-bottom: 1px solid black;">
-                    {% if velocity_equipment|get_list:'Design C.F.M.' %}{{ velocity_equipment|get_list:'Design C.F.M.' }}{% else %}N.S.{% endif %}
+                    {{ rows.design_cfm }}
                 </td>
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                     Actual C.F.M.:
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Actual CFM. Initial' }}
+                    {{ rows.actual_cfm.initial }}
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Actual CFM. Final' }}
+                    {{ rows.actual_cfm.final }}
                 </td>
             </tr>
             <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
@@ -82,16 +86,16 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Duct Size' }}
+                    {{ rows.duct_size }}
                 </td>
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                     Duct Static:
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Duct Static Initial' }}
+                    {{ rows.duct_static.initial }}
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Duct Static Final' }}
+                    {{ rows.duct_static.final }}
                 </td>
             </tr>
 
@@ -101,16 +105,16 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Duct Area' }} Sq. Ft.
+                    {{ rows.duct_area }} Sq. Ft.
                 </td>
                 <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
                     Actual Vel:
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Actual Vel Initial' }}
+                    {{ rows.actual_vel.initial }}
                 </td>
                 <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ velocity_equipment|get_list:'Actual Vel Final' }}
+                    {{ rows.actual_vel.final }}
                 </td>
             </tr>
 
@@ -120,7 +124,7 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Req. Vel' }} FPM
+                    {{ rows.reqd_vel }} FPM
                 </td>
             </tr>
 
@@ -130,7 +134,7 @@
                 </td>
                 <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
                     style="border-bottom: 1px solid black;">
-                    {{ velocity_equipment|get_list:'Traverse Location' }}
+                    {{ rows.traverse_location }}
                 </td>
             </tr>
 
@@ -141,7 +145,7 @@
                 {% for i in page.max_row %}
                     <tr class="pdf-table-row-thick section-middle-row" style="border-bottom-width: 0; {% if i == 0 %}border-top-width: 2px;{% else %}border-top-width: 1px;{% endif %}">
                         {% for j in page.max_col %}
-                            <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">{% get_velocity_cell_value velocity_equipment|get_list:'equipment_id' i j %}</td>
+                            <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">equipment_id</td>
                         {% endfor %}
                     </tr>
                 {% endfor %}
@@ -150,7 +154,7 @@
                         Notes:
                     </td>
                     <td class="pdf-table-cell no-border" colspan="65" style="text-align: left;">
-                        {{ velocity_equipment|get_list:'Note' }}
+                        {{ rows.note }}
                     </td>
                 </tr>
             </tbody>

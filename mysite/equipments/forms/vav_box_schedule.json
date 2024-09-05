@@ -10,15 +10,6 @@
             "formula": "",
             "required": false
         },
-        "Code": {
-            "type": "text", 
-            "value": null,
-            "note": "",
-            "order": 2,
-            "validation": "",
-            "formula": "",
-            "required": false
-        },
         "Type": {
             "type": "text", 
             "value": null,

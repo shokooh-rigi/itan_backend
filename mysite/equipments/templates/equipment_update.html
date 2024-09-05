@@ -146,6 +146,465 @@
             </div>
             <button type="submit" class="btn btn-primary m-5">Save</button>
         </form>
+    <!-- Velocity Traverse -->
+     {% elif ds.equipment_type.test_sheet.name == 'Velocity Traverse' %}
+     <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
+    <!-- Pump -->
+    {% elif ds.equipment_type.test_sheet.name == 'Pump' %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
+    <!-- Chiller -->
+    {% elif ds.equipment_type.test_sheet.name == 'Chiller' %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
+    <!-- Cooling Tower -->
+    {% elif ds.equipment_type.test_sheet.name == 'Cooling Tower' %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
+    <!-- Flow Measuring -->
+    {% elif ds.equipment_type.test_sheet.name == 'Flow Measuring' %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
     {% else %}
         <form action="/path-to-your-post-method" method="put">
             <div class="row">
@@ -253,7 +712,6 @@
             <button type="submit" class="btn btn-primary m-5">Save</button>
         </form>
     {% endif %}
-
 
 </div>
 

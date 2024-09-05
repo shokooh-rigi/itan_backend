@@ -59,7 +59,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitReportForm()">Create Report</button>
+                <button type="button" class="btn btn-primary" onclick="submitReportFormRed()">Create Report</button>
               </div>
             </div>
           </div>
@@ -601,6 +601,25 @@
             }
         });
     }
+    function submitReportFormRed() {
+        // Close the modal immediately
+        $('#reportModal').modal('hide');
+
+        // Get form data
+        const orderId = document.getElementById('orderId').value;
+        const reportType = document.getElementById('reportType').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const reportDate = document.getElementById('reportDate').value;
+        const revisedDate = document.getElementById('revisedDate').value;
+
+        // Construct the URL with query parameters
+        const url = `/reports/orders/${orderId}/?report_type=${encodeURIComponent(reportType)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&report_date=${encodeURIComponent(reportDate)}&revised_date=${encodeURIComponent(revisedDate)}`;
+
+        // Redirect the user to the constructed URL
+        window.location.href = url;
+    }
+
 
 </script>
       

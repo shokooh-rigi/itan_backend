@@ -147,6 +147,9 @@ def update_data_sheet_form(request, pk):
     data_sheet = get_object_or_404(DataSheet, pk=pk)
     form_fields = copy.deepcopy(data_sheet.form_fields)
 
+    print("===" * 20)
+    print(request.data)
+
     errors = []
     exclude_applied_formula = ["AK Factor"]
 
@@ -190,12 +193,18 @@ def update_data_sheet_form(request, pk):
     else:
         for key, value in request.data.items():
             field_key = key.replace("_note", "")
+
+            print("---" * 10)
+            print(key, value)
+            
             if field_key in form_fields[form_type]:
                 field_data = form_fields[form_type][field_key]
                 # Update field note or value
                 if "_note" in key:
                     field_data["note"] = value
                 else:
+                    print("---" * 10)
+                    print(field_key, value)
                     field_data["value"] = value
                     # Check and apply formula
                     formula = field_data.get("formula")
@@ -215,6 +224,8 @@ def update_data_sheet_form(request, pk):
                                 computed_value = f"{float(computed_value):.2f}"
                             field_data["value"] = computed_value
         data_sheet.form_fields = form_fields
+        print("===" * 20)
+        print(form_fields)
         if form_type == "design":
             data_sheet.design_data_entry_completed = True
         elif form_type == "actual":

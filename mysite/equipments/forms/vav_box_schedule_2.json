@@ -10,15 +10,6 @@
             "formula": "",
             "required": false
         },
-        "Code": {
-            "type": "text", 
-            "value": null,
-            "note": "",
-            "order": 2,
-            "validation": "",
-            "formula": "",
-            "required": true
-        },
         "Type": {
             "type": "text", 
             "value": null,
@@ -102,15 +93,6 @@
             "formula": "",
             "required": true
         },
-        "Fan CFM": {
-            "type": "text", 
-            "value": null,
-            "note": "",
-            "order": 3,
-            "validation": "",
-            "formula": "",
-            "required": false
-        },
         "K.F.": {
             "type": "text", 
             "value": null,
@@ -192,11 +174,20 @@
             "formula": "",
             "required": false
         },
+        "H.P.": {
+            "type": "text", 
+            "value": null,
+            "note": "",
+            "order": 13,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
         "Note": {
             "type": "textarea", 
             "value": null,
             "note": "",
-            "order": 13,
+            "order": 14,
             "validation": "",
             "formula": "",
             "required": false

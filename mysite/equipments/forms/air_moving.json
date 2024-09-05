@@ -47,31 +47,34 @@
             "required": false
         },
         "Total C.F.M. Fan": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
-            "note": "",
+            "note": "See general note",
             "order": 6,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Total C.F.M. Outlets": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
-            "note": "",
+            "note": "See general note",
             "order": 7,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": true
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Return Air C.F.M.": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
-            "note": "",
+            "note": "See general note",
             "order": 8,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "1_design - 4_design",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Outdoor Air C.F.M.": {
             "type": "number", 
@@ -202,9 +205,9 @@
         "Voltage": {
             "type": "text", 
             "value": null,
-            "note": "^\\d{1,3}(?: - \\d{1,3})?(?: - \\d{1,3})?$",
+            "note": "",
             "order": 23,
-            "validation": "",
+            "validation": "^\\d{1,3}(?: - \\d{1,3})?(?: - \\d{1,3})?$",
             "formula": "",
             "required": false
         },
@@ -222,7 +225,7 @@
             "value": null,
             "note": "",
             "order": 25,
-            "validation": "^\\d{1,3}(?: - \\d{1,3})?(?: - \\d{1,3})?$",
+            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?)(?: - \\d{1,3}(?:\\.\\d+)?)?$",
             "formula": "",
             "required": false
         },
@@ -273,30 +276,34 @@
     },
     "actual": {
         "Total C.F.M. Fan": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
-            "note": "",
+            "note": "See general note",
             "order": 1,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Total C.F.M. Outlets": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
+            "note": "See general note",
             "order": 2,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Return Air C.F.M.": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
-            "note": "",
+            "note": "See general note",
             "order": 3,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "1_actual - 4_actual",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Outdoor Air C.F.M.": {
             "type": "number", 
@@ -447,7 +454,7 @@
             "value": null,
             "note": "",
             "order": 20,
-            "validation": "^\\d{1,3}(?: - \\d{1,3})?(?: - \\d{1,3})?$",
+            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?)(?: - \\d{1,3}(?:\\.\\d+)?)?$",
             "formula": "",
             "required": false
         },
