@@ -1,0 +1,65 @@
+{% load static %}
+
+<style type="text/css">
+    .logo { width: 160px; display: inline-block; float: left; }
+    @page {
+        size: letter portrait;
+        @frame header_frame {
+            -pdf-frame-content: header_content;
+            width: 530pt; height: 150pt; left: 40pt; top: 12pt;
+        }
+        @frame content_frame {
+            width: 530pt; left: 40pt; top: 90pt; height: 652pt;
+        }
+        @frame footer_frame {
+            -pdf-frame-content: footer_content;
+            width: 530pt; height: 40pt; left: 40pt; bottom: 10pt;
+        }
+    }
+    div.together { -pdf-keep-with-next: true; }
+
+    {% if os != "Windows" %}
+    @font-face {
+        font-family: cambria;
+        font-weight: normal;
+        src: url({% static 'fonts/cambria.ttf' %});
+    }
+    @font-face {
+        font-family: cambria;
+        font-weight: bold;
+        src: url({% static 'fonts/cambriab.ttf' %});
+    }
+    @font-face {
+        font-family: calibri;
+        font-weight: normal;
+        src: url({% static 'fonts/Calibri.ttf' %});
+    }
+
+    body {
+        font-family: cambria;
+    }
+
+    .cambria {
+        font-family: cambria;
+    }
+
+    .calibri {
+        font-family: calibri;
+    }
+    {% endif %}
+
+
+    .page-break {
+        page-break-before: always;
+    }
+
+    @media print {
+        #footer_content {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+</style>

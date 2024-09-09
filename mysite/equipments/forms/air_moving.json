@@ -49,17 +49,17 @@
         "Total C.F.M. Fan": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 6,
-            "validation": "^[0-9@]*$",
+            "validation": "^[0-9]*$",
             "formula": "",
-            "required": true,
-            "placeholder": "@ requires note"
+            "required": false,
+            "placeholder": ""
         },
         "Total C.F.M. Outlets": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 7,
             "validation": "^[0-9@]*$",
             "formula": "",
@@ -69,7 +69,7 @@
         "Return Air C.F.M.": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 8,
             "validation": "^[0-9@]*$",
             "formula": "1_design - 4_design",
@@ -77,13 +77,14 @@
             "placeholder": "@ requires note"
         },
         "Outdoor Air C.F.M.": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
             "note": "",
             "order": 9,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Total SP (Ext. SP)": {
             "type": "text", 
@@ -225,7 +226,7 @@
             "value": null,
             "note": "",
             "order": 25,
-            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?)(?: - \\d{1,3}(?:\\.\\d+)?)?$",
+            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?){0,2}?$",
             "formula": "",
             "required": false
         },
@@ -278,17 +279,17 @@
         "Total C.F.M. Fan": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 1,
-            "validation": "^[0-9@]*$",
+            "validation": "^[0-9]*$",
             "formula": "",
-            "required": true,
-            "placeholder": "@ requires note"
+            "required": false,
+            "placeholder": ""
         },
         "Total C.F.M. Outlets": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 2,
             "validation": "^[0-9@]*$",
             "formula": "",
@@ -298,7 +299,7 @@
         "Return Air C.F.M.": {
             "type": "text", 
             "value": null,
-            "note": "See general note",
+            "note": "",
             "order": 3,
             "validation": "^[0-9@]*$",
             "formula": "1_actual - 4_actual",
@@ -306,13 +307,14 @@
             "placeholder": "@ requires note"
         },
         "Outdoor Air C.F.M.": {
-            "type": "number", 
+            "type": "text", 
             "value": null,
             "note": "",
             "order": 4,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
-            "required": false
+            "required": true,
+            "placeholder": "@ requires note"
         },
         "Total SP (Ext. SP)": {
             "type": "text", 
@@ -422,15 +424,6 @@
             "formula": "",
             "required": false
         },
-        "H.P.": {
-            "type": "text", 
-            "value": "SEE BHP",
-            "note": "",
-            "order": 17,
-            "validation": "^[0-9]+(\\.[0-9]{1,3})?$",
-            "formula": "",
-            "required": false
-        },
         "Voltage": {
             "type": "text", 
             "value": null,
@@ -454,7 +447,7 @@
             "value": null,
             "note": "",
             "order": 20,
-            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?)(?: - \\d{1,3}(?:\\.\\d+)?)?$",
+            "validation": "^\\d{1,3}(?:\\.\\d+)?(?: - \\d{1,3}(?:\\.\\d+)?){0,2}?$",
             "formula": "",
             "required": false
         },

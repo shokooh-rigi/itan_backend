@@ -575,29 +575,6 @@
             <div class="col-md-6">
                 <!-- <h4>Project Info</h4> -->
                 <div class="form-group">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
-                        </div>
-                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
-                            <option value="">---------</option>
-                            {% for manufacturer in manufacturers %}
-                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="input-group-append">
-                            <!-- Edit icon -->
-                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
-                                <i class="fas fa-edit fa-sm"></i>
-                            </a>
-                            <!-- Add icon (plus) -->
-                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
-                                <i class="fas fa-plus fa-sm"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label for="model_number" class="form-label">Model Number</label>
                     <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
                 </div>

@@ -53,7 +53,7 @@
             "formula": "",
             "required": false
         },
-        "Entering Water Temperature, °F Design": {
+        "Cooler Entering Water Temperature, °F Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -63,7 +63,7 @@
             "formula": "",
             "required": false
         },
-        "Entering Water Temperature, °F Actual": {
+        "Cooler Entering Water Temperature, °F Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -73,7 +73,7 @@
             "formula": "",
             "required": false
         },
-        "Leaving Water Temperature, °F Design": {
+        "Cooler Leaving Water Temperature, °F Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -83,7 +83,7 @@
             "formula": "",
             "required": false
         },
-        "Leaving Water Temperature, °F Actual": {
+        "Cooler Leaving Water Temperature, °F Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -93,7 +93,7 @@
             "formula": "",
             "required": false
         },
-        "Pressure Drop, Ft. Design": {
+        "Cooler Pressure Drop, Ft. Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -103,7 +103,7 @@
             "formula": "",
             "required": false
         },
-        "Pressure Drop, Ft. Actual": {
+        "Cooler Pressure Drop, Ft. Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -113,7 +113,7 @@
             "formula": "",
             "required": false
         },
-        "G.P.M. Cooler": {
+        "Cooler G.P.M.": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -123,7 +123,7 @@
             "formula": "",
             "required": false
         },
-        "G.P.M. Condenser": {
+        "Condenser Entering Water Temperature, °F Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -133,7 +133,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T1 - T2 Design": {
+        "Condenser Entering Water Temperature, °F Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -143,7 +143,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T1 - T2 Actual": {
+        "Condenser Leaving Water Temperature, °F Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -153,7 +153,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T2 - T3 Design": {
+        "Condenser Leaving Water Temperature, °F Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -163,7 +163,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T2 - T3 Actual": {
+        "Condenser Pressure Drop, Ft. Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -173,7 +173,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T3 - T1 Design": {
+        "Condenser Pressure Drop, Ft. Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -183,7 +183,7 @@
             "formula": "",
             "required": false
         },
-        "Voltage: T3 - T1 Actual": {
+        "Condenser G.P.M.": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -193,7 +193,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T1 Design": {
+        "Voltage: T1 - T2 Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -203,7 +203,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T2 Design": {
+        "Voltage: T1 - T2 Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -213,7 +213,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T3 Design": {
+        "Voltage: T2 - T3 Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -223,7 +223,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T1 Actual": {
+        "Voltage: T2 - T3 Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -233,7 +233,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T2 Actual": {
+        "Voltage: T3 - T1 Actual": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -243,7 +243,7 @@
             "formula": "",
             "required": false
         },
-        "Amperage: T3 Actual": {
+        "Voltage: T3 - T1 Design": {
             "type": "text",
             "value": null,
             "placeholder": "",
@@ -253,12 +253,72 @@
             "formula": "",
             "required": false
         },
+        "Amperage: T1 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 22,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T1 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 23,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T2 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 24,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T2 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 25,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T3 Actual": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 26,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
+        "Amperage: T3 Design": {
+            "type": "text",
+            "value": null,
+            "placeholder": "",
+            "note": "",
+            "order": 27,
+            "validation": "",
+            "formula": "",
+            "required": false
+        },
         "Note": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 22,
+            "order": 28,
             "validation": "",
             "formula": "",
             "required": false

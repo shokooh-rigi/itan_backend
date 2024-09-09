@@ -1019,7 +1019,14 @@ def fetch_terminal_data(terminals, _type):
             'title': terminal.fan_no,
             'type': _type,
         }
-
+        # for fpm if number or float round to int
+        if equipment_data['fpm']['design'] and equipment_data['fpm']['design'] != "*":
+            equipment_data['fpm']['design'] = int(float(equipment_data['fpm']['design']))
+        if equipment_data['fpm']['initial'] and equipment_data['fpm']['initial'] != "*":
+            equipment_data['fpm']['initial'] = int(float(equipment_data['fpm']['initial']))
+        if equipment_data['fpm']['final'] and equipment_data['fpm']['final'] != "*":
+            equipment_data['fpm']['final'] = int(float(equipment_data['fpm']['final']))
+        
         # Convert all values to upper case
         for key, val in equipment_data.items():
             if isinstance(val, dict):
@@ -1646,118 +1653,77 @@ def report_sheet_show(
     request, 
     order_id,
 ):
-    report_type = request.GET.get('report_type')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    report_date = request.GET.get('report_date')
-    revised_date = request.GET.get('revised_date')
-
-    
-
-    return render(request, "report_order.html", {})
-
     order = get_object_or_404(Order, id=order_id)
-    if revised_date:
-        # report_sheet = ReportSheet.objects.get_or_create(
-        #     project=order, 
-        #     report_type=1,
-        #     report_date=report_date,
-        #     revised_date=revised_date
-        # )[0]
-        report_sheet = ReportSheet.objects.create(
-            project=order, 
-            report_type=1,
-            report_date=report_date,
-            revised_date=revised_date
-        )
-    else:
-        # report_sheet = ReportSheet.objects.get_or_create(
-        #     project=order, 
-        #     report_type=1,
-        #     report_date=report_date
-        # )[0]
-        report_sheet = ReportSheet.objects.create(
-            project=order, 
-            report_type=1,
-            report_date=report_date
-        )
-    if start_date:
-        order.start_date = start_date
-    if end_date:
-        order.end_date = end_date
-    if start_date or end_date:
-        order.save()
 
-    license_owner = LicenseInfo.objects.get(key='OwnerName').value
-    report_stamp = LicenseFiles.objects.get(key='ReportStamp').value
-    instruction_image = LicenseFiles.objects.get(key='InstructionReport').value
-    abbreviation_image = LicenseFiles.objects.get(key='AbbreviationReport').value
-    owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
-    owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
-    owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
-    owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
-    owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
-    company_name = LicenseInfo.objects.get(key='CompanyName').value
 
-    parameters = {
-        'file_name': ('COVER SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper(),
-        'report_sheet': report_sheet,
-        'report_stamp': report_stamp,
-        'datetime': datetime.datetime.now(),
-        'license_owner': license_owner,
-        'instruction_image': instruction_image,
-        'abbreviation_image': abbreviation_image,
-        'owner_title': owner_title,
-        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-        'owner_tel': owner_tel,
-        'owner_fax': owner_fax,
-        'owner_web': owner_web,
-        'owner_mail': owner_mail,
-        'owner_signature': owner_signature,
-        'owner_logo': owner_logo,
-        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-        'company_name': company_name,
-        'WEB_URL': settings.WEB_URL,
-        'MEDIA_URL': settings.MEDIA_URL,
-        'STATIC_URL': settings.STATIC_URL,
-        'os': system(),
+    context = {
+        'order_id': order_id,
+        'report_type': request.GET.get('report_type'),
+        'start_date': request.GET.get('start_date'),
+        'end_date': request.GET.get('end_date'),
+        'report_date': request.GET.get('report_date'),
+        'revised_date': request.GET.get('revised_date'),
+
+        'project': order.proposal.quote.estimate.project.name.upper(),
+        'project_no': order.project_number.upper(),
+
+        'header': {
+            'text': LicenseInfo.objects.get(key='PDFHeaderText').value
+        },
+        'footer': {
+            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+            'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+            'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+            'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+            'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+        },
+        'cover': {
+            'project': order.proposal.quote.estimate.project.name.upper(),
+            'location': "",
+            'contractor': order.proposal.quote.estimate.customer.company.name.upper(),
+            'architect': order.architect_name.company.name.upper() if order.architect_name else "N.S.",
+            'engineer': order.proposal.quote.estimate.engineer.company.name.upper() if order.proposal.quote.estimate.engineer else "N.S.",
+            'project_no': order.project_number.upper(),
+        },
+        'toc': [],
+        'general_info': {
+            'notes_and_comments': order.general_notes_and_comments,
+        },
+        'pages': [],
     }
+    if order.proposal.quote.estimate.project.address_line_1:
+        context['cover']['location'] += order.proposal.quote.estimate.project.address_line_1.upper()
+    if order.proposal.quote.estimate.project.address_line_2:
+        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.address_line_2.upper()
+    if order.proposal.quote.estimate.project.city:
+        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.city.upper()
+    if order.proposal.quote.estimate.project.state:
+        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.state.upper()
+    if order.proposal.quote.estimate.project.zip:
+        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.zip.upper()
 
-    cover_pdf = ReportSheet.create_cover_pdf(parameters)
-    parameters['cover_pdf'] = cover_pdf[1]
+    datasheets = order.data_sheets.all()
+    air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
 
-    parameters['file_name'] = ('REPORT SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                           report_sheet.project.project_number)).upper()
-    merger = PdfMerger()
-    cover = open(cover_pdf[1], "rb")
-    merger.append(fileobj=cover)
+    for air_moving_equipment in air_moving_equipments:
+        context['pages'].append({
+            'type': 'AIRMOVING',
+            'system': air_moving_equipment.fan_no,
+            'data': fetch_air_mov_data(air_moving_equipment),
+        })
 
-    if not report_sheet.report_type == 1:
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_table_of_content.file)))
-        table_of_content_file = open(response[0], "rb")
-        merger.append(fileobj=table_of_content_file)
+    vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
+    velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
 
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_test_sheets.file)))
-        test_sheets = open(response[0], "rb")
-        merger.append(fileobj=test_sheets)
 
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
-        drawings = open(response[0], "rb")
-        merger.append(fileobj=drawings)
+
+    context['pages'].append([])
+
+    return render(request, "pdf/base_report.html", context)
 
     if report_sheet.report_type == 1:
-        datasheets = DataSheet.objects.filter(project=report_sheet.project)
-        air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
-        # indipendent_vav_equipments = datasheets.exclude(
-        #     equipment_type__test_sheet__name__iexact='Air Moving').exclude(
-        #     equipment_type__test_sheet__name__iexact='Air Terminal'
-        # ).all()
-        indipendent_vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
-        velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
+
 
         pages = []
         request.session['toc_counter'] = 0

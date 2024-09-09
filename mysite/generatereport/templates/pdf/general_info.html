@@ -1,0 +1,454 @@
+{% load static %}
+{% load estimator_tags %}
+
+<style>
+    .calibration-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .calibration-table td, .calibration-table th {
+        padding: 5px;
+        /* border: 1px solid #ddd; */
+    }
+    .calibration-table .two-column td {
+        width: 50%;
+    }
+    .calibration-table .no-border {
+        border: none;
+        border-top: none;
+        border-bottom: none;
+        border-left: none;
+        border-right: none;
+    }
+
+    #abbreviationTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px auto;
+    }
+    .abbreviationTable th, .abbreviationTable td {
+        border: 1px solid black;
+        padding: 5px;
+        text-align: left;
+    }
+    .abbreviationTable th {
+        /* background-color: #f2f2f2; */
+        text-align: center;
+    }
+
+    /* Container for your entire component */
+    #guarantee-container {
+        position: relative;
+        margin-top: 20px;
+    }
+
+    /* Background image handling */
+    #guarantee-background {
+        position: absolute;
+        top:0;
+        left: 70px;
+        width: 80%;
+        height: auto;
+        z-index: 1;
+    }
+
+    /* Content container styling */
+    .guarantee-content-container {
+        position: relative; /* Ensure content is on top of the background */
+        z-index: 2;
+        margin-left: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        /* height: 100%; */
+    }
+    .guarantee-page {
+        text-align: right;
+        font-weight: bold;
+        position: relative;
+        top: 0;
+        right: 0;
+    }
+
+    .guarantee-text-box {
+        padding: 20px;
+        border-radius: 10px;
+        width: 70%;
+        max-width: 750px;
+        text-align: justify;
+        margin-top: 100px;
+        /* background-color: white; */
+        font-size: 10px;
+    }
+
+    /* Text styling */
+    .guarantee-text {
+        font-family: Candara;
+        font-size: 1.00em;
+        line-height: 1;
+        color: black;
+    }
+
+    /* Centered lines */
+    .guarantee-centered-line {
+        text-align: center;
+        margin-left: -40px;
+    }
+
+    /* Underline styling */
+    .guarantee-underline {
+        display: inline-block;
+        border-bottom: 1px solid black;
+        height: 1em;
+        vertical-align: bottom;
+        line-height: 1em;
+    }
+
+</style>
+
+
+
+<div id="content_frame">
+
+    {% include "pdf/header.html" %}
+
+    <div class="content pdf-page-content">
+        <div style="font-size: 14pt; text-align: right; font-weight: bold; margin-top: 15px; margin-right: 20px;">
+            PAGE I
+        </div>
+        <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="cambria" style="font-weight: bold;">INSTRUMENTATION</span><br />
+            <span style="font-size: 13pt;">AIR BALANCE</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ project_no }}
+            <br />{{ project }}
+        </div>
+        <div style="font-size: 10pt;">
+            
+            <table class="calibration-table">
+                <tr>
+                    <td colspan="2">
+                        <strong>1. Dwyer Manufacturing company - Pitot – Tubes with 10' Hoses</strong>
+                    </td>
+                </tr>
+                <tr class="two-column">
+                    <td>a. 5/16” x 18”</td>
+                    <td>d. A301 Static Probes (2)</td>
+                </tr>
+                <tr class="two-column">
+                    <td>b. 5/16” x 24”</td>
+                    <td>e. 5/16” x 48”</td>
+                </tr>
+                <tr class="two-column">
+                    <td>c. 5/16” x 36”</td>
+                    <td>f. 5/16” x 60”</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>2. Laser Non-Contact Tachometer, Model DT-205LR-S12</strong>
+                    </td>
+                </tr>
+                <tr class="two-column">
+                    <td>a. 0-99999 RPM</td>
+                    <td>b. ACCURACY: +/-1 FROM 6 TO 8300</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibrated: 06 – 16 – 23.</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>3. Fluke, Volt –Amp Meter</strong>
+                    </td>
+                </tr>
+                <tr class="two-column">
+                    <td>a. 0 – 300 Amps</td>
+                    <td>b. 0 – 600 Volts</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibration Date: 06 – 16 – 23.</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>4. Shortridge Instrument Company – Series ADM 860 & 870</strong>
+                    </td>
+                </tr>
+                <tr class="two-column">
+                    <td>a. Electronic Flow Hood 0 – 2000 CFM</td>
+                    <td>b. Static Pressure 0 – 10”</td>
+                </tr>
+                <tr class="two-column">
+                    <td>c. Velocity Probe 0 – 2000 FPM</td>
+                    <td>d. Velocity Grid 0 – 2000 FPM</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibration Date: 10 – 3 – 23.</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>5. Shortridge Instruments Company – Series HDM 300</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibration Date: 10 – 3 – 23.</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>6. Fluke, Infrared thermometer 561 HVAC PRO</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">-40 DF to 1022 DF. Accuracy +/-1%</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibration Date: 06 – 16 – 23.</td>
+                </tr>
+            
+                <tr>
+                    <td colspan="2">
+                        <strong>7. Fluke, Temperature, Humidity Meter 971</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">-4 to 140 DF. Accuracy +/-1.0 DF on 32 to 113 DF</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="no-border">Calibration Date: 06 – 16 – 23.</td>
+                </tr>
+            </table>
+            
+            <p>The listed Instruments are calibrated periodically as required by the Associated Air Balance Council. Maximum time lapse between calibration date is six months, except for the Shortridge Instruments, they require a yearly calibration.</p>
+              
+        </div>
+    </div>
+
+    {% include "pdf/footer.html" %}
+    <div class="page-break"></div>
+    {% include "pdf/header.html" %}
+
+    <div class="content pdf-page-content calibri">
+        <div style="font-size: 14pt; text-align: right; font-weight: bold; margin-top: 15px; margin-right: 20px;">
+            PAGE II
+        </div>
+        <div style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="calbria" style="font-weight: bold;">GENERAL NOTES AND COMMENTS</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ general_info.project_no }}
+        <br />{{ general_info.project }}
+        </div>
+        <br />
+        <div style="font-size: 13pt;">
+            {% if general_info.notes_and_comments.html != '' %}
+                {{ general_info.notes_and_comments.html|safe }}
+            {% else %}
+                The systems described here in this report are operating per design intent.
+            {% endif %}
+        </div>
+    </div>
+
+    {% include "pdf/footer.html" %}
+    <div class="page-break"></div>
+    {% include "pdf/header.html" %}
+
+    <div class="content pdf-page-content">
+        <div style="font-size: 14pt; text-align: right; font-weight: bold; margin-top: 15px; margin-right: 20px;">
+            PAGE III
+        </div>
+        <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
+            <span class="cambria" style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
+            TAB TECHNOLOGIES PROJECT NO. {{ general_info.project_no }}<br />{{ general_info.project }}
+        </div>
+        <div style="text-align: center;">
+
+            <table id="abbreviationTable" class="abbreviationTable">
+                <tr>
+                    <th>AC</th>
+                    <td>Air Conditioner</td>
+                    <th>ACU</th>
+                    <td>Air Conditioning Unit</td>
+                </tr>
+                <tr>
+                    <th>AHU</th>
+                    <td>Air Handling Unit</td>
+                    <th>AK</th>
+                    <td>Effective Area</td>
+                </tr>
+                <tr>
+                    <th>A</th>
+                    <td>Amperage</td>
+                    <th>BHP</th>
+                    <td>Brake Horsepower</td>
+                </tr>
+                <tr>
+                    <th>CD</th>
+                    <td>Ceiling Diffuser</td>
+                    <th>CFM</th>
+                    <td>Cubic Feet Per Minute</td>
+                </tr>
+                <tr>
+                    <th>CR</th>
+                    <td>Ceiling Register</td>
+                    <th>EA</th>
+                    <td>Exhaust Fan</td>
+                </tr>
+                <tr>
+                    <th>ESP</th>
+                    <td>External Static Pressure</td>
+                    <th>FLR</th>
+                    <td>Floor Register</td>
+                </tr>
+                <tr>
+                    <th>FPM</th>
+                    <td>Feet Per Minute</td>
+                    <th>FT</th>
+                    <td>Feet</td>
+                </tr>
+                <tr>
+                    <th>G</th>
+                    <td>Grille</td>
+                    <th>GPM</th>
+                    <td>Gallons Per Minute</td>
+                </tr>
+                <tr>
+                    <th>HD</th>
+                    <td>Head Pressure</td>
+                    <th>HP</th>
+                    <td>Horsepower</td>
+                </tr>
+                <tr>
+                    <th>HZ</th>
+                    <td>Frequency</td>
+                    <th>LSD</th>
+                    <td>Linear Slot Diffuser</td>
+                </tr>
+                <tr>
+                    <th>NA</th>
+                    <td>Not Applicable</td>
+                    <th>NC</th>
+                    <td>Not Calculable</td>
+                </tr>
+                <tr>
+                    <th>NIC</th>
+                    <td>Not In Contract</td>
+                    <th>NM</th>
+                    <td>Not Measurable or not Measured</td>
+                </tr>
+                <tr>
+                    <th>NR</th>
+                    <td>Not Recorded</td>
+                    <th>NS</th>
+                    <td>Not Specified</td>
+                </tr>
+                <tr>
+                    <th>OA</th>
+                    <td>Outside Air</td>
+                    <th>OED</th>
+                    <td>Open End Duct</td>
+                </tr>
+                <tr>
+                    <th>PD</th>
+                    <td>Perforated Diffuser</td>
+                    <th>PSI</th>
+                    <td>Pound Per Square Inch</td>
+                </tr>
+                <tr>
+                    <th>PT</th>
+                    <td>Pitot Traverse</td>
+                    <th>R</th>
+                    <td>Register</td>
+                </tr>
+                <tr>
+                    <th>RA</th>
+                    <td>Return Air</td>
+                    <th>RAF</th>
+                    <td>Return Air Fan</td>
+                </tr>
+                <tr>
+                    <th>RF</th>
+                    <td>Recirculating Fan</td>
+                    <th>RPM</th>
+                    <td>Revolution Per Minute</td>
+                </tr>
+                <tr>
+                    <th>RTU</th>
+                    <td>Roof Top Unit</td>
+                    <th>SA</th>
+                    <td>Supply Air Fan</td>
+                </tr>
+                <tr>
+                    <th>SF</th>
+                    <td>Service Factor</td>
+                    <th>SP</th>
+                    <td>Static Pressure</td>
+                </tr>
+                <tr>
+                    <th>TEF</th>
+                    <td>Toilet Exhaust Fan</td>
+                    <th>TSP</th>
+                    <td>Total Static Pressure</td>
+                </tr>
+                <tr>
+                    <th>V</th>
+                    <td>Volts</td>
+                    <th>W</th>
+                    <td>Watts</td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+    {% include "pdf/footer.html" %}
+    <div class="page-break"></div>
+    {% include "pdf/header.html" %}
+
+    <div class="content pdf-page-content">
+
+        <div id="guarantee-container">
+            <!-- Background image -->
+            <img src="{% static 'images/gauranty_template.jpg' %}" id="guarantee-background" alt="Guarantee Background"> 
+            <div class="guarantee-page">PAGE IV</div>
+            <!-- Content container -->
+            <div class="guarantee-content-container">
+                <div class="guarantee-text-box">
+                    <br><br>
+                    <p class="guarantee-centered-line">Pursuant to the agreement between</p>
+                    <p><span class="guarantee-underline" style="width: 90%; text-align: center;">TAB Technologies, INC.</span></p>
+                    <p class="guarantee-centered-line">AABC Certified Testing & Balancing Agency</p>
+                    <p>and <span class="guarantee-underline" style="width: 85%;"></span></p>
+                    <p class="guarantee-centered-line">Client</p>
+                    <p><span style="margin-left: 30px;">
+                        All systems shall be tested and balanced in accordance with the project plans and specifications and to the optimum performance capabilities of the equipment. Testing and balancing shall be done in accordance with the standards published by the Associated Air Balance Council.
+                    </p>
+                    <p><span style="margin-left: 30px;">
+                        If the Agency listed above fails to comply with the specifications for any reason other than termination of business by the AABC agency or equipment malfunction or inadequacy which prevents proper balancing of the systems, AABC will investigate and, if warranted, will provide supervisory personnel to assist the member Agency to perform work in accordance with AABC Standards. This supervision will be provided at no additional cost to the building owner.
+                    </p>
+                    <p><span style="margin-left: 30px;">
+                        This Guaranty is valid for one year from the date of submission of a test and balance report, provided the Agency is a current member of AABC, and may only be invoked in writing by the building owner, architect, or engineer of record. The Guaranty is limited to the terms and conditions as stated herein.
+                    </p>
+                    <p>Project Name: <span class="guarantee-underline" style="width: 85%;">SOUTHERN TIDE</span></p>
+                    <p>Address: <span class="guarantee-underline" style="width: 90%;">2905 DISTRICT AVENUE , SUITE 145</span></p>
+                    <p><span class="guarantee-underline" style="width: 98%;">
+                        <span style="margin-left: 65px;"></span>FAIRFAX , VA , 22031
+                    </span></p>
+                    <p>Name of Engineer: <span class="guarantee-underline" style="width: 80%;">N.S.</span></p>
+                    <p>Engineering Firm: <span class="guarantee-underline" style="width: 80%;"></span></p>
+                    <p>Email Address: <span class="guarantee-underline" style="width: 57%;">N.S.</span></p>
+                    <p>Address: <span class="guarantee-underline" style="width: 63%;"></span></p>
+                    <p><span class="guarantee-underline" style="width: 70%;"></span></p>
+                    <p>Date: <span class="guarantee-underline" style="width: 63%;">8/31/2024</span></p>
+                    <p>TBE #: <span class="guarantee-underline" style="width: 60%;">90-07-25</span></p>
+                    <p>By: <span class="guarantee-underline" style="width: 63%;">Hossain Askari</span></p>
+                    <p><span style="margin-left: 60px;"></span>AABC Certified TBE</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    {% include "pdf/footer.html" %}
+
+</div>

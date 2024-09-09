@@ -107,7 +107,7 @@ def order_update(request, order_id):
         #         if service not in sorted_equipments:
         #             sorted_equipments[service] = [eq]
 
-    _s3 = S3()
+    # _s3 = S3()
     image_data_list = []
     # for _fl in [
     #     # this_order.equipment_submittal, 

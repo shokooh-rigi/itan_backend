@@ -22,7 +22,8 @@ def calculate_formula(formula, fields, new_data):
         formula = formula.replace(placeholder, str(value))
     try:
         # Evaluate the mathematical expression from the formula
-        return eval(formula)
+        rs = eval(formula)
+        return round(rs, 2)
     except Exception as e:
         print(f"Error evaluating formula: {e}")
         return "*"

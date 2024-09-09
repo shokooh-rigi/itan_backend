@@ -115,6 +115,9 @@
                             <a href="#" data-toggle="modal" data-target="#noteModal{{ properties.order }}" class="note-info-icon">
                                 <i class="fas fa-comment" style="color: {% if properties.note %}blue{% else %}gray{% endif %};"></i>
                             </a>
+                            {% if properties.hint %}
+                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="{{ properties.hint }}"></i>
+                            {% endif %}
                         </label>
                         {% if properties.type == 'text' or properties.type == 'number' %}
                             <input type="{{ properties.type }}" class="form-control" id="{{ field_name }}" name="{{ field_name }}"

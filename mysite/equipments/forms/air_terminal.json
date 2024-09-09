@@ -59,7 +59,8 @@
             "order": 6,
             "validation": "",
             "formula": "7_design / 5_design",
-            "required": false
+            "required": false,
+            "hint": "Numbers will be rounded to whole numbers when reported."
         },
         "CFM": {
             "type": "number", 
@@ -81,7 +82,8 @@
             "order": 1,
             "validation": "",
             "formula": "2_actual / 5_design",
-            "required": false
+            "required": false,
+            "hint": "Numbers will be rounded to whole numbers when reported."
         },
         "Initial CFM": {
             "type": "number", 
@@ -91,7 +93,8 @@
             "order": 2,
             "validation": "^[0-9]*$",
             "formula": "",
-            "required": false
+            "required": false,
+            "hint": "Numbers will be rounded to whole numbers when reported."
         },
         "Final FPM": {
             "type": "text", 
@@ -101,7 +104,8 @@
             "order": 3,
             "validation": "",
             "formula": "4_actual / 5_design",
-            "required": false
+            "required": false,
+            "hint": "Numbers will be rounded to whole numbers when reported."
         },
         "Final CFM": {
             "type": "number", 
@@ -111,7 +115,8 @@
             "order": 4,
             "validation": "^[0-9]*$",
             "formula": "",
-            "required": false
+            "required": false,
+            "hint": "Numbers will be rounded to whole numbers when reported."
         }
     }
 }

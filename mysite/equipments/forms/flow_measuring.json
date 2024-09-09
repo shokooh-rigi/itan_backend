@@ -53,16 +53,6 @@
             "formula": "",
             "required": false
         },
-        "Model Number": {
-            "type": "text", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 4,
-            "validation": "",
-            "formula": "",
-            "required": false
-        },
         "Set / P.D.": {
             "type": "text", 
             "value": null,

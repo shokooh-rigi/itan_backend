@@ -193,9 +193,6 @@ def update_data_sheet_form(request, pk):
     else:
         for key, value in request.data.items():
             field_key = key.replace("_note", "")
-
-            print("---" * 10)
-            print(key, value)
             
             if field_key in form_fields[form_type]:
                 field_data = form_fields[form_type][field_key]
@@ -203,9 +200,14 @@ def update_data_sheet_form(request, pk):
                 if "_note" in key:
                     field_data["note"] = value
                 else:
+
                     print("---" * 10)
+                    print(field_data)
                     print(field_key, value)
+
                     field_data["value"] = value
+                    if value == "@":
+                        field_data["note"] = "See general note"
                     # Check and apply formula
                     formula = field_data.get("formula")
                     if formula and field_key not in exclude_applied_formula:
@@ -224,8 +226,7 @@ def update_data_sheet_form(request, pk):
                                 computed_value = f"{float(computed_value):.2f}"
                             field_data["value"] = computed_value
         data_sheet.form_fields = form_fields
-        print("===" * 20)
-        print(form_fields)
+
         if form_type == "design":
             data_sheet.design_data_entry_completed = True
         elif form_type == "actual":
