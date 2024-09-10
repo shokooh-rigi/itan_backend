@@ -286,13 +286,13 @@
             {% elif page.type == 'SUPPLY' or page.type == 'RETURN' or page.type == 'OUTSIDE' or page.type == 'OTHER' %}
                 {% include "pdfTemplates/terminalPdfContent.html" %}
             {% elif page.type == 'TERMINAL' %}
-                {% include "pdfTemplates/terminalPdfContent.html" %}
+                {% include "terminal.html" %}
             {% elif page.type == 'VAV' %}
-                {% include "pdfTemplates/vavPdfContent.html" %}
+                {% include "vav.html" %}
             {% elif page.type == 'VELOCITY' %}
                 {% include "pdfTemplates/velocityPdfContent.html" %}
             {% elif page.type == 'PUMP' %}
-                {% include "pdfTemplates/pumpPdfContent.html" %}
+                {% include "pump.html" %}
             {% endif %}
         </div>
             

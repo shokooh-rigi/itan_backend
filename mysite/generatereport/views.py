@@ -941,14 +941,6 @@ def fetch_vav_data(this_sheet_equipment):
         if note_marker:
             equipment_data[key] += f" {note_marker}".strip()
 
-    # Convert all values to upper case
-    for key, val in equipment_data.items():
-        if isinstance(val, dict):
-            for sub_key, sub_val in val.items():
-                equipment_data[key][sub_key] = str(sub_val).upper()
-        else:
-            equipment_data[key] = str(val).upper()
-
     equipment_data['note'] = " | ".join(notes)
 
     # Clean up any fields that are empty or None
@@ -959,11 +951,17 @@ def fetch_vav_data(this_sheet_equipment):
         else:
             equipment_data[key] = val if val else ''
 
+    # Convert all values to upper case
+    for key, val in equipment_data.items():
+        if isinstance(val, dict):
+            for sub_key, sub_val in val.items():
+                equipment_data[key][sub_key] = str(sub_val).upper()
+        else:
+            equipment_data[key] = str(val).upper()
+
     return equipment_data
 
 def fetch_terminal_data(terminals, _type):
-    if not terminals:
-        return []
 
     def map_type(_type):
         return {
@@ -1065,7 +1063,50 @@ def fetch_terminal_data(terminals, _type):
 
     page = create_page(terminals, equipments, _type, total_cfm_design, total_cfm_initial, total_cfm_final)
     
-    return [page]
+    return page
+
+def fetch_pump_data(pumps):
+    data = []
+    for p in pumps:
+        design_field_set = p.form_fields["design"]
+        actual_field_set = p.form_fields["actual"]
+
+        equipment_data = {
+            'pump_no': p.model_number,
+            'manufacturer': p.manufacturer.name.upper() if p.manufacturer else '',
+            'serial_no': get_field_value(actual_field_set, "Serial No."),
+            'model_size': f"{p.model_number} / {get_field_value(design_field_set, 'Size')}",
+            'impeller_rpm': f"{get_field_value(design_field_set, 'Impeller')} / {get_field_value(design_field_set, 'RPM')}",
+            'maxwk_mfgdate': f"{get_field_value(design_field_set, 'Max. Wk. Pr.')} / {get_field_value(design_field_set, 'Mfg. Date')}",
+            'design_gpm': get_field_value(design_field_set, 'Design GPM'),
+            'design_ft': get_field_value(design_field_set, 'Design FT'),
+            'design_bhp': get_field_value(actual_field_set, 'Design BHP'),
+            'actual_gpm': get_field_value(actual_field_set, 'Actual GPM'),
+            'actual_ft': get_field_value(actual_field_set, 'Actual FT'),
+            'actual_bhp': get_field_value(actual_field_set, 'Actual BHP'),
+            'discharge_gpm': get_field_value(actual_field_set, 'Discharge GPM'),
+            'discharge_ft': get_field_value(actual_field_set, 'Discharge FT'),
+            'discharge_bhp': get_field_value(actual_field_set, 'Discharge BHP'),
+            'suction_gpm': get_field_value(actual_field_set, 'Suction GPM'),
+            'suction_ft': get_field_value(actual_field_set, 'Suction FT'),
+            'suction_bhp': get_field_value(actual_field_set, 'Suction BHP'),
+            'discharge_suction': get_field_value(actual_field_set, 'Discharge / Suction'),
+            'motor_mfg': get_field_value(actual_field_set, 'Motor Mfg.'),
+            'hp_frame': f"{get_field_value(design_field_set, 'HP')} / {get_field_value(design_field_set, 'Frame')}",
+            'sf_code': f"{get_field_value(design_field_set, 'S.F.')} / {get_field_value(design_field_set, 'Code')}",
+            'rpm_phase_hz': f"{get_field_value(design_field_set, 'RPM')} / {get_field_value(design_field_set, 'Phase')} / {get_field_value(design_field_set, 'HZ')}",
+            'amps_design': get_field_value(design_field_set, 'Amps'),
+            'amps_actual': get_field_value(actual_field_set, 'Amps'),
+            'volts_design': get_field_value(design_field_set, 'Volts'),
+            'volts_actual': get_field_value(actual_field_set, 'Volts'),
+            'remarks': "",
+            'note': "",
+        }
+
+        notes = []
+        note_count = 0
+        data.append(equipment_data)
+    return data
 
 def fetch_velocity_data(equipment):
     design_field_set = equipment.form_fields["design"]
@@ -1695,16 +1736,62 @@ def report_sheet_show(
         context['cover']['location'] += ", " + order.proposal.quote.estimate.project.zip.upper()
 
     datasheets = order.data_sheets.all()
+    # Air Moving
     air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
+    if len(air_moving_equipments) > 0:
+        for air_moving_equipment in air_moving_equipments:
+            context['pages'].append({
+                'type': 'AIRMOVING',
+                'system': air_moving_equipment.fan_no,
+                'data': fetch_air_mov_data(air_moving_equipment),
+            })
+            # Air Terminal
+            this_air_moving_terminals = datasheets.filter(parent=air_moving_equipment.id, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+            for _t in [1, 2, 3, 4]:
+                this_terminals = this_air_moving_terminals.filter(_type=_t)
+                if this_terminals:
+                    terminals_data = fetch_terminal_data(this_terminals, _t)
+                    context['pages'].append(terminals_data)
 
-    for air_moving_equipment in air_moving_equipments:
-        context['pages'].append({
-            'type': 'AIRMOVING',
-            'system': air_moving_equipment.fan_no,
-            'data': fetch_air_mov_data(air_moving_equipment),
-        })
-
+    # VAV
     vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
+    VAV_IN_ONE_PAGE = 12
+    if len(vav_equipments) > 0:
+        for i in range(math.ceil(vav_equipments.count() / VAV_IN_ONE_PAGE)):
+            data = []
+            page_items = vav_equipments[i * VAV_IN_ONE_PAGE: (i + 1) * VAV_IN_ONE_PAGE]
+            for eq in page_items:
+                data.append(fetch_vav_data(eq))
+            if len(page_items) < VAV_IN_ONE_PAGE:
+                empty_slots = VAV_IN_ONE_PAGE - len(page_items)
+                data.extend([{}] * empty_slots)
+            context['pages'].append({
+                'type': 'VAV',
+                'system': 'VAVs',
+                'data': data,
+            })
+            # Air Terminal
+            this_vav_terminals = datasheets.filter(parent__in=page_items, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+            for _t in [1, 2, 3, 4]:
+                this_terminals = this_vav_terminals.filter(_type=_t)
+                if this_terminals:
+                    terminals_data = fetch_terminal_data(this_terminals, _t)
+                    context['pages'].append(terminals_data)
+
+    # Pump
+    pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all()
+    PUMP_IN_ONE_PAGE = 2
+    if len(pump_equipments) > 0:
+        for i in range(math.ceil(pump_equipments.count() / PUMP_IN_ONE_PAGE)):
+            page_items = pump_equipments[i * PUMP_IN_ONE_PAGE: (i + 1) * PUMP_IN_ONE_PAGE]
+            data = fetch_pump_data(page_items)
+            context['pages'].append({
+                'type': 'PUMP',
+                'system': 'Pumps',
+                'data': data,
+            })
+
+    # Velocity Traverse
     velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
 
 

@@ -1,0 +1,469 @@
+{% load estimator_tags %}
+{% load velocity_tags %}
+{% load custom_date_format %}
+
+{% block css %}
+<style type="text/css">
+    .pump-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin-top: 20px;
+    }
+
+    .pump-table td, .pump-table th {
+        border: 1px solid #000; /* You can adjust the border color and thickness */
+        font-size: 14px;
+        padding: 3.5px;
+    }
+
+    .no-cell-border {
+        border: none !important;
+    }
+
+</style>
+{% endblock %}
+
+<div class="content pdf-page-content">
+    <table class="table pdf-table pump-table">
+        <!-- Table head section -->
+        <thead>
+            <tr class="pdf-head-tr">
+                <th colspan="18" scope="col"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <!-- Table title -->
+            <tr class="pdf-table-title">
+                <td colspan="16" class="pdf-table-title-td no-cell-border">PUMP TEST SHEET</td>
+                <td colspan="2" class="pdf-table-title-td pdf-page-number no-cell-border">Page {{ forloop.counter }}</td>
+            </tr>
+
+            <!-- Project specifications -->
+            <tr class="pdf-table-project-tr">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-cell-border" style="padding: 0 2px 0;">PROJECT NO:</td>
+                <td colspan="9" class="pdf-table-cell border">
+                    &nbsp;{{ project_no }}
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border">DATE:</td>
+                <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    &nbsp;{{ start_date|custom_date_format }}{% if end_date %} - {{ end_date|custom_date_format }}{% endif %}
+                </td>
+            </tr>
+            <tr class="pdf-table-project-tr">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-cell-border">PROJECT:</td>
+                <td colspan="9" class="pdf-table-cell border">
+                    &nbsp;{{ project }}
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border">SYSTEM:
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-center-cell border">
+                    &nbsp;{{ page.system }}
+                </td>
+            </tr>
+            <!-- Title rows -->
+            <tr class="section-first-row pdf-table-row top-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Pump No. / Service
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.pump_no }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Pump No. / Service
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.pump_no }}
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Manufacturer
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.manufacturer }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Manufacturer
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.manufacturer }}                    
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Serial No.
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.serial_no }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Serial No.
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.serial_no }}
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Model / Size
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.model_size }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Model / Size
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.model_size }}
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Impeller / RPM
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.impeller_rpm }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Impeller / RPM
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.impeller_rpm }}
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Max. Wk. Pr. / Mfg. Date
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.0.maxwk_mfgdate }}
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Max. Wk. Pr. / Mfg. Date
+                </td>
+                <td colspan="6" class="pdf-table-cell center-title" style="border-right-width: 2px;">
+                    {{ page.data.1.maxwk_mfgdate }}
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Test Data
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    GPM
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    FT
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    BHP
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Test Data
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    GPM
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    FT
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    BHP
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Design
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.design_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.design_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.design_bhp }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Design
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.design_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">
+                        {{ page.data.1.design_ft }}
+                    </span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">
+                        {{ page.data.1.design_bhp }}
+                    </span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Actual
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.actual_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.actual_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.actual_bhp }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Actual
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.actual_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.actual_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.actual_bhp }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Discharge
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.discharge_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.discharge_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.discharge_bhp }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Discharge
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.discharge_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.discharge_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.discharge_bhp }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Suction
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.suction_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.suction_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.suction_bhp }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Suction
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.suction_gpm }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.suction_ft }}</span>
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.suction_bhp }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    ΔP
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">
+                        x2.31=    Ft.H.d
+                    </span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    ΔP
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">
+                        x2.31=    Ft.H.d
+                    </span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Shut-Off
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    DESIGN HEAD CURVE
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Shut-Off
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    DESIGN HEAD CURVE
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Discharge / Suction
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.discharge_suction }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Discharge / Suction
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.discharge_suction }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    ΔP
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">
+                        x2.31=    Ft.H.d
+                    </span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    ΔP
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">
+                        x2.31=    Ft.H.d
+                    </span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Motor Mfg.
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.motor_mfg }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px;">
+                    Motor Mfg.
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.motor_mfg }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    H.P. / Frame
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.hp_frame }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    H.P. / Frame
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.hp_frame }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    S.F. / Code
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.sf_code }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    S.F. / Code
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.sf_code }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    RPM / Phase / Hz
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.rpm_phase_hz }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    RPM / Phase / Hz
+                </td>
+                <td colspan="6" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    <span style="font-weight: normal;">{{ page.data.1.rpm_phase_hz }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Amps
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.amps_design }}</span>
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                    ACT: <span style="font-weight: normal;">{{ page.data.0.amps_actual }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Amps
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.amps_design }}</span>
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    ACT: <span style="font-weight: normal;">{{ page.data.1.amps_actual }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick">
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Volts
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.0.volts_design }}</span>
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                    ACT: <span style="font-weight: normal;">{{ page.data.0.volts_actual }}</span>
+                </td>
+                <td colspan="3" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; font-weight: normal;">
+                    Volts
+                </td>
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                    <span style="font-weight: normal;">{{ page.data.1.volts_design }}</span>
+                </td>
+                <td colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                    ACT: <span style="font-weight: normal;">{{ page.data.1.volts_actual }}</span>
+                </td>
+            </tr>
+            <tr class="section-first-row pdf-table-row bottom-row-thick" style="height: 60px;">
+                <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top;">
+                    Remarks: <span style="font-weight: normal;">{{ page.data.0.remarks }}</span>
+                </td>
+                <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top; border-right-width: 2px;">
+                    Remarks: <span style="font-weight: normal;">{{ page.data.1.remarks }}</span>
+                </td>
+            </tr>
+
+            <!-- Note section -->
+            <tr class="pdf-table-note-section">
+                <td class="note-title no-cell-border">
+                    Notes:
+                </td>
+                <td colspan="9" class="no-cell-border">
+                <div id="note-div-actual" class="note-div">
+                    {% for  note in page.data.note %}
+                        {{ note }} |
+                    {% endfor %}
+                </div>
+                </td>
+            </tr>
+            </tbody>
+
+        </tbody>
+    </table>
+</div>
