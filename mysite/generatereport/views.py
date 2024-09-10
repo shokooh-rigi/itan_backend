@@ -762,25 +762,6 @@ def delete_report_sheet(request, sheet_id):
 
 
 
-
-# Template view
-def report_cover_template(request):
-    return render(request, 'pdfTemplates/coverTemplate.html')
-
-
-def report_full_template(request):
-    return render(request, 'pdfTemplates/fullTemplate_2.html')
-
-
-def report_report_template(request):
-    return render(request, 'pdfTemplates/reportTemplate.html')
-
-
-def report_toc_template(request):
-    return render(request, 'pdfTemplates/tocTemplate_2.html')
-
-
-
 def get_field_value(field_set, field_name, default=""):
     return field_set.get(field_name, {}).get('value', default)
     
@@ -1666,6 +1647,7 @@ def report_sheet_show(
 
         'project': order.proposal.quote.estimate.project.name.upper(),
         'project_no': order.project_number.upper(),
+        'client': order.proposal.quote.estimate.customer.company.name.upper(),
 
         'header': {
             'text': LicenseInfo.objects.get(key='PDFHeaderText').value
@@ -1689,6 +1671,15 @@ def report_sheet_show(
         'toc': [],
         'general_info': {
             'notes_and_comments': order.general_notes_and_comments,
+            'guaranty': {
+                'owner': LicenseInfo.objects.get(key='OwnerName').value,
+                'company': LicenseInfo.objects.get(key='CompanyName').value,
+                'address': LicenseInfo.objects.get(key='OwnerAddressLine1').value + ", " + LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+                'address2': order.proposal.quote.estimate.project.city + ", " + order.proposal.quote.estimate.project.state + ", " + order.proposal.quote.estimate.project.zip,
+                'eng_firm': order.proposal.quote.estimate.engineer.company.name.upper(),
+                'eng_firm_address': order.proposal.quote.estimate.engineer.company.address_line_1 + ", " + order.proposal.quote.estimate.engineer.company.address_line_2,
+                'eng_firm_address2': order.proposal.quote.estimate.engineer.company.city + ", " + order.proposal.quote.estimate.engineer.company.state + ", " + order.proposal.quote.estimate.engineer.company.zip,
+            }
         },
         'pages': [],
     }

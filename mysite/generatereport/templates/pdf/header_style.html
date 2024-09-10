@@ -1,23 +1,69 @@
 {% load static %}
 
+{% load static %}
+
 <style type="text/css">
     .logo { width: 160px; display: inline-block; float: left; }
+
+    /* Define the page size in both print and screen media */
     @page {
         size: letter portrait;
-        @frame header_frame {
-            -pdf-frame-content: header_content;
-            width: 530pt; height: 150pt; left: 40pt; top: 12pt;
+    }
+
+    /* Set the background color outside the page to black for screen */
+    @media screen {
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
         }
-        @frame content_frame {
-            width: 530pt; left: 40pt; top: 90pt; height: 652pt;
+
+        .page {
+            width: 8.5in;    /* Letter size width */
+            height: 11in;    /* Letter size height */
+            margin: 10px auto;  /* Center the page vertically and horizontally */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Adds some visual for pages */
+            position: relative;
+            overflow: hidden;
+            background: white; /* Keep page background white */
+            padding: 40px;
         }
-        @frame footer_frame {
-            -pdf-frame-content: footer_content;
-            width: 530pt; height: 40pt; left: 40pt; bottom: 10pt;
+
+        /* Optional, ensures content is vertically centered (can adjust as needed) */
+        .page-content {
+            padding: 1in;   /* Adjust to match content */
+        }
+
+        /* Ensure footer sticks to the bottom of each page in screen view */
+        #footer_content {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 20px; /* Adjust padding if needed */
         }
     }
-    div.together { -pdf-keep-with-next: true; }
 
+    /* Print styling */
+    @media print {
+        .page-break {
+            page-break-before: always;
+        }
+
+        #footer_content {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Ensure the background is white for print */
+        body {
+            background-color: white;
+        }
+    }
+
+    /* Handle custom fonts */
     {% if os != "Windows" %}
     @font-face {
         font-family: cambria;
@@ -47,19 +93,5 @@
         font-family: calibri;
     }
     {% endif %}
-
-
-    .page-break {
-        page-break-before: always;
-    }
-
-    @media print {
-        #footer_content {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-        }
-    }
-
 </style>
+
