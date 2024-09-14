@@ -1,0 +1,12 @@
+{% block css %}
+<style>
+    .attach {
+        box-shadow: none;
+        max-width: 8.5in;
+    }
+</style>
+{% endblock %}
+
+<div class="attach">
+    <img style="width: 100%;" src="data:image/png;base64,{{ attach_img }}" data-magnify-src="data:image/png;base64,{{ attach_img }}">
+</div>

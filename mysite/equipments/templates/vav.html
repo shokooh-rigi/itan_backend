@@ -6,16 +6,31 @@
         border-collapse: collapse;
         border-spacing: 0;
         margin-top: 20px;
+
+        table-layout: fixed;
+        width: 100%;
     }
 
     .vav-table td, .vav-table th {
         border: 1px solid #000; /* You can adjust the border color and thickness */
         font-size: 14px;
         padding: 3.5px;
+
+        padding-bottom: 4px !important;
+        padding-top: 4px !important;
     }
 
     .no-cell-border {
         border: none !important;
+    }
+
+
+    .vav-table .center-title {
+        width: 100px; /* Adjust based on your desired width */
+    }
+
+    .vav-table td[colspan="2"] {
+        width: 20%; /* Adjust the width to ensure uniformity */
     }
 
 </style>

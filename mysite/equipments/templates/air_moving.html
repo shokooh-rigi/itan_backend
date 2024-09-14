@@ -7,16 +7,29 @@
         border-collapse: collapse;
         border-spacing: 0;
         margin-top: 20px;
+
+        table-layout: fixed;
+        width: 100%;
     }
 
     .air-mov-table td, .air-mov-table th {
         border: 1px solid #000; /* You can adjust the border color and thickness */
         font-size: 14px;
         padding: 3.5px;
+        padding-bottom: 5px !important;
+        padding-top: 5px !important;
     }
 
     .no-cell-border {
         border: none !important;
+    }
+
+    .air-mov-table .center-title {
+        width: 100px; /* Adjust based on your desired width */
+    }
+
+    .air-mov-table td[colspan="2"] {
+        width: 20%; /* Adjust the width to ensure uniformity */
     }
 
 </style>

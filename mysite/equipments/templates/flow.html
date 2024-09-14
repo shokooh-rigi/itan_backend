@@ -1,0 +1,182 @@
+{% load static %}
+{% load estimator_tags %}
+{% load flow_tags %}
+
+{% load custom_date_format %}
+
+{% block css %}
+<style type="text/css">
+    .flow-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin-top: 20px;
+
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .flow-table td, .flow-table th {
+        border: 1px solid #000; /* You can adjust the border color and thickness */
+        font-size: 14px;
+        padding: 3.5px;
+
+        padding-bottom: 4px !important;
+        padding-top: 4px !important;
+    }
+
+    .no-cell-border {
+        border: none !important;
+    }
+
+    .flow-table .center-title {
+        width: 100px; /* Adjust based on your desired width */
+    }
+
+    .flow-table td[colspan="2"] {
+        width: 20%; /* Adjust the width to ensure uniformity */
+    }
+
+</style>
+{% endblock %}
+
+
+<div id="content_frame">
+        <div class="content pdf-page-content">
+            <table class="table pdf-table flow-table">
+                <!-- Table head section -->
+                <thead>
+                <tr class="pdf-head-tr">
+                    <th colspan="21" scope="col"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <!-- Table title -->
+                <tr class="pdf-table-title">
+                    <td colspan="18" class="pdf-table-title-td no-cell-border">FLOW TEST SHEET</td>
+                    <td colspan="3" class="pdf-table-title-td pdf-page-number no-cell-border">Page {{ forloop.counter }}</td>
+                </tr>
+
+                <!-- Project specifications -->
+                <tr class="pdf-table-project-tr">
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border" style="padding: 0 2px 0;">PROJECT NO:</td>
+                    <td colspan="11" class="pdf-table-cell border">
+                        &nbsp;{{ project_no }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border">DATE:</td>
+                    <td colspan="6" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ start_date|custom_date_format }}{% if end_date %} - {{ end_date|custom_date_format }}{% endif %}
+                    </td>
+                </tr>
+                <tr class="pdf-table-project-tr">
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border">PROJECT:</td>
+                    <td colspan="11" class="pdf-table-cell border">
+                        &nbsp;{{ project }}
+                    </td>
+                    <td colspan="2" class="pdf-table-cell pdf-table-title-cell no-cell-border">SYSTEM:
+                    </td>
+                    <td colspan="6" class="pdf-table-cell pdf-table-center-cell border">
+                        &nbsp;{{ page.system }}
+                    </td>
+                </tr>
+                <!-- Title rows -->
+                <tr class="section-first-row pdf-table-row top-row-thick">
+                    <th rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title" style="border-left-width: 2px;">
+                        Br No.
+                    </th>
+                    <th rowspan="2" colspan="1" class="pdf-table-cell pdf-table-title-cell center-title">
+                        FMF No.
+                    </th>
+                    <th rowspan="2" colspan="3" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Location
+                    </th>
+                    <th rowspan="2" colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Unit Number
+                    </th>
+                    <th rowspan="2" colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Model Number
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Design
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Initial Test
+                    </th>
+                    <th colspan="4" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                        Final
+                    </th>
+                </tr>
+                <tr class="section-first-row pdf-table-row">
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        G.P.M.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        G.P.M.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title">
+                        Set / P.D.
+                    </th>
+                    <th colspan="2" class="pdf-table-cell pdf-table-title-cell center-title" style="border-right-width: 2px;">
+                        G.P.M.
+                    </th>
+                </tr>
+                {% for eq in page.data %}
+                    <tr class="pdf-table-row" style="height: 30px;">
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell" style="border-left-width: 2px;">
+                            {{ eq.br_no }}
+                        </td>
+                        <td colspan="1" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.fmf_no }}
+                        </td>
+                        <td colspan="3" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.location }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.unit_number }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.model_number }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.design.set_pd }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.design.gpm }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.initial_test.set_pd }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.initial_test.gpm }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell">
+                            {{ eq.final.set_pd }}
+                        </td>
+                        <td colspan="2" class="pdf-table-cell pdf-table-center-cell" style="border-right-width: 2px;">
+                            {{ eq.final.gpm }}
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                <tr class="no-border" style="border-top: 2px solid black;">
+                    <td class="pdf-table-cell no-cell-border" colspan="1">
+                        Notes:
+                    </td>
+                    <td class="pdf-table-cell no-cell-border" colspan="19" style="text-align: left">
+                        {% for eq in page.rows %}
+                            {% with eq|get_item:'Note' as note %}
+                                {% if note != '' %}{{ note }} | {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+</div>

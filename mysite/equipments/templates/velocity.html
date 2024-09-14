@@ -1,163 +1,418 @@
 {% load estimator_tags %}
 {% load velocity_tags %}
+
 {% load custom_date_format %}
 
-{% for velocity_equipment in page.rows %}
-    <div class="content pdf-page-content velocity">
-        <table class="table pdf-table">
-            <!-- Table head section -->
-            <thead>
-            <tr class="pdf-head-tr">
-                <th scope="col" colspan="14"></th>
-            </tr>
-            </thead>
+{% block css %}
+<style type="text/css">
+    .velocicty-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin-top: 20px;
 
-            <tbody>
-            <!-- Table title -->
-            <tr class="pdf-table-title">
-                <td class="pdf-table-title-td" colspan="13">VELOCITY TRAVERSE TEST SHEET</td>
-                <td class="pdf-table-title-td pdf-page-number" colspan="1">Page {{ forloop.parentloop.counter }}</td>
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .velocicty-table td, .velocicty-table th {
+        border: 1px solid #000; /* You can adjust the border color and thickness */
+        font-size: 14px;
+        padding: 3.5px;
+
+        padding-bottom: 4px !important;
+        padding-top: 4px !important;
+    }
+
+    .no-cell-border {
+        border: none !important;
+    }
+
+    .velocicty-table .center-title {
+        width: 100px; /* Adjust based on your desired width */
+    }
+
+    .velocicty-table td[colspan="2"] {
+        width: 20%; /* Adjust the width to ensure uniformity */
+    }
+
+</style>
+{% endblock %}
+
+<div class="content pdf-page-content velocity">
+    <table class="table pdf-table velocicty-table">
+        <!-- Table head section -->
+        <thead>
+        <tr class="pdf-head-tr">
+            <th scope="col" colspan="14"></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- Table title -->
+        <tr class="pdf-table-title">
+            <td class="pdf-table-title-td no-cell-border" colspan="13">VELOCITY TRAVERSE TEST SHEET</td>
+            <td class="pdf-table-title-td pdf-page-number no-cell-border" colspan="1">Page {{ forloop.parentloop.counter }}</td>
+        </tr>
+
+        <!-- Project specifications -->
+        <tr class="pdf-table-project-tr">
+            <td class="pdf-table-cell pdf-table-title-cell no-cell-border" colspan="2">PROJECT NO:</td>
+            <td class="pdf-table-cell border" colspan="6">
+                &nbsp;{{ project_no }}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell no-cell-border" colspan="2">DATE:</td>
+            <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
+                &nbsp;{{ start_date|custom_date_format }}{% if end_date %} - {{ end_date|custom_date_format }}{% endif %}
+            </td>
+        </tr>
+        <tr class="pdf-table-project-tr">
+            <td class="pdf-table-cell pdf-table-title-cell no-cell-border" colspan="2">PROJECT:</td>
+            <td class="pdf-table-cell border" colspan="6">
+                &nbsp;{{ project }}
+            </td>
+            <td class="pdf-table-cell pdf-table-title-cell no-cell-border" colspan="2">SYSTEM:</td>
+            <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
+                &nbsp;{{ page.system }}
+            </td>
+        </tr>
+
+        <!-- Title rows -->
+        <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="font-weight: bold;">
+                Fan No.
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.fan_no }}
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title no-border">
+
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title border">
+                Initial
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title border">
+                Final
+            </td>
+        </tr>
+        <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
+                Design C.F.M.
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.design_cfm }}
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
+                Actual C.F.M.:
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.actual_cfm.initial }}
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.actual_cfm.final }}
+            </td>
+        </tr>
+        <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
+                Duct Size
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.duct_size }}
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
+                Duct Static:
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.duct_static.initial }}
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.duct_static.final }}
+            </td>
+        </tr>
+
+        <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
+                Duct Area
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.duct_area }} Sq. Ft.
+            </td>
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
+                Actual Vel:
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.actual_vel.initial }}
+            </td>
+            <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
+                {{ data.actual_vel.final }}
+            </td>
+        </tr>
+
+        <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
+                Req. Vel
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.reqd_vel }} FPM
+            </td>
+        </tr>
+
+        <tr class="section-first-row pdf-table-row-thick" style="border-top-width: 0;">
+            <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
+                Traverse Location
+            </td>
+            <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
+                style="border-bottom: 1px solid black;">
+                {{ data.traverse_location }}
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    
+    <table class="table pdf-table velocicty-table" style="width: 100%; margin-top: 8px;">
+        <tbody>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+            </tr>
+            <tr class="pdf-table-row-thick section-middle-row" style="border-top-width: 2px;">
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
+                <td class="pdf-table-cell pdf-table-center-cell border" style="height: 35px; width: 7.14%;"></td>
             </tr>
 
-            <!-- Project specifications -->
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell" colspan="2">PROJECT NO:</td>
-                <td class="pdf-table-cell border" colspan="6">
-                    &nbsp;{{ form.my_sheet.project.project_number }}
+            <!-- Final row with the notes section -->
+            <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
+                <td class="pdf-table-cell note-title no-border" colspan="2" style="text-align: left;">
+                    Notes:
                 </td>
-                <td class="pdf-table-cell pdf-table-title-cell" colspan="2">DATE:</td>
-                <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
-                    &nbsp;{{ form.my_sheet.project.start_date|custom_date_format }}{% if form.my_sheet.project.end_date %} - {{ form.my_sheet.project.end_date|custom_date_format }}{% endif %}
+                <td class="pdf-table-cell no-border" colspan="12" style="text-align: left;">
+                    {{ data.note }}
                 </td>
             </tr>
-            <tr class="pdf-table-project-tr">
-                <td class="pdf-table-cell pdf-table-title-cell" colspan="2">PROJECT:</td>
-                <td class="pdf-table-cell border" colspan="6">
-                    &nbsp;{{ form.my_sheet.project.proposal.quote.estimate.project.name | upper }}
-                </td>
-                <td class="pdf-table-cell pdf-table-title-cell" colspan="2">SYSTEM:</td>
-                <td class="pdf-table-cell pdf-table-center-cell border" colspan="4">
-                    &nbsp;{{ page.system }}
-                </td>
-            </tr>
-
-            {{ rows }}
-
-            <!-- Title rows -->
-            <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="font-weight: bold;">
-                    Fan No.
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.fan_no }}
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell center-title no-border">
-
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title border">
-                    Initial
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-title-cell center-title border">
-                    Final
-                </td>
-            </tr>
-            <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
-                    Design C.F.M.
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.design_cfm }}
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
-                    Actual C.F.M.:
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.actual_cfm.initial }}
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.actual_cfm.final }}
-                </td>
-            </tr>
-            <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
-                    Duct Size
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.duct_size }}
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
-                    Duct Static:
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.duct_static.initial }}
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.duct_static.final }}
-                </td>
-            </tr>
-
-            <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
-                    Duct Area
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.duct_area }} Sq. Ft.
-                </td>
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border" style="text-align: right;">
-                    Actual Vel:
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.actual_vel.initial }}
-                </td>
-                <td colspan="2" class="pdf-table-cell pdf-table-center-cell border">
-                    {{ rows.actual_vel.final }}
-                </td>
-            </tr>
-
-            <tr class="section-first-row pdf-table-row-thick" style="border-bottom-width: 0; border-top-width: 0;">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
-                    Req. Vel
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.reqd_vel }} FPM
-                </td>
-            </tr>
-
-            <tr class="section-first-row pdf-table-row-thick" style="border-top-width: 0;">
-                <td colspan="3" class="pdf-table-cell pdf-table-title-cell no-border">
-                    Traverse Location
-                </td>
-                <td colspan="4" class="pdf-table-cell pdf-table-center-cell center-title no-border"
-                    style="border-bottom: 1px solid black;">
-                    {{ rows.traverse_location }}
-                </td>
-            </tr>
-
-            </tbody>
-        </table>
-        <table class="table pdf-table" style="margin-top: 8px;">
-            <tbody>
-                {% for i in page.max_row %}
-                    <tr class="pdf-table-row-thick section-middle-row" style="border-bottom-width: 0; {% if i == 0 %}border-top-width: 2px;{% else %}border-top-width: 1px;{% endif %}">
-                        {% for j in page.max_col %}
-                            <td colspan="5" class="pdf-table-cell pdf-table-center-cell border" style="height: 35px;">equipment_id</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-                <tr class="pdf-table-row no-border" style="border-top: 2px solid black;">
-                    <td class="pdf-table-cell note-title no-border" colspan="4">
-                        Notes:
-                    </td>
-                    <td class="pdf-table-cell no-border" colspan="65" style="text-align: left;">
-                        {{ rows.note }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-{% endfor %}
+        </tbody>
+    </table>
+    
+    
+</div>

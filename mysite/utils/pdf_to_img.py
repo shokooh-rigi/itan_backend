@@ -3,7 +3,8 @@ from pdf2image import convert_from_bytes
 from io import BytesIO
 from PIL import Image
 
-def pdf_to_image_bytes(s3_url):
+
+def pdf_to_image_bytes(url):
     """
     Download a PDF from an S3 link, convert it to images, and return image bytes.
     
@@ -11,7 +12,7 @@ def pdf_to_image_bytes(s3_url):
     :return: List of image bytes
     """
     # Download the PDF file
-    response = requests.get(s3_url)
+    response = requests.get(url)
     response.raise_for_status()  # Raise an error for bad status codes
 
     # Convert the PDF bytes to images

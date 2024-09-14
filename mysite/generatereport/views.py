@@ -38,6 +38,9 @@ from mysite.order.models import Order
 from django.conf import settings
 
 from contextlib import contextmanager
+from mysite.utils.pdf_to_img import pdf_to_image_bytes
+from base64 import b64encode
+
 
 
 # Create your views here.
@@ -788,13 +791,20 @@ def populate_notes_and_fields(field_names, design_set, actual_set, equipment_dat
     return note_count
 
 
-def fetch_field_data(equipment, field_name, default_value='', is_dict=True, actual_field=None):
+def fetch_field_data(
+        equipment, 
+        field_name, 
+        default_design_value='', 
+        default_actual_value='', 
+        is_dict=True, 
+        actual_field=None
+    ):
     """Fetches design and actual data for a given field name, or returns default values."""
     custom_fields = equipment.form_fields["design"]
     actual_fields = equipment.form_fields["actual"]
     
-    design_value = custom_fields.get(field_name, {}).get('value', default_value)
-    actual_value = actual_fields.get(field_name, {}).get('value', default_value if not is_dict else 'N.M.')
+    design_value = custom_fields.get(field_name, {}).get('value', default_design_value)
+    actual_value = actual_fields.get(field_name, {}).get('value', default_actual_value if not is_dict else 'N.M.')
     
     if design_value == '@':
         design_value = ''
@@ -803,11 +813,11 @@ def fetch_field_data(equipment, field_name, default_value='', is_dict=True, actu
 
     if is_dict:
         return {
-            'design': design_value if design_value else default_value,
-            'actual': actual_value if actual_value else default_value
+            'design': design_value if design_value else default_design_value,
+            'actual': actual_value if actual_value else default_actual_value
         }
     else:
-        return design_value if design_value else default_value
+        return design_value if design_value else default_design_value
 
 def fetch_air_mov_data(equipment):
     """Fetches and returns equipment data."""
@@ -826,30 +836,30 @@ def fetch_air_mov_data(equipment):
         'rh': fetch_field_data(equipment, 'RH %'),
         'outdoor_air_cfm': fetch_field_data(equipment, 'Outdoor Air C.F.M.'),
         'air_temp_in_heating': fetch_field_data(equipment, 'Air Temp. In Heating'),
-        'total_sp_ext_sp': fetch_field_data(equipment, 'Total SP (Ext. SP)'),
+        'total_sp_ext_sp': fetch_field_data(equipment, 'Total SP (Ext. SP)', default_actual_value='N.S.'),
         'air_temp_out_heating': fetch_field_data(equipment, 'Air Temp. Out Heating'),
-        'fan_unit_suction_pressure': fetch_field_data(equipment, 'Fan (Unit) Suction Pressure'),
+        'fan_unit_suction_pressure': fetch_field_data(equipment, 'Fan (Unit) Suction Pressure', default_actual_value='N.S.'),
         'ambient_temp': fetch_field_data(equipment, 'Ambient Temp.'),
-        'discharge_pressure_fan_unit': fetch_field_data(equipment, 'Discharge Pressure, Fan / Unit'),
+        'discharge_pressure_fan_unit': fetch_field_data(equipment, 'Discharge Pressure, Fan / Unit', default_actual_value='N.S.'),
         'oa_damper_poss': fetch_field_data(equipment, 'O.A. Damper Poss.'),
-        'fan_rpm': fetch_field_data(equipment, 'Fan R.P.M.', default_value='D.D.'),
+        'fan_rpm': fetch_field_data(equipment, 'Fan R.P.M.', default_design_value='D.D.', default_actual_value='D.D.'),
         'gpm': fetch_field_data(equipment, 'GPM'),
         'hp': fetch_field_data(equipment, 'H.P.', is_dict=False),
-        'belt_size': fetch_field_data(equipment, 'Belt Size', is_dict=False, default_value='N.A.'),
-        'motor_pully': fetch_field_data(equipment, 'Motor Pully', is_dict=False, default_value='N.A.'),
+        'belt_size': fetch_field_data(equipment, 'Belt Size', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
+        'motor_pully': fetch_field_data(equipment, 'Motor Pully', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
         'voltage': fetch_field_data(equipment, 'Voltage'),
-        'fan_pully': fetch_field_data(equipment, 'Fan Pully', is_dict=False, default_value='N.A.'),
+        'fan_pully': fetch_field_data(equipment, 'Fan Pully', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
         'phase': fetch_field_data(equipment, 'Phase'),
-        'c_to_c': fetch_field_data(equipment, 'C to C', is_dict=False, default_value='N.A.'),
+        'c_to_c': fetch_field_data(equipment, 'C to C', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
         'amperage': fetch_field_data(equipment, 'Amperage'),
-        'motor_shaft': fetch_field_data(equipment, 'Motor Shaft', is_dict=False, default_value='N.A.'),
-        'bhp': fetch_field_data(equipment, 'B.H.P. (Calc.)', default_value='N.S.'),
-        'fan_shaft': fetch_field_data(equipment, 'Fan Shaft', is_dict=False, default_value='N.A.'),
-        'frame': fetch_field_data(equipment, 'Frame', default_value='N.S.'),
+        'motor_shaft': fetch_field_data(equipment, 'Motor Shaft', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
+        'bhp': fetch_field_data(equipment, 'B.H.P. (Calc.)', default_design_value='N.S.', default_actual_value='N.S.'),
+        'fan_shaft': fetch_field_data(equipment, 'Fan Shaft', is_dict=False, default_design_value='N.A.', default_actual_value='N.A.'),
+        'frame': fetch_field_data(equipment, 'Frame', default_design_value='N.S.', default_actual_value='N.S.'),
         'vfd_hz': fetch_field_data(equipment, 'VFD / HZ', is_dict=False),
-        'sf_code': fetch_field_data(equipment, 'S.F. / Code', default_value='N.S.'),
+        'sf_code': fetch_field_data(equipment, 'S.F. / Code', default_design_value='N.S.', default_actual_value='N.S.'),
         'filter_size': fetch_field_data(equipment, 'Filter Size', is_dict=False),
-        'motor_rpm': fetch_field_data(equipment, 'Motor RPM', default_value='D.D.'),
+        'motor_rpm': fetch_field_data(equipment, 'Motor RPM', default_design_value='D.D.', default_actual_value='D.D.'),
         'filter_model': fetch_field_data(equipment, 'Filter Model', is_dict=False),
         'direct_drive': fetch_field_data(equipment, 'Direct Drive', is_dict=False),
         'belt_drive': fetch_field_data(equipment, 'Belt Drive', is_dict=False),
@@ -1150,6 +1160,59 @@ def fetch_velocity_data(equipment):
 
     return equipment_data
 
+def fetch_flow_measuring_data(equipments):
+    data = []
+    total_design_gpm = 0
+    total_final_gpm = 0
+    total_title = "TOTAL FLOW MEASURING STATION"
+    for e in equipments:
+        design_field_set = e.form_fields["design"]
+        actual_field_set = e.form_fields["actual"]
+
+        equipment_data = {
+            'br_no': actual_field_set.get('Br No.', {}).get('value', ''),
+            'fmf_no': actual_field_set.get('FMF No.', {}).get('value', ''),
+            'location': actual_field_set.get('Location', {}).get('value', ''),
+            'unit_number': e.code,
+            'model_number': e.model_number,
+            'design': {
+                'set_pd': actual_field_set.get('Set / P.D.', {}).get('value', ''),
+                'gpm': design_field_set.get('Design G.P.M.', {}).get('value', ''),
+            },
+            'initial_test': {
+                'set_pd': actual_field_set.get('Initial Test Set / P.D.', {}).get('value', ''),
+                'gpm': actual_field_set.get('Initial Test G.P.M.', {}).get('value', ''),
+            },
+            'final': {
+                'set_pd': actual_field_set.get('Final Set / P.D.', {}).get('value', ''),
+                'gpm': actual_field_set.get('Final G.P.M.', {}).get('value', ''),
+            },
+            'note': "",
+        }
+        # iterate and set '' for None
+        for key, val in equipment_data.items():
+            if isinstance(val, dict):
+                for sub_key, sub_val in val.items():
+                    equipment_data[key][sub_key] = sub_val if sub_val else ''
+            else:
+                equipment_data[key] = val if val else ''
+
+        notes = []
+        note_count = 0
+        note_count = populate_notes_and_fields({
+            'Note': 'note'
+        }, design_field_set, actual_field_set, equipment_data, notes, note_count)
+        equipment_data['note'] = " | ".join(notes)
+
+        data.append(equipment_data)
+        total_design_gpm += int(equipment_data['design']['gpm']) if equipment_data['design']['gpm'] else 0
+        total_final_gpm += int(equipment_data['final']['gpm']) if equipment_data['final']['gpm'] else 0
+    return {
+        'data': data, 
+        'total_design_gpm': total_design_gpm, 
+        'total_final_gpm': total_final_gpm, 
+        'total_title': total_title
+    }
     
 @login_required
 def report_sheet_recreate_call(
@@ -1676,7 +1739,7 @@ def report_sheet_show(
     order_id,
 ):
     order = get_object_or_404(Order, id=order_id)
-
+    toc = []
 
     context = {
         'order_id': order_id,
@@ -1716,10 +1779,10 @@ def report_sheet_show(
                 'owner': LicenseInfo.objects.get(key='OwnerName').value,
                 'company': LicenseInfo.objects.get(key='CompanyName').value,
                 'address': LicenseInfo.objects.get(key='OwnerAddressLine1').value + ", " + LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-                'address2': order.proposal.quote.estimate.project.city + ", " + order.proposal.quote.estimate.project.state + ", " + order.proposal.quote.estimate.project.zip,
+                'address2': str(order.proposal.quote.estimate.project.city) + ", " + str(order.proposal.quote.estimate.project.state) + ", " + str(order.proposal.quote.estimate.project.zip),
                 'eng_firm': order.proposal.quote.estimate.engineer.company.name.upper(),
                 'eng_firm_address': order.proposal.quote.estimate.engineer.company.address_line_1 + ", " + order.proposal.quote.estimate.engineer.company.address_line_2,
-                'eng_firm_address2': order.proposal.quote.estimate.engineer.company.city + ", " + order.proposal.quote.estimate.engineer.company.state + ", " + order.proposal.quote.estimate.engineer.company.zip,
+                'eng_firm_address2': str(order.proposal.quote.estimate.engineer.company.city) + ", " + str(order.proposal.quote.estimate.engineer.company.state) + ", " + str(order.proposal.quote.estimate.engineer.company.zip),
             }
         },
         'pages': [],
@@ -1736,6 +1799,7 @@ def report_sheet_show(
         context['cover']['location'] += ", " + order.proposal.quote.estimate.project.zip.upper()
 
     datasheets = order.data_sheets.all()
+    page_counter = 1
     # Air Moving
     air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
     if len(air_moving_equipments) > 0:
@@ -1745,13 +1809,36 @@ def report_sheet_show(
                 'system': air_moving_equipment.fan_no,
                 'data': fetch_air_mov_data(air_moving_equipment),
             })
+            toc.append({
+                'name': air_moving_equipment.fan_no,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'AIR MOVING EQUIPMENT TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
+
             # Air Terminal
             this_air_moving_terminals = datasheets.filter(parent=air_moving_equipment.id, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
-            for _t in [1, 2, 3, 4]:
-                this_terminals = this_air_moving_terminals.filter(_type=_t)
-                if this_terminals:
-                    terminals_data = fetch_terminal_data(this_terminals, _t)
-                    context['pages'].append(terminals_data)
+            if len(this_air_moving_terminals) > 0:
+                toc.append({
+                    'name': 'AIR TERMINAL TEST SHEET',
+                    'page': page_counter,
+                    'level': 1,
+                    'underline': False
+                })
+                for _t in [1, 2, 3, 4]:
+                    this_terminals = this_air_moving_terminals.filter(_type=_t)
+                    if this_terminals:
+                        for terminal in this_terminals:
+                            terminals_data = fetch_terminal_data([terminal], _t)
+                            context['pages'].append(terminals_data)
+                page_counter += len(this_air_moving_terminals)
 
     # VAV
     vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
@@ -1770,13 +1857,35 @@ def report_sheet_show(
                 'system': 'VAVs',
                 'data': data,
             })
+            toc.append({
+                'name': page_items[0].code,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'V.A.V. BOX SCHEDULE TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
             # Air Terminal
             this_vav_terminals = datasheets.filter(parent__in=page_items, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
-            for _t in [1, 2, 3, 4]:
-                this_terminals = this_vav_terminals.filter(_type=_t)
-                if this_terminals:
-                    terminals_data = fetch_terminal_data(this_terminals, _t)
-                    context['pages'].append(terminals_data)
+            if len(this_vav_terminals) > 0:
+                toc.append({
+                    'name': 'AIR TERMINAL TEST SHEET',
+                    'page': page_counter,
+                    'level': 1,
+                    'underline': False
+                })
+                for _t in [1, 2, 3, 4]:
+                    this_terminals = this_vav_terminals.filter(_type=_t)
+                    if this_terminals:
+                        for terminal in this_terminals:
+                            terminals_data = fetch_terminal_data([terminal], _t)
+                            context['pages'].append(terminals_data)
+                page_counter += len(this_vav_terminals)
 
     # Pump
     pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all()
@@ -1790,13 +1899,131 @@ def report_sheet_show(
                 'system': 'Pumps',
                 'data': data,
             })
+            toc.append({
+                'name': page_items[0].code,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'PUMP TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
 
     # Velocity Traverse
     velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
+    if len(velocity_traverse_equipments) > 0:
+        for eq in velocity_traverse_equipments:
+            data = fetch_velocity_data(eq)
+            context['pages'].append({
+                'type': 'VELOCITY',
+                'system': 'VELOCITY TRAVERSE',
+                'data': data
+            })
+            toc.append({
+                'name': eq.code,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'VELOCITY TRAVERSE TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
 
+    # Flow Measuring
+    flow_measuring_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Flow Measuring').all()
+    # 22 - 1 total row
+    FLOW_MEASURING_IN_ONE_PAGE = 21
+    if len(flow_measuring_equipments) > 0:
+        for i in range(math.ceil(flow_measuring_equipments.count() / FLOW_MEASURING_IN_ONE_PAGE)):
+            page_items = flow_measuring_equipments[i * FLOW_MEASURING_IN_ONE_PAGE: (i + 1) * FLOW_MEASURING_IN_ONE_PAGE]
+            data = fetch_flow_measuring_data(page_items)
+            total_design_gpm = data['total_design_gpm']
+            total_final_gpm = data['total_final_gpm']
+            total_title = data['total_title']
+            data = data['data']
+            if len(page_items) < FLOW_MEASURING_IN_ONE_PAGE:
+                empty_slots = FLOW_MEASURING_IN_ONE_PAGE - len(page_items)
+                data.extend([{}] * empty_slots)
+            context['pages'].append({
+                'type': 'FLOWMEASURING',
+                'system': 'Flow Measuring',
+                'data': data,
+                'total_design_gpm': total_design_gpm,
+                'total_final_gpm': total_final_gpm,
+                'total_title': total_title,
+            })
+            toc.append({
+                'name': page_items[0].code,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'FLOW MEASURING TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
 
+    # Attachment
+    attachments = []
+    for ds in datasheets:
+        if ds.attach:
+            url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(ds.attach.file)
+            url = url.replace("/media///app/", "")
+            image_bytes_list = pdf_to_image_bytes(url)
+            image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
+            attachments.extend(image_data_list)
+            context['pages'].append({
+                'type': 'ATTACHMENT',
+                'images': attachments,
+            })
+            toc.append({
+                'name': ds.attach_type,
+                'page': page_counter,
+                'level': 0,
+                'underline': False
+            })
+            page_counter += len(image_data_list)
 
-    context['pages'].append([])
+    # Colored Drawing
+    if order.report_colored_drawing:
+        url = "http://itab-test-server.airdec.net:8000" + str(order.report_colored_drawing.file)
+        url = url.replace("/app/", "/")
+        image_bytes_list = pdf_to_image_bytes(url)
+        image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
+        context['pages'].append({
+            'type': 'ATTACHMENT',
+            'images': image_data_list,
+        })
+        toc.append({
+            'name': 'AS BUILT MECHANICAL PLAN',
+            'page': page_counter,
+            'level': 0,
+            'underline': False
+        })
+        page_counter += len(image_data_list)
+    context['toc'] = toc
+
+    context['attach_types'] = {
+        'SITE PHOTO',
+        'THIRD PARTY TEST SHEET',
+        'SPECIFIC DRAWING',
+        'CHART',
+        'CERTIFICATE & CALIBRATION',
+        'SUBMITTAL DATA',
+
+        'AS BUILT MECHANICAL PLAN'
+    }
 
     return render(request, "pdf/base_report.html", context)
 

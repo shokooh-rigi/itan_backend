@@ -17,7 +17,6 @@
     {% include "pdf/header.html" %}
     <div class="content pdf-page-content">
         <table class="table" style="font-size: 14pt;">
-            <!-- Table head section -->
             <thead>
                 <tr>
                     <th colspan="8"></th>
@@ -28,85 +27,77 @@
         <div style="text-align: center; font-size: 17pt; padding: 0; margin-top: 20px;">
             <span style="font-weight: bold;">TABLE OF CONTENTS</span><br />
             <span class="calibri">
-            TAB TECHNOLOGIES PROJECT NO. {{ report_sheet.project.project_number }}
-            <br />{{ report_sheet.project.proposal.quote.estimate.project|upper }}
+            TAB TECHNOLOGIES PROJECT NO. {{ project_no }}
+            <br />{{ project }}
             </span>
         </div>
 
         <table class="table table-borderless" style="margin-left: 20px; margin-top: 20px;">
             <thead>
                 <tr>
-                    <th scope="col" style="width: 30%; text-align: left;">ITEM</th> <!-- Adjusted width for item names -->
-                    <th scope="col" style="width: 55%;">&nbsp;</th> <!-- Increased width for dots -->
-                    <th scope="col" style="width: 15%;">PAGE NO.</th>
+                    <th scope="col" style="width: 30%; text-align: left;">ITEM</th>
+                    <th scope="col" style="width: 55%;">&nbsp;</th> 
+                    <th scope="col" style="width: 15%;">PAGE&nbsp;NO.</th>
                 </tr>
             </thead>
             <tbody>
+                <tr></tr>
+                <tr></tr>
                 <tr class="pt-5">
-                    <th scope="row" class="left_align" style="width: 30%;">INSTRUMENTATION</th> <!-- Reduced width -->
-                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <th scope="row" class="left_align" style="width: 30%;">INSTRUMENTATION</th>
+                    <td style="width: 80%;">...............................................................................................................</td>
                     <td style="text-align: center;">I</td>
                 </tr>
                 <tr>
-                    <th scope="row" class="left_align" style="width: 30%;">GENERAL NOTES</th> <!-- Reduced width -->
-                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <th scope="row" class="left_align" style="width: 30%;">GENERAL NOTES</th>
+                    <td style="width: 80%;">...............................................................................................................</td>
                     <td style="text-align: center;">II</td>
                 </tr>
                 <tr>
-                    <th scope="row" class="left_align" style="width: 30%;">ABBREVIATIONS</th> <!-- Reduced width -->
-                    <td style="width: 80%;">.....................................................</td> <!-- Increased dots -->
+                    <th scope="row" class="left_align" style="width: 30%;">ABBREVIATIONS</th>
+                    <td style="width: 80%;">...............................................................................................................</td> 
                     <td style="text-align: center;">III</td>
                 </tr>
                 <tr>
                     <th scope="row" class="left_align" style="width: 100%;">AABC NATIONAL PERFORMANCE GUARANTY</th>
-                    <td style="width: 25%;">..................................................</td> <!-- Default dots width -->
+                    <td style="width: 25%;">...............................................................................................................</td> 
                     <td style="text-align: center;">IV</td>
                 </tr>
-                {% for line in table_of_content %}
+
+                <tr></tr>
+                <tr></tr>
+
+                {% for line in toc %}
                 <tr>
-                    {% if line.pages %}
-                        {% if 'AS BUILT MECHANICAL PLAN' in line.name %}
-                        <th scope="row" class="left_align mt-2 pt-2" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% elif 'SITE PHOTO' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% elif 'THIRD PARTY TEST SHEET' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% elif 'SPECIFIC DRAWING' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% elif 'CHART' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        % elif 'CERTIFICATE & CALIBRATION' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% elif 'SUBMITTAL DATA' in line.name %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">{{ line.name }}</th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
+                    {% if line.level == 0 %}
+                        {% if line.name in attach_types %}
+                            <th scope="row" class="left_align" style="font-weight: normal;">
+                                {{ line.name }}
+                            </th>
+                            <td style="width: 60%;">...............................................................................................................</td> <!-- Default dots width -->
+                            <td style="text-align: center;">
+                                {{ line.page }}
+                            </td>
                         {% else %}
+                            <th scope="row" class="left_align" style="font-weight: bold; text-decoration: underline;">
+                                {{ line.name }}
+                            </th>
+                            <td style="width: 60%;"></td>
+                            <td style="text-align: center;"></td>
+                        {% endif %}
+
+                    {% else %}
                         <th scope="row" class="left_align" style="font-weight: normal;">
                             &nbsp;&nbsp;&nbsp;&nbsp;• {{ line.name }}
                         </th>
-                        <td style="width: 60%;">..................................................</td> <!-- Default dots width -->
-                        <td style="text-align: center;">{{ line.pages }}</td>
-                        {% endif %}
-                    {% else %}
-                        <th scope="row" class="left_align" style="text-decoration: underline;">{{ line.name }}</th>
-                        <td></td>
-                        <td></td>
+                        <td style="width: 60%;">...............................................................................................................</td> <!-- Default dots width -->
+                        <td style="text-align: center;">
+                            {{ line.page }}
+                        </td>
                     {% endif %}
                 </tr>
                 {% endfor %}
+
             </tbody>
         </table>
         

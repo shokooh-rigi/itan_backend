@@ -265,6 +265,22 @@
             -pdf-keep-with-next: false;
         }
 
+        /* Floating icon styles */
+        .floating-print-icon {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .floating-print-icon:hover {
+            opacity: 1;
+        }
+
     </style>
     {% block css %}{% endblock %}
 </head>
@@ -275,31 +291,53 @@
 {% include "pdf/general_info.html" %}
 
 
+<!-- Floating icon for printing -->
+<img src="{% static 'images/icons/print.png' %}" width="32" alt="Print Icon" class="floating-print-icon" onclick="printReport()" id="print_icon">
+
 {% for page in pages %}
+    {% if page.type == 'ATTACHMENT' %}
+        {% for attach_img in page.images %}
+            <div class="page page-break">
+                <div id="content_frame">
+                    {% include "attach.html" %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
 
-    <div class="page page-break">
-        {% include "pdf/header.html" %}
-        
-        <div id="content_frame">
-            {% if page.type == 'AIRMOVING' %}
-                {% include "air_moving.html" %}
-            {% elif page.type == 'SUPPLY' or page.type == 'RETURN' or page.type == 'OUTSIDE' or page.type == 'OTHER' %}
-                {% include "pdfTemplates/terminalPdfContent.html" %}
-            {% elif page.type == 'TERMINAL' %}
-                {% include "terminal.html" %}
-            {% elif page.type == 'VAV' %}
-                {% include "vav.html" %}
-            {% elif page.type == 'VELOCITY' %}
-                {% include "pdfTemplates/velocityPdfContent.html" %}
-            {% elif page.type == 'PUMP' %}
-                {% include "pump.html" %}
-            {% endif %}
-        </div>
+        <div class="page page-break">
+            {% include "pdf/header.html" %}
             
-        {% include "pdf/footer.html" %}
-    </div>
-
+            <div id="content_frame">
+                {% if page.type == 'AIRMOVING' %}
+                    {% include "air_moving.html" %}
+                {% elif page.type == 'SUPPLY' or page.type == 'RETURN' or page.type == 'OUTSIDE' or page.type == 'OTHER' %}
+                    {% include "pdfTemplates/terminalPdfContent.html" %}
+                {% elif page.type == 'TERMINAL' %}
+                    {% include "terminal.html" %}
+                {% elif page.type == 'VAV' %}
+                    {% include "vav.html" %}
+                {% elif page.type == 'VELOCITY' %}
+                    {% include "velocity.html" %}
+                {% elif page.type == 'PUMP' %}
+                    {% include "pump.html" %}
+                {% elif page.type == 'FLOWMEASURING' %}
+                    {% include "flow.html" %}
+                {% endif %}
+            </div>
+            {% include "pdf/footer.html" %}
+        </div>
+    {% endif %}
+    
 {% endfor %}
+
+
+<script>
+    function printReport() {
+        console.log('Printing report...');
+        window.print();
+    }
+</script>
 
 </body>
 </html>

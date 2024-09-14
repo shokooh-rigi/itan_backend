@@ -14,41 +14,41 @@
     <div id="content_frame" class="calibri">
         <h1 style="text-align: center; font-size: 20pt; padding: 20px 0 10px 0;">Test and Balance Report</h1>
         <div class="content pdf-page-content">
-            <table class="table" style="font-size: 14pt;">
+            <table class="table" style="font-size: 14pt; width: 100%;">
                 <!-- Table head section -->
                 <tbody>
                 <!-- Table title -->
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td" colspan="2" style="font-weight: bold;">Project:</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="7" style="font-size: 16pt;">{{ project }}</td>
+                    <td class="pdf-table-title-td" colspan="3" style="font-weight: bold;">Project:</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="6" style="font-size: 16pt;">{{ project }}</td>
                 </tr>
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Location:</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="7">
+                    <td class="pdf-table-title-td font-weight-bold" colspan="3" style="font-weight: bold;">Location:</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="6">
                         {{ cover.location }}
                     </td>
                 </tr>
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Contractor:</td>
+                    <td class="pdf-table-title-td font-weight-bold" colspan="3" style="font-weight: bold;">Contractor:</td>
                     <td class="pdf-table-title-td pdf-page-number"
-                        colspan="7">{{ client }}</td>
+                        colspan="6">{{ client }}</td>
                 </tr>
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Architect:</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="7">
+                    <td class="pdf-table-title-td font-weight-bold" colspan="3" style="font-weight: bold;">Architect:</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="6">
                         {{ cover.architect }}
                     </td>
                 </tr>
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Engineer:</td>
+                    <td class="pdf-table-title-td font-weight-bold" colspan="3" style="font-weight: bold;">Engineer:</td>
                     <td class="pdf-table-title-td pdf-page-number"
-                        colspan="7">{{ cover.engineer }}</td>
+                        colspan="6">{{ cover.engineer }}</td>
                 </tr>
                 <tr class="pdf-table-title cover-table-cell">
                 </tr>
                 <tr class="pdf-table-title cover-table-cell" style="padding: 3px 0;">
-                    <td class="pdf-table-title-td font-weight-bold" colspan="2" style="font-weight: bold;">Project No.:</td>
-                    <td class="pdf-table-title-td pdf-page-number" colspan="7" style="text-decoration: overline;">
+                    <td class="pdf-table-title-td font-weight-bold" colspan="3" style="font-weight: bold;">Project No.:</td>
+                    <td class="pdf-table-title-td pdf-page-number" colspan="6">
                         {{ project_no }}</td>
                 </tr>
 
@@ -74,7 +74,8 @@
                         style="border-bottom-color: white; border-top-color: white; padding: 5px 0;">
                         <td class="pdf-table-title-td font-weight-bold cover-table-cell"
                             style="width: 50%; text-align: center; border-right-color: white; font-size: 11pt;">ASSOCIATED
-                            AIR BALANCE COUNCIL CERTIFICATION NO. 90-07-25
+                            AIR BALANCE COUNCIL 
+                            <br/> CERTIFICATION NO. 90-07-25
                         </td>
                         <td class="pdf-table-title-td font-weight-bold cover-table-cell" style="width: 50%; border-left-color: white;">
                             <img alt="tbe-signature" src="{% static 'images/stamp.png' %}" class="signature"
