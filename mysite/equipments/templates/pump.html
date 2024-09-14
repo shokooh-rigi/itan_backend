@@ -18,8 +18,8 @@
         font-size: 14px;
         padding: 3.5px;
 
-        padding-bottom: 6px !important;
-        padding-top: 6px !important;
+        padding-bottom: 5px !important;
+        padding-top: 5px !important;
     }
 
     .no-cell-border {
@@ -456,26 +456,13 @@
             </tr>
             <tr class="section-first-row pdf-table-row bottom-row-thick" style="height: 60px;">
                 <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top;">
-                    Remarks: <span style="font-weight: normal;">{{ page.data.0.remarks }}</span>
+                    Notes: <span style="font-weight: normal;">{{ page.data.0.note }}</span>
                 </td>
                 <td colspan="9" class="pdf-table-cell pdf-table-title-cell" style="border-left-width: 2px; vertical-align:top; border-right-width: 2px;">
-                    Remarks: <span style="font-weight: normal;">{{ page.data.1.remarks }}</span>
+                    Notes: <span style="font-weight: normal;">{{ page.data.1.note }}</span>
                 </td>
             </tr>
 
-            <!-- Note section -->
-            <tr class="pdf-table-note-section">
-                <td class="note-title no-cell-border">
-                    Notes:
-                </td>
-                <td colspan="9" class="no-cell-border">
-                <div id="note-div-actual" class="note-div">
-                    {% for  note in page.data.note %}
-                        {{ note }} |
-                    {% endfor %}
-                </div>
-                </td>
-            </tr>
             </tbody>
 
         </tbody>

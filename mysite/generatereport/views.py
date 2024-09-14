@@ -1109,7 +1109,6 @@ def fetch_pump_data(pumps):
             'amps_actual': get_field_value(actual_field_set, 'Amps'),
             'volts_design': get_field_value(design_field_set, 'Volts'),
             'volts_actual': get_field_value(actual_field_set, 'Volts'),
-            'remarks': "",
             'note': "",
         }
 

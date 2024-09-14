@@ -27,6 +27,7 @@ def order_update(request, order_id):
     dsq = this_order.data_sheets.all()
     _eq_types = Equipment.objects.exclude(test_sheet__isnull=True)
     manufacturers = EquipmentManufacturer.objects.all()
+    manufacturers = sorted(manufacturers, key=lambda x: x.name)
     modules_type = "Equipments"
     eq_types = []
     for eq in _eq_types:
@@ -36,6 +37,7 @@ def order_update(request, order_id):
             'test_sheet': eq.test_sheet.name if eq.test_sheet else None,
             'test_sheet_id': eq.test_sheet.id if eq.test_sheet else None,
         })
+    eq_types = sorted(eq_types, key=lambda x: x['name'])
     _test_sheets = TestSheet.objects.all()
     test_sheets = []
     for ts in _test_sheets:
@@ -43,7 +45,7 @@ def order_update(request, order_id):
             'id': ts.id,
             'name': ts.name,
         })
-
+    test_sheets = sorted(test_sheets, key=lambda x: x['name'])
     ـequipments = []
     if not dsq.exists():
         estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
@@ -157,6 +159,7 @@ def equipment_update(request, equipment_id):
             'title': title,
         })
     manufacturers = EquipmentManufacturer.objects.all()
+    manufacturers = sorted(manufacturers, key=lambda x: x.name)
     context = {
         "ds": ds,
         "manufacturers": manufacturers,
