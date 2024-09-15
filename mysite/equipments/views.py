@@ -52,6 +52,8 @@ def order_update(request, order_id):
         if estimate.exists():
             modules_type = "Estimate"
             for eq in estimate:
+                if eq.equipment.name == "RGD":
+                    continue
                 ـequipments.append({
                     'id': eq.id,
                     'equipment': eq.equipment.name,
@@ -94,8 +96,14 @@ def order_update(request, order_id):
             # nested_dict[service][test_sheet][equipment_id] = eq['equipment']
             nested_dict[service][test_sheet][equipment_id] = eq
         ـequipments = nested_dict
+
         if 'Air Terminal' in ـequipments['Air Balancing']:
-            del ـequipments['Air Balancing']['Air Terminal']
+            keys_to_delete = []
+            for eq_id, eq in ـequipments['Air Balancing']['Air Terminal'].items():
+                if eq['equipment'] != 'Other Air Terminal':
+                    keys_to_delete.append(eq_id)
+            for eq_id in keys_to_delete:
+                del ـequipments['Air Balancing']['Air Terminal'][eq_id]
 
         # service_order = ['Air Balancing', 'Water Balancing']
         # sorted_equipments = OrderedDict()

@@ -11,22 +11,12 @@
             "formula": "",
             "required": false
         },
-        "Outlet No.": {
-            "type": "number", 
-            "value": null,
-            "placeholder": "",
-            "note": "",
-            "order": 2,
-            "validation": "^[0-9]*$",
-            "formula": "",
-            "required": true
-        },
         "Code": {
             "type": "text", 
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 3,
+            "order": 2,
             "validation": "",
             "formula": "",
             "required": true
@@ -36,7 +26,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 4,
+            "order": 3,
             "validation": "",
             "formula": "",
             "required": true
@@ -46,7 +36,7 @@
             "value": "*",
             "placeholder": "",
             "note": "",
-            "order": 5,
+            "order": 4,
             "validation": "",
             "formula": "",
             "required": false
@@ -56,7 +46,7 @@
             "value": "*",
             "placeholder": "",
             "note": "",
-            "order": 6,
+            "order": 5,
             "validation": "",
             "formula": "7_design / 5_design",
             "required": false,
@@ -67,7 +57,7 @@
             "value": null,
             "placeholder": "",
             "note": "",
-            "order": 7,
+            "order": 6,
             "validation": "^[0-9]*$",
             "formula": "",
             "required": true

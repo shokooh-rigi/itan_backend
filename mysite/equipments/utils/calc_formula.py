@@ -3,6 +3,7 @@ import re
 
 def calculate_formula(formula, fields, new_data):
     # Regex to identify placeholders like '2_actual'
+    value = None
     placeholders = re.findall(r'\d+_[a-zA-Z]+', formula)
     for placeholder in placeholders:
         order, form_type = placeholder.split('_')

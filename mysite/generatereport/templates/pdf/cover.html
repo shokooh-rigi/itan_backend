@@ -82,11 +82,13 @@
                                 style="height: 200px;"/><br/>
                         </td>
                     </tr>
-                    <tr style="border-top-color: white; border-bottom-color: white;">
-                        <td colspan="2" class="cover-table-cell">REVISED: <span style="text-decoration: underline;">
-                                {{ revised_date|custom_date_format }}
-                        </span></td>
-                    </tr>
+                    {% if revised_date %}
+                        <tr style="border-top-color: white; border-bottom-color: white;">
+                            <td colspan="2" class="cover-table-cell">REVISED: <span style="text-decoration: underline;">
+                                    {{ revised_date|custom_date_format }}
+                            </span></td>
+                        </tr>
+                    {% endif %}
                     <tr style="border-top-color: white;">
                         <td colspan="2" class="cover-table-cell">DATE: <span style="text-decoration: underline;">
                                 {{ report_date|custom_date_format }}

@@ -238,8 +238,8 @@
             </div>
             <div style="text-align: center; font-size: 17pt; padding: 0;">
                 <span class="calbria" style="font-weight: bold;">GENERAL NOTES AND COMMENTS</span><br />
-                TAB TECHNOLOGIES PROJECT NO. {{ general_info.project_no }}
-            <br />{{ general_info.project }}
+                TAB TECHNOLOGIES PROJECT NO. {{ project_no }}
+            <br />{{ project }}
             </div>
             <br />
             <div style="font-size: 13pt;">
@@ -262,7 +262,7 @@
             </div>
             <div class="calibri" style="text-align: center; font-size: 17pt; padding: 0;">
                 <span class="cambria" style="font-weight: bold;">REPORT ABBREVIATIONS SHEET</span><br />
-                TAB TECHNOLOGIES PROJECT NO. {{ general_info.project_no }}<br />{{ general_info.project }}
+                TAB TECHNOLOGIES PROJECT NO. {{ project_no }}<br />{{ project }}
             </div>
             <div style="text-align: center;">
 
@@ -424,11 +424,15 @@
                         <br><br>
                         <p class="guarantee-centered-line">Pursuant to the agreement between</p>
                         <p><span class="guarantee-underline" style="width: 100%; text-align: center;">
-                            {{ general_info.guaranty.company }}
+                            <span style="margin-left: -50px;">
+                                {{ general_info.guaranty.company }}
+                            </span>
                         </span></p>
                         <p class="guarantee-centered-line">AABC Certified Testing & Balancing Agency</p>
                         <p>and <span class="guarantee-underline" style="width: 95%; text-align: center;">
-                            {{ client }}
+                            <span style="margin-left: -50px;">
+                                {{ client }}
+                            </span>
                         </span></p>
                         <p class="guarantee-centered-line">Client</p>
                         <p style="font-size: 10px;"><span style="margin-left: 30px;">

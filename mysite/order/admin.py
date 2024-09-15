@@ -15,11 +15,11 @@ class OrderResource(resources.ModelResource):
 
 # class OrderAdmin(ImportExportModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
-    resource_class = OrderResource
+    # resource_class = OrderResource
     search_fields = ['project_number']
-    # fieldsets = [
-    #     ('Order Information', {'fields': ['project_number', 'colored_drawing']}),
-    # ]
+    fieldsets = [
+        ('Order Information', {'fields': ['project_number', 'colored_drawing', 'report_colored_drawing']}),
+    ]
 
 
 admin.site.register(Order, OrderAdmin)

@@ -40,112 +40,124 @@
         </h3>
     </div>
     {% if ds.equipment_type.test_sheet.name == 'Air Moving' %}
-        <form action="/path-to-your-post-method" method="put">
-            <div class="row">
-                <!-- DataSheet Info -->
-                <div class="col-md-6">
-                    <!-- <h4>DataSheet Info</h4> -->
-                    <div class="form-group">
-                        <label for="fan_no" class="form-label">Fan No.</label>
-                        <input type="text" class="form-control" id="fan_no" name="fan_no" value="{{ ds.fan_no }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="area_served" class="form-label">Area Served</label>
-                        <input type="text" class="form-control" id="area_served" name="area_served" value="{{ ds.area_served }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="location" class="form-label">Location</label>
-                        <input type="text" class="form-control" id="location" name="location" value="{{ ds.location }}" required>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Parent</span>
-                            </div>
-                            <select name="parent" class="form-control" id="id_parent">
-                                <option value="">---------</option>
-                                {% for p in parents %}
-                                <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Refrence file select -->
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Reference File</span>
-                            </div>
-                            <select name="attach_type" class="form-control" id="id_attach_type">
-                                <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
-                                <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
-                                <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
-                                <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
-                                <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
-                                <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- File field -->
-                    <div class="form-group">
-                        <label for="attach" class="form-label">File</label>
-                        <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
-                    </div>
-                    <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
-
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="fan_no" class="form-label">Fan No.</label>
+                    <input type="text" class="form-control" id="fan_no" name="fan_no" value="{{ ds.fan_no }}" required>
                 </div>
-                <!-- Project Info -->
-                <div class="col-md-6">
-                    <!-- <h4>Project Info</h4> -->
-                    <div class="form-group">
-                        <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                <div class="form-group">
+                    <label for="area_served" class="form-label">Area Served</label>
+                    <input type="text" class="form-control" id="area_served" name="area_served" value="{{ ds.area_served }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" value="{{ ds.location }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="form-group">
-                        <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
                     </div>
-                    <div class="form-group">
-                        <label for="number_of_outside_air_terminal" class="form-label">Number of Outside Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_outside_air_terminal" name="number_of_outside_air_terminal" value="{{ ds.number_of_outside_air_terminal }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="number_of_exhaust_air_terminal" class="form-label">Number of Exhaust Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_exhaust_air_terminal" name="number_of_exhaust_air_terminal" value="{{ ds.number_of_exhaust_air_terminal }}" required>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Manufacturer</span>
-                            </div>
-                            <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
-                                <option value="">---------</option>
-                                {% for manufacturer in manufacturers %}
-                                <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="input-group-append">
-                                <!-- Edit icon -->
-                                <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
-                                    <i class="fas fa-edit fa-sm"></i>
-                                </a>
-                                <!-- Add icon (plus) -->
-                                <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
-                                    <i class="fas fa-plus fa-sm"></i>
-                                </a>
-                            </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_outside_air_terminal" class="form-label">Number of Outside Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_outside_air_terminal" name="number_of_outside_air_terminal" value="{{ ds.number_of_outside_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_exhaust_air_terminal" class="form-label">Number of Exhaust Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_exhaust_air_terminal" name="number_of_exhaust_air_terminal" value="{{ ds.number_of_exhaust_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="model_number" class="form-label">Model Number</label>
-                        <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
-                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary m-5">Save</button>
-        </form>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
     <!-- Velocity Traverse -->
      {% elif ds.equipment_type.test_sheet.name == 'Velocity Traverse' %}
      <form action="/path-to-your-post-method" method="put">
@@ -201,9 +213,21 @@
                 <!-- File field -->
                 <div class="form-group">
                     <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
                     <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
                 </div>
-                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
 
             </div>
         </div>
@@ -269,9 +293,21 @@
                 <!-- File field -->
                 <div class="form-group">
                     <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
                     <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
                 </div>
-                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
 
             </div>
             <!-- Project Info -->
@@ -368,9 +404,21 @@
                 <!-- File field -->
                 <div class="form-group">
                     <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
                     <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
                 </div>
-                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
 
             </div>
             <!-- Project Info -->
@@ -467,9 +515,21 @@
                 <!-- File field -->
                 <div class="form-group">
                     <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
                     <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
                 </div>
-                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
 
             </div>
             <!-- Project Info -->
@@ -566,9 +626,21 @@
                 <!-- File field -->
                 <div class="form-group">
                     <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
                     <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
                 </div>
-                <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
 
             </div>
             <!-- Project Info -->
@@ -582,112 +654,235 @@
         </div>
         <button type="submit" class="btn btn-primary m-5">Save</button>
     </form>
-    {% else %}
-        <form action="/path-to-your-post-method" method="put">
-            <div class="row">
-                <!-- DataSheet Info -->
-                <div class="col-md-6">
-                    <!-- <h4>DataSheet Info</h4> -->
-                    <div class="form-group">
-                        <label for="code" class="form-label">Code</label>
-                        <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
-                        <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Equipment Group</span>
-                            </div>
-                            <select name="equipment_group" class="form-control" id="equipment_group">
-                                <option value="">---------</option>
-                                <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
-                                <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
-                                <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
-                                <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Parent</span>
-                            </div>
-                            <select name="parent" class="form-control" id="id_parent">
-                                <option value="">---------</option>
-                                {% for p in parents %}
-                                <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Refrence file select -->
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Reference File</span>
-                            </div>
-                            <select name="attach_type" class="form-control" id="id_attach_type">
-                                <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
-                                <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
-                                <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
-                                <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
-                                <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
-                                <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- File field -->
-                    <div class="form-group">
-                        <label for="attach" class="form-label">File</label>
-                        <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
-                    </div>
-                    <small class="form-text text-muted mr-5" style="text-align: right!important;">Pdf files only with portrait orientation.</small>
-
+    {% elif ds.equipment_type.name == 'Other Air Terminal' %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="fan_no" class="form-label">Fan No.</label>
+                    <input type="text" class="form-control" id="fan_no" name="fan_no" value="{{ ds.fan_no }}" required>
                 </div>
-                <!-- Project Info -->
-                <div class="col-md-6">
-                    <!-- <h4>Project Info</h4> -->
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Manufacturer</span>
-                            </div>
-                            <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
-                                <option value="">---------</option>
-                                {% for manufacturer in manufacturers %}
-                                <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="input-group-append">
-                                <!-- Edit icon -->
-                                <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
-                                    <i class="fas fa-edit fa-sm"></i>
-                                </a>
-                                <!-- Add icon (plus) -->
-                                <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
-                                    <i class="fas fa-plus fa-sm"></i>
-                                </a>
-                            </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_outside_air_terminal" class="form-label">Number of Outside Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_outside_air_terminal" name="number_of_outside_air_terminal" value="{{ ds.number_of_outside_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_exhaust_air_terminal" class="form-label">Number of Exhaust Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_exhaust_air_terminal" name="number_of_exhaust_air_terminal" value="{{ ds.number_of_exhaust_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="model_number" class="form-label">Model Number</label>
-                        <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
-                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary m-5">Save</button>
-        </form>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
+    {% else %}
+    <form action="/path-to-your-post-method" method="put">
+        <div class="row">
+            <!-- DataSheet Info -->
+            <div class="col-md-6">
+                <!-- <h4>DataSheet Info</h4> -->
+                <div class="form-group">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ ds.code }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_supply_air_terminal" class="form-label">Number of Supply Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_supply_air_terminal" name="number_of_supply_air_terminal" value="{{ ds.number_of_supply_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number_of_return_air_terminal" class="form-label">Number of Return Air Terminal</label>
+                    <input type="number" class="form-control" id="number_of_return_air_terminal" name="number_of_return_air_terminal" value="{{ ds.number_of_return_air_terminal }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Equipment Group</span>
+                        </div>
+                        <select name="equipment_group" class="form-control" id="equipment_group">
+                            <option value="">---------</option>
+                            <option value="A" {% if ds.equipment_group == 'A' %}selected="selected"{% endif %}>A</option>
+                            <option value="B" {% if ds.equipment_group == 'B' %}selected="selected"{% endif %}>B</option>
+                            <option value="C" {% if ds.equipment_group == 'C' %}selected="selected"{% endif %}>C</option>
+                            <option value="D" {% if ds.equipment_group == 'D' %}selected="selected"{% endif %}>D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Parent</span>
+                        </div>
+                        <select name="parent" class="form-control" id="id_parent">
+                            <option value="">---------</option>
+                            {% for p in parents %}
+                            <option value="{{ p.id }}" {% if ds.p.id == p.id %}selected="selected"{% endif %}>{{ p.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Refrence file select -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Reference File</span>
+                        </div>
+                        <select name="attach_type" class="form-control" id="id_attach_type">
+                            <option value="SITE PHOTO" {% if ds.attach_type == 'SITE PHOTO' %}selected="selected"{% endif %}>SITE PHOTO</option>
+                            <option value="THIRD PARTY TEST SHEET" {% if ds.attach_type == 'THIRD PARTY TEST SHEET' %}selected="selected"{% endif %}>THIRD PARTY TEST SHEET</option>
+                            <option value="SPECIFIC DRAWING" {% if ds.attach_type == 'SPECIFIC DRAWING' %}selected="selected"{% endif %}>SPECIFIC DRAWING</option>
+                            <option value="CHART" {% if ds.attach_type == 'CHART' %}selected="selected"{% endif %}>CHART</option>
+                            <option value="CERTIFICATE & CALIBRATION" {% if ds.attach_type == 'CERTIFICATE & CALIBRATION' %}selected="selected"{% endif %}>CERTIFICATE & CALIBRATION</option>
+                            <option value="SUBMITTAL DATA" {% if ds.attach_type == 'SUBMITTAL DATA' %}selected="selected"{% endif %}>SUBMITTAL DATA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File field -->
+                <div class="form-group">
+                    <label for="attach" class="form-label">File</label>
+                    {% if ds.attach %}
+                        <!-- Display the existing file -->
+                        <p>Existing File: <a href="{{ ds.attach.url }}" target="_blank">{{ ds.attach.name }}</a></p>
+                        <p>You can upload a new file to replace the existing one.</p>
+                        <!-- Optional: Remove file checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remove_attach" name="remove_attach">
+                            <label class="form-check-label" for="remove_attach">Remove existing file</label>
+                        </div>
+                    {% else %}
+                        <p>No file uploaded yet.</p>
+                    {% endif %}
+                    <input type="file" class="form-control" id="attach" name="attach" accept="application/pdf">
+                </div>
+                <small class="form-text text-muted mr-5" style="text-align: right!important;">PDF files only with portrait orientation.</small>
+
+            </div>
+            <!-- Project Info -->
+            <div class="col-md-6">
+                <!-- <h4>Project Info</h4> -->
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Manufacturer</span>
+                        </div>
+                        <select name="manufacturer" class="form-control" id="id_manufacturer" onchange="updateEditLink('manufacturer')">
+                            <option value="">---------</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer.id }}" {% if ds.manufacturer.id == manufacturer.id %}selected="selected"{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <!-- Edit icon -->
+                            <a id="edit-manufacturer-link" href="#" class="btn btn-outline-secondary disabled" title="Edit Manufacturer">
+                                <i class="fas fa-edit fa-sm"></i>
+                            </a>
+                            <!-- Add icon (plus) -->
+                            <a href="{% url 'manufacturerCreate' %}" class="btn btn-outline-secondary" title="Add Manufacturer">
+                                <i class="fas fa-plus fa-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model_number" class="form-label">Model Number</label>
+                    <input type="text" class="form-control" id="model_number" name="model_number" value="{{ ds.model_number }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary m-5">Save</button>
+    </form>
     {% endif %}
 
 </div>
@@ -753,7 +948,7 @@
         $('form').on('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
 
-            var formData = $(this).serialize(); // Serialize the form data into a query string
+            var formData = new FormData(this); // Use FormData to include file input
 
             var pathname = window.location.pathname;
             var parts = pathname.split('/');
@@ -765,14 +960,14 @@
                 url: newPathname,
                 type: 'PUT',
                 data: formData,
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                contentType: false, // Important: Do not set contentType
+                processData: false, // Important: Do not process data
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
                 },
                 success: function(response) {
                     console.log('Success:', response);
                     // Handle success here (e.g., showing a success message or redirecting)
-                    // window.location.reload();
                     window.location.href = "{% url 'order_update_new' ds.project.id %}";
                 },
                 error: function(xhr, status, error) {

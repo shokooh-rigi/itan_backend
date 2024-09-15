@@ -45,6 +45,9 @@
             <h3>{{ terminal_type }}</h3>
             <div class="row">
                 {% for terminal, fields in terminal_data %}
+                    <div class="col-md-12">
+                        <h6>Outlet No.{{ terminal.outlet_no }}</h6>
+                    </div>
                     {% for field_name, properties in fields.items %}
                         <div class="col-md-6">
                             <div class="form-group">

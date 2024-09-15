@@ -916,21 +916,43 @@ def fetch_vav_data(this_sheet_equipment):
         't_in': get_field_value(actual_field_set, "T In"),
         'fan_va': get_field_value(actual_field_set, "Fan V / A"),
         't_out': get_field_value(actual_field_set, "T Out"),
+        'max_cfm': {
+            'design': get_field_value(design_field_set, "Max. CFM"),
+            'actual': get_field_value(actual_field_set, "Max. CFM")
+        },
+        'min_cfm': {
+            'design': get_field_value(design_field_set, "Min. CFM"),
+            'actual': get_field_value(actual_field_set, "Min. CFM")
+        },
+        "heat_va": get_field_value(actual_field_set, "Heat V / A"),
+        "heat_va_actual": get_field_value(actual_field_set, "Heat V / A Actual"),
+        "note": "",
     }
+    if not equipment_data['fan_cfm']:
+        equipment_data['fan_cfm'] = "----"
+    if not equipment_data['kf']:
+        equipment_data['kf'] = "----"
+    if not equipment_data['min_fan_cfm']:
+        equipment_data['min_fan_cfm'] = "----"
+    if not equipment_data['max_cfm']['design']:
+        equipment_data['max_cfm']['design'] = "----"
+    if not equipment_data['max_cfm']['actual']:
+        equipment_data['max_cfm']['actual'] = "----"
 
     notes = []
+    eq_types = {
+        'HW': 'Hot Water',
+        'RH': 'Reheat',
+        'CO': 'Cooling Only',
+        'FPS': 'Fan Powered Series',
+        'FPP': 'Fan Powered Parallel',
+    }
+    if equipment_data['type'] in eq_types:
+        tmp = f"{equipment_data['type']}: {eq_types[equipment_data['type']]}".strip()
+        notes.append(tmp)
     note_count = 0
 
-    # Process fields that need design and actual values
-    field_mappings = {
-        "Min. CFM": 'min_cfm',
-        "Max. CFM": 'max_cfm',
-        "Heat V / A": 'heat_va',
-    }
-    note_count = populate_notes_and_fields(field_mappings, design_field_set, actual_field_set, equipment_data, notes, note_count)
-
-    # Process single fields and notes
-    single_fields = {
+    note_fields = {
         'Address': 'address',
         'Code': 'code',
         'Type': 'type',
@@ -944,14 +966,29 @@ def fetch_vav_data(this_sheet_equipment):
         'T In': 't_in',
         'Fan V / A': 'fan_va',
         'T Out': 't_out',
+        "Min. CFM": 'min_cfm',
+        "Max. CFM": 'max_cfm',
+        "Heat V / A": 'heat_va',
     }
 
-    for field_name, key in single_fields.items():
-        note_marker, note_count = get_field_note_and_append(design_field_set, field_name, notes, note_count)
-        if note_marker:
-            equipment_data[key] += f" {note_marker}".strip()
+    for field_name, key in note_fields.items():
+        this_note_design = design_field_set.get(field_name, {}).get('note', '')
+        this_note_actual = actual_field_set.get(field_name, {}).get('note', '')
+        if this_note_design:
+            note_count += 1
+            note_marker = str(note_count * "*")
+            notes.append(f"{note_marker} {this_note_design}")
+            equipment_data[key] += f" {note_marker}"
+        if this_note_actual:
+            note_count += 1
+            note_marker = str(note_count * "*")
+            notes.append(f"{note_marker} {this_note_actual}")
+            equipment_data[key] += f" {note_marker}"
 
-    equipment_data['note'] = " | ".join(notes)
+    if notes:
+        notes = [note for note in notes if note]
+        notes = list(set(notes))
+        equipment_data['note'] = " | ".join(notes)
 
     # Clean up any fields that are empty or None
     for key, val in equipment_data.items():
@@ -963,6 +1000,8 @@ def fetch_vav_data(this_sheet_equipment):
 
     # Convert all values to upper case
     for key, val in equipment_data.items():
+        if key == 'note':
+            continue
         if isinstance(val, dict):
             for sub_key, sub_val in val.items():
                 equipment_data[key][sub_key] = str(sub_val).upper()
@@ -990,7 +1029,7 @@ def fetch_terminal_data(terminals, _type):
 
         equipment_data = {
             'room_no': get_field_value(design_field_set, "Room No."),
-            'outlet_no': get_field_value(design_field_set, "Outlet No."),
+            'outlet_no': terminal.outlet_no,
             'code': get_field_value(design_field_set, "Code"),
             'size': get_field_value(design_field_set, "Size"),
             'ak_factor': get_field_value(design_field_set, "AK Factor"),
@@ -1039,7 +1078,10 @@ def fetch_terminal_data(terminals, _type):
         return total_cfm_design, total_cfm_initial, total_cfm_final
 
     def create_page(terminals, equipments, _type, total_cfm_design, total_cfm_initial, total_cfm_final):
-        this_title = terminals[0].parent.name or terminals[0].parent.fan_no
+        if terminals[0].parent:
+            this_title = terminals[0].parent.name or terminals[0].parent.fan_no
+        else:
+            this_title = "OTHER TERMINAL"
         page = {
             'type': 'TERMINAL',
             'eq_name': "Terminal",
@@ -1054,7 +1096,7 @@ def fetch_terminal_data(terminals, _type):
             }
         }
 
-        if 'V.A.V' in terminals[0].parent.equipment_type.test_sheet.name:
+        if (terminals[0].parent) and 'V.A.V' in (terminals[0].parent.equipment_type.test_sheet.name):
             design_code = terminals[0].parent.code
             page['system'] = "Existing Supply".upper()
             page['title'] = f"{design_code} {_type}".upper()
@@ -1777,11 +1819,11 @@ def report_sheet_show(
             'guaranty': {
                 'owner': LicenseInfo.objects.get(key='OwnerName').value,
                 'company': LicenseInfo.objects.get(key='CompanyName').value,
-                'address': LicenseInfo.objects.get(key='OwnerAddressLine1').value + ", " + LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-                'address2': str(order.proposal.quote.estimate.project.city) + ", " + str(order.proposal.quote.estimate.project.state) + ", " + str(order.proposal.quote.estimate.project.zip),
+                'address': "",
+                'address2': "",
                 'eng_firm': order.proposal.quote.estimate.engineer.company.name.upper(),
-                'eng_firm_address': order.proposal.quote.estimate.engineer.company.address_line_1 + ", " + order.proposal.quote.estimate.engineer.company.address_line_2,
-                'eng_firm_address2': str(order.proposal.quote.estimate.engineer.company.city) + ", " + str(order.proposal.quote.estimate.engineer.company.state) + ", " + str(order.proposal.quote.estimate.engineer.company.zip),
+                'eng_firm_address': "",
+                'eng_firm_address2': "",
             }
         },
         'pages': [],
@@ -1796,6 +1838,35 @@ def report_sheet_show(
         context['cover']['location'] += ", " + order.proposal.quote.estimate.project.state.upper()
     if order.proposal.quote.estimate.project.zip:
         context['cover']['location'] += ", " + order.proposal.quote.estimate.project.zip.upper()
+    if context['cover']['engineer'] == "UNKNOWN":
+        context['cover']['engineer'] = "N.S."
+    # guarenty address
+    if order.proposal.quote.estimate.project.address_line_1:
+        context['general_info']['guaranty']['address'] = order.proposal.quote.estimate.project.address_line_1
+    if order.proposal.quote.estimate.project.address_line_2:
+        context['general_info']['guaranty']['address'] += ", " + order.proposal.quote.estimate.project.address_line_2
+    if order.proposal.quote.estimate.project.city:
+        context['general_info']['guaranty']['address2'] = order.proposal.quote.estimate.project.city
+    if order.proposal.quote.estimate.project.state:
+        context['general_info']['guaranty']['address2'] += ", " + order.proposal.quote.estimate.project.state
+    if order.proposal.quote.estimate.project.zip:
+        context['general_info']['guaranty']['address2'] += ", " + str(order.proposal.quote.estimate.project)
+    if context['general_info']['guaranty']['eng_firm'] == "UNKNOWN":
+        context['general_info']['guaranty']['eng_firm'] = "N.S."
+    if order.proposal.quote.estimate.engineer.company.address_line_1:
+        context['general_info']['guaranty']['eng_firm_address'] = order.proposal.quote.estimate.engineer.company.address_line_1
+    if order.proposal.quote.estimate.engineer.company.address_line_2:
+        context['general_info']['guaranty']['eng_firm_address'] += ", " + order.proposal.quote.estimate.engineer.company.address_line_2
+    if order.proposal.quote.estimate.engineer.company.city:
+        context['general_info']['guaranty']['eng_firm_address2'] = order.proposal.quote.estimate.engineer.company.city
+    if order.proposal.quote.estimate.engineer.company.state:
+        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.quote.estimate.engineer.company.state
+    if order.proposal.quote.estimate.engineer.company.zip:
+        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.quote.estimate.engine
+    if not context['general_info']['guaranty']['eng_firm_address']:
+        context['general_info']['guaranty']['eng_firm_address'] = "N.S."
+    if not context['general_info']['guaranty']['eng_firm_address2']:
+        context['general_info']['guaranty']['eng_firm_address2'] = "N.S."
 
     datasheets = order.data_sheets.all()
     page_counter = 1
@@ -1834,10 +1905,9 @@ def report_sheet_show(
                 for _t in [1, 2, 3, 4]:
                     this_terminals = this_air_moving_terminals.filter(_type=_t)
                     if this_terminals:
-                        for terminal in this_terminals:
-                            terminals_data = fetch_terminal_data([terminal], _t)
-                            context['pages'].append(terminals_data)
-                page_counter += len(this_air_moving_terminals)
+                        terminals_data = fetch_terminal_data(this_terminals, _t)
+                        context['pages'].append(terminals_data)
+                        page_counter += 1
 
     # VAV
     vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
@@ -1857,7 +1927,7 @@ def report_sheet_show(
                 'data': data,
             })
             toc.append({
-                'name': page_items[0].code,
+                'name': 'VAVs',
                 'page': page_counter,
                 'level': 0,
                 'underline': True
@@ -1878,13 +1948,21 @@ def report_sheet_show(
                     'level': 1,
                     'underline': False
                 })
-                for _t in [1, 2, 3, 4]:
-                    this_terminals = this_vav_terminals.filter(_type=_t)
-                    if this_terminals:
-                        for terminal in this_terminals:
-                            terminals_data = fetch_terminal_data([terminal], _t)
+            for this_vav_terminal_set in page_items:
+                this_vav_terminals = datasheets.filter(parent=this_vav_terminal_set, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+                if len(this_vav_terminals) > 0:
+                    # toc.append({
+                    #     'name': 'AIR TERMINAL TEST SHEET',
+                    #     'page': page_counter,
+                    #     'level': 1,
+                    #     'underline': False
+                    # })
+                    for _t in [1, 2, 3, 4]:
+                        this_terminals = this_vav_terminals.filter(_type=_t)
+                        if this_terminals:
+                            terminals_data = fetch_terminal_data(this_terminals, _t)
                             context['pages'].append(terminals_data)
-                page_counter += len(this_vav_terminals)
+                            page_counter += 1
 
     # Pump
     pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all()
@@ -1972,6 +2050,30 @@ def report_sheet_show(
                 'underline': False
             })
             page_counter += 1
+
+    # Other Terminal
+    other_terminal_equipments = datasheets.filter(equipment_type__name__icontains='Other Air Terminal').all()
+    for ot in other_terminal_equipments:
+        this_terminals_set = datasheets.filter(parent=ot.id, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+        if len(this_terminals_set) > 0:
+            toc.append({
+                'name': ot.fan_no,
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'AIR TERMINALS TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
+            for _t in [1, 2, 3, 4]:
+                this_terminals = other_terminal_equipments.filter(_type=_t)
+                if this_terminals:
+                    terminals_data = fetch_terminal_data(this_terminals, _t)
+                    context['pages'].append(terminals_data)
 
     # Attachment
     attachments = []

@@ -138,10 +138,13 @@
 
                             <div class="mb-2" style="text-align: left;">
                                 <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_update' eq_id %}" style="color: {% if eq.eq.main_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">General Info</a>
-                                </br>
-                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=design" style="color: {% if eq.eq.design_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Design Data</a>
-                                </br>
-                                <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=actual" style="color: {% if eq.eq.actual_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Actual Data</a>
+                                {% if eq.equipment == "Other Air Terminal" %}
+                                {% else %}
+                                    </br>
+                                    <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=design" style="color: {% if eq.eq.design_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Design Data</a>
+                                    </br>
+                                    <a class="es-{{ eq_id }} pl-3" href="{% url 'equipment_forms_update' eq_id %}?t=actual" style="color: {% if eq.eq.actual_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Actual Data</a>
+                                {% endif %}
                                 {% if eq.has_terminal %}
                                     </br>
                                     <a class="es-{{ eq_id }} pl-3" href="{% url 'terminals_update' eq_id %}?t=design" style="color: {% if eq.eq.terminal_design_data_entry_completed %}green{% else %}#0000FF{% endif %};!important">Terminals Design</a>
@@ -356,22 +359,22 @@
                     {% csrf_token %}
                     <div class="row form-line">
                         <div class="col-lg-12" style="padding-right: 36px;">
-                            <label class="control-label">Equipment type<span class="required">*</span></label>
-                            <select class="form-control" type="text" name="select-eq-type" id="select-eq-type">
+                            <label for="id_validity" class="control-label">Equipment<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq" id="select-eq">
                                 <option value="">---------</option>
-                                {% for ts in test_sheets %}
-                                <option value="{{ ts.name }}">{{ ts.name }}</option>
+                                {% for eqt in eq_types %}
+                                <option value="{{ eqt.name }}">{{ eqt.name }} ({{ eqt.test_sheet }})</option>
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
                     <div class="row form-line">
                         <div class="col-lg-12" style="padding-right: 36px;">
-                            <label for="id_validity" class="control-label">Equipment<span class="required">*</span></label>
-                            <select class="form-control" type="text" name="select-eq" id="select-eq">
+                            <label class="control-label">Equipment type form<span class="required">*</span></label>
+                            <select class="form-control" type="text" name="select-eq-type" id="select-eq-type">
                                 <option value="">---------</option>
-                                {% for eqt in eq_types %}
-                                <option value="{{ eqt.name }}">{{ eqt.name }} ({{ eqt.test_sheet }})</option>
+                                {% for ts in test_sheets %}
+                                <option value="{{ ts.name }}">{{ ts.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>

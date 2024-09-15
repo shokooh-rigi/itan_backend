@@ -12,6 +12,8 @@ import copy
 from ..utils.calc_formula import calculate_formula
 
 from mysite.generatereport.views import report_sheet_recreate_call
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 
 @api_view(['POST'])
@@ -121,7 +123,6 @@ def update_data_sheet(request, pk):
                         equipment_type__name='Air Terminal',
                         _type=_type
                     ).count() + 1
-                    form_fields["design"]["Outlet No."]["value"] = outlet_no
                     form_fields["design"]["Code"]["value"] = _code
                     new_ds = DataSheet.objects.create(
                         sheet_date=datetime.now().date(),
@@ -136,6 +137,16 @@ def update_data_sheet(request, pk):
                     )
 
         setattr(data_sheet, key, value)
+
+    # Handle file upload or removal
+    if 'remove_attach' in request.data and request.data['remove_attach'] == 'on':
+        # Remove the existing file
+        data_sheet.attach.delete(save=False)
+        data_sheet.attach = None
+    elif 'attach' in request.FILES:
+        # Assign the uploaded file
+        data_sheet.attach = request.FILES['attach']
+
     data_sheet.main_data_entry_completed = True
     data_sheet.save()
     return Response({"data": "data sheet updated"})
