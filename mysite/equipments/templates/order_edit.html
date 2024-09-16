@@ -620,7 +620,8 @@
         const url = `/reports/orders/${orderId}/?report_type=${encodeURIComponent(reportType)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&report_date=${encodeURIComponent(reportDate)}&revised_date=${encodeURIComponent(revisedDate)}`;
 
         // Redirect the user to the constructed URL
-        window.location.href = url;
+        // window.location.href = url;
+        window.open(url, '_blank');
     }
 
 

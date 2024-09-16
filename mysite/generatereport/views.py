@@ -928,6 +928,7 @@ def fetch_vav_data(this_sheet_equipment):
         "heat_va_actual": get_field_value(actual_field_set, "Heat V / A Actual"),
         "note": "",
     }
+
     if not equipment_data['fan_cfm']:
         equipment_data['fan_cfm'] = "----"
     if not equipment_data['kf']:
@@ -2063,7 +2064,7 @@ def report_sheet_show(
                 'underline': True
             })
             toc.append({
-                'name': 'AIR TERMINALS TEST SHEET',
+                'name': 'AIR TERMINAL TEST SHEET',
                 'page': page_counter,
                 'level': 1,
                 'underline': False
