@@ -791,6 +791,28 @@ def populate_notes_and_fields(field_names, design_set, actual_set, equipment_dat
     return note_count
 
 
+
+def handle_defaults(equipment_data, equipment_type):
+    return equipment_data
+
+def handle_empty_fields(equipment_data, equipment_type):
+    return equipment_data
+
+def get_field_value_new(field_set, field_name):
+    design_set = field_set.get('design', {})
+    actual_set = field_set.get('actual', {})
+    return {
+        'design': design_set.get(field_name, {}).get('value', ''),
+        'actual': actual_set.get(field_name, {}).get('value', '')
+    }
+    
+def get_notes():
+    pass
+
+
+def count_asterisks(text):
+    return len(text) - len(text.lstrip('*'))
+
 def fetch_field_data(
         equipment, 
         field_name, 
@@ -894,122 +916,123 @@ def fetch_air_mov_data(equipment):
 
     return equipment_data
 
-def fetch_vav_data(this_sheet_equipment):
-    design_field_set = this_sheet_equipment.form_fields["design"]
-    actual_field_set = this_sheet_equipment.form_fields["actual"]
+def fetch_vav_data(this_sheet_equipments):
+    data = []
+    for this_sheet_equipment in this_sheet_equipments:
+        design_field_set = this_sheet_equipment.form_fields["design"]
+        actual_field_set = this_sheet_equipment.form_fields["actual"]
 
-    equipment_data = {
-        'inherit': this_sheet_equipment.equipment_type.test_sheet.inheritance,
-        'address': get_field_value(design_field_set, "Address"),
-        'code': this_sheet_equipment.code,
-        'type': get_field_value(design_field_set, "Type"),
-        'size_kw': get_field_value(design_field_set, "Size / KW"),
-        'fan': get_field_value(design_field_set, "Fan %"),
-        'fan_cfm': get_field_value(design_field_set, "Fan CFM"),
-        'kf': get_field_value(actual_field_set, "K.F."),
-        'min_fan_cfm': get_field_value(actual_field_set, "Min. / Fan CFM"),
-        'model_number': this_sheet_equipment.model_number,
-        'hp': get_field_value(actual_field_set, "H.P."),
-        'make': this_sheet_equipment.manufacturer,
-        'fan_volt': get_field_value(actual_field_set, "Fan volt"),
-        'fan_amp': get_field_value(actual_field_set, "Fan Amp"),
-        't_in': get_field_value(actual_field_set, "T In"),
-        'fan_va': get_field_value(actual_field_set, "Fan V / A"),
-        't_out': get_field_value(actual_field_set, "T Out"),
-        'max_cfm': {
-            'design': get_field_value(design_field_set, "Max. CFM"),
-            'actual': get_field_value(actual_field_set, "Max. CFM")
-        },
-        'min_cfm': {
-            'design': get_field_value(design_field_set, "Min. CFM"),
-            'actual': get_field_value(actual_field_set, "Min. CFM")
-        },
-        "heat_va": get_field_value(actual_field_set, "Heat V / A"),
-        "heat_va_actual": get_field_value(actual_field_set, "Heat V / A Actual"),
-        "note": "",
-    }
+        equipment_data = {
+            'id': this_sheet_equipment.id,
+            'inherit': this_sheet_equipment.equipment_type.test_sheet.inheritance,
+            'address': get_field_value(design_field_set, "Address"),
+            'code': this_sheet_equipment.code,
+            'type': get_field_value(design_field_set, "Type"),
+            'size_kw': get_field_value(design_field_set, "Size / KW"),
+            'fan': get_field_value(design_field_set, "Fan %"),
+            'fan_cfm': get_field_value(design_field_set, "Fan CFM"),
+            'kf': get_field_value(actual_field_set, "K.F."),
+            'min_fan_cfm': get_field_value(actual_field_set, "Min. / Fan CFM"),
+            'model_number': this_sheet_equipment.model_number,
+            'hp': get_field_value(actual_field_set, "H.P."),
+            'make': this_sheet_equipment.manufacturer,
+            'fan_volt': get_field_value(actual_field_set, "Fan volt"),
+            'fan_amp': get_field_value(actual_field_set, "Fan Amp"),
+            't_in': get_field_value(actual_field_set, "T In"),
+            'fan_va': get_field_value(actual_field_set, "Fan V / A"),
+            't_out': get_field_value(actual_field_set, "T Out"),
+            'max_cfm': {
+                'design': get_field_value(design_field_set, "Max. CFM"),
+                'actual': get_field_value(actual_field_set, "Max. CFM")
+            },
+            'min_cfm': {
+                'design': get_field_value(design_field_set, "Min. CFM"),
+                'actual': get_field_value(actual_field_set, "Min. CFM")
+            },
+            "heat_va": get_field_value(actual_field_set, "Heat V / A"),
+            "heat_va_actual": get_field_value(actual_field_set, "Heat V / A Actual"),
+            "note": "",
+        }
 
-    if not equipment_data['fan_cfm']:
-        equipment_data['fan_cfm'] = "----"
-    if not equipment_data['kf']:
-        equipment_data['kf'] = "----"
-    if not equipment_data['min_fan_cfm']:
-        equipment_data['min_fan_cfm'] = "----"
-    if not equipment_data['max_cfm']['design']:
-        equipment_data['max_cfm']['design'] = "----"
-    if not equipment_data['max_cfm']['actual']:
-        equipment_data['max_cfm']['actual'] = "----"
+        notes = []
+        # add actual and design note
+        if 'Note' in design_field_set and design_field_set['Note']['value']:
+            notes.append(design_field_set['Note']['value'].strip())
+        if 'Note' in actual_field_set and actual_field_set['Note']['value']:
+            notes.append(actual_field_set['Note']['value'].strip())
+        eq_types = {
+            'HW': 'Hot Water',
+            'RH': 'Reheat',
+            'CO': 'Cooling Only',
+            'FPS': 'Fan Powered Series',
+            'FPP': 'Fan Powered Parallel',
+        }
+        if equipment_data['type'] in eq_types:
+            tmp = f"{equipment_data['type']}: {eq_types[equipment_data['type']]}".strip()
+            notes.append(tmp)
+        note_count = 0
 
-    notes = []
-    eq_types = {
-        'HW': 'Hot Water',
-        'RH': 'Reheat',
-        'CO': 'Cooling Only',
-        'FPS': 'Fan Powered Series',
-        'FPP': 'Fan Powered Parallel',
-    }
-    if equipment_data['type'] in eq_types:
-        tmp = f"{equipment_data['type']}: {eq_types[equipment_data['type']]}".strip()
-        notes.append(tmp)
-    note_count = 0
+        note_fields = {
+            'Address': 'address',
+            'Code': 'code',
+            'Type': 'type',
+            'Size / KW': 'size_kw',
+            'Fan %': 'fan',
+            'Fan CFM': 'fan_cfm',
+            'K.F.': 'kf',
+            'Min. / Fan CFM': 'min_fan_cfm',
+            'Fan volt': 'fan_volt',
+            'Fan Amp': 'fan_amp',
+            'T In': 't_in',
+            'Fan V / A': 'fan_va',
+            'T Out': 't_out',
+            "Min. CFM": 'min_cfm',
+            "Max. CFM": 'max_cfm',
+            "Heat V / A": 'heat_va',
+        }
 
-    note_fields = {
-        'Address': 'address',
-        'Code': 'code',
-        'Type': 'type',
-        'Size / KW': 'size_kw',
-        'Fan %': 'fan',
-        'Fan CFM': 'fan_cfm',
-        'K.F.': 'kf',
-        'Min. / Fan CFM': 'min_fan_cfm',
-        'Fan volt': 'fan_volt',
-        'Fan Amp': 'fan_amp',
-        'T In': 't_in',
-        'Fan V / A': 'fan_va',
-        'T Out': 't_out',
-        "Min. CFM": 'min_cfm',
-        "Max. CFM": 'max_cfm',
-        "Heat V / A": 'heat_va',
-    }
+        for field_name, key in note_fields.items():
+            this_note_design = design_field_set.get(field_name, {}).get('note', '').strip()
+            this_note_actual = actual_field_set.get(field_name, {}).get('note', '').strip()
+            if this_note_design:
+                note_count += 1
+                note_marker = str(note_count * "*")
+                notes.append(f"{note_marker} {this_note_design}".strip())
+                equipment_data[key] += f" {note_marker}"
+            if this_note_actual:
+                note_count += 1
+                note_marker = str(note_count * "*")
+                notes.append(f"{note_marker} {this_note_actual}".strip())
+                # TODO: FIX THIS
+                if isinstance(equipment_data[key], dict):
+                    equipment_data[key]['actual'] += f" {note_marker}"
+                else:
+                    equipment_data[key] += f" {note_marker}"
 
-    for field_name, key in note_fields.items():
-        this_note_design = design_field_set.get(field_name, {}).get('note', '')
-        this_note_actual = actual_field_set.get(field_name, {}).get('note', '')
-        if this_note_design:
-            note_count += 1
-            note_marker = str(note_count * "*")
-            notes.append(f"{note_marker} {this_note_design}")
-            equipment_data[key] += f" {note_marker}"
-        if this_note_actual:
-            note_count += 1
-            note_marker = str(note_count * "*")
-            notes.append(f"{note_marker} {this_note_actual}")
-            equipment_data[key] += f" {note_marker}"
+        if notes:
+            notes = [note for note in notes if note]
+            equipment_data['note'] = "|".join(notes)
 
-    if notes:
-        notes = [note for note in notes if note]
-        notes = list(set(notes))
-        equipment_data['note'] = " | ".join(notes)
+        # Clean up any fields that are empty or None
+        for key, val in equipment_data.items():
+            if isinstance(val, dict):
+                for sub_key, sub_val in val.items():
+                    equipment_data[key][sub_key] = sub_val if sub_val else '----'
+            else:
+                equipment_data[key] = val if val else '----'
 
-    # Clean up any fields that are empty or None
-    for key, val in equipment_data.items():
-        if isinstance(val, dict):
-            for sub_key, sub_val in val.items():
-                equipment_data[key][sub_key] = sub_val if sub_val else ''
-        else:
-            equipment_data[key] = val if val else ''
+        # Convert all values to upper case
+        for key, val in equipment_data.items():
+            if key == 'note':
+                continue
+            if isinstance(val, dict):
+                for sub_key, sub_val in val.items():
+                    equipment_data[key][sub_key] = str(sub_val).upper()
+            else:
+                equipment_data[key] = str(val).upper()
+        data.append(equipment_data)
 
-    # Convert all values to upper case
-    for key, val in equipment_data.items():
-        if key == 'note':
-            continue
-        if isinstance(val, dict):
-            for sub_key, sub_val in val.items():
-                equipment_data[key][sub_key] = str(sub_val).upper()
-        else:
-            equipment_data[key] = str(val).upper()
-
-    return equipment_data
+    return data
 
 def fetch_terminal_data(terminals, _type):
 
@@ -1048,7 +1071,13 @@ def fetch_terminal_data(terminals, _type):
             'title': terminal.fan_no,
             'type': _type,
         }
-        # for fpm if number or float round to int
+        if not equipment_data['fpm']['design']:
+            equipment_data['fpm']['design'] = "*"
+        if not equipment_data['fpm']['initial']:
+            equipment_data['fpm']['initial'] = "*"
+        if not equipment_data['fpm']['final']:
+            equipment_data['fpm']['final'] = "*"
+
         if equipment_data['fpm']['design'] and equipment_data['fpm']['design'] != "*":
             equipment_data['fpm']['design'] = int(float(equipment_data['fpm']['design']))
         if equipment_data['fpm']['initial'] and equipment_data['fpm']['initial'] != "*":
@@ -1064,25 +1093,45 @@ def fetch_terminal_data(terminals, _type):
             else:
                 equipment_data[key] = str(val).upper() if val else ''
 
+        # fill all empty values with "----"
+        for key, val in equipment_data.items():
+            if isinstance(val, dict):
+                for sub_key, sub_val in val.items():
+                    equipment_data[key][sub_key] = sub_val if sub_val else '----'
+            else:
+                equipment_data[key] = val if val else '----'
+
         return equipment_data
 
     def calculate_totals(equipments):
-        total_cfm_design = sum(int(e['cfm']['design']) for e in equipments if e['cfm']['design'] and e['cfm']['design'] != "*")
-        total_cfm_initial = sum(int(e['cfm']['initial']) for e in equipments if e['cfm']['initial'] and e['cfm']['initial'] != "*")
-        total_cfm_final = sum(int(e['cfm']['final']) for e in equipments if e['cfm']['final'] and e['cfm']['final'] != "*")
+        total_cfm_design = sum(
+            int(e['cfm']['design']) for e in equipments 
+            if e['cfm']['design'] and e['cfm']['design'] not in ("*", "----")
+        )
+        total_cfm_initial = sum(
+            int(e['cfm']['initial']) for e in equipments 
+            if e['cfm']['initial'] and e['cfm']['initial'] not in ("*", "----")
+        )
+        total_cfm_final = sum(
+            int(e['cfm']['final']) for e in equipments 
+            if e['cfm']['final'] and e['cfm']['final'] not in ("*", "----")
+        )
+        
+        # Set total to empty string if it's zero
         if total_cfm_design == 0:
             total_cfm_design = ""
         if total_cfm_initial == 0:
             total_cfm_initial = ""
         if total_cfm_final == 0:
             total_cfm_final = ""
+        
         return total_cfm_design, total_cfm_initial, total_cfm_final
 
     def create_page(terminals, equipments, _type, total_cfm_design, total_cfm_initial, total_cfm_final):
         if terminals[0].parent:
             this_title = terminals[0].parent.name or terminals[0].parent.fan_no
         else:
-            this_title = "OTHER TERMINAL"
+            this_title = terminals[0].fan_no
         page = {
             'type': 'TERMINAL',
             'eq_name': "Terminal",
@@ -1100,6 +1149,7 @@ def fetch_terminal_data(terminals, _type):
         if (terminals[0].parent) and 'V.A.V' in (terminals[0].parent.equipment_type.test_sheet.name):
             design_code = terminals[0].parent.code
             page['system'] = "Existing Supply".upper()
+            page['system'] = design_code.upper()
             page['title'] = f"{design_code} {_type}".upper()
             page['total']['footer'] = f'TOTAL {_type} {design_code}'.upper()
 
@@ -1256,524 +1306,6 @@ def fetch_flow_measuring_data(equipments):
         'total_title': total_title
     }
     
-@login_required
-def report_sheet_recreate_call(
-    request, 
-    order_id,
-    report_type,
-    start_date,
-    end_date,
-    report_date,
-    revised_date
-):
-    s3 = S3()
-    order = get_object_or_404(Order, id=order_id)
-    if revised_date:
-        # report_sheet = ReportSheet.objects.get_or_create(
-        #     project=order, 
-        #     report_type=1,
-        #     report_date=report_date,
-        #     revised_date=revised_date
-        # )[0]
-        report_sheet = ReportSheet.objects.create(
-            project=order, 
-            report_type=1,
-            report_date=report_date,
-            revised_date=revised_date
-        )
-    else:
-        # report_sheet = ReportSheet.objects.get_or_create(
-        #     project=order, 
-        #     report_type=1,
-        #     report_date=report_date
-        # )[0]
-        report_sheet = ReportSheet.objects.create(
-            project=order, 
-            report_type=1,
-            report_date=report_date
-        )
-    if start_date:
-        order.start_date = start_date
-    if end_date:
-        order.end_date = end_date
-    if start_date or end_date:
-        order.save()
-
-    license_owner = LicenseInfo.objects.get(key='OwnerName').value
-    report_stamp = LicenseFiles.objects.get(key='ReportStamp').value
-    instruction_image = LicenseFiles.objects.get(key='InstructionReport').value
-    abbreviation_image = LicenseFiles.objects.get(key='AbbreviationReport').value
-    owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
-    owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
-    owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
-    owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
-    owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
-    company_name = LicenseInfo.objects.get(key='CompanyName').value
-
-    parameters = {
-        'file_name': ('COVER SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper(),
-        'report_sheet': report_sheet,
-        'report_stamp': report_stamp,
-        'datetime': datetime.datetime.now(),
-        'license_owner': license_owner,
-        'instruction_image': instruction_image,
-        'abbreviation_image': abbreviation_image,
-        'owner_title': owner_title,
-        'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-        'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-        'owner_tel': owner_tel,
-        'owner_fax': owner_fax,
-        'owner_web': owner_web,
-        'owner_mail': owner_mail,
-        'owner_signature': owner_signature,
-        'owner_logo': owner_logo,
-        'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-        'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-        'company_name': company_name,
-        'WEB_URL': settings.WEB_URL,
-        'MEDIA_URL': settings.MEDIA_URL,
-        'STATIC_URL': settings.STATIC_URL,
-        'os': system(),
-    }
-
-    cover_pdf = ReportSheet.create_cover_pdf(parameters)
-    parameters['cover_pdf'] = cover_pdf[1]
-
-    parameters['file_name'] = ('REPORT SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                           report_sheet.project.project_number)).upper()
-    merger = PdfMerger()
-    cover = open(cover_pdf[1], "rb")
-    merger.append(fileobj=cover)
-
-    if not report_sheet.report_type == 1:
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_table_of_content.file)))
-        table_of_content_file = open(response[0], "rb")
-        merger.append(fileobj=table_of_content_file)
-
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_test_sheets.file)))
-        test_sheets = open(response[0], "rb")
-        merger.append(fileobj=test_sheets)
-
-        response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.upload_drawing_pdf.file)))
-        drawings = open(response[0], "rb")
-        merger.append(fileobj=drawings)
-
-    if report_sheet.report_type == 1:
-        datasheets = DataSheet.objects.filter(project=report_sheet.project)
-        air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
-        # indipendent_vav_equipments = datasheets.exclude(
-        #     equipment_type__test_sheet__name__iexact='Air Moving').exclude(
-        #     equipment_type__test_sheet__name__iexact='Air Terminal'
-        # ).all()
-        indipendent_vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
-        velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
-
-        pages = []
-        request.session['toc_counter'] = 0
-        request.session['continues'] = 0
-        table_of_content = []
-
-        def toc_line_maker(title, number_of_pages, level, show_page_number=True, underline=False):
-            if show_page_number:
-                request.session['toc_counter'] = request.session.get('toc_counter') + 1
-                table_of_content.append({
-                    'name': title,
-                    # 'pages': str(request.session['toc_counter']) + ('-' + str(request.session['toc_counter']+number_of_pages+request.session['continues']-1)) if number_of_pages+request.session['continues'] > 1 else str(request.session['toc_counter']),
-                    'pages': str(request.session['toc_counter']),
-                    'level': level,
-                    'underline': underline
-                })
-                request.session['toc_counter'] = request.session.get('toc_counter') + number_of_pages - 1
-            else:
-                table_of_content.append({
-                    'name': title,
-                    'pages': '',
-                    'level': level,
-                    'underline': underline
-                })
-            request.session['continues'] = 0
-
-        def add_rogue_terminal_pages():
-            terminal_pages = []
-            equipment_in_page = 21
-            is_report_pdf = True
-            air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                          air_equipment__isnull=True,
-                                                                          vav_equipment__isnull=True,
-                                                                          type=4).order_by('type', 'other_group', 'outlet_no')
-
-
-            last_air_equipment_group = 0
-            value_list = air_terminal_equipments.values_list('other_group', flat=True).distinct()
-
-            for value in value_list:
-                if last_air_equipment_group != value:
-                    last_air_equipment_group = value
-                    all_air_equipment_terminals = air_terminal_equipments.filter(other_group=value)
-
-                    if len(all_air_equipment_terminals) > 0:
-                        terminal_pdf_pages = prepare_terminal_pages(all_air_equipment_terminals, 'OTHER', 0,
-                                                                             is_report_pdf,
-                                                                             equipment_in_page)
-                        toc_line_maker(all_air_equipment_terminals[0].equipment_name, 0, 0, False, True)
-                        toc_line_maker('AIR TERMINAL TEST SHEET', len(terminal_pdf_pages), 1, True, False)
-                        terminal_pages = terminal_pages + terminal_pdf_pages
-
-            return terminal_pages
-
-        def add_terminal_pages_for_air_moving(air_moving_equipment):
-            terminal_pages = []
-            equipment_in_page = 21
-
-            air_terminal_equipments = DataSheet.objects.filter(project=report_sheet.project, parent=air_moving_equipment.id).order_by('_type', 'outlet_no')
-            if len(air_terminal_equipments) > 0:
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=1), 1
-                )
-                terminal_pages.append(air_terminal_pages)
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=2), 2
-                )
-                terminal_pages.append(air_terminal_pages)
-                
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=3), 3
-                )
-                terminal_pages.append(air_terminal_pages)
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=4), 4
-                )
-                terminal_pages.append(air_terminal_pages)
-            
-            terminal_pages = [page for page in terminal_pages if page]
-            if terminal_pages:
-                terminal_pages = terminal_pages[0]
-
-            return terminal_pages
-
-        def add_vav_pages_using_air_moving(air_moving_equipments):
-            vav_pages = []
-            is_report_pdf = True
-            for air_moving_equipment in air_moving_equipments:
-                vav_equipments = DataSheetEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                   inherited_from_air_moving=air_moving_equipment,
-                                                                   main_data_entry_completed=True,
-                                                                   design_data_entry_completed=True,
-                                                                   actual_data_entry_completed=True)
-
-                if len(vav_equipments) > 0:
-                    my_sheet = DataSheet.objects.get(test_sheet_type__name__iexact='vav', project=report_sheet.project)
-
-                    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
-                    equipment_in_page = 21
-                    last_loop = 0
-                    for group in equipment_groups:
-                        group_equipments = vav_equipments.filter(equipment_group=group)
-                        len_equipments = group_equipments.count()
-                        for i in range(math.ceil(len_equipments / equipment_in_page)):
-                            last_loop += 1
-                            empty_rows = 0
-                            page = {
-                                'type': 'VAV',
-                                'system': 'VAVS ' + air_moving_equipment.secd_set.get(
-                                    key__column_title__icontains='fan no.').value,
-                                'rows': [],
-                                'notes': [],
-                                'vavp_available': 0,
-                            }
-                            for j in range(equipment_in_page):
-                                index = i * equipment_in_page + j
-                                if index < len_equipments:
-                                    page['rows'].append(fetch_vav_equipment_data(group_equipments[index], is_report_pdf))
-                                    if group_equipments[index].equipment_type.test_sheet.inheritance:
-                                        page['vavp_available'] = 1
-                                else:
-                                    empty_rows += 1
-                            page['empty_rows'] = range(empty_rows)
-                            if page['rows']:
-                                vav_pages.append(page)
-
-                        if len_equipments > 0:
-                            toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1, True, False)
-
-                        air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                                      vav_equipment__terminal_design_data_entry_completed=True,
-                                                                                      vav_equipment__terminal_actual_data_entry_completed=True,
-                                                                                      vav_equipment__in=group_equipments.all()) \
-                            .order_by('air_equipment__field_order', 'vav_equipment_id', 'type', 'outlet_no')
-
-                        last_vav_equipment_id = 0
-                        value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
-                        for value in value_list:
-                            if last_vav_equipment_id != value:
-                                last_vav_equipment_id = value
-                                all_vav_equipment_terminals = air_terminal_equipments.filter(vav_equipment_id=value)
-
-                                if len(all_vav_equipment_terminals) > 0:
-                                    vav_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
-                                                           is_report_pdf,
-                                                           equipment_in_page)
-                                    toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2, True, False)
-                                    vav_pages = vav_pages + vav_terminal_pages
-
-            return vav_pages
-
-        def add_independent_vav_pages(vav_equipments):
-            vav_pages = []
-
-            equipment_in_page = 10  # Number of equipments per page
-            total_equipments = vav_equipments.count()
-
-            vav_eqs = []
-            for eq in vav_equipments:
-                vav_eqs.append(fetch_vav_data(eq))
-
-            # Create VAV pages with 8 equipments each
-            for i in range(math.ceil(total_equipments / equipment_in_page)):
-                rows = vav_eqs[i * equipment_in_page: (i + 1) * equipment_in_page]
-                
-                # Only proceed if there are actual rows
-                if rows:
-                    empty_rows = [None] * (equipment_in_page - len(rows))
-                    
-                    page = {
-                        'type': 'VAV',
-                        'system': 'VAVs',
-                        'rows': rows + empty_rows,  # Filling the remaining rows with `None` to indicate emptiness
-                        'notes': [],
-                        'vavp_available': 0,
-                        'empty_rows': empty_rows
-                    }
-
-                    # Check if any equipment on the page has inheritance, set `vavp_available` if true
-                    for equipment_data in rows:  # Only check actual rows, not the empty placeholders
-                        if equipment_data.get('inheritance', False):  # Assuming 'inheritance' key in equipment data
-                            page['vavp_available'] = 1
-                            break
-
-                    vav_pages.append(page)
-
-            # Add TOC line for the VAV schedule only if there are any pages
-            if vav_pages:
-                toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', len(vav_pages), 1, True, False)
-
-            # Now handle air terminal equipment pages
-            air_terminal_equipments = DataSheet.objects.filter(
-                project=report_sheet.project,
-                parent__in=vav_equipments,
-            ).order_by('id', '_type', 'outlet_no')
-
-            if len(air_terminal_equipments) > 0:
-                air_terminal_pages = fetch_terminal_data(air_terminal_equipments, 1)
-                vav_pages.extend(air_terminal_pages)
-                toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 2, True, False)
-
-            return vav_pages
-
-        def add_velocity_traverse_pages(velocity_traverse_equipments):
-            pages = []
-            for eq in velocity_traverse_equipments:
-                rows = fetch_velocity_data(eq)
-                page = {
-                    'type': 'VELOCITY',
-                    'system': 'VELOCITY TRAVERSE',
-                    'rows': rows,
-                }
-                toc_line_maker('VELOCITY TRAVERSE TEST SHEET', 1, 1, True, False)
-                pages.append(page)
-            return pages
-
-        while len(air_moving_equipments):
-            current_air_moving_equipments = air_moving_equipments[0]
-            air_moving_equipments = air_moving_equipments[1:]
-            pages.append({
-                'type': 'AIRMOVING',
-                'system': current_air_moving_equipments.fan_no,
-                'rows': [
-                    fetch_air_mov_data(current_air_moving_equipments),
-                ]
-            })
-            toc_line_maker(current_air_moving_equipments.fan_no, 0, 0, False, True)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
-            terminals = add_terminal_pages_for_air_moving(current_air_moving_equipments)
-            if terminals:
-                toc_line_maker('AIR TERMINAL TEST SHEET', len(terminals), 2, True, False)
-                pages.extend(terminals)
-            # pages = pages + add_vav_pages_using_air_moving([air_moving_equipments[0]])
-
-        if len(indipendent_vav_equipments) > 0:
-            toc_line_maker('VAV\'S', 0, 0, False, True)
-            pages = pages + add_independent_vav_pages(indipendent_vav_equipments)
-
-        if len(velocity_traverse_equipments) > 0:
-            toc_line_maker('VELOCITY TRAVERSE', 0, 0, False, True)
-            pages = pages + add_velocity_traverse_pages(velocity_traverse_equipments)
-
-        # pages = pages + add_rogue_terminal_pages()
-
-        # attachment
-        for ds in datasheets:
-            if ds.attach:
-                title = ds.name
-                if ds.equipment_type.test_sheet.name == 'Air Moving':
-                    title = ds.fan_no
-                elif 'V.A.V' in ds.equipment_type.test_sheet.name:
-                    title = ds.code
-
-                url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(ds.attach.file)
-                url = url.replace("/media///app/", "")
-                response = url_request.urlretrieve(url)
-                attach = open(response[0], "rb")
-                tmp_reader = PdfReader(attach)
-                toc_line_maker(f"{ds.attach_type} ({title})", len(tmp_reader.pages), 1, True, False)
-
-        if report_sheet.project.colored_drawing or report_sheet.project.report_colored_drawing:
-            toc_line_maker('AS BUILT MECHANICAL PLAN', 1, 1, True, False)
-
-        parameters = {
-            'report_sheet': report_sheet,
-            'form': {
-                'my_sheet': report_sheet,
-                'pages': pages,
-            },
-            'file_name': ('FINAL REPORT {}-{}{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                        report_sheet.project.project_number,'')).upper(),
-            'license_owner': license_owner,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'os': system(),
-        }
-        pdf_name, pdf_path = Render.render_to_file('pdfTemplates/fullTemplate_2.html', parameters, 'FinalReport')
-        full_pdf = open(pdf_path, "rb")
-
-        # Append table of content
-        parameters = {
-            'table_of_content': table_of_content,
-            'report_sheet': report_sheet,
-            'file_name': ('TABLE OF CONTENT {}-{}{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                            report_sheet.project.project_number, '')).upper(),
-            'license_owner': license_owner,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'os': system(),
-        }
-        pdf_name, pdf_path = Render.render_to_file('pdfTemplates/tocTemplate_2.html', parameters, 'TocReport')
-        toc_pdf = open(pdf_path, "rb")
-        merger.append(fileobj=toc_pdf)
-
-        parameters = {
-            'file_name': ('INSTRUMENT SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                     report_sheet.project.project_number)).upper(),
-            'report_sheet': report_sheet,
-            'report_stamp': report_stamp,
-            'datetime': datetime.datetime.now(),
-            'license_owner': license_owner,
-            'instruction_image': instruction_image,
-            'abbreviation_image': abbreviation_image,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'os': system()
-        }
-
-        instrument_pdf = ReportSheet.create_report_pdf(parameters)
-        parameters['instrument_pdf'] = instrument_pdf[1]
-        instrument = open(instrument_pdf[1], "rb")
-        merger.append(fileobj=instrument)
-        merger.append(fileobj=full_pdf)
-
-        # append attaches
-        for ds in datasheets:
-            if ds.attach:
-                url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(ds.attach.file)
-                url = url.replace("/media///app/", "")
-                response = url_request.urlretrieve(url)
-                attach = open(response[0], "rb")
-                merger.append(fileobj=attach)
-
-        if report_sheet.project.report_colored_drawing:
-            # response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.report_colored_drawing.file)))
-            
-            url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(report_sheet.project.report_colored_drawing.file)
-            url = url.replace("/media///app/", "")
-            print("===" * 15)
-            print(url)
-            response = url_request.urlretrieve(url)
-            drawings = open(response[0], "rb")
-            merger.append(fileobj=drawings)
-        else:
-            # response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.colored_drawing.file)))
-            url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(report_sheet.project.colored_drawing.file)
-            url = url.replace("/media///app/", "")
-            print("===" * 15)
-            print(url)
-            response = url_request.urlretrieve()
-            drawings = open(response[0], "rb")
-            merger.append(fileobj=drawings)
-
-    if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
-        os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report"))
-    file_name = ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper() + '.pdf'
-    file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report", file_name)
-    s3_path = os.path.join("media/pdfs/report", file_name)
-    output = open(file_path, "wb")
-    merger.write(output)
-    output.close()
-    cover.close()
-    if not report_sheet.report_type == 1:
-        table_of_content_file.close()
-        test_sheets.close()
-        drawings.close()
-    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
-
-    # return JsonResponse({'reload': True}, safe=False)
-    # return JsonResponse({'url': settings.MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper()}, safe=False)
-    # s3.get_bucket_object(os.path.join("media/pdfs/report", final_pdf_name))
-    return s3.get_bucket_object(s3_path)
-
 
 @login_required
 def report_sheet_show(
@@ -1914,56 +1446,87 @@ def report_sheet_show(
     vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
     VAV_IN_ONE_PAGE = 12
     if len(vav_equipments) > 0:
-        for i in range(math.ceil(vav_equipments.count() / VAV_IN_ONE_PAGE)):
-            data = []
-            page_items = vav_equipments[i * VAV_IN_ONE_PAGE: (i + 1) * VAV_IN_ONE_PAGE]
-            for eq in page_items:
-                data.append(fetch_vav_data(eq))
-            if len(page_items) < VAV_IN_ONE_PAGE:
-                empty_slots = VAV_IN_ONE_PAGE - len(page_items)
-                data.extend([{}] * empty_slots)
-            context['pages'].append({
-                'type': 'VAV',
-                'system': 'VAVs',
-                'data': data,
-            })
-            toc.append({
-                'name': 'VAVs',
-                'page': page_counter,
-                'level': 0,
-                'underline': True
-            })
-            toc.append({
-                'name': 'V.A.V. BOX SCHEDULE TEST SHEET',
-                'page': page_counter,
-                'level': 1,
-                'underline': False
-            })
-            page_counter += 1
-            # Air Terminal
-            this_vav_terminals = datasheets.filter(parent__in=page_items, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
-            if len(this_vav_terminals) > 0:
+        vavs_data = fetch_vav_data(vav_equipments)
+        if len(vavs_data) > 0:
+            for i in range(math.ceil(len(vavs_data) / VAV_IN_ONE_PAGE)):
+                page_items = vavs_data[i * VAV_IN_ONE_PAGE: (i + 1) * VAV_IN_ONE_PAGE]
+                if len(page_items) < VAV_IN_ONE_PAGE:
+                    empty_slots = VAV_IN_ONE_PAGE - len(page_items)
+                    page_items.extend([{}] * empty_slots)
+
+                # Join
+                notes = []
+                for item in page_items:
+                    if item.get('note'):
+                        notes.append(item['note'].strip())
+                notes = [note for note in notes if note]
+                # separate by |
+                _separated_notes = []
+                for note in notes:
+                    _separated_notes.extend(note.split("|"))
+                notes = _separated_notes
+                # check if some notes already in other notes
+                _filtered_notes = []
+                for note in notes:
+                    if note not in " | ".join(_filtered_notes):
+                        _filtered_notes.append(note)
+                notes = _filtered_notes
+
+                regular_notes = [note for note in notes if not note.startswith('*')]
+                asterisk_notes = [note for note in notes if note.startswith('*')]
+                regular_notes.sort()
+                asterisk_notes.sort(key=lambda note: (count_asterisks(note), note))
+
+                notes = regular_notes + asterisk_notes
+                notes = " | ".join(notes)
+
+                context['pages'].append({
+                    'type': 'VAV',
+                    'system': 'VAVs',
+                    'data': page_items,
+                    'notes': notes,
+                })
                 toc.append({
-                    'name': 'AIR TERMINAL TEST SHEET',
+                    'name': 'VAVs',
+                    'page': page_counter,
+                    'level': 0,
+                    'underline': True
+                })
+                toc.append({
+                    'name': 'V.A.V. BOX SCHEDULE TEST SHEET',
                     'page': page_counter,
                     'level': 1,
                     'underline': False
                 })
-            for this_vav_terminal_set in page_items:
-                this_vav_terminals = datasheets.filter(parent=this_vav_terminal_set, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+                page_counter += 1
+                this_page_vav_ids = [k.get('id', 0) for k in page_items]
+                this_page_vav_ids = [k for k in this_page_vav_ids if k]
+                # Air Terminal
+                this_vav_terminals = datasheets.filter(parent__in=this_page_vav_ids, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
                 if len(this_vav_terminals) > 0:
-                    # toc.append({
-                    #     'name': 'AIR TERMINAL TEST SHEET',
-                    #     'page': page_counter,
-                    #     'level': 1,
-                    #     'underline': False
-                    # })
-                    for _t in [1, 2, 3, 4]:
-                        this_terminals = this_vav_terminals.filter(_type=_t)
-                        if this_terminals:
-                            terminals_data = fetch_terminal_data(this_terminals, _t)
-                            context['pages'].append(terminals_data)
-                            page_counter += 1
+                    toc.append({
+                        'name': 'AIR TERMINAL TEST SHEET',
+                        'page': page_counter,
+                        'level': 1,
+                        'underline': False
+                    })
+                for this_vav_ in page_items:
+                    if not this_vav_:
+                        continue
+                    this_vav_terminals = datasheets.filter(parent__id=this_vav_['id'], equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
+                    if len(this_vav_terminals) > 0:
+                        # toc.append({
+                        #     'name': 'AIR TERMINAL TEST SHEET',
+                        #     'page': page_counter,
+                        #     'level': 1,
+                        #     'underline': False
+                        # })
+                        for _t in [1, 2, 3, 4]:
+                            this_terminals = this_vav_terminals.filter(_type=_t)
+                            if this_terminals:
+                                terminals_data = fetch_terminal_data(this_terminals, _t)
+                                context['pages'].append(terminals_data)
+                                page_counter += 1
 
     # Pump
     pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all()
@@ -2071,7 +1634,7 @@ def report_sheet_show(
             })
             page_counter += 1
             for _t in [1, 2, 3, 4]:
-                this_terminals = other_terminal_equipments.filter(_type=_t)
+                this_terminals = this_terminals_set.filter(_type=_t)
                 if this_terminals:
                     terminals_data = fetch_terminal_data(this_terminals, _t)
                     context['pages'].append(terminals_data)
@@ -2128,410 +1691,3 @@ def report_sheet_show(
     }
 
     return render(request, "pdf/base_report.html", context)
-
-    if report_sheet.report_type == 1:
-
-
-        pages = []
-        request.session['toc_counter'] = 0
-        request.session['continues'] = 0
-        table_of_content = []
-
-        def toc_line_maker(title, number_of_pages, level, show_page_number=True, underline=False):
-            if show_page_number:
-                request.session['toc_counter'] = request.session.get('toc_counter') + 1
-                table_of_content.append({
-                    'name': title,
-                    # 'pages': str(request.session['toc_counter']) + ('-' + str(request.session['toc_counter']+number_of_pages+request.session['continues']-1)) if number_of_pages+request.session['continues'] > 1 else str(request.session['toc_counter']),
-                    'pages': str(request.session['toc_counter']),
-                    'level': level,
-                    'underline': underline
-                })
-                request.session['toc_counter'] = request.session.get('toc_counter') + number_of_pages - 1
-            else:
-                table_of_content.append({
-                    'name': title,
-                    'pages': '',
-                    'level': level,
-                    'underline': underline
-                })
-            request.session['continues'] = 0
-
-        def add_rogue_terminal_pages():
-            terminal_pages = []
-            equipment_in_page = 21
-            is_report_pdf = True
-            air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                          air_equipment__isnull=True,
-                                                                          vav_equipment__isnull=True,
-                                                                          type=4).order_by('type', 'other_group', 'outlet_no')
-
-
-            last_air_equipment_group = 0
-            value_list = air_terminal_equipments.values_list('other_group', flat=True).distinct()
-
-            for value in value_list:
-                if last_air_equipment_group != value:
-                    last_air_equipment_group = value
-                    all_air_equipment_terminals = air_terminal_equipments.filter(other_group=value)
-
-                    if len(all_air_equipment_terminals) > 0:
-                        terminal_pdf_pages = prepare_terminal_pages(all_air_equipment_terminals, 'OTHER', 0,
-                                                                             is_report_pdf,
-                                                                             equipment_in_page)
-                        toc_line_maker(all_air_equipment_terminals[0].equipment_name, 0, 0, False, True)
-                        toc_line_maker('AIR TERMINAL TEST SHEET', len(terminal_pdf_pages), 1, True, False)
-                        terminal_pages = terminal_pages + terminal_pdf_pages
-
-            return terminal_pages
-
-        def add_terminal_pages_for_air_moving(air_moving_equipment):
-            terminal_pages = []
-            equipment_in_page = 21
-
-            air_terminal_equipments = DataSheet.objects.filter(project=report_sheet.project, parent=air_moving_equipment.id).order_by('_type', 'outlet_no')
-            if len(air_terminal_equipments) > 0:
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=1), 1
-                )
-                terminal_pages.append(air_terminal_pages)
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=2), 2
-                )
-                terminal_pages.append(air_terminal_pages)
-                
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=3), 3
-                )
-                terminal_pages.append(air_terminal_pages)
-
-                air_terminal_pages = fetch_terminal_data(
-                    air_terminal_equipments.filter(_type=4), 4
-                )
-                terminal_pages.append(air_terminal_pages)
-            
-            terminal_pages = [page for page in terminal_pages if page]
-            if terminal_pages:
-                terminal_pages = terminal_pages[0]
-
-            return terminal_pages
-
-        def add_vav_pages_using_air_moving(air_moving_equipments):
-            vav_pages = []
-            is_report_pdf = True
-            for air_moving_equipment in air_moving_equipments:
-                vav_equipments = DataSheetEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                   inherited_from_air_moving=air_moving_equipment,
-                                                                   main_data_entry_completed=True,
-                                                                   design_data_entry_completed=True,
-                                                                   actual_data_entry_completed=True)
-
-                if len(vav_equipments) > 0:
-                    my_sheet = DataSheet.objects.get(test_sheet_type__name__iexact='vav', project=report_sheet.project)
-
-                    equipment_groups = list(map(lambda x: chr(x), range(65, 65 + my_sheet.number_of_equipment_groups)))
-                    equipment_in_page = 21
-                    last_loop = 0
-                    for group in equipment_groups:
-                        group_equipments = vav_equipments.filter(equipment_group=group)
-                        len_equipments = group_equipments.count()
-                        for i in range(math.ceil(len_equipments / equipment_in_page)):
-                            last_loop += 1
-                            empty_rows = 0
-                            page = {
-                                'type': 'VAV',
-                                'system': 'VAVS ' + air_moving_equipment.secd_set.get(
-                                    key__column_title__icontains='fan no.').value,
-                                'rows': [],
-                                'notes': [],
-                                'vavp_available': 0,
-                            }
-                            for j in range(equipment_in_page):
-                                index = i * equipment_in_page + j
-                                if index < len_equipments:
-                                    page['rows'].append(fetch_vav_equipment_data(group_equipments[index], is_report_pdf))
-                                    if group_equipments[index].equipment_type.test_sheet.inheritance:
-                                        page['vavp_available'] = 1
-                                else:
-                                    empty_rows += 1
-                            page['empty_rows'] = range(empty_rows)
-                            if page['rows']:
-                                vav_pages.append(page)
-
-                        if len_equipments > 0:
-                            toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', math.ceil(len_equipments / equipment_in_page), 1, True, False)
-
-                        air_terminal_equipments = AirTerminalEquipment.objects.filter(sheet__project=report_sheet.project,
-                                                                                      vav_equipment__terminal_design_data_entry_completed=True,
-                                                                                      vav_equipment__terminal_actual_data_entry_completed=True,
-                                                                                      vav_equipment__in=group_equipments.all()) \
-                            .order_by('air_equipment__field_order', 'vav_equipment_id', 'type', 'outlet_no')
-
-                        last_vav_equipment_id = 0
-                        value_list = air_terminal_equipments.values_list('vav_equipment_id', flat=True).distinct()
-                        for value in value_list:
-                            if last_vav_equipment_id != value:
-                                last_vav_equipment_id = value
-                                all_vav_equipment_terminals = air_terminal_equipments.filter(vav_equipment_id=value)
-
-                                if len(all_vav_equipment_terminals) > 0:
-                                    vav_terminal_pages = prepare_terminal_pages(all_vav_equipment_terminals, 'SUPPLY', 2,
-                                                           is_report_pdf,
-                                                           equipment_in_page)
-                                    toc_line_maker('AIR TERMINAL TEST SHEET', len(vav_terminal_pages), 2, True, False)
-                                    vav_pages = vav_pages + vav_terminal_pages
-
-            return vav_pages
-
-        def add_independent_vav_pages(vav_equipments):
-            vav_pages = []
-
-            equipment_in_page = 10  # Number of equipments per page
-            total_equipments = vav_equipments.count()
-
-            vav_eqs = []
-            for eq in vav_equipments:
-                vav_eqs.append(fetch_vav_data(eq))
-
-            # Create VAV pages with 8 equipments each
-            for i in range(math.ceil(total_equipments / equipment_in_page)):
-                rows = vav_eqs[i * equipment_in_page: (i + 1) * equipment_in_page]
-                
-                # Only proceed if there are actual rows
-                if rows:
-                    empty_rows = [None] * (equipment_in_page - len(rows))
-                    
-                    page = {
-                        'type': 'VAV',
-                        'system': 'VAVs',
-                        'rows': rows + empty_rows,  # Filling the remaining rows with `None` to indicate emptiness
-                        'notes': [],
-                        'vavp_available': 0,
-                        'empty_rows': empty_rows
-                    }
-
-                    # Check if any equipment on the page has inheritance, set `vavp_available` if true
-                    for equipment_data in rows:  # Only check actual rows, not the empty placeholders
-                        if equipment_data.get('inheritance', False):  # Assuming 'inheritance' key in equipment data
-                            page['vavp_available'] = 1
-                            break
-
-                    vav_pages.append(page)
-
-            # Add TOC line for the VAV schedule only if there are any pages
-            if vav_pages:
-                toc_line_maker('V.A.V. BOX SCHEDULE TEST SHEET', len(vav_pages), 1, True, False)
-
-            # Now handle air terminal equipment pages
-            air_terminal_equipments = DataSheet.objects.filter(
-                project=report_sheet.project,
-                parent__in=vav_equipments,
-            ).order_by('id', '_type', 'outlet_no')
-
-            if len(air_terminal_equipments) > 0:
-                air_terminal_pages = fetch_terminal_data(air_terminal_equipments, 1)
-                vav_pages.extend(air_terminal_pages)
-                toc_line_maker('AIR TERMINAL TEST SHEET', len(air_terminal_pages), 2, True, False)
-
-            return vav_pages
-
-        def add_velocity_traverse_pages(velocity_traverse_equipments):
-            pages = []
-            for eq in velocity_traverse_equipments:
-                rows = fetch_velocity_data(eq)
-                page = {
-                    'type': 'VELOCITY',
-                    'system': 'VELOCITY TRAVERSE',
-                    'rows': rows,
-                }
-                toc_line_maker('VELOCITY TRAVERSE TEST SHEET', 1, 1, True, False)
-                pages.append(page)
-            return pages
-
-        while len(air_moving_equipments):
-            current_air_moving_equipments = air_moving_equipments[0]
-            air_moving_equipments = air_moving_equipments[1:]
-            pages.append({
-                'type': 'AIRMOVING',
-                'system': current_air_moving_equipments.fan_no,
-                'rows': [
-                    fetch_air_mov_data(current_air_moving_equipments),
-                ]
-            })
-            toc_line_maker(current_air_moving_equipments.fan_no, 0, 0, False, True)
-            toc_line_maker('AIR MOVING EQUIPMENT TEST SHEET', 1, 1, True, False)
-            terminals = add_terminal_pages_for_air_moving(current_air_moving_equipments)
-            if terminals:
-                toc_line_maker('AIR TERMINAL TEST SHEET', len(terminals), 2, True, False)
-                pages.extend(terminals)
-            # pages = pages + add_vav_pages_using_air_moving([air_moving_equipments[0]])
-
-        if len(indipendent_vav_equipments) > 0:
-            toc_line_maker('VAV\'S', 0, 0, False, True)
-            pages = pages + add_independent_vav_pages(indipendent_vav_equipments)
-
-        if len(velocity_traverse_equipments) > 0:
-            toc_line_maker('VELOCITY TRAVERSE', 0, 0, False, True)
-            pages = pages + add_velocity_traverse_pages(velocity_traverse_equipments)
-
-        # pages = pages + add_rogue_terminal_pages()
-
-        # attachment
-        for ds in datasheets:
-            if ds.attach:
-                title = ds.name
-                if ds.equipment_type.test_sheet.name == 'Air Moving':
-                    title = ds.fan_no
-                elif 'V.A.V' in ds.equipment_type.test_sheet.name:
-                    title = ds.code
-
-                url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(ds.attach.file)
-                url = url.replace("/media///app/", "")
-                response = url_request.urlretrieve(url)
-                attach = open(response[0], "rb")
-                tmp_reader = PdfReader(attach)
-                toc_line_maker(f"{ds.attach_type} ({title})", len(tmp_reader.pages), 1, True, False)
-
-        if report_sheet.project.colored_drawing or report_sheet.project.report_colored_drawing:
-            toc_line_maker('AS BUILT MECHANICAL PLAN', 1, 1, True, False)
-
-        parameters = {
-            'report_sheet': report_sheet,
-            'form': {
-                'my_sheet': report_sheet,
-                'pages': pages,
-            },
-            'file_name': ('FINAL REPORT {}-{}{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                        report_sheet.project.project_number,'')).upper(),
-            'license_owner': license_owner,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'os': system(),
-        }
-        pdf_name, pdf_path = Render.render_to_file('pdfTemplates/fullTemplate_2.html', parameters, 'FinalReport')
-        full_pdf = open(pdf_path, "rb")
-
-        # Append table of content
-        parameters = {
-            'table_of_content': table_of_content,
-            'report_sheet': report_sheet,
-            'file_name': ('TABLE OF CONTENT {}-{}{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                            report_sheet.project.project_number, '')).upper(),
-            'license_owner': license_owner,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'os': system(),
-        }
-        pdf_name, pdf_path = Render.render_to_file('pdfTemplates/tocTemplate_2.html', parameters, 'TocReport')
-        toc_pdf = open(pdf_path, "rb")
-        merger.append(fileobj=toc_pdf)
-
-        parameters = {
-            'file_name': ('INSTRUMENT SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name,
-                                                     report_sheet.project.project_number)).upper(),
-            'report_sheet': report_sheet,
-            'report_stamp': report_stamp,
-            'datetime': datetime.datetime.now(),
-            'license_owner': license_owner,
-            'instruction_image': instruction_image,
-            'abbreviation_image': abbreviation_image,
-            'owner_title': owner_title,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': owner_tel,
-            'owner_fax': owner_fax,
-            'owner_web': owner_web,
-            'owner_mail': owner_mail,
-            'owner_signature': owner_signature,
-            'owner_logo': owner_logo,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-            'company_name': company_name,
-            'WEB_URL': settings.WEB_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'os': system()
-        }
-
-        instrument_pdf = ReportSheet.create_report_pdf(parameters)
-        parameters['instrument_pdf'] = instrument_pdf[1]
-        instrument = open(instrument_pdf[1], "rb")
-        merger.append(fileobj=instrument)
-        merger.append(fileobj=full_pdf)
-
-        # append attaches
-        for ds in datasheets:
-            if ds.attach:
-                url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(ds.attach.file)
-                url = url.replace("/media///app/", "")
-                response = url_request.urlretrieve(url)
-                attach = open(response[0], "rb")
-                merger.append(fileobj=attach)
-
-        if report_sheet.project.report_colored_drawing:
-            # response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.report_colored_drawing.file)))
-            
-            url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(report_sheet.project.report_colored_drawing.file)
-            url = url.replace("/media///app/", "")
-            print("===" * 15)
-            print(url)
-            response = url_request.urlretrieve(url)
-            drawings = open(response[0], "rb")
-            merger.append(fileobj=drawings)
-        else:
-            # response = url_request.urlretrieve(s3.get_bucket_object('media/' + str(report_sheet.project.colored_drawing.file)))
-            url = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + str(report_sheet.project.colored_drawing.file)
-            url = url.replace("/media///app/", "")
-            print("===" * 15)
-            print(url)
-            response = url_request.urlretrieve()
-            drawings = open(response[0], "rb")
-            merger.append(fileobj=drawings)
-
-    if not os.path.exists(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report")):
-        os.makedirs(os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report"))
-    file_name = ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper() + '.pdf'
-    file_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/pdfs/report", file_name)
-    s3_path = os.path.join("media/pdfs/report", file_name)
-    output = open(file_path, "wb")
-    merger.write(output)
-    output.close()
-    cover.close()
-    if not report_sheet.report_type == 1:
-        table_of_content_file.close()
-        test_sheets.close()
-        drawings.close()
-    s3.upload_file_to_bucket(file_name=file_path, key=s3_path)
-
-    # return JsonResponse({'reload': True}, safe=False)
-    # return JsonResponse({'url': settings.MEDIA_URL + 'pdfs/report/' + ('FINAL SHEET {}-{}'.format(report_sheet.project.proposal.quote.estimate.project.name, report_sheet.project.project_number)).upper()}, safe=False)
-    # s3.get_bucket_object(os.path.join("media/pdfs/report", final_pdf_name))
-    return s3.get_bucket_object(s3_path)

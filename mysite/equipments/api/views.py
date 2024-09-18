@@ -11,7 +11,6 @@ from mysite.dbmanagement.models import EquipmentManufacturer
 import copy
 from ..utils.calc_formula import calculate_formula
 
-from mysite.generatereport.views import report_sheet_recreate_call
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -158,9 +157,6 @@ def update_data_sheet_form(request, pk):
     data_sheet = get_object_or_404(DataSheet, pk=pk)
     form_fields = copy.deepcopy(data_sheet.form_fields)
 
-    print("===" * 20)
-    print(request.data)
-
     errors = []
     exclude_applied_formula = ["AK Factor"]
 
@@ -181,9 +177,9 @@ def update_data_sheet_form(request, pk):
                 field_data = form_fields[form_type][field_key]
                 # Update field note or value
                 if "_note" in key:
-                    field_data["note"] = value
+                    field_data["note"] = value.strip()
                 else:
-                    field_data["value"] = value
+                    field_data["value"] = value.strip()
                     # Check and apply formula
                     formula = field_data.get("formula")
                     if formula and field_key not in exclude_applied_formula:
@@ -198,7 +194,7 @@ def update_data_sheet_form(request, pk):
                             #     field_data["value"] = computed_value
                             if ('Total SP' in field_key) and ('*' not in computed_value):
                                 computed_value = f"{float(computed_value):.2f}"
-                            field_data["value"] = computed_value
+                            field_data["value"] = computed_value.strip()
             data_sheet.form_fields = form_fields
             data_sheet.save()
     else:
@@ -209,16 +205,12 @@ def update_data_sheet_form(request, pk):
                 field_data = form_fields[form_type][field_key]
                 # Update field note or value
                 if "_note" in key:
-                    field_data["note"] = value
+                    field_data["note"] = value.strip()
                 else:
 
-                    print("---" * 10)
-                    print(field_data)
-                    print(field_key, value)
-
-                    field_data["value"] = value
+                    field_data["value"] = value.strip()
                     if value == "@":
-                        field_data["note"] = "See general note"
+                        field_data["note"] = "See general note".strip()
                     # Check and apply formula
                     formula = field_data.get("formula")
                     if formula and field_key not in exclude_applied_formula:
@@ -236,6 +228,8 @@ def update_data_sheet_form(request, pk):
                             if ('Total SP' in field_key) and ('*' not in computed_value):
                                 computed_value = f"{float(computed_value):.2f}"
                             field_data["value"] = computed_value
+                        else:
+                            field_data["value"] = value.strip()
         data_sheet.form_fields = form_fields
 
         if form_type == "design":
@@ -265,24 +259,3 @@ def clear_data_sheet(request, pk):
     order.state = "Not Started"
     order.save()
     return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['POST'])
-def create_report(request, order_id):
-    report_type = request.data.get('report_type')
-    start_date = request.data.get('start_date')
-    end_date = request.data.get('end_date')
-    report_date = request.data.get('report_date')
-    revised_date = request.data.get('revised_date')
-
-    # Pass these parameters to your report generation logic
-    report = report_sheet_recreate_call(
-        request=request,
-        order_id=order_id,
-        report_type=report_type,
-        start_date=start_date,
-        end_date=end_date,
-        report_date=report_date,
-        revised_date=revised_date,
-    )
-    return Response({"report": report})

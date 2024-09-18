@@ -21,11 +21,12 @@ def calculate_formula(formula, fields, new_data):
             return None  # if any value is None, we cannot compute the formula
         # Replace placeholder in formula with the actual value
         formula = formula.replace(placeholder, str(value))
+        if "@" in formula:
+            return None
     try:
         # Evaluate the mathematical expression from the formula
         rs = eval(formula)
         return round(rs, 2)
     except Exception as e:
         print(f"Error evaluating formula: {e}")
-        return "*"
-        # return None
+        return None

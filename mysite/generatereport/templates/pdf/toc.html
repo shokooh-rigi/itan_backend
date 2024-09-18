@@ -45,24 +45,26 @@
                 <tr></tr>
                 <tr class="pt-5">
                     <th scope="row" class="left_align" style="width: 30%; font-weight: normal;">INSTRUMENTATION</th>
-                    <td style="width: 80%;">...............................................................................................................</td>
+                    <td style="width: 80%;">...............................................................................................</td>
                     <td style="text-align: center;">I</td>
                 </tr>
                 <tr>
                     <th scope="row" class="left_align" style="width: 30%; font-weight: normal;">GENERAL NOTES</th>
-                    <td style="width: 80%;">...............................................................................................................</td>
+                    <td style="width: 80%;">...............................................................................................</td>
                     <td style="text-align: center;">II</td>
                 </tr>
                 <tr>
                     <th scope="row" class="left_align" style="width: 30%; font-weight: normal;">ABBREVIATIONS</th>
-                    <td style="width: 80%;">...............................................................................................................</td> 
+                    <td style="width: 80%;">...............................................................................................</td> 
                     <td style="text-align: center;">III</td>
                 </tr>
-                <tr>
-                    <th scope="row" class="left_align" style="width: 100%; font-weight: normal;">AABC NATIONAL PERFORMANCE GUARANTY</th>
-                    <td style="width: 25%;">...............................................................................................................</td> 
-                    <td style="text-align: center;">IV</td>
-                </tr>
+                {% if report_type == 'Final' %}
+                    <tr>
+                        <th scope="row" class="left_align" style="width: 100%; font-weight: normal;">AABC NATIONAL PERFORMANCE GUARANTY</th>
+                        <td style="width: 25%;">...............................................................................................</td> 
+                        <td style="text-align: center;">IV</td>
+                    </tr>
+                {% endif %}
 
                 <tr></tr>
                 <tr></tr>
@@ -71,10 +73,10 @@
                 <tr>
                     {% if line.level == 0 %}
                         {% if line.name in attach_types %}
-                            <th scope="row" class="left_align" style="font-weight: normal;">
+                            <th scope="row" class="left_align" style="font-weight: normal; width: 50%;">
                                 {{ line.name }}
                             </th>
-                            <td style="width: 60%;">...............................................................................................................</td> <!-- Default dots width -->
+                            <td style="width: 50%;">...............................................................................................</td> <!-- Default dots width -->
                             <td style="text-align: center;">
                                 {{ line.page }}
                             </td>
@@ -82,15 +84,15 @@
                             <th scope="row" class="left_align" style="font-weight: bold; text-decoration: underline;">
                                 {{ line.name }}
                             </th>
-                            <td style="width: 60%;"></td>
+                            <td style="width: 50%;"></td>
                             <td style="text-align: center;"></td>
                         {% endif %}
 
                     {% else %}
-                        <th scope="row" class="left_align" style="font-weight: normal;">
+                        <th scope="row" class="left_align" style="font-weight: normal; width: 50%;">
                             &nbsp;&nbsp;&nbsp;&nbsp;• {{ line.name }}
                         </th>
-                        <td style="width: 60%;">...............................................................................................................</td> <!-- Default dots width -->
+                        <td style="width: 50%;">...............................................................................................</td> <!-- Default dots width -->
                         <td style="text-align: center;">
                             {{ line.page }}
                         </td>

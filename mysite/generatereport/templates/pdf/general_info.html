@@ -107,6 +107,11 @@
         line-height: 1em;
     }
 
+    #tmp p {
+        margin-block-start: .5em;
+        margin-block-end: .5em;
+    }
+
 </style>
 
 
@@ -125,7 +130,7 @@
                 TAB TECHNOLOGIES PROJECT NO. {{ project_no }}
                 <br />{{ project }}
             </div>
-            <div style="font-size: 11pt;">
+            <div style="font-size: 11pt; padding-left: 30px;">
                 
                 <table class="calibration-table">
                     <tr>
@@ -242,11 +247,26 @@
             <br />{{ project }}
             </div>
             <br />
-            <div style="font-size: 13pt;">
-                {% if general_info.notes_and_comments.html != '' %}
-                    {{ general_info.notes_and_comments.html|safe }}
+            <div style="font-size: 13pt; padding-left: 50px;" id="tmp">
+                {% if report_type == 'Preliminary' %}
+                    <h2 style="text-align: center;">
+                        THIS IS A PRELIMINARY REPORT
+                    </h2>
+                        {% if general_info.notes_and_comments.html != '' %}
+                        <p style="font-weight: bold !important;">
+                            The following is a list of system deficiencies.
+                        </p>
+                        {{ general_info.notes_and_comments.html|safe }}
+                        {% endif %}
                 {% else %}
-                    The systems described here in this report are operating per design intent.
+                    {% if general_info.notes_and_comments.html != '' %}
+                        <p style="font-weight: bold !important;">
+                            The following is a list of system deficiencies.
+                        </p>
+                        {{ general_info.notes_and_comments.html|safe }}
+                    {% else %}
+                        The systems described here in this report are operating per design intent.
+                        {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -407,76 +427,88 @@
         {% include "pdf/footer.html" %}
     </div>
 
-    <div class="page page-break">
-        {% include "pdf/header.html" %}
+    {% if report_type == 'Final' %}
+        <div class="page page-break">
+            {% include "pdf/header.html" %}
 
-        <div class="content pdf-page-content">
+            <div class="content pdf-page-content">
 
-            <div id="guarantee-container">
-                <!-- Background image -->
-                <img src="{% static 'images/gauranty_template.jpg' %}" id="guarantee-background" alt="Guarantee Background"> 
-                <div class="guarantee-page">
-                    PAGE IV
-                </div>
-                <!-- Content container -->
-                <div class="guarantee-content-container">
-                    <div class="guarantee-text-box">
-                        <br><br>
-                        <p class="guarantee-centered-line">Pursuant to the agreement between</p>
-                        <p><span class="guarantee-underline" style="width: 100%; text-align: center;">
-                            <span style="margin-left: -50px;">
-                                {{ general_info.guaranty.company }}
-                            </span>
-                        </span></p>
-                        <p class="guarantee-centered-line">AABC Certified Testing & Balancing Agency</p>
-                        <p>and <span class="guarantee-underline" style="width: 95%; text-align: center;">
-                            <span style="margin-left: -50px;">
-                                {{ client }}
-                            </span>
-                        </span></p>
-                        <p class="guarantee-centered-line">Client</p>
-                        <p style="font-size: 10px;"><span style="margin-left: 30px;">
-                            All systems shall be tested and balanced in accordance with the project plans and specifications and to the optimum performance capabilities of the equipment. Testing and balancing shall be done in accordance with the standards published by the Associated Air Balance Council.
-                        </p>
-                        <p style="font-size: 10px;"><span style="margin-left: 30px;">
-                            If the Agency listed above fails to comply with the specifications for any reason other than termination of business by the AABC agency or equipment malfunction or inadequacy which prevents proper balancing of the systems, AABC will investigate and, if warranted, will provide supervisory personnel to assist the member Agency to perform work in accordance with AABC Standards. This supervision will be provided at no additional cost to the building owner.
-                        </p>
-                        <p style="font-size: 10px;"><span style="margin-left: 30px;">
-                            This Guaranty is valid for one year from the date of submission of a test and balance report, provided the Agency is a current member of AABC, and may only be invoked in writing by the building owner, architect, or engineer of record. The Guaranty is limited to the terms and conditions as stated herein.
-                        </p>
-                        <p>Project Name: <span class="guarantee-underline" style="width: 83%;">
-                            {{ project }}
-                        </span></p>
-                        <p>Address: <span class="guarantee-underline" style="width: 88%;">
-                            {{ general_info.guaranty.address }}
-                        </span></p>
-                        <p><span class="guarantee-underline" style="width: 98%;">
-                            <span style="margin-left: 65px;"></span>{{ general_info.guaranty.address2 }}
-                        </span></p>
-                        <p>Name of Engineer: <span class="guarantee-underline" style="width: 78%;">N.S.</span></p>
-                        <p>Engineering Firm: <span class="guarantee-underline" style="width: 78%;">
-                            {{ general_info.guaranty.eng_firm }}
-                        </span></p>
-                        <p>Email Address: <span class="guarantee-underline" style="width: 57%;">N.S.</span></p>
-                        <p>Address: <span class="guarantee-underline" style="width: 63%;">
-                            {{ general_info.guaranty.eng_firm_address }}
-                        </span></p>
-                        <p><span class="guarantee-underline" style="width: 70%;">
-                            <span style="margin-left: 60px;"></span>{{ general_info.guaranty.eng_firm_address2 }}
-                        </span></p>
-                        <p>Date: <span class="guarantee-underline" style="width: 63%;">
-                            {{ report_date|custom_date_format }}
-                        </span></p>
-                        <p>TBE #: <span class="guarantee-underline" style="width: 60%;">90-07-25</span></p>
-                        <p>By: <span class="guarantee-underline" style="width: 63%;">{{ general_info.guaranty.owner }}</span></p>
-                        <p><span style="margin-left: 60px;"></span>AABC Certified TBE</p>
+                <div id="guarantee-container">
+                    <!-- Background image -->
+                    <img src="{% static 'images/gauranty_template.jpg' %}" id="guarantee-background" alt="Guarantee Background"> 
+                    <div class="guarantee-page">
+                        PAGE IV
+                    </div>
+                    <!-- Content container -->
+                    <div class="guarantee-content-container">
+                        <div class="guarantee-text-box">
+                            <br><br>
+                            <p class="guarantee-centered-line">Pursuant to the agreement between</p>
+                            <p><span class="guarantee-underline" style="width: 100%; text-align: center;">
+                                <span style="margin-left: -50px;">
+                                    {{ general_info.guaranty.company }}
+                                </span>
+                            </span></p>
+                            <p class="guarantee-centered-line">AABC Certified Testing & Balancing Agency</p>
+                            <p>and <span class="guarantee-underline" style="width: 95%; text-align: center;">
+                                <span style="margin-left: -50px;">
+                                    {{ client }}
+                                </span>
+                            </span></p>
+                            <p class="guarantee-centered-line">Client</p>
+                            <p style="font-size: 10px;"><span style="margin-left: 30px;">
+                                All systems shall be tested and balanced in accordance with the project plans and specifications and to the optimum performance capabilities of the equipment. Testing and balancing shall be done in accordance with the standards published by the Associated Air Balance Council.
+                            </p>
+                            <p style="font-size: 10px;"><span style="margin-left: 30px;">
+                                If the Agency listed above fails to comply with the specifications for any reason other than termination of business by the AABC agency or equipment malfunction or inadequacy which prevents proper balancing of the systems, AABC will investigate and, if warranted, will provide supervisory personnel to assist the member Agency to perform work in accordance with AABC Standards. This supervision will be provided at no additional cost to the building owner.
+                            </p>
+                            <p style="font-size: 10px;"><span style="margin-left: 30px;">
+                                This Guaranty is valid for one year from the date of submission of a test and balance report, provided the Agency is a current member of AABC, and may only be invoked in writing by the building owner, architect, or engineer of record. The Guaranty is limited to the terms and conditions as stated herein.
+                            </p>
+                            <p>Project Name: <span class="guarantee-underline" style="width: 83%;">
+                                {{ project }}
+                            </span></p>
+                            <p>Address: <span class="guarantee-underline" style="width: 88%;">
+                                {{ general_info.guaranty.address }}
+                            </span></p>
+                            <p><span class="guarantee-underline" style="width: 98%;">
+                                <span style="margin-left: 65px;"></span>{{ general_info.guaranty.address2 }}
+                            </span></p>
+                            <p>Name of Engineer: <span class="guarantee-underline" style="width: 78%;">N.S.</span></p>
+                            <p>Engineering Firm: <span class="guarantee-underline" style="width: 78%;">
+                                {{ general_info.guaranty.eng_firm }}
+                            </span></p>
+                            <p>Email Address: <span class="guarantee-underline" style="width: 57%;">N.S.</span></p>
+                            <p>Address: <span class="guarantee-underline" style="width: 63%;">
+                                {{ general_info.guaranty.eng_firm_address }}
+                            </span></p>
+                            <p><span class="guarantee-underline" style="width: 70%;">
+                                <span style="margin-left: 60px;"></span>{{ general_info.guaranty.eng_firm_address2 }}
+                            </span></p>
+                            <p>Date: <span class="guarantee-underline" style="width: 63%;">
+                                {{ report_date|custom_date_format }}
+                            </span></p>
+                            <p>TBE #: <span class="guarantee-underline" style="width: 60%;">90-07-25</span></p>
+                            <p>By: <span class="guarantee-underline" style="width: 63%;">{{ general_info.guaranty.owner }}</span></p>
+                            <p><span style="margin-left: 60px;"></span>AABC Certified TBE</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
+            
+            {% include "pdf/footer.html" %}
         </div>
-        
-        {% include "pdf/footer.html" %}
-    </div>
+    {% endif %}
 
 </div>
+
+<script>
+    var div = document.getElementById("tmp");
+  
+    var brElements = div.getElementsByTagName("br");
+  
+    Array.from(brElements).forEach(function(br) {
+      br.parentNode.removeChild(br);
+    });
+</script>

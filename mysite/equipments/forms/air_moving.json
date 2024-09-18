@@ -72,7 +72,7 @@
             "note": "",
             "order": 8,
             "validation": "^[0-9@]*$",
-            "formula": "1_design - 4_design",
+            "formula": "6_design - 9_design",
             "required": true,
             "placeholder": "@ requires note"
         },
