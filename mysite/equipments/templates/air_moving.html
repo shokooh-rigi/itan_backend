@@ -90,11 +90,11 @@
                 Fan No.
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.fan_no }}
+                &nbsp;{{ page.data.0.fan_no }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;
-                {% if page.data.direct_drive == 'on' %}
+                {% if page.data.0.direct_drive == 'on' %}
                     <img src="{% static 'images/ck1.png' %}" width="16" height="16" />
                 {% else %}
                     <img src="{% static 'images/ck0.png' %}" width="16" height="16" />
@@ -107,11 +107,11 @@
                 Location
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.location }}
+                &nbsp;{{ page.data.0.location }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;
-                {% if page.data.belt_drive == 'on' %}
+                {% if page.data.0.belt_drive == 'on' %}
                     <img src="{% static 'images/ck1.png' %}" width="16" height="16" />
                 {% else %}
                     <img src="{% static 'images/ck0.png' %}" width="16" height="16" />
@@ -124,11 +124,11 @@
                 Area Served
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.area_served }}
+                &nbsp;{{ page.data.0.area_served }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;
-                {% if page.data.max_speed == 'on' %}
+                {% if page.data.0.max_speed == 'on' %}
                     <img src="{% static 'images/ck1.png' %}" width="16" height="16" />
                 {% else %}
                     <img src="{% static 'images/ck0.png' %}" width="16" height="16" />
@@ -141,11 +141,11 @@
                 Manufacturer
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.manufacturer }}
+                &nbsp;{{ page.data.0.manufacturer }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;
-                {% if page.data.med_speed == 'on' %}
+                {% if page.data.0.med_speed == 'on' %}
                     <img src="{% static 'images/ck1.png' %}" width="16" height="16" />
                 {% else %}
                     <img src="{% static 'images/ck0.png' %}" width="16" height="16" />
@@ -158,11 +158,11 @@
                 Model No.
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.model_no }}
+                &nbsp;{{ page.data.0.model_no }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;
-                {% if page.data.min_speed == 'on' %}
+                {% if page.data.0.min_speed == 'on' %}
                     <img src="{% static 'images/ck1.png' %}" width="16" height="16" />
                 {% else %}
                     <img src="{% static 'images/ck0.png' %}" width="16" height="16" />
@@ -175,7 +175,7 @@
                 Serial / Job No.
             </td>
             <td class="pdf-table-cell" colspan="4">
-                &nbsp;{{ page.data.serial_no }}
+                &nbsp;{{ page.data.0.serial_no }}
             </td>
             <td class="pdf-table-cell" colspan="2">&nbsp;</td>
             <td class="pdf-table-cell" colspan="2">&nbsp;</td>
@@ -198,19 +198,19 @@
                 Total C.F.M. Fan
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_cfm_fan.design }}
+                &nbsp;{{ page.data.0.total_cfm_fan_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_cfm_fan.actual }}
+                &nbsp;{{ page.data.0.total_cfm_fan_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">
                 Air Temp. In Cooling
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_in_cooling.design }}
+                &nbsp;{{ page.data.0.air_temp_in_cooling_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_in_cooling.actual }}
+                &nbsp;{{ page.data.0.air_temp_in_cooling_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -218,36 +218,36 @@
                 Total C.F.M. Outlets
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_cfm_outlets.design }}
+                &nbsp;{{ page.data.0.total_cfm_outlets_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_cfm_outlets.actual }}
+                &nbsp;{{ page.data.0.total_cfm_outlets_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell"  colspan="2">
                 Air Temp. Out Cooling
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_out_cooling.design }}
+                &nbsp;{{ page.data.0.air_temp_out_cooling_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_out_cooling.actual }}
+                &nbsp;{{ page.data.0.air_temp_out_cooling_actual }}
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
                 Return Air C.F.M.
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.return_air_cfm.design }}
+                &nbsp;{{ page.data.0.return_air_cfm_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.return_air_cfm.actual }}
+                &nbsp;{{ page.data.0.return_air_cfm_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">RH %</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.rh.design }}
+                &nbsp;{{ page.data.0.rh_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.rh.actual }}
+                &nbsp;{{ page.data.0.rh_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -255,17 +255,17 @@
                 Outdoor Air C.F.M.
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.outdoor_air_cfm.design }}
+                &nbsp;{{ page.data.0.outdoor_air_cfm_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.outdoor_air_cfm.actual }}
+                &nbsp;{{ page.data.0.outdoor_air_cfm_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Air Temp. In Heating</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_in_heating.design }}
+                &nbsp;{{ page.data.0.air_temp_in_heating_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_in_heating.actual }}
+                &nbsp;{{ page.data.0.air_temp_in_heating_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -273,17 +273,17 @@
                 Total SP (Ext. SP)
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_sp_ext_sp.design }}
+                &nbsp;{{ page.data.0.total_sp_ext_sp_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.total_sp_ext_sp.actual }}
+                &nbsp;{{ page.data.0.total_sp_ext_sp_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Air Temp. Out Heating</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_out_heating.design }}
+                &nbsp;{{ page.data.0.air_temp_out_heating_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.air_temp_out_heating.actual }}
+                &nbsp;{{ page.data.0.air_temp_out_heating_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -291,17 +291,17 @@
                 Fan (Unit) Suction Pressure
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_unit_suction_pressure.design }}
+                &nbsp;{{ page.data.0.fan_unit_suction_pressure_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_unit_suction_pressure.actual }}
+                &nbsp;{{ page.data.0.fan_unit_suction_pressure_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Ambient Temp.</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.ambient_temp.design }}
+                &nbsp;{{ page.data.0.ambient_temp_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.ambient_temp.actual }}
+                &nbsp;{{ page.data.0.ambient_temp_actual }}
             </td>    
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -309,17 +309,17 @@
                 Discharge Pressure, Fan/Unit
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.discharge_pressure_fan_unit.design }}
+                &nbsp;{{ page.data.0.discharge_pressure_fan_unit_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.discharge_pressure_fan_unit.actual }}
+                &nbsp;{{ page.data.0.discharge_pressure_fan_unit_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">O.A. Damper Poss.</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.oa_damper_poss.design }}
+                &nbsp;{{ page.data.0.oa_damper_poss_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.oa_damper_poss.actual }}
+                &nbsp;{{ page.data.0.oa_damper_poss_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-last-row">
@@ -327,17 +327,17 @@
                 Fan R.P.M.
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_rpm.design }}
+                &nbsp;{{ page.data.0.fan_rpm_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_rpm.actual }}
+                &nbsp;{{ page.data.0.fan_rpm_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">GPM</td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.gpm.design }}
+                &nbsp;{{ page.data.0.gpm_design }}
             </td>
             <td class="pdf-table-cell">
-                &nbsp;{{ page.data.gpm.actual }}
+                &nbsp;{{ page.data.0.gpm_actual }}
             </td>
         </tr>
 
@@ -352,14 +352,14 @@
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Rated</td>
             <td class="pdf-table-cell pdf-table-title-cell center-title" colspan="2">Actual</td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Belt Size</td>
-            <td class="pdf-table-cell center-title" colspan="2">&nbsp;{{ page.data.belt_size.actual }}</td>
+            <td class="pdf-table-cell center-title" colspan="2">&nbsp;{{ page.data.0.belt_size_actual }}</td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
             <td class="pdf-table-cell pdf-table-title-cell">
                 H.P.
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.hp.design }}
+                &nbsp;{{ page.data.0.hp_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
                 &nbsp;SEE BHP
@@ -368,7 +368,7 @@
                 Motor Pully 
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.motor_pully.actual }}
+                &nbsp;{{ page.data.0.motor_pully_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -376,14 +376,14 @@
                 Voltage
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.voltage.design }}
+                &nbsp;{{ page.data.0.voltage_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.voltage.actual }}
+                &nbsp;{{ page.data.0.voltage_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Fan Pully</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_pully.actual }}
+                &nbsp;{{ page.data.0.fan_pully_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -391,14 +391,14 @@
                 Phase
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.phase.design }}
+                &nbsp;{{ page.data.0.phase_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.phase.actual }}
+                &nbsp;{{ page.data.0.phase_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">C to C</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.c_to_c.actual }}
+                &nbsp;{{ page.data.0.c_to_c_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -406,14 +406,14 @@
                 Amperage
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.amperage.design }}
+                &nbsp;{{ page.data.0.amperage_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.amperage.actual }}
+                &nbsp;{{ page.data.0.amperage_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Motor Shaft</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.motor_shaft.actual }}
+                &nbsp;{{ page.data.0.motor_shaft_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -421,14 +421,14 @@
                 B.H.P. (Calc.)
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.bhp_calc.design }}
+                &nbsp;{{ page.data.0.bhp_calc_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.bhp_calc.actual }}
+                &nbsp;{{ page.data.0.bhp_calc_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Fan Shaft</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.fan_shaft.actual }}
+                &nbsp;{{ page.data.0.fan_shaft_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -436,12 +436,12 @@
                 Frame
             </td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.frame.design }}
+                &nbsp;{{ page.data.0.frame_design }}
             </td>
             <td class="pdf-table-cell" colspan="2">--------</td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">VFD / HZ</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.vfd_hz.actual }}
+                &nbsp;{{ page.data.0.vfd_hz_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-middle-row">
@@ -449,12 +449,12 @@
                 S.F. / Code
             </td>
             <td class="pdf-table-cell"  colspan="2">
-                &nbsp;{{ page.data.sf_code.design }}
+                &nbsp;{{ page.data.0.sf_code_design }}
             </td>
             <td class="pdf-table-cell"  colspan="2">--------</td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Filter Size</td>
             <td class="pdf-table-cell"  colspan="2">
-                &nbsp;{{ page.data.filter_size.actual }}
+                &nbsp;{{ page.data.0.filter_size_actual }}
             </td>
         </tr>
         <tr class="pdf-table-row section-last-row">
@@ -462,14 +462,14 @@
                 Motor RPM
             </td>
             <td class="pdf-table-cell"  colspan="2">
-                &nbsp;{{ page.data.motor_rpm.design }}
+                &nbsp;{{ page.data.0.motor_rpm_design }}
             </td>
             <td class="pdf-table-cell"  colspan="2">
-                &nbsp;{{ page.data.motor_rpm.actual }}
+                &nbsp;{{ page.data.0.motor_rpm_actual }}
             </td>
             <td class="pdf-table-cell pdf-table-title-cell" colspan="2">Filter Model</td>
             <td class="pdf-table-cell" colspan="2">
-                &nbsp;{{ page.data.filter_model.actual }}
+                &nbsp;{{ page.data.0.filter_model_actual }}
             </td>
         </tr>
         <tr class="pdf-table-note-section">
@@ -477,7 +477,7 @@
                 Notes:
             </td>
             <td colspan="8" class="no-cell-border">
-                <div class="">{{ page.data.note }}{% if page.data.note != '' and page.rows.1.note != '' %} | {% endif %}{{ page.rows.1.note }}</div>
+                <div class="">{{ page.notes }}</div>
             </td>
         </tr>
         </tbody>

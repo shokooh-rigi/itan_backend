@@ -520,40 +520,80 @@
     }
     function createDataSheet(button) {
         button.disabled = true;
+
+        // Prevent form submission from refreshing the page
+        event.preventDefault();
+
+        // Get form data
         var eq_type = $('#select-eq-type').val();
         var eq = $('#select-eq').val();
         var eq_count = $('#eq_count').val();
+
+        // Check if all required fields are filled
         if (eq_type === '' || eq === '' || eq_count === '') {
             alert('Please fill all fields!');
             button.disabled = false;
             return;
         }
-        var pathname = window.location.pathname;
-        var parts = pathname.split('/');
-        var index = parts.indexOf('equipments');
-        var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/';
-        $.ajax({
-            url: newPathname,
-            type: 'POST',
-            contentType: 'application/json', // Set contentType to application/json
-            data: JSON.stringify({ data: [{
-                equipment: eq,
-                test_sheet: eq_type,
-                qty: eq_count,
-                project: '{{ order }}',
-                // csrfmiddlewaretoken: '{{ csrf_token }}'
-            }] }), // Send data as JSON string
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
-            },
-            success: function(result) {
-                location.reload();
-            },
-            error: function(error) {
-                console.log(error);
-                alert('Error creating DataSheet!');
-            }
-        });
+
+        // Check if the type is 'Estimate'
+        var modules_type = "{{ modules_type }}"; // Assuming `modules_type` is available in the template
+        if (modules_type === "Estimate") {
+            // Create new item element for the Estimate list
+            var newItemHtml = `
+                <div class="d-flex justify-content-between align-items-center mb-2 estimate-wrapper">
+                    <div class="mb-0 eq-wrapper">
+                        <span class="es-${eq}-${eq_type}">${eq} (${eq_type})</span>
+                        &nbsp;-&nbsp;
+                        <span class="qty-container">
+                            <span class="qty mr-5 inner-qty">${eq_count}</span>
+                        </span>
+                    </div>
+                    <div>
+                        <button onclick="decreaseQty(this, 'new-id')" type="button" class="btn btn-primary btn-sm">-</button>
+                        <button onclick="increaseQty(this, 'new-id')" type="button" class="btn btn-primary btn-sm">+</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-btn" onclick="deleteSection(event, 'new-id')" data-id="new-id">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Append the new item to the estimate list
+            $('.estimate-wrapper:last').after(newItemHtml);
+
+            // Close the modal
+            closemodulesModal();
+            button.disabled = false;
+        } else {
+            // Previous functionality: sending data to the backend
+            var pathname = window.location.pathname;
+            var parts = pathname.split('/');
+            var index = parts.indexOf('equipments');
+            var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/';
+            
+            $.ajax({
+                url: newPathname,
+                type: 'POST',
+                contentType: 'application/json', // Set contentType to application/json
+                data: JSON.stringify({ data: [{
+                    equipment: eq,
+                    test_sheet: eq_type,
+                    qty: eq_count,
+                    project: '{{ order }}',
+                }] }), // Send data as JSON string
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token in headers
+                },
+                success: function(result) {
+                    location.reload(); // Reload page after success
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert('Error creating DataSheet!');
+                }
+            });
+        }
     }
 
     function openReportModal(orderId) {

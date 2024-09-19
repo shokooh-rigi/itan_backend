@@ -184,22 +184,22 @@
                     &nbsp;{{ equipment.ak_factor }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.fpm.design }}
+                    &nbsp;{{ equipment.fpm_design }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.cfm.design }}
+                    &nbsp;{{ equipment.cfm_design }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.fpm.initial }}
+                    &nbsp;{{ equipment.fpm_initial }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.cfm.initial }}
+                    &nbsp;{{ equipment.cfm_initial }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.fpm.final }}
+                    &nbsp;{{ equipment.fpm_final }}
                 </td>
                 <td class="pdf-table-cell">
-                    &nbsp;{{ equipment.cfm.final }}
+                    &nbsp;{{ equipment.cfm_final }}
                 </td>
             </tr>
         {% endfor %}
@@ -289,19 +289,9 @@
             <td colspan="9">
             <div id="note-div-actual" class="note-div">
             * Not Applicable … Direct Reading Flow Hood
-                {% for row in page.rows %}
-                    {% for one_row in row %}
-                        {% if one_row.actual.note %}
-                            | {{ one_row.actual.note }}
-                        {% endif %}
-                        {% if one_row.design.cfm_note %}
-                            | {{ one_row.design.cfm_indicator }} {{ one_row.design.cfm_note }}
-                        {% endif %}
-                        {% if one_row.actual.cfm_note %}
-                            | {{ one_row.actual.cfm_indicator }} {{ one_row.actual.cfm_note }}
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
+                {% if page.notes %}
+                    | {{ page.notes }}
+                {% endif %}
             </div>
             </td>
         </tr>

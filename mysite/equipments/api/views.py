@@ -192,7 +192,7 @@ def update_data_sheet_form(request, pk):
                             #         field_data["value"] = computed_value
                             # else:
                             #     field_data["value"] = computed_value
-                            if ('Total SP' in field_key) and ('*' not in computed_value):
+                            if ('Total SP' in field_key):
                                 computed_value = f"{float(computed_value):.2f}"
                             field_data["value"] = computed_value.strip()
             data_sheet.form_fields = form_fields
