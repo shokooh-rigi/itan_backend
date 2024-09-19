@@ -14,6 +14,9 @@
             background-color: black;
             margin: 0;
             padding: 0;
+
+            /* display: flex;
+            flex-direction: column; */
         }
 
         .page {
@@ -32,13 +35,17 @@
             padding: 1in;   /* Adjust to match content */
         }
 
+        /* .header_content {
+        } */
+         
         /* Ensure footer sticks to the bottom of each page in screen view */
-        #footer_content {
+        .footer_content {
             position: absolute;
             bottom: 0;
             width: 100%;
             text-align: center;
-            padding-bottom: 20px; /* Adjust padding if needed */
+            /* padding-bottom: 20px; */
+            /* height: 50px; */
         }
     }
 
@@ -48,11 +55,20 @@
             page-break-before: always;
         }
 
-        #footer_content {
+        /* #footer_content {
             position: fixed;
             bottom: 0;
             width: 100%;
             text-align: center;
+        } */
+
+        .footer_content {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            /* padding-bottom: 20px; */
+            /* height: 50px; */
         }
 
         /* Ensure the background is white for print */
