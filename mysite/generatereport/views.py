@@ -990,11 +990,11 @@ def fetch_air_mov_data(equipment):
         'motor_rpm_design': get_field_value(design_set, 'Motor RPM', default='D.D.'),
         'motor_rpm_actual': get_field_value(actual_set, 'Motor RPM', default='D.D.'),
         'filter_model_actual': get_field_value(actual_set, 'Filter Model', default="N.A."),
-        'direct_drive': get_field_value(actual_set, 'Direct Drive'),
-        'belt_drive': get_field_value(actual_set, 'Belt Drive'),
-        'max_speed': get_field_value(actual_set, 'Max Speed'),
-        'med_speed': get_field_value(actual_set, 'Med Speed'),
-        'min_speed': get_field_value(actual_set, 'Min Speed'),
+        'direct_drive': get_field_value(design_set, 'Direct Drive'),
+        'belt_drive': get_field_value(design_set, 'Belt Drive'),
+        'max_speed': get_field_value(design_set, 'Max Speed'),
+        'med_speed': get_field_value(design_set, 'Med Speed'),
+        'min_speed': get_field_value(design_set, 'Min Speed'),
         'note': [get_field_value(design_set, 'Note')["value"], get_field_value(actual_set, 'Note')["value"]],
     }
 

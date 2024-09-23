@@ -119,25 +119,13 @@ def order_update(request, order_id):
 
     # _s3 = S3()
     image_data_list = []
-    for _fl in [
-        # this_order.equipment_submittal, 
-        this_order.colored_drawing, 
-        this_order.report_colored_drawing, 
-        # this_order.field_draw, 
-        # this_order.site_pictures,
-        # this_order.test_sheets
-    ]:
-        if not _fl:
-            continue
-        if _fl.name.endswith('.pdf'):
-            # _fl_path = _s3.get_bucket_object("media/" + _fl.name)
-            # DEBUG using local media
-            _fl_path = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + _fl.name
-            # url = _fl_path.replace("//", "/")
-            image_bytes_list = pdf_to_image_bytes(_fl_path)
-            image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
-        else:
-            image_data_list.append(_fl_path)
+    if this_order.colored_drawing and this_order.colored_drawing.name.endswith('.pdf'):
+        # _fl_path = _s3.get_bucket_object("media/" + _fl.name)
+        # DEBUG using local media
+        _fl_path = "http://itab-test-server.airdec.net:8000/" + settings.MEDIA_URL + "/" + this_order.colored_drawing.name
+        # url = _fl_path.replace("//", "/")
+        image_bytes_list = pdf_to_image_bytes(_fl_path)
+        image_data_list = [b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
 
     context = {
         "order": this_order,
