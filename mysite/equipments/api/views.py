@@ -158,7 +158,7 @@ def update_data_sheet_form(request, pk):
     form_fields = copy.deepcopy(data_sheet.form_fields)
 
     errors = []
-    exclude_applied_formula = ["AK Factor"]
+    can_be_calculated = True
 
     is_air_terminal = request.query_params.get("ds")
     if is_air_terminal == "air-terminal":
@@ -182,19 +182,13 @@ def update_data_sheet_form(request, pk):
                     field_data["value"] = value.strip()
                     # Check and apply formula
                     formula = field_data.get("formula")
-                    if formula and field_key not in exclude_applied_formula:
+                    if formula and can_be_calculated:
                         computed_value = calculate_formula(formula, form_fields, request.data)
-                        # if computed_value is not None and field_data.get("type") == "number":
                         if computed_value is not None:
-                            # if value:
-                            #     if float(computed_value) != float(value):
-                            #         # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
-                            #         field_data["value"] = computed_value
-                            # else:
-                            #     field_data["value"] = computed_value
                             if ('Total SP' in field_key):
-                                computed_value = f"{float(computed_value):.2f}"
-                            field_data["value"] = computed_value.strip()
+                                computed_value = f"({float(computed_value):.2f})"
+                            field_data["value"] = computed_value
+            can_be_calculated = True
             data_sheet.form_fields = form_fields
             data_sheet.save()
     else:
@@ -207,13 +201,17 @@ def update_data_sheet_form(request, pk):
                 if "_note" in key:
                     field_data["note"] = value.strip()
                 else:
-
                     field_data["value"] = value.strip()
                     if value == "@":
                         field_data["note"] = "See general note".strip()
                     # Check and apply formula
                     formula = field_data.get("formula")
-                    if formula and field_key not in exclude_applied_formula:
+                    if field_key == "AK Factor":
+                        # check code
+                        _code = form_fields[form_type]["Code"]["value"]
+                        if _code not in ["SR", "SG", "OED"]:
+                            can_be_calculated = False
+                    if formula and can_be_calculated:
                         computed_value = calculate_formula(formula, form_fields, request.data)
                         if computed_value is not None:
                             if 'Total SP' in field_key:
@@ -221,6 +219,8 @@ def update_data_sheet_form(request, pk):
                             field_data["value"] = computed_value
                         else:
                             field_data["value"] = value.strip()
+            can_be_calculated = True
+                            
         data_sheet.form_fields = form_fields
 
         if form_type == "design":
