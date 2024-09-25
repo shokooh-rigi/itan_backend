@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+{% load slugify %}
 
 {% block content %}
 <style>
@@ -40,66 +41,6 @@
         </h3>
     </div>
 
-
-    <!-- <form action="/path-to-your-post-method" method="post">
-        <div id="errorDisplayTop" class="alert alert-danger" style="display: none;"></div>
-        <div class="row">
-            {% for field_name, properties in fields.items %}
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="{{ field_name }}" class="form-label">
-                            {{ field_name }}
-                            {% if properties.required %}<span style="color: red;">*</span>{% endif %}
-                            <a href="#" data-toggle="modal" data-target="#noteModal{{ properties.order }}" class="note-info-icon">
-                                <i class="fas fa-comment" style="color: {% if properties.note %}blue{% else %}gray{% endif %};"></i>
-                            </a>
-                        </label>
-                        {% if properties.type == 'text' or properties.type == 'number' %}
-                            <input type="{{ properties.type }}" class="form-control" id="{{ field_name }}" name="{{ field_name }}"
-                                   value="{{ properties.value|default_if_none:'' }}"
-                                   placeholder="{{ properties.placeholder|default_if_none:'' }}"
-                                   {% if properties.required %} required {% endif %}
-                                   {% if properties.validation %} pattern="{{ properties.validation }}" {% endif %}>
-                        {% elif properties.type == 'textarea' %}
-                            <textarea class="form-control" id="{{ field_name }}" name="{{ field_name }}"
-                                      {% if properties.required %} required {% endif %}>{{ properties.value|default_if_none:'' }}</textarea>
-                        {% elif properties.type == 'checkbox' %}
-                            <input type="checkbox" class="form-control" id="{{ field_name }}" name="{{ field_name }}"
-                                   {% if properties.value == 'on' %} checked {% endif %}>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="modal fade" id="noteModal{{ properties.order }}" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel{{ properties.order }}" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="noteModalLabel{{ loop.index }}">Edit Note for {{ field_name }}</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <textarea class="form-control" name="{{ field_name }}_note">{{ properties.note|default_if_none:'' }}</textarea>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-
-        {% if  ds.equipment_type.test_sheet.name == 'Velocity Traverse' %}
-            HIiiiiiiiiii
-        {% endif %}
-
-        <button type="submit" class="btn btn-primary m-5">Save</button>
-        <div id="errorDisplayBottom" class="alert alert-danger" style="display: none;"></div>
-    </form> -->
-
-
     <form action="/path-to-your-post-method" method="post">
         <!-- Error display section -->
         <div id="errorDisplayTop" class="alert alert-danger" style="display: none;"></div>
@@ -133,7 +74,7 @@
                                 {{ properties.value|default_if_none:'' }}
                             </textarea>
                         {% elif properties.type == 'checkbox' %}
-                            <input type="checkbox" class="form-control" id="{{ field_name }}" name="{{ field_name }}"
+                            <input type="checkbox" class="form-control" id="{{ field_name|slugify }}" name="{{ field_name }}"
                                    {% if properties.value == 'on' %} checked {% endif %}
                                    {% if properties.display %} style="display: {{ properties.display }};" {% endif %}>
                         {% endif %}
@@ -326,6 +267,16 @@
         $('#colCount').val(othersData[0].length);
         $('#dynamicTableContainer').html(generateTable(othersData.length, othersData[0].length, othersData));
         {% endif %}
+
+        $('#belt-drive').change(function() {
+            $('#direct-drive').prop('disabled', $(this).is(':checked'));
+        });
+        $('#direct-drive').change(function() {
+            $('#belt-drive').prop('disabled', $(this).is(':checked'));
+        });
+        $('#belt-drive').trigger('change');
+        $('#direct-drive').trigger('change');
+
     });
 </script>
 

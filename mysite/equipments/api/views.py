@@ -215,18 +215,9 @@ def update_data_sheet_form(request, pk):
                     formula = field_data.get("formula")
                     if formula and field_key not in exclude_applied_formula:
                         computed_value = calculate_formula(formula, form_fields, request.data)
-                        # if computed_value is not None and field_data.get("type") == "number":
                         if computed_value is not None:
-                            # if value:
-                            #     if "(" in value:
-                            #         value = value.split("(")[1].split(")")[0]
-                            #     if float(computed_value) != float(value):
-                            #         # errors.append(f"Value mismatch for {field_key}: expected {computed_value}, got {value}")
-                            #         field_data["value"] = computed_value
-                            # else:
-                            #     field_data["value"] = computed_value
-                            if ('Total SP' in field_key) and ('*' not in computed_value):
-                                computed_value = f"{float(computed_value):.2f}"
+                            if 'Total SP' in field_key:
+                                computed_value = f"({float(computed_value):.2f})"
                             field_data["value"] = computed_value
                         else:
                             field_data["value"] = value.strip()

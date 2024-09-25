@@ -934,7 +934,7 @@ def fetch_air_mov_data(equipment):
         'area_served': equipment.area_served,
         'manufacturer': equipment.manufacturer.name.upper() if equipment.manufacturer else '',
         'model_no': equipment.model_number,
-        'serial_no': get_field_value(design_set, 'Serial No.'),
+        'serial_no': get_field_value(design_set, 'Serial / Job No.'),
         'total_cfm_fan_design': get_field_value(design_set, 'Total C.F.M. Fan'),
         'total_cfm_fan_actual': get_field_value(actual_set, 'Total C.F.M. Fan'),
         'air_temp_in_cooling_design': get_field_value(design_set, 'Air Temp. In Cooling'),
@@ -983,7 +983,7 @@ def fetch_air_mov_data(equipment):
         'bhp_calc_actual': get_field_value(actual_set, 'B.H.P. (Calc.)'),
         'fan_shaft_actual': get_field_value(actual_set, 'Fan Shaft', default='N.A.'),
         'frame_design': get_field_value(design_set, 'Frame', default='N.S.'),
-        'frame_actual': get_field_value(actual_set, 'Frame', default='N.S.'),
+        'frame_actual': get_field_value(actual_set, 'Frame'),
         'vfd_hz_actual': get_field_value(actual_set, 'VFD / HZ', default="N.A."),
         'sf_code_design': get_field_value(design_set, 'S.F. / Code', default='N.S.'),
         'filter_size_actual': get_field_value(actual_set, 'Filter Size', default="N.A."),
@@ -997,6 +997,10 @@ def fetch_air_mov_data(equipment):
         'min_speed': get_field_value(design_set, 'Min Speed'),
         'note': [get_field_value(design_set, 'Note')["value"], get_field_value(actual_set, 'Note')["value"]],
     }
+    if equipment_data['oa_damper_poss_design']['value']:
+        equipment_data['oa_damper_poss_design']['value'] = f"{equipment_data['oa_damper_poss_design']['value']} %"
+    if equipment_data['oa_damper_poss_actual']['value']:
+        equipment_data['oa_damper_poss_actual']['value'] = f"{equipment_data['oa_damper_poss_actual']['value']} %"
 
     return equipment_data
 

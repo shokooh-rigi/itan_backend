@@ -17,8 +17,16 @@ def calculate_formula(formula, fields, new_data):
         new_value = new_data.get(k)
         if new_value:
             value = new_value
-        if value is None:
+        if (value is None) or (value == ""):
             return None  # if any value is None, we cannot compute the formula
+
+        if isinstance(value, str):
+            if "@" in value:
+                return None
+            if "-" in value:
+                # split and pick the first value
+                value = value.split("-")[0]
+            value = float(value)
         # Replace placeholder in formula with the actual value
         formula = formula.replace(placeholder, str(value))
         if "@" in formula:
