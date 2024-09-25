@@ -934,7 +934,7 @@ def fetch_air_mov_data(equipment):
         'area_served': equipment.area_served,
         'manufacturer': equipment.manufacturer.name.upper() if equipment.manufacturer else '',
         'model_no': equipment.model_number,
-        'serial_no': get_field_value(design_set, 'Serial / Job No.'),
+        'serial_no': get_field_value(actual_set, 'Serial / Job No.'),
         'total_cfm_fan_design': get_field_value(design_set, 'Total C.F.M. Fan'),
         'total_cfm_fan_actual': get_field_value(actual_set, 'Total C.F.M. Fan'),
         'air_temp_in_cooling_design': get_field_value(design_set, 'Air Temp. In Cooling'),
@@ -997,10 +997,6 @@ def fetch_air_mov_data(equipment):
         'min_speed': get_field_value(design_set, 'Min Speed'),
         'note': [get_field_value(design_set, 'Note')["value"], get_field_value(actual_set, 'Note')["value"]],
     }
-    if equipment_data['oa_damper_poss_design']['value']:
-        equipment_data['oa_damper_poss_design']['value'] = f"{equipment_data['oa_damper_poss_design']['value']} %"
-    if equipment_data['oa_damper_poss_actual']['value']:
-        equipment_data['oa_damper_poss_actual']['value'] = f"{equipment_data['oa_damper_poss_actual']['value']} %"
 
     return equipment_data
 
@@ -1037,6 +1033,8 @@ def fetch_vav_data(this_sheet_equipments):
             "heat_va_actual": get_field_value(actual_field_set, 'Heat V / A Actual'),
             "note": [get_field_value(design_field_set, 'Note')["value"], get_field_value(actual_field_set, 'Note')["value"]],
         }
+        if equipment_data['fan']['value']:
+            equipment_data['fan']['value'] = f"{equipment_data['fan']['value']} %"
 
         eq_types = {
             'HW': 'Hot Water',

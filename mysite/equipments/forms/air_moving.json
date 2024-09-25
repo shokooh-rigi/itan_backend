@@ -181,7 +181,7 @@
             "value": null,
             "note": "",
             "order": 20,
-            "validation": "^[0-9]*$",
+            "validation": "",
             "formula": "",
             "required": false
         },
@@ -411,7 +411,7 @@
             "value": null,
             "note": "",
             "order": 15,
-            "validation": "^[0-9]*$",
+            "validation": "",
             "formula": "",
             "required": false
         },

@@ -24,7 +24,7 @@
             "value": null,
             "note": "",
             "order": 4,
-            "validation": "",
+            "validation": "^[0-9]+(\\.[0-9]{1})?$",
             "formula": "",
             "required": false
         },
@@ -33,7 +33,7 @@
             "value": null,
             "note": "",
             "order": 5,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },
@@ -42,7 +42,7 @@
             "value": null,
             "note": "",
             "order": 6,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": true
         },
@@ -51,7 +51,7 @@
             "value": null,
             "note": "",
             "order": 7,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },
@@ -60,7 +60,7 @@
             "value": null,
             "note": "",
             "order": 8,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },
@@ -89,7 +89,7 @@
             "value": null,
             "note": "",
             "order": 2,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": true
         },
@@ -98,7 +98,7 @@
             "value": null,
             "note": "",
             "order": 4,
-            "validation": "",
+            "validation": "^[0-9]+(\\.[0-9]{1,2})?$",
             "formula": "",
             "required": true
         },
@@ -116,7 +116,7 @@
             "value": null,
             "note": "",
             "order": 6,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },
@@ -125,7 +125,7 @@
             "value": null,
             "note": "",
             "order": 7,
-            "validation": "",
+            "validation": "^[0-9]+(\\.[0-9]{1,2})?$",
             "formula": "",
             "required": false
         },
@@ -134,7 +134,7 @@
             "value": null,
             "note": "",
             "order": 8,
-            "validation": "",
+            "validation": "^\\d+(?:\\.\\d{2})? - \\d+(?:\\.\\d{2})$",
             "formula": "",
             "required": false
         },
@@ -143,7 +143,7 @@
             "value": null,
             "note": "",
             "order": 9,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },
@@ -161,7 +161,7 @@
             "value": null,
             "note": "",
             "order": 11,
-            "validation": "",
+            "validation": "^\\d+(?:\\.\\d{2})? - \\d+(?:\\.\\d{2})$",
             "formula": "",
             "required": false
         },
@@ -170,7 +170,7 @@
             "value": null,
             "note": "",
             "order": 12,
-            "validation": "",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false
         },

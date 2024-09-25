@@ -26,9 +26,14 @@ def calculate_formula(formula, fields, new_data):
             if "-" in value:
                 # split and pick the first value
                 value = value.split("-")[0]
-            value = float(value)
+            if "(" in value:
+                value = value.replace("(", "").replace(")", "")
+            if "*" not in value:
+                value = float(value)
         # Replace placeholder in formula with the actual value
+
         formula = formula.replace(placeholder, str(value))
+        print(formula)
         if "@" in formula:
             return None
     try:

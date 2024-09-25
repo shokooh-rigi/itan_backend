@@ -5,6 +5,8 @@
 {% load estimator_tags %}
 {% load humanize %}
 
+
+
 {% block content %}
 <div class="container-fluid">
     <div class="row">
@@ -23,47 +25,47 @@
         
         <!-- Modal for Report -->
         <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
+            <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-header">
+                <div class="modal-header">
                 <h5 class="modal-title" id="reportModalLabel">Create Report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeReportModal()"></button>
-              </div>
-              <div class="modal-body">
+                </div>
+                <div class="modal-body">
                 <form id="reportForm">
-                  <div class="mb-3">
+                    <div class="mb-3">
                     <label for="reportType" class="form-label">Report Type</label>
                     <select id="reportType" class="form-select" required>
-                      <option value="Final">Final</option>
-                      <option value="Preliminary">Preliminary</option>
+                        <option value="Final">Final</option>
+                        <option value="Preliminary">Preliminary</option>
                     </select>
-                  </div>
-                  <div class="mb-3">
+                    </div>
+                    <div class="mb-3">
                     <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" class="form-control" required>
-                  </div>
-                  <div class="mb-3">
+                    <input type="text" id="startDate" class="form-control datepicker" required>
+                    </div>
+                    <div class="mb-3">
                     <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" class="form-control" required>
-                  </div>
-                  <div class="mb-3">
+                    <input type="text" id="endDate" class="form-control datepicker" required>
+                    </div>
+                    <div class="mb-3">
                     <label for="reportDate" class="form-label">Report Date</label>
-                    <input type="date" id="reportDate" class="form-control" required>
-                  </div>
-                  <div class="mb-3">
+                    <input type="text" id="reportDate" class="form-control datepicker" required>
+                    </div>
+                    <div class="mb-3">
                     <label for="revisedDate" class="form-label">Revised Date</label>
-                    <input type="date" id="revisedDate" class="form-control">
-                  </div>
-                  <input type="hidden" id="orderId">
+                    <input type="text" id="revisedDate" class="form-control datepicker">
+                    </div>
+                    <input type="hidden" id="orderId">
                 </form>
-              </div>
-              <div class="modal-footer">
+                </div>
+                <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeReportModal()">Close</button>
                 <button type="button" class="btn btn-primary" onclick="submitReportFormRed()">Create Report</button>
-              </div>
+                </div>
             </div>
-          </div>
-        </div>                  
+            </div>
+        </div>
 
         <!-- Modal for Add -->
         <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -365,6 +367,13 @@
         });
     });
 
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr('.datepicker', {
+        dateFormat: 'm/d/Y',
+        allowInput: true
+        });
+    });
+
     $('#id_project').on('change', function() {
         if($(this).val() === '') {
             $("#project_name").text('');
@@ -617,8 +626,6 @@
             });
         }
     }
-
-
 
     function openReportModal(orderId) {
         document.getElementById('orderId').value = orderId;

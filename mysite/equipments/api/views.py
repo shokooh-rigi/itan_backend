@@ -159,6 +159,7 @@ def update_data_sheet_form(request, pk):
 
     errors = []
     can_be_calculated = True
+    exclude_in_formula = ["AK Factor"]
 
     is_air_terminal = request.query_params.get("ds")
     if is_air_terminal == "air-terminal":
@@ -182,7 +183,7 @@ def update_data_sheet_form(request, pk):
                     field_data["value"] = value.strip()
                     # Check and apply formula
                     formula = field_data.get("formula")
-                    if formula and can_be_calculated:
+                    if formula and can_be_calculated and (field_key not in exclude_in_formula):
                         computed_value = calculate_formula(formula, form_fields, request.data)
                         if computed_value is not None:
                             if ('Total SP' in field_key):
@@ -211,7 +212,7 @@ def update_data_sheet_form(request, pk):
                         _code = form_fields[form_type]["Code"]["value"]
                         if _code not in ["SR", "SG", "OED"]:
                             can_be_calculated = False
-                    if formula and can_be_calculated:
+                    if formula and can_be_calculated and (field_key not in exclude_in_formula):
                         computed_value = calculate_formula(formula, form_fields, request.data)
                         if computed_value is not None:
                             if 'Total SP' in field_key:
@@ -220,7 +221,7 @@ def update_data_sheet_form(request, pk):
                         else:
                             field_data["value"] = value.strip()
             can_be_calculated = True
-                            
+        
         data_sheet.form_fields = form_fields
 
         if form_type == "design":
