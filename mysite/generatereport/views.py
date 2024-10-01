@@ -1411,7 +1411,7 @@ def report_sheet_show(
     datasheets = order.data_sheets.all()
     page_counter = 1
     # Air Moving
-    air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all()
+    air_moving_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Air Moving').all().order_by('id')
     if len(air_moving_equipments) > 0:
         for air_moving_equipment in air_moving_equipments:
             air_moving_data = fetch_air_mov_data(air_moving_equipment)
@@ -1461,7 +1461,7 @@ def report_sheet_show(
                         page_counter += 1
 
     # VAV
-    vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all()
+    vav_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='V.A.V').all().order_by('id')
     VAV_IN_ONE_PAGE = 12
     if len(vav_equipments) > 0:
         vavs_data = fetch_vav_data(vav_equipments)
@@ -1524,7 +1524,7 @@ def report_sheet_show(
                                 page_counter += 1
 
     # Pump
-    pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all()
+    pump_equipments = datasheets.filter(equipment_type__test_sheet__name__iexact='Pump').all().order_by('id')
     PUMP_IN_ONE_PAGE = 2
     if len(pump_equipments) > 0:
         for i in range(math.ceil(pump_equipments.count() / PUMP_IN_ONE_PAGE)):
@@ -1550,7 +1550,7 @@ def report_sheet_show(
             page_counter += 1
 
     # Velocity Traverse
-    velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all()
+    velocity_traverse_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Velocity Traverse').all().order_by('id')
     if len(velocity_traverse_equipments) > 0:
         for eq in velocity_traverse_equipments:
             data = fetch_velocity_data(eq)
@@ -1574,7 +1574,7 @@ def report_sheet_show(
             page_counter += 1
 
     # Flow Measuring
-    flow_measuring_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Flow Measuring').all()
+    flow_measuring_equipments = datasheets.filter(equipment_type__test_sheet__name__icontains='Flow Measuring').all().order_by('id')
     # 22 - 1 total row
     FLOW_MEASURING_IN_ONE_PAGE = 21
     if len(flow_measuring_equipments) > 0:
@@ -1611,7 +1611,7 @@ def report_sheet_show(
             page_counter += 1
 
     # Other Terminal
-    other_terminal_equipments = datasheets.filter(equipment_type__name__icontains='Other Air Terminal').all()
+    other_terminal_equipments = datasheets.filter(equipment_type__name__icontains='Other Air Terminal').all().order_by('id')
     for ot in other_terminal_equipments:
         this_terminals_set = datasheets.filter(parent=ot.id, equipment_type__test_sheet__name__iexact='Air Terminal').all().order_by('_type', 'outlet_no')
         if len(this_terminals_set) > 0:
