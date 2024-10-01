@@ -1054,11 +1054,28 @@ def fetch_vav_data(this_sheet_equipments):
 
 
 def fetch_terminal_data(terminals, _type):
+    if not terminals:
+        equipment_list = []
+        page = {
+            'type': 'TERMINAL',
+            'eq_name': "Terminal",
+            'system': "",
+            'rows': equipment_list,
+            'title': "Terminal",
+            'total': {},
+            'notes': ""
+        }
+        # Add empty rows to fill the page
+        equipment_in_page = 18  # 21 total rows - 3 header rows
+        page['empty_rows'] = [{} for _ in range(equipment_in_page - len(equipment_list))]
+        return page
+
     map_type = {
         1: 'SUPPLY',
         2: 'RETURN',
-        3: 'OTHER',
-        4: 'EXHAUST'
+        3: 'OUTSIDE AIR',
+        4: 'EXHAUST',
+        5: 'OTHER'
     }
     _type = map_type.get(_type, '')
     equipment_list = []
@@ -1071,7 +1088,7 @@ def fetch_terminal_data(terminals, _type):
             'outlet_no': terminal.outlet_no,
             'code': get_field_value(design_field_set, "Code"),
             'size': get_field_value(design_field_set, "Size"),
-            'ak_factor': get_field_value(design_field_set, "AK Factor"),
+            'ak_factor': get_field_value(design_field_set, "AK Factor", "*"),
             'fpm_design': get_field_value(design_field_set, "FPM", "*"),
             'fpm_initial': get_field_value(actual_field_set, "Initial FPM", "*"),
             'fpm_final': get_field_value(actual_field_set, "Final FPM", "*"),
@@ -1082,14 +1099,17 @@ def fetch_terminal_data(terminals, _type):
             'title': terminal.fan_no,
             'type': _type,
         }
-        # # add custom notes
-        # if equipment_data['fpm_design'] == "*":
-        #     equipment_data['fpm_design']['note'] = "Not Applicable … Direct Reading Flow Hood"
-        # if equipment_data['fpm_initial'] == "*":
-        #     equipment_data['fpm_initial']['note'] = "Not Applicable … Direct Reading Flow Hood"
-        # if equipment_data['fpm_final'] == "*":
-        #     equipment_data['fpm_final']['note'] = "Not Applicable … Direct Reading Flow Hood"
 
+        if (str(equipment_data['cfm_design']['value']) == "0") or (equipment_data['cfm_design']['note']) or (not equipment_data['cfm_design']['value']):
+            if not equipment_data['fpm_design']['value']:
+                equipment_data['fpm_design']['value'] = "*"
+        if (str(equipment_data['cfm_initial']['value']) == "0") or (equipment_data['cfm_initial']['note']) or (not equipment_data['cfm_initial']['value']):
+            if not equipment_data['fpm_initial']['value']:
+                equipment_data['fpm_initial']['value'] = "*"
+        if (str(equipment_data['cfm_final']['value']) == "0") or (equipment_data['cfm_final']['note']) or (not equipment_data['cfm_final']['value']):
+            if not equipment_data['fpm_final']['value']:
+                equipment_data['fpm_final']['value'] = "*"
+            
         equipment_list.append(equipment_data)
 
     # Calculate totals
@@ -1613,6 +1633,23 @@ def report_sheet_show(
                 if this_terminals:
                     terminals_data = fetch_terminal_data(this_terminals, _t)
                     context['pages'].append(terminals_data)
+        # else add 1 empty page for each other terminal
+        else:
+            terminals_data = fetch_terminal_data([], 5)
+            toc.append({
+                'name': "Other Air Terminal",
+                'page': page_counter,
+                'level': 0,
+                'underline': True
+            })
+            toc.append({
+                'name': 'AIR TERMINAL TEST SHEET',
+                'page': page_counter,
+                'level': 1,
+                'underline': False
+            })
+            page_counter += 1
+            context['pages'].append(terminals_data)
 
     # Attachment
     attachments = []

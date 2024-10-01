@@ -59,6 +59,13 @@
                             {% if properties.hint %}
                                 <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="{{ properties.hint }}"></i>
                             {% endif %}
+
+                            {% if field_name == 'Return Air C.F.M.' %}
+                                {% if properties.formula_calculated %}
+                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Calculated by system: {{ properties.formula_calculated }}"></i>
+                                {% endif %}
+                            {% endif %}
+
                         </label>
                         {% if properties.type == 'text' or properties.type == 'number' %}
                             <input type="{{ properties.type }}" class="form-control" id="{{ field_name }}" name="{{ field_name }}"
@@ -67,6 +74,7 @@
                                    {% if properties.required %} required {% endif %}
                                    {% if properties.validation %} pattern="{{ properties.validation }}" {% endif %}
                                    {% if properties.display %} style="display: {{ properties.display }};" {% endif %}>
+                                   
                         {% elif properties.type == 'textarea' %}
                             <textarea class="form-control" id="{{ field_name }}" name="{{ field_name }}"
                                       {% if properties.required %} required {% endif %}

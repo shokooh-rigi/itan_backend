@@ -24,7 +24,7 @@
             "value": null,
             "note": "",
             "order": 4,
-            "validation": "^[0-9]+(\\.[0-9]{1})?$",
+            "validation": "",
             "formula": "",
             "required": false
         },
@@ -134,7 +134,7 @@
             "value": null,
             "note": "",
             "order": 8,
-            "validation": "^\\d+(?:\\.\\d{2})? - \\d+(?:\\.\\d{2})$",
+            "validation": "",
             "formula": "",
             "required": false
         },
@@ -161,7 +161,7 @@
             "value": null,
             "note": "",
             "order": 11,
-            "validation": "^\\d+(?:\\.\\d{2})? - \\d+(?:\\.\\d{2})$",
+            "validation": "",
             "formula": "",
             "required": false
         },

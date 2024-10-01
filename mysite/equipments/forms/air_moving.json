@@ -73,6 +73,7 @@
             "order": 8,
             "validation": "^[0-9@]*$",
             "formula": "7_design - 9_design",
+            "formula_calculated": "",
             "required": true,
             "placeholder": "@ requires note"
         },
@@ -303,6 +304,7 @@
             "order": 3,
             "validation": "^[0-9@]*$",
             "formula": "2_actual - 4_actual",
+            "formula_calculated": "",
             "required": true,
             "placeholder": "@ requires note"
         },

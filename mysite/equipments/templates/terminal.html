@@ -132,38 +132,40 @@
             </td>
         </tr>
 
-        <tr class="pdf-table-row section-middle-row">
-            <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="text-align:left;">
-                &nbsp;{{ page.title }}
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-        </tr>
+        {% if page.rows %}
+            <tr class="pdf-table-row section-middle-row">
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="text-align:left;">
+                    &nbsp;{{ page.title }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+            </tr>
+        {% endif %}
 
         <!-- Data rows -->
         {% for equipment in page.rows %}
@@ -204,43 +206,45 @@
             </tr>
         {% endfor %}
 
-        <tr class="pdf-table-row section-middle-row">
-            <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="text-align:left;">
-                &nbsp;{{ page.total.footer }}
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title">
-                &nbsp;{{ page.total.cfm_design }}
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title">
-                &nbsp;{{ page.total.cfm_initial }}
-            </td>
-            <td class="pdf-table-cell">
-                &nbsp;
-            </td>
-            <td class="pdf-table-cell pdf-table-title-cell center-title">
-                &nbsp;{{ page.total.cfm_final }}
-            </td>
-        </tr>
-        <tr class="pdf-table-row section-middle-row">
-            <td colspan="11" class="pdf-table-cell">
-                &nbsp;
-            </td>
-        </tr>
+        {% if page.rows %}
+            <tr class="pdf-table-row section-middle-row">
+                <td colspan="2" class="pdf-table-cell pdf-table-title-cell" style="text-align:left;">
+                    &nbsp;{{ page.total.footer }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell pdf-table-title-cell center-title">
+                    &nbsp;{{ page.total.cfm_design }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell pdf-table-title-cell center-title">
+                    &nbsp;{{ page.total.cfm_initial }}
+                </td>
+                <td class="pdf-table-cell">
+                    &nbsp;
+                </td>
+                <td class="pdf-table-cell pdf-table-title-cell center-title">
+                    &nbsp;{{ page.total.cfm_final }}
+                </td>
+            </tr>
+            <tr class="pdf-table-row section-middle-row">
+                <td colspan="11" class="pdf-table-cell">
+                    &nbsp;
+                </td>
+            </tr>
+        {% endif %}
 
         <!-- Empty rows -->
         {% for i in page.empty_rows %}
@@ -288,7 +292,9 @@
             </td>
             <td colspan="9">
             <div id="note-div-actual" class="note-div">
+            {% if page.rows %}
             * Not Applicable … Direct Reading Flow Hood
+            {% endif %}
                 {% if page.notes %}
                     | {{ page.notes }}
                 {% endif %}

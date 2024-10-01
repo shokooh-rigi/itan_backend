@@ -9,7 +9,8 @@ from mysite.order.models import Order
 from datetime import datetime
 from mysite.dbmanagement.models import EquipmentManufacturer
 import copy
-from ..utils.calc_formula import calculate_formula
+from ..utils.calc_formula import calculate_formula, calc_terminal_ak_factor
+from collections import defaultdict
 
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -155,83 +156,104 @@ def update_data_sheet(request, pk):
 def update_data_sheet_form(request, pk):
     form_type = request.query_params.get("t")
     data_sheet = get_object_or_404(DataSheet, pk=pk)
-    form_fields = copy.deepcopy(data_sheet.form_fields)
-
-    errors = []
-    can_be_calculated = True
-    exclude_in_formula = ["AK Factor"]
-
     is_air_terminal = request.query_params.get("ds")
-    if is_air_terminal == "air-terminal":
-        if form_type == "design":
-            data_sheet.terminal_design_data_entry_completed = True
-        elif form_type == "actual":
-            data_sheet.terminal_actual_data_entry_completed = True
-        data_sheet.save()
+    errors = []
     
-        for key, value in request.data.items():
-            field_key = key.replace("_note", "")
-            data_sheet = get_object_or_404(DataSheet, pk=field_key.split("_")[-1])
-            field_key = field_key.split("_")[0]
-            form_fields = copy.deepcopy(data_sheet.form_fields)
-            if field_key in form_fields[form_type]:
-                field_data = form_fields[form_type][field_key]
-                # Update field note or value
-                if "_note" in key:
-                    field_data["note"] = value.strip()
-                else:
-                    field_data["value"] = value.strip()
-                    # Check and apply formula
-                    formula = field_data.get("formula")
-                    if formula and can_be_calculated and (field_key not in exclude_in_formula):
-                        computed_value = calculate_formula(formula, form_fields, request.data)
-                        if computed_value is not None:
-                            if ('Total SP' in field_key):
-                                computed_value = f"({float(computed_value):.2f})"
-                            field_data["value"] = computed_value
-            can_be_calculated = True
-            data_sheet.form_fields = form_fields
-            data_sheet.save()
-    else:
-        for key, value in request.data.items():
-            field_key = key.replace("_note", "")
-            
-            if field_key in form_fields[form_type]:
-                field_data = form_fields[form_type][field_key]
-                # Update field note or value
-                if "_note" in key:
-                    field_data["note"] = value.strip()
-                else:
-                    field_data["value"] = value.strip()
-                    if value == "@":
-                        field_data["note"] = "See general note".strip()
-                    # Check and apply formula
-                    formula = field_data.get("formula")
-                    if field_key == "AK Factor":
-                        # check code
-                        _code = form_fields[form_type]["Code"]["value"]
-                        if _code not in ["SR", "SG", "OED"]:
-                            can_be_calculated = False
-                    if formula and can_be_calculated and (field_key not in exclude_in_formula):
-                        computed_value = calculate_formula(formula, form_fields, request.data)
-                        if computed_value is not None:
-                            if 'Total SP' in field_key:
-                                computed_value = f"({float(computed_value):.2f})"
-                            field_data["value"] = computed_value
-                        else:
-                            field_data["value"] = value.strip()
-            can_be_calculated = True
-        
-        data_sheet.form_fields = form_fields
+    # clean data
+    data_dict = defaultdict(lambda: defaultdict(dict))
+    for key, value_list in request.data.items():
+        if isinstance(value_list, str):
+            value_list = [value_list]
+        value = value_list[0]
 
-        if form_type == "design":
-            data_sheet.design_data_entry_completed = True
-        elif form_type == "actual":
-            data_sheet.actual_data_entry_completed = True
+        if key.endswith('_note'):
+            base_key = key[:-5]
+            if is_air_terminal == "air-terminal":
+                field_name, id = base_key.rsplit('_', 1)
+            else:
+                field_name = base_key
+                id = data_sheet.pk
+            data_dict[id][field_name]['note'] = value
+        else:
+            if is_air_terminal == "air-terminal":
+                field_name, id = key.rsplit('_', 1)
+            else:
+                field_name = key
+                id = data_sheet.pk
+            data_dict[id][field_name]['value'] = value
+    data_dict = {id: dict(fields) for id, fields in data_dict.items()}
+
+    for ds_id in data_dict:
+        data_sheet = get_object_or_404(DataSheet, pk=ds_id)
+        org_form_fields = copy.deepcopy(data_sheet.form_fields)
+        # update state
+        if is_air_terminal == "air-terminal":
+            parent = data_sheet.parent
+            if form_type == "design":
+                parent.terminal_design_data_entry_completed = True
+            elif form_type == "actual":
+                parent.terminal_actual_data_entry_completed = True
+            parent.save()
+        else:
+            if form_type == "design":
+                data_sheet.design_data_entry_completed = True
+            elif form_type == "actual":
+                data_sheet.actual_data_entry_completed = True
+            data_sheet.save()
+        new_data = data_dict[ds_id]
+
+        # calc ak factor and fpms
+        if is_air_terminal == "air-terminal":
+            if form_type == "design":
+                _code = new_data["Code"]["value"] if "Code" in new_data else org_form_fields["design"]["Code"]["value"]
+                if _code in ["SR", "SG", "OED", "RG", "DUCT"]:
+                    new_data["AK Factor"]["value"] = calc_terminal_ak_factor(new_data["Size"]["value"])
+                new_data["FPM"]["value"] = calculate_formula(org_form_fields[form_type]["FPM"]["formula"], org_form_fields, new_data, new_data["FPM"], "FPM", form_type)
+            elif form_type == "actual":
+                new_data["Initial FPM"]["value"] = calculate_formula(org_form_fields[form_type]["Initial FPM"]["formula"], org_form_fields, new_data, new_data["Initial FPM"], "Initial FPM", form_type)
+                new_data["Final FPM"]["value"] = calculate_formula(org_form_fields[form_type]["Final FPM"]["formula"], org_form_fields, new_data, new_data["Final FPM"], "Final FPM", form_type)
+
+        for field_name in org_form_fields[form_type]:
+            org_form_fields[form_type][field_name]['note'] = new_data.get(field_name, {}).get('note', '')
+            org_form_fields[form_type][field_name]['value'] = new_data.get(field_name, {}).get('value', '')
+            computed_value = None
+            # calculate formula
+            if org_form_fields[form_type][field_name].get('formula', None) and is_air_terminal != "air-terminal":
+                computed_value = calculate_formula(org_form_fields[form_type][field_name]['formula'], org_form_fields, new_data, org_form_fields[form_type][field_name], field_name, form_type)
+                # set formula calculated value
+                if (field_name == "Return Air C.F.M."):
+                    org_form_fields[form_type][field_name]['formula_calculated'] = computed_value
+                else:
+                    org_form_fields[form_type][field_name]['value'] = computed_value.strip() if computed_value else computed_value
+
+            # Handle belt drive and direct drive
+            if data_sheet.equipment_type.test_sheet.name == "Air Moving":
+                if (form_type == "design") and (field_name == "Direct Drive"):
+                    if new_data["Direct Drive"]["value"] == "on":
+                        org_form_fields["actual"]["Motor Pully"]["value"] = org_form_fields["actual"]["Motor Pully"]["value"] if org_form_fields["actual"]["Motor Pully"]["value"] else "N.A."
+                        org_form_fields["actual"]["Fan Pully"]["value"] = org_form_fields["actual"]["Fan Pully"]["value"] if org_form_fields["actual"]["Fan Pully"]["value"] else "N.A."
+                        org_form_fields["actual"]["C to C"]["value"] = org_form_fields["actual"]["C to C"]["value"] if org_form_fields["actual"]["C to C"]["value"] else "N.A."
+                        org_form_fields["actual"]["Motor Shaft"]["value"] = org_form_fields["actual"]["Motor Shaft"]["value"] if org_form_fields["actual"]["Motor Shaft"]["value"] else "N.A."
+                        org_form_fields["actual"]["Fan Shaft"]["value"] = org_form_fields["actual"]["Fan Shaft"]["value"] if org_form_fields["actual"]["Fan Shaft"]["value"] else "N.A."
+
+        # set ak factor and FPMS to * if emoty
+        if is_air_terminal == "air-terminal":
+            if form_type == "design":
+                if not org_form_fields[form_type]["AK Factor"]["value"]:
+                    org_form_fields[form_type]["AK Factor"]["value"] = "*"
+                if not org_form_fields[form_type]["FPM"]["value"]:
+                    org_form_fields[form_type]["FPM"]["value"] = "*"
+            elif form_type == "actual":
+                if not org_form_fields[form_type]["Initial FPM"]["value"]:
+                    org_form_fields[form_type]["Initial FPM"]["value"] = "*"
+                if not org_form_fields[form_type]["Final FPM"]["value"]:
+                    org_form_fields[form_type]["Final FPM"]["value"] = "*"
+
+        data_sheet.form_fields = org_form_fields
         data_sheet.save()
+
     if errors:
         return Response({"errors": errors}, status=400)
-
     return Response({"data": "Data sheet updated successfully"})
 
 

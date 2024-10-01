@@ -203,6 +203,7 @@ def terminals_update(request, datasheet_id):
 
     parameters = {
         'terminal_types': terminal_fields,  # This now includes both terminals and their specific fields
-        'ds': my_sheet.first()
+        'ds': my_sheet.first(),
+        't': t,
     }
     return render(request, "air_terminals_update.html", parameters)

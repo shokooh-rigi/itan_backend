@@ -47,7 +47,7 @@
             "placeholder": "",
             "note": "",
             "order": 5,
-            "validation": "^([0-9]+(\\.[0-9]{1,2})?|\\*)$",
+            "validation": "^[0-9*]*$",
             "formula": "6_design / 4_design",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
@@ -70,7 +70,7 @@
             "placeholder": "",
             "note": "",
             "order": 1,
-            "validation": "^([0-9]+(\\.[0-9]{1,2})?|\\*)$",
+            "validation": "^[0-9*]*$",
             "formula": "2_actual / 5_design",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
@@ -92,7 +92,7 @@
             "placeholder": "",
             "note": "",
             "order": 3,
-            "validation": "^([0-9]+(\\.[0-9]{1,2})?|\\*)$",
+            "validation": "^[0-9*]*$",
             "formula": "4_actual / 5_design",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
