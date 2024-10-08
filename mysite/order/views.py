@@ -528,23 +528,54 @@ def order_field_drawing(request, order_id):
     return render(request, "fmd.html", parameters)
 
 
+# @login_required
+# def order_general_notes(request, order_id):
+#     this_order = get_object_or_404(Order, id=order_id)
+#     form = GeneralNoteForm(request.POST or None, request.FILES or None, instance=this_order)
+#     if request.method == 'POST':
+#         if request.POST.get("cancel"):
+#             return redirect('orderHome')
+#         if form.is_valid():
+#             if request.POST.get('finalize'):
+#                 this_order.general_notes_and_comments_finalize = True
+#                 this_order.save()
+#                 return redirect('orderHome')
+#             if request.POST.get("save"):
+#                 form.save()
+#                 return redirect('orderHome')
+#     parameters = {
+#         'form': form,
+#         'this_order': this_order,
+#         'page_title': 'General Notes & Comments',
+#     }
+#     return render(request, "generalNotes.html", parameters)
 @login_required
 def order_general_notes(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
-    form = GeneralNoteForm(request.POST or None, request.FILES or None, instance=this_order)
+    
     if request.method == 'POST':
+        # If the user clicks "cancel", redirect them back
         if request.POST.get("cancel"):
             return redirect('orderHome')
-        if form.is_valid():
-            if request.POST.get('finalize'):
-                this_order.general_notes_and_comments_finalize = True
-                this_order.save()
-                return redirect('orderHome')
-            if request.POST.get("save"):
-                form.save()
-                return redirect('orderHome')
+
+        # Manually retrieve the input values from POST request
+        general_notes_and_comments = str(request.POST.get('general_notes_and_comments', ""))
+        # to json string
+        general_notes_and_comments = general_notes_and_comments
+        # Finalize the form submission if "finalize" button is pressed
+        if request.POST.get('finalize'):
+            this_order.general_notes_and_comments = general_notes_and_comments
+            this_order.general_notes_and_comments_finalize = True
+            this_order.save()
+            return redirect('orderHome')
+
+        # Save the form if "save" button is pressed
+        if request.POST.get("save"):
+            this_order.general_notes_and_comments = general_notes_and_comments
+            this_order.save()
+            return redirect('orderHome')
+
     parameters = {
-        'form': form,
         'this_order': this_order,
         'page_title': 'General Notes & Comments',
     }

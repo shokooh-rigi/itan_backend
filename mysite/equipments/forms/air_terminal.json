@@ -58,7 +58,7 @@
             "placeholder": "",
             "note": "",
             "order": 6,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": true
         }
@@ -81,7 +81,7 @@
             "placeholder": "",
             "note": "",
             "order": 2,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
@@ -103,7 +103,7 @@
             "placeholder": "",
             "note": "",
             "order": 4,
-            "validation": "^[0-9]*$",
+            "validation": "^[0-9@]*$",
             "formula": "",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."

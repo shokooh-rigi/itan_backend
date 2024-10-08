@@ -51,7 +51,7 @@
             "value": null,
             "note": "",
             "order": 6,
-            "validation": "^[0-9]*$",
+            "validation": "",
             "formula": "",
             "required": false,
             "placeholder": ""
@@ -82,7 +82,7 @@
             "value": null,
             "note": "",
             "order": 9,
-            "validation": "^[0-9@]*$",
+            "validation": "",
             "formula": "",
             "required": true,
             "placeholder": "@ requires note"
@@ -313,7 +313,7 @@
             "value": null,
             "note": "",
             "order": 4,
-            "validation": "^[0-9@]*$",
+            "validation": "",
             "formula": "",
             "required": true,
             "placeholder": "@ requires note"
@@ -341,7 +341,7 @@
             "value": null,
             "note": "",
             "order": 7,
-            "validation": "^(N\\.M\\.|[0-9]+(\\.[0-9]{1,3})?)$",
+            "validation": "",
             "formula": "",
             "required": false
         },

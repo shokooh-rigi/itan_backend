@@ -1,3 +1,4 @@
+import re
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -213,12 +214,30 @@ def update_data_sheet_form(request, pk):
                 new_data["Initial FPM"]["value"] = calculate_formula(org_form_fields[form_type]["Initial FPM"]["formula"], org_form_fields, new_data, new_data["Initial FPM"], "Initial FPM", form_type)
                 new_data["Final FPM"]["value"] = calculate_formula(org_form_fields[form_type]["Final FPM"]["formula"], org_form_fields, new_data, new_data["Final FPM"], "Final FPM", form_type)
 
+        # for air moving
+        if data_sheet.equipment_type.test_sheet.name == "Air Moving":
+            if form_type == "actual":
+                # calculate Total SP (Ext. SP)
+                total_sp_actual = calculate_formula(org_form_fields[form_type]["Total SP (Ext. SP)"]["formula"], org_form_fields, new_data, new_data["Total SP (Ext. SP)"], "Total SP (Ext. SP)", form_type)
+                if total_sp_actual:
+                    new_data["Total SP (Ext. SP)"]["value"] = total_sp_actual
+                else:
+                    # check with regex if either 'Fan (Unit) Suction Pressure' or 'Discharge Pressure, Fan / Unit' has a number in it set it to total sp
+                    number_pattern = re.compile(r'\d+')
+                    fan_suction_pressure = new_data["Fan (Unit) Suction Pressure"]["value"]
+                    discharge_pressure = new_data["Discharge Pressure, Fan / Unit"]["value"]
+                    if number_pattern.search(fan_suction_pressure) or number_pattern.search(discharge_pressure):
+                        new_data["Total SP (Ext. SP)"]["value"] = fan_suction_pressure if number_pattern.search(fan_suction_pressure) else discharge_pressure
+               
         for field_name in org_form_fields[form_type]:
             org_form_fields[form_type][field_name]['note'] = new_data.get(field_name, {}).get('note', '')
             org_form_fields[form_type][field_name]['value'] = new_data.get(field_name, {}).get('value', '')
             computed_value = None
             # calculate formula
-            if org_form_fields[form_type][field_name].get('formula', None) and is_air_terminal != "air-terminal":
+            if org_form_fields[form_type][field_name].get('formula', None) and (is_air_terminal != "air-terminal"):
+                # since we already calculated Total SP (Ext. SP) above, skip it
+                if (field_name == "Total SP (Ext. SP)") and (form_type == "actual") and (data_sheet.equipment_type.test_sheet.name == "Air Moving"):
+                    continue
                 computed_value = calculate_formula(org_form_fields[form_type][field_name]['formula'], org_form_fields, new_data, org_form_fields[form_type][field_name], field_name, form_type)
                 # set formula calculated value
                 if (field_name == "Return Air C.F.M."):

@@ -106,13 +106,20 @@ class OrderForm(ModelForm):
         self.fields['proposal'].widget.attrs['class'] = 'select2'
 
 
-class GeneralNoteForm(ModelForm):
+class GeneralNoteForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
             'general_notes_and_comments',
         ]
-
+        widgets = {
+            'general_notes_and_comments': forms.Textarea(attrs={
+                'class': 'form-control',  # Bootstrap class for consistent form styling
+                'rows': 5,  # Customize this as needed
+                'placeholder': 'Enter general notes and comments here...',
+            }),
+        }
+        
     def __init__(self, *args, **kwargs):
         super(GeneralNoteForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():

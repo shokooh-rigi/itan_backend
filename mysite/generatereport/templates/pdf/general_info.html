@@ -252,18 +252,18 @@
                     <h2 style="text-align: center;">
                         THIS IS A PRELIMINARY REPORT
                     </h2>
-                        {% if general_info.notes_and_comments.html != '' %}
+                        {% if general_info.notes_and_comments != '' %}
                         <p style="font-weight: bold !important;">
                             The following is a list of system deficiencies.
                         </p>
-                        {{ general_info.notes_and_comments.html|safe }}
+                        {{ general_info.notes_and_comments|safe }}
                         {% endif %}
                 {% else %}
-                    {% if general_info.notes_and_comments.html != '' %}
+                    {% if general_info.notes_and_comments != '' %}
                         <p style="font-weight: bold !important;">
                             The following is a list of system deficiencies.
                         </p>
-                        {{ general_info.notes_and_comments.html|safe }}
+                        {{ general_info.notes_and_comments|safe }}
                     {% else %}
                         The systems described here in this report are operating per design intent.
                         {% endif %}

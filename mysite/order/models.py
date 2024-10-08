@@ -1,7 +1,7 @@
 from mysite.estimator.models import *
 from ..core.models import *
 from ..dbmanagement.models import *
-from django_quill.fields import QuillField
+# from django_quill.fields import QuillField
 
 # Create your models here.
 
@@ -53,7 +53,8 @@ class Order(models.Model):
     report_colored_drawing = models.FileField(upload_to='uploads/order_colored_drawing/report', blank=True, null=True)
     colored_drawing_finalize = models.BooleanField(default=False)
     field_draw = models.FileField(upload_to='uploads/field_draw', blank=True, null=True)
-    general_notes_and_comments = QuillField(blank=True, null=True)
+    # general_notes_and_comments = QuillField(blank=True, null=True)
+    general_notes_and_comments = models.TextField(max_length=4096, blank=True, null=True)
     general_notes_and_comments_finalize = models.BooleanField(default=False)
     site_pictures = models.FileField(upload_to='uploads/order_site_pictures', blank=True, null=True)
     test_sheets = models.FileField(upload_to='uploads/order_test_sheets', blank=True, null=True)

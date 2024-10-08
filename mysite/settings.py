@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django_select2',
     'adminsortable2',
     'storages',
-    'django_quill',
+    # 'django_quill',
     'mysite.core',
     'mysite.estimator',
     'mysite.submittal',

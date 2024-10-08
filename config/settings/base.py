@@ -112,9 +112,10 @@ THIRD_PARTY_APPS = [
     'django_recaptcha',
     'django_select2',
     'adminsortable2',
-    'django_quill',
+    # 'django_quill',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'custom_user.apps.CustomUserConfig',
+    
 ]
 
 LOCAL_APPS = [

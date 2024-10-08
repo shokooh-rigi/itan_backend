@@ -2,29 +2,37 @@
 {% load static %}
 {% load estimator_tags %}
 {% block extra_head %}
-    {% include 'django_quill/media.html' %}
 {%  endblock %}
 
+<style>
+    textarea.form-control {
+        height: 150px;  /* You can adjust the height here */
+        width: 100%;    /* Full width */
+        font-size: 14px;  /* Adjust text size */
+    }
+</style>
 
 {% block content %}
     <h2>Assign {{ page_title }} for Project Number #{{ this_order.project_number }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="coloredDrawing-form">
+        {% csrf_token %}
         <div class="form-group">
-            {% csrf_token %}
-            {{ form.proposal.as_hidden }}
-            {{ form.po_number.as_hidden }}
-            <div class="row form-line">
-                <div class="col-lg-12" style="padding-right: 36px;">
-{#                    <label for="id_general_notes_and_comments" class="control-label">General Notes & Comments</label>#}
-                    {{ form.general_notes_and_comments }}
-                </div>
+            <label for="general_notes_and_comments" class="control-label">General Notes & Comments</label>
+        </br>
+            <div id="editor">
+                {{ this_order.general_notes_and_comments }}
             </div>
-            <div class="row">
-                <div class="col-lg-12" style="padding-right: 36px;">
-                    <input type="submit" class="btn btn-warning" value="Save" name="save" />
-                    <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
-                    <input type="submit" class="btn btn-success" value="Finalize" name="finalize" />
-                </div>
+            <input type="hidden" name="general_notes_and_comments" id="hidden_input">
+
+            <input type="hidden" id="saved_content" value="{{ this_order.general_notes_and_comments|escape }}" />
+            <div id="editor"></div>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-right: 36px;">
+                <input type="submit" class="btn btn-warning" value="Save" name="save" />
+                <input type="submit" class="btn btn-danger" value="Cancel" name="cancel" formnovalidate />
+                <input type="submit" class="btn btn-success" value="Finalize" name="finalize" />
             </div>
         </div>
 	</form>
@@ -45,6 +53,26 @@
                 scrollInput: false,
             });
         });
+    </script>
+    <script>
+        // Initialize Quill editor
+        var quill = new Quill('#editor', {
+        theme: 'snow'
+        });
+    
+        // Get the saved content from the hidden input
+        var savedContent = document.getElementById('saved_content').value;
+    
+        // Set the content of the editor using dangerouslyPasteHTML
+        quill.clipboard.dangerouslyPasteHTML(savedContent);
+    
+        // Handle form submission
+        var form = document.querySelector('form');
+        form.onsubmit = function() {
+        // Populate hidden form on submit
+        var content = document.querySelector('input[name=general_notes_and_comments]');
+        content.value = quill.root.innerHTML;
+        };
     </script>
 
 {% endblock %}
