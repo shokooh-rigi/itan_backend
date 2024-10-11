@@ -1103,12 +1103,18 @@ def fetch_terminal_data(terminals, _type):
         if (str(equipment_data['cfm_design']['value']) == "0") or (equipment_data['cfm_design']['note']) or (not equipment_data['cfm_design']['value']):
             if not equipment_data['fpm_design']['value']:
                 equipment_data['fpm_design']['value'] = "*"
+            else:
+                equipment_data['fpm_design']['value'] = round(equipment_data['fpm_design']['value'])
         if (str(equipment_data['cfm_initial']['value']) == "0") or (equipment_data['cfm_initial']['note']) or (not equipment_data['cfm_initial']['value']):
             if not equipment_data['fpm_initial']['value']:
                 equipment_data['fpm_initial']['value'] = "*"
+            else:
+                equipment_data['fpm_initial']['value'] = round(equipment_data['fpm_initial']['value'])
         if (str(equipment_data['cfm_final']['value']) == "0") or (equipment_data['cfm_final']['note']) or (not equipment_data['cfm_final']['value']):
             if not equipment_data['fpm_final']['value']:
                 equipment_data['fpm_final']['value'] = "*"
+            else:
+                equipment_data['fpm_final']['value'] = round(equipment_data['fpm_final']['value'])
             
         equipment_list.append(equipment_data)
 
@@ -1390,7 +1396,7 @@ def report_sheet_show(
     if order.proposal.quote.estimate.project.state:
         context['general_info']['guaranty']['address2'] += ", " + order.proposal.quote.estimate.project.state
     if order.proposal.quote.estimate.project.zip:
-        context['general_info']['guaranty']['address2'] += ", " + str(order.proposal.quote.estimate.project)
+        context['general_info']['guaranty']['address2'] += " " + order.proposal.quote.estimate.project.zip
     if context['general_info']['guaranty']['eng_firm'] == "UNKNOWN":
         context['general_info']['guaranty']['eng_firm'] = "N.S."
     if order.proposal.quote.estimate.engineer.company.address_line_1:

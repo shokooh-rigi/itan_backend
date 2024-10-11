@@ -248,12 +248,13 @@ def update_data_sheet_form(request, pk):
             # Handle belt drive and direct drive
             if data_sheet.equipment_type.test_sheet.name == "Air Moving":
                 if (form_type == "design") and (field_name == "Direct Drive"):
-                    if new_data["Direct Drive"]["value"] == "on":
-                        org_form_fields["actual"]["Motor Pully"]["value"] = org_form_fields["actual"]["Motor Pully"]["value"] if org_form_fields["actual"]["Motor Pully"]["value"] else "N.A."
-                        org_form_fields["actual"]["Fan Pully"]["value"] = org_form_fields["actual"]["Fan Pully"]["value"] if org_form_fields["actual"]["Fan Pully"]["value"] else "N.A."
-                        org_form_fields["actual"]["C to C"]["value"] = org_form_fields["actual"]["C to C"]["value"] if org_form_fields["actual"]["C to C"]["value"] else "N.A."
-                        org_form_fields["actual"]["Motor Shaft"]["value"] = org_form_fields["actual"]["Motor Shaft"]["value"] if org_form_fields["actual"]["Motor Shaft"]["value"] else "N.A."
-                        org_form_fields["actual"]["Fan Shaft"]["value"] = org_form_fields["actual"]["Fan Shaft"]["value"] if org_form_fields["actual"]["Fan Shaft"]["value"] else "N.A."
+                    if new_data["Direct Drive"]["value"]:
+                        if new_data["Direct Drive"]["value"] == "on":
+                            org_form_fields["actual"]["Motor Pully"]["value"] = org_form_fields["actual"]["Motor Pully"]["value"] if org_form_fields["actual"]["Motor Pully"]["value"] else "N.A."
+                            org_form_fields["actual"]["Fan Pully"]["value"] = org_form_fields["actual"]["Fan Pully"]["value"] if org_form_fields["actual"]["Fan Pully"]["value"] else "N.A."
+                            org_form_fields["actual"]["C to C"]["value"] = org_form_fields["actual"]["C to C"]["value"] if org_form_fields["actual"]["C to C"]["value"] else "N.A."
+                            org_form_fields["actual"]["Motor Shaft"]["value"] = org_form_fields["actual"]["Motor Shaft"]["value"] if org_form_fields["actual"]["Motor Shaft"]["value"] else "N.A."
+                            org_form_fields["actual"]["Fan Shaft"]["value"] = org_form_fields["actual"]["Fan Shaft"]["value"] if org_form_fields["actual"]["Fan Shaft"]["value"] else "N.A."
 
         # set ak factor and FPMS to * if emoty
         if is_air_terminal == "air-terminal":
