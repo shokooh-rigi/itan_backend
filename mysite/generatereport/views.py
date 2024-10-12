@@ -1113,12 +1113,10 @@ def fetch_terminal_data(terminals, _type):
         
         # round fpm design, fpm initial and fpm final
         for key in ['fpm_design', 'fpm_initial', 'fpm_final']:
-            logging.info(equipment_data[key]['value'])
-            if isinstance(equipment_data[key]['value'], (int, float)):
-                logging.info(key)
-                logging.info(equipment_data[key]['value'])
-                equipment_data[key]['value'] = int(round(equipment_data[key]['value'], 0))
-                logging.info(equipment_data[key]['value'])
+            try:
+                equipment_data[key]['value'] = round(float(equipment_data[key]['value']))
+            except ValueError:
+                pass
 
         equipment_list.append(equipment_data)
 
