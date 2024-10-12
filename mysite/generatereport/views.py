@@ -1113,7 +1113,7 @@ def fetch_terminal_data(terminals, _type):
         # round fpm design, fpm initial and fpm final
         for key in ['fpm_design', 'fpm_initial', 'fpm_final']:
             if isinstance(equipment_data[key]['value'], (int, float)):
-                equipment_data[key]['value'] = round(equipment_data[key]['value'])
+                equipment_data[key]['value'] = int(round(equipment_data[key]['value'], 0))
 
         equipment_list.append(equipment_data)
 
