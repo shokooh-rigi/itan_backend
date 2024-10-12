@@ -1108,14 +1108,15 @@ def fetch_terminal_data(terminals, _type):
         if (str(equipment_data['cfm_initial']['value']) == "0") or (equipment_data['cfm_initial']['note']) or (not equipment_data['cfm_initial']['value']):
             if not equipment_data['fpm_initial']['value']:
                 equipment_data['fpm_initial']['value'] = "*"
-            else:
-                equipment_data['fpm_initial']['value'] = round(equipment_data['fpm_initial']['value'])
         if (str(equipment_data['cfm_final']['value']) == "0") or (equipment_data['cfm_final']['note']) or (not equipment_data['cfm_final']['value']):
             if not equipment_data['fpm_final']['value']:
                 equipment_data['fpm_final']['value'] = "*"
-            else:
-                equipment_data['fpm_final']['value'] = round(equipment_data['fpm_final']['value'])
-            
+        
+        # round fpm design, fpm initial and fpm final
+        for key in ['fpm_design', 'fpm_initial', 'fpm_final']:
+            if isinstance(equipment_data[key]['value'], (int, float)):
+                equipment_data[key]['value'] = round(equipment_data[key]['value'])
+
         equipment_list.append(equipment_data)
 
     # Calculate totals
