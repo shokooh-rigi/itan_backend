@@ -3,6 +3,7 @@ import os
 import re
 from itertools import chain
 from platform import system
+import logging
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -1112,11 +1113,12 @@ def fetch_terminal_data(terminals, _type):
         
         # round fpm design, fpm initial and fpm final
         for key in ['fpm_design', 'fpm_initial', 'fpm_final']:
+            logging.info(equipment_data[key]['value'])
             if isinstance(equipment_data[key]['value'], (int, float)):
-                print(key)
-                print(equipment_data[key]['value'])
+                logging.info(key)
+                logging.info(equipment_data[key]['value'])
                 equipment_data[key]['value'] = int(round(equipment_data[key]['value'], 0))
-                print(equipment_data[key]['value'])
+                logging.info(equipment_data[key]['value'])
 
         equipment_list.append(equipment_data)
 
