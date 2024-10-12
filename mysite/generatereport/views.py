@@ -1103,8 +1103,6 @@ def fetch_terminal_data(terminals, _type):
         if (str(equipment_data['cfm_design']['value']) == "0") or (equipment_data['cfm_design']['note']) or (not equipment_data['cfm_design']['value']):
             if not equipment_data['fpm_design']['value']:
                 equipment_data['fpm_design']['value'] = "*"
-            else:
-                equipment_data['fpm_design']['value'] = round(equipment_data['fpm_design']['value'])
         if (str(equipment_data['cfm_initial']['value']) == "0") or (equipment_data['cfm_initial']['note']) or (not equipment_data['cfm_initial']['value']):
             if not equipment_data['fpm_initial']['value']:
                 equipment_data['fpm_initial']['value'] = "*"
