@@ -1,8 +1,8 @@
 volumes:
-  postgres_data_prod_itab: {}
-  postgres_data_backups_prod_itab: {}
-  django_media_prod_itab: {}
-  traefik_prod_itab: {}
+  itab_prod_postgres_data: {}
+  itab_prod_postgres_data_backups: {}
+  itab_prod_django_media: {}
+  itab_prod_traefik: {}
 
 services:
   django:
@@ -12,7 +12,7 @@ services:
 
     image: django_prod_itab
     volumes:
-      - django_media_prod_itab:/app/media
+      - itab_prod_django_media:/app/media
     depends_on:
       - postgres
     env_file:
@@ -26,8 +26,8 @@ services:
       dockerfile: ./docker/prod/postgres/Dockerfile
     image: postgres_prod_itab
     volumes:
-      - postgres_data_prod_itab:/var/lib/postgresql/data
-      - postgres_data_backups_prod_itab:/backups
+      - itab_prod_postgres_data:/var/lib/postgresql/data
+      - itab_prod_postgres_data_backups:/backups
     env_file:
       - ./.envs/.prod/.postgres
 
@@ -35,11 +35,11 @@ services:
     build:
       context: .
       dockerfile: ./docker/prod/traefik/Dockerfile
-    image: traefik_prod_itab
+    image: itab_prod_traefik
     depends_on:
       - django
     volumes:
-      - traefik_prod_itab:/etc/traefik/acme
+      - itab_prod_traefik:/etc/traefik/acme
     ports:
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
@@ -52,4 +52,4 @@ services:
     depends_on:
       - django
     volumes:
-      - django_media_prod_itab:/usr/share/nginx/media:ro
+      - itab_prod_django_media:/usr/share/nginx/media:ro
