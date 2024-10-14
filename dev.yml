@@ -14,8 +14,7 @@ services:
     volumes:
       - .:/app:z
     env_file:
-      - ./.envs/.dev/.django
-      - ./.envs/.dev/.postgres
+      - .env
     ports:
       - '8001:8000'
     command: /start
@@ -30,6 +29,6 @@ services:
       - itab_dev_postgres_data:/var/lib/postgresql/data
       - itab_dev_postgres_data_backups:/backups
     env_file:
-      - ./.envs/.dev/.postgres
+      - .env
     ports:
       - '8002:5432'

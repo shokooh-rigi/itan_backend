@@ -49,32 +49,35 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES = {
     'default': {
-        # # psql
+        # psql
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': 'test',
-        # 'USER': 'debug',
-        # 'PASSWORD': 'debug',
-        # 'HOST': 'postgres',
-        # 'PORT': '5432',
-        # # mysql
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'test',
-        # 'USER': 'debug',
-        # 'PASSWORD': 'debug',
-        # 'HOST': 'mysql',
-        # 'PORT': '3306',
+        # 'NAME': env('POSTGRES_DB'),
+        # 'USER': env.str('POSTGRES_USER'),
+        # 'PASSWORD': env.str('POSTGRES_PASSWORD'),
+        # 'HOST': env.str('POSTGRES_HOST'),
+        # 'PORT': env.str('POSTGRES_PORT'),
         # sqlite
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         # mysql
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dtabtech_testdb',
-        'USER': 'dtabtech_testusr',
-        'PASSWORD': 'L[SP+hbSl!J{',
-        'HOST': '64.251.19.223',
-        'PORT': '3306',
+        'NAME': env('MYSQL_DB'),
+        'USER': env('MYSQL_USER'),
+        'PASSWORD': env('MYSQL_PASSWORD'),
+        'HOST': env('MYSQL_HOST'),
+        'PORT': env('MYSQL_PORT'),
     }
 }
+if env.str("ENV", None) == "test":
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("POSTGRES_DB") + "_test",
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": "postgres",
+        "PORT": "5432",
+    }
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
