@@ -105,18 +105,6 @@ def order_update(request, order_id):
             for eq_id in keys_to_delete:
                 del ـequipments['Air Balancing']['Air Terminal'][eq_id]
 
-        # service_order = ['Air Balancing', 'Water Balancing']
-        # sorted_equipments = OrderedDict()
-        # for service in service_order:
-        #     sorted_equipments[service] = []
-        # for eq in ـequipments:
-        #     service = eq['service']
-        #     if service in sorted_equipments:
-        #         sorted_equipments[service].append(eq)
-        #     else:
-        #         if service not in sorted_equipments:
-        #             sorted_equipments[service] = [eq]
-
     # _s3 = S3()
     image_data_list = []
     if this_order.colored_drawing and this_order.colored_drawing.name.endswith('.pdf'):
