@@ -248,7 +248,7 @@ def update_data_sheet_form(request, pk):
             # Handle belt drive and direct drive
             if data_sheet.equipment_type.test_sheet.name == "Air Moving":
                 if (form_type == "design") and (field_name == "Direct Drive"):
-                    if new_data["Direct Drive"]["value"]:
+                    if "value" in new_data["Direct Drive"]:
                         if new_data["Direct Drive"]["value"] == "on":
                             org_form_fields["actual"]["Motor Pully"]["value"] = org_form_fields["actual"]["Motor Pully"]["value"] if org_form_fields["actual"]["Motor Pully"]["value"] else "N.A."
                             org_form_fields["actual"]["Fan Pully"]["value"] = org_form_fields["actual"]["Fan Pully"]["value"] if org_form_fields["actual"]["Fan Pully"]["value"] else "N.A."

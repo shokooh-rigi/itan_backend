@@ -71,7 +71,7 @@
             "note": "",
             "order": 1,
             "validation": "^[0-9*]*$",
-            "formula": "2_actual / 5_design",
+            "formula": "2_actual / 4_design",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
         },
@@ -93,7 +93,7 @@
             "note": "",
             "order": 3,
             "validation": "^[0-9*]*$",
-            "formula": "4_actual / 5_design",
+            "formula": "4_actual / 4_design",
             "required": false,
             "hint": "Numbers will be rounded to whole numbers when reported."
         },

@@ -33,7 +33,7 @@
             "value": "N.S.",
             "note": "",
             "order": 4,
-            "validation": "^(N.S.|\\([0-9]*\\)|\\([A-Za-z ]*\\))$",
+            "validation": "^(N.S.|\\([0-9]{1,3}\\)|\\([A-Za-z ]*\\))$",
             "formula": "",
             "required": false
         },
@@ -42,7 +42,7 @@
             "value": "N.S.",
             "note": "",
             "order": 5,
-            "validation": "^(N.S.|\\([0-9]*\\)|\\([A-Za-z ]*\\))$",
+            "validation": "^(N.S.|\\([0-9]{1,3}\\)|\\([A-Za-z ]*\\))$",
             "formula": "",
             "required": false
         },
@@ -51,7 +51,7 @@
             "value": "N.S.",
             "note": "",
             "order": 6,
-            "validation": "^(N.S.|\\([0-9]*\\)|\\([A-Za-z ]*\\))$",
+            "validation": "^(N.S.|\\([0-9]{1,3}\\)|\\([A-Za-z ]*\\))$",
             "formula": "",
             "required": false
         },

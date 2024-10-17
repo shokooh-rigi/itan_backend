@@ -1113,6 +1113,7 @@ def fetch_terminal_data(terminals, _type):
         
         # round fpm design, fpm initial and fpm final
         for key in ['fpm_design', 'fpm_initial', 'fpm_final']:
+            print(equipment_data[key]['value'])
             try:
                 equipment_data[key]['value'] = round(float(equipment_data[key]['value']))
             except ValueError:

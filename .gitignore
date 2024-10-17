@@ -116,6 +116,7 @@ celerybeat.pid
 
 # Environments
 mysite/.env
+config/settings/.env
 .venv
 env/
 venv/
