@@ -999,6 +999,11 @@ def fetch_air_mov_data(equipment):
         'note': [get_field_value(design_set, 'Note')["value"], get_field_value(actual_set, 'Note')["value"]],
     }
 
+    # if equipment_data['total_sp_ext_sp_actual'] is a number put it in between ( )
+    if equipment_data['total_sp_ext_sp_actual']['value'].replace('.', '', 1).isdigit():
+        equipment_data['total_sp_ext_sp_actual']['value'] = f"({equipment_data['total_sp_ext_sp_actual']['value']})"
+    
+
     return equipment_data
 
 def fetch_vav_data(this_sheet_equipments):
