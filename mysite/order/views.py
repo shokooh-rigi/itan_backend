@@ -528,27 +528,6 @@ def order_field_drawing(request, order_id):
     return render(request, "fmd.html", parameters)
 
 
-# @login_required
-# def order_general_notes(request, order_id):
-#     this_order = get_object_or_404(Order, id=order_id)
-#     form = GeneralNoteForm(request.POST or None, request.FILES or None, instance=this_order)
-#     if request.method == 'POST':
-#         if request.POST.get("cancel"):
-#             return redirect('orderHome')
-#         if form.is_valid():
-#             if request.POST.get('finalize'):
-#                 this_order.general_notes_and_comments_finalize = True
-#                 this_order.save()
-#                 return redirect('orderHome')
-#             if request.POST.get("save"):
-#                 form.save()
-#                 return redirect('orderHome')
-#     parameters = {
-#         'form': form,
-#         'this_order': this_order,
-#         'page_title': 'General Notes & Comments',
-#     }
-#     return render(request, "generalNotes.html", parameters)
 @login_required
 def order_general_notes(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
