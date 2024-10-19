@@ -16,7 +16,6 @@ urlpatterns = [
     path('vav/equipment_general_data/<int:sheet_equipment_id>/', views.vav_sheet_equipment_general_data, name='vavSheetEquipmentGeneralData'),
     path('vav/equipment_design_data/<int:sheet_equipment_id>/', views.vav_sheet_equipment_design_data, name='vavSheetEquipmentDesignData'),
     path('vav/equipment_actual_value/<int:sheet_equipment_id>/', views.vav_sheet_equipment_actual_data, name='vavSheetEquipmentActualData'),
-    # path('order/edit/<int:order_id>/', views.order_edit, name='orderEdit'),
     # path('order/archive/<int:order_id>/', views.order_archive, name='orderArchive'),
     path('vav/delete/<int:sheet_id>/', views.vav_sheet_delete, name='vavSheetDelete'),
     path('vav/delete/<int:sheet_id>/<str:sheet_equipment_name>/', views.vav_sheet_equipment_delete, name='vavSheetEquipmentDelete'),
