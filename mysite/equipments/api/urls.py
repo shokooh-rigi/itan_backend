@@ -16,6 +16,6 @@ urlpatterns = [
     path('data-sheets/<int:pk>/', retrieve_data_sheet, name='retrieve-data-sheet'),
     path('data-sheets/<int:pk>/update/', update_data_sheet, name='update-data-sheet'),
     path('data-sheets/<int:pk>/update/form/', update_data_sheet_form, name='update-data-sheet-form'),
-    path('data-sheets/<int:pk>/delete/', delete_data_sheet, name='elete-data-sheetsd'),
+    path('data-sheets/<int:pk>/delete/', delete_data_sheet, name='delete-data-sheets'),
     path('data-sheets/order/<int:pk>/delete/', clear_data_sheet, name='clear-data-sheets'),
 ]
