@@ -1,6 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
-
+import os
 from pathlib import Path
 
 import environ
@@ -116,7 +116,7 @@ THIRD_PARTY_APPS = [
     # 'django_quill',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'custom_user.apps.CustomUserConfig',
-    
+    'drf_yasg',
 ]
 
 LOCAL_APPS = [
@@ -324,6 +324,9 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
@@ -368,3 +371,11 @@ RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY')
 
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
+
+# upload file pathS:
+UPLOAD_BID_FILE_PATH: str = os.getenv(
+        "UPLOAD_BID_FILE_PATH",
+        'uploads/ibidfiles',
+    )
+# page size
+PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
