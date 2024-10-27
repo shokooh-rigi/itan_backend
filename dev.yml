@@ -1,49 +1,34 @@
 volumes:
-  postgres_data_dev_itab: {}
-  postgres_data_backups_dev_itab: {}
-  # mysql_data_dev_itab: {}
-  # mysql_data_backups_dev_itab: {}
+  itab_dev_postgres_data: {}
+  itab_dev_postgres_data_backups: {}
 
 services:
   django:
     build:
       context: .
       dockerfile: ./docker/dev/django/Dockerfile
-    image: django_dev_itab
-    container_name: django_dev_itab
+    image: itab_dev_django
+    container_name: itab_dev_django
     depends_on:
       - postgres
-      # - mysql
     volumes:
       - .:/app:z
     env_file:
-      - ./.envs/.dev/.django
-      - ./.envs/.dev/.postgres
-      # - ./.envs/.dev/.mysql
+      - .env
     ports:
-      - '8000:8000'
+      - '8001:8000'
     command: /start
 
   postgres:
     build:
       context: .
       dockerfile: ./docker/prod/postgres/Dockerfile
-    image: postgres_prod_itab
-    container_name: postgres_dev_itab
+    image: itab_prod_postgres
+    container_name: itab_prod_postgres
     volumes:
-      - postgres_data_dev_itab:/var/lib/postgresql/data
-      - postgres_data_backups_dev_itab:/backups
+      - itab_dev_postgres_data:/var/lib/postgresql/data
+      - itab_dev_postgres_data_backups:/backups
     env_file:
-      - ./.envs/.dev/.postgres
+      - .env
     ports:
-      - '5432:5432'
-
-  # mysql:
-  #   image: mysql:8.0.37
-  #   container_name: mysql_dev_itab
-  #   volumes:
-  #     - mysql_data_dev_itab:/var/lib/mysql
-  #     - mysql_data_backups_dev_itab:/backups
-  #   env_file:
-  #     - ./.envs/.dev/.mysql
-  
+      - '8002:5432'

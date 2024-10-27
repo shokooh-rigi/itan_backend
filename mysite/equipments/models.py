@@ -23,26 +23,6 @@ class TestSheet(models.Model):
         return self.name
 
 
-# class Manufacturer(models.Model):
-#     name = models.CharField(max_length=255, blank=False, unique=True)
-#     tel = models.CharField(max_length=15, blank=True)
-#     fax = models.CharField(max_length=15, blank=True)
-#     mail = models.EmailField(max_length=55, blank=True)
-#     web = models.CharField(max_length=55, blank=True)
-#     address_line_1 = models.CharField(max_length=255, blank=True)
-#     address_line_2 = models.CharField(max_length=255, blank=True)
-#     city = models.CharField(max_length=55, blank=True)
-#     state = models.CharField(max_length=55, blank=True)
-#     zip = models.CharField(max_length=10, blank=True, null=True)
-#     created_on = models.DateTimeField(auto_now_add=True)
-#     flag = models.BooleanField(default=True)
-
-#     def __str__(self):
-#         return self.name
-
-
-
-
 class Equipment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True, related_name='equipments')
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True, related_name='equipments')
