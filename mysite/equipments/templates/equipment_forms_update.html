@@ -144,58 +144,6 @@
 
 </div>
 
-
-<!-- <script>
-    $(document).ready(function() {
-        $('form').on('submit', function(e) {
-            e.preventDefault();
-
-            var formData = $(this).serialize();
-
-            var pathname = window.location.pathname;
-            var parts = pathname.split('/');
-            var id = parts[parts.length - 2];
-            var index = parts.indexOf('equipments');
-            var newPathname = parts.slice(0, index).join('/') + '/api/equipments/data-sheets/' + id + '/update/form/';
-
-            const url = window.location.href;
-            const queryParams = new URLSearchParams(window.location.search);
-            const myParam = queryParams.get('t');
-            newPathname += '?t=' + myParam;
-
-            $.ajax({
-                url: newPathname,
-                type: 'PUT',
-                data: formData,
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    console.log('Success:', response);
-                    window.location.href = "{% url 'order_update_new' ds.project.id %}";
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    const errorMsg = xhr.responseJSON.errors.join('<br>');
-                    $('#errorDisplayTop, #errorDisplayBottom').html(errorMsg).show();
-                }
-            });
-        });
-        $('input, select').each(function() {
-            var value = $(this).val();
-            if (value === 'None') {
-                $(this).val('');
-            }
-        });
-        $(document).on('change', 'input, select', function() {
-            if ($(this).val() === 'None') {
-                $(this).val('');
-            }
-        });
-    });
-</script> -->
-
 <script>
     $(document).ready(function() {
         function generateTable(rows, cols, data = []) {

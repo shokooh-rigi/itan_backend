@@ -17,7 +17,6 @@ urlpatterns = [
     path('sheetcreator/equipment_design_value/<int:sheet_equipment_id>/', views.review_equipment_values, name='sheetEquipmentDesignValue'),
     path('sheetcreator/equipment_actual_value/<int:sheet_equipment_id>/', views.equipment_actual_values, name='sheetEquipmentActualValue'),
     path('sheetcreator/equipment_actual_values_edit/<int:sheet_equipment_id>/', views.equipment_actual_values_edit, name='sheetEquipmentActualValueEdit'),
-    # path('order/edit/<int:order_id>/', views.order_edit, name='orderEdit'),
     path('sheetcreator/archive/<int:sheet_id>/', views.sheet_archive, name='sheetArchive'),
     path('sheetcreator/delete/<int:sheet_id>/', views.sheet_delete, name='sheetDelete'),
     path('sheetcreator/delete/<int:sheet_id>/<str:sheet_equipment_name>/', views.sheet_equipment_delete, name='sheetEquipmentDelete'),

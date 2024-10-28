@@ -17,6 +17,8 @@ def pdf_to_image_bytes(url):
 
     # Convert the PDF bytes to images
     pdf_bytes = response.content
+    # for windows users who wish not to use chocolatey or conda
+    # images = convert_from_bytes(pdf_bytes, poppler_path = r'D:\poppler-24.08.0\Library\bin')
     images = convert_from_bytes(pdf_bytes)
 
     image_bytes_list = []
