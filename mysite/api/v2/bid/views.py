@@ -51,16 +51,22 @@ class BidFileListView(APIView):
     def get(self, request) -> Response:
         search: str = request.GET.get('search', '')
         ordering: str = request.GET.get('ordering', 'due_date')
-        from_date: str = request.GET.get("fromDate", '01/01/2020')
-        to_date: str = request.GET.get("toDate", '01/01/2024')
+        from_date: str = request.GET.get("fromDate")
+        to_date: str = request.GET.get("toDate")
 
         try:
-            from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-            to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(days=1)
-            object_list = iBidFile.objects.filter(
-                Q(project__name__icontains=search) |
-                Q(customer__company__name__icontains=search)
-            ).filter(due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
+            if not from_date or not to_date:
+                object_list = iBidFile.objects.filter(
+                    Q(project__name__icontains=search) |
+                    Q(customer__company__name__icontains=search)
+                ).order_by(ordering)
+            else:
+                from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
+                to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(days=1)
+                object_list = iBidFile.objects.filter(
+                    Q(project__name__icontains=search) |
+                    Q(customer__company__name__icontains=search)
+                ).filter(due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
             paginator = PageNumberPagination()
             paginator.page_size = settings.PAGE_SIZE
@@ -103,23 +109,23 @@ class BidFileUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @staticmethod
-    def get_object(bid_files_id: int) -> iBidFile:
+    def get_object(id: int) -> iBidFile:
         """
         Retrieve a bid file by ID.
         """
-        return get_object_or_404(iBidFile, id=bid_files_id)
+        return get_object_or_404(iBidFile, id=id)
 
     @swagger_auto_schema(
         request_body=BidFileUpdateSerializer,
         operation_description="Update an existing bid file",
         responses={200: BidFileUpdateSerializer}
     )
-    def put(self, request, bid_files_id: int) -> Response:
+    def put(self, request, id: int) -> Response:
         """
         PUT method to update an existing bid file.
         """
         try:
-            bid_file = self.get_object(bid_files_id)
+            bid_file = self.get_object(id)
             serializer = BidFileUpdateSerializer(bid_file, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -141,12 +147,12 @@ class BidFileDeleteView(APIView):
         operation_description="Delete an existing bid file",
         responses={204: 'No Content'}
     )
-    def delete(self, request, bid_files_id: int) -> Response:
+    def delete(self, request, id: int) -> Response:
         """
         DELETE method to remove a bid file.
         """
         try:
-            bid_file = get_object_or_404(iBidFile, id=bid_files_id)
+            bid_file = get_object_or_404(iBidFile, id=id)
 
             # Check if the user is authorized to delete the bid file
             if bid_file.created_by != request.user:
