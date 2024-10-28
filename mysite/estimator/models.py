@@ -1,6 +1,15 @@
+import datetime
+
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from custom_user.models import User
 from mysite.bidfilemgm.models import BidFile
-from mysite.dbmanagement.models import *
 from .enums import ControlSystemChoices, HoursChoices
+from ..core.models import Person, Project, Service
+from ..equipments.models import Equipment
 
 
 def estimate_number_generator(estimate_id: int):
@@ -87,7 +96,14 @@ class EstimateHistory(models.Model):
         on_delete=models.CASCADE,
         blank=False,
     )
-    total = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0)], blank=False, null=False)
+    # todo : import it : MinValueValidator
+    total = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        blank=False,
+        null=False,
+    )
     version = models.IntegerField(blank=False, null=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
