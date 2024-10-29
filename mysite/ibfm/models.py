@@ -24,6 +24,7 @@ class iBidFile(models.Model):
         blank=False,
         null=True,
     )
+    # Todo: check this path work from settings?
     uploaded_file = models.FileField(
         upload_to=settings.UPLOAD_BID_FILE_PATH,
         blank=True,
