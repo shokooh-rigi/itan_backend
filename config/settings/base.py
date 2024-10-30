@@ -375,10 +375,22 @@ RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY')
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
 
-# upload file pathS:
+# upload file paths:
 UPLOAD_BID_FILE_PATH: str = os.getenv(
         "UPLOAD_BID_FILE_PATH",
         'uploads/ibidfiles',
     )
+STORAGE_ESTIMATE_PDFS_PATH: str = os.getenv(
+    "STORAGE_ESTIMATE_PDFS_PATH",
+    "media/pdfs/estimate/",
+)
 # page size
 PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
+
+
+# S3 Configuration
+AWS_S3_DOMAIN = os.getenv("AWS_S3_DOMAIN", "https://s3.us-central-1.wasabisys.com")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "912TIXQPRLEFEDLWGSXM")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "BggzC2hjvtr1DMQjjAk6k7ZnDua9wXw8B0RciN0R")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-central-1")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "airtab-test")
