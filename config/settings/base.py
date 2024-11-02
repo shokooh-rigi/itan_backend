@@ -376,9 +376,17 @@ TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
 
 # upload file paths:
+UPLOAD_IBID_FILE_PATH: str = os.getenv(
+        "UPLOAD_IBID_FILE_PATH",
+        'uploads/ibidfiles',
+    )
 UPLOAD_BID_FILE_PATH: str = os.getenv(
         "UPLOAD_BID_FILE_PATH",
-        'uploads/ibidfiles',
+        'uploads/bidfiles',
+    )
+UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = os.getenv(
+        "UPLOAD_BID_FILE_PATH",
+        'uploads/equipmentsubmittal',
     )
 STORAGE_ESTIMATE_PDFS_PATH: str = os.getenv(
     "STORAGE_ESTIMATE_PDFS_PATH",
