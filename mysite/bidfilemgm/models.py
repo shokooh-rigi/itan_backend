@@ -3,12 +3,13 @@ import datetime
 from django.conf import settings
 from django.db import models
 
+from mysite.core.base_model import BaseModel
 from mysite.core.models import Person, User, Project
 
 
-class BidFile(models.Model):
+class BidFile(BaseModel):
     """
-        Model representing bid files associated with a customer and project.
+        Model representing ibid files associated with a customer and project.
         Includes details such as the customer, project, due date, uploaded file,
         creator, and additional notes. Also contains flags for archiving and
         controlling visibility to customers.
@@ -39,15 +40,7 @@ class BidFile(models.Model):
         blank=True,
         null=True,
     )
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        blank=False,
-    )
     note = models.TextField(max_length=1000, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    flag = models.BooleanField(default=True)
-    archive = models.BooleanField(default=False)
     hidden_for_customer = models.BooleanField(default=False)
 
     class Meta:
@@ -61,7 +54,7 @@ class BidFile(models.Model):
 
 class EquipmentSubmittal(models.Model):
     """
-       Model representing an equipment submittal associated with a bid file.
+       Model representing an equipment submittal associated with a ibid file.
        Stores the file related to equipment and tracks the creation timestamp.
        """
     bidfile = models.OneToOneField(

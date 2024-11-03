@@ -9,7 +9,7 @@ from .views import views
 urlpatterns = [
     path('profiles/', views.ProfilesAPIView.as_view()),
     path('profiles/addresses/', views.AddressesAPIView.as_view()),
-    path('bid-files/', views.BidFilesAPIView.as_view()),
+    path('ibid-files/', views.BidFilesAPIView.as_view()),
     path('business-checking-accounts/',
          views.BusinessCheckingAccountAPIView.as_view()),
     path('business-checking-accounts/<int:pk>/',
