@@ -249,6 +249,17 @@ class ProposalCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+from mysite.proposal.models import Proposal
+
+
 class ProposalArchiveView(APIView):
     """
     Archives a proposal if the user is authorized and confirms the action.
@@ -275,8 +286,7 @@ class ProposalArchiveView(APIView):
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
             if request.data.get("confirm"):
-                proposal.archive = True
-                proposal.save()
+                proposal.archive_record()  # Use the archive_record method from BaseModel
                 return Response(
                     {"message": "Proposal archived successfully"},
                     status=status.HTTP_200_OK
@@ -321,9 +331,9 @@ class ProposalDeleteView(APIView):
                 file_name = pdf_filename_generator(proposal.estimate.id, 'P')
                 proposal_service = ProposalService()
                 proposal_service.delete_proposal_pdf(file_name)
-                proposal.delete()
+                proposal.soft_delete()
                 return Response(
-                    {"message": "Proposal deleted successfully"},
+                    {"message": "Proposal soft_delete successfully"},
                     status=status.HTTP_200_OK
                 )
             return Response(

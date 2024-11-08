@@ -37,3 +37,9 @@ class BaseModel(models.Model):
         """Marks the record as archived."""
         self.archive = True
         self.save(update_fields=['archive', 'updated_at'])
+
+    def unarchive_record(self):
+        """Marks the record as unarchived."""
+        self.archive = False
+        self.save(update_fields=['archive', 'updated_at'])
+
