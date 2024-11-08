@@ -3,17 +3,24 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mysite.core.models import LicenseFiles, LicenseInfo
+from mysite.estimator.models import Estimate
+from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
 from mysite.proposal.models import Proposal
 from mysite.s3_file_manager import S3
+from .schemas import ProposalResponseModel
 from .serializers import ProposalSerializer
-from ..estimator.serializers import EmailSerializer
+from .services import ProposalService
+from ..estimator.serializers import EmailSerializer, EstimateSerializer
 from ..estimator.services import TemplateService, EstimateEmailService
 
 
@@ -141,8 +148,190 @@ class ProposalListView(APIView):
 
 
 class ProposalCreateView(APIView):
-    pass
+    """
+    API endpoint for creating a proposal.
+
+    Handles form data for creating a new proposal, associates it with an estimate,
+    and generates a proposal PDF if the form data is valid.
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    @staticmethod
+    def get_license_info():
+        """Fetches license and owner information for the proposal document."""
+        return {
+            'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
+            'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
+            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
+            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
+            'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
+            'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
+            'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
+            'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
+            'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
+            'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
+            'company_name': LicenseInfo.objects.get(key='CompanyName').value,
+            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
+            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
+        }
+
+    @staticmethod
+    def get_user_info(user):
+        """Fetches user information for proposal document, providing defaults if values are missing."""
+        user_profile = getattr(user, 'profile', None)
+        return {
+            'user_name': f"{user.first_name} {user.last_name}" if user.last_name else "TAB Technologies, INC. Operator",
+            'user_title': user_profile.title if user_profile and user_profile.title else 'Estimator',
+            'user_signature': user_profile.e_sign if user_profile else None,
+            'user_cell': user_profile.cell if user_profile and user_profile.cell else '',
+        }
+
+    def get(self, request, estimate_id=None):
+        """
+        Retrieves available estimates that are not archived or associated with a proposal.
+
+        Parameters:
+            - estimate_id (int): Optional; filters by specific estimate ID.
+
+        Returns:
+            - Response: Serialized data of estimates.
+        """
+        if estimate_id:
+            estimate = Estimate.objects.filter(id=estimate_id)
+        else:
+            estimate = Estimate.objects.filter(
+                archive=False
+            ).exclude(
+                id__in=Proposal.objects.values_list('estimate_id', flat=True)
+            ).order_by('-created_on')
+
+        serializer = EstimateSerializer(estimate, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """
+        Creates a new proposal and generates a PDF document.
+        """
+        # Proposal creation logic
+        serializer = ProposalSerializer(data=request.data)
+        if serializer.is_valid():
+            proposal = serializer.save()
+
+            # Fetch license and user information
+            license_info = self.get_license_info()
+            user_info = self.get_user_info(request.user)
+
+            # Prepare parameters for the proposal PDF
+            parameters = {
+                'file_name': pdf_filename_generator(proposal.estimate.id, 'P'),
+                'other_than_dalt_services': proposal.estimate.service.exclude(name__iexact="DALT"),
+                'has_dalt': proposal.estimate.service.filter(name__iexact="DALT").exists(),
+                'proposal': proposal,
+                'estimate': proposal.estimate,
+                'predemo_calculated': proposal.estimate.estimatedetails.pre_demo * 1200,
+                **license_info,
+                **user_info,
+            }
+
+            # Generate the proposal PDF
+            proposal_service = ProposalService()
+            pdf_path = proposal_service.create_proposal_pdf(parameters=parameters)
+
+            # Prepare and return response
+            response_data = ProposalResponseModel(
+                proposal_id=proposal.id,
+                pdf_path=pdf_path,
+                message="Proposal created successfully."
+            )
+            return Response(response_data.dict(), status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ProposalArchiveView(APIView):
-    pass
+    """
+    Archives a proposal if the user is authorized and confirms the action.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Archives a proposal if the user is authorized and confirms the action.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to archive the proposal')
+            },
+            required=['confirm']
+        ),
+        responses={
+            200: openapi.Response(description="Proposal archived successfully"),
+            400: openapi.Response(description="Confirmation not received for archiving."),
+            403: openapi.Response(description="User is not authorized to archive this record.")
+        }
+    )
+    def post(self, request, id):
+        proposal = get_object_or_404(Proposal, id=id)
+
+        if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
+            if request.data.get("confirm"):
+                proposal.archive = True
+                proposal.save()
+                return Response(
+                    {"message": "Proposal archived successfully"},
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                {"error": "Confirmation not received for archiving."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {"error": "You are not authorized to archive this record."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+
 class ProposalDeleteView(APIView):
-    pass
+    """
+    Deletes a proposal if the user is authorized and confirms the action.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Deletes a proposal if the user is authorized and confirms the action.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to delete the proposal')
+            },
+            required=['confirm']
+        ),
+        responses={
+            200: openapi.Response(description="Proposal deleted successfully"),
+            400: openapi.Response(description="Confirmation not received for deletion."),
+            403: openapi.Response(description="User is not authorized to delete this record.")
+        }
+    )
+    def delete(self, request, proposal_id):
+        proposal = get_object_or_404(Proposal, id=proposal_id)
+
+        if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
+            if request.data.get("confirm"):
+                file_name = pdf_filename_generator(proposal.estimate.id, 'P')
+                proposal_service = ProposalService()
+                proposal_service.delete_proposal_pdf(file_name)
+                proposal.delete()
+                return Response(
+                    {"message": "Proposal deleted successfully"},
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                {"error": "Confirmation not received for deletion."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {"error": "You are not authorized to delete this record."},
+            status=status.HTTP_403_FORBIDDEN
+        )
