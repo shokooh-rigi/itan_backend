@@ -58,6 +58,10 @@ class EstimateEmailService:
             estimate_id: int,
             storage_service: S3,
             template_service: TemplateService,
+            modules_to_email_template: int,
+            pdf_path: str,
+            pdf_prefix: str,
+
     ):
         """Initialize EstimateEmailService with the specified estimate, storage service, and template service.
 
@@ -74,6 +78,9 @@ class EstimateEmailService:
         self.body_content = ""
         self.footer_content = ""
         self.attachment_path = ""
+        self.modules_to_email_template = modules_to_email_template
+        self.pdf_path = pdf_path
+        self.pdf_prefix = pdf_prefix
 
     def _fetch_body_content(self) -> str:
         """Fetch the body content of the email using the template service.
@@ -81,7 +88,7 @@ class EstimateEmailService:
         Returns:
             str: The formatted body content for the email.
         """
-        content = self.template_service.get_template(module=1)
+        content = self.template_service.get_template(module=self.modules_to_email_template)
         # todo: check this view: htmlbodytemplate_tag_converter is good practise or not
         return htmlbodytemplate_tag_converter(
             form_type=1,
@@ -115,7 +122,8 @@ class EstimateEmailService:
         Raises:
             Exception: If there is an error while fetching or saving the PDF.
         """
-        pdf_filename = f"{settings.MEDIA_ROOT}/pdfs/estimate/{pdf_filename_generator(self.estimate.id, 'E')}.pdf"
+        pdf_filename_generate = pdf_filename_generator(self.estimate.id, self.pdf_prefix)
+        pdf_filename = f"{settings.MEDIA_ROOT}{self.pdf_path}{pdf_filename_generate}.pdf"
         s3_key = f"{settings.STORAGE_ESTIMATE_PDFS_PATH}{pdf_filename}"
 
         try:

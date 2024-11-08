@@ -5,9 +5,6 @@ from import_export.admin import ImportExportModelAdmin
 from .models import *
 
 
-# Register your models here.
-
-
 class EstimateAdmin(ImportExportModelAdmin):
     readonly_fields = ('created_by', 'created_on',)
     search_fields = ('project__name', 'id')
@@ -22,31 +19,6 @@ class EstimateAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(Estimate, EstimateAdmin)
-
-
-class QuoteResource(resources.ModelResource):
-    class Meta:
-        model = Quote
-
-
-class QuoteAdmin(ImportExportModelAdmin):
-    resource_class = QuoteResource
-    autocomplete_fields = ['estimate']
-
-
-admin.site.register(Quote, QuoteAdmin)
-
-
-class ProposalResource(resources.ModelResource):
-    class Meta:
-        model = Proposal
-
-
-class ProposalAdmin(ImportExportModelAdmin):
-    resource_class = ProposalResource
-
-
-admin.site.register(Proposal, ProposalAdmin)
 
 
 class EstimateEquipmentResource(resources.ModelResource):

@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from custom_user.models import User
 from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
+from ..core.base_model import BaseModel
 from ..core.models import Person, Project, Service
 from ..equipments.models import Equipment
 
@@ -28,7 +29,7 @@ def estimate_number_generator(estimate_id: int):
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
 
 
-class Estimate(models.Model):
+class Estimate(BaseModel):
     """Model representing an estimate."""
 
     bfm = models.OneToOneField(
@@ -67,17 +68,10 @@ class Estimate(models.Model):
         blank=False,
         null=True,
     )
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        blank=False,
-    )
     drawing_date = models.DateField(blank=True, null=True)
     confirm_date = models.DateTimeField(blank=True, null=True)
     note = models.TextField(max_length=255, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
-    archive = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-due_date"]
@@ -114,28 +108,6 @@ class EstimateHistory(models.Model):
 
     def __str__(self):
         return str(self.estimate) + ': History ' + str(self.version)
-
-
-class Proposal(models.Model):
-    """Model representing a proposal related to an estimate."""
-
-    estimate = models.OneToOneField(
-        Estimate,
-        on_delete=models.CASCADE,
-        blank=False,
-    )
-    validity = models.IntegerField(blank=False, default=180)
-    note = models.TextField(max_length=255, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    archive = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ["-estimate"]
-        verbose_name = 'Proposal List'
-        verbose_name_plural = 'Proposal Lists'
-
-    def __str__(self):
-        return estimate_number_generator(self.estimate.id) + "Proposal"
 
 
 class EstimateEquipment(models.Model):

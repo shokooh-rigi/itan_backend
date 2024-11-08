@@ -1,15 +1,14 @@
 import datetime
 import logging
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,44 +17,89 @@ from mysite.bidfilemgm.models import BidFile
 from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
 from mysite.s3_file_manager import S3
-from .serializers import EmailSerializer
-from .serializers import EstimateSerializer
+from .serializers import EstimateSerializer, EmailSerializer
 from .services import EstimateEmailService, TemplateService
 
-# Configure logger
 logger = logging.getLogger(__name__)
 
 
-class EstimateEmailViewSet(viewsets.ViewSet):
+class EstimateListView(APIView):
     """
-    Handles email operations related to estimate.
+    List, filter, and email estimates with pagination.
 
-    This view set allows authenticated users to send emails related to estimate.
-    It validates email addresses and utilizes the EstimateEmailService to send emails.
-
-    Methods:
-        send: Sends an email with the provided information.
+    This view provides an endpoint for authenticated users to retrieve a paginated
+    list of estimates with search and date filters, and to send emails related to estimates.
     """
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="Send an email",
+        operation_summary="List estimates",
+        manual_parameters=[
+            openapi.Parameter(
+                'search', openapi.IN_QUERY, description="Search term for estimates", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'fromDate', openapi.IN_QUERY, description="Start date for filtering", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'toDate', openapi.IN_QUERY, description="End date for filtering", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'paginate_by', openapi.IN_QUERY, description="Number of items per page", type=openapi.TYPE_INTEGER),
+            openapi.Parameter(
+                'page', openapi.IN_QUERY, description="Page number to retrieve", type=openapi.TYPE_INTEGER),
+        ],
+        responses={200: openapi.Response("List of estimates returned successfully.")}
+    )
+    def get(self, request):
+        search = request.GET.get('search', '')
+        paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
+        ordering = request.GET.get('ordering', '-created_on')
+        from_date = request.GET.get("fromDate")
+        to_date = request.GET.get("toDate")
+
+        filters = Q(archive=False)
+        if search:
+            filters &= Q(id__icontains=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search)
+
+        if from_date:
+            from_date_obj = datetime.strptime(from_date, '%m/%d/%Y')
+            filters &= Q(due_date__gte=from_date_obj)
+        if to_date:
+            to_date_obj = datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(days=1) - timedelta(seconds=1)
+            filters &= Q(due_date__lte=to_date_obj)
+
+        object_list = Estimate.objects.filter(filters).order_by(ordering)
+        paginator = Paginator(object_list, paginate_by)
+        page_number = request.GET.get('page', 1)
+        paginated_estimates = paginator.get_page(page_number)
+
+        serializer = EstimateSerializer(paginated_estimates, many=True)
+        data = {
+            'estimates': serializer.data,
+            'pagination': {
+                'total_rows': paginator.count,
+                'total_pages': paginator.num_pages,
+                'current_page': paginated_estimates.number,
+                'page_size': paginate_by,
+            }
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Send an email related to an estimate",
         request_body=EmailSerializer,
         responses={
             200: openapi.Response("Email sent successfully."),
             400: openapi.Response("Invalid email data provided."),
         },
     )
-    @action(detail=False, methods=['post'])
-    def send(self, request):
+    def post(self, request):
         """
-        Sends an email based on the validated email data.
+        Sends an email based on the provided validated data in the request.
 
         Args:
-            request: The incoming HTTP request containing email data.
+            request: The incoming HTTP request with email data.
 
         Returns:
-            Response: A JSON response indicating the result of the email sending process.
+            Response: JSON indicating the result of the email send operation.
         """
         serializer = EmailSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,11 +110,13 @@ class EstimateEmailViewSet(viewsets.ViewSet):
 
             email_service = EstimateEmailService(
                 estimate_id=email_id,
-                storage_service=S3(),  # Inject actual storage service
-                template_service=TemplateService(),  # Inject actual template service
+                storage_service=S3(),
+                template_service=TemplateService(),
                 request=request,
+                modules_to_email_template=1,
+                pdf_path='/pdfs/estimate/',
+                pdf_prefix='E',
             )
-
             try:
                 email_service.send_email(
                     to_email=to_emails,
@@ -80,136 +126,7 @@ class EstimateEmailViewSet(viewsets.ViewSet):
                 return Response({"message": "Email sent successfully."}, status=status.HTTP_200_OK)
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class EstimateListView(APIView):
-    """
-    List and filter estimates with pagination.
-
-    This view provides an endpoint for authenticated users to retrieve
-    a paginated list of estimates, allowing optional search and date filtering.
-
-    Methods:
-        get: Retrieves filtered estimates with pagination.
-    """
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_summary="List estimates",
-        manual_parameters=[
-            openapi.Parameter(
-                'search',
-                openapi.IN_QUERY,
-                description="Search term for filtering estimates",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                'fromDate',
-                openapi.IN_QUERY,
-                description="Start date for filtering",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                'toDate',
-                openapi.IN_QUERY,
-                description="End date for filtering",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                'paginate_by',
-                openapi.IN_QUERY,
-                description="Number of items per page",
-                type=openapi.TYPE_INTEGER,
-            ),
-            openapi.Parameter(
-                'page',
-                openapi.IN_QUERY,
-                description="Page number to retrieve",
-                type=openapi.TYPE_INTEGER
-            ),
-        ],
-        responses={
-            200: openapi.Response("List of estimates returned successfully."),
-            400: openapi.Response("Invalid parameters provided."),
-        },
-    )
-    def get(self, request):
-        """
-        Retrieves a paginated list of estimates based on optional filters.
-
-        Args:
-            request: The incoming HTTP request containing filtering parameters.
-
-        Returns:
-            Response: A JSON response containing the list of estimates and total rows.
-        """
-        search = request.GET.get('search', '')
-        paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
-        ordering = request.GET.get('ordering', '-created_on')
-        from_date = request.GET.get("fromDate", None)
-        to_date = request.GET.get("toDate", None)
-
-        # Parse date range
-        if from_date and to_date:
-            from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-            to_date_obj = datetime.datetime.strptime(
-                to_date,
-                '%m/%d/%Y',
-            ) + datetime.timedelta(days=1) - datetime.timedelta(seconds=1)
-
-            # Filter and order queryset
-            object_list = Estimate.objects.filter(
-                Q(id=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search),
-                archive=False,
-                due_date__range=(from_date_obj, to_date_obj)
-            ).annotate(null_count=Count('quote')).order_by('null_count', ordering)
-
-        elif not from_date and to_date:
-            # todo: what put from_date_obj?
-            from_date_obj = ""
-            to_date_obj = datetime.datetime.strptime(
-                to_date,
-                '%m/%d/%Y',
-            ) + datetime.timedelta(days=1) - datetime.timedelta(seconds=1)
-
-            # Filter and order queryset
-            object_list = Estimate.objects.filter(
-                Q(id=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search),
-                archive=False,
-                due_date__range=(from_date_obj, to_date_obj)
-            ).annotate(null_count=Count('quote')).order_by('null_count', ordering)
-
-        elif not to_date and from_date:
-            # todo: what put to_date_obj?
-            from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-            to_date_obj = ""
-
-            # Filter and order queryset
-            object_list = Estimate.objects.filter(
-                Q(id=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search),
-                archive=False,
-                due_date__range=(from_date_obj, to_date_obj)
-            ).annotate(null_count=Count('quote')).order_by('null_count', ordering)
-
-        else:
-            # Filter and order queryset
-            object_list = Estimate.objects.filter(
-                Q(id=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search),
-                archive=False,
-            ).annotate(null_count=Count('quote')).order_by('null_count', ordering)
-
-        # Pagination
-        paginator = Paginator(object_list, paginate_by)
-        page = request.GET.get('page')
-        estimates = paginator.get_page(page)
-
-        data = {
-            'estimates': estimates.object_list.values(),
-            'total_rows': paginator.count,
-        }
-        return Response(data, status=status.HTTP_200_OK)
 
 
 class EstimateCreateView(APIView):

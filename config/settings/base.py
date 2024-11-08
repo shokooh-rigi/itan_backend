@@ -167,6 +167,7 @@ LOCAL_APPS = [
     'api',
     'mysite.estimator.templatetags',
     'mysite.pdf_analyzer',
+    'mysite.proposal',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

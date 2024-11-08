@@ -12,7 +12,7 @@ class BaseModel(models.Model):
         is_deleted (Boolean): Soft delete flag.
         archive (Boolean): Archive flag.
     """
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

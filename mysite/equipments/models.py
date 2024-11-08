@@ -1,8 +1,8 @@
 from django.db import models
+
 from mysite.core.models import Service
-from mysite.order.models import Order
 from mysite.dbmanagement.models import EquipmentManufacturer as Manufacturer
-# from mysite.dbmanagement.models import TestSheet
+from mysite.order.models import Order
 
 
 class TestSheet(models.Model):
