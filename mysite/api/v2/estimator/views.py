@@ -1,5 +1,6 @@
 import datetime
 import logging
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -14,10 +15,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mysite.bidfilemgm.models import BidFile
-from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment
+from mysite.core.models import Person
+from mysite.equipments.models import Equipment
+from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
+from mysite.order.templatetags.order_tags import calculate_total_amount_due
 from mysite.s3_file_manager import S3
-from .serializers import EstimateSerializer, EmailSerializer
+from .serializers import EstimateSerializer, EmailSerializer, EstimateEquipmentSerializer, EstimateDetailsSerializer, \
+    EstimateHistorySerializer
 from .services import EstimateEmailService, TemplateService
 
 logger = logging.getLogger(__name__)
@@ -416,16 +421,161 @@ class EstimateDeleteView(APIView):
 
         # Archive related BFM data if applicable
         if estimate.bfm:
-            estimate.bfm.archive = False
-            estimate.bfm.save()
+            estimate.bfm.unarchive_record()
 
         # todo: check PDF deletion (assumed method from old code) is work ok?
         estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(estimate.id, 'E')})
 
         # Delete the estimate
-        estimate.delete()
+        estimate.soft_delete()
         logger.info("Estimate with ID %s deleted.", estimate_id)
         return Response(
-            {"message": "Estimate deleted"},
+            {"message": "Estimate  soft deleted"},
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class EstimateArchiveView(APIView):
+    """
+    Archives an estimate if the user is authorized and confirms the action.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Archives an estimate if the user is authorized and confirms the action.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to archive the estimate')
+            },
+            required=['confirm']
+        ),
+        responses={
+            200: openapi.Response(description="Estimate archived successfully"),
+            400: openapi.Response(description="Confirmation not received for archiving."),
+            403: openapi.Response(description="User is not authorized to archive this record.")
+        }
+    )
+    def post(self, request, estimate_id):
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+
+        # Check user authorization
+        if estimate.created_by != request.user and request.user.profile.user_type != 2:
+            return Response(
+                {"error": "You are not authorized to archive this record."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check for confirmation
+        if not request.data.get("confirm"):
+            return Response(
+                {"error": "Confirmation not received for archiving."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Archive associated BFM record if it exists
+        if estimate.bfm:
+            estimate.bfm.archive_record()
+
+        # Archive the estimate using archive_record()
+        estimate.archive_record()
+
+        return Response(
+            {"message": "Estimate archived successfully"},
+            status=status.HTTP_200_OK
+        )
+
+
+class EstimateHistoryView(APIView):
+    """
+    View the history of an estimate.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(operation_description="Get the history of an estimate.")
+    def get(self, request, estimate_id):
+        """
+        Get the history of an estimate by ID.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate_histories = EstimateHistory.objects.filter(estimate=estimate)
+
+        data = {
+            'estimate_id': estimate.id,
+            'estimate_histories': EstimateHistorySerializer(estimate_histories, many=True).data
+        }
+
+        return Response(data)
+
+
+class EstimateDetailsView(APIView):
+    """
+    View and update details of an estimate.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(operation_description="Get or update the details of an estimate.")
+    def get(self, request, estimate_id):
+        """
+        Get the details of the estimate.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate_details = get_object_or_404(EstimateDetails, estimate=estimate)
+        estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+
+        estimate_sub = sum(
+            float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+            for eq in estimate_equipments_pricing
+        )
+
+        data = {
+            "estimate_id": estimate_id,
+            "estimate": EstimateSerializer(estimate).data,
+            "estimate_details": EstimateDetailsSerializer(estimate_details).data,
+            "estimate_sub": estimate_sub,
+            "estimate_equipments_pricing": EstimateEquipmentSerializer(estimate_equipments_pricing, many=True).data
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(operation_description="Update the details of the estimate.")
+    def post(self, request, estimate_id):
+        """
+        Update the details of an estimate.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate_details = get_object_or_404(EstimateDetails, estimate=estimate)
+        # Add form processing and save logic here, similar to your original function
+
+        # Example of how to update estimate details
+        serializer = EstimateDetailsSerializer(estimate_details, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EstimateEquipmentDeleteView(APIView):
+    """
+    Delete the Estimate Equipment record.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(operation_description="Delete the estimate equipment by ID.")
+    def delete(self, request, estimate_equipment_id):
+        """
+        Delete the estimate equipment by ID if confirmed.
+        """
+        # todo: what is used for: interval_id?
+        estimate_equipment = get_object_or_404(EstimateEquipment, id=estimate_equipment_id)
+
+        # Ensure confirmation is received before proceeding with deletion
+        if request.data.get("confirm"):
+            estimate_equipment.soft_delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"detail": "Confirmation required to delete."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+

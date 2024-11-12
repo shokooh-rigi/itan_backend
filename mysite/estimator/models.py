@@ -135,6 +135,8 @@ class EstimateEquipment(models.Model):
     # if flag is True means it counts in estimate price (its service is in the estimate services)
     # todo: ENHANCEMENT: differentiate between Quantity (integer) and Number of Days (float) (flag)
     flag = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False, help_text="Soft delete flag.")
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Estimated Equipment List'
@@ -142,6 +144,11 @@ class EstimateEquipment(models.Model):
 
     def __str__(self):
         return estimate_number_generator(self.estimate.id) + " " + self.equipment.name
+
+    def soft_delete(self):
+        """Marks the record as deleted without actually removing it from the database."""
+        self.is_deleted = True
+        self.save(update_fields=['is_deleted', 'updated_at'])
 
 
 class EstimateDetails(models.Model):

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from mysite.bidfilemgm.models import BidFile
-from mysite.estimator.models import Estimate, EstimateDetails
+from mysite.equipments.models import Equipment
+from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
 
 
 class EmailSerializer(serializers.Serializer):
@@ -34,9 +35,22 @@ class EmailSerializer(serializers.Serializer):
 
 
 class EstimateSerializer(serializers.ModelSerializer):
+    predemo = serializers.FloatField(initial=0)
+
     class Meta:
         model = Estimate
-        fields = '__all__'
+        fields = [
+            'bfm',
+            'customer',
+            'project',
+            'engineer',
+            'service',
+            'note',
+            'due_date',
+            'drawing_date',
+            'predemo',
+            'created_by',
+        ]
 
 
 class EstimateDetailsSerializer(serializers.ModelSerializer):
@@ -45,7 +59,21 @@ class EstimateDetailsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class BidFileSerializer(serializers.ModelSerializer):
+class EstimateEquipmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BidFile
+        model = EstimateEquipment
+        fields = ['equipment', 'quantity', 'price_override']
+
+    def validate_equipment(self, value):
+        # Ensure the equipment is related to the given estimate
+        estimate_id = self.context['estimate_id']
+        if not Equipment.objects.filter(id=value.id, service__estimate__id=estimate_id).exists():
+            raise serializers.ValidationError("Invalid equipment for this estimate.")
+        return value
+
+
+class EstimateHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EstimateHistory
         fields = '__all__'
+
