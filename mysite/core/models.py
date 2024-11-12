@@ -9,6 +9,24 @@ from tinymce.models import HTMLField
 
 from custom_user.models import User
 
+gender_choices = (
+    (1, 'Male'),
+    (2, 'Female'),
+    (3, 'Other'),
+)
+USER_TYPE_CHOICES = (
+        (1, 'customer'),
+        (2, 'super admin'),
+        (3, 'estimator'),
+        (4, 'accounting'),
+        (5, 'tech'),
+        (6, 'super tech'),
+    )
+STATUS_CHOICES = (
+        (1, 'Employee'),
+        (2, 'Contractor'),
+    )
+
 
 class CompanyType(models.Model):
     name = models.CharField(max_length=255, blank=False)
@@ -18,13 +36,26 @@ class CompanyType(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Company Type'
-        verbose_name_plural = 'Company Type'
+        verbose_name_plural = 'Company Types'
 
     def __str__(self):
         return self.name
 
 
 class ContactInfo(models.Model):
+    """Represents company contact information."""
+
+    company_type = models.ForeignKey(
+        CompanyType,
+        on_delete=models.CASCADE,
+        error_messages={'required': 'You have to specify Company Type.'},
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=False,
+        null=True,
+    )
     customer_id = models.PositiveIntegerField(blank=True, null=True, unique=True)
     name = models.CharField(max_length=255, blank=False, error_messages={'required': 'Name Required.'})
     tel = models.CharField(max_length=15, blank=True)
@@ -36,10 +67,7 @@ class ContactInfo(models.Model):
     city = models.CharField(max_length=55, blank=True)
     state = models.CharField(max_length=55, blank=True)
     zip = models.CharField(max_length=10, blank=True, null=True)
-    company_type = models.ForeignKey(CompanyType, on_delete=models.CASCADE,
-                                     error_messages={'required': 'You have to specify Company Type.'})
     customer_adjustment_in_percentage = models.IntegerField(default=0)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -51,51 +79,57 @@ class ContactInfo(models.Model):
         return self.name
 
 
-@receiver(post_save, sender=ContactInfo)
-def update_customer_id(sender, instance, created, **kwargs):
-    if created:
-        # new_number = Setting.objects.get(key='Customer ID Last Digit')
-        # new_number.value = int(Setting.objects.get(key='Customer ID Last Digit').value) + 1
-        # new_number.save()
-        # instance.customer_id = Setting.objects.get(key='Customer ID Last Digit').value
-        # instance.save()
-
-        # new_number = Setting.objects.get(key=0)
-        # new_number.value = int(Setting.objects.get(key=0).value) + 1
-        # new_number.save()
-        # instance.customer_id = Setting.objects.get(key=0).value
-        # instance.save()
-        pass
-
-
 class Person(models.Model):
-    company = models.ForeignKey(ContactInfo, on_delete=models.CASCADE, blank=False)
+    """Represents a person associated with a company."""
+
+    company = models.ForeignKey(
+        ContactInfo,
+        on_delete=models.CASCADE,
+        blank=False,
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=False,
+        null=True,
+    )
+
     name = models.CharField(max_length=255, blank=False)
     title = models.CharField(max_length=255, blank=True)
-    gender_choices = (
-        (1, 'Male'),
-        (2, 'Female'),
-        (3, 'Other'),
-    )
     gender = models.PositiveSmallIntegerField(choices=gender_choices, default=1)
     tel = models.CharField(max_length=15, blank=True)
     fax = models.CharField(max_length=15, blank=True)
     mail = models.EmailField(max_length=55, blank=True)
     web = models.CharField(max_length=55, blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('company',)
         verbose_name = 'Company Contact Person'
-        verbose_name_plural = 'Company Contact Person'
+        verbose_name_plural = 'Company Contact Persons'
 
     def __str__(self):
         return self.company.name + ', ' + self.name
 
 
 class Profile(models.Model):
+    """Represents a user profile with additional information."""
+
+    customer = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='profile_customer'
+    )
+    tech = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='profile_tech'
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=30, null=True, blank=True)
     emp_id = models.CharField(max_length=10, null=True, blank=True)
@@ -106,37 +140,13 @@ class Profile(models.Model):
     pic = models.FileField(upload_to='uploads/users/profiles', null=True, blank=True)
     wallpaper = models.FileField(upload_to='uploads/users/wallpapers', null=True, blank=True)
     stamp = models.FileField(upload_to='uploads/users/stamps', null=True, blank=True)
-
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     email_confirmed = models.BooleanField(default=False)
-    USER_TYPE_CHOICES = (
-        (1, 'customer'),
-        (2, 'super admin'),
-        (3, 'estimator'),
-        (4, 'accounting'),
-        (5, 'tech'),
-        (6, 'super tech'),
-    )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
-    STATUS_CHOICES = (
-        (1, 'Employee'),
-        (2, 'Contractor'),
-    )
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, blank=True, null=True)
     id_number = models.PositiveIntegerField(blank=True, null=True, unique=True)
-
-    interest_percentage = models.PositiveIntegerField(default=0,
-                                                      validators=[MaxValueValidator(100), MinValueValidator(0)],
-                                                      help_text="exclusive for sub contractors.")
-    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True,
-                                      help_text="exclusive for sub contractors.")
-
-    customer = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True,
-                                 related_name='profile_customer')
-    tech = models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True,
-                                 related_name='profile_tech')
     physical_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
     physical_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
     physical_city = models.CharField(max_length=55, blank=True, null=True)
@@ -147,6 +157,18 @@ class Profile(models.Model):
     billing_city = models.CharField(max_length=55, blank=True, null=True)
     billing_state = models.CharField(max_length=55, blank=True, null=True)
     billing_zip = models.CharField(max_length=10, blank=True, null=True)
+    interest_percentage = models.PositiveIntegerField(
+        default=0,
+        validators=[MaxValueValidator(100), MinValueValidator(0)],
+        help_text="exclusive for sub contractors."
+    )
+    hourly_rate = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="exclusive for sub contractors."
+    )
 
     def __str__(self):
         return self.user.email
@@ -205,7 +227,7 @@ class Project(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Project Info'
-        verbose_name_plural = 'Project Info'
+        verbose_name_plural = 'Projects Info'
 
     def __str__(self):
         return self.name
