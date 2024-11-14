@@ -16,15 +16,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mysite.bidfilemgm.models import BidFile
-from mysite.core.models import Person
+from mysite.core.models import Person, LicenseFiles, LicenseInfo
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
-from mysite.order.templatetags.order_tags import calculate_total_amount_due
+from mysite.gi.models import InvoiceHistory
+from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
+    calculate_remaining_invoice_due
 from mysite.s3_file_manager import S3
 from .serializers import EstimateSerializer, EmailSerializer, EstimateEquipmentSerializer, EstimateDetailsSerializer, \
     EstimateHistorySerializer
 from .services import EstimateEmailService, TemplateService
+from ..proposal.services import ProposalService
 
 logger = logging.getLogger(__name__)
 
@@ -793,5 +796,174 @@ class EstimateEquipmentView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EstimateBidView(APIView):
+    """
+    Generate the bid for an estimate.
+    """
+    permission_classes = [IsAuthenticated]
 
+    @staticmethod
+    def _get_license_info():
+        """
+        Retrieve required license information and files.
+        """
+        required_keys = [
+            'OwnerName', 'OwnerTitle', 'OwnerAddressLine1', 'OwnerAddressLine2',
+            'OwnerTel', 'OwnerFax', 'OwnerWeb', 'OwnerMail', 'PDFHeaderText',
+            'CompanyName'
+        ]
+        required_files = ['OwnerSignature', 'OwnerLogo', 'PDFHeaderLogo']
 
+        license_info = {
+            info['key']: info['value']
+            for info in LicenseInfo.objects.filter(key__in=required_keys).values('key', 'value')
+        }
+
+        license_files = {
+            file['key']: file['value']
+            for file in LicenseFiles.objects.filter(key__in=required_files).values('key', 'value')
+        }
+
+        return license_info, license_files
+
+    @staticmethod
+    def _estimate_total_work(estimate_id: int):
+        """
+        Calculate the total work based on estimate equipment.
+        """
+        estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
+        estimate_work = sum(
+            int(each_estimate_equipment.quantity) * int(each_estimate_equipment.equipment.estimate_work)
+            for each_estimate_equipment in estimate_equipments
+        )
+        return estimate_work
+
+    @staticmethod
+    def _estimate_equipments(estimate_id: int):
+        estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
+        return estimate_equipments
+
+    @staticmethod
+    def _calculate_estimate_totals(estimate, estimate_sub):
+        """
+        Calculate control system, hours, predemo, and final estimate total.
+        """
+        control_system_calculated = round(
+            (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2
+        )
+        hours_calculated = round(
+            (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2
+        )
+        predemo_calculated = estimate.estimatedetails.pre_demo * 1200
+
+        estimate_total = round(
+            estimate_sub + control_system_calculated + hours_calculated + predemo_calculated +
+            float(estimate.estimatedetails.adjustment) + float(estimate.estimatedetails.customer_adjustment), 2
+        )
+        return control_system_calculated, hours_calculated, predemo_calculated, estimate_total
+
+    @staticmethod
+    def _generate_invoice_history(estimate):
+        """
+        Generate and log the invoice history for the estimate.
+        """
+        try:
+            invoice = estimate.proposal.order.invoice
+            invoice.times_estimate_changed += 1
+            invoice.save()
+
+            total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+            invoice_file_name = f"Invoice-{estimate.proposal.order.project_number[3:]:0>3}-{invoice.id:0>3}-{total_count}"
+
+            InvoiceHistory.objects.create(
+                invoice=invoice,
+                total_invoiced=calculate_total_amount_due(invoice),
+                total_paid=calculate_total_paid(invoice),
+                balance_due=calculate_remaining_invoice_due(invoice),
+                pdf_filename=invoice_file_name
+            )
+            return None
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def _prepare_response_data(
+            request,
+            estimate,
+            license_info,
+            license_files,
+            estimate_totals,
+            estimate_work,
+            estimate_equipments,
+    ):
+        """
+        Prepare the final response data dictionary.
+        """
+        control_system_calculated, hours_calculated, predemo_calculated, estimate_total = estimate_totals
+        estimate_sub = sum(
+            float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+            for eq in EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+        )
+        estimate_file_name = pdf_filename_generator(estimate.id, 'E')
+
+        return {
+            'file_name': estimate_file_name,
+            'estimate': estimate,
+            'other_than_dalt_services': estimate.service.exclude(name__iexact="DALT"),
+            'has_dalt': estimate.service.filter(name__iexact="DALT").exists(),
+            'estimate_equipments_pricing': estimate_equipments(estimate_id=estimate.id),
+            'estimate_work_in_hours': int(estimate_work / 60),
+            'estimate_work_in_minutes': int(estimate_work % 60),
+            **license_info,
+            **license_files,
+            'pdf_header_logo': license_files.get('PDFHeaderLogo'),
+            'company_name': license_info.get('CompanyName'),
+            'estimate_id': estimate.id,
+            'estimate_sub': estimate_sub,
+            'estimate_total': estimate_total,
+            'control_system_calculated': control_system_calculated,
+            'hours_calculated': hours_calculated,
+            'predemo_calculated': predemo_calculated,
+            'datetime': datetime.datetime.now(),
+            'user_name': f"{request.user.first_name} {request.user.last_name or 'TAB Technologies, INC. Operator'}",
+            'user_title': request.user.profile.title or 'Estimator',
+            'user_signature': request.user.profile.e_sign,
+            'user_cell': request.user.profile.cell or '',
+        }
+
+    @swagger_auto_schema(operation_description="Generate and retrieve the estimate bid.")
+    def get(self, request, estimate_id):
+        """
+        Generate and return the estimate bid with relevant data.
+        """
+        try:
+            license_info, license_files = self._get_license_info()
+            estimate = get_object_or_404(Estimate, id=estimate_id)
+            estimate_sub = sum(
+                float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+                for eq in EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+            )
+            estimate_work = self._estimate_total_work(estimate_id=estimate_id)
+            estimate_totals = self._calculate_estimate_totals(estimate, estimate_sub)
+            estimate_equipments = self._estimate_equipments(estimate_id=estimate_id)
+
+            invoice_error = self._generate_invoice_history(estimate)
+            response_data = self._prepare_response_data(
+                request=request,
+                estimate=estimate,
+                license_info=license_info,
+                license_files=license_files,
+                estimate_totals=estimate_totals,
+                estimate_work=estimate_work,
+                estimate_equipments=estimate_equipments,
+            )
+
+            if invoice_error:
+                response_data['invoice_error'] = invoice_error
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except Estimate.DoesNotExist:
+            return Response({"error": "Estimate not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -4,6 +4,7 @@ from ..dbmanagement.models import *
 # from django_quill.fields import QuillField
 
 # Create your models here.
+from ..proposal.models import Proposal
 
 
 class ControlSystemManufacturer(models.Model):
