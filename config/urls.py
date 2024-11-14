@@ -41,6 +41,7 @@ urlpatterns = [
     path('tech/', include('mysite.dashboardtech.urls'), name='techPanel'),
     path('equipments/', include('mysite.equipments.urls')),
     path('', core_views.home, name='home'),
+    path('', include('mysite.api.v2.core.urls')),
     path('', include('mysite.api.v2.estimator.urls')),
     path('', include('mysite.api.v2.proposal.urls')),
     path('', include('mysite.api.v2.ibid.urls')),
