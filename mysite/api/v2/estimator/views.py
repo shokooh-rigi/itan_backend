@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.db import DatabaseError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
@@ -643,4 +644,154 @@ class EstimateDuplicateView(APIView):
             {"message": "Estimate duplicated successfully"},
             status=status.HTTP_200_OK
         )
+
+
+class EstimateEquipmentView(APIView):
+    """
+    Handles equipment-related operations for an estimate, including
+    retrieving equipment pricing details and adding or updating equipment.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieves equipment details for an estimate service, including pricing information.",
+        responses={
+            200: openapi.Response(
+                description="Returns the equipment details and total estimate price.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'estimate_money': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'interval_set': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'estimate_service_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'equipments': openapi.Schema(type=openapi.TYPE_ARRAY,
+                                                     items=openapi.Items(type=openapi.TYPE_INTEGER)),
+                        'equipment_in': openapi.Schema(type=openapi.TYPE_ARRAY,
+                                                       items=openapi.Items(type=openapi.TYPE_INTEGER)),
+                    }
+                ),
+            ),
+            404: "Estimate not found.",
+            500: "Internal server error.",
+        }
+    )
+    def get(self, request, estimate_id, estimate_service_id):
+        """
+        Retrieves equipment and pricing data for a specific estimate and service interval.
+
+        Arguments:
+            estimate_id (int): The ID of the estimate.
+            estimate_service_id (int): The ID of the service interval.
+
+        Returns:
+            Response: The equipment details and total pricing.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        interval_set = estimate.service.all()[estimate_service_id]
+
+        try:
+            # Get the equipment pricing data
+            estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+            estimate_money = sum(
+                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                for e in estimate_equipments_pricing
+            )
+
+            # Filter equipment based on the service interval
+            equipments = Equipment.objects.filter(service=interval_set.id)
+            equipment_in = [item.equipment.id for item in estimate_equipments_pricing]
+
+            return Response({
+                'estimate_id': estimate_id,
+                'estimate_money': estimate_money,
+                'interval_set': interval_set.id,
+                'estimate_service_id': estimate_service_id,
+                'equipments': [equipment.id for equipment in equipments],
+                'equipment_in': equipment_in
+            })
+
+        except DatabaseError:
+            return Response(
+                {"error": "An error occurred while retrieving the equipment details."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @swagger_auto_schema(
+        operation_description="Adds or updates equipment for an estimate service.",
+        request_body=EstimateEquipmentSerializer,
+        responses={
+            200: openapi.Response(
+                description="Equipment added/updated successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'estimate_money': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    }
+                )
+            ),
+            400: openapi.Response(description="Invalid input data."),
+            404: "Estimate not found.",
+            500: "Internal server error.",
+        }
+    )
+    def post(self, request, estimate_id):
+        """
+        Adds or updates equipment for a specific estimate and service interval.
+
+        Arguments:
+            estimate_id (int): The ID of the estimate.
+
+        Returns:
+            Response: Success message and updated estimate pricing.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        serializer = EstimateEquipmentSerializer(data=request.data, context={'estimate_id': estimate_id})
+
+        if serializer.is_valid():
+            try:
+                equipment = serializer.validated_data['equipment']
+                quantity = serializer.validated_data['quantity']
+                price_override = serializer.validated_data['price_override']
+
+                # Check if the equipment already exists in the estimate
+                existing_equipment = EstimateEquipment.objects.filter(estimate=estimate_id, equipment=equipment).first()
+                if existing_equipment:
+                    # Update existing equipment pricing
+                    existing_equipment.quantity = quantity
+                    existing_equipment.price_override = price_override
+                    existing_equipment.save()
+                else:
+                    # Create a new EstimateEquipment entry
+                    EstimateEquipment.objects.create(
+                        estimate=estimate,
+                        equipment=equipment,
+                        quantity=quantity,
+                        price_override=price_override,
+                        flag=True
+                    )
+
+                # Recalculate the total price
+                estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+                estimate_money = sum(
+                    (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                    for e in estimate_equipments_pricing
+                )
+
+                return Response({
+                    'message': 'Estimate equipment updated successfully.',
+                    'estimate_money': estimate_money
+                }, status=status.HTTP_200_OK)
+
+            except DatabaseError:
+                return Response(
+                    {"error": "An error occurred while updating the equipment."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
