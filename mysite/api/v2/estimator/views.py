@@ -579,3 +579,68 @@ class EstimateEquipmentDeleteView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+class EstimateDuplicateView(APIView):
+    """
+    Duplicates an estimate along with associated records if the user is authorized.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Duplicates an estimate with associated records.",
+        responses={
+            200: openapi.Response(description="Estimate duplicated successfully"),
+            400: openapi.Response(description="Invalid data provided for duplication."),
+            403: openapi.Response(description="You are not authorized to duplicate this record.")
+        }
+    )
+    def post(self, request, estimate_id):
+        this_estimate = get_object_or_404(Estimate, id=estimate_id)
+
+        # todo: Ask to is directly get the customer from the request data ??
+        customer_id = request.data.get("customer")
+        if not customer_id:
+            return Response(
+                {"error": "Customer ID is required for duplication."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Duplicate the estimate object
+        duplicated_obj = deepcopy(this_estimate)
+        duplicated_obj.id = None  # Reset the ID to create a new instance
+
+        # Duplicate BidFile if it exists
+        if this_estimate.bfm:
+            duplicated_bfm = deepcopy(this_estimate.bfm)
+            duplicated_bfm.id = None
+            duplicated_bfm.save()
+            duplicated_obj.bfm = duplicated_bfm
+
+        # Set the new customer for the duplicated estimate
+        duplicated_obj.customer = get_object_or_404(Person, id=customer_id)
+        duplicated_obj.save()
+
+        # Duplicate services associated with the estimate
+        duplicated_obj.service.set(this_estimate.service.all())
+
+        # Duplicate EstimateEquipment records
+        all_equipments = EstimateEquipment.objects.filter(estimate=this_estimate)
+        for equipment in all_equipments:
+            equipment.pk = None
+            equipment.estimate = duplicated_obj
+            equipment.save()
+
+        # Duplicate EstimateDetails if it exists
+        try:
+            estimate_detail = deepcopy(EstimateDetails.objects.get(estimate=this_estimate))
+            estimate_detail.id = None
+            estimate_detail.estimate = duplicated_obj
+            estimate_detail.save()
+        except EstimateDetails.DoesNotExist:
+            pass
+
+        return Response(
+            {"message": "Estimate duplicated successfully"},
+            status=status.HTTP_200_OK
+        )
+
