@@ -6,15 +6,15 @@ from .views import (
     BidFileDuplicateView,
     BidFileArchiveView,
     BidFileDeleteView,
-    BidCreateView,
-    BidCreateFileView,
+    BidFileCreateView,
+    BidFileAddFileView,
 )
 
 
 urlpatterns = [
     path('bidfiles/get/', BidFileListView.as_view(), name='bidfile-list'),
-    path('bid/create/', BidCreateView.as_view(), name='bid-create'),
-    path('bid/create/file/<int: id>/', BidCreateFileView.as_view(), name='bid-create-file'),
+    path('bidfiles/create/', BidFileCreateView.as_view(), name='bidfile-create'),
+    path('bidfile/add/file/<int: id>/', BidFileAddFileView.as_view(), name='bidfile-add-file'),
     path('bidfiles/update/<int:bidfiles_id>/', BidFileUpdateView.as_view(), name='bidfile-update'),
     path('bidfiles/duplicate/<int:bidfiles_id>/', BidFileDuplicateView.as_view(), name='bidfile-duplicate'),
     path('bidfiles/archive/<int:id>/', BidFileArchiveView.as_view(), name='bidfile-archive'),

@@ -1,10 +1,12 @@
 import datetime
+import os
 
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -15,7 +17,8 @@ from mysite import settings
 from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import Person
 from mysite.s3_file_manager import S3
-from .serializers import BidFileSerializer
+from .serializers import BidFileSerializer, BidFileCreateSerializer
+from .services import BidFileService
 
 
 class BidFileListView(APIView):
@@ -297,3 +300,186 @@ class BidFileDeleteView(APIView):
             {"message": "BidFile successfully deleted."},
             status=status.HTTP_204_NO_CONTENT
         )
+
+
+class BidFileCreateView(APIView):
+    """
+    Create a new bid file with uploaded files.
+    This view processes the files, creates a zip, and uploads it to S3.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Create a new bid file",
+        operation_description="Uploads files, creates a zip archive, saves it to S3, and registers the bid file entry in the database.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['project_name'],
+            properties={
+                'project_name': openapi.Schema(type=openapi.TYPE_STRING, description="Name of the project"),
+                'uploaded_file': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_FILE),
+                                                description="Files to upload"),
+            },
+        ),
+        responses={
+            201: openapi.Response("Bid file created successfully", BidFileSerializer),
+            400: "Selected files exceeded maximum upload size",
+            500: "Internal server error",
+        },
+    )
+    def post(self, request):
+        form_data = request.data
+        files_list = request.FILES.getlist('uploaded_file')
+
+        # Validate file size
+        if not self._is_valid_file_size(files_list):
+            return Response(
+                {"error": "Selected files exceeded maximum upload size!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Handle file uploads and create zip
+        temp_path = self._get_temp_path()
+        file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
+        zip_file_path = self._create_project_zip(form_data.get('project_name'), file_paths, temp_path)
+
+        # Save bid file to database and S3
+        self._save_bidfile_to_db(form_data, zip_file_path)
+
+        return Response(
+            {"message": "Bid file created successfully."},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def _is_valid_file_size(files_list):
+        """
+        Check if the total size of uploaded files is within the allowed limit.
+        """
+        total_size = sum([f.size for f in files_list])
+        return total_size <= settings.MAX_UPLOAD_SIZE
+
+    @staticmethod
+    def _get_temp_path():
+        """
+        Generate or retrieve the temporary path for storing uploaded files.
+        """
+        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+        os.makedirs(temp_path, exist_ok=True)
+        return temp_path
+
+    @staticmethod
+    def _create_project_zip(project_name, file_paths, temp_path):
+        """
+        Clean the project name and create a zip file from the uploaded files.
+        """
+        project_clean_name = BidFileService.clean_project_name(project_name)
+        return BidFileService.create_zip_file(file_paths, temp_path, project_clean_name)
+
+    def _save_bidfile_to_db(self, form_data, zip_file_path):
+        """
+        Save the bid file entry to the database and upload the zip to S3.
+        """
+        bidfile = BidFile.objects.create(
+            project=form_data.get('project'),
+            created_by=self.request.user,
+        )
+        BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
+        return bidfile
+
+
+class BidFileAddFileView(APIView):
+    """
+    APIView for adding files to an existing BidFile.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Add files to a BidFile and compress them into a zip file.",
+        request_body=BidFileCreateSerializer,
+        responses={200: "File(s) uploaded and updated successfully.", 400: "Invalid input or file size exceeded."}
+    )
+    def post(self, request, bidfile_id):
+        """
+        Handles POST request to add files to BidFile and update it with a compressed zip file.
+        """
+        this_bfm = self._get_bidfile(bidfile_id)
+        serializer = self._validate_request_data(request, this_bfm)
+
+        temp_path = self._create_temp_path()
+        files_list = request.FILES.getlist('uploaded_file')
+
+        # Check file size limit
+        if not self._validate_file_size(files_list):
+            return Response(
+                {"error": "Selected files exceeded maximum upload size!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Process file uploads and create zip file
+        files_paths = self._save_uploaded_files(files_list, temp_path)
+        zip_file_path = self._create_zip_file(files_paths, temp_path, this_bfm)
+
+        # Update the BidFile instance with the zip file
+        self._update_bidfile_with_zip(this_bfm, zip_file_path)
+
+        return Response(
+            {"detail": "File(s) uploaded and updated successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+    @staticmethod
+    def _get_bidfile(bidfile_id):
+        """
+        Retrieves the BidFile instance or raises 404 error.
+        """
+        return get_object_or_404(BidFile, id=bidfile_id)
+
+    @staticmethod
+    def _validate_request_data(request, instance):
+        """
+        Validates incoming data with BidFileCreateSerializer.
+        """
+        serializer = BidFileCreateSerializer(instance=instance, data=request.data, partial=True)
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+        return serializer
+
+    @staticmethod
+    def _create_temp_path():
+        """
+        Creates and returns the temporary directory path for file uploads.
+        """
+        temp_path = os.path.join(settings.MEDIA_ROOT, "uploads/bidfiles")
+        os.makedirs(temp_path, exist_ok=True)
+        return temp_path
+
+    @staticmethod
+    def _validate_file_size(files_list):
+        """
+        Validates that total file size does not exceed maximum allowed size.
+        """
+        size_sum = sum(f.size for f in files_list)
+        return size_sum <= settings.MAX_UPLOAD_SIZE
+
+    @staticmethod
+    def _save_uploaded_files(files_list, temp_path):
+        """
+        Saves each uploaded file in the temp path and returns list of file paths.
+        """
+        return BidFileService.handle_uploaded_files(files_list, temp_path)
+
+    @staticmethod
+    def _create_zip_file(files_paths, temp_path, bidfile):
+        """
+        Creates a zip file from uploaded files and returns the path to the zip file.
+        """
+        project_clean_name = BidFileService.clean_project_name(bidfile.project.name)
+        return BidFileService.create_zip_file(files_paths, temp_path, f"{bidfile.pk}_{project_clean_name}")
+
+    @staticmethod
+    def _update_bidfile_with_zip(bidfile, zip_file_path):
+        """
+        Updates the BidFile instance with the new zip file uploaded to S3.
+        """
+        BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
