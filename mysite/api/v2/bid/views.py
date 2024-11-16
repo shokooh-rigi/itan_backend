@@ -235,6 +235,7 @@ class BidFileDuplicateView(APIView):
         )
 
         return duplicated_bfm
+from mysite.core.models import UserTypeChoices
 
 
 class BidFileArchiveView(APIView):
@@ -246,15 +247,22 @@ class BidFileArchiveView(APIView):
     def post(self, request, id):
         bid_file = get_object_or_404(BidFile, id=id)
 
-        # Check if the requesting user is the creator or has user_type 2
-        if bid_file.created_by == request.user or request.user.profile.user_type == 2:
-            # Confirm archiving action
-            if request.data.get("confirm"):
-                bid_file.archive_record()
-                return Response(
-                    {"message": "Bid file archived successfully"},
-                    status=status.HTTP_200_OK,
-                )
+        # Check if the requesting user is the creator of the bid file
+        if bid_file.created_by != request.user:
+            return Response(
+                {"error": "You are not authorized to archive this record."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Confirm archiving action
+        if request.data.get("confirm"):
+            bid_file.archive = True
+            bid_file.save()
+            return Response(
+                {"message": "Bid file archived successfully"},
+                status=status.HTTP_200_OK,
+            )
+
         return Response(
             {"error": "Confirmation not received for archiving."},
             status=status.HTTP_400_BAD_REQUEST,

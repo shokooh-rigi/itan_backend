@@ -8,6 +8,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
+from mysite.core.models import UserTypeChoices
+
 from .forms import BidFileForm, BidFileEditForm, Person
 from .models import BidFile
 from django.conf import settings
@@ -252,7 +254,7 @@ def bidfiles_delete(request, bidfiles_id):
     if request.method == "POST":
         if request.POST.get("confirm"):
             if request.user.is_authenticated:
-                if this_bidfile.created_by == request.user or request.user.profile.user_type == 2:
+                if this_bidfile.created_by == request.user or request.user.profile.user_type == UserTypeChoices.SUPER_ADMIN:
                     s3 = S3()
                     s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(this_bidfile.uploaded_file))
                     this_bidfile.delete()

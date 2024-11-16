@@ -214,7 +214,7 @@ $(document).ready(function() {
     const field_capitalizer = "{{ field_capitalizer }}";
 
     if (parseInt(field_capitalizer)) {
-        $("body").on('input', 'input[type=text]:not(#id_username):not(#id_web)', function() {
+        $("body").on('input', 'input[type=text]:not(#id_username):not(#id_web):not(#id_password)', function() {
             const old_value = $(this).val()
             const new_value = old_value.toUpperCase()
             $(this).val(new_value)

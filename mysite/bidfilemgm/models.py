@@ -52,7 +52,7 @@ class BidFile(BaseModel):
         return str(self.id) + ' - ' + self.customer.company.name + ': ' + str(self.project)
 
 
-class EquipmentSubmittal(models.Model):
+class EquipmentSubmittal(BaseModel):
     """
        Model representing an equipment submittal associated with a ibid file.
        Stores the file related to equipment and tracks the creation timestamp.
@@ -68,7 +68,6 @@ class EquipmentSubmittal(models.Model):
         blank=False,
         null=False,
     )
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
