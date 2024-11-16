@@ -151,18 +151,18 @@ def settlement_orders(request, settlement_id):
                             override_quoted_price = float(request.POST.get("quoted-price-" + str(schedule.id)))
                             quoted_price = override_quoted_price
                         else:
-                            if schedule.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                            if schedule.order.proposal.estimate.estimatedetails.pre_demo > 0:
                                 if schedule.pre_demo:
-                                    quoted_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+                                    quoted_price = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
                                     predemo_offset = float(schedule.order.predemo_offset)
                                     quoted_price = quoted_price - predemo_offset
                                 else:
-                                    pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
-                                    order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order)
+                                    pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
+                                    order_price = order_total_calculator(schedule.order.proposal.estimate.id, schedule.order)
                                     final_offset = float(schedule.order.final_offset)
                                     quoted_price = order_price - pre_demo_price - final_offset
                             else:
-                                quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
+                                quoted_price = float(order_total_calculator(schedule.order.proposal.estimate.id, schedule.order))
                                 offset = float(schedule.order.final_offset)
                                 quoted_price = quoted_price - offset
                         settle_value = (float(this_settlement.contractor.profile.interest_percentage) / 100 * quoted_price) * schedule_tech.involvement_percentage / 100 * completion_percentage/100
@@ -181,19 +181,19 @@ def settlement_orders(request, settlement_id):
                         else:
                             schedule_duration_in_hours = ((schedule.schedule_end - schedule.schedule_start).total_seconds()) / 3600
                         total_schedules_duration = total_schedules_duration + schedule_duration_in_hours
-                        if schedule.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                        if schedule.order.proposal.estimate.estimatedetails.pre_demo > 0:
                             if schedule.pre_demo:
-                                quoted_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+                                quoted_price = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
                                 predemo_offset = float(schedule.order.predemo_offset)
                                 quoted_price = quoted_price - predemo_offset
                             else:
-                                pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
-                                order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id,
+                                pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
+                                order_price = order_total_calculator(schedule.order.proposal.estimate.id,
                                                                      schedule.order)
                                 final_offset = float(schedule.order.final_offset)
                                 quoted_price = order_price - pre_demo_price - final_offset
                         else:
-                            quoted_price = float(order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order))
+                            quoted_price = float(order_total_calculator(schedule.order.proposal.estimate.id, schedule.order))
                             offset = float(schedule.order.final_offset)
                             quoted_price = quoted_price - offset
                         settle_value = float(this_settlement.contractor.profile.hourly_rate) * float(schedule_duration_in_hours)

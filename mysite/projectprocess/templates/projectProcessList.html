@@ -77,8 +77,8 @@
             <thead>
                 <tr>
                     <th data-sortable="project_number"><a href="{% if request.GET.ordering == 'project_number' %}?{% url_replace request 'ordering' '-project_number' %}{% else %}?{% url_replace request 'ordering' 'project_number' %}{% endif %}">Project #</a></th>
-                    <th data-sortable="proposal__quote__estimate__customer__company__name"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer__company__name' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer__company__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer__company__name' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
+                    <th data-sortable="proposal__estimate__customer__company__name"><a href="{% if request.GET.ordering == 'proposal__estimate__customer__company__name' %}?{% url_replace request 'ordering' '-proposal__estimate__customer__company__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__customer__company__name' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="proposal__estimate__project__name"><a href="{% if request.GET.ordering == 'proposal__estimate__project__name' %}?{% url_replace request 'ordering' '-proposal__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__project__name' %}{% endif %}">Project Name</a></th>
                     <th>Order Total</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Package" style="text-decoration: underline;">TP</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tech Scheduled" style="text-decoration: underline;">TS</th>
@@ -93,9 +93,9 @@
                 {% for project in projects %}
                     <tr>
                         <td>{{ project.project_number }}</td>
-                        <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
-                        <td>{{ project.proposal.quote.estimate.project.name }}</td>
-                        <td>${% order_tech_final_price_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>{{ project.proposal.estimate.customer.company.name }}</td>
+                        <td>{{ project.proposal.estimate.project.name }}</td>
+                        <td>${% order_tech_final_price_calculator project.proposal.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
                         <td>{% if project.projectprocess.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocess.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
@@ -104,12 +104,12 @@
                         <td>{% if project.projectprocess.completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td><a href="{% url 'projectProcessEdit' project.id 0 %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a></td>
                     </tr>
-                    {% if project.proposal.quote.estimate.estimatedetails.pre_demo != 0 %}
+                    {% if project.proposal.estimate.estimatedetails.pre_demo != 0 %}
                     <tr>
                         <td>{{ project.project_number }}-PREDEMO</td>
-                        <td>{{ project.proposal.quote.estimate.customer.company.name }}</td>
-                        <td>{{ project.proposal.quote.estimate.project.name }}</td>
-                        <td>${% order_tech_predemo_price_calculator project.proposal.quote.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                        <td>{{ project.proposal.estimate.customer.company.name }}</td>
+                        <td>{{ project.proposal.estimate.project.name }}</td>
+                        <td>${% order_tech_predemo_price_calculator project.proposal.estimate.id project as otc %}{{ otc|floatformat:2|intcomma }}</td>
                         <td>{% if project.projectprocesspredemo.tech_package %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocesspredemo.tech_scheduled %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
                         <td>{% if project.projectprocesspredemo.job_completed %}<div class="icon completedicon"></div>{% else %}<div class="icon deleteicon"></div>{% endif %}</td>
@@ -154,7 +154,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['project_number', 'proposal__quote__estimate__project__name', 'proposal__quote__estimate__customer__company__name'];
+        var sortables = ['project_number', 'proposal__estimate__project__name', 'proposal__estimate__customer__company__name'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

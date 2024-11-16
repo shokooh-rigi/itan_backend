@@ -16,12 +16,12 @@
                         <option value="" selected="" data-customer="" data-engineer="" data-project="" data-totalamount="" data-totalpre="" data-totalfinal="" data-haspre="0" data-dalt="0">---------</option>
                         {% for order in orders %}
                             <option value="{{ order.id }}"
-                                    data-customer="{{ order.proposal.quote.estimate.customer }}"
-                                    data-project="{{ order.proposal.quote.estimate.project }}"
-                                    data-totalamount="${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}"
-                                    data-totalpre="${% order_predemo_calculator order.proposal.quote.estimate.id order as opc %}{{ opc|floatformat:2|intcomma }}"
-                                    data-totaldalt="${% order_dalt_calculator order.proposal.quote.estimate.id order as odc %}{{ odc|floatformat:2|intcomma }}"
-                                    data-totalfinal="${% order_final_calculator order.proposal.quote.estimate.id order as ofc %}{{ ofc|floatformat:2|intcomma }}"
+                                    data-customer="{{ order.proposal.estimate.customer }}"
+                                    data-project="{{ order.proposal.estimate.project }}"
+                                    data-totalamount="${% order_total_calculator order.proposal.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}"
+                                    data-totalpre="${% order_predemo_calculator order.proposal.estimate.id order as opc %}{{ opc|floatformat:2|intcomma }}"
+                                    data-totaldalt="${% order_dalt_calculator order.proposal.estimate.id order as odc %}{{ odc|floatformat:2|intcomma }}"
+                                    data-totalfinal="${% order_final_calculator order.proposal.estimate.id order as ofc %}{{ ofc|floatformat:2|intcomma }}"
                                     data-haspre="{% if opc|floatformat:"0" == '0' %}0{% else %}1{% endif %}"
                                     data-hasdalt="{% if odc|floatformat:"0" == '0' %}0{% else %}1{% endif %}"
                                     {% if orders.count == 1 %}selected="selected"{% endif %}>{{ order.project_number }}

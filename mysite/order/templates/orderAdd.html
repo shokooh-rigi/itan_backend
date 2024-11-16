@@ -14,7 +14,7 @@
                     <select name="proposal" class="form-control select2" required="" id="id_proposal">
                         <option value="" selected="" data-customer="" data-engineer="" data-tabamount="" data-preamount="" data-totalamount="">---------</option>
                         {% for proposal in proposals %}
-                            <option value="{{ proposal.id }}" data-customer="{{ proposal.quote.estimate.customer }}" data-engineer="{{ proposal.quote.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.quote.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}" data-predemo="{{ proposal.quote.estimate.estimatedetails.pre_demo }}" data-dlink="{% if proposal.quote.estimate.bfm.uploaded_file %}{{ proposal.quote.estimate.bfm.uploaded_file.url }}{% endif %}"{% if proposals.count == 1 %} selected="selected"{% endif %}>{% estimate_number_generator proposal.quote.estimate.id %}</option>
+                            <option value="{{ proposal.id }}" data-customer="{{ proposal.estimate.customer }}" data-engineer="{{ proposal.estimate.engineer }}" data-totalamount="${% estimate_total_calculator proposal.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}" data-predemo="{{ proposal.estimate.estimatedetails.pre_demo }}" data-dlink="{% if proposal.estimate.bfm.uploaded_file %}{{ proposal.estimate.bfm.uploaded_file.url }}{% endif %}"{% if proposals.count == 1 %} selected="selected"{% endif %}>{% estimate_number_generator proposal.estimate.id %}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'proposalAdd' %}" id="add_proposal"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>

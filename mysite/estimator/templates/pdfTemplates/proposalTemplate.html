@@ -19,7 +19,7 @@
 <div id="content_frame">
     <div class="content">
         <div class="row form-line" style="text-align: center; padding: 10px 0; font-size: 14pt;">
-            <div class="col-sm-6"><b>Proposal:</b> {% estimate_number_generator proposal.quote.estimate.id %}</div>
+            <div class="col-sm-6"><b>Proposal:</b> {% estimate_number_generator proposal.estimate.id %}</div>
         </div>
             <div class="row form-line" style="font-size: 10pt;">
                <table>
@@ -51,7 +51,7 @@
                         <td style="padding: 5px; width: 100%; font-weight: bold;">Proposal Date: </td>
                         <td style="padding: 5px; width: 100%;">{{ proposal.created_on|date:'m/d/Y' }}</td>
                         <td style="padding: 5px; width: 100%; font-weight: bold;">Engineer: </td>
-                        <td style="padding: 5px; width: 100%;">{{ proposal.quote.estimate.engineer.company.name }}</td>
+                        <td style="padding: 5px; width: 100%;">{{ proposal.estimate.engineer.company.name }}</td>
                     </tr>
                </tbody>
             </table>
@@ -66,14 +66,14 @@
                                 {{ estimate_service }}{%if not forloop.last%}, {%endif%}
                             {% endfor %}
                         </td>
-                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_exclude_dalt_calculator proposal.quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_exclude_dalt_calculator proposal.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
                     </tr>
                     {% if has_dalt %}
                     <tr style="text-align: left;">
                         <td style="padding: 5px; width: 300px;">
                             DALT
                         </td>
-                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_dalt_calculator proposal.quote.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
+                        <td style="padding: 5px; width: 100px; font-weight: bold; text-align: right;">${% estimate_sub_total_dalt_calculator proposal.estimate.id as estc %}{{ estc|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
                     {% if predemo_calculated > 0 %}
@@ -84,7 +84,7 @@
                     {% endif %}
                     <tr style="font-size: 16px;">
                         <td style="padding: 5px;">Total Amount:</td>
-                        <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator proposal.quote.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
+                        <td style="padding: 5px; font-weight: bold; text-align: right;">${% estimate_total_calculator proposal.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
                     </tr>
                   </tbody>
                 </table>

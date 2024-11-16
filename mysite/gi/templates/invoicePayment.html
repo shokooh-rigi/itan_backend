@@ -6,7 +6,7 @@
 
 {% block content %}
     <h2>Invoice {{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }} Transactions</h2>
-    <h4>Total Amount ${% order_total_calculator invoice.order.proposal.quote.estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }} - Total Due: ${% calculate_total_amount_due invoice as ctad %}{{ ctad|floatformat:2|intcomma }}</h4>
+    <h4>Total Amount ${% order_total_calculator invoice.order.proposal.estimate.id invoice.order as otc %}{{ otc|floatformat:2|intcomma }} - Total Due: ${% calculate_total_amount_due invoice as ctad %}{{ ctad|floatformat:2|intcomma }}</h4>
     <ul class="list-group">
     {% if invoice_transactions %}
     {% for invoice_transaction in invoice_transactions %}

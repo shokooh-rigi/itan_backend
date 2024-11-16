@@ -20,6 +20,7 @@ from django.db.models import Count
 import requests
 import os
 from copy import deepcopy
+from mysite.proposal.models import Proposal
 
 # Create your views here.
 
@@ -118,97 +119,6 @@ def estimate_list(request):
     return render(request, "estimator.html", parameters)
 
 
-@login_required
-def quotation_list(request):
-    form = EmailForm(request.POST)
-    if request.method == 'POST':
-        if form.is_valid():
-            to_email = form.cleaned_data['to_email']
-            to_email = to_email.replace(" ", "").replace(";", ",").split(',')
-            cc = form.cleaned_data['cc']
-            cc = cc.replace(" ", "").replace(";", ",").split(',')
-            cc.append('est@tabtechinc.com')
-            cc.append('a.behehsti@tabtechinc.com')
-            email_id = form.cleaned_data['email_id']
-            subject = form.cleaned_data['subject']
-            this_estimate = get_object_or_404(Estimate, id=email_id)
-            customer = this_estimate.customer
-            if ModulesToEmailTemplateRelation.objects.filter(module=2).exists():
-                body_content = get_object_or_404(ModulesToEmailTemplateRelation, module=2).template.content
-            else:
-                body_content = "There was no email template defined for 'Quotation'."
-            body_content = htmlbodytemplate_tag_converter(1, body_content, request, customer)
-            if ModulesToEmailTemplateRelation.objects.filter(module=5).exists():
-                footer_content = ModulesToEmailTemplateRelation.objects.get(module=5).template.content
-            else:
-                footer_content = "There was no email template defined for 'Email Footer'."
-            footer_content = htmlbodytemplate_tag_converter(1, footer_content, request, customer)
-            message = body_content + '<br />' + footer_content
-            try:
-                msg = EmailMessage(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    to_email,
-                    cc=cc,
-                )
-                msg.content_subtype = "html"
-                s3 = S3()
-                response = requests.get(s3.get_bucket_object('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf'))
-                f = open('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf', 'wb')
-                f.write(response.content)
-                f.close()
-                msg.attach_file('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf')
-                msg.send()
-                os.remove('media/pdfs/quote/' + pdf_filename_generator(email_id, 'Q') + '.pdf')
-            except BadHeaderError:
-                return HttpResponse('Invalid header found.')
-            return redirect('quotationHome')
-
-    search = request.GET.get('search', '')
-
-    pagination = 20
-    if request.GET.get('paginate_by'):
-        pagination = request.GET.get('paginate_by')
-
-    ordering = '-created_on'
-    if request.GET.get('ordering'):
-        ordering = request.GET.get('ordering')
-
-    if search:
-        if search.isnumeric():
-            object_list = Quote.objects.filter(Q(estimate__id=search)
-                                              | Q(estimate__project__name__icontains=search)
-                                              | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
-        else:
-            object_list = Quote.objects.filter(Q(estimate__project__name__icontains=search)
-                                               | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
-    else:
-        object_list = Quote.objects.filter(archive=False)
-
-    from_date = request.GET.get("fromDate", '01/01/2000')
-    to_date = request.GET.get("toDate", '01/01/2100')
-    if from_date and to_date:
-        from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-        to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
-        to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
-
-        object_list = object_list.filter(estimate__due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
-
-    else:
-        object_list = object_list.order_by(ordering)
-
-    paginator = Paginator(object_list, pagination)
-    page = request.GET.get('page')
-    quotes = paginator.get_page(page)
-
-    parameters = {'quotes': quotes,
-                  'form': form,
-                  'WEB_URL': settings.WEB_URL,
-                  'MEDIA_URL': settings.MEDIA_URL,
-                  }
-    return render(request, "quotation.html", parameters)
-
 
 @login_required
 def proposal_list(request):
@@ -268,12 +178,12 @@ def proposal_list(request):
 
     if search:
         if search.isnumeric():
-            object_list = Proposal.objects.filter(Q(quote__estimate__id=search)
-                                                  | Q(quote__estimate__project__name__icontains=search)
-                                                  | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
+            object_list = Proposal.objects.filter(Q(estimate__id=search)
+                                                  | Q(estimate__project__name__icontains=search)
+                                                  | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
         else:
-            object_list = Proposal.objects.filter(Q(quote__estimate__project__name__icontains=search)
-                                                  | Q(quote__estimate__customer__company__name__icontains=search)).filter(archive=False)
+            object_list = Proposal.objects.filter(Q(estimate__project__name__icontains=search)
+                                                  | Q(estimate__customer__company__name__icontains=search)).filter(archive=False)
     else:
         object_list = Proposal.objects.filter(archive=False)
 
@@ -284,7 +194,7 @@ def proposal_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = object_list.filter(quote__estimate__due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
+        object_list = object_list.filter(estimate__due_date__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
         object_list = object_list.order_by(ordering)
@@ -366,166 +276,6 @@ def estimator_edit(request, estimate_id):
     return render(request, "estimatorEdit.html", parameters)
 
 
-@login_required
-def quote_add(request, estimate_id=None):
-    form = QuoteForm(request.POST or None, request.FILES or None)
-    license_owner = LicenseInfo.objects.get(key='OwnerName').value
-    owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
-    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
-    owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
-    owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
-    owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
-    owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
-    owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
-    company_name = LicenseInfo.objects.get(key='CompanyName').value
-
-    if request.user.last_name == '' or request.user.last_name is None:
-        user_name = 'TAB Technologies, INC. Operator'
-    else:
-        user_name = request.user.first_name + " " + request.user.last_name
-    if request.user.profile.title == '' or request.user.profile.title is None:
-        user_title = 'Estimator'
-    else:
-        user_title = request.user.profile.title
-    user_signature = request.user.profile.e_sign
-    if request.user.profile.cell == '' or request.user.profile.cell is None:
-        user_cell = ''
-    else:
-        user_cell = request.user.profile.cell
-    if estimate_id:
-        estimates = Estimate.objects.filter(id=estimate_id)
-    else:
-        estimates = Estimate.objects.filter(archive=False).exclude(id__in=Quote.objects.all().values_list('estimate_id')).order_by('-created_on')
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('quotationHome')
-        if form.is_valid():
-            if request.POST.get("next"):
-                quote = form.save()
-                if quote.estimate.bfm:
-                    this_bfm = get_object_or_404(BidFile, id=quote.estimate.bfm_id)
-                    this_bfm.archive = True
-                    this_bfm.save()
-                predemo_calculated = quote.estimate.estimatedetails.pre_demo * 1200
-                parameters = {'form': form,
-                              'other_than_dalt_services': quote.estimate.service.exclude(name__iexact="DALT"),
-                              'has_dalt': quote.estimate.service.filter(name__iexact="DALT").exists(),
-                              'file_name': pdf_filename_generator(quote.estimate.id, 'Q'),
-                              'quote': quote,
-                              'predemo_calculated': predemo_calculated,
-                              'license_owner': license_owner,
-                              'owner_title': owner_title,
-                              'owner_address_line1': owner_address_line1,
-                              'owner_address_line2': owner_address_line2,
-                              'owner_tel': owner_tel,
-                              'owner_fax': owner_fax,
-                              'owner_web': owner_web,
-                              'owner_mail': owner_mail,
-                              'owner_signature': owner_signature,
-                              'owner_logo': owner_logo,
-                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-                              'company_name': company_name,
-                              'user_name': user_name,
-                              'user_title': user_title,
-                              'user_signature': user_signature,
-                              'user_cell': user_cell,
-                              'WEB_URL': settings.WEB_URL,
-                              'STATIC_URL': settings.STATIC_URL,
-                              'MEDIA_URL': settings.MEDIA_URL,
-                              'os': system(),
-                              }
-                quote_pdf = Quote.create_quote_pdf(parameters)
-                parameters['quote_pdf'] = quote_pdf[1]
-                return redirect('quotationHome')
-    parameters = {
-        'form': form,
-        'estimates': estimates
-    }
-    return render(request, "quoteAdd.html", parameters)
-
-
-@login_required
-def proposal_add(request, quote_id=None):
-    form = ProposalForm(request.POST or None, request.FILES or None)
-    license_owner = LicenseInfo.objects.get(key='OwnerName').value
-    owner_title = LicenseInfo.objects.get(key='OwnerTitle').value
-    owner_address_line1 = LicenseInfo.objects.get(key='OwnerAddressLine1').value
-    owner_address_line2 = LicenseInfo.objects.get(key='OwnerAddressLine2').value
-    owner_tel = LicenseInfo.objects.get(key='OwnerTel').value
-    owner_fax = LicenseInfo.objects.get(key='OwnerFax').value
-    owner_web = LicenseInfo.objects.get(key='OwnerWeb').value
-    owner_mail = LicenseInfo.objects.get(key='OwnerMail').value
-    owner_signature = LicenseFiles.objects.get(key='OwnerSignature').value
-    owner_logo = LicenseFiles.objects.get(key='OwnerLogo').value
-    company_name = LicenseInfo.objects.get(key='CompanyName').value
-    if request.user.last_name == '' or request.user.last_name is None:
-        user_name = 'TAB Technologies, INC. Operator'
-    else:
-        user_name = request.user.first_name + " " + request.user.last_name
-    if request.user.profile.title == '' or request.user.profile.title is None:
-        user_title = 'Estimator'
-    else:
-        user_title = request.user.profile.title
-    user_signature = request.user.profile.e_sign
-    if request.user.profile.cell == '' or request.user.profile.cell is None:
-        user_cell = ''
-    else:
-        user_cell = request.user.profile.cell
-    if quote_id:
-        quotes = Quote.objects.filter(id=quote_id)
-    else:
-        quotes = Quote.objects.filter(archive=False).exclude(
-        id__in=Proposal.objects.all().values_list('quote_id')).order_by('-created_on')
-    if request.method == 'POST':
-        if request.POST.get("cancel"):
-            return redirect('proposalHome')
-        if form.is_valid():
-            if request.POST.get("next"):
-                proposal = form.save()
-                predemo_calculated = proposal.quote.estimate.estimatedetails.pre_demo * 1200
-                parameters = {'form': form,
-                              'file_name': pdf_filename_generator(proposal.quote.estimate.id, 'P'),
-                              'other_than_dalt_services': proposal.quote.estimate.service.exclude(name__iexact="DALT"),
-                              'has_dalt': proposal.quote.estimate.service.filter(name__iexact="DALT").exists(),
-                              'proposal': proposal,
-                              'estimate': proposal.quote.estimate,
-                              'predemo_calculated': predemo_calculated,
-                              'license_owner': license_owner,
-                              'owner_title': owner_title,
-                              'owner_address_line1': owner_address_line1,
-                              'owner_address_line2': owner_address_line2,
-                              'owner_tel': owner_tel,
-                              'owner_fax': owner_fax,
-                              'owner_web': owner_web,
-                              'owner_mail': owner_mail,
-                              'owner_signature': owner_signature,
-                              'owner_logo': owner_logo,
-                              'user_name': user_name,
-                              'user_title': user_title,
-                              'user_signature': user_signature,
-                              'user_cell': user_cell,
-                              'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-                              'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-                              'company_name': company_name,
-                              'WEB_URL': settings.WEB_URL,
-                              'STATIC_URL': settings.STATIC_URL,
-                              'MEDIA_URL': settings.MEDIA_URL,
-                              'os': system(),
-                              }
-                proposal_pdf = Proposal.create_proposal_pdf(parameters)
-                parameters['proposal_pdf'] = proposal_pdf[1]
-                return redirect('proposalHome')
-    parameters = {
-        'form': form,
-        'quotes': quotes
-    }
-    return render(request, "proposalAdd.html", parameters)
-
-
-@login_required
 def estimate_delete(request, estimate_id):
     this_estimate = get_object_or_404(Estimate, id=estimate_id)
     if request.method == "POST" and request.POST.get("confirm"):
@@ -549,56 +299,6 @@ def estimate_delete(request, estimate_id):
         'this_estimate': this_estimate
     }
     return render(request, "estimateDelete.html", parameters)
-
-
-@login_required
-def quote_delete(request, quote_id):
-    this_quote = get_object_or_404(Quote, id=quote_id)
-    if request.method == "POST" and request.user.is_authenticated:
-        if this_quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            if request.POST.get("confirm"):
-                if this_quote.estimate.bfm:
-                    this_quote.estimate.bfm.archive = False
-                    this_quote.estimate.bfm.save()
-                this_quote.delete_quote_pdf({'file_name': pdf_filename_generator(this_quote.estimate.id, 'Q')})
-                this_quote.delete()
-            return redirect('quotationHome')
-        else:
-            if request.POST.get("confirm"):
-                error_msg = "This record was created by another user, you are not authorized to delete this record."
-                parameters = {
-                    'this_quote': this_quote,
-                    'error_msg': error_msg
-                }
-                return render(request, "quoteDelete.html", parameters)
-            return redirect('quotationHome')
-    parameters = {'this_quote': this_quote
-                  }
-    return render(request, "quoteDelete.html", parameters)
-
-
-@login_required
-def proposal_delete(request, proposal_id):
-    this_proposal = get_object_or_404(Proposal, id=proposal_id)
-    if request.method == "POST" and request.user.is_authenticated:
-        if this_proposal.quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            if request.POST.get("confirm"):
-                this_proposal.delete_proposal_pdf(
-                    {'file_name': pdf_filename_generator(this_proposal.quote.estimate.id, 'P')})
-                this_proposal.delete()
-            return redirect('proposalHome')
-        else:
-            if request.POST.get("confirm"):
-                error_msg = "This record was created by another user, you are not authorized to delete this record."
-                parameters = {
-                    'this_proposal': this_proposal,
-                    'error_msg': error_msg
-                }
-                return render(request, "proposalDelete.html", parameters)
-            return redirect('proposalHome')
-    parameters = {'this_proposal': this_proposal
-                  }
-    return render(request, "proposalDelete.html", parameters)
 
 
 @login_required
@@ -681,201 +381,7 @@ def estimate_duplicate(request, estimate_id):
     }
     return render(request, "estimatorDuplicate.html", parameters)
 
-
-@login_required
-def quote_archive(request, quote_id):
-    this_quote = get_object_or_404(Quote, id=quote_id)
-    if request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by == request.user:
-        if request.POST.get("confirm"):
-            this_quote.archive = True
-            this_quote.save()
-        return redirect('quotationHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_quote.estimate.created_by != request.user:
-        if request.POST.get("confirm"):
-            error_msg = "This record was created by another user, you are not authorized to delete this record."
-            parameters = {
-                'this_quote': this_quote,
-                'error_msg': error_msg
-            }
-            return render(request, "quoteArchive.html", parameters)
-        return redirect('quotationHome')
-    parameters = {'this_quote': this_quote
-                  }
-    return render(request, "quoteArchive.html", parameters)
-
-
-@login_required
-def proposal_archive(request, proposal_id):
-    this_proposal = get_object_or_404(Proposal, id=proposal_id)
-    if request.method == "POST" and request.user.is_authenticated:
-        if this_proposal.quote.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            if request.POST.get("confirm"):
-                this_proposal.archive = True
-                this_proposal.save()
-            return redirect('proposalHome')
-        else:
-            if request.POST.get("confirm"):
-                error_msg = "This record was created by another user, you are not authorized to delete this record."
-                parameters = {
-                    'this_proposal': this_proposal,
-                    'error_msg': error_msg
-                }
-                return render(request, "proposalArchive.html", parameters)
-            return redirect('proposalHome')
-    parameters = {'this_proposal': this_proposal
-                  }
-    return render(request, "proposalArchive.html", parameters)
-
-
-@login_required
-def company_customer_create_popup(request):
-    form = CompanyCustomerForm(request.POST or None, initial={'created_by': request.user})
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "company_form.html", {"form": form})
-
-
-@login_required
-def company_customer_edit_popup(request, pk=None):
-    instance = get_object_or_404(ContactInfo, pk=pk)
-    form = CompanyCustomerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "company_form.html", {"form": form})
-
-
-@login_required
-def company_customer_archive(request, pk=None):
-    instance = get_object_or_404(ContactInfo, pk=pk)
-    form = CompanyCustomerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "company_form.html", {"form": form})
-
-
-@login_required
-def company_engineer_create_popup(request):
-    form = CompanyEngineerForm(request.POST or None, initial={'created_by': request.user})
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "company_form.html", {"form": form})
-
-
-@login_required
-def company_engineer_edit_popup(request, pk=None):
-    instance = get_object_or_404(ContactInfo, pk=pk)
-    form = CompanyEngineerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_company", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "company_form.html", {"form": form})
-
-
-@login_required
-@csrf_exempt
-def get_company_id(request):
-    if request.accepts():
-        company_name = request.GET['company_name']
-        company_id = ContactInfo.objects.get(name=company_name).id
-        data = {'company_id': company_id, }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-    return HttpResponse("/")
-
-
-@login_required
-def customer_person_create_popup(request):
-    form = CustomerForm(request.POST or None, initial={'created_by': request.user})
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
-@login_required
-def customer_person_edit_popup(request, pk=None):
-    instance = get_object_or_404(Person, pk=pk)
-    form = CustomerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
-@login_required
-def engineer_person_create_popup(request):
-    form = EngineerForm(request.POST or None, initial={'created_by': request.user})
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
-@login_required
-def engineer_person_edit_popup(request, pk=None):
-    instance = get_object_or_404(Person, pk=pk)
-    form = EngineerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_customer", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
-@login_required
-def manufacturer_person_create_popup(request):
-    form = ManufacturerForm(request.POST or None, initial={'created_by': request.user})
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
-@login_required
-def manufacturer_person_edit_popup(request, pk=None):
-    instance = get_object_or_404(Person, pk=pk)
-    form = ManufacturerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_manufacturer_contact_info", 1);</script>' % (instance.pk, instance))
-
-    return render(request, "customer_form.html", {"form": form})
-
-
+\
 @login_required
 @csrf_exempt
 def get_person_id(request):
@@ -920,19 +426,6 @@ def engineer_create_popup(request):
         instance = form.save()
         return HttpResponse(
             '<script>opener.closePopup(window, "%s", "%s", "#id_engineer", 0);</script>' % (instance.pk, instance))
-
-    return render(request, "engineer_form.html", {"form": form})
-
-
-@login_required
-def engineer_edit_popup(request, pk=None):
-    instance = get_object_or_404(Person, pk=pk)
-    form = EngineerForm(request.POST or None, instance=instance)
-    form.fields['created_by'].widget = forms.HiddenInput()
-    if form.is_valid():
-        instance = form.save()
-        return HttpResponse(
-            '<script>opener.closePopup(window, "%s", "%s", "#id_engineer", 1);</script>' % (instance.pk, instance))
 
     return render(request, "engineer_form.html", {"form": form})
 
@@ -1066,7 +559,7 @@ def estimate_details(request, estimate_id):
             if request.POST.get("save"):
 
                 existing_estimate_history = EstimateHistory.objects.filter(estimate=estimate)
-                if len(Quote.objects.filter(estimate=estimate)) > 0:
+                if len(Proposal.objects.filter(estimate=estimate)) > 0:
                     new_history = EstimateHistory(estimate=estimate, total=estimate_total_calculator(estimate.id),
                                                   version=len(existing_estimate_history))
                     new_history.save()
@@ -1138,7 +631,7 @@ def estimate_bid(request, estimate_id):
 
     estimate_file_name = pdf_filename_generator(estimate.id, 'E')
     existing_estimate_history = EstimateHistory.objects.filter(estimate=estimate)
-    if len(Quote.objects.filter(estimate=estimate)) > 0:
+    if len(Proposal.objects.filter(estimate=estimate)) > 0:
         estimate_file_name = pdf_filename_generator(estimate.id, 'E', len(existing_estimate_history))
 
     parameters = {'file_name': estimate_file_name,
@@ -1181,36 +674,36 @@ def estimate_bid(request, estimate_id):
     try:
         parameters['file_name'] = pdf_filename_generator(estimate.id, 'Q')
         parameters['quote'] = estimate.quote
-        Quote.create_quote_pdf(parameters)
+        Proposal.create_quote_pdf(parameters)
     except:
         pass
     try:
         parameters['file_name'] = pdf_filename_generator(estimate.id, 'P')
-        parameters['proposal'] = estimate.quote.proposal
+        parameters['proposal'] = estimate.proposal
         parameters['estimate'] = estimate
         Proposal.create_proposal_pdf(parameters)
     except:
         pass
 
     try:
-        Invoice.objects.filter(id=estimate.quote.proposal.order.invoice.id) \
-            .update(times_estimate_changed=estimate.quote.proposal.order.invoice.times_estimate_changed + 1)
-        total_count = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).count() + 1
-        invoice_file_name = 'Invoice-' + str(estimate.quote.proposal.order.project_number[3:]).zfill(3) + '-' + str(
-            estimate.quote.proposal.order.invoice.id).zfill(3) + '-' + str(total_count)
+        Invoice.objects.filter(id=estimate.proposal.order.invoice.id) \
+            .update(times_estimate_changed=estimate.proposal.order.invoice.times_estimate_changed + 1)
+        total_count = InvoiceHistory.objects.filter(invoice=estimate.proposal.order.invoice).count() + 1
+        invoice_file_name = 'Invoice-' + str(estimate.proposal.order.project_number[3:]).zfill(3) + '-' + str(
+            estimate.proposal.order.invoice.id).zfill(3) + '-' + str(total_count)
         parameters['file_name'] = invoice_file_name
         parameters['total_count'] = total_count
-        parameters['invoice'] = estimate.quote.proposal.order.invoice
-        change_orders = ChangeOrder.objects.filter(order=estimate.quote.proposal.order)
+        parameters['invoice'] = estimate.proposal.order.invoice
+        change_orders = ChangeOrder.objects.filter(order=estimate.proposal.order)
         parameters['change_orders'] = change_orders
-        parameters['total_amount_due'] = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
-        parameters['revision_date'] = InvoiceHistory.objects.filter(invoice=estimate.quote.proposal.order.invoice).order_by('-id')[0]
+        parameters['total_amount_due'] = calculate_total_amount_due(estimate.proposal.order.invoice)
+        parameters['revision_date'] = InvoiceHistory.objects.filter(invoice=estimate.proposal.order.invoice).order_by('-id')[0]
         Invoice.create_invoice_pdf(parameters)
 
-        total_invoiced = calculate_total_amount_due(estimate.quote.proposal.order.invoice)
-        total_paid = calculate_total_paid(estimate.quote.proposal.order.invoice)
-        balance_due = calculate_remaining_invoice_due(estimate.quote.proposal.order.invoice)
-        new_object = InvoiceHistory(invoice=estimate.quote.proposal.order.invoice, total_invoiced=total_invoiced, total_paid=total_paid,
+        total_invoiced = calculate_total_amount_due(estimate.proposal.order.invoice)
+        total_paid = calculate_total_paid(estimate.proposal.order.invoice)
+        balance_due = calculate_remaining_invoice_due(estimate.proposal.order.invoice)
+        new_object = InvoiceHistory(invoice=estimate.proposal.order.invoice, total_invoiced=total_invoiced, total_paid=total_paid,
                                     balance_due=balance_due, pdf_filename=invoice_file_name)
         new_object.save()
     except:

@@ -221,6 +221,6 @@ def get_s3_file_url(key, pdf_type, version=None):
     if pdf_type == 'submittal':
         return s3.get_bucket_object(key='media/pdfs/submittal/submittal-' + submittal_number_generator(key) + '.pdf')
     if pdf_type == 'report':
-        return s3.get_bucket_object(key='media/pdfs/report/FINAL SHEET ' + key.project.proposal.quote.estimate.project.name.upper() + '-' + str(key.project.project_number) + '.pdf')
+        return s3.get_bucket_object(key='media/pdfs/report/FINAL SHEET ' + key.project.proposal.estimate.project.name.upper() + '-' + str(key.project.project_number) + '.pdf')
     else:
         return s3.get_bucket_object(key='media/' + str(key))

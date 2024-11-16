@@ -91,14 +91,14 @@
                         <td style="padding: 5px 0 0 0;">{% if invoice.invoice_type == 1 %}${% estimate_total_minus_predemo_minus_dalt_calculator estimate.id as etc %}{{ etc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 2 %}${% estimate_predemo_calculator estimate.id as epc %}{{ epc|floatformat:2|intcomma }}{% elif invoice.invoice_type == 4 %}${% estimate_sub_total_dalt_calculator estimate.id as tdc %}{{ tdc|floatformat:2|intcomma }}{% else %}${% estimate_total_minus_predemo_minus_dalt_calculator estimate.id as etmpc %}{{ etmpc|floatformat:2|intcomma }}{% endif %} </td>
                     </tr>
                     {% if invoice.invoice_type == 1 %}
-                        {% order_predemo_calculator invoice.order.proposal.quote.estimate.id order as opc %}
+                        {% order_predemo_calculator invoice.order.proposal.estimate.id order as opc %}
                         {% if opc|floatformat:"0" != '0' %}
                             <tr style="border: 1px solid #000;">
                                 <td style="padding: 5px 0 0 0; text-transform: uppercase;">PREDEMO</td>
                                 <td style="padding: 5px 0 0 0;">${{ opc|floatformat:2|intcomma }} </td>
                             </tr>
                         {% endif %}
-                        {% order_dalt_calculator invoice.order.proposal.quote.estimate.id order as odc %}
+                        {% order_dalt_calculator invoice.order.proposal.estimate.id order as odc %}
                         {% if odc|floatformat:"0" != '0' %}
                             <tr style="border: 1px solid #000;">
                                 <td style="padding: 5px 0 0 0; text-transform: uppercase;">DALT</td>

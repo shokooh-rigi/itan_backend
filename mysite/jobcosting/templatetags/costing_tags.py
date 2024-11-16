@@ -37,7 +37,7 @@ def actual_total_work(order_id):
 
 @register.simple_tag
 def delta_total_work(order):
-    etw = estimate_total_work(order.proposal.quote.estimate.id)
+    etw = estimate_total_work(order.proposal.estimate.id)
     atw = actual_total_work(order.id)
     if atw > 0:
         delta = (atw - etw) / atw * 100
@@ -48,7 +48,7 @@ def delta_total_work(order):
 
 @register.simple_tag
 def delta_total_price(order):
-    etp = estimate_total_calculator(order.proposal.quote.estimate.id)
+    etp = estimate_total_calculator(order.proposal.estimate.id)
     atp = calculate_total_amount_due(order.invoice)
     if atp > 0:
         delta = (atp - etp) / atp * 100

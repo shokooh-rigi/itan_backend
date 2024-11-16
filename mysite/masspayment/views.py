@@ -67,7 +67,7 @@ def customer_list(request):
 @login_required
 def mass_payment(request, contact_id):
     customer = ContactInfo.objects.get(id=contact_id)
-    invoices = Invoice.objects.filter(order__proposal__quote__estimate__customer__company__id=contact_id)
+    invoices = Invoice.objects.filter(order__proposal__estimate__customer__company__id=contact_id)
     total_invoiced = 0
     total_paid = 0
     total_balance_due = 0
@@ -112,7 +112,7 @@ def mass_payment(request, contact_id):
                         'invoice': invoice,
                         'change_orders': change_orders,
                         'total_amount_due': total_amount_due,
-                        'estimate': invoice.order.proposal.quote.estimate,
+                        'estimate': invoice.order.proposal.estimate,
                         'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                         'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                         'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,

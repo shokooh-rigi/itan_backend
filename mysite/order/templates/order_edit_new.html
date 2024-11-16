@@ -11,7 +11,7 @@
       <div class="col-md-6">
         
         <h3 class="text-uppercase">Project: {{ order.project_number }}</h3>
-        <h4 class="text-uppercase">{{ order.proposal.quote.estimate.project.name }}</h4>
+        <h4 class="text-uppercase">{{ order.proposal.estimate.project.name }}</h4>
 
         <!-- Modal -->
         <div class="modal fade bd-example-modal-lg" id="modulesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -41,7 +41,7 @@
         </div>
 
         <h5 style="text-align: left;">
-            {{ modules_type }}{% if modules_type == "Estimate" %}({% estimate_number_generator order.proposal.quote.estimate.id %}){% endif %}:
+            {{ modules_type }}{% if modules_type == "Estimate" %}({% estimate_number_generator order.proposal.estimate.id %}){% endif %}:
         </h5>
 
         {% for eq in equipments %}

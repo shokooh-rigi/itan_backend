@@ -65,12 +65,12 @@
         <table class="table table-striped table-responsive">
             <thead>
                 <tr>
-                    <th data-sortable="proposal__quote__estimate__id"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__id' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__id' %}{% endif %}">Proposal ID</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">PO Date</a></th>
-                    <th data-sortable="proposal__quote__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__due_date' %}{% endif %}">Start Date</a></th>
-                    <th data-sortable="proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
-                    <th data-sortable="proposal__quote__estimate__engineer"><a href="{% if request.GET.ordering == 'proposal__quote__estimate__engineer' %}?{% url_replace request 'ordering' '-proposal__quote__estimate__engineer' %}{% else %}?{% url_replace request 'ordering' 'proposal__quote__estimate__engineer' %}{% endif %}">Engineer</a></th>
+                    <th data-sortable="proposal__estimate__id"><a href="{% if request.GET.ordering == 'proposal__estimate__id' %}?{% url_replace request 'ordering' '-proposal__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__id' %}{% endif %}">Proposal ID</a></th>
+                    <th data-sortable="proposal__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__due_date' %}{% endif %}">PO Date</a></th>
+                    <th data-sortable="proposal__estimate__due_date"><a href="{% if request.GET.ordering == 'proposal__estimate__due_date' %}?{% url_replace request 'ordering' '-proposal__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__due_date' %}{% endif %}">Start Date</a></th>
+                    <th data-sortable="proposal__estimate__customer"><a href="{% if request.GET.ordering == 'proposal__estimate__customer' %}?{% url_replace request 'ordering' '-proposal__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="proposal__estimate__project"><a href="{% if request.GET.ordering == 'proposal__estimate__project' %}?{% url_replace request 'ordering' '-proposal__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__project' %}{% endif %}">Project</a></th>
+                    <th data-sortable="proposal__estimate__engineer"><a href="{% if request.GET.ordering == 'proposal__estimate__engineer' %}?{% url_replace request 'ordering' '-proposal__estimate__engineer' %}{% else %}?{% url_replace request 'ordering' 'proposal__estimate__engineer' %}{% endif %}">Engineer</a></th>
                     <th>Project Number</th>
                     <th>Manual Adj.</th>
                     <th>Remark</th>
@@ -85,16 +85,16 @@
                 {% for order in orders %}
                     {% if order.archive == False %}
                         <tr>
-                            <td>{% estimate_number_generator order.proposal.quote.estimate.id %}</td>
-                            <td>{{ order.proposal.quote.estimate.due_date }}</td>
+                            <td>{% estimate_number_generator order.proposal.estimate.id %}</td>
+                            <td>{{ order.proposal.estimate.due_date }}</td>
                             <td>{{ order.estimated_date_of_project }}</td>
-                            <td>{{ order.proposal.quote.estimate.customer.company.name }}</td>
-                            <td>{{ order.proposal.quote.estimate.project }}</td>
-                            <td>{{ order.proposal.quote.estimate.engineer.company.name }}</td>
+                            <td>{{ order.proposal.estimate.customer.company.name }}</td>
+                            <td>{{ order.proposal.estimate.project }}</td>
+                            <td>{{ order.proposal.estimate.engineer.company.name }}</td>
                             <td>{{ order.project_number }}</td>
-                            <td>${{ order.proposal.quote.estimate.estimatedetails.adjustment|floatformat:2|intcomma }}</td>
-                            <td>{{ order.proposal.quote.estimate.estimatedetails.remark }}</td>
-                            <td>${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}</td>
+                            <td>${{ order.proposal.estimate.estimatedetails.adjustment|floatformat:2|intcomma }}</td>
+                            <td>{{ order.proposal.estimate.estimatedetails.remark }}</td>
+                            <td>${% order_total_calculator order.proposal.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}</td>
                             <td>
                                 {% if order.invoice %}
                                     {% past_30_days order as ptd %}
@@ -131,7 +131,7 @@
                             <td>
                                 <a {% if not order.invoice %}href="{% url 'invoiceAddUsingOrder' order_id=order.id %}"{% endif %} style="display: inline-block; margin-left: 5px;"><div class="icon linkicon{% if order.invoice %} disableicon{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if order.invoice %}Invoice Already Created!{% else %}Invoice Shortcut{% endif %}"></div></a>
                                 <a href="{% url 'orderEdit' order_id=order.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
-                                <a href="{% url 'estimateBid' estimate_id=order.proposal.quote.estimate.id %}" style="display: inline-block;"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View Estimate"></div></a>
+                                <a href="{% url 'estimateBid' estimate_id=order.proposal.estimate.id %}" style="display: inline-block;"><div class="icon viewicon" data-toggle="tooltip" data-placement="bottom" title="View Estimate"></div></a>
                                 {% if order.equipment_submittal %}<a href="{{ order.equipment_submittal.url }}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download Equipment Submittal"></div></a>{% endif %}
                                 <a href="{% url 'orderDelete' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'orderArchive' order_id=order.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
@@ -242,7 +242,7 @@ function updateURLParameter(url, param, paramVal)
 
 <script>
     $(document).ready(function() {
-        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        var sortables = ['proposal__estimate__id', 'proposal__estimate__customer', 'proposal__estimate__project', 'proposal__estimate__engineer', 'proposal__estimate__due_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

@@ -9,8 +9,8 @@
         <div class="form-group">
             {% csrf_token %}
             {{ form.order.as_hidden }}
-            {% order_predemo_calculator invoice.order.proposal.quote.estimate.id invoice.order as opc %}
-            {% order_dalt_calculator invoice.order.proposal.quote.estimate.id invoice.order as odc %}
+            {% order_predemo_calculator invoice.order.proposal.estimate.id invoice.order as opc %}
+            {% order_dalt_calculator invoice.order.proposal.estimate.id invoice.order as odc %}
             <div class="row form-line {% if opc|floatformat:"0" == '0' %}d-none{% endif %}">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="predemo_selected" class="control-label">Pre-Demo Select</label>

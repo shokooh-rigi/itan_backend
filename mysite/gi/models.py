@@ -27,7 +27,7 @@ class Invoice(models.Model):
         verbose_name_plural = 'Invoice List'
 
     def __str__(self):
-        return estimate_number_generator(self.order.proposal.quote.estimate.id) + "I"
+        return estimate_number_generator(self.order.proposal.estimate.id) + "I"
 
     @classmethod
     def create_invoice_pdf(cls, parameters):

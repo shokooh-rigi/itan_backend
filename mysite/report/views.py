@@ -34,12 +34,12 @@ def report_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Report.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+        object_list = Report.objects.filter(Q(order__proposal__estimate__project__name__icontains=search)
                                             | Q(order__project_number__icontains=search)) \
             .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Report.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+        object_list = Report.objects.filter(Q(order__proposal__estimate__project__name__icontains=search)
                                             | Q(order__project_number__icontains=search)) \
             .order_by(ordering)
 
@@ -96,11 +96,11 @@ def report_edit(request, report_id):
 @login_required
 def report_delete(request, report_id):
     this_report = get_object_or_404(Report, id=report_id)
-    if request.method == "POST" and request.user.is_authenticated and this_report.order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_report.order.proposal.estimate.created_by == request.user:
         if request.POST.get("confirm"):
             this_report.delete()
         return redirect('reportHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_report.order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_report.order.proposal.estimate.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {

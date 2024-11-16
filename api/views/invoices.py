@@ -18,7 +18,7 @@ class InvoicesAPIView(AuthenticationMixin, APIView):
         return get_object_or_404(self._get_all_invoices(request), pk=pk)
 
     def _get_all_invoices(self, request):
-        return Invoice.objects.filter(mark_as_paid=False, order__proposal__quote__estimate__bfm__customer=request.user.profile.customer)
+        return Invoice.objects.filter(mark_as_paid=False, order__proposal__estimate__bfm__customer=request.user.profile.customer)
 
     def _filter_invoices(self, request, invoices):
         """Filter the invoices"""

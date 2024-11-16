@@ -61,8 +61,8 @@
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Sheet ID</a></th>
                     <th data-sortable="project__project_number"><a href="{% if request.GET.ordering == 'project__project_number' %}?{% url_replace request 'ordering' '-project__project_number' %}{% else %}?{% url_replace request 'ordering' 'project__project_number' %}{% endif %}">Project</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__name' %}{% endif %}">Project Name</a></th>
-                    <th data-sortable="project__proposal__quote__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__quote__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__quote__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__quote__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
+                    <th data-sortable="project__proposal__estimate__project__name"><a href="{% if request.GET.ordering == 'project__proposal__estimate__project__name' %}?{% url_replace request 'ordering' '-project__proposal__estimate__project__name' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__estimate__project__name' %}{% endif %}">Project Name</a></th>
+                    <th data-sortable="project__proposal__estimate__project__address_line_1"><a href="{% if request.GET.ordering == 'project__proposal__estimate__project__address_line_1' %}?{% url_replace request 'ordering' '-project__proposal__estimate__project__address_line_1' %}{% else %}?{% url_replace request 'ordering' 'project__proposal__estimate__project__address_line_1' %}{% endif %}">Address</a></th>
                     <th data-sortable="sheet_date"><a href="{% if request.GET.ordering == 'sheet_date' %}?{% url_replace request 'ordering' '-sheet_date' %}{% else %}?{% url_replace request 'ordering' 'sheet_date' %}{% endif %}">Date</a></th>
                     <th>Equipments List</th>
                     <th>Actions</th>
@@ -73,8 +73,8 @@
                     <tr>
                         <td>{{ sheet.id }}</td>
                         <td>{{ sheet.project.project_number }}</td>
-                        <td>{{ sheet.project.proposal.quote.estimate.project.name }}</td>
-                        <td>{{ sheet.project.proposal.quote.estimate.project.address_line_1 }}{% if sheet.project.proposal.quote.estimate.project.address_line_1 and sheet.project.proposal.quote.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.quote.estimate.project.address_line_2 }}</td>
+                        <td>{{ sheet.project.proposal.estimate.project.name }}</td>
+                        <td>{{ sheet.project.proposal.estimate.project.address_line_1 }}{% if sheet.project.proposal.estimate.project.address_line_1 and sheet.project.proposal.estimate.project.address_line_2 %}, {% endif %}{{ sheet.project.proposal.estimate.project.address_line_2 }}</td>
                         <td>{{ sheet.sheet_date }}</td>
                         <td>
                             <a href="{% url 'sheetEquipmentAdd' sheet.id %}" style="display: inline-block;"><div class="icon addicon" data-toggle="tooltip" data-placement="bottom" title="Add Equipment"></div></a>
@@ -121,7 +121,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['id', 'project__project_number', 'sheet_date', 'project__proposal__quote__estimate__project__name', 'project__proposal__quote__estimate__project__address_line_1'];
+        var sortables = ['id', 'project__project_number', 'sheet_date', 'project__proposal__estimate__project__name', 'project__proposal__estimate__project__address_line_1'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

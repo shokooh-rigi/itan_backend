@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from pathlib import Path
 import environ
 import pymysql
 
@@ -18,56 +19,56 @@ pymysql.install_as_MySQLdb()
 
 env = environ.Env()
 
+# Read environment variables from a .env file if it exists
 environ.Env.read_env()
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+APPS_DIR = BASE_DIR / "mysite"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
+# General Settings
+SECRET_KEY = env("SECRET_KEY", default="i%06y2q&4l-!nv*8oolv470b!o)!xg*^9f7^d=q10#b$wd%c_e")
+ENV = env("ENV", default="local")
+DEBUG = ENV in ["local", "test"]
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'i%06y2q&4l-!nv*8oolv470b!o)!xg*^9f7^d=q10#b$wd%c_e'
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
+)
 
-ENV = 'local'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-if ENV == 'local':
-    DEBUG = True
-if ENV == 'production':
-    DEBUG = False
-if ENV == 'test':
-    DEBUG = True
-
-if ENV == 'local':
-    ALLOWED_HOSTS = ['127.0.0.1']
-if ENV == 'production':
-    ALLOWED_HOSTS = ['dashboard.tabtechinc.com']
-if ENV == 'test':
-    ALLOWED_HOSTS = ['airtab.us', 'www.airtab.us']
-
-# Application definition
-
-INSTALLED_APPS = [
+# Installed Apps
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
-    'custom_user.apps.CustomUserConfig',
+    'django.contrib.humanize',
+]
+THIRD_PARTY_APPS = [
+    "crispy_forms",
+    "crispy_bootstrap5",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "drf_spectacular",
     'djrichtextfield',
     'tinymce',
     'import_export',
-    'rest_framework',
     'django_recaptcha',
     'django_select2',
     'adminsortable2',
-    'storages',
-    # 'django_quill',
+    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
+    'custom_user.apps.CustomUserConfig',
+    'drf_yasg',
+]
+LOCAL_APPS = [
     'mysite.core',
     'mysite.estimator',
+    'mysite.proposal',
     'mysite.submittal',
     'mysite.mgmreport',
     'mysite.order',
@@ -81,6 +82,7 @@ INSTALLED_APPS = [
     'mysite.settlement',
     'mysite.techupload',
     'mysite.dbmanagement',
+    'mysite.equipments',
     'mysite.sheetcreator',
     'mysite.testsheetsetup',
     'mysite.testsheetvav',
@@ -106,12 +108,13 @@ INSTALLED_APPS = [
     'mysite.companyperformance',
     'mysite.revenueperformance',
     'mysite.dashboardtech',
-    'api',
-    'django.contrib.humanize',
     'mysite.estimator.templatetags',
     'mysite.pdf_analyzer',
+    'api',
 ]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
+# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -120,14 +123,61 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # From the first file
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # From the first file
 ]
 
-ROOT_URLCONF = 'mysite.urls'
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('MYSQL_DB'),
+        'USER': env('MYSQL_USER'),
+        'PASSWORD': env('MYSQL_PASSWORD'),
+        'HOST': env('MYSQL_HOST'),
+        'PORT': env('MYSQL_PORT'),
+    }
+}
 
+DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+if ENV == "test":
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env("POSTGRES_DB") + "_test",
+        'USER': env("POSTGRES_USER"),
+        'PASSWORD': env("POSTGRES_PASSWORD"),
+        'HOST': env("POSTGRES_HOST", default="localhost"),
+        'PORT': env("POSTGRES_PORT", default="5432"),
+    }
+
+# Authentication
+AUTH_USER_MODEL = "custom_user.User"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
+LOGIN_URL = "login"
+LOGOUT_URL = "logout"
+
+# Timezone and Localization
+TIME_ZONE = "UTC"
+LANGUAGE_CODE = "en-us"
+USE_I18N = True
+USE_TZ = True
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# Static and Media Files
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [APPS_DIR / "static"]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = APPS_DIR / "media"
+
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'mysite/templates')],
+        'DIRS': [APPS_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,77 +185,55 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'mysite.core.context_processors.settings.get_settings',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'mysite.wsgi.application'
+# Email Configuration
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.filebased.EmailBackend"
+)
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+EMAIL_TIMEOUT = 5
 
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+# Django Rest Framework (DRF) Configuration
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/1.10/topics/i18n/
+# CORS
+CORS_URLS_REGEX = r"^/api/.*$"
 
-LANGUAGE_CODE = 'en-us'
+# Logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {"level": "INFO", "handlers": ["console"]},
+}
 
-if ENV == 'local':
-    TIME_ZONE = 'Asia/Tehran'
-if ENV == 'production':
-    TIME_ZONE = 'America/New_York'
-if ENV == 'test':
-    TIME_ZONE = 'America/New_York'
-
-USE_I18N = True
-
-USE_L10N = False
-
-USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-MEDIA_URL_NOSLASH = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-if ENV == 'local':
-    UPLOAD_URL = '/uploads/'
-if ENV == 'production':
-    UPLOAD_URL = '/uploads/'
-if ENV == 'test':
-    UPLOAD_URL = '/uploads/'
-
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
-
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
-AUTH_USER_MODEL = 'custom_user.User'
-
-DATE_INPUT_FORMATS = ['%m/%d/%Y']
-DATE_FORMAT = "m/d/Y"
-
-if ENV == 'local':
-    WEB_URL = 'http://127.0.0.1:8000'
-if ENV == 'production':
-    WEB_URL = 'https://dashboard.tabtechinc.com'
-if ENV == 'test':
-    WEB_URL = 'https://airtab.us'
-
+# Third-Party Configurations
 DJRICHTEXTFIELD_CONFIG = {
     'js': ['//tinymce.cachefly.net/4.1/tinymce.min.js'],
     'init_template': 'djrichtextfield/init/tinymce.js',
@@ -213,8 +241,7 @@ DJRICHTEXTFIELD_CONFIG = {
         'menubar': True,
         'plugins': 'link image code',
         'toolbar': 'code | bold italic | link image | removeformat',
-        'width': 700
-    }
+    },
 }
 
 FILE_UPLOAD_PERMISSIONS = 0o644

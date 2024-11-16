@@ -35,7 +35,7 @@ def sheet_list(request):
         ordering = request.GET.get('ordering')
 
     object_list = Sheet.objects.filter(test_sheet_type_id=1, archive=False)
-    object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=project_name) |
+    object_list = object_list.filter(Q(project__proposal__estimate__project__name__icontains=project_name) |
                                      Q(project__project_number__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -360,7 +360,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf):
             'my_sheet': my_sheet,
             'data': data,
         },
-        'file_name': ('AIR MOVING {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': ('AIR MOVING {}-{}{}'.format(my_sheet.project.proposal.estimate.project.name,
                                                   my_sheet.project.project_number,
                                                   '' if is_report_pdf else ' TECH')).upper(),
         'license_owner': license_owner,

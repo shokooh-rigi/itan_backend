@@ -1,10 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from mysite.core.models import ContactInfo
 from mysite.estimator.models import *
 from mysite.estimator.views import estimate_total_calculator
 from mysite.order.models import Order
 from django.conf import settings
+
+from mysite.proposal.models import Proposal
 from ..scheduler.models import Schedule, Maintenance
 from django.db.models import Q
 
@@ -40,7 +43,7 @@ def performance_list(request):
         if is_num(search):
             object_list = ContactInfo.objects.order_by('customer_id').filter(Q(customer_id=search) | Q(name=search))
         for this_object in object_list:
-            if Quote.objects.filter(estimate__customer__company=this_object, created_on__range=(from_date_obj, to_date_obj)).count() == 0:
+            if Proposal.objects.filter(estimate__customer__company=this_object, created_on__range=(from_date_obj, to_date_obj)).count() == 0:
                 object_list = object_list.exclude(id=this_object.id)
     parameters = {
         'WEB_URL': settings.WEB_URL,

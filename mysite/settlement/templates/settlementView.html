@@ -76,7 +76,7 @@
                                     <tr>
                                         <td>{{ settled_schedule.schedule.schedule_start|date:'d-M' }}</td>
                                         <td>{{ settled_schedule.schedule.order.project_number }}</td>
-                                        <td colspan="3">{{ settled_schedule.schedule.order.proposal.quote.estimate.project.name }}</td>
+                                        <td colspan="3">{{ settled_schedule.schedule.order.proposal.estimate.project.name }}</td>
                                         <td>
                                             {% if settled_schedule.schedule.pre_demo %}PRE-DEMO{% else %}
                                                 Final{% endif %}</td>
@@ -109,7 +109,7 @@
                                     <tr>
                                         <td>{{ settled_maintenance.maintenance.schedule_start|date:'d-M' }}</td>
                                         <td>{{ settled_maintenance.maintenance.order.project_number }}</td>
-                                        <td colspan="3">{{ settled_maintenance.maintenance.order.proposal.quote.estimate.project.name }}</td>
+                                        <td colspan="3">{{ settled_maintenance.maintenance.order.proposal.estimate.project.name }}</td>
                                         <td>Extra</td>
                                         <td>C</td>
                                         <td>N.A.</td>

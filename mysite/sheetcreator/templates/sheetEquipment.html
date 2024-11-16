@@ -4,7 +4,7 @@
 
 
 {% block content %}
-    <h2>Define Air Moving Equipments for {{ sheet.project.project_number }} {{ sheet.project.proposal.quote.estimate.project.name }}</h2>
+    <h2>Define Air Moving Equipments for {{ sheet.project.project_number }} {{ sheet.project.proposal.estimate.project.name }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="service{{ estimate_service.id }}-form">
         <div class="form-group">
             {% csrf_token %}

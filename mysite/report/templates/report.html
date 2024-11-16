@@ -113,8 +113,8 @@
                 <tr>
                     <th data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Report ID</a></th>
                     <th data-sortable="order__project_number"><a href="{% if request.GET.ordering == 'order__project_number' %}?{% url_replace request 'ordering' '-order__project_number' %}{% else %}?{% url_replace request 'ordering' 'order__project_number' %}{% endif %}">Project Number</a></th>
-                    <th data-sortable="order__proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="order__proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
+                    <th data-sortable="order__proposal__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="order__proposal__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__estimate__project' %}{% endif %}">Project</a></th>
                     <th data-sortable="report_date"><a href="{% if request.GET.ordering == 'report_date' %}?{% url_replace request 'ordering' '-report_date' %}{% else %}?{% url_replace request 'ordering' 'report_date' %}{% endif %}">Report Date</a></th>
                     <th>Actions</th>
                 </tr>
@@ -124,8 +124,8 @@
                         <tr>
                             <td>{{ report.id }}</td>
                             <td>{{ report.order.project_number }}</td>
-                            <td>{{ report.order.proposal.quote.estimate.customer.company.name }}</td>
-                            <td>{{ report.order.proposal.quote.estimate.project }}</td>
+                            <td>{{ report.order.proposal.estimate.customer.company.name }}</td>
+                            <td>{{ report.order.proposal.estimate.project }}</td>
                             <td>{{ report.report_date|date:"DATE_FORMAT" }}</td>
                             <td>
                                 <a href="{% if report.report_file %}{{ report.report_file.url }}{% else %}#{% endif %}" style="display: inline-block; margin-right: 5px;"><div class="icon downloadicon{% if not report.report_file %} disableicon{% endif %}" data-toggle="tooltip" data-placement="bottom" {% if report.report_file %}title="Download Report"{% else %}title="No Report File Uploaded."{% endif %}></div>{% if report.report_file %}</a>{% endif %}
@@ -221,7 +221,7 @@
              $(".modal-header .modal-title").text('Email Invoice #' + invoiceId);
         });
 
-        var sortables = ['id', 'order__project_number', 'order__proposal__quote__estimate__customer', 'order__proposal__quote__estimate__project', 'report_date'];
+        var sortables = ['id', 'order__project_number', 'order__proposal__estimate__customer', 'order__proposal__estimate__project', 'report_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

@@ -62,7 +62,7 @@ def revenue_list(request):
 
         object_list = Order.objects.filter(created_on__range=(from_date_obj_1, to_date_obj_1))
         for obj in object_list:
-            order_total_1 = order_total_1 + order_total_calculator(obj.proposal.quote.estimate.id, obj)
+            order_total_1 = order_total_1 + order_total_calculator(obj.proposal.estimate.id, obj)
 
         object_list = Invoice.objects.filter(created_on__range=(from_date_obj_1, to_date_obj_1))
         for obj in object_list:
@@ -83,7 +83,7 @@ def revenue_list(request):
 
             object_list = Order.objects.filter(created_on__range=(from_date_obj_2, to_date_obj_2))
             for obj in object_list:
-                order_total_2 = order_total_2 + order_total_calculator(obj.proposal.quote.estimate.id, obj)
+                order_total_2 = order_total_2 + order_total_calculator(obj.proposal.estimate.id, obj)
 
             object_list = Invoice.objects.filter(created_on__range=(from_date_obj_2, to_date_obj_2))
             for obj in object_list:

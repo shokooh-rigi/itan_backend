@@ -35,19 +35,19 @@ def calculate_total_settled_including_expenses(settlement):
 
 @register.simple_tag
 def order_quote_price(schedule):
-    if schedule.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+    if schedule.order.proposal.estimate.estimatedetails.pre_demo > 0:
         if schedule.pre_demo:
-            total = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
+            total = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
             predemo_offset = float(schedule.order.predemo_offset)
             total = total - predemo_offset
         else:
-            pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.quote.estimate.id)
-            order_price = order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order)
+            pre_demo_price = estimate_predemo_calculator(schedule.order.proposal.estimate.id)
+            order_price = order_total_calculator(schedule.order.proposal.estimate.id, schedule.order)
             final_offset = float(schedule.order.final_offset)
             print(final_offset)
             total = order_price - pre_demo_price - final_offset
     else:
-        total = order_total_calculator(schedule.order.proposal.quote.estimate.id, schedule.order)
+        total = order_total_calculator(schedule.order.proposal.estimate.id, schedule.order)
         offset = float(schedule.order.final_offset)
         total = total - offset
     return total

@@ -5,7 +5,7 @@
 {% load humanize %}
 
 {% block content %}
-    <h2>Edit Order {{ this_order }} - {{ this_order.proposal.quote.estimate.project }} - ${% estimate_total_calculator this_order.proposal.quote.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</h2>
+    <h2>Edit Order {{ this_order }} - {{ this_order.proposal.estimate.project }} - ${% estimate_total_calculator this_order.proposal.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</h2>
     <form method = 'POST' action= '' enctype = "multipart/form-data" id="proposalAdd-form">
         <div class="form-group">
             {% csrf_token %}
@@ -43,7 +43,7 @@
                     {{ form.final_offset }}
                 </div>
             </div>
-            {% if this_order.proposal.quote.estimate.estimatedetails.pre_demo > 0 %}
+            {% if this_order.proposal.estimate.estimatedetails.pre_demo > 0 %}
             <div class="row form-line">
                 <div class="col-lg-12" style="padding-right: 36px;">
                     <label for="id_validity" class="control-label">Predemo Tech Offset</label>

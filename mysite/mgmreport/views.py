@@ -50,11 +50,11 @@ def bids_list(request, bid_type):
         if bid_type == 'quote':
             object_list = Quote.objects.all().order_by('estimate__customer')
         if bid_type == 'proposal':
-            object_list = Proposal.objects.all().order_by('quote__estimate__customer')
+            object_list = Proposal.objects.all().order_by('estimate__customer')
         if bid_type == 'order':
-            object_list = Order.objects.all().order_by('proposal__quote__estimate__customer')
+            object_list = Order.objects.all().order_by('proposal__estimate__customer')
         if bid_type == 'invoice':
-            object_list = Invoice.objects.all().order_by('order__proposal__quote__estimate__customer')
+            object_list = Invoice.objects.all().order_by('order__proposal__estimate__customer')
         from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
@@ -81,9 +81,9 @@ def bids_list(request, bid_type):
         if bid_type == 'proposal':
             rowfromestimate = row.quote.estimate
         if bid_type == 'order':
-            rowfromestimate = row.proposal.quote.estimate
+            rowfromestimate = row.proposal.estimate
         if bid_type == 'invoice':
-            rowfromestimate = row.order.proposal.quote.estimate
+            rowfromestimate = row.order.proposal.estimate
         if rowfromestimate.customer.id not in customer_rows:
             customer_rows[rowfromestimate.customer.id] = {
                 "customer_name": rowfromestimate.customer,
@@ -118,9 +118,9 @@ def detailed_orders_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
+    object_list = Order.objects.filter(Q(proposal__estimate__project__name__icontains=project_name) |
                                        Q(project_number__icontains=project_name) |
-                                       Q(proposal__quote__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
+                                       Q(proposal__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
     page = request.GET.get('page')

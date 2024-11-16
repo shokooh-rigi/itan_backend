@@ -39,9 +39,9 @@ def order_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=project_name) |
+    object_list = Order.objects.filter(Q(proposal__estimate__project__name__icontains=project_name) |
                                        Q(project_number__icontains=project_name) |
-                                       Q(proposal__quote__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
+                                       Q(proposal__estimate__customer__company__name__icontains=project_name)).order_by(ordering)
 
     if request.GET.get('type') == 'all' or request.GET.get('type') is None:
         object_list = object_list
@@ -126,11 +126,11 @@ def order_edit(request, order_id):
 @login_required
 def order_delete(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
-    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.estimate.created_by == request.user:
         if request.POST.get("confirm"):
             this_order.delete()
         return redirect('orderHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.estimate.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {
@@ -147,12 +147,12 @@ def order_delete(request, order_id):
 @login_required
 def order_archive(request, order_id):
     this_order = get_object_or_404(Order, id=order_id)
-    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by == request.user:
+    if request.method == "POST" and request.user.is_authenticated and this_order.proposal.estimate.created_by == request.user:
         if request.POST.get("confirm"):
             this_order.archive = True
             this_order.save()
         return redirect('orderHome')
-    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.quote.estimate.created_by != request.user:
+    elif request.method == "POST" and request.user.is_authenticated and this_order.proposal.estimate.created_by != request.user:
         if request.POST.get("confirm"):
             error_msg = "This record was created by another user, you are not authorized to delete this record."
             parameters = {
@@ -203,7 +203,7 @@ def change_order(request, order_id):
                     'change_order': new_change_order,
                     'change_order_services': new_change_order.changeorderservice_set.all(),
                     'order': this_order,
-                    'estimate': this_order.proposal.quote.estimate,
+                    'estimate': this_order.proposal.estimate,
                     'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                     'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                     'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -263,7 +263,7 @@ def tech_label(request, order_id):
                 if request.POST.get("save"):
                     return redirect('orderEdit', order_id=order_id)
                 if request.POST.get("savep"):
-                    if this_tech_label.order.proposal.quote.estimate.estimatedetails.pre_demo > 0:
+                    if this_tech_label.order.proposal.estimate.estimatedetails.pre_demo > 0:
                         has_pre_demo = 1
                     else:
                         has_pre_demo = 0
@@ -699,7 +699,7 @@ def change_order_delete(request, order_id, change_order_id):
                 'invoice': this_order.invoice,
                 'change_orders': change_orders,
                 'total_amount_due': total_amount_due,
-                'estimate': this_order.invoice.order.proposal.quote.estimate,
+                'estimate': this_order.invoice.order.proposal.estimate,
                 'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                 'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                 'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -767,7 +767,7 @@ def approve_change_order(request, change_order_id, action):
             'invoice': this_order.invoice,
             'change_orders': change_orders,
             'total_amount_due': total_amount_due,
-            'estimate': this_order.invoice.order.proposal.quote.estimate,
+            'estimate': this_order.invoice.order.proposal.estimate,
             'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
             'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
             'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -872,7 +872,7 @@ def order_update(request, order_id):
 
     # ـequipments = []
     # if not dsq.exists() and not sq.exists():
-    #     estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
+    #     estimate = this_order.proposal.estimate.estimateequipment_set.all()
     #     if estimate.exists():
     #         modules_type = "Estimate"
     #         for eq in estimate:
@@ -1090,7 +1090,7 @@ def order_update(request, order_id):
 
     ـequipments = []
     if not dsq.exists() and not sq.exists():
-        estimate = this_order.proposal.quote.estimate.estimateequipment_set.all()
+        estimate = this_order.proposal.estimate.estimateequipment_set.all()
         if estimate.exists():
             modules_type = "Estimate"
             for eq in estimate:

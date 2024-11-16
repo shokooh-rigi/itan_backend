@@ -6,7 +6,7 @@
 {% block content %}
     <h2>Enter Flow Design Data for
         #{{ flow_equipment.sheet.project.project_number }}
-        {{ flow_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+        {{ flow_equipment.sheet.project.proposal.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>

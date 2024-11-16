@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from enum import Enum
 
 from creditcards.models import CardExpiryField
 from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
@@ -10,13 +9,17 @@ from tinymce.models import HTMLField
 
 from custom_user.models import User
 
-class UserTypeChoices(Enum):
+class UserTypeChoices(models.IntegerChoices):
     SUPER_ADMIN = 0, 'Super Admin'
     ESTIMATOR = 1, 'Estimator'
     ACCOUNTING = 2, 'Accounting'
     SUPER_TECH = 3, 'Super Tech'
     TECH = 4, 'Tech'
     CUSTOMER = 5, 'Customer'
+
+class GenderChoices(models.IntegerChoices):
+    MALE = 0, 'Male'
+    FEMALE = 1, 'Female'
 
 
 class CompanyType(models.Model):
@@ -87,7 +90,8 @@ class Person(models.Model):
 
     name = models.CharField(max_length=255, blank=False)
     title = models.CharField(max_length=255, blank=True)
-    gender = models.PositiveSmallIntegerField(choices=gender_choices, default=1)
+    gender = models.PositiveSmallIntegerField(choices=GenderChoices.choices,
+        default=GenderChoices.MALE)
     tel = models.CharField(max_length=15, blank=True)
     fax = models.CharField(max_length=15, blank=True)
     mail = models.EmailField(max_length=55, blank=True)
@@ -135,15 +139,7 @@ class Profile(models.Model):
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     email_confirmed = models.BooleanField(default=False)
-    USER_TYPE_CHOICES = (
-        (1, 'customer'),
-        (2, 'super admin'),
-        (3, 'estimator'),
-        (4, 'accounting'),
-        (5, 'tech'),
-        (6, 'super tech'),
-    )
-    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
+    user_type = models.PositiveSmallIntegerField(choices=UserTypeChoices.choices, default=UserTypeChoices.CUSTOMER)
     STATUS_CHOICES = (
         (1, 'Employee'),
         (2, 'Contractor'),

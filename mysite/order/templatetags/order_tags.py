@@ -73,13 +73,13 @@ def order_tech_final_price_calculator(estimate_id, order):
 @register.simple_tag
 def calculate_total_amount_due(invoice):
     if invoice.invoice_type == 1:
-        sub_total = order_total_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+        sub_total = order_total_calculator(invoice.order.proposal.estimate.id, invoice.order)
     elif invoice.invoice_type == 2:
-        sub_total = order_predemo_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+        sub_total = order_predemo_calculator(invoice.order.proposal.estimate.id, invoice.order)
     elif invoice.invoice_type == 4:
-        sub_total = order_dalt_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+        sub_total = order_dalt_calculator(invoice.order.proposal.estimate.id, invoice.order)
     else:
-        sub_total = order_final_calculator(invoice.order.proposal.quote.estimate.id, invoice.order)
+        sub_total = order_final_calculator(invoice.order.proposal.estimate.id, invoice.order)
     completed_percentage = invoice.percent_of_performance_completed
     total = (sub_total * completed_percentage / 100)
     return total

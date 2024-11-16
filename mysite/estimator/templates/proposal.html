@@ -110,11 +110,11 @@
         <table class="table table-striped" id="printThis">
             <thead>
                 <tr>
-                    <th data-sortable="quote__estimate__id"><a href="{% if request.GET.ordering == 'quote__estimate__id' %}?{% url_replace request 'ordering' '-quote__estimate__id' %}{% else %}?{% url_replace request 'ordering' 'quote__estimate__id' %}{% endif %}">Proposal ID</a></th>
-                    <th data-sortable="quote__estimate__due_date"><a href="{% if request.GET.ordering == 'quote__estimate__due_date' %}?{% url_replace request 'ordering' '-quote__estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'quote__estimate__due_date' %}{% endif %}">Due Date</a></th>
-                    <th data-sortable="quote__estimate__customer"><a href="{% if request.GET.ordering == 'quote__estimate__customer' %}?{% url_replace request 'ordering' '-quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'quote__estimate__customer' %}{% endif %}">Customer</a></th>
-                    <th data-sortable="quote__estimate__project"><a href="{% if request.GET.ordering == 'quote__estimate__project' %}?{% url_replace request 'ordering' '-quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'quote__estimate__project' %}{% endif %}">Project</a></th>
-                    <th data-sortable="quote__estimate__engineer"><a href="{% if request.GET.ordering == 'quote__estimate__engineer' %}?{% url_replace request 'ordering' '-quote__estimate__engineer' %}{% else %}?{% url_replace request 'ordering' 'quote__estimate__engineer' %}{% endif %}">Engineer</a></th>
+                    <th data-sortable="estimate__id"><a href="{% if request.GET.ordering == 'estimate__id' %}?{% url_replace request 'ordering' '-estimate__id' %}{% else %}?{% url_replace request 'ordering' 'estimate__id' %}{% endif %}">Proposal ID</a></th>
+                    <th data-sortable="estimate__due_date"><a href="{% if request.GET.ordering == 'estimate__due_date' %}?{% url_replace request 'ordering' '-estimate__due_date' %}{% else %}?{% url_replace request 'ordering' 'estimate__due_date' %}{% endif %}">Due Date</a></th>
+                    <th data-sortable="estimate__customer"><a href="{% if request.GET.ordering == 'estimate__customer' %}?{% url_replace request 'ordering' '-estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th data-sortable="estimate__project"><a href="{% if request.GET.ordering == 'estimate__project' %}?{% url_replace request 'ordering' '-estimate__project' %}{% else %}?{% url_replace request 'ordering' 'estimate__project' %}{% endif %}">Project</a></th>
+                    <th data-sortable="estimate__engineer"><a href="{% if request.GET.ordering == 'estimate__engineer' %}?{% url_replace request 'ordering' '-estimate__engineer' %}{% else %}?{% url_replace request 'ordering' 'estimate__engineer' %}{% endif %}">Engineer</a></th>
                     <th>Total</th>
                     <th>Actions</th>
                 </tr>
@@ -123,18 +123,18 @@
                 {% for proposal in proposals %}
                     {% if proposal.archive == False %}
                         <tr>
-                            <td>{% estimate_number_generator proposal.quote.estimate.id %}</td>
-                            <td>{{ proposal.quote.estimate.due_date }}</td>
-                            <td>{{ proposal.quote.estimate.customer.company.name }}</td>
-                            <td>{{ proposal.quote.estimate.project }}</td>
-                            <td>{{ proposal.quote.estimate.engineer.company.name }}</td>
-                            <td>${% estimate_total_calculator proposal.quote.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
+                            <td>{% estimate_number_generator proposal.estimate.id %}</td>
+                            <td>{{ proposal.estimate.due_date }}</td>
+                            <td>{{ proposal.estimate.customer.company.name }}</td>
+                            <td>{{ proposal.estimate.project }}</td>
+                            <td>{{ proposal.estimate.engineer.company.name }}</td>
+                            <td>${% estimate_total_calculator proposal.estimate.id as etc %}{{ etc|floatformat:2|intcomma }}</td>
                             <td>
                                 <a {% if not proposal.order %}href="{% url 'orderAddUsingProposal' proposal_id=proposal.id %}"{% endif %} style="display: inline-block; margin-left: 5px;"><div class="icon linkicon{% if proposal.order %} disableicon{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if proposal.order %}Already Created!{% else %}Order Shortcut{% endif %}"></div></a>
                                 <a href="{% url 'proposalDelete' proposal_id=proposal.id %}" style="display: inline-block;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'proposalArchive' proposal_id=proposal.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
-                                <a href="{% get_s3_file_url proposal.quote.estimate.id 'proposal' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
-                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% estimate_number_generator proposal.quote.estimate.id %}" data-id="{{ proposal.quote.estimate.id }}" data-project="{{ proposal.quote.estimate.project.name }}" data-to="{{ proposal.quote.estimate.customer.mail }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                                <a href="{% get_s3_file_url proposal.estimate.id 'proposal' %}" style="display: inline-block; margin-left: 5px;"><div class="icon downloadicon" data-toggle="tooltip" data-placement="bottom" title="Download"></div></a>
+                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-name="{% estimate_number_generator proposal.estimate.id %}" data-id="{{ proposal.estimate.id }}" data-project="{{ proposal.estimate.project.name }}" data-to="{{ proposal.estimate.customer.mail }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -269,7 +269,7 @@ function updateURLParameter(url, param, paramVal)
             window.history.replaceState('', '', updateURLParameter(window.location.href, "toDate", ""));
             location.reload();
         });
-        var sortables = ['quote__estimate__id', 'quote__estimate__customer', 'quote__estimate__project', 'quote__estimate__engineer', 'quote__estimate__due_date'];
+        var sortables = ['estimate__id', 'estimate__customer', 'estimate__project', 'estimate__engineer', 'estimate__due_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

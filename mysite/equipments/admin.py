@@ -1,4 +1,4 @@
-from .models import TestSheet, Equipment, DataSheet
+from .models import TestSheet, Equipment
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -17,11 +17,3 @@ class EquipmentAdmin(admin.ModelAdmin):
     search_fields = ('id',)
 
 admin.site.register(Equipment, EquipmentAdmin)
-
-
-class DataSheetAdmin(admin.ModelAdmin):
-    model = DataSheet
-    list_display = ('id', 'name', 'project', 'equipment_type', 'manufacturer', 'model_number',)
-    search_fields = ('id',  'name',)
-
-admin.site.register(DataSheet, DataSheetAdmin)

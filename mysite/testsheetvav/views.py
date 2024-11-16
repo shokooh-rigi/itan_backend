@@ -39,7 +39,7 @@ def vav_sheet_list(request):
         ordering = request.GET.get('ordering')
 
     object_list = DataSheet.objects.filter(test_sheet_type__name__iexact='vav')
-    object_list = object_list.filter(Q(project__proposal__quote__estimate__project__name__icontains=search) |
+    object_list = object_list.filter(Q(project__proposal__estimate__project__name__icontains=search) |
                                      Q(project__project_number__icontains=search)).order_by(ordering)
 
     paginator = Paginator(object_list, pagination)
@@ -370,7 +370,7 @@ def get_pdf_parameters(sheet_id, is_report_pdf: bool):
             'data': data,
             'last_loop': last_loop,
         },
-        'file_name': 'V.A.V. BOX SCHEDULE {}-{}{}'.format(my_sheet.project.proposal.quote.estimate.project.name,
+        'file_name': 'V.A.V. BOX SCHEDULE {}-{}{}'.format(my_sheet.project.proposal.estimate.project.name,
                                                           my_sheet.project.project_number,
                                                           '' if is_report_pdf else ' TECH').upper(),
         'license_owner': license_owner,

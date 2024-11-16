@@ -35,9 +35,9 @@ def report_sheet_show(
         'report_date': request.GET.get('report_date'),
         'revised_date': request.GET.get('revised_date'),
 
-        'project': order.proposal.quote.estimate.project.name.upper(),
+        'project': order.proposal.estimate.project.name.upper(),
         'project_no': order.project_number.upper(),
-        'client': order.proposal.quote.estimate.customer.company.name.upper(),
+        'client': order.proposal.estimate.customer.company.name.upper(),
 
         'header': {
             'text': LicenseInfo.objects.get(key='PDFHeaderText').value
@@ -51,11 +51,11 @@ def report_sheet_show(
             'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
         },
         'cover': {
-            'project': order.proposal.quote.estimate.project.name.upper(),
+            'project': order.proposal.estimate.project.name.upper(),
             'location': "",
-            'contractor': order.proposal.quote.estimate.customer.company.name.upper(),
+            'contractor': order.proposal.estimate.customer.company.name.upper(),
             'architect': order.architect_name.company.name.upper() if order.architect_name else "N.S.",
-            'engineer': order.proposal.quote.estimate.engineer.company.name.upper() if order.proposal.quote.estimate.engineer else "N.S.",
+            'engineer': order.proposal.estimate.engineer.company.name.upper() if order.proposal.estimate.engineer else "N.S.",
             'project_no': order.project_number.upper(),
         },
         'toc': [],
@@ -66,48 +66,48 @@ def report_sheet_show(
                 'company': LicenseInfo.objects.get(key='CompanyName').value,
                 'address': "",
                 'address2': "",
-                'eng_firm': order.proposal.quote.estimate.engineer.company.name.upper(),
+                'eng_firm': order.proposal.estimate.engineer.company.name.upper(),
                 'eng_firm_address': "",
                 'eng_firm_address2': "",
             }
         },
         'pages': [],
     }
-    if order.proposal.quote.estimate.project.address_line_1:
-        context['cover']['location'] += order.proposal.quote.estimate.project.address_line_1.upper()
-    if order.proposal.quote.estimate.project.address_line_2:
-        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.address_line_2.upper()
-    if order.proposal.quote.estimate.project.city:
-        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.city.upper()
-    if order.proposal.quote.estimate.project.state:
-        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.state.upper()
-    if order.proposal.quote.estimate.project.zip:
-        context['cover']['location'] += ", " + order.proposal.quote.estimate.project.zip.upper()
+    if order.proposal.estimate.project.address_line_1:
+        context['cover']['location'] += order.proposal.estimate.project.address_line_1.upper()
+    if order.proposal.estimate.project.address_line_2:
+        context['cover']['location'] += ", " + order.proposal.estimate.project.address_line_2.upper()
+    if order.proposal.estimate.project.city:
+        context['cover']['location'] += ", " + order.proposal.estimate.project.city.upper()
+    if order.proposal.estimate.project.state:
+        context['cover']['location'] += ", " + order.proposal.estimate.project.state.upper()
+    if order.proposal.estimate.project.zip:
+        context['cover']['location'] += ", " + order.proposal.estimate.project.zip.upper()
     if context['cover']['engineer'] == "UNKNOWN":
         context['cover']['engineer'] = "N.S."
     # guarenty address
-    if order.proposal.quote.estimate.project.address_line_1:
-        context['general_info']['guaranty']['address'] = order.proposal.quote.estimate.project.address_line_1
-    if order.proposal.quote.estimate.project.address_line_2:
-        context['general_info']['guaranty']['address'] += ", " + order.proposal.quote.estimate.project.address_line_2
-    if order.proposal.quote.estimate.project.city:
-        context['general_info']['guaranty']['address2'] = order.proposal.quote.estimate.project.city
-    if order.proposal.quote.estimate.project.state:
-        context['general_info']['guaranty']['address2'] += ", " + order.proposal.quote.estimate.project.state
-    if order.proposal.quote.estimate.project.zip:
-        context['general_info']['guaranty']['address2'] += " " + order.proposal.quote.estimate.project.zip
+    if order.proposal.estimate.project.address_line_1:
+        context['general_info']['guaranty']['address'] = order.proposal.estimate.project.address_line_1
+    if order.proposal.estimate.project.address_line_2:
+        context['general_info']['guaranty']['address'] += ", " + order.proposal.estimate.project.address_line_2
+    if order.proposal.estimate.project.city:
+        context['general_info']['guaranty']['address2'] = order.proposal.estimate.project.city
+    if order.proposal.estimate.project.state:
+        context['general_info']['guaranty']['address2'] += ", " + order.proposal.estimate.project.state
+    if order.proposal.estimate.project.zip:
+        context['general_info']['guaranty']['address2'] += " " + order.proposal.estimate.project.zip
     if context['general_info']['guaranty']['eng_firm'] == "UNKNOWN":
         context['general_info']['guaranty']['eng_firm'] = "N.S."
-    if order.proposal.quote.estimate.engineer.company.address_line_1:
-        context['general_info']['guaranty']['eng_firm_address'] = order.proposal.quote.estimate.engineer.company.address_line_1
-    if order.proposal.quote.estimate.engineer.company.address_line_2:
-        context['general_info']['guaranty']['eng_firm_address'] += ", " + order.proposal.quote.estimate.engineer.company.address_line_2
-    if order.proposal.quote.estimate.engineer.company.city:
-        context['general_info']['guaranty']['eng_firm_address2'] = order.proposal.quote.estimate.engineer.company.city
-    if order.proposal.quote.estimate.engineer.company.state:
-        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.quote.estimate.engineer.company.state
-    if order.proposal.quote.estimate.engineer.company.zip:
-        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.quote.estimate.engineer.company.zip
+    if order.proposal.estimate.engineer.company.address_line_1:
+        context['general_info']['guaranty']['eng_firm_address'] = order.proposal.estimate.engineer.company.address_line_1
+    if order.proposal.estimate.engineer.company.address_line_2:
+        context['general_info']['guaranty']['eng_firm_address'] += ", " + order.proposal.estimate.engineer.company.address_line_2
+    if order.proposal.estimate.engineer.company.city:
+        context['general_info']['guaranty']['eng_firm_address2'] = order.proposal.estimate.engineer.company.city
+    if order.proposal.estimate.engineer.company.state:
+        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.estimate.engineer.company.state
+    if order.proposal.estimate.engineer.company.zip:
+        context['general_info']['guaranty']['eng_firm_address2'] += ", " + order.proposal.estimate.engineer.company.zip
     if not context['general_info']['guaranty']['eng_firm_address']:
         context['general_info']['guaranty']['eng_firm_address'] = "N.S."
     if not context['general_info']['guaranty']['eng_firm_address2']:

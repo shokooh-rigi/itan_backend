@@ -39,7 +39,7 @@ def order_update(request, order_id):
     equipments = []
     # If there are no datasheets for this order (previously not created), we need to show the equipment list from the estimate
     if not order_data_sheets.exists():
-        estimate_equipments = this_order.proposal.quote.estimate.estimateequipment_set.all()
+        estimate_equipments = this_order.proposal.estimate.estimateequipment_set.all()
         if estimate_equipments.exists():
             modules_type = "Estimate"
             for equipment in estimate_equipments:

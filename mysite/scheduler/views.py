@@ -155,16 +155,16 @@ def schedule_orders_list(request, type):
         for schedule in scheduled:
 
             full_address = ''
-            if schedule.order.proposal.quote.estimate.project.address_line_1:
-                full_address += schedule.order.proposal.quote.estimate.project.address_line_1
-            if schedule.order.proposal.quote.estimate.project.address_line_2:
-                full_address += ' ' + schedule.order.proposal.quote.estimate.project.address_line_2
-            if schedule.order.proposal.quote.estimate.project.city:
-                full_address += ' ' + schedule.order.proposal.quote.estimate.project.city
-            if schedule.order.proposal.quote.estimate.project.state:
-                full_address += ' ' + schedule.order.proposal.quote.estimate.project.state
-            if schedule.order.proposal.quote.estimate.project.zip:
-                full_address += ' ' + schedule.order.proposal.quote.estimate.project.zip
+            if schedule.order.proposal.estimate.project.address_line_1:
+                full_address += schedule.order.proposal.estimate.project.address_line_1
+            if schedule.order.proposal.estimate.project.address_line_2:
+                full_address += ' ' + schedule.order.proposal.estimate.project.address_line_2
+            if schedule.order.proposal.estimate.project.city:
+                full_address += ' ' + schedule.order.proposal.estimate.project.city
+            if schedule.order.proposal.estimate.project.state:
+                full_address += ' ' + schedule.order.proposal.estimate.project.state
+            if schedule.order.proposal.estimate.project.zip:
+                full_address += ' ' + schedule.order.proposal.estimate.project.zip
 
             # if schedule.assigned_to_employee:
             #     calendar_id = schedule.assigned_to_employee.id
@@ -213,23 +213,23 @@ def schedule_orders_list(request, type):
                 'assigned_to_employees_names': assigned_to_employees_names,
                 'assigned_to_contractors_names': assigned_to_contractors_names,
                 'project_number': schedule.order.project_number,
-                'project_name': str(schedule.order.proposal.quote.estimate.project),
-                'customer': str(schedule.order.proposal.quote.estimate.customer.company.name),
-                'engineer': str(schedule.order.proposal.quote.estimate.engineer.company.name),
-                'predemo': schedule.order.proposal.quote.estimate.estimatedetails.pre_demo,
+                'project_name': str(schedule.order.proposal.estimate.project),
+                'customer': str(schedule.order.proposal.estimate.customer.company.name),
+                'engineer': str(schedule.order.proposal.estimate.engineer.company.name),
+                'predemo': schedule.order.proposal.estimate.estimatedetails.pre_demo,
                 'is_predemo': schedule.pre_demo,
                 'poc_name': poc_name,
                 'poc_cell_phone': poc_cell_phone,
                 'poc_office_phone': poc_office_phone,
                 'control_system': str(schedule.order.control_system),
                 'special_instruction': tech_notes,
-                'title': str(schedule.order.proposal.quote.estimate.project),
+                'title': str(schedule.order.proposal.estimate.project),
                 'assigned': any_assigned,
                 'location': full_address,
                 'category': 'time',
                 'start': schedule.schedule_start,
                 'end': schedule.schedule_end,
-                'estimate': estimate_total_work(schedule.order.proposal.quote.estimate.id),
+                'estimate': estimate_total_work(schedule.order.proposal.estimate.id),
                 'goingDuration': str(30),
                 'comingDuration': str(30),
                 'partial': schedule.order.partial_job_done,
@@ -262,7 +262,7 @@ def schedule_orders_list(request, type):
             maintenance_order_id = ''
             maintenance_title = 'Maintenace'
             if maintenance.order:
-                maintenance_title = str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
+                maintenance_title = str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.estimate.project))
                 maintenance_order_id = maintenance.order.id
             color = '#fff'
             if maintenance.maintenance_type == 1:
@@ -275,7 +275,7 @@ def schedule_orders_list(request, type):
                 maintenance_title = 'Lost Time'
                 if maintenance.order:
                     maintenance_title = str(maintenance.order.project_number + '<br />' + str(
-                        maintenance.order.proposal.quote.estimate.project))
+                        maintenance.order.proposal.estimate.project))
                 if details_completed:
                     bg_color = '#c82333'
 
@@ -322,28 +322,28 @@ def schedule_orders_list(request, type):
             else:
                 color = '#3699ff'
             full_address = ''
-            if order.proposal.quote.estimate.project.address_line_1:
-                full_address += order.proposal.quote.estimate.project.address_line_1
-            if order.proposal.quote.estimate.project.address_line_2:
-                full_address += ' ' + order.proposal.quote.estimate.project.address_line_2
-            if order.proposal.quote.estimate.project.city:
-                full_address += ' ' + order.proposal.quote.estimate.project.city
-            if order.proposal.quote.estimate.project.state:
-                full_address += ' ' + order.proposal.quote.estimate.project.state
-            if order.proposal.quote.estimate.project.zip:
-                full_address += ' ' + order.proposal.quote.estimate.project.zip
+            if order.proposal.estimate.project.address_line_1:
+                full_address += order.proposal.estimate.project.address_line_1
+            if order.proposal.estimate.project.address_line_2:
+                full_address += ' ' + order.proposal.estimate.project.address_line_2
+            if order.proposal.estimate.project.city:
+                full_address += ' ' + order.proposal.estimate.project.city
+            if order.proposal.estimate.project.state:
+                full_address += ' ' + order.proposal.estimate.project.state
+            if order.proposal.estimate.project.zip:
+                full_address += ' ' + order.proposal.estimate.project.zip
             response_data.append({
                 'id': order.id,
                 'number': order.project_number,
                 'title': order.project_number,
-                'body': order.project_number + ': ' + str(order.proposal.quote.estimate.project),
+                'body': order.project_number + ': ' + str(order.proposal.estimate.project),
                 'location': full_address,
                 'category': 'time',
-                'estimated_work': estimate_total_work(order.proposal.quote.estimate.id),
+                'estimated_work': estimate_total_work(order.proposal.estimate.id),
                 'color': color,
                 'predemo': False
             })
-            if order.proposal.quote.estimate.estimatedetails.pre_demo != 0:
+            if order.proposal.estimate.estimatedetails.pre_demo != 0:
                 if ProjectProcessPreDemo.objects.filter(order=order).exists():
                     if not order.projectprocesspredemo.tech_scheduled:
                         color = '#3699ff'
@@ -355,10 +355,10 @@ def schedule_orders_list(request, type):
                     'id': order.id,
                     'number': order.project_number,
                     'title': order.project_number,
-                    'body': order.project_number + ': ' + str(order.proposal.quote.estimate.project) + ' - PREDEMO',
+                    'body': order.project_number + ': ' + str(order.proposal.estimate.project) + ' - PREDEMO',
                     'location': full_address,
                     'category': 'time',
-                    'estimated_work': estimate_total_work(order.proposal.quote.estimate.id),
+                    'estimated_work': estimate_total_work(order.proposal.estimate.id),
                     'color': color,
                     'predemo': True
                 })

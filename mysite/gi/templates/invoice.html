@@ -122,8 +122,8 @@
                     <th style="padding: .75rem .5rem;" data-sortable="id"><a href="{% if request.GET.ordering == 'id' %}?{% url_replace request 'ordering' '-id' %}{% else %}?{% url_replace request 'ordering' 'id' %}{% endif %}">Invoice Number</a></th>
                     <th style="padding: .75rem .5rem;" data-sortable="order__project_number"><a href="{% if request.GET.ordering == 'order__project_number' %}?{% url_replace request 'ordering' '-order__project_number' %}{% else %}?{% url_replace request 'ordering' 'order__project_number' %}{% endif %}">Project Number</a></th>
                     <th style="padding: .75rem .5rem;" data-sortable="order__date_po_received"><a href="{% if request.GET.ordering == 'order__date_po_received' %}?{% url_replace request 'ordering' '-order__date_po_received' %}{% else %}?{% url_replace request 'ordering' 'order__date_po_received' %}{% endif %}">PO Date</a></th>
-                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__quote__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__customer' %}{% endif %}">Customer</a></th>
-                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__quote__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__quote__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__quote__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__quote__estimate__project' %}{% endif %}">Project</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__estimate__customer"><a href="{% if request.GET.ordering == 'order__proposal__estimate__customer' %}?{% url_replace request 'ordering' '-order__proposal__estimate__customer' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__estimate__customer' %}{% endif %}">Customer</a></th>
+                    <th style="padding: .75rem .5rem;" data-sortable="order__proposal__estimate__project"><a href="{% if request.GET.ordering == 'order__proposal__estimate__project' %}?{% url_replace request 'ordering' '-order__proposal__estimate__project' %}{% else %}?{% url_replace request 'ordering' 'order__proposal__estimate__project' %}{% endif %}">Project</a></th>
                     <th style="padding: .75rem .5rem;">Invoice Date</th>
                     <th style="padding: .75rem .5rem;">Total Invoiced</th>
                     <th style="padding: .75rem .5rem;">Total Paid</th>
@@ -138,8 +138,8 @@
                             <td style="padding: .75rem .5rem;">{{ invoice.order.project_number|slice:"3:" }}-{{ invoice.id|stringformat:"03d" }}</td>
                             <td style="padding: .75rem .5rem;">{{ invoice.order.project_number }}</td>
                             <td style="padding: .75rem .5rem;">{{ invoice.order.date_po_received }}</td>
-                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.customer.company.name }}</td>
-                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.quote.estimate.project }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.estimate.customer.company.name }}</td>
+                            <td style="padding: .75rem .5rem;">{{ invoice.order.proposal.estimate.project }}</td>
                             <td style="padding: .75rem .5rem;">{% if invoice.edited_on %}{{ invoice.edited_on|date:"DATE_FORMAT" }}{% else %}{{ invoice.created_on|date:"DATE_FORMAT" }}{% endif %}</td>
                             <td style="padding: .75rem .5rem;">${% calculate_total_amount_due invoice as ctad %}{{ ctad|floatformat:2|intcomma }}</td>
                             <td style="padding: .75rem .5rem;">${% calculate_total_paid invoice as ctp %}{{ ctp|floatformat:2|intcomma }}</td>
@@ -152,7 +152,7 @@
                                 <a href="{% url 'invoiceEdit' invoice_id=invoice.id %}" style="display: inline-block;"><div class="icon editicon" data-toggle="tooltip" data-placement="bottom" title="Edit"></div></a>
                                 <a href="{% url 'invoiceDelete' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon deleteicon" data-toggle="tooltip" data-placement="bottom" title="Delete"></div></a>
                                 <a href="{% url 'invoiceArchive' invoice_id=invoice.id %}" style="display: inline-block; margin-left: 5px;"><div class="icon archiveicon" data-toggle="tooltip" data-placement="bottom" title="Archive"></div></a>
-                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-id="{{ invoice.id }}"  data-project="{{ invoice.order.proposal.quote.estimate.project.name }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
+                                <a href="#" style="display: inline-block; margin-left: 5px;" data-toggle="modal" data-target="#myModal" class="email_modal" data-id="{{ invoice.id }}"  data-project="{{ invoice.order.proposal.estimate.project.name }}"><div class="icon sendmailicon" data-toggle="tooltip" data-placement="bottom" title="Send Via Mail"></div></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -261,7 +261,7 @@
              $(".modal-header .modal-title").text('Email Invoice #' + invoiceId);
         });
 
-        var sortables = ['id', 'order__project_number', 'order__date_po_received', 'order__proposal__quote__estimate__customer', 'order__proposal__quote__estimate__project'];
+        var sortables = ['id', 'order__project_number', 'order__date_po_received', 'order__proposal__estimate__customer', 'order__proposal__estimate__project'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

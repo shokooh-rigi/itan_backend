@@ -25,11 +25,11 @@
                 {% for order in object_list %}
                         <tr>
                             <td>{{ order.project_number }}</td>
-                            <td>{{ order.proposal.quote.estimate.project }}</td>
-                            <td>{% estimate_total_work order.proposal.quote.estimate.id as etw %}{{ etw|floatformat:2 }}</td>
+                            <td>{{ order.proposal.estimate.project }}</td>
+                            <td>{% estimate_total_work order.proposal.estimate.id as etw %}{{ etw|floatformat:2 }}</td>
                             <td>{% actual_total_work order.id as atw %}{{ atw|floatformat:2 }}</td>
                             <td>{% delta_total_work order as dtw %}{% if dtw < 0 %}<span class="text-danger font-weight-bold">{{ dtw|floatformat:0 }}%</span>{% else %}<span class="text-success font-weight-bold">{{ dtw|floatformat:0 }}%</span>{% endif %}</td>
-                            <td>{% estimate_total_calculator order.proposal.quote.estimate.id as etp %}${{ etp|floatformat:2|intcomma }}</td>
+                            <td>{% estimate_total_calculator order.proposal.estimate.id as etp %}${{ etp|floatformat:2|intcomma }}</td>
                             <td>{% calculate_total_amount_due order.invoice as atp %}${{ atp|floatformat:2|intcomma }}</td>
                             <td>{% delta_total_price order as dtp %}{% if dtp < 0 %}<span class="text-danger font-weight-bold">{{ dtp|floatformat:0 }}%</span>{% else %}<span class="text-success font-weight-bold">{{ dtp|floatformat:0 }}%</span>{% endif %}</td>
                         </tr>

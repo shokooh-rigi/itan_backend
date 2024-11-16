@@ -59,16 +59,16 @@ def schedule_list(request):
         else:
             this_schedule_tech = None
         full_address = ''
-        if schedule.order.proposal.quote.estimate.project.address_line_1:
-            full_address += schedule.order.proposal.quote.estimate.project.address_line_1
-        if schedule.order.proposal.quote.estimate.project.address_line_2:
-            full_address += ' ' + schedule.order.proposal.quote.estimate.project.address_line_2
-        if schedule.order.proposal.quote.estimate.project.city:
-            full_address += ' ' + schedule.order.proposal.quote.estimate.project.city
-        if schedule.order.proposal.quote.estimate.project.state:
-            full_address += ' ' + schedule.order.proposal.quote.estimate.project.state
-        if schedule.order.proposal.quote.estimate.project.zip:
-            full_address += ' ' + schedule.order.proposal.quote.estimate.project.zip
+        if schedule.order.proposal.estimate.project.address_line_1:
+            full_address += schedule.order.proposal.estimate.project.address_line_1
+        if schedule.order.proposal.estimate.project.address_line_2:
+            full_address += ' ' + schedule.order.proposal.estimate.project.address_line_2
+        if schedule.order.proposal.estimate.project.city:
+            full_address += ' ' + schedule.order.proposal.estimate.project.city
+        if schedule.order.proposal.estimate.project.state:
+            full_address += ' ' + schedule.order.proposal.estimate.project.state
+        if schedule.order.proposal.estimate.project.zip:
+            full_address += ' ' + schedule.order.proposal.estimate.project.zip
 
         # if schedule.assigned_to_employee:
         #     calendar_id = schedule.assigned_to_employee.id
@@ -149,29 +149,29 @@ def schedule_list(request):
             'assigned_to_contractors_names': assigned_to_contractors_names,
             'tech_file': tech_file,
             'project_number': schedule.order.project_number,
-            'project_name': str(schedule.order.proposal.quote.estimate.project),
-            'customer': str(schedule.order.proposal.quote.estimate.customer.company.name),
-            'engineer': str(schedule.order.proposal.quote.estimate.engineer.company.name),
-            'predemo': schedule.order.proposal.quote.estimate.estimatedetails.pre_demo,
+            'project_name': str(schedule.order.proposal.estimate.project),
+            'customer': str(schedule.order.proposal.estimate.customer.company.name),
+            'engineer': str(schedule.order.proposal.estimate.engineer.company.name),
+            'predemo': schedule.order.proposal.estimate.estimatedetails.pre_demo,
             'poc_name': poc_name,
             'poc_cell_phone': poc_cell_phone,
             'poc_office_phone': poc_office_phone,
             'control_system': str(schedule.order.control_system),
             'special_instruction': special_instruction,
             'tech_note': this_schedule_tech.note,
-            'price': order_tech_predemo_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order) if schedule.pre_demo else order_tech_final_price_calculator(schedule.order.proposal.quote.estimate.id, schedule.order),
+            'price': order_tech_predemo_price_calculator(schedule.order.proposal.estimate.id, schedule.order) if schedule.pre_demo else order_tech_final_price_calculator(schedule.order.proposal.estimate.id, schedule.order),
             'equipment_submittals_link': equipment_submittal,
             'test_sheets_link': test_sheets,
             'tech_marked_drawing_link': tech_marked_drawing,
             'site_pictures_link': site_pictures,
             'cs_software_link': cs_file,
-            'title': str(schedule.order.proposal.quote.estimate.project),
+            'title': str(schedule.order.proposal.estimate.project),
             'assigned': any_assigned,
             'location': full_address,
             'category': 'time',
             'start': schedule.schedule_start,
             'end': schedule.schedule_end,
-            'estimate': estimate_total_work(schedule.order.proposal.quote.estimate.id),
+            'estimate': estimate_total_work(schedule.order.proposal.estimate.id),
             'goingDuration': str(30),
             'comingDuration': str(30),
             'partial': schedule.order.partial_job_done,
@@ -181,16 +181,16 @@ def schedule_list(request):
     for maintenance in maintenance_list:
         full_address = ''
         if maintenance.order:
-            if maintenance.order.proposal.quote.estimate.project.address_line_1:
-                full_address += maintenance.order.proposal.quote.estimate.project.address_line_1
-            if maintenance.order.proposal.quote.estimate.project.address_line_2:
-                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.address_line_2
-            if maintenance.order.proposal.quote.estimate.project.city:
-                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.city
-            if maintenance.order.proposal.quote.estimate.project.state:
-                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.state
-            if maintenance.order.proposal.quote.estimate.project.zip:
-                full_address += ' ' + maintenance.order.proposal.quote.estimate.project.zip
+            if maintenance.order.proposal.estimate.project.address_line_1:
+                full_address += maintenance.order.proposal.estimate.project.address_line_1
+            if maintenance.order.proposal.estimate.project.address_line_2:
+                full_address += ' ' + maintenance.order.proposal.estimate.project.address_line_2
+            if maintenance.order.proposal.estimate.project.city:
+                full_address += ' ' + maintenance.order.proposal.estimate.project.city
+            if maintenance.order.proposal.estimate.project.state:
+                full_address += ' ' + maintenance.order.proposal.estimate.project.state
+            if maintenance.order.proposal.estimate.project.zip:
+                full_address += ' ' + maintenance.order.proposal.estimate.project.zip
         assigned_to_employees = []
         assigned_to_employees_names = []
         assigned_to_contractors = []
@@ -221,9 +221,9 @@ def schedule_list(request):
             maintenance_title = 'Off/Vacation'
         if maintenance.order:
             if maintenance.maintenance_type == 1:
-                maintenance_title = 'Maintenance ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
+                maintenance_title = 'Maintenance ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.estimate.project))
             else:
-                maintenance_title = 'Lost Time ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.quote.estimate.project))
+                maintenance_title = 'Lost Time ' + str(maintenance.order.project_number + '<br />' + str(maintenance.order.proposal.estimate.project))
             maintenance_order_id = maintenance.order.id
 
         poc_name = ''
@@ -280,10 +280,10 @@ def schedule_list(request):
             'assigned_to_employees_names': assigned_to_employees_names,
             'assigned_to_contractors_names': assigned_to_contractors_names,
             'project_number': maintenance.order.project_number if maintenance.order else 0,
-            'project_name': str(maintenance.order.proposal.quote.estimate.project) if maintenance.order else '',
-            'customer': str(maintenance.order.proposal.quote.estimate.customer.company.name) if maintenance.order else '',
-            'engineer': str(maintenance.order.proposal.quote.estimate.engineer.company.name) if maintenance.order else '',
-            'predemo': maintenance.order.proposal.quote.estimate.estimatedetails.pre_demo if maintenance.order else 0,
+            'project_name': str(maintenance.order.proposal.estimate.project) if maintenance.order else '',
+            'customer': str(maintenance.order.proposal.estimate.customer.company.name) if maintenance.order else '',
+            'engineer': str(maintenance.order.proposal.estimate.engineer.company.name) if maintenance.order else '',
+            'predemo': maintenance.order.proposal.estimate.estimatedetails.pre_demo if maintenance.order else 0,
             'poc_name': poc_name,
             'poc_cell_phone': poc_cell_phone,
             'poc_office_phone': poc_office_phone,

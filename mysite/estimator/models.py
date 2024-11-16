@@ -8,9 +8,9 @@ from django.dispatch import receiver
 from custom_user.models import User
 from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
-from ..core.base_model import BaseModel
-from ..core.models import Person, Project, Service
-from ..equipments.models import Equipment
+from mysite.core.base_model import BaseModel
+from mysite.core.models import Person, Project, Service
+from mysite.equipments.models import Equipment
 
 
 def estimate_number_generator(estimate_id: int):

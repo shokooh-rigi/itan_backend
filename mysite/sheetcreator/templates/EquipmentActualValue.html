@@ -5,7 +5,7 @@
 {% block content %}
     <h2>Enter {{ this_sheet_equipment.equipment_type.name }} Actual Values for
         {{ this_sheet_equipment.sheet.project.project_number }}
-        {{ this_sheet_equipment.sheet.project.proposal.quote.estimate.project.name }}</h2>
+        {{ this_sheet_equipment.sheet.project.proposal.estimate.project.name }}</h2>
     <div class="alert alert-danger" style="{% if error_msg == null %}display: none;{% endif %}">
         <strong>Error!</strong> {{ error_msg }}
     </div>

@@ -102,12 +102,12 @@ def invoice_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+        object_list = Invoice.objects.filter(Q(order__proposal__estimate__project__name__icontains=search)
                                              | Q(order__project_number__icontains=search)) \
             .filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
 
     else:
-        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+        object_list = Invoice.objects.filter(Q(order__proposal__estimate__project__name__icontains=search)
                                              | Q(order__project_number__icontains=search)) \
             .order_by(ordering)
 
@@ -131,9 +131,9 @@ def invoice_list(request):
         for invoice in object_list:
             if calculate_remaining_invoice_due(invoice) != 0:
                 to_be_deleted.append(invoice.id)
-        object_list = Invoice.objects.filter(Q(order__proposal__quote__estimate__project__name__icontains=search)
+        object_list = Invoice.objects.filter(Q(order__proposal__estimate__project__name__icontains=search)
                                              | Q(order__project_number__icontains=search)) \
-            .filter(order__proposal__quote__estimate__due_date__lte=datetime.datetime.strptime('04/01/2020', '%m/%d/%Y'))\
+            .filter(order__proposal__estimate__due_date__lte=datetime.datetime.strptime('04/01/2020', '%m/%d/%Y'))\
             .filter(id__in=to_be_deleted).distinct().order_by(ordering)
 
     overdue_days = Setting.objects.get(key='Overdue Days').value
@@ -205,7 +205,7 @@ def invoice_add(request, order_id=None):
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
-                    'estimate': invoice.order.proposal.quote.estimate,
+                    'estimate': invoice.order.proposal.estimate,
                     'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                     'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                     'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -298,7 +298,7 @@ def invoice_edit(request, invoice_id):
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
-                    'estimate': invoice.order.proposal.quote.estimate,
+                    'estimate': invoice.order.proposal.estimate,
                     'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                     'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                     'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -361,7 +361,7 @@ def invoice_view(request, invoice_id):
             'revision_date': InvoiceHistory.objects.filter(invoice=invoice).order_by('-id')[0],
             'change_orders': change_orders,
             'total_amount_due': total_amount_due,
-            'estimate': invoice.order.proposal.quote.estimate,
+            'estimate': invoice.order.proposal.estimate,
             'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
             'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
             'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -395,7 +395,7 @@ def invoice_view(request, invoice_id):
     parameters = {
         'latest_invoice_history': latest_invoice_history,
         'invoice': invoice,
-        'estimate': invoice.order.proposal.quote.estimate,
+        'estimate': invoice.order.proposal.estimate,
         'WEB_URL': settings.WEB_URL,
         'STATIC_URL': settings.STATIC_URL,
         'MEDIA_URL': settings.MEDIA_URL,
@@ -493,7 +493,7 @@ def invoice_payment(request, invoice_id):
                     'invoice': invoice,
                     'change_orders': change_orders,
                     'total_amount_due': total_amount_due,
-                    'estimate': invoice.order.proposal.quote.estimate,
+                    'estimate': invoice.order.proposal.estimate,
                     'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
                     'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
                     'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
@@ -692,7 +692,7 @@ def account_summary_add(request, customer_id=None):
             if request.POST.get("next"):
                 form.cleaned_data['created_by'] = request.user
                 customer = form.cleaned_data['customer']
-                customer_invoices = Invoice.objects.filter(order__proposal__quote__estimate__customer__company=customer, order__proposal__quote__estimate__due_date__gt="2020-01-04").order_by('created_on')
+                customer_invoices = Invoice.objects.filter(order__proposal__estimate__customer__company=customer, order__proposal__estimate__due_date__gt="2020-01-04").order_by('created_on')
                 this_total = 0
                 for invoice in customer_invoices:
                     this_total += float(calculate_remaining_invoice_due(invoice))

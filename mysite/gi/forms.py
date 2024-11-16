@@ -7,7 +7,7 @@ from .models import *
 class OrderWidget(s2forms.ModelSelect2Widget):
     search_fields = [
         "id",
-        "order__quote__estimate__project__name__icontains"
+        "order__estimate__project__name__icontains"
     ]
 
 

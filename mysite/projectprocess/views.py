@@ -41,10 +41,10 @@ def project_process_list(request):
     if request.GET.get('ordering'):
         ordering = request.GET.get('ordering')
 
-    object_list = Order.objects.filter(Q(proposal__quote__estimate__project__name__icontains=search) |
+    object_list = Order.objects.filter(Q(proposal__estimate__project__name__icontains=search) |
                                        Q(project_number__icontains=search)).order_by(ordering)
     for obj in object_list:
-        if order_total_calculator(obj.proposal.quote.estimate.id, obj) == 0:
+        if order_total_calculator(obj.proposal.estimate.id, obj) == 0:
             object_list = object_list.exclude(id=obj.id)
 
 

@@ -58,7 +58,7 @@ class DataSheetEquipmentForm(forms.Form):
 class ProposalWidget(s2forms.ModelSelect2Widget):
     search_fields = [
         "id",
-        "quote__estimate__project__name__icontains"
+        "estimate__project__name__icontains"
     ]
 
 

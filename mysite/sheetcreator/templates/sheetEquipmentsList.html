@@ -6,17 +6,17 @@
 
 {% block content %}
     <div class="text-center">
-        <h2>DEFINED AIR MOVING EQUIPMENT LIST FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.quote.estimate.project.name }}</h2>
+        <h2>DEFINED AIR MOVING EQUIPMENT LIST FOR {{ my_sheet.project.project_number }} {{ my_sheet.project.proposal.estimate.project.name }}</h2>
         <br>
         <a href="{% url 'sortEquipmentsList' sheet_id %}">
             <button type="button" class="btn btn-primary">Sort Report Equipments</button>
         </a>
         <a href="{% url 'sheetEquipmentsGenerateTechPDF' sheet_id %}" target="_blank"
-           download="TEST SHEET {{ my_sheet.project.proposal.quote.estimate.project.name | upper }}-{{ my_sheet.project.project_number }} TECH.pdf">
+           download="TEST SHEET {{ my_sheet.project.proposal.estimate.project.name | upper }}-{{ my_sheet.project.project_number }} TECH.pdf">
             <button type="button" class="btn btn-primary">Generate Tech PDF</button>
         </a>
         <a href="{% url 'sheetEquipmentsGenerateReportPDF' sheet_id %}" target="_blank"
-           download="TEST SHEET {{ my_sheet.project.proposal.quote.estimate.project.name | upper }}-{{ my_sheet.project.project_number }}.pdf">
+           download="TEST SHEET {{ my_sheet.project.proposal.estimate.project.name | upper }}-{{ my_sheet.project.project_number }}.pdf">
             <button type="button" class="btn btn-primary">Generate Report PDF</button>
         </a>
         <br>
@@ -140,7 +140,7 @@
     </div>
 <script>
     $(document).ready(function() {
-        var sortables = ['proposal__quote__estimate__id', 'proposal__quote__estimate__customer', 'proposal__quote__estimate__project', 'proposal__quote__estimate__engineer', 'proposal__quote__estimate__due_date'];
+        var sortables = ['proposal__estimate__id', 'proposal__estimate__customer', 'proposal__estimate__project', 'proposal__estimate__engineer', 'proposal__estimate__due_date'];
         for (const myConst of sortables) {
             if (window.location.href.indexOf('ordering=' + myConst) > 0) {
                 $("table th[data-sortable=" + myConst +"]").append("<i class='fas fa-caret-down'></i>");

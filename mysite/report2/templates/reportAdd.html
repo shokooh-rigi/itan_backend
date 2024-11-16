@@ -15,7 +15,7 @@
                     <select name="order" class="form-control" required="" id="id_order">
                         <option value="" selected="" data-customer="" data-project="" data-totalamount="">---------</option>
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-customer="{{ order.proposal.quote.estimate.customer }}" data-project="{{ order.proposal.quote.estimate.project }}" data-totalamount="${% order_total_calculator order.proposal.quote.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}">{{ order.project_number }}</option>
+                            <option value="{{ order.id }}" data-customer="{{ order.proposal.estimate.customer }}" data-project="{{ order.proposal.estimate.project }}" data-totalamount="${% order_total_calculator order.proposal.estimate.id order as otc %}{{ otc|floatformat:2|intcomma }}">{{ order.project_number }}</option>
                         {% endfor %}
                     </select>
                     <div class="form-icon"><a href="{% url 'orderAdd' %}" id="add_order"><img src = "{% static 'admin/img/icon-addlink.svg' %}"></a></div>

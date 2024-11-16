@@ -14,7 +14,7 @@
                     <select name="project" class="form-control" required="" id="id_project" style="transform: translateX(-9px);">
                         <option value="" selected="" data-projectname="">---------</option>
                         {% for order in orders %}
-                            <option value="{{ order.id }}" data-projectname="{{ order.proposal.quote.estimate.project.name }}">
+                            <option value="{{ order.id }}" data-projectname="{{ order.proposal.estimate.project.name }}">
                                 {{ order.project_number }}</option>
                         {% endfor %}
                     </select>

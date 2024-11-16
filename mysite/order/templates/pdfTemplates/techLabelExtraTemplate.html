@@ -30,9 +30,9 @@
                     <img style="position: absolute; height: 10px; width: 100%;" src="{% static 'images/header-line.jpg' %}" />
                 </div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT #: </b>{{ tech_label.order.project_number|upper }}</div>
-                <div style="margin: 3px 0 auto;"><b>PROJECT NAME: </b>{{ tech_label.order.proposal.quote.estimate.project|upper }}</div>
+                <div style="margin: 3px 0 auto;"><b>PROJECT NAME: </b>{{ tech_label.order.proposal.estimate.project|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>PROJECT ADDRESS: </b>
-                    <span style="padding-left: 10px;">{% if tech_label.order.proposal.quote.estimate.project.address_line_1 %}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_1|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.address_line_2 %}<br />{{ tech_label.order.proposal.quote.estimate.project.address_line_2|upper }}{% endif %}<br />{% if tech_label.order.proposal.quote.estimate.project.city %}{{ tech_label.order.proposal.quote.estimate.project.city|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.state %}, {{ tech_label.order.proposal.quote.estimate.project.state|upper }}{% endif %}{% if tech_label.order.proposal.quote.estimate.project.zip %} {{ tech_label.order.proposal.quote.estimate.project.zip }}{% endif %}</span>
+                    <span style="padding-left: 10px;">{% if tech_label.order.proposal.estimate.project.address_line_1 %}<br />{{ tech_label.order.proposal.estimate.project.address_line_1|upper }}{% endif %}{% if tech_label.order.proposal.estimate.project.address_line_2 %}<br />{{ tech_label.order.proposal.estimate.project.address_line_2|upper }}{% endif %}<br />{% if tech_label.order.proposal.estimate.project.city %}{{ tech_label.order.proposal.estimate.project.city|upper }}{% endif %}{% if tech_label.order.proposal.estimate.project.state %}, {{ tech_label.order.proposal.estimate.project.state|upper }}{% endif %}{% if tech_label.order.proposal.estimate.project.zip %} {{ tech_label.order.proposal.estimate.project.zip }}{% endif %}</span>
                 </div>
                 <br />
                 <div style="margin: 3px 0 auto;"><b>DATE PACKAGE CREATED: </b>{{ datenow }}</div>
@@ -40,9 +40,9 @@
                 <div style="margin: 3px 0 auto;"><b>SCHEDULED DATE: </b>{% if tech_label.schedule_date %}{{ tech_label.schedule_date }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>DATE PROJECT COMPLETED: </b></div>
                 <br />
-                <div style="margin: 3px 0 auto;"><b>MC INFO: </b>{{ tech_label.order.proposal.quote.estimate.customer.company.name|upper }}</div>
+                <div style="margin: 3px 0 auto;"><b>MC INFO: </b>{{ tech_label.order.proposal.estimate.customer.company.name|upper }}</div>
                 <div style="margin: 3px 0 auto;"><b>ARCH INFO: </b>{% if tech_label.order.architect_name %}{{ tech_label.order.architect_name|upper }}{% endif %}</div>
-                <div style="margin: 3px 0 auto;"><b>ENG INFO: </b>{{ tech_label.order.proposal.quote.estimate.engineer.company.name|upper }}</div>
+                <div style="margin: 3px 0 auto;"><b>ENG INFO: </b>{{ tech_label.order.proposal.estimate.engineer.company.name|upper }}</div>
                 <br />
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 25%;"><b>PRE-DEMO: </b></td>
@@ -53,7 +53,7 @@
                     <td style="width: 5%;"><img src="{% static 'images/xhtml2pdf/circle1.png' %}" style="width: 16px; height: 16px; display: inline-block;"/></td>
                     <td style="width: 5%;">NO</td>
                 </tr></tbody></table></div>
-                <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.quote.estimate.drawing_date %}{{ tech_label.order.proposal.quote.estimate.drawing_date|upper }}{% endif %}</div>
+                <div style="margin: 3px 0 auto;"><b>DRAWING DATE: </b>{% if tech_label.order.proposal.estimate.drawing_date %}{{ tech_label.order.proposal.estimate.drawing_date|upper }}{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><b>DRAWING INCLUDED: </b>{% if tech_label.detailed_drawing %}DETAIL{% endif %}{% if tech_label.detailed_drawing and tech_label.schedule_drawing %}, {% endif %}{% if tech_label.schedule_drawing %}SCHEDULE{% endif %}{% if tech_label.schedule_drawing and tech_label.mechanical_drawing %}, {% endif %}{% if tech_label.detailed_drawing and tech_label.mechanical_drawing and not tech_label.schedule_drawing %}, {% endif %}{% if tech_label.mechanical_drawing %}MECHANICAL{% endif %}</div>
                 <div style="margin: 3px 0 auto;"><table><tbody><tr>
                     <td style="width: 30%;"><b>TEST SHEETS: </b></td>

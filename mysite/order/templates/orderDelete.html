@@ -8,7 +8,7 @@
     </div>
     <br />
     {%if request.user.is_authenticated %}
-        <h2>Delete Order {% estimate_number_generator this_order.proposal.quote.estimate.id %}</h2>
+        <h2>Delete Order {% estimate_number_generator this_order.proposal.estimate.id %}</h2>
         <br />
         <form method="POST" action="">
             {% csrf_token %}

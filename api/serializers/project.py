@@ -10,22 +10,22 @@ from mysite.report.models import Report
 def get_project_step(project):
     steps_date = [1, '', '', '', '', '', '', '', '', '']
     steps_date[1] = project.created_on
-    if Proposal.objects.filter(quote__estimate__bfm__id=project.id).exists():
+    if Proposal.objects.filter(estimate__bfm__id=project.id).exists():
         steps_date[0] = 2
-        steps_date[2] = project.estimate.quote.proposal.created_on
-    if Order.objects.filter(proposal__quote__estimate__bfm__id=project.id).exists():
+        steps_date[2] = project.estimate.proposal.created_on
+    if Order.objects.filter(proposal__estimate__bfm__id=project.id).exists():
         steps_date[0] = 4
-        steps_date[3] = project.estimate.quote.proposal.order.date_po_received
-        steps_date[4] = project.estimate.quote.proposal.order.estimated_date_of_project
-    if Invoice.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
+        steps_date[3] = project.estimate.proposal.order.date_po_received
+        steps_date[4] = project.estimate.proposal.order.estimated_date_of_project
+    if Invoice.objects.filter(order__proposal__estimate__bfm__id=project.id).exists():
         steps_date[0] = 5
-        steps_date[5] = project.estimate.quote.proposal.order.invoice.date_completed
-    if Report.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
+        steps_date[5] = project.estimate.proposal.order.invoice.date_completed
+    if Report.objects.filter(order__proposal__estimate__bfm__id=project.id).exists():
         steps_date[0] = 6
-        steps_date[6] = project.estimate.quote.proposal.order.report.report_date
-        if Invoice.objects.filter(order__proposal__quote__estimate__bfm__id=project.id).exists():
+        steps_date[6] = project.estimate.proposal.order.report.report_date
+        if Invoice.objects.filter(order__proposal__estimate__bfm__id=project.id).exists():
             steps_date[0] = 7
-            steps_date[7] = project.estimate.quote.proposal.order.invoice.created_on
+            steps_date[7] = project.estimate.proposal.order.invoice.created_on
     return steps_date
 
 
