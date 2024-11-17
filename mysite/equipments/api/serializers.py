@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from ..models import Equipment, DataSheet
+from ..models import Equipment
+from mysite.sheetcreator.models import DataSheet
 
 class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:

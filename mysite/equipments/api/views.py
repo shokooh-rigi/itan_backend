@@ -2,7 +2,8 @@ import re
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from ..models import Equipment, DataSheet, TestSheet
+from ..models import Equipment, TestSheet
+from mysite.sheetcreator.models import DataSheet
 from .serializers import EquipmentSerializer, DataSheetSerializer
 from ast import literal_eval
 from django.shortcuts import get_object_or_404

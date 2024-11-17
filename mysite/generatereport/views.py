@@ -10,7 +10,6 @@ from django.db.models import Count
 
 from django.conf import settings
 
-from mysite.equipments.models import DataSheet
 from mysite.order.models import Order
 from django.conf import settings
 

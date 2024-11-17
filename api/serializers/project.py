@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from mysite.bidfilemgm.models import BidFile
-from mysite.estimator.models import Proposal
+from mysite.proposal.models import Proposal
 from mysite.order.models import Order
 from mysite.gi.models import Invoice
 from mysite.report.models import Report

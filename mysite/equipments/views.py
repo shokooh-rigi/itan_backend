@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from .models import DataSheet
+from mysite.sheetcreator.models import DataSheet
 from mysite.utils.pdf_to_img import pdf_to_image_bytes
 from base64 import b64encode
 from mysite.s3_file_manager import S3

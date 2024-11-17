@@ -141,6 +141,10 @@ DATABASES = {
 
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
+ROOT_URLCONF = "config.urls"
+
+WSGI_APPLICATION = "config.wsgi.application"
+
 if ENV == "test":
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
