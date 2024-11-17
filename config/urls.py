@@ -2,17 +2,34 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include
-from django.urls import path
-from django.views import defaults as default_views
-from mysite.core import views as core_views
 from django.contrib.auth import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path, include
+from django.views import defaults as default_views
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+
+from mysite.core import views as core_views
 from mysite.core.forms import UserLoginForm
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="iTab",
+      default_version='v2',
+      description="Test description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="contact@myapi.local"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
     path('select2/', include("django_select2.urls")),
     path('accounts/password_change/', core_views.change_password, name='password_change'),
     path('accounts/', include('django.contrib.auth.urls')),

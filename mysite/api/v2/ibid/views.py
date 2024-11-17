@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mysite.ibfm.models import iBidFile
-from .serializers import BidFileSerializer, BidFileUpdateSerializer
+from .serializers import iBidFileSerializer, iBidFileUpdateSerializer
 
 
 class BidFileListView(APIView):
@@ -46,7 +46,7 @@ class BidFileListView(APIView):
                 type=openapi.TYPE_STRING
             ),
         ],
-        responses={200: BidFileSerializer(many=True)}
+        responses={200: iBidFileSerializer(many=True)}
     )
     def get(self, request) -> Response:
         search: str = request.GET.get('search', '')
@@ -71,7 +71,7 @@ class BidFileListView(APIView):
             paginator.page_size = settings.PAGE_SIZE
             result_page = paginator.paginate_queryset(object_list, request)
 
-            serializer = BidFileSerializer(result_page, many=True)
+            serializer = iBidFileSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
         except ValueError:
             return Response(
@@ -93,7 +93,7 @@ class BidFileCreateView(APIView):
         """
         POST method to create a new ibid file.
         """
-        serializer = BidFileSerializer(data=request.data)
+        serializer = iBidFileSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save(created_by=request.user)
@@ -115,9 +115,9 @@ class BidFileUpdateView(APIView):
         return get_object_or_404(iBidFile, id=id)
 
     @swagger_auto_schema(
-        request_body=BidFileUpdateSerializer,
+        request_body=iBidFileUpdateSerializer,
         operation_description="Update an existing ibid file",
-        responses={200: BidFileUpdateSerializer}
+        responses={200: iBidFileUpdateSerializer}
     )
     def put(self, request, id: int) -> Response:
         """
@@ -125,7 +125,7 @@ class BidFileUpdateView(APIView):
         """
         try:
             bid_file = self.get_object(id)
-            serializer = BidFileUpdateSerializer(bid_file, data=request.data, partial=True)
+            serializer = iBidFileUpdateSerializer(bid_file, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from mysite.ibfm.models import iBidFile
 
 
-class BidFileSerializer(serializers.ModelSerializer):
+class iBidFileSerializer(serializers.ModelSerializer):
     due_date = serializers.DateField(format='%m/%d/%Y', input_formats=['%m/%d/%Y'])
     uploaded_file = serializers.ListField(
         child=serializers.FileField(required=False),
@@ -48,7 +48,7 @@ class BidFileSerializer(serializers.ModelSerializer):
         return bid_file
 
 
-class BidFileUpdateSerializer(serializers.ModelSerializer):
+class iBidFileUpdateSerializer(serializers.ModelSerializer):
     due_date = serializers.DateField(format='%m/%d/%Y', input_formats=['%m/%d/%Y'])
 
     class Meta:
