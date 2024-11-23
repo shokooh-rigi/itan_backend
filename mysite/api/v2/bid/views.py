@@ -27,7 +27,7 @@ class BidFileListView(APIView):
 
     - GET: Retrieves a list of bid files based on optional query parameters for search, date range, and ordering.
     """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Retrieve a list of bid files with filtering options.",
@@ -235,7 +235,6 @@ class BidFileDuplicateView(APIView):
         )
 
         return duplicated_bfm
-from mysite.core.models import UserTypeChoices
 
 
 class BidFileArchiveView(APIView):
@@ -315,7 +314,7 @@ class BidFileCreateView(APIView):
     Create a new bid file with uploaded files.
     This view processes the files, creates a zip, and uploads it to S3.
     """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Create a new bid file",

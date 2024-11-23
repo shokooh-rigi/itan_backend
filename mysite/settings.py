@@ -173,7 +173,7 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [APPS_DIR / "static"]
-
+WEB_URL = "" # todo: complete it later
 MEDIA_URL = "/media/"
 MEDIA_ROOT = APPS_DIR / "media"
 
@@ -210,7 +210,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
 }
@@ -319,3 +319,4 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "912TIXQPRLEFEDLWGSXM")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "BggzC2hjvtr1DMQjjAk6k7ZnDua9wXw8B0RciN0R")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-central-1")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "airtab-test")
+ROOT_URLCONF = 'config.urls'
