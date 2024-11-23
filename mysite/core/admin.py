@@ -13,25 +13,19 @@ admin.site.register(ModulesToEmailTemplateRelation)
 
 
 class LogEntryAdmin(admin.ModelAdmin):
-    readonly_fields = ('content_type',
-                       'user',
-                       'action_time',
-                       'object_id',
-                       'object_repr',
-                       'action_flag',
-                       'change_message'
-                       )
+    readonly_fields = (
+        "content_type",
+        "user",
+        "action_time",
+        "object_id",
+        "object_repr",
+        "action_flag",
+        "change_message",
+    )
 
-    list_filter = [
-        'user',
-        'content_type',
-        'action_flag'
-    ]
+    list_filter = ["user", "content_type", "action_flag"]
 
-    search_fields = [
-        'object_repr',
-        'change_message'
-    ]
+    search_fields = ["object_repr", "change_message"]
 
     def has_add_permission(self, request):
         return False
@@ -68,7 +62,7 @@ admin.site.register(LicenseFiles, LicenseFilesAdmin)
 
 
 class SettingAdmin(ImportExportModelAdmin):
-    readonly_fields = ['key']
+    readonly_fields = ["key"]
 
     def has_add_permission(self, request):
         return True
@@ -106,10 +100,16 @@ admin.site.register(CompanyType, CompanyTypeAdmin)
 
 class ContactInfoAdmin(ImportExportModelAdmin):
     search_fields = [
-        'customer_id',
-        'name'
+        "tel",
+        "cel",
+        "fax",
+        "mail",
+        "web",
     ]
-    readonly_fields = ('created_by', 'created_on',)
+    readonly_fields = (
+        "created_by",
+        "created_at",
+    )
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -121,11 +121,11 @@ admin.site.register(ContactInfo, ContactInfoAdmin)
 
 
 class PersonAdmin(ImportExportModelAdmin):
-    search_fields = [
-        'company__name',
-        'name'
-    ]
-    readonly_fields = ('created_by', 'created_on',)
+    search_fields = ["company__name", "name"]
+    readonly_fields = (
+        "created_by",
+        "created_at",
+    )
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -149,7 +149,10 @@ admin.site.register(Profile, ProfileAdmin)
 
 
 class ProjectAdmin(ImportExportModelAdmin):
-    readonly_fields = ('created_by', 'created_on',)
+    readonly_fields = (
+        "created_by",
+        "created_at",
+    )
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
