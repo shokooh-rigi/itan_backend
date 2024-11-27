@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from mysite.core.models import ContactInfo
 from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary
-from mysite.api.v2.invoice.services.invoice_services import InvoiceService, CreateInvoiceService
+from mysite.api.v2.invoice.services.invoice_services import InvoiceService
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -14,37 +14,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Invoice
-        fields = ['order', 'created_by', 'invoice_type', 'amount', 'due_date']  # Add other required fields
 
-    def create(self, validated_data):
-        """
-        Create a new Invoice instance.
-
-        - Uses the service layer to manage invoice creation and post-save logic.
-
-        Args:
-            validated_data (dict): The validated data from the request.
-
-        Returns:
-            Invoice: The created invoice instance.
-        """
-        return CreateInvoiceService.create_invoice(validated_data, self.context['request'].user)
-
-    def update(self, instance, validated_data):
-        """
-        Update an existing Invoice instance.
-
-        - Delegates update logic to the service layer.
-
-        Args:
-            instance (Invoice): The existing invoice instance.
-            validated_data (dict): The updated data from the request.
-
-        Returns:
-            Invoice: The updated invoice instance.
-        """
-        request = self.context.get('request')
-        return CreateInvoiceService.update_invoice(instance, validated_data, request)
+    fields = [
+        'order',
+        'date_started',
+        'date_completed',
+        'terms',
+        'description',
+        'percent_of_performance_completed',
+        'attention',
+        'edited_on',
+        'created_by',
+    ]
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):

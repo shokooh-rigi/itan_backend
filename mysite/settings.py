@@ -309,6 +309,10 @@ STORAGE_ESTIMATE_PDFS_PATH: str = os.getenv(
     "STORAGE_ESTIMATE_PDFS_PATH",
     "media/pdfs/estimate/",
 )
+STORAGE_INVOICE_PDFS_PATH: str = os.getenv(
+    "STORAGE_INVOICE_PDFS_PATH",
+    "media/pdfs/invoice/",
+)
 # page size
 PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
 

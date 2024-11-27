@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -7,6 +8,8 @@ from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
@@ -22,29 +25,137 @@ from mysite.order.models import Order
 from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
     calculate_remaining_invoice_due
 from .services.account_summary_service import AccountSummaryService
+from .services.email_service import InvoiceEmailService
+from .services.invoice_detail_service import DetailedInvoiceService
 from .services.invoice_payment_service import InvoicePaymentService
-from .services.invoice_services import ListInvoiceService, UpdateInvoiceService, DetailedInvoiceService, \
-    DeleteInvoiceService
+from .services.invoice_services import InvoiceService, DeleteInvoiceService
+from .services.ivnoice_list_service import ListInvoiceService
 from ..estimator.serializers import EmailSerializer
+from ..order.serializers import OrderSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class InvoiceListView(APIView):
+    """
+    API view for managing and retrieving invoice-related data.
+
+    Permissions:
+        - Only authenticated users can access this view.
+
+    Attributes:
+        permission_classes (list): Restricts access to authenticated users (`IsAuthenticated`).
+
+    Methods:
+        post(request):
+            Sends an email containing an invoice.
+
+        get(request):
+            Filters and lists invoices based on various criteria, with support for pagination.
+    """
     permission_classes = [IsAuthenticated]
-    pagination_class = InvoicePagination  # todo: where is Custom pagination????
+
+    def post(self, request):
+        """
+        Sends an invoice email to the specified recipient.
+
+        Parameters:
+            request (Request): HTTP request containing the email details in the following format:
+                - `email_id` (int): ID of the invoice to be sent.
+                - `to_email` (str): Recipient's email address.
+                - `cc` (str, optional): CC email address(es). Default is an empty string.
+                - `subject` (str): Email subject.
+
+        Returns:
+            Response:
+                - HTTP 200: On successful email dispatch.
+                - HTTP 400: If email sending fails or data is invalid.
+
+        Example Request Body:
+            {
+                "email_id": 123,
+                "to_email": "example@domain.com",
+                "cc": "cc@domain.com",
+                "subject": "Invoice #123"
+            }
+        """
+        serializer = EmailSerializer(data=request.data)
+        if serializer.is_valid():
+            invoice_id = serializer.validated_data['email_id']
+            to_email = serializer.validated_data['to_email']
+            cc = serializer.validated_data.get('cc', '')
+            subject = serializer.validated_data['subject']
+
+            success = InvoiceEmailService.send_invoice_email(invoice_id, to_email, cc, subject)
+            if success:
+                return Response({"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK)
+
+            return Response({"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
+        """
+        Retrieves a filtered and paginated list of invoices based on query parameters.
+
+        Query Parameters:
+            - `search` (str, optional): Search term for filtering by project name or project number.
+            - `paginate_by` (int, optional): Number of records per page. Defaults to `settings.PAGE_SIZE`.
+            - `ordering` (str, optional): Field for sorting results. Default is `-created_on`.
+            - `fromDate` (str, optional): Start date for filtering invoices (`MM/DD/YYYY` format).
+            - `toDate` (str, optional): End date for filtering invoices (`MM/DD/YYYY` format).
+            - `type` (str, optional): Invoice status filter. Options:
+                - `fully-paid`
+                - `partial-paid`
+                - `not-paid`
+                - `old-estimate`
+            - `overdue` (bool, optional): Filter for overdue invoices. Pass `1` for true. Default is false.
+
+        Returns:
+            Response:
+                - HTTP 200: On successful filtering and pagination.
+                - Contains filtered invoices, pagination details, overdue settings, and result status.
+
+        Example Response:
+            {
+                "invoices": [...],
+                "pagination": {
+                    "total_rows": 50,
+                    "total_pages": 5,
+                    "current_page": 1,
+                    "page_size": 10
+                },
+                "overdue_days": 30,
+                "overdue_result": true
+            }
+        """
         search = request.GET.get('search', '')
         paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
         ordering = request.GET.get('ordering', '-created_on')
         from_date = request.GET.get('fromDate')
         to_date = request.GET.get('toDate')
+        invoice_type = request.GET.get('type')  # e.g., 'fully-paid', 'partial-paid', 'not-paid', 'old-estimate'
+        overdue = request.GET.get('overdue', '0') == '1'
 
-        invoices = ListInvoiceService.filter_invoices(search, from_date, to_date, ordering)
-        paginator = Paginator(invoices, paginate_by)
-        page = request.GET.get('page', 1)
-        paginated_invoices = paginator.get_page(page)
+        # Fetch filtered invoices
+        invoices = ListInvoiceService.filter_invoices(
+            search=search,
+            from_date=from_date,
+            to_date=to_date,
+            ordering=ordering,
+            invoice_type=invoice_type,
+            overdue=overdue,
+        )
 
+        # Paginate the filtered results
+        paginator = Paginator(object_list=invoices, per_page=paginate_by)
+        page_number = request.GET.get('page', 1)
+        paginated_invoices = paginator.get_page(number=page_number)
+
+        # Serialize and return response
         serializer = InvoiceSerializer(paginated_invoices, many=True)
+        overdue_days = ListInvoiceService.get_overdue_days()
+
         return Response({
             'invoices': serializer.data,
             'pagination': {
@@ -52,88 +163,119 @@ class InvoiceListView(APIView):
                 'total_pages': paginator.num_pages,
                 'current_page': paginated_invoices.number,
                 'page_size': paginate_by,
-            }
+            },
+            'overdue_days': overdue_days,
+            'overdue_result': overdue
         }, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = EmailSerializer(data=request.data)
-        if serializer.is_valid():
-            invoice_id = serializer.validated_data['invoice_id']
-            to_email = serializer.validated_data['to_email']
-            cc = serializer.validated_data.get('cc', '')
-            subject = serializer.validated_data['subject']
-
-            success = ListInvoiceService.send_invoice_email(invoice_id, to_email, cc, subject)
-            if success:
-                return Response({"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK)
-            return Response({"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InvoiceCreateView(APIView):
     """
     Handles the creation and retrieval of invoices.
-
-    GET:
-    - Retrieves orders that are either pending or associated with the given order ID.
-
-    POST:
-    - Creates a new invoice for a specific order.
-    - Validates and processes invoice creation using the `InvoiceSerializer`.
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Retrieve orders for invoice creation.",
+        manual_parameters=[
+            openapi.Parameter(
+                'order_id',
+                openapi.IN_PATH,
+                description="The ID of the order to retrieve.",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="A list of orders.",
+                schema=OrderSerializer(many=True)
+            ),
+            400: "Bad Request"
+        }
+    )
     def get(self, request, *args, **kwargs):
         """
         Retrieve orders for invoice creation.
-
-        - If `order_id` is provided, fetches a specific order.
-        - Otherwise, fetches orders that are not archived and not already invoiced.
-
-        Args:
-            request: The HTTP request object.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            Response: A JSON response with a list of orders.
         """
-        order_id = kwargs.get('order_id', None)
+        order_id = kwargs.get('order_id')
         if order_id:
             orders = Order.objects.filter(id=order_id)
         else:
-            orders = Order.objects.filter(archive=False).exclude(
-                id__in=Invoice.objects.all().values_list('order_id')
+            orders = Order.objects.filter(
+                archive=False
+            ).exclude(
+                id__in=Invoice.objects.values_list('order_id', flat=True)
             ).order_by('-created_on')
 
-        # Serialize and return the orders
-        return Response({'orders': orders.values()}, status=status.HTTP_200_OK)
+        # Serialize the orders
+        result = OrderSerializer(orders, many=True).data
+        return Response({'orders': result}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Create a new invoice for a specific order.",
+        request_body=InvoiceSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                'order_id',
+                openapi.IN_PATH,
+                description="The ID of the order for which the invoice is created.",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            201: openapi.Response(
+                description="Invoice created successfully.",
+                examples={
+                    "application/json": {
+                        "invoice_id": 123,
+                        "status": "success"
+                    }
+                }
+            ),
+            400: "Bad Request"
+        }
+    )
     def post(self, request, *args, **kwargs):
         """
         Create a new invoice for a specific order.
-
-        - Validates the request data using `InvoiceSerializer`.
-        - Saves the invoice and triggers service logic for additional processing.
-
-        Args:
-            request: The HTTP request object.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            Response: A JSON response with the created invoice's ID or validation errors.
         """
-        order_id = kwargs.get('order_id', None)
+        order_id = kwargs.get('order_id')
+        if not order_id:
+            return Response(
+                {'error': 'order_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Fetch the order or return 404
         order = get_object_or_404(Order, id=order_id)
+        if not order:
+            return Response(
+                {'error': 'order not found '},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        serializer = InvoiceSerializer(data=request.data, context={'request': request})
+        serializer = InvoiceSerializer(
+            data=request.data,
+            context={'request': request},
+        )
         if serializer.is_valid():
-            invoice = serializer.save()  # Save the invoice using the serializer
-            return Response({'invoice_id': invoice.id, 'status': 'success'}, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Call the service layer to create the invoice
+            invoice, pdf_params = InvoiceService.create_invoice(
+                validated_data=serializer.validated_data,
+                request_user=request.user,
+            )
+            return Response(
+                {'invoice_id': invoice.id,
+                 "parameters": pdf_params,
+                 'status': 'success'},
+                status=status.HTTP_201_CREATED
+                            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class InvoiceUpdateView(APIView):
@@ -150,42 +292,6 @@ class InvoiceUpdateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, invoice_id):
-        """
-        Retrieve the Invoice instance by ID.
-
-        Args:
-            invoice_id (int): The ID of the invoice.
-
-        Returns:
-            Invoice: The retrieved invoice object.
-
-        Raises:
-            Returns None if the invoice does not exist.
-        """
-        try:
-            return Invoice.objects.get(id=invoice_id)
-        except Invoice.DoesNotExist:
-            return None
-
-    def get(self, request, invoice_id):
-        """
-        Retrieve the details of an invoice.
-
-        Args:
-            request (Request): The incoming HTTP request.
-            invoice_id (int): The ID of the invoice to retrieve.
-
-        Returns:
-            Response: Serialized invoice data or a 404 error.
-        """
-        invoice = self.get_object(invoice_id)
-        if not invoice:
-            return Response({"detail": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = InvoiceSerializer(invoice)
-        return Response(serializer.data)
-
     def put(self, request, invoice_id):
         """
         Fully update an invoice.
@@ -197,13 +303,10 @@ class InvoiceUpdateView(APIView):
         Returns:
             Response: Updated invoice data or validation errors.
         """
-        invoice = self.get_object(invoice_id)
-        if not invoice:
-            return Response({"detail": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        invoice = get_object_or_404(Invoice, id=invoice_id)
         serializer = InvoiceSerializer(invoice, data=request.data, context={'request': request})
         if serializer.is_valid():
-            updated_invoice = UpdateInvoiceService.update_invoice(invoice, serializer.validated_data, request)
+            updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
             return Response(InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -219,13 +322,10 @@ class InvoiceUpdateView(APIView):
         Returns:
             Response: Updated invoice data or validation errors.
         """
-        invoice = self.get_object(invoice_id)
-        if not invoice:
-            return Response({"detail": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        invoice = get_object_or_404(Invoice, id=invoice_id)
         serializer = InvoiceSerializer(invoice, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
-            updated_invoice = UpdateInvoiceService.update_invoice(invoice, serializer.validated_data, request)
+            updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
             return Response(InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -239,6 +339,8 @@ class InvoiceDetailView(APIView):
         - GET: Retrieves the invoice details and processes the invoice if no history exists.
     """
 
+    @swagger_auto_schema(
+        operation_description="Retrieves the details of the specified invoice and processes it if necessary.")
     def get(self, request, invoice_id):
         """
         Retrieves the details of the specified invoice and processes it if necessary.
@@ -253,16 +355,41 @@ class InvoiceDetailView(APIView):
         # Retrieve the invoice
         invoice = get_object_or_404(Invoice, id=invoice_id)
 
-        # Process the invoice if necessary
-        data = DetailedInvoiceService.process_invoice(invoice, request.user)
+        try:
+            data = DetailedInvoiceService.process_invoice(
+                invoice=invoice,
+                user=request.user,
+            )
+            return Response(data, status=status.HTTP_200_OK)
 
-        return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(
+                f"Error processing invoice {invoice_id}: {str(e)}"
+            )
+            return Response(
+                {"error": "An error occurred while processing the invoice."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class InvoiceDeleteView(APIView):
+    """
+    View for deleting an invoice. Only authenticated users can access this view.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, invoice_id):
+        """
+        Handle the DELETE request to remove an invoice by its ID.
+
+        Args:
+            request: The HTTP request object.
+            invoice_id: The ID of the invoice to be deleted.
+
+        Returns:
+            Response: A JSON response indicating the result of the deletion attempt.
+        """
         # Retrieve the invoice object
         this_invoice = get_object_or_404(Invoice, id=invoice_id)
 
