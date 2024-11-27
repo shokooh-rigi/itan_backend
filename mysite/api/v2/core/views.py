@@ -1,15 +1,19 @@
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
-from mysite.core.models import ContactInfo, Person, Project
+from mysite.core.models import ContactInfo, Person, Project, Company, Profile, CreditCard
+from mysite.s3_file_manager import S3
+from .permissions import IsOwnerOrAdmin
 from .serializers import (
     CompanyCustomerSerializer, CompanyEngineerSerializer,
-    CustomerSerializer, EngineerSerializer,
-    ManufacturerSerializer, ProjectSerializer
+    ProjectSerializer, CompanySerializer, PersonSerializer, CreditCardSerializer
 )
+from .serializers import ProfileSerializer
 
 
 class CompanyCustomerViewSet(viewsets.ModelViewSet):
@@ -42,13 +46,101 @@ class CompanyEngineerViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
+class CompanyViewSet(ModelViewSet):
     """
-    API endpoint for managing Customer Persons.
+    API ViewSet for managing Company objects.
+    Supports CRUD operations.
+    """
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Optionally filter the queryset based on query parameters.
+        """
+        queryset = super().get_queryset()
+        name = self.request.query_params.get("name", None)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
+
+
+class PersonViewSet(ModelViewSet):
+    """
+    API ViewSet for managing Person objects.
+    Supports CRUD operations.
     """
     queryset = Person.objects.all()
-    serializer_class = CustomerSerializer
+    serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Optionally filter the queryset based on query parameters.
+        """
+        queryset = super().get_queryset()
+        company_id = self.request.query_params.get("company", None)
+        name = self.request.query_params.get("name", None)
+
+        if company_id:
+            queryset = queryset.filter(company__id=company_id)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
+
+class ProfileViewSet(ModelViewSet):
+    queryset = Profile.objects.select_related(
+        'user', 'customer', 'tech', 'contact_info', 'location', 'physical_address', 'billing_address'
+    )
+    serializer_class = ProfileSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        filters = {}
+        if user_id := self.request.query_params.get('user'):
+            filters['user__id'] = user_id
+        if user_type := self.request.query_params.get('user_type'):
+            filters['user_type'] = user_type
+        if worker_status := self.request.query_params.get('worker_status'):
+            filters['worker_status'] = worker_status
+
+        return queryset.filter(**filters)
+
+    def perform_create(self, serializer):
+        if self.request.user.is_authenticated:
+            profile = serializer.save(user=self.request.user)
+            s3 = S3()
+            # Upload files after profile is created
+            self.upload_file_to_s3(profile, 'photo', s3)
+            self.upload_file_to_s3(profile, 'e_sign', s3)
+            self.upload_file_to_s3(profile, 'stamp', s3)
+            self.upload_file_to_s3(profile, 'wallpaper', s3)
+        else:
+            raise PermissionDenied("Authentication is required to create a profile.")
+
+    def upload_file_to_s3(self, profile, field_name, s3):
+        file = getattr(profile, field_name, None)
+        if file:
+            s3.upload_file_to_bucket(file_name=file.name, key=file.name)
+
+    def delete(self, *args, **kwargs):
+        profile = self.get_object()  # Get the profile instance to delete
+        s3 = S3()
+        for field_name in ['photo', 'e_sign', 'stamp', 'wallpaper']:
+            file = getattr(profile, field_name, None)
+            if file:
+                s3.delete_file_from_bucket(file.name)
+        return super().delete(*args, **kwargs)
+
+
+class CreditCardViewSet(viewsets.ModelViewSet):
+    queryset = CreditCard.objects.all()
+    serializer_class = CreditCardSerializer
+    permission_classes = [IsOwnerOrAdmin]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -62,7 +154,7 @@ class EngineerViewSet(viewsets.ModelViewSet):
     API endpoint for managing Engineer Persons.
     """
     queryset = Person.objects.all()
-    serializer_class = EngineerSerializer
+    serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -77,7 +169,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
     API endpoint for managing Manufacturer Persons.
     """
     queryset = Person.objects.all()
-    serializer_class = ManufacturerSerializer
+    serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):

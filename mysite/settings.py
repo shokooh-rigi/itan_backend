@@ -315,7 +315,7 @@ STORAGE_INVOICE_PDFS_PATH: str = os.getenv(
 )
 # page size
 PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
-
+LIMIT_FILE_SIZE: int = os.getenv("LIMIT_FILE_SIZE",  5 * 1024 * 1024)  # Limit file size to 5MB
 
 # S3 Configuration
 AWS_S3_DOMAIN = os.getenv("AWS_S3_DOMAIN", "https://s3.us-central-1.wasabisys.com")

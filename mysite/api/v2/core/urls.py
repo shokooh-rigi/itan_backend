@@ -1,13 +1,17 @@
-from rest_framework.routers import DefaultRouter
-from . import views
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
+from . import views
+from .views import CompanyViewSet, ProfileViewSet
 from .views import GetEngineerId, GetPersonId, GetCompanyId, GetProjectId
 
 router = DefaultRouter()
+
+router.register(r'companies', CompanyViewSet, basename='company')
 router.register(r'company-customer', views.CompanyCustomerViewSet, basename='company-customer')
 router.register(r'company-engineer', views.CompanyEngineerViewSet, basename='company-engineer')
-router.register(r'customer', views.CustomerViewSet, basename='customer')
+router.register(r'persons', views.PersonViewSet, basename='persons')
+router.register(r'profiles', ProfileViewSet, basename='profile')
 router.register(r'engineer', views.EngineerViewSet, basename='engineer')
 router.register(r'manufacturer', views.ManufacturerViewSet, basename='manufacturer')
 router.register(r'project', views.ProjectViewSet, basename='project')
