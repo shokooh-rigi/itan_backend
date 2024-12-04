@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from mysite import settings
-from mysite.core.models import ContactInfo, Person, Project, Company, Address, Profile, CreditCard
+from mysite.core.models import ContactInfo, Person, Project, Company, Address, Profile, CreditCard, LicenseFiles
 from mysite.s3_file_manager import S3
 
 
@@ -119,12 +119,19 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for User model.
-    """
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'email', 'username']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name']
+
+    # todo: ask for we have capcha or not?
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        user.is_active = False
+        user.save()
+        return user
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -246,3 +253,8 @@ class CreditCardSerializer(serializers.ModelSerializer):
 
         return value
 
+
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LicenseFiles
+        fields = ['value']

@@ -1,19 +1,30 @@
-from rest_framework import status
-from rest_framework import viewsets
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator as account_activation_token
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
-from mysite.core.models import ContactInfo, Person, Project, Company, Profile, CreditCard
+from mysite import settings
+from mysite.core.models import ContactInfo, Person, Project, Company, Profile, CreditCard, LicenseInfo
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
 from .serializers import (
     CompanyCustomerSerializer, CompanyEngineerSerializer,
-    ProjectSerializer, CompanySerializer, PersonSerializer, CreditCardSerializer
+    ProjectSerializer, CompanySerializer, PersonSerializer, CreditCardSerializer,
+    ProfileSerializer, UserSerializer, DocumentSerializer
 )
-from .serializers import ProfileSerializer
 
 
 class CompanyCustomerViewSet(viewsets.ModelViewSet):
@@ -244,3 +255,109 @@ class GetCompanyId(APIView):
             return Response({'company_id': company.id}, status=status.HTTP_200_OK)
         except ContactInfo.DoesNotExist:
             return Response({'error': 'Company not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SignUpAPIView(APIView):
+    """
+    API for user registration. Creates a new user and sends an activation email.
+    """
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save(is_active=False)  # Deactivate user until they activate their account
+
+            # Send activation email
+            current_site = get_current_site(request)
+            subject = 'Activate Your Account on Tab Technologies INC.'
+            message = render_to_string('account_activation_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'main_website': LicenseInfo.objects.get(key='OwnerWeb').value,
+                'uid': urlsafe_base64_encode(str(user.pk).encode()),
+                'token': account_activation_token.make_token(user),
+            })
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+            return Response(
+                {"message": "Account created. Please check your email to activate your account."},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AccountActivationSentAPIView(APIView):
+    """
+    API to confirm that the account activation link has been sent.
+    """
+    def get(self, request, *args, **kwargs):
+        return Response(
+            {"message": "Account activation link sent. Please check your email."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ActivateAccountAPIView(APIView):
+    """
+    API for activating user accounts via email link.
+    """
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            # Decode the user ID
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            user = None
+
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return Response(
+                {"message": "Account successfully activated."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"message": "Invalid activation link."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class DocumentUploadAPIView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, *args, **kwargs):
+        serializer = DocumentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Document uploaded successfully."},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ChangePasswordAPIView(APIView):
+    """
+    API for changing passwords and invalidating JWT tokens.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        form = PasswordChangeForm(user=request.user, data=request.data)
+        if form.is_valid():
+            form.save()
+            # Blacklist all outstanding tokens for the user
+            tokens = OutstandingToken.objects.filter(user=request.user)
+            for token in tokens:
+                token.blacklist()
+            return Response(
+                {"message": "Password successfully updated. Please log in again."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"errors": form.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
