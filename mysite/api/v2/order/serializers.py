@@ -12,4 +12,17 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
 
-    fields = '__all_'
+    fields = [
+        "id",
+        "project_number",
+        "po_number",
+        "date_po_received",
+        "estimated_date_of_project",
+        "completion_percentage",
+        "fully_settled",
+        "archive",
+        "state",
+        "start_date",
+        "end_date",
+        "created_on",
+    ]
