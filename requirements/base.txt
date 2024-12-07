@@ -40,7 +40,6 @@ django-storages==1.14.2  # https://github.com/jschneier/django-storages
 img2pdf==0.5.1  # https://gitlab.mister-muffin.de/josch/img2pdf
 boto3==1.34.79  # https://github.com/boto/boto3
 django-use-email-as-username==1.4.0  # https://github.com/jmfederico/django-use-email-as-username
-reportlab==4.0.9  # https://www.reportlab.com/
 pdf2image==1.17.0  # https://github.com/Belval/pdf2image
 pydantic==2.9.1
 pydantic-core==2.23.3
