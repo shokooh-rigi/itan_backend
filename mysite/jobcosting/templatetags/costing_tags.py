@@ -1,7 +1,7 @@
 from django import template
 
 from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator
-from ...order.models import EstimateEquipment
+from ...estimator.models import EstimateEquipment
 from ...gi.models import InvoiceTransaction
 from ...scheduler.models import Schedule, Maintenance
 from ...order.templatetags.order_tags import calculate_total_amount_due
@@ -11,12 +11,16 @@ register = template.Library()
 
 @register.simple_tag
 def estimate_total_work(estimate_id):
-    estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
+    estimate_equipments = EstimateEquipment.objects.filter(
+        estimate=estimate_id, flag=True
+    )
     estimate_work = 0
     for each_estimate_equipment in estimate_equipments:
-        work_total = int(each_estimate_equipment.quantity) * int(each_estimate_equipment.equipment.estimate_work)
+        work_total = int(each_estimate_equipment.quantity) * int(
+            each_estimate_equipment.equipment.estimate_work
+        )
         estimate_work += int(work_total)
-    estimate_work = estimate_work/60
+    estimate_work = estimate_work / 60
     return estimate_work
 
 
@@ -31,7 +35,7 @@ def actual_total_work(order_id):
     for maintenance in maintenances:
         work_total = maintenance.schedule_end - maintenance.schedule_start
         actual_work += int(work_total.total_seconds())
-    actual_work = actual_work/3600
+    actual_work = actual_work / 3600
     return actual_work
 
 
