@@ -27,26 +27,33 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 APPS_DIR = BASE_DIR / "mysite"
 
 # General Settings
-SECRET_KEY = env("SECRET_KEY", default="i%06y2q&4l-!nv*8oolv470b!o)!xg*^9f7^d=q10#b$wd%c_e")
+SECRET_KEY = env(
+    "SECRET_KEY", default="i%06y2q&4l-!nv*8oolv470b!o)!xg*^9f7^d=q10#b$wd%c_e"
+)
 ENV = env("ENV", default="local")
 DEBUG = ENV in ["local", "test"]
 
-ALLOWED_HOSTS = env.list(
-    "ALLOWED_HOSTS",
-    default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
-)
+if ENV == "local":
+    ALLOWED_HOSTS = env.list(
+        "ALLOWED_HOSTS",
+        default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
+    )
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
+    CORS_ORIGIN_ALLOW_ALL = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Installed Apps
 DJANGO_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.humanize',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -55,104 +62,104 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
-    'djrichtextfield',
-    'tinymce',
-    'import_export',
-    'django_recaptcha',
-    'django_select2',
-    'adminsortable2',
-    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
-    'custom_user.apps.CustomUserConfig',
-    'drf_yasg',
+    "djrichtextfield",
+    "tinymce",
+    "import_export",
+    "django_recaptcha",
+    "django_select2",
+    "adminsortable2",
+    "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
+    "custom_user.apps.CustomUserConfig",
+    "drf_yasg",
 ]
 LOCAL_APPS = [
-    'mysite.core',
-    'mysite.estimator',
-    'mysite.proposal',
-    'mysite.submittal',
-    'mysite.mgmreport',
-    'mysite.order',
-    'mysite.coi',
-    'mysite.gi',
-    'mysite.report',
-    'mysite.bidfilemgm',
-    'mysite.ibfm',
-    'mysite.administrative',
-    'mysite.scheduler',
-    'mysite.settlement',
-    'mysite.techupload',
-    'mysite.dbmanagement',
-    'mysite.equipments',
-    'mysite.sheetcreator',
-    'mysite.testsheetsetup',
-    'mysite.testsheetvav',
-    'mysite.testsheetterminal',
-    'mysite.testsheetvelocity',
-    'mysite.testsheetflow',
-    'mysite.testsheetpump',
-    'mysite.testsheetdalt',
-    'mysite.testsheetchiller',
-    'mysite.testsheetvavboxfanheatschedule',
-    'mysite.testsheetinductionunit',
-    'mysite.testsheetphe',
-    'mysite.testsheetphe2',
-    'mysite.testsheetairmoving',
-    'mysite.testsheetvavboxtemperatureschedule',
-    'mysite.testsheetvavboxschedule',
-    'mysite.testsheetpitottraverse',
-    'mysite.testsheethotwaterboiler',
-    'mysite.generatereport',
-    'mysite.projectprocess',
-    'mysite.masspayment',
-    'mysite.jobcosting',
-    'mysite.companyperformance',
-    'mysite.revenueperformance',
-    'mysite.dashboardtech',
-    'mysite.estimator.templatetags',
-    'mysite.pdf_analyzer',
-    'api',
+    "mysite.core",
+    "mysite.estimator",
+    "mysite.proposal",
+    "mysite.submittal",
+    "mysite.mgmreport",
+    "mysite.order",
+    "mysite.coi",
+    "mysite.gi",
+    "mysite.report",
+    "mysite.bidfilemgm",
+    "mysite.ibfm",
+    "mysite.administrative",
+    "mysite.scheduler",
+    "mysite.settlement",
+    "mysite.techupload",
+    "mysite.dbmanagement",
+    "mysite.equipments",
+    "mysite.sheetcreator",
+    "mysite.testsheetsetup",
+    "mysite.testsheetvav",
+    "mysite.testsheetterminal",
+    "mysite.testsheetvelocity",
+    "mysite.testsheetflow",
+    "mysite.testsheetpump",
+    "mysite.testsheetdalt",
+    "mysite.testsheetchiller",
+    "mysite.testsheetvavboxfanheatschedule",
+    "mysite.testsheetinductionunit",
+    "mysite.testsheetphe",
+    "mysite.testsheetphe2",
+    "mysite.testsheetairmoving",
+    "mysite.testsheetvavboxtemperatureschedule",
+    "mysite.testsheetvavboxschedule",
+    "mysite.testsheetpitottraverse",
+    "mysite.testsheethotwaterboiler",
+    "mysite.generatereport",
+    "mysite.projectprocess",
+    "mysite.masspayment",
+    "mysite.jobcosting",
+    "mysite.companyperformance",
+    "mysite.revenueperformance",
+    "mysite.dashboardtech",
+    "mysite.estimator.templatetags",
+    "mysite.pdf_analyzer",
+    "api",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 # Middleware
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # From the first file
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # From the first file
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # From the first file
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # From the first file
 ]
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('MYSQL_DB'),
-        'USER': env('MYSQL_USER'),
-        'PASSWORD': env('MYSQL_PASSWORD'),
-        'HOST': env('MYSQL_HOST'),
-        'PORT': env('MYSQL_PORT'),
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("MYSQL_DB"),
+        "USER": env("MYSQL_USER"),
+        "PASSWORD": env("MYSQL_PASSWORD"),
+        "HOST": env("MYSQL_HOST"),
+        "PORT": env("MYSQL_PORT"),
     }
 }
 
-DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 ROOT_URLCONF = "config.urls"
 
 WSGI_APPLICATION = "config.wsgi.application"
 
 if ENV == "test":
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env("POSTGRES_DB") + "_test",
-        'USER': env("POSTGRES_USER"),
-        'PASSWORD': env("POSTGRES_PASSWORD"),
-        'HOST': env("POSTGRES_HOST", default="localhost"),
-        'PORT': env("POSTGRES_PORT", default="5432"),
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("POSTGRES_DB") + "_test",
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST", default="localhost"),
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
 
 # Authentication
@@ -173,25 +180,25 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [APPS_DIR / "static"]
-WEB_URL = "" # todo: complete it later
+WEB_URL = ""  # todo: complete it later
 MEDIA_URL = "/media/"
 MEDIA_ROOT = APPS_DIR / "media"
 
 # Templates
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [APPS_DIR / "templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [APPS_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
             ],
         },
     },
@@ -209,8 +216,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -241,72 +247,75 @@ LOGGING = {
 
 # Third-Party Configurations
 DJRICHTEXTFIELD_CONFIG = {
-    'js': ['//tinymce.cachefly.net/4.1/tinymce.min.js'],
-    'init_template': 'djrichtextfield/init/tinymce.js',
-    'settings': {
-        'menubar': True,
-        'plugins': 'link image code',
-        'toolbar': 'code | bold italic | link image | removeformat',
+    "js": ["//tinymce.cachefly.net/4.1/tinymce.min.js"],
+    "init_template": "djrichtextfield/init/tinymce.js",
+    "settings": {
+        "menubar": True,
+        "plugins": "link image code",
+        "toolbar": "code | bold italic | link image | removeformat",
     },
 }
 
 FILE_UPLOAD_PERMISSIONS = 0o644
 MAX_UPLOAD_SIZE = 524288000
-DEFAULT_FROM_EMAIL = 'Estimator at TAB TECHNOLOGIES <estimator@tabtechinc.com>'
+DEFAULT_FROM_EMAIL = "Estimator at TAB TECHNOLOGIES <estimator@tabtechinc.com>"
 
 BOOTSTRAP4 = {
-    'include_jquery': True,
+    "include_jquery": True,
 }
 
-RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PRIVATE_KEY')
+RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY")
+RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
 
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
 
-AWS_ACCESS_KEY_ID = 'EA8U7ESW7BOLAMRCJBPD'
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'reza-local'
-AWS_REGION_NAME = 'eu-central-1'
-AWS_S3_ENDPOINT_URL = 'https://s3.%s.wasabisys.com' % AWS_REGION_NAME
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.wasabisys.com' % (AWS_STORAGE_BUCKET_NAME, AWS_REGION_NAME)
+AWS_ACCESS_KEY_ID = "EA8U7ESW7BOLAMRCJBPD"
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = "reza-local"
+AWS_REGION_NAME = "eu-central-1"
+AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_REGION_NAME
+AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.wasabisys.com" % (
+    AWS_STORAGE_BUCKET_NAME,
+    AWS_REGION_NAME,
+)
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
+    "CacheControl": "max-age=86400",
 }
 AWS_S3_OBJECT_PARAMETERS
-AWS_LOCATION = 'static/'
-AWS_DEFAULT_ACL = 'public-read'
+AWS_LOCATION = "static/"
+AWS_DEFAULT_ACL = "public-read"
 AWS_QUERYSTRING_AUTH = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 
-if ENV == 'local':
-    STATIC_URL = '/mysite/static/'
-if ENV != 'local':
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+if ENV == "local":
+    STATIC_URL = "/mysite/static/"
+if ENV != "local":
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+    STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 
-if ENV != 'local':
-    DEFAULT_FILE_STORAGE = 'mysite.storage_backends.MediaStorage'
-MEDIA_URL = 'media/'
+if ENV != "local":
+    DEFAULT_FILE_STORAGE = "mysite.storage_backends.MediaStorage"
+MEDIA_URL = "media/"
 
 
 # upload file paths:
 UPLOAD_IBID_FILE_PATH: str = os.getenv(
-        "UPLOAD_IBID_FILE_PATH",
-        'uploads/ibidfiles',
-    )
+    "UPLOAD_IBID_FILE_PATH",
+    "uploads/ibidfiles",
+)
 UPLOAD_BID_FILE_PATH: str = os.getenv(
-        "UPLOAD_BID_FILE_PATH",
-        'uploads/bidfiles',
-    )
+    "UPLOAD_BID_FILE_PATH",
+    "uploads/bidfiles",
+)
 UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = os.getenv(
-        "UPLOAD_BID_FILE_PATH",
-        'uploads/equipmentsubmittal',
-    )
+    "UPLOAD_BID_FILE_PATH",
+    "uploads/equipmentsubmittal",
+)
 STORAGE_ESTIMATE_PDFS_PATH: str = os.getenv(
     "STORAGE_ESTIMATE_PDFS_PATH",
     "media/pdfs/estimate/",
@@ -317,12 +326,16 @@ STORAGE_INVOICE_PDFS_PATH: str = os.getenv(
 )
 # page size
 PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
-LIMIT_FILE_SIZE: int = os.getenv("LIMIT_FILE_SIZE",  5 * 1024 * 1024)  # Limit file size to 5MB
+LIMIT_FILE_SIZE: int = os.getenv(
+    "LIMIT_FILE_SIZE", 5 * 1024 * 1024
+)  # Limit file size to 5MB
 
 # S3 Configuration
 AWS_S3_DOMAIN = os.getenv("AWS_S3_DOMAIN", "https://s3.us-central-1.wasabisys.com")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "912TIXQPRLEFEDLWGSXM")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "BggzC2hjvtr1DMQjjAk6k7ZnDua9wXw8B0RciN0R")
+AWS_SECRET_ACCESS_KEY = os.getenv(
+    "AWS_SECRET_ACCESS_KEY", "BggzC2hjvtr1DMQjjAk6k7ZnDua9wXw8B0RciN0R"
+)
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-central-1")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "airtab-test")
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
