@@ -25,7 +25,7 @@ def estimate_number_generator(estimate_id: int):
     """
     estimate = Estimate.objects.get(id=estimate_id)
     estimator_long_id = estimate.created_by.id + 100
-    estimate_date_created = str(estimate.created_on).replace('-', '')[2:8]
+    estimate_date_created = str(estimate.created_on).replace("-", "")[2:8]
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
 
 
@@ -43,7 +43,7 @@ class Estimate(BaseModel):
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
-        related_name='cu_person',
+        related_name="cu_person",
     )
     project = models.ForeignKey(
         Project,
@@ -56,15 +56,14 @@ class Estimate(BaseModel):
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
-        related_name='en_person',
+        related_name="en_person",
     )
     service = models.ManyToManyField(
         Service,
-        related_name='estimates',
+        related_name="estimates",
         blank=False,
     )
     due_date = models.DateField(
-        default=datetime.datetime.now().strftime("%m/%d/%Y"),
         blank=False,
         null=True,
     )
@@ -75,8 +74,8 @@ class Estimate(BaseModel):
 
     class Meta:
         ordering = ["-due_date"]
-        verbose_name = 'Estimate List'
-        verbose_name_plural = 'Estimate Lists'
+        verbose_name = "Estimate List"
+        verbose_name_plural = "Estimate Lists"
 
     def __str__(self):
         return estimate_number_generator(self.id)
@@ -103,11 +102,11 @@ class EstimateHistory(models.Model):
 
     class Meta:
         ordering = ["created_on"]
-        verbose_name = 'Estimate History'
-        verbose_name_plural = 'Estimate Histories'
+        verbose_name = "Estimate History"
+        verbose_name_plural = "Estimate Histories"
 
     def __str__(self):
-        return str(self.estimate) + ': History ' + str(self.version)
+        return str(self.estimate) + ": History " + str(self.version)
 
 
 class EstimateEquipment(models.Model):
@@ -139,8 +138,8 @@ class EstimateEquipment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Estimated Equipment List'
-        verbose_name_plural = 'Estimated Equipment Lists'
+        verbose_name = "Estimated Equipment List"
+        verbose_name_plural = "Estimated Equipment Lists"
 
     def __str__(self):
         return estimate_number_generator(self.estimate.id) + " " + self.equipment.name
@@ -148,7 +147,7 @@ class EstimateEquipment(models.Model):
     def soft_delete(self):
         """Marks the record as deleted without actually removing it from the database."""
         self.is_deleted = True
-        self.save(update_fields=['is_deleted', 'updated_at'])
+        self.save(update_fields=["is_deleted", "updated_at"])
 
 
 class EstimateDetails(models.Model):
@@ -187,8 +186,8 @@ class EstimateDetails(models.Model):
     flag = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name = 'Estimated Additional info'
-        verbose_name_plural = 'Estimated Additional infos'
+        verbose_name = "Estimated Additional info"
+        verbose_name_plural = "Estimated Additional infos"
 
     def __str__(self):
         return estimate_number_generator(self.estimate.id)

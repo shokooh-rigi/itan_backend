@@ -11,7 +11,9 @@ class iBidFile(models.Model):
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
-        help_text="Maximum Upload Size: " + str(settings.MAX_UPLOAD_SIZE / 1048576) + "MB",
+        help_text="Maximum Upload Size: "
+        + str(settings.MAX_UPLOAD_SIZE / 1048576)
+        + "MB",
     )
     project = models.ForeignKey(
         Project,
@@ -20,7 +22,6 @@ class iBidFile(models.Model):
         null=True,
     )
     due_date = models.DateField(
-        default=datetime.datetime.now().strftime("%m/%d/%Y"),
         blank=False,
         null=True,
     )
@@ -48,8 +49,10 @@ class iBidFile(models.Model):
 
     class Meta:
         ordering = ["-due_date"]
-        verbose_name = 'Bid Files Management'
-        verbose_name_plural = 'Bid Files Management'
+        verbose_name = "Bid Files Management"
+        verbose_name_plural = "Bid Files Management"
 
     def __str__(self):
-        return str(self.id) + ' - ' + self.customer.company.name + ': ' + str(self.project)
+        return (
+            str(self.id) + " - " + self.customer.company.name + ": " + str(self.project)
+        )

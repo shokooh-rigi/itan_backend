@@ -16,9 +16,7 @@ class Report(models.Model):
         )
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False)
-    report_date = models.DateField(
-        default=datetime.datetime.now().strftime("%m/%d/%Y"), blank=False, null=False
-    )
+    report_date = models.DateField(blank=False, null=False)
     report_file = models.FileField(upload_to=_, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)

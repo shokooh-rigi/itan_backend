@@ -9,18 +9,20 @@ from mysite.core.models import Person, User, Project
 
 class BidFile(BaseModel):
     """
-        Model representing ibid files associated with a customer and project.
-        Includes details such as the customer, project, due date, uploaded file,
-        creator, and additional notes. Also contains flags for archiving and
-        controlling visibility to customers.
-        """
+    Model representing ibid files associated with a customer and project.
+    Includes details such as the customer, project, due date, uploaded file,
+    creator, and additional notes. Also contains flags for archiving and
+    controlling visibility to customers.
+    """
 
     customer = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
-        help_text="Maximum Upload Size: " + str(settings.MAX_UPLOAD_SIZE / 1048576) + "MB",
+        help_text="Maximum Upload Size: "
+        + str(settings.MAX_UPLOAD_SIZE / 1048576)
+        + "MB",
     )
     # todo: whats this hard code : 1048576 ????
 
@@ -31,7 +33,6 @@ class BidFile(BaseModel):
         null=True,
     )
     due_date = models.DateField(
-        default=datetime.datetime.now().strftime("%m/%d/%Y"),
         blank=False,
         null=True,
     )
@@ -45,18 +46,21 @@ class BidFile(BaseModel):
 
     class Meta:
         ordering = ["-due_date"]
-        verbose_name = 'Bid Files Management'
-        verbose_name_plural = 'Bid Files Managements'
+        verbose_name = "Bid Files Management"
+        verbose_name_plural = "Bid Files Managements"
 
     def __str__(self):
-        return str(self.id) + ' - ' + self.customer.company.name + ': ' + str(self.project)
+        return (
+            str(self.id) + " - " + self.customer.company.name + ": " + str(self.project)
+        )
 
 
 class EquipmentSubmittal(BaseModel):
     """
-       Model representing an equipment submittal associated with a ibid file.
-       Stores the file related to equipment and tracks the creation timestamp.
-       """
+    Model representing an equipment submittal associated with a ibid file.
+    Stores the file related to equipment and tracks the creation timestamp.
+    """
+
     bidfile = models.OneToOneField(
         BidFile,
         on_delete=models.SET_NULL,

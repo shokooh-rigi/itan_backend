@@ -17,6 +17,7 @@ class Invoice(BaseModel):
     Represents an invoice for an order. Includes details such as dates,
     description, invoice type, and the associated user who created the invoice.
     """
+
     order = models.OneToOneField(
         Order,
         on_delete=models.CASCADE,
@@ -24,22 +25,12 @@ class Invoice(BaseModel):
     )
     date_started = models.DateField(blank=True, null=True)
     date_completed = models.DateField(blank=True, null=True)
-    terms = models.CharField(
-        max_length=255,
-        blank=True,
-        default='Due upon Receipt'
-    )
+    terms = models.CharField(max_length=255, blank=True, default="Due upon Receipt")
     description = models.TextField(
-        max_length=255,
-        blank=True,
-        default='TESTING AND BALANCING'
+        max_length=255, blank=True, default="TESTING AND BALANCING"
     )
     percent_of_performance_completed = models.FloatField(
-        default=100,
-        validators=[
-            MaxValueValidator(100),
-            MinValueValidator(0)
-        ]
+        default=100, validators=[MaxValueValidator(100), MinValueValidator(0)]
     )
     # Invoice type: 1: Full Invoice, 2: Pre-Demo Invoice, 3: Rest Invoice, 4: DALT
     invoice_type = models.SmallIntegerField(default=1)
@@ -50,8 +41,8 @@ class Invoice(BaseModel):
 
     class Meta:
         ordering = ["-created_on"]
-        verbose_name = 'Invoice List'
-        verbose_name_plural = 'Invoice Lists'
+        verbose_name = "Invoice List"
+        verbose_name_plural = "Invoice Lists"
 
     def __str__(self):
         return estimate_number_generator(self.order.proposal.estimate.id) + "I"
@@ -68,9 +59,7 @@ class Invoice(BaseModel):
             str: File path of the generated PDF.
         """
         quote_pdf = Render.render_to_file(
-            'pdfTemplates/invoiceTemplate.html',
-            parameters,
-            'invoice'
+            "pdfTemplates/invoiceTemplate.html", parameters, "invoice"
         )
         return quote_pdf
 
@@ -85,7 +74,7 @@ class Invoice(BaseModel):
         Returns:
             bool: Success of the delete operation.
         """
-        delete_pdf = Render.delete_file(parameters, 'invoice')
+        delete_pdf = Render.delete_file(parameters, "invoice")
         return delete_pdf
 
 
@@ -94,6 +83,7 @@ class InvoiceTransaction(models.Model):
     Represents a transaction associated with an invoice.
     Tracks payment details and user who created the transaction.
     """
+
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     amount = models.DecimalField(
         max_digits=8,
@@ -103,7 +93,6 @@ class InvoiceTransaction(models.Model):
         null=False,
     )
     payment_date = models.DateField(
-        default=datetime.datetime.now().strftime("%Y-%m-%d"),
         blank=False,
         null=False,
     )
@@ -113,18 +102,21 @@ class InvoiceTransaction(models.Model):
 
     class Meta:
         ordering = ["-created_on"]
-        verbose_name = 'Invoice Transactions'
-        verbose_name_plural = 'Invoice Transactions'
+        verbose_name = "Invoice Transactions"
+        verbose_name_plural = "Invoice Transactions"
 
     def __str__(self):
-        return str(self.invoice) + ' $' + str(self.amount)
+        return str(self.invoice) + " $" + str(self.amount)
 
 
 class AccountSummary(models.Model):
     """
     Represents a summary of an account, including statements and associated user details.
     """
-    customer = models.ForeignKey(ContactInfo, on_delete=models.CASCADE, blank=False, null=False)
+
+    customer = models.ForeignKey(
+        ContactInfo, on_delete=models.CASCADE, blank=False, null=False
+    )
     statement_no = models.CharField(max_length=10, blank=False, null=False)
     total = models.DecimalField(
         max_digits=8,
@@ -138,11 +130,11 @@ class AccountSummary(models.Model):
 
     class Meta:
         ordering = ["-created_on"]
-        verbose_name = 'Account Summary List'
-        verbose_name_plural = 'Account Summary Lists'
+        verbose_name = "Account Summary List"
+        verbose_name_plural = "Account Summary Lists"
 
     def __str__(self):
-        return str(self.statement_no) + ' ' + str(self.customer)
+        return str(self.statement_no) + " " + str(self.customer)
 
     @classmethod
     def create_account_summary_pdf(cls, parameters):
@@ -156,9 +148,7 @@ class AccountSummary(models.Model):
             str: File path of the generated PDF.
         """
         account_summary_pdf = Render.render_to_file(
-            'pdfTemplates/accountSummaryTemplate.html',
-            parameters,
-            'accountsummary'
+            "pdfTemplates/accountSummaryTemplate.html", parameters, "accountsummary"
         )
         return account_summary_pdf
 
@@ -173,7 +163,7 @@ class AccountSummary(models.Model):
         Returns:
             bool: Success of the delete operation.
         """
-        delete_pdf = Render.delete_file(parameters, 'accountsummary')
+        delete_pdf = Render.delete_file(parameters, "accountsummary")
         return delete_pdf
 
 
@@ -183,13 +173,14 @@ def update_statement_number(sender, instance, created, **kwargs):
     Signal handler to update statement numbers after an AccountSummary is created.
     """
     if created:
-        last_digit_setting = Setting.objects.get(key='Account Summary Number Last Digit')
+        last_digit_setting = Setting.objects.get(
+            key="Account Summary Number Last Digit"
+        )
         last_digit_setting.value = str(int(last_digit_setting.value) + 1)
         last_digit_setting.save()
-        instance.statement_no = (
-            Setting.objects.get(key='Project Number Pre Text').value.replace('A', 'S') +
-            last_digit_setting.value.zfill(3)
-        )
+        instance.statement_no = Setting.objects.get(
+            key="Project Number Pre Text"
+        ).value.replace("A", "S") + last_digit_setting.value.zfill(3)
         instance.save()
 
 
@@ -197,6 +188,7 @@ class InvoiceHistory(models.Model):
     """
     Tracks the history of invoices, including amounts invoiced, paid, and the balance due.
     """
+
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     total_invoiced = models.DecimalField(
         max_digits=8,
@@ -224,8 +216,8 @@ class InvoiceHistory(models.Model):
 
     class Meta:
         ordering = ["created_on"]
-        verbose_name = 'Invoice History'
-        verbose_name_plural = 'Invoice Histories'
+        verbose_name = "Invoice History"
+        verbose_name_plural = "Invoice Histories"
 
     def __str__(self):
-        return str(self.invoice) + ': History ' + self.pdf_filename
+        return str(self.invoice) + ": History " + self.pdf_filename
