@@ -13,3 +13,5 @@ source /home/airdec/virtualenv/public_html/api.airdec.net/3.11/bin/activate
 python manage.py makemigrations
 python manage.py migrate
 python manage.py collectstatic --noinput
+
+touch /home/airdec/public_html/api.airdec.net/tmp/restart.txt
