@@ -1,14 +1,15 @@
 <?php
 // Path to your Bash script
 $scriptPath = 'webhook-handler.sh';
-
-// Execute the Bash script and capture the output
-$output = shell_exec("bash $scriptPath 2>&1");
-
-// Save the output to a log file
 $logFile = '../api-update-log.txt';
-file_put_contents($logFile, $output, FILE_APPEND); // Use FILE_APPEND to add new output without overwriting
 
-// Display the output (optional)
-echo "<pre>$output</pre>";
+// Run the script in the background
+// "&" ensures the script runs in the background
+// ">>" appends output to the log file
+// "2>&1" redirects errors to the log file
+exec("bash $scriptPath >> $logFile 2>&1 &");
+
+// Respond to GitHub webhook immediately
+http_response_code(200);
+echo "OK";
 ?>
