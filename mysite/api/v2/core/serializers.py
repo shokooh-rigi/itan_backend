@@ -2,57 +2,41 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from mysite import settings
-from mysite.core.models import ContactInfo, Person, Project, Company, Address, Profile, CreditCard, LicenseFiles
+from mysite.core.models import (
+    ContactInfo,
+    Person,
+    Project,
+    Company,
+    Address,
+    Profile,
+    CreditCard,
+    LicenseFiles,
+)
 from mysite.s3_file_manager import S3
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ContactInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactInfo
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CompanyCustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ContactInfo
+        model = Company
         fields = [
             "name",
-            "tel",
-            "fax",
-            "mail",
-            "web",
-            "address_line_1",
-            "address_line_2",
-            "city",
-            "state",
-            "zip",
             "company_type",
-        ]
-
-
-class CompanyEngineerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContactInfo
-        fields = [
-            'id',
-            'name',
-            'tel',
-            'fax',
-            'mail',
-            'web',
-            'address_line_1',
-            'address_line_2',
-            'city',
-            'state',
-            'zip',
-            'company_type',
-            'created_by'
+            "contact_info",
+            "address",
+            "customer_id",
+            "customer_adjustment_in_percentage",
         ]
 
 
@@ -60,6 +44,7 @@ class PersonSerializer(serializers.ModelSerializer):
     """
     Serializer for the Person model.
     """
+
     contact_info = ContactInfoSerializer()
 
     class Meta:
@@ -69,12 +54,12 @@ class PersonSerializer(serializers.ModelSerializer):
             "name",
             "title",
             "gender",
-            'contact_info',
+            "contact_info",
             "created_by",
         ]
 
     def create(self, validated_data):
-        contact_info_data = validated_data.pop('contact_info')
+        contact_info_data = validated_data.pop("contact_info")
         # Create the related ContactInfo object
         contact_info = ContactInfo.objects.create(**contact_info_data)
         # Now create the Person object and associate the created ContactInfo
@@ -88,24 +73,20 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = [
-            "name",
-            "address",
-            "contact_info",
-            "note",
-            "created_by"
-        ]
+        fields = ["name", "address", "contact_info", "note", "created_by"]
 
     def create(self, validated_data):
-        address_data = validated_data.pop('address')
-        contact_info_data = validated_data.pop('contact_info')
+        address_data = validated_data.pop("address")
+        contact_info_data = validated_data.pop("contact_info")
 
         # Create the related Address and ContactInfo objects
         address = Address.objects.create(**address_data)
         contact_info = ContactInfo.objects.create(**contact_info_data)
 
         # Now create the Project object
-        project = Project.objects.create(address=address, contact_info=contact_info, **validated_data)
+        project = Project.objects.create(
+            address=address, contact_info=contact_info, **validated_data
+        )
 
         return project
 
@@ -123,7 +104,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'first_name', 'last_name']
+        fields = ["username", "email", "password", "first_name", "last_name"]
 
     # todo: ask for we have capcha or not?
 
@@ -139,27 +120,62 @@ class ProfileSerializer(serializers.ModelSerializer):
     Serializer for the Profile model.
     Handles nested relationships for related models and file validations.
     """
+
     user = serializers.StringRelatedField(read_only=True)
-    customer = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), required=False)
-    tech = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), required=False)
-    contact_info = serializers.PrimaryKeyRelatedField(queryset=ContactInfo.objects.all(), required=False)
-    location = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all(), required=False)
-    physical_address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all(), required=False)
-    billing_address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all(), required=False)
+    customer = serializers.PrimaryKeyRelatedField(
+        queryset=Person.objects.all(), required=False
+    )
+    tech = serializers.PrimaryKeyRelatedField(
+        queryset=Person.objects.all(), required=False
+    )
+    contact_info = serializers.PrimaryKeyRelatedField(
+        queryset=ContactInfo.objects.all(), required=False
+    )
+    location = serializers.PrimaryKeyRelatedField(
+        queryset=Address.objects.all(), required=False
+    )
+    physical_address = serializers.PrimaryKeyRelatedField(
+        queryset=Address.objects.all(), required=False
+    )
+    billing_address = serializers.PrimaryKeyRelatedField(
+        queryset=Address.objects.all(), required=False
+    )
 
     # Generated URLs for file fields
     photo_url = serializers.SerializerMethodField()
     e_sign_url = serializers.SerializerMethodField()
-    stamp_url = serializers.SerializerMethodField()
     wallpaper_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = [
-            "id", "user", "customer", "tech", "title", "employment_id", "contact_info",
-            "photo", "wallpaper", "e_sign", "stamp", "bio", "location", "birth_date",
-            "email_confirmed", "user_type", "worker_status", "id_number", "physical_address",
-            "billing_address", "interest_percentage", "hourly_rate", "photo_url", "e_sign_url",
+            "id",
+            "user",
+            "customer",
+            "tech",
+            "title",
+            "employment_id",
+            "contact_info",
+            "photo",
+            "wallpaper",
+            "wallpaper_url",
+            "e_sign_url",
+            "photo_url",
+            "e_sign",
+            "stamp",
+            "bio",
+            "location",
+            "birth_date",
+            "email_confirmed",
+            "user_type",
+            "worker_status",
+            "id_number",
+            "physical_address",
+            "billing_address",
+            "interest_percentage",
+            "hourly_rate",
+            "photo_url",
+            "e_sign_url",
         ]
 
     # File validation
@@ -211,45 +227,48 @@ class ProfileSerializer(serializers.ModelSerializer):
         """
         Generates the URL for the photo file.
         """
-        return self.get_file_url(obj, 'photo')
+        return self.get_file_url(obj, "photo")
 
     def get_e_sign_url(self, obj):
         """
         Generates the URL for the e-sign file.
         """
-        return self.get_file_url(obj, 'e_sign')
-
-    def get_stamp_url(self, obj):
-        """
-        Generates the URL for the stamp file.
-        """
-        return self.get_file_url(obj, 'stamp')
+        return self.get_file_url(obj, "e_sign")
 
     def get_wallpaper_url(self, obj):
         """
         Generates the URL for the wallpaper file.
         """
-        return self.get_file_url(obj, 'wallpaper')
+        return self.get_file_url(obj, "wallpaper")
 
 
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = '__all__'
+        fields = "__all__"
 
     def validate_default_card(self, value):
         # If value is True (indicating the card is being set as default)
         if value:
             # Get user_profile from either the instance (update case) or input data (create case)
-            user_profile = self.instance.user_profile if self.instance else self.initial_data.get('user_profile')
+            user_profile = (
+                self.instance.user_profile
+                if self.instance
+                else self.initial_data.get("user_profile")
+            )
 
             if not user_profile:
                 raise serializers.ValidationError("User profile is required.")
 
             # Check if another default card exists for this user
-            if CreditCard.objects.filter(user_profile=user_profile, default_card=True).exclude(
-                    id=self.instance.id if self.instance else None).exists():
-                raise serializers.ValidationError('User can only have one default card.')
+            if (
+                CreditCard.objects.filter(user_profile=user_profile, default_card=True)
+                .exclude(id=self.instance.id if self.instance else None)
+                .exists()
+            ):
+                raise serializers.ValidationError(
+                    "User can only have one default card."
+                )
 
         return value
 
@@ -257,4 +276,4 @@ class CreditCardSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LicenseFiles
-        fields = ['value']
+        fields = ["value"]

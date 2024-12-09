@@ -1,6 +1,8 @@
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator as account_activation_token
+from django.contrib.auth.tokens import (
+    default_token_generator as account_activation_token,
+)
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
@@ -17,13 +19,26 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from mysite import settings
-from mysite.core.models import ContactInfo, Person, Project, Company, Profile, CreditCard, LicenseInfo
+from mysite.core.models import (
+    ContactInfo,
+    Person,
+    Project,
+    Company,
+    Profile,
+    CreditCard,
+    LicenseInfo,
+)
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
 from .serializers import (
-    CompanyCustomerSerializer, CompanyEngineerSerializer,
-    ProjectSerializer, CompanySerializer, PersonSerializer, CreditCardSerializer,
-    ProfileSerializer, UserSerializer, DocumentSerializer
+    CompanyCustomerSerializer,
+    ProjectSerializer,
+    CompanySerializer,
+    PersonSerializer,
+    CreditCardSerializer,
+    ProfileSerializer,
+    UserSerializer,
+    DocumentSerializer,
 )
 
 
@@ -31,6 +46,7 @@ class CompanyCustomerViewSet(viewsets.ModelViewSet):
     """
     API endpoint for creating and editing Company Customers.
     """
+
     queryset = ContactInfo.objects.all()
     serializer_class = CompanyCustomerSerializer
     permission_classes = [IsAuthenticated]
@@ -46,8 +62,9 @@ class CompanyEngineerViewSet(viewsets.ModelViewSet):
     """
     API endpoint for creating and editing Company Engineers.
     """
+
     queryset = ContactInfo.objects.all()
-    serializer_class = CompanyEngineerSerializer
+    serializer_class = CompanyCustomerSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -62,6 +79,7 @@ class CompanyViewSet(ModelViewSet):
     API ViewSet for managing Company objects.
     Supports CRUD operations.
     """
+
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [IsAuthenticated]
@@ -82,6 +100,7 @@ class PersonViewSet(ModelViewSet):
     API ViewSet for managing Person objects.
     Supports CRUD operations.
     """
+
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
@@ -104,7 +123,13 @@ class PersonViewSet(ModelViewSet):
 
 class ProfileViewSet(ModelViewSet):
     queryset = Profile.objects.select_related(
-        'user', 'customer', 'tech', 'contact_info', 'location', 'physical_address', 'billing_address'
+        "user",
+        "customer",
+        "tech",
+        "contact_info",
+        "location",
+        "physical_address",
+        "billing_address",
     )
     serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrAdmin]
@@ -112,12 +137,12 @@ class ProfileViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         filters = {}
-        if user_id := self.request.query_params.get('user'):
-            filters['user__id'] = user_id
-        if user_type := self.request.query_params.get('user_type'):
-            filters['user_type'] = user_type
-        if worker_status := self.request.query_params.get('worker_status'):
-            filters['worker_status'] = worker_status
+        if user_id := self.request.query_params.get("user"):
+            filters["user__id"] = user_id
+        if user_type := self.request.query_params.get("user_type"):
+            filters["user_type"] = user_type
+        if worker_status := self.request.query_params.get("worker_status"):
+            filters["worker_status"] = worker_status
 
         return queryset.filter(**filters)
 
@@ -126,10 +151,10 @@ class ProfileViewSet(ModelViewSet):
             profile = serializer.save(user=self.request.user)
             s3 = S3()
             # Upload files after profile is created
-            self.upload_file_to_s3(profile, 'photo', s3)
-            self.upload_file_to_s3(profile, 'e_sign', s3)
-            self.upload_file_to_s3(profile, 'stamp', s3)
-            self.upload_file_to_s3(profile, 'wallpaper', s3)
+            self.upload_file_to_s3(profile, "photo", s3)
+            self.upload_file_to_s3(profile, "e_sign", s3)
+            self.upload_file_to_s3(profile, "stamp", s3)
+            self.upload_file_to_s3(profile, "wallpaper", s3)
         else:
             raise PermissionDenied("Authentication is required to create a profile.")
 
@@ -141,7 +166,7 @@ class ProfileViewSet(ModelViewSet):
     def delete(self, *args, **kwargs):
         profile = self.get_object()  # Get the profile instance to delete
         s3 = S3()
-        for field_name in ['photo', 'e_sign', 'stamp', 'wallpaper']:
+        for field_name in ["photo", "e_sign", "stamp", "wallpaper"]:
             file = getattr(profile, field_name, None)
             if file:
                 s3.delete_file_from_bucket(file.name)
@@ -164,6 +189,7 @@ class EngineerViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing Engineer Persons.
     """
+
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
@@ -179,6 +205,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing Manufacturer Persons.
     """
+
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
@@ -194,6 +221,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing Projects.
     """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
@@ -209,52 +237,64 @@ class GetEngineerId(APIView):
     """
     Retrieve the engineer ID based on the engineer's name.
     """
+
     def get(self, request):
-        engineer_name = request.GET.get('engineer_name')
+        engineer_name = request.GET.get("engineer_name")
         try:
             engineer = Person.objects.get(name=engineer_name)
-            return Response({'person_id': engineer.id}, status=status.HTTP_200_OK)
+            return Response({"person_id": engineer.id}, status=status.HTTP_200_OK)
         except Person.DoesNotExist:
-            return Response({'error': 'Engineer not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Engineer not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class GetProjectId(APIView):
     """
     Retrieve the project ID based on the project name.
     """
+
     def get(self, request):
-        project_name = request.GET.get('project_name')
+        project_name = request.GET.get("project_name")
         try:
             project = Project.objects.get(name=project_name)
-            return Response({'project_id': project.id}, status=status.HTTP_200_OK)
+            return Response({"project_id": project.id}, status=status.HTTP_200_OK)
         except Project.DoesNotExist:
-            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class GetPersonId(APIView):
     """
     Retrieve the person ID based on the person's name.
     """
+
     def get(self, request):
-        person_name = request.GET.get('person_name')
+        person_name = request.GET.get("person_name")
         try:
             person = Person.objects.get(name=person_name)
-            return Response({'person_id': person.id}, status=status.HTTP_200_OK)
+            return Response({"person_id": person.id}, status=status.HTTP_200_OK)
         except Person.DoesNotExist:
-            return Response({'error': 'Person not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Person not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class GetCompanyId(APIView):
     """
     Retrieve the company ID based on the company name.
     """
+
     def get(self, request):
-        company_name = request.GET.get('company_name')
+        company_name = request.GET.get("company_name")
         try:
             company = ContactInfo.objects.get(name=company_name)
-            return Response({'company_id': company.id}, status=status.HTTP_200_OK)
+            return Response({"company_id": company.id}, status=status.HTTP_200_OK)
         except ContactInfo.DoesNotExist:
-            return Response({'error': 'Company not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class SignUpAPIView(APIView):
@@ -265,22 +305,29 @@ class SignUpAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save(is_active=False)  # Deactivate user until they activate their account
+            user = serializer.save(
+                is_active=False
+            )  # Deactivate user until they activate their account
 
             # Send activation email
             current_site = get_current_site(request)
-            subject = 'Activate Your Account on Tab Technologies INC.'
-            message = render_to_string('account_activation_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'main_website': LicenseInfo.objects.get(key='OwnerWeb').value,
-                'uid': urlsafe_base64_encode(str(user.pk).encode()),
-                'token': account_activation_token.make_token(user),
-            })
+            subject = "Activate Your Account on Tab Technologies INC."
+            message = render_to_string(
+                "account_activation_email.html",
+                {
+                    "user": user,
+                    "domain": current_site.domain,
+                    "main_website": LicenseInfo.objects.get(key="OwnerWeb").value,
+                    "uid": urlsafe_base64_encode(str(user.pk).encode()),
+                    "token": account_activation_token.make_token(user),
+                },
+            )
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
             return Response(
-                {"message": "Account created. Please check your email to activate your account."},
+                {
+                    "message": "Account created. Please check your email to activate your account."
+                },
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -290,6 +337,7 @@ class AccountActivationSentAPIView(APIView):
     """
     API to confirm that the account activation link has been sent.
     """
+
     def get(self, request, *args, **kwargs):
         return Response(
             {"message": "Account activation link sent. Please check your email."},
@@ -301,6 +349,7 @@ class ActivateAccountAPIView(APIView):
     """
     API for activating user accounts via email link.
     """
+
     def get(self, request, uidb64, token, *args, **kwargs):
         try:
             # Decode the user ID
@@ -343,6 +392,7 @@ class ChangePasswordAPIView(APIView):
     """
     API for changing passwords and invalidating JWT tokens.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
