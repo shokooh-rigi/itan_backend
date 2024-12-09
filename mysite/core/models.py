@@ -294,6 +294,7 @@ class BaseAbstractModel(models.Model):
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
+        related_name="%(class)s_created_by",
     )
 
     class Meta:
@@ -396,9 +397,7 @@ class Person(BaseAbstractModel):
 class Profile(BaseAbstractModel):
     """Represents a user profile with additional information."""
 
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="user_profile"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     customer = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,
