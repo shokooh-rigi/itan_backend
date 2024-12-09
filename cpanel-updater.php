@@ -6,7 +6,7 @@ $scriptPath = 'webhook-handler.sh';
 // "&" ensures the script runs in the background
 // ">>" appends output to the log file
 // "2>&1" redirects errors to the log file
-exec("bash $scriptPath &");
+exec("nohup bash $scriptPath > /dev/null 2>&1 &");
 
 // Respond to GitHub webhook immediately
 http_response_code(200);
