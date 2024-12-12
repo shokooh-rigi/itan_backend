@@ -1,6 +1,6 @@
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
 
 from mysite.order.models import Order, ChangeOrder
 from mysite.proposal.models import Proposal

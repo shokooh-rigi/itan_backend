@@ -1,14 +1,29 @@
 import datetime
-from django.core.exceptions import PermissionDenied
+import os
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
-from .serializers import OrderSerializer
-from .services import OrderService, OrderEditService
+from mysite.order.models import Order, TechLabel, ChangeOrder
+from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer
+from .serializers import TechLabelSerializer
+from .services.change_order_service import ChangeOrderServiceLayer, DeleteChangeOrderService
+from .services.order_equipment_submittal_service import OrderEquipmentSubmittalService
+from .services.order_field_drawing_service import OrderFieldDrawingService
+from .services.order_full_update_service import OrderFullUpdateService
+from .services.order_service import OrderService, OrderEditService
+from .services.order_site_pictures_service import OrderSitePicturesService
+from .services.tech_label_service import TechLabelServiceLayer
 
 
 class OrderListAPIView(APIView):
@@ -250,3 +265,471 @@ class OrderArchiveAPIView(APIView):
             {"message": "Order archiving canceled."},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class ChangeOrderView(APIView):
+    """
+    API endpoint for creating a change order.
+
+    This view handles:
+    - Validating incoming data using a serializer.
+    - Delegating business logic to the ChangeOrderServiceLayer.
+
+    Methods:
+        - post: Creates a new change order along with associated services and generates a PDF.
+
+    Parameters:
+        - order_id (int): The ID of the order to associate with the change order.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        """
+        Handles the creation of a change order.
+
+        Args:
+            request: The HTTP request containing the data for the change order.
+            order_id (int): The ID of the order to associate with the change order.
+
+        Returns:
+            Response: Success or error response based on the validation and execution.
+        """
+        # Get the order object (ensure it exists)
+        this_order = get_object_or_404(Order, id=order_id)
+
+        # Validate the incoming data using the serializer
+        serializer = ChangeOrderSerializer(data=request.data)
+        if serializer.is_valid():
+            # Instantiate the service layer and pass the required data
+            change_order_service = ChangeOrderServiceLayer(
+                order=this_order,
+                user=request.user,
+                data=request.data,
+            )
+
+            # Create the change order and associated services
+            change_order = change_order_service.create_change_order()
+
+            return Response(
+                {'status': 'Change order created successfully', 'change_order_id': change_order.id},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeOrderDeleteAPIView(APIView):
+    """
+    API View to delete a Change Order.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id, change_order_id):
+        order = get_object_or_404(Order, id=order_id)
+        change_order = get_object_or_404(ChangeOrder, id=change_order_id)
+
+        # Service layer handling change order deletion
+        service = DeleteChangeOrderService(order, request.user)
+        success = service.delete_change_order(change_order)
+
+        if success:
+            return Response({"detail": "Change order deleted successfully."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Change order not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangeOrderApproveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, change_order_id, action):
+        try:
+            # Call the service to approve the change order and generate the invoice PDF
+            new_file_name = ChangeOrderServiceLayer.approve_change_order(
+                change_order_id=change_order_id,
+                action=action,
+                user=request.user,
+            )
+
+            # Return a success response
+            return Response(
+                {"message": f"Change order approved and invoice generated successfully.", "file_name": new_file_name},
+                status=status.HTTP_200_OK
+            )
+        except ChangeOrder.DoesNotExist:
+            return Response(
+                {"message": "Change order not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class TechLabelViewSet(ModelViewSet):
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+
+    @action(detail=True, methods=['post'], url_path='update-extra-fields')
+    def update_extra_fields(self, request, order_id=None):
+        """
+        Updates or creates a TechLabel and its extra fields.
+        """
+        this_order = get_object_or_404(Order, id=order_id)
+        tech_label = TechLabel.objects.filter(order__id=order_id).first()
+        service = TechLabelServiceLayer(user=request.user, data=request.data)
+
+        try:
+            updated_tech_label = service.update_tech_label(tech_label, this_order)
+            return Response({
+                'message': 'TechLabel updated successfully!',
+                'data': TechLabelSerializer(updated_tech_label).data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path='download-pdf')
+    def download_pdf(self, request, order_id=None):
+        """
+        Download the PDF associated with a TechLabel.
+        """
+        this_order = get_object_or_404(Order, id=order_id)
+        tech_label = TechLabel.objects.filter(order__id=order_id).first()
+
+        service = TechLabelServiceLayer()
+        try:
+            local_path = service.generate_pdf(tech_label, this_order)
+            if os.path.exists(local_path):
+                with open(local_path, 'rb') as pdf_file:
+                    response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+                    response['Content-Disposition'] = f'inline; filename={os.path.basename(local_path)}'
+                    return response
+            return Response({'error': 'PDF not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ControlSystemAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id):
+        """
+        Retrieve the current control system for the given order.
+        """
+        order = get_object_or_404(Order, id=order_id)
+        serializer = OrderControlSystemSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, order_id):
+        """
+        Update the control system for the given order.
+        """
+        order = get_object_or_404(Order, id=order_id)
+        serializer = OrderControlSystemSerializer(order, data=request.data, partial=True)
+
+        if 'cancel' in request.data:
+            return Response({'message': 'Action canceled.'}, status=status.HTTP_200_OK)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Control system updated successfully!'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderEquipmentSubmittalView(APIView):
+    """
+    API view to handle order equipment submittal actions including
+    uploading files, clearing submittal, and updating the order.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        """
+        Handle POST request to manage equipment submittal for an order.
+        - Cancel action
+        - Clear equipment submittal
+        - Upload files and update order with equipment submittal.
+        """
+        try:
+            # Fetch the order instance
+            order = get_object_or_404(Order, id=order_id)
+
+            # Handle cancel action (redirect is simulated here)
+            if request.data.get("cancel"):
+                return Response(
+                    {"detail": "Order edit canceled."},
+                    status=status.HTTP_200_OK
+                )
+
+            # Handle clearing the equipment submittal
+            if request.data.get("equipment_submittal-clear"):
+                OrderEquipmentSubmittalService.clear_equipment_submittal(order_id)
+                return Response(
+                    {"detail": "Equipment submittal cleared."},
+                    status=status.HTTP_200_OK
+                )
+
+            # Handle files upload and processing
+            files = request.FILES.getlist('equipment_submittal')
+            OrderEquipmentSubmittalService.update_order_with_equipment_submittal(order, files)
+
+            return Response(
+                {"detail": "Equipment submittal updated successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as e:
+            return Response(
+                {"detail": "An error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class OrderFieldDrawingView(APIView):
+    """
+    API View to handle the field drawing upload process for an order.
+
+    This view handles the following actions:
+    - Uploading field drawings as files.
+    - Cancelling the action and redirecting to the order edit page.
+    - Validating uploaded files for size and saving them after processing.
+    - Creating a zip file of the uploaded field drawings.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        """
+        Handle the POST request to upload and process field drawing files for an order.
+
+        Depending on the data passed, the following actions are performed:
+        - If the "cancel" key is present in the request data, the request is cancelled,
+          and a success message is returned.
+        - If the field drawings are provided, the files are validated and processed.
+          If valid, the files are saved, and a zip file is created and associated with the order.
+
+        Args:
+            request (Request): The HTTP request object containing the data and files.
+            order_id (int): The ID of the order to which the field drawings belong.
+
+        Returns:
+            Response: A DRF Response object with either success or error details.
+        """
+        try:
+            # Fetch the order instance
+            order = get_object_or_404(Order, id=order_id)
+
+            # Handle cancel request
+            if request.data.get("cancel"):
+                return Response({"detail": "Order edit canceled."}, status=status.HTTP_200_OK)
+
+            # Handle form submission for field drawing files
+            if 'field_drawing' in request.FILES:
+                files = request.FILES.getlist('field_drawing')
+                OrderFieldDrawingService.process_field_drawing_files(order, files)
+                return Response(
+                    {"detail": "Field drawing updated successfully."},
+                    status=status.HTTP_200_OK
+                )
+
+            return Response(
+                {"detail": "No files provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"detail": "An error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class OrderGeneralNotesView(APIView):
+    """
+    API View to handle the general notes and comments for an order.
+
+    This view allows:
+    - Retrieving the general notes and comments for an order (GET request).
+    - Saving the general notes and comments (POST request with "save" action).
+    - Finalizing the general notes and comments (POST request with "finalize" action).
+    - Cancelling the action (POST request with "cancel" action).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        """
+        Handle POST request to save, finalize, or cancel the general notes and comments.
+
+        Args:
+            request (Request): The HTTP request object containing the data.
+            order_id (int): The ID of the order to update.
+
+        Returns:
+            Response: DRF Response indicating success or failure of the action.
+        """
+        # Retrieve the order object by ID
+        order = get_object_or_404(Order, id=order_id)
+
+        # If "cancel" is pressed, return a canceled action response
+        if request.data.get("cancel"):
+            return Response({"detail": "Action canceled."}, status=status.HTTP_200_OK)
+
+        # Extract general notes and comments from the request data
+        general_notes_and_comments = str(request.data.get('general_notes_and_comments', ""))
+
+        # If "finalize" action is pressed, finalize the general notes and save them
+        if request.data.get('finalize'):
+            order.general_notes_and_comments = general_notes_and_comments
+            order.general_notes_and_comments_finalize = True
+            order.save()
+            return Response(
+                {"detail": "General notes finalized and saved."},
+                status=status.HTTP_200_OK
+            )
+
+        # If "save" action is pressed, save the general notes without finalizing
+        if request.data.get("save"):
+            order.general_notes_and_comments = general_notes_and_comments
+            order.save()
+            return Response(
+                {"detail": "General notes saved successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        # If no valid action is found, return a bad request error
+        return Response(
+            {"detail": "Invalid action or missing data."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def get(self, request, order_id):
+        """
+        Handle GET request to retrieve the general notes and comments for an order.
+
+        Args:
+            request (Request): The HTTP request object.
+            order_id (int): The ID of the order to retrieve.
+
+        Returns:
+            Response: DRF Response containing the general notes and comments of the order.
+        """
+        # Retrieve the order object by ID
+        order = get_object_or_404(Order, id=order_id)
+
+        # Return the general notes and comments of the order
+        return Response(
+            {"general_notes_and_comments": order.general_notes_and_comments},
+            status=status.HTTP_200_OK
+        )
+
+
+class OrderSitePicturesView(APIView):
+    """
+    API View to handle uploading and saving site pictures for an order.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        """
+        Handle POST request to save site pictures or cancel the action.
+        """
+        # Retrieve the order object by ID
+        order = get_object_or_404(Order, id=order_id)
+
+        # Cancel the action if 'cancel' is present in the request
+        if request.data.get("cancel"):
+            return Response({"detail": "Action canceled."}, status=status.HTTP_200_OK)
+
+        # Process the form data and files using the service layer
+        try:
+            service = OrderSitePicturesService(order_id, request.FILES.getlist('site_pictures'))
+            zip_file_name = service.process_upload()
+            return Response({"detail": f"Site pictures uploaded and saved as {zip_file_name}."},
+                            status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": "An error occurred during the upload process."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, order_id):
+        """
+        Handle GET request to retrieve the site pictures for a specific order.
+        """
+        order = get_object_or_404(Order, id=order_id)
+
+        if order.site_pictures:
+            return Response({"site_pictures": order.site_pictures.url}, status=status.HTTP_200_OK)
+
+        return Response({"message": "No site pictures available for this order."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class OrderFullUpdateAPIView(APIView):
+    """
+    API endpoint for retrieving all necessary data related to an order
+    to facilitate its full update process. This includes details such as:
+    - Equipment related to the order
+    - Test sheets associated with the order
+    - Estimates and pricing
+    - Manufacturers and other relevant data
+
+    This endpoint is used to prepare the data required for updating an order,
+    ensuring that all related information is available for the user to make
+    necessary changes.
+    """
+
+    def get(self, request, order_id, *args, **kwargs):
+        """
+        Handles the GET request to retrieve comprehensive data for updating
+        an order. The data includes the order's equipment, test sheet details,
+        manufacturers, and other relevant information.
+
+        Args:
+            request: The HTTP request object.
+            order_id: The unique identifier of the order to be updated.
+
+        Returns:
+            Response: A JSON response containing all necessary data for
+            updating the order or an error message if the order is not found.
+
+        Raises:
+            Order.DoesNotExist: If the order with the given order_id is not found.
+            Exception: For any other errors during data retrieval.
+        """
+        try:
+            # Fetch the order instance by its ID
+            order = Order.objects.get(id=order_id)
+
+            # Initialize the service class with the order instance
+            order_full_update_service = OrderFullUpdateService(order)
+
+            # Get the order details using the correct method
+            order_data = order_full_update_service.get_order_details()
+
+            return Response(order_data, status=status.HTTP_200_OK)
+
+        except Order.DoesNotExist:
+            return Response(
+                {"detail": "Order not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
