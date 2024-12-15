@@ -51,7 +51,7 @@ urlpatterns = [
     path('orders/<int:order_id>/control-system/',
          ControlSystemAPIView.as_view(),
          name='control-system'),  # Handle control system for an order
-    path('order/<int:order_id>/equipment-submittal/',
+    path('orders/<int:order_id>/equipment-submittal/',
          OrderEquipmentSubmittalView.as_view(),
          name='order_equipment_submittal'),
     path('orders/<int:order_id>/field-drawing/',

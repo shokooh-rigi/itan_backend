@@ -65,7 +65,7 @@ urlpatterns = [
     path('', include('mysite.api.v2.bid.urls')),
     path('', include('mysite.submittal.urls')),
     path('', include('mysite.mgmreport.urls')),
-    path('', include('mysite.order.urls')),
+    path('', include('mysite.api.v2.order.urls')),
     path('', include('mysite.coi.urls')),
     path('', include('mysite.gi.urls')),
     path('', include('mysite.report.urls')),
@@ -98,11 +98,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # API URLS
-urlpatterns += [
-    # API base url
-    path('api/', include('api.urls')),
-    # DRF auth token
-]
+# urlpatterns += [
+#     # API base url
+#     path('api/', include('api.urls')),
+#     # DRF auth token
+# ]
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
