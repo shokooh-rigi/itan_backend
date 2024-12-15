@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 
 from mysite import settings
 from mysite.bidfilemgm.models import BidFile
-from mysite.core.models import Person
+from mysite.core.models import Person, Project
 from mysite.s3_file_manager import S3
 from .serializers import BidFileSerializer, BidFileCreateSerializer
 from .services import BidFileService
@@ -346,17 +346,23 @@ class BidFileCreateView(APIView):
     This view processes the files, creates a zip, and uploads it to S3.
     """
 
-    # permission_classes = [IsAuthenticated]
-
     @swagger_auto_schema(
         operation_summary="Create a new bid file",
         operation_description="Uploads files, creates a zip archive, saves it to S3, and registers the bid file entry in the database.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["project_name"],
+            required=["customer", "project", "due_date"],
             properties={
-                "project_name": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Name of the project"
+                "customer_id": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="ID of the customer"
+                ),
+                "project_id": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="ID of the project"
+                ),
+                "due_date": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format="date",
+                    description="Due date in YYYY-MM-DD format",
                 ),
                 "uploaded_file": openapi.Schema(
                     type=openapi.TYPE_ARRAY,
@@ -367,13 +373,28 @@ class BidFileCreateView(APIView):
         ),
         responses={
             201: openapi.Response("Bid file created successfully", BidFileSerializer),
-            400: "Selected files exceeded maximum upload size",
+            400: "Invalid input or files exceeded maximum upload size",
             500: "Internal server error",
         },
     )
     def post(self, request):
         form_data = request.data
         files_list = request.FILES.getlist("uploaded_file")
+        customer_id = form_data.get("customer_id")
+        project_id = form_data.get("project_id")
+        due_date = form_data.get("due_date")
+
+        # Validate required fields
+        missing_fields = [
+            field
+            for field in ["customer_id", "project_id", "due_date"]
+            if not form_data.get(field)
+        ]
+        if missing_fields:
+            return Response(
+                {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Validate file size
         if not self._is_valid_file_size(files_list):
@@ -385,12 +406,10 @@ class BidFileCreateView(APIView):
         # Handle file uploads and create zip
         temp_path = self._get_temp_path()
         file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
-        zip_file_path = self._create_project_zip(
-            form_data.get("project_name"), file_paths, temp_path
-        )
+        zip_file_path = self._create_project_zip(project_id, file_paths, temp_path)
 
         # Save bid file to database and S3
-        self._save_bidfile_to_db(form_data, zip_file_path)
+        self._save_bidfile_to_db(customer_id, project_id, due_date, zip_file_path)
 
         return Response(
             {"message": "Bid file created successfully."},
@@ -417,19 +436,23 @@ class BidFileCreateView(APIView):
         return temp_path
 
     @staticmethod
-    def _create_project_zip(project_name, file_paths, temp_path):
+    def _create_project_zip(project_id, file_paths, temp_path):
         """
         Clean the project name and create a zip file from the uploaded files.
         """
-        project_clean_name = BidFileService.clean_project_name(project_name)
+        project_clean_name = BidFileService.clean_project_name(
+            Project.objects.get(id=project_id).name
+        )
         return BidFileService.create_zip_file(file_paths, temp_path, project_clean_name)
 
-    def _save_bidfile_to_db(self, form_data, zip_file_path):
+    def _save_bidfile_to_db(self, customer_id, project_id, due_date, zip_file_path):
         """
         Save the bid file entry to the database and upload the zip to S3.
         """
         bidfile = BidFile.objects.create(
-            project=form_data.get("project"),
+            customer_id=customer_id,
+            project_id=project_id,
+            due_date=due_date,
             created_by=self.request.user,
         )
         BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
