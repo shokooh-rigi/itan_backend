@@ -27,37 +27,38 @@ class BidFileListView(APIView):
 
     - GET: Retrieves a list of bid files based on optional query parameters for search, date range, and ordering.
     """
+
     # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Retrieve a list of bid files with filtering options.",
         manual_parameters=[
             openapi.Parameter(
-                'search',
+                "search",
                 openapi.IN_QUERY,
                 description="Search term to filter by project name or customer company name.",
-                type=openapi.TYPE_STRING
+                type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                'ordering',
+                "ordering",
                 openapi.IN_QUERY,
                 description="Field to order the results by. Defaults to 'due_date'.",
-                type=openapi.TYPE_STRING
+                type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                'fromDate',
+                "fromDate",
                 openapi.IN_QUERY,
                 description="Start date in mm/dd/yyyy format for filtering bid files by due date.",
-                type=openapi.TYPE_STRING
+                type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                'toDate',
+                "toDate",
                 openapi.IN_QUERY,
                 description="End date in mm/dd/yyyy format for filtering bid files by due date.",
-                type=openapi.TYPE_STRING
+                type=openapi.TYPE_STRING,
             ),
         ],
-        responses={200: BidFileSerializer(many=True)}
+        responses={200: BidFileSerializer(many=True)},
     )
     def get(self, request) -> Response:
         """
@@ -72,10 +73,10 @@ class BidFileListView(APIView):
         Returns:
             - A paginated list of bid files that match the filter criteria.
         """
-        search = request.GET.get('search', '')
-        ordering = request.GET.get('ordering', 'due_date')
-        from_date = request.GET.get('fromDate')
-        to_date = request.GET.get('toDate')
+        search = request.GET.get("search", "")
+        ordering = request.GET.get("ordering", "due_date")
+        from_date = request.GET.get("fromDate")
+        to_date = request.GET.get("toDate")
 
         try:
             # Get the filtered query set based on the parameters
@@ -83,7 +84,9 @@ class BidFileListView(APIView):
 
             # Pagination
             paginator = PageNumberPagination()
-            paginator.page_size = settings.PAGE_SIZE  # Ensure PAGE_SIZE is set in settings
+            paginator.page_size = (
+                settings.PAGE_SIZE
+            )  # Ensure PAGE_SIZE is set in settings
             result_page = paginator.paginate_queryset(object_list, request)
 
             # Serialize the results
@@ -92,11 +95,11 @@ class BidFileListView(APIView):
 
         except ValueError:
             return Response(
-                {'error': 'Invalid date format. Use mm/dd/yyyy'},
+                {"error": "Invalid date format. Use mm/dd/yyyy"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def get_filtered_query(search, from_date, to_date, ordering):
@@ -121,17 +124,22 @@ class BidFileListView(APIView):
             ValueError: If the date format is invalid.
         """
         # Build the initial query for filtering by search term
-        query = Q(project__name__icontains=search) | Q(customer__company__name__icontains=search)
+        query = Q()
+        if search:
+            query = Q(project__name__icontains=search) | Q(
+                customer__company__name__icontains=search
+            )
 
         # Handle the fromDate and toDate filtering
         if from_date and to_date:
             try:
-                from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-                to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(days=1)
+                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = datetime.datetime.strptime(
+                    to_date, "%m/%d/%Y"
+                ) + datetime.timedelta(days=1)
                 query &= Q(due_date__range=(from_date_obj, to_date_obj))
             except ValueError:
-                raise ValueError('Invalid date format. Use mm/dd/yyyy')
-
+                raise ValueError("Invalid date format. Use mm/dd/yyyy")
         # Filter for non-archived bid files and apply the ordering
         return BidFile.objects.filter(query).filter(archive=False).order_by(ordering)
 
@@ -142,11 +150,12 @@ class BidFileUpdateView(APIView):
     - GET: Retrieve a BidFile's details by its ID.
     - POST: Update an existing BidFile instance with the provided data.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Retrieve a BidFile by ID.",
-        responses={200: BidFileSerializer(), 404: 'BidFile not found'}
+        responses={200: BidFileSerializer(), 404: "BidFile not found"},
     )
     def get(self, request, bidfiles_id):
         """
@@ -157,12 +166,14 @@ class BidFileUpdateView(APIView):
             serializer = BidFileSerializer(bidfile)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except BidFile.DoesNotExist:
-            return Response({"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     @swagger_auto_schema(
         operation_description="Update an existing BidFile instance.",
         request_body=BidFileSerializer(),
-        responses={200: BidFileSerializer(), 400: 'Bad request'}
+        responses={200: BidFileSerializer(), 400: "Bad request"},
     )
     def post(self, request, bidfiles_id):
         """
@@ -171,10 +182,14 @@ class BidFileUpdateView(APIView):
         try:
             bidfile = BidFile.objects.get(id=bidfiles_id)
         except BidFile.DoesNotExist:
-            return Response({"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # Attempt to update the BidFile instance with the new data
-        serializer = BidFileSerializer(bidfile, data=request.data, partial=True)  # partial=True allows partial updates
+        serializer = BidFileSerializer(
+            bidfile, data=request.data, partial=True
+        )  # partial=True allows partial updates
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -186,12 +201,17 @@ class BidFileDuplicateView(APIView):
     API view to duplicate an existing BidFile instance.
     - POST: Duplicate an existing BidFile by copying its fields and creating a new instance.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Duplicate a BidFile by ID.",
         request_body=BidFileSerializer(),
-        responses={201: BidFileSerializer(), 400: 'Bad request', 404: 'BidFile not found'}
+        responses={
+            201: BidFileSerializer(),
+            400: "Bad request",
+            404: "BidFile not found",
+        },
     )
     def post(self, request, bidfiles_id):
         """
@@ -200,14 +220,20 @@ class BidFileDuplicateView(APIView):
         try:
             this_bidfile = BidFile.objects.get(id=bidfiles_id)
         except BidFile.DoesNotExist:
-            return Response({"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
-        customer_id = request.data.get('customer')
+        customer_id = request.data.get("customer")
         if not customer_id:
-            return Response({"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Call internal helper method to handle the duplication process
-        duplicated_bidfile = self._duplicate_bidfile(this_bidfile, customer_id, request.user)
+        duplicated_bidfile = self._duplicate_bidfile(
+            this_bidfile, customer_id, request.user
+        )
 
         # Return the new duplicated BidFile instance
         serializer = BidFileSerializer(duplicated_bidfile)
@@ -241,6 +267,7 @@ class BidFileArchiveView(APIView):
     """
     Archives a bid file if the user is authorized and confirms the action.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
@@ -273,6 +300,7 @@ class BidFileDeleteView(APIView):
     API view to delete a BidFile instance.
     - DELETE: Deletes a BidFile instance by ID if the user is authorized.
     """
+
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, bidfiles_id):
@@ -282,10 +310,13 @@ class BidFileDeleteView(APIView):
         this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
 
         # Check if the user is authorized to delete the bid file
-        if this_bidfile.created_by != request.user and request.user.profile.user_type != 2:
+        if (
+            this_bidfile.created_by != request.user
+            and request.user.profile.user_type != 2
+        ):
             return Response(
                 {"error": "You are not authorized to delete this record."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         # Proceed to delete the file from S3 and then the BidFile
@@ -298,14 +329,14 @@ class BidFileDeleteView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error deleting file from S3: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         this_bidfile.soft_delete()
 
         return Response(
             {"message": "BidFile successfully deleted."},
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
@@ -314,6 +345,7 @@ class BidFileCreateView(APIView):
     Create a new bid file with uploaded files.
     This view processes the files, creates a zip, and uploads it to S3.
     """
+
     # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -321,11 +353,16 @@ class BidFileCreateView(APIView):
         operation_description="Uploads files, creates a zip archive, saves it to S3, and registers the bid file entry in the database.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['project_name'],
+            required=["project_name"],
             properties={
-                'project_name': openapi.Schema(type=openapi.TYPE_STRING, description="Name of the project"),
-                'uploaded_file': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_FILE),
-                                                description="Files to upload"),
+                "project_name": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Name of the project"
+                ),
+                "uploaded_file": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_FILE),
+                    description="Files to upload",
+                ),
             },
         ),
         responses={
@@ -336,7 +373,7 @@ class BidFileCreateView(APIView):
     )
     def post(self, request):
         form_data = request.data
-        files_list = request.FILES.getlist('uploaded_file')
+        files_list = request.FILES.getlist("uploaded_file")
 
         # Validate file size
         if not self._is_valid_file_size(files_list):
@@ -348,7 +385,9 @@ class BidFileCreateView(APIView):
         # Handle file uploads and create zip
         temp_path = self._get_temp_path()
         file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
-        zip_file_path = self._create_project_zip(form_data.get('project_name'), file_paths, temp_path)
+        zip_file_path = self._create_project_zip(
+            form_data.get("project_name"), file_paths, temp_path
+        )
 
         # Save bid file to database and S3
         self._save_bidfile_to_db(form_data, zip_file_path)
@@ -371,7 +410,9 @@ class BidFileCreateView(APIView):
         """
         Generate or retrieve the temporary path for storing uploaded files.
         """
-        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+        temp_path = os.path.join(
+            os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
+        )
         os.makedirs(temp_path, exist_ok=True)
         return temp_path
 
@@ -388,7 +429,7 @@ class BidFileCreateView(APIView):
         Save the bid file entry to the database and upload the zip to S3.
         """
         bidfile = BidFile.objects.create(
-            project=form_data.get('project'),
+            project=form_data.get("project"),
             created_by=self.request.user,
         )
         BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
@@ -399,12 +440,16 @@ class BidFileAddFileView(APIView):
     """
     APIView for adding files to an existing BidFile.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Add files to a BidFile and compress them into a zip file.",
         request_body=BidFileCreateSerializer,
-        responses={200: "File(s) uploaded and updated successfully.", 400: "Invalid input or file size exceeded."}
+        responses={
+            200: "File(s) uploaded and updated successfully.",
+            400: "Invalid input or file size exceeded.",
+        },
     )
     def post(self, request, bidfile_id):
         """
@@ -414,7 +459,7 @@ class BidFileAddFileView(APIView):
         serializer = self._validate_request_data(request, this_bfm)
 
         temp_path = self._create_temp_path()
-        files_list = request.FILES.getlist('uploaded_file')
+        files_list = request.FILES.getlist("uploaded_file")
 
         # Check file size limit
         if not self._validate_file_size(files_list):
@@ -447,7 +492,9 @@ class BidFileAddFileView(APIView):
         """
         Validates incoming data with BidFileCreateSerializer.
         """
-        serializer = BidFileCreateSerializer(instance=instance, data=request.data, partial=True)
+        serializer = BidFileCreateSerializer(
+            instance=instance, data=request.data, partial=True
+        )
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
         return serializer
@@ -482,7 +529,9 @@ class BidFileAddFileView(APIView):
         Creates a zip file from uploaded files and returns the path to the zip file.
         """
         project_clean_name = BidFileService.clean_project_name(bidfile.project.name)
-        return BidFileService.create_zip_file(files_paths, temp_path, f"{bidfile.pk}_{project_clean_name}")
+        return BidFileService.create_zip_file(
+            files_paths, temp_path, f"{bidfile.pk}_{project_clean_name}"
+        )
 
     @staticmethod
     def _update_bidfile_with_zip(bidfile, zip_file_path):

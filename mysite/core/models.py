@@ -369,7 +369,7 @@ class Person(BaseAbstractModel):
     """Represents a person associated with a company."""
 
     company = models.ForeignKey(
-        ContactInfo,
+        Company,
         on_delete=models.CASCADE,
         blank=False,
         related_name="company_persons",
