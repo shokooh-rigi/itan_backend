@@ -57,7 +57,7 @@ class EngineerViewSet(viewsets.ModelViewSet):
     API endpoint for creating and editing Engineers.
     """
 
-    queryset = Person.objects.all()
+    queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
