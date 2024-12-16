@@ -58,9 +58,9 @@ class ContactInfoSerializer(BaseSerializer):
         fields = "__all__"
 
 
-class CompanyCustomerSerializer(BaseSerializer):
+class CustomerSerializer(BaseSerializer):
     class Meta:
-        model = Company
+        model = Person
         fields = [
             "name",
             "company_type",
@@ -80,21 +80,14 @@ class PersonSerializer(BaseSerializer):
 
     class Meta:
         model = Person
-        fields = [
-            "company",
-            "name",
-            "title",
-            "gender",
-            "contact_info",
-            "created_by",
-        ]
+        fields = "__all__"
 
     def create(self, validated_data):
         contact_info_data = validated_data.pop("contact_info")
         # Create the related ContactInfo object
         contact_info = ContactInfo.objects.create(**contact_info_data)
         # Now create the Person object and associate the created ContactInfo
-        person = Person.objects.create(contact_info=contact_info, **validated_data)
+        person = Person.objects.create(**validated_data, contact_info=contact_info)
         return person
 
 

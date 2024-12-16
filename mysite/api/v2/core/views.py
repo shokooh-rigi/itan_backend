@@ -31,7 +31,7 @@ from mysite.core.models import (
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
 from .serializers import (
-    CompanyCustomerSerializer,
+    CustomerSerializer,
     ProjectSerializer,
     CompanySerializer,
     PersonSerializer,
@@ -42,36 +42,24 @@ from .serializers import (
 )
 
 
-class CompanyCustomerViewSet(viewsets.ModelViewSet):
+class CustomerViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for creating and editing Company Customers.
+    API endpoint for creating and editing Customers.
     """
 
-    queryset = ContactInfo.objects.all()
-    serializer_class = CompanyCustomerSerializer
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
 
-    def perform_update(self, serializer):
-        serializer.save()
-
-
-class CompanyEngineerViewSet(viewsets.ModelViewSet):
+class EngineerViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for creating and editing Company Engineers.
+    API endpoint for creating and editing Engineers.
     """
 
-    queryset = ContactInfo.objects.all()
-    serializer_class = CompanyCustomerSerializer
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save()
 
 
 class CompanyViewSet(ModelViewSet):
@@ -177,22 +165,6 @@ class CreditCardViewSet(viewsets.ModelViewSet):
     queryset = CreditCard.objects.all()
     serializer_class = CreditCardSerializer
     permission_classes = [IsOwnerOrAdmin]
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save()
-
-
-class EngineerViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing Engineer Persons.
-    """
-
-    queryset = Person.objects.all()
-    serializer_class = PersonSerializer
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

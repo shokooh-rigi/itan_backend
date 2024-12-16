@@ -18,8 +18,8 @@ from .views import (
     GetPersonId,
     GetCompanyId,
     GetProjectId,
-    CompanyCustomerViewSet,
-    CompanyEngineerViewSet,
+    CustomerViewSet,
+    EngineerViewSet,
     PersonViewSet,
     EngineerViewSet,
     ManufacturerViewSet,
@@ -29,16 +29,11 @@ from .views import (
 router = DefaultRouter()
 
 router.register(r"companies", CompanyViewSet, basename="company")
-router.register(
-    r"company-customer", CompanyCustomerViewSet, basename="company-customer"
-)
-router.register(
-    r"company-engineer", CompanyEngineerViewSet, basename="company-engineer"
-)
-router.register(r"persons", PersonViewSet, basename="persons")
+router.register(r"customer", CustomerViewSet, basename="customer")
+router.register(r"engineer", EngineerViewSet, basename="engineer")
+# router.register(r"persons", PersonViewSet, basename="persons")
 router.register(r"profiles", ProfileViewSet, basename="profile")
 router.register(r"credit-card", CreditCardViewSet, basename="credit-card")
-router.register(r"engineer", EngineerViewSet, basename="engineer")
 router.register(r"manufacturer", ManufacturerViewSet, basename="manufacturer")
 router.register(r"project", ProjectViewSet, basename="project")
 
