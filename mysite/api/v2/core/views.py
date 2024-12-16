@@ -26,7 +26,7 @@ from mysite.core.models import (
     Company,
     Profile,
     CreditCard,
-    LicenseInfo,
+    LicenseInfo, CompanyType,
 )
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
@@ -261,9 +261,9 @@ class GetCompanyId(APIView):
     def get(self, request):
         company_name = request.GET.get("company_name")
         try:
-            company = ContactInfo.objects.get(name=company_name)
+            company = CompanyType.objects.get(name=company_name)
             return Response({"company_id": company.id}, status=status.HTTP_200_OK)
-        except ContactInfo.DoesNotExist:
+        except CompanyType.DoesNotExist:
             return Response(
                 {"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND
             )
