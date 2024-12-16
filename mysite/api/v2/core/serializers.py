@@ -15,19 +15,50 @@ from mysite.core.models import (
 from mysite.s3_file_manager import S3
 
 
-class AddressSerializer(serializers.ModelSerializer):
+class BaseSerializer(serializers.ModelSerializer):
+    """Custom base serializer to exclude fields and set created_by automatically."""
+
+    class Meta:
+        abstract = True  # Make this class abstract so it won't be used directly
+
+    def __init__(self, *args, **kwargs):
+        # Remove 'archive' from the fields of the serializer dynamically
+        exclude_fields = ["archive", "created_by"]
+        super().__init__(*args, **kwargs)
+
+        # Dynamically exclude 'archive' and 'created_by' from fields
+        for field_name in exclude_fields:
+            if field_name in self.fields:
+                del self.fields[field_name]
+
+    def create(self, validated_data):
+        """Override create method to set 'created_by' automatically."""
+        user = self.context["request"].user  # Get the user from the request context
+        validated_data["created_by"] = user
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Override update method to set 'created_by' automatically."""
+        user = self.context["request"].user  # Get the user from the request context
+        validated_data["created_by"] = user
+
+        return super().update(instance, validated_data)
+
+
+class AddressSerializer(BaseSerializer):
     class Meta:
         model = Address
         fields = "__all__"
 
 
-class ContactInfoSerializer(serializers.ModelSerializer):
+class ContactInfoSerializer(BaseSerializer):
     class Meta:
         model = ContactInfo
         fields = "__all__"
 
 
-class CompanyCustomerSerializer(serializers.ModelSerializer):
+class CompanyCustomerSerializer(BaseSerializer):
     class Meta:
         model = Company
         fields = [
@@ -40,7 +71,7 @@ class CompanyCustomerSerializer(serializers.ModelSerializer):
         ]
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class PersonSerializer(BaseSerializer):
     """
     Serializer for the Person model.
     """
@@ -67,7 +98,7 @@ class PersonSerializer(serializers.ModelSerializer):
         return person
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(BaseSerializer):
     address = AddressSerializer()
     contact_info = ContactInfoSerializer()
 
@@ -91,15 +122,65 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 
-class CompanySerializer(serializers.ModelSerializer):
+class CompanySerializer(BaseSerializer):
     """Serializer for the Company model."""
+
+    address = AddressSerializer()
+    contact_info = ContactInfoSerializer()
 
     class Meta:
         model = Company
         fields = "__all__"
 
+    def create(self, validated_data):
+        """
+        Override the create method to handle writable nested fields
+        for the related models (Address and ContactInfo).
+        """
+        # Pop out the nested fields from validated_data
+        address_data = validated_data.pop("address")
+        contact_info_data = validated_data.pop("contact_info")
 
-class UserSerializer(serializers.ModelSerializer):
+        # Create the related Address and ContactInfo instances
+        address = Address.objects.create(**address_data)
+        contact_info = ContactInfo.objects.create(**contact_info_data)
+
+        validated_data["address"] = address
+        validated_data["contact_info"] = contact_info
+
+        # Create the Company instance
+        company = Company.objects.create(**validated_data)
+
+        return company
+
+    def update(self, instance, validated_data):
+        """
+        Override the update method to handle updating nested fields.
+        """
+        # Pop out the nested fields from validated_data
+        address_data = validated_data.pop("address", None)
+        contact_info_data = validated_data.pop("contact_info", None)
+
+        # Update related models (Address and ContactInfo)
+        if address_data:
+            for attr, value in address_data.items():
+                setattr(instance.address, attr, value)
+            instance.address.save()
+
+        if contact_info_data:
+            for attr, value in contact_info_data.items():
+                setattr(instance.contact_info, attr, value)
+            instance.contact_info.save()
+
+        # Update the Company instance
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
+
+class UserSerializer(BaseSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -115,7 +196,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(BaseSerializer):
     """
     Serializer for the Profile model.
     Handles nested relationships for related models and file validations.
@@ -242,7 +323,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return self.get_file_url(obj, "wallpaper")
 
 
-class CreditCardSerializer(serializers.ModelSerializer):
+class CreditCardSerializer(BaseSerializer):
     class Meta:
         model = CreditCard
         fields = "__all__"
@@ -273,7 +354,7 @@ class CreditCardSerializer(serializers.ModelSerializer):
         return value
 
 
-class DocumentSerializer(serializers.ModelSerializer):
+class DocumentSerializer(BaseSerializer):
     class Meta:
         model = LicenseFiles
         fields = ["value"]
