@@ -23,7 +23,7 @@ from .views import (
     PersonViewSet,
     EngineerViewSet,
     ManufacturerViewSet,
-    ProjectViewSet,
+    ProjectViewSet, CompanyTypeList,
 )
 
 router = DefaultRouter()
@@ -41,10 +41,10 @@ router.register(r"project", ProjectViewSet, basename="project")
 urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("get-engineer-id/", GetEngineerId.as_view(), name="get-engineer-id"),
-    path("get-project-id/", GetProjectId.as_view(), name="get-project-id"),
-    path("get-person-id/", GetPersonId.as_view(), name="get-person-id"),
-    path("get-company-id/", GetCompanyId.as_view(), name="get-company-id"),
+    path("get-engineer-id/<str:engineer_name>/", GetEngineerId.as_view(), name="get-engineer-id"),
+    path("get-project-id/<str:project_name>/", GetProjectId.as_view(), name="get-project-id"),
+    path("get-person-id/<str:person_name>/", GetPersonId.as_view(), name="get-person-id"),
+    path("get-company-types/", CompanyTypeList.as_view(), name="get-company-types"),
     path("signup/", SignUpAPIView.as_view(), name="signup"),
     path("change-password/", ChangePasswordAPIView.as_view(), name="change_password"),
     path(
