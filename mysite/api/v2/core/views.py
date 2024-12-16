@@ -38,7 +38,7 @@ from .serializers import (
     CreditCardSerializer,
     ProfileSerializer,
     UserSerializer,
-    DocumentSerializer,
+    DocumentSerializer, CompanyTypeSerializer,
 )
 
 
@@ -267,6 +267,27 @@ class GetCompanyId(APIView):
             return Response(
                 {"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class CompanyTypeList(APIView):
+    """
+    Retrieve all company types.
+    """
+
+    def get(self, request):
+        try:
+            company_types = CompanyType.objects.all()
+            serializer = CompanyTypeSerializer(
+                company_types,
+                many=True,
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred in get company types: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 class SignUpAPIView(APIView):
