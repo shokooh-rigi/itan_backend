@@ -113,15 +113,15 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 # Middleware
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # From the first file
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # From the first file
-    "django.middleware.common.CommonMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 
@@ -133,10 +133,12 @@ if ENV == "local":
     CORS_ORIGIN_ALLOW_ALL = True
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
-    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ORIGIN_ALLOW_ALL = False
 
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
 CORS_ALLOW_CREDENTIALS = True
 
 # Database
