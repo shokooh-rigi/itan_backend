@@ -43,7 +43,7 @@ else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
     CORS_ORIGIN_ALLOW_ALL = False
     CORS_ALLOWED_ORIGINS = env.list(
-        "ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"]
+        "CORS_ALLOWED_ORIGINS", default=["dashboard.tabtechinc.com"]
     )
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
