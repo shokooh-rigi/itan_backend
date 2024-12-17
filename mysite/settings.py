@@ -33,6 +33,27 @@ SECRET_KEY = env(
 ENV = env("ENV", default="local")
 DEBUG = ENV in ["local", "test"]
 
+if ENV == "local":
+    ALLOWED_HOSTS = env.list(
+        "ALLOWED_HOSTS",
+        default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
+    )
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
+    CORS_ORIGIN_ALLOW_ALL = False
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+CORS_ORIGIN_WHITELIST = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Installed Apps
@@ -46,11 +67,11 @@ DJANGO_APPS = [
     "django.contrib.humanize",
 ]
 THIRD_PARTY_APPS = [
+    "corsheaders",
     "crispy_forms",
     "crispy_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
-    "corsheaders",
     "drf_spectacular",
     "djrichtextfield",
     "tinymce",
@@ -113,33 +134,17 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 # Middleware
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-
-if ENV == "local":
-    ALLOWED_HOSTS = env.list(
-        "ALLOWED_HOSTS",
-        default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
-    )
-    CORS_ORIGIN_ALLOW_ALL = True
-else:
-    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
-    CORS_ORIGIN_ALLOW_ALL = False
-
-
-CORS_ALLOWED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CORS_ALLOW_CREDENTIALS = True
 
 # Database
 DATABASES = {
