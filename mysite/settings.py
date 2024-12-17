@@ -133,35 +133,11 @@ if ENV == "local":
     CORS_ORIGIN_ALLOW_ALL = True
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
-    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ORIGIN_ALLOW_ALL = True
 
 
-CORS_ALLOWED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CORS_ORIGIN_WHITELIST = env.list(
-    "CORS_ORIGIN_WHITELIST", default=["http://localhost:3000"]
-)
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
 
 # Database
 DATABASES = {
