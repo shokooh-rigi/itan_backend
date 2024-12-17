@@ -42,13 +42,14 @@ if ENV == "local":
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
     CORS_ORIGIN_ALLOW_ALL = False
-    CORS_ALLOWED_ORIGINS = env.list(
-        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-    )
-    CORS_ORIGIN_WHITELIST = env.list(
-        "CORS_ORIGIN_WHITELIST", default=["http://localhost:3000"]
-    )
 
+
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+CORS_ORIGIN_WHITELIST = env.list(
+    "CORS_ORIGIN_WHITELIST", default=["http://localhost:3000"]
+)
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
