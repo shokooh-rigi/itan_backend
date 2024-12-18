@@ -54,19 +54,6 @@ CORS_ORIGIN_WHITELIST = env.list(
 CSRF_TRUSTED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
 )
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
-CORS_ALLOW_HEADERS = [
-    "Authorization",
-    "Content-Type",
-    "X-Requested-With",
-]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -81,7 +68,6 @@ DJANGO_APPS = [
     "django.contrib.humanize",
 ]
 THIRD_PARTY_APPS = [
-    "corsheaders",
     "crispy_forms",
     "crispy_bootstrap5",
     "rest_framework",
@@ -96,6 +82,7 @@ THIRD_PARTY_APPS = [
     "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
     "custom_user.apps.CustomUserConfig",
     "drf_yasg",
+    "corsheaders",
 ]
 LOCAL_APPS = [
     "mysite.core",
@@ -149,8 +136,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
