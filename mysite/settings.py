@@ -39,6 +39,7 @@ if ENV == "local":
         default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
     )
     CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
     CORS_ORIGIN_ALLOW_ALL = False
@@ -53,6 +54,19 @@ CORS_ORIGIN_WHITELIST = env.list(
 CSRF_TRUSTED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
 )
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "Authorization",
+    "Content-Type",
+    "X-Requested-With",
+]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
