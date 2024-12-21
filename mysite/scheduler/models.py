@@ -1,18 +1,41 @@
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+)
+from django.db import models
+
 from custom_user.models import User
-from mysite.order.models import *
+from mysite.core.base_model import BaseModel
+from mysite.order.models import Order
 
 
-# Create your models here.
+class Schedule(BaseModel):
+    """
+    Represents a scheduled event related to an order.
+    Includes information about the start and end times of the schedule.
+    """
 
-
-class Schedule(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=False, null=False)
-    schedule_start = models.DateTimeField(blank=False, null=False)
-    schedule_end = models.DateTimeField(blank=False, null=False)
-    archive = models.BooleanField(default=False)
-    pre_demo = models.BooleanField(default=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        help_text="The order associated with this schedule."
+    )
+    schedule_start = models.DateTimeField(
+        blank=False,
+        null=False,
+        help_text="The start time of the schedule."
+    )
+    schedule_end = models.DateTimeField(
+        blank=False,
+        null=False,
+        help_text="The end time of the schedule."
+    )
+    pre_demo = models.BooleanField(
+        default=False,
+        help_text="Indicates whether the schedule is for a pre-demonstration."
+    )
 
     class Meta:
         ordering = ["-created_on"]
@@ -20,17 +43,32 @@ class Schedule(models.Model):
         verbose_name_plural = "Schedule List"
 
     def __str__(self):
+        """
+        Returns the project number of the associated order as the string representation.
+        """
         return self.order.project_number
 
 
-class Maintenance(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
+class Maintenance(BaseModel):
+    """
+    Represents a maintenance activity related to an order.
+    Includes details about the maintenance type, assigned personnel, and additional notes.
+    """
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        help_text="The order associated with this maintenance activity."
+    )
     assigned_to_employee = models.ForeignKey(
         User,
         blank=True,
         null=True,
         related_name="maintenance_assigned_to_employee",
         on_delete=models.CASCADE,
+        help_text="The employee assigned to this maintenance task."
     )
     assigned_to_contractor = models.ForeignKey(
         User,
@@ -38,24 +76,49 @@ class Maintenance(models.Model):
         null=True,
         related_name="maintenance_assigned_to_contractor",
         on_delete=models.CASCADE,
+        help_text="The contractor assigned to this maintenance task."
     )
-    schedule_start = models.DateTimeField(blank=False, null=False)
-    schedule_end = models.DateTimeField(blank=False, null=False)
-    description = models.TextField(max_length=500, blank=True)
+    schedule_start = models.DateTimeField(
+        blank=False,
+        null=False,
+        help_text="The start time of the maintenance schedule."
+    )
+    schedule_end = models.DateTimeField(
+        blank=False,
+        null=False,
+        help_text="The end time of the maintenance schedule."
+    )
+    description = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="A brief description of the maintenance task."
+    )
     MAINTENANCE_TYPE_CHOICES = (
         (1, "Maintenance"),
         (2, "Lost Time"),
         (3, "Off/Vacation"),
     )
     maintenance_type = models.PositiveSmallIntegerField(
-        choices=MAINTENANCE_TYPE_CHOICES, default=1
+        choices=MAINTENANCE_TYPE_CHOICES,
+        default=1,
+        help_text="The type of maintenance task."
     )
-    archive = models.BooleanField(default=False)
-    settlement = models.BooleanField(default=False)
-    tech_upload = models.FileField(upload_to="uploads/techfiles", blank=True, null=True)
-    note = models.TextField(max_length=1000, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
+    settlement = models.BooleanField(
+        default=False,
+        help_text="Indicates whether the task has been settled."
+    )
+    tech_upload = models.FileField(
+        upload_to="uploads/techfiles",
+        blank=True,
+        null=True,
+        help_text="File upload related to the maintenance task."
+    )
+    note = models.TextField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        help_text="Additional notes related to the maintenance task."
+    )
 
     class Meta:
         ordering = ["-created_on"]
@@ -63,12 +126,24 @@ class Maintenance(models.Model):
         verbose_name_plural = "Maintenance List"
 
     def __str__(self):
+        """
+        Returns the project number of the associated order as the string representation.
+        """
         return self.order.project_number
 
 
 class ScheduleTech(models.Model):
+    """
+    Represents a technician's involvement in a schedule.
+    Includes details about assigned personnel, involvement percentage, and additional notes.
+    """
+
     schedule = models.ForeignKey(
-        Schedule, on_delete=models.CASCADE, blank=False, null=False
+        Schedule,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        help_text="The schedule associated with this technician."
     )
     assigned_to_employee = models.ForeignKey(
         User,
@@ -76,17 +151,40 @@ class ScheduleTech(models.Model):
         null=True,
         related_name="assigned_to_employee",
         on_delete=models.CASCADE,
+        help_text="The employee assigned to this schedule."
     )
     assigned_to_contractor = models.ForeignKey(
-        User, blank=True, null=True, on_delete=models.CASCADE
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text="The contractor assigned to this schedule."
     )
     involvement_percentage = models.PositiveIntegerField(
-        default=0, validators=[MaxValueValidator(100), MinValueValidator(0)]
+        default=0,
+        validators=[MaxValueValidator(100), MinValueValidator(0)],
+        help_text="The percentage of involvement of the technician."
     )
-    settlement = models.BooleanField(default=False)
-    tech_upload = models.FileField(upload_to="uploads/techfiles", blank=True, null=True)
-    note = models.TextField(max_length=1000, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
+    settlement = models.BooleanField(
+        default=False,
+        help_text="Indicates whether the task has been settled."
+    )
+    tech_upload = models.FileField(
+        upload_to="uploads/techfiles",
+        blank=True,
+        null=True,
+        help_text="File upload related to the technician's task."
+    )
+    note = models.TextField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        help_text="Additional notes related to the technician's task."
+    )
+    created_on = models.DateTimeField(
+        auto_now_add=True,
+        help_text="The date and time when this record was created."
+    )
 
     class Meta:
         ordering = ["-created_on"]
@@ -94,6 +192,9 @@ class ScheduleTech(models.Model):
         verbose_name_plural = "Schedule Technicians"
 
     def __str__(self):
+        """
+        Returns a string representation of the assigned technician and the associated schedule order.
+        """
         return (
             str(self.assigned_to_employee)
             + str(self.assigned_to_contractor)
