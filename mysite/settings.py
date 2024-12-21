@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 import environ
@@ -39,12 +40,21 @@ if ENV == "local":
         default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
     )
     CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
     CORS_ORIGIN_ALLOW_ALL = False
-    CORS_ALLOWED_ORIGINS = env.list(
-        "ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"]
-    )
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+CORS_ORIGIN_WHITELIST = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -63,7 +73,6 @@ THIRD_PARTY_APPS = [
     "crispy_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
-    "corsheaders",
     "drf_spectacular",
     "djrichtextfield",
     "tinymce",
@@ -74,6 +83,7 @@ THIRD_PARTY_APPS = [
     "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
     "custom_user.apps.CustomUserConfig",
     "drf_yasg",
+    "corsheaders",
 ]
 LOCAL_APPS = [
     "mysite.core",
@@ -128,14 +138,15 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # From the first file
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # From the first file
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
+
 
 # Database
 DATABASES = {
@@ -342,3 +353,8 @@ AWS_SECRET_ACCESS_KEY = os.getenv(
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-central-1")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "airtab-test")
 ROOT_URLCONF = "config.urls"
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}

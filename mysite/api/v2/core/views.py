@@ -20,7 +20,6 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from mysite import settings
 from mysite.core.models import (
-    ContactInfo,
     Person,
     Project,
     Company,
@@ -31,7 +30,6 @@ from mysite.core.models import (
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
 from .serializers import (
-    CustomerSerializer,
     ProjectSerializer,
     CompanySerializer,
     PersonSerializer,
@@ -51,6 +49,15 @@ class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        """
+        Optionally filter the queryset based on query parameters.
+        """
+        queryset = super().get_queryset()
+        name = self.request.query_params.get("name", None)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
 
 class EngineerViewSet(viewsets.ModelViewSet):
     """
@@ -276,7 +283,11 @@ class CompanyTypeList(APIView):
 
     def get(self, request):
         try:
-            company_types = CompanyType.objects.all()
+            name_filter = request.query_params.get("name")
+            if name_filter:
+                company_types = CompanyType.objects.filter(name__icontains=name_filter)
+            else:
+                company_types = CompanyType.objects.all()
             serializer = CompanyTypeSerializer(
                 company_types,
                 many=True,
