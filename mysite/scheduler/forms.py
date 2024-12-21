@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.db.models import Q
-from .models import Schedule, Person, User, Order
+from .models import Schedule, User, Order
 from django_select2 import forms as s2forms
 
 
