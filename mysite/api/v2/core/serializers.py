@@ -97,7 +97,7 @@ class ProjectSerializer(BaseSerializer):
 
     class Meta:
         model = Project
-        fields = ["name", "address", "contact_info", "note", "created_by"]
+        fields = ["id","name", "address", "contact_info", "note", "created_by"]
 
     def create(self, validated_data):
         address_data = validated_data.pop("address")
