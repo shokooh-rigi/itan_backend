@@ -24,13 +24,14 @@ class BidFileService:
         """
         Creates a zip file from the provided file paths.
         """
-        zip_filename = os.path.join(path, f"{project_name}.zip")
-        with zipfile.ZipFile(zip_filename, "w") as zf:
-            for file in filenames:
-                fdir, fname = os.path.split(file)
-                zf.write(file, fname)
-                os.remove(file)  # Cleanup uploaded files after adding to zip
-        return zip_filename
+        zip_filename = os.path.join(path, project_name)
+        zf = zipfile.ZipFile(zip_filename, "w")
+        for file in filenames:
+            fdir, fname = os.path.split(file)
+            zf.write(file, fname)
+            os.remove(file)
+        zf.close()
+        return zf
 
     @staticmethod
     def clean_project_name(project_name):

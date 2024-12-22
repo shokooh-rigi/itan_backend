@@ -8,12 +8,16 @@ from mysite.s3_file_manager import S3
 
 
 class BidFileSerializer(serializers.ModelSerializer):
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    project_name = serializers.CharField(source='project.name', read_only=True)
 
     class Meta:
         model = BidFile
         fields = [
             'customer',
+            'customer_name',
             'project',
+            'project_name',
             'uploaded_file',
             'due_date',
             'note',
@@ -37,12 +41,3 @@ class BidFileCreateSerializer(serializers.ModelSerializer):
             'note',
             'created_by',
         ]
-
-    def validate_uploaded_file(self, value):
-        """
-        Custom validation for file size to ensure it doesn't exceed the maximum upload size.
-        """
-        total_size = sum([f.size for f in value])
-        if total_size > settings.MAX_UPLOAD_SIZE:
-            raise serializers.ValidationError("Selected files exceeded maximum upload size!")
-        return value

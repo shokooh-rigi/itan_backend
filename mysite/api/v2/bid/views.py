@@ -477,9 +477,11 @@ class BidFileAddFileView(APIView):
     def post(self, request, bidfile_id):
         """
         Handles POST request to add files to BidFile and update it with a compressed zip file.
-        """
-        this_bfm = self._get_bidfile(bidfile_id)
-        serializer = self._validate_request_data(request, this_bfm)
+        """        this_bfm = self._get_bidfile(bidfile_id=bidfile_id)
+        serializer = self._validate_request_data(
+            request=request,
+            instance=this_bfm,
+        )
 
         temp_path = self._create_temp_path()
         files_list = request.FILES.getlist("uploaded_file")
@@ -492,11 +494,21 @@ class BidFileAddFileView(APIView):
             )
 
         # Process file uploads and create zip file
-        files_paths = self._save_uploaded_files(files_list, temp_path)
-        zip_file_path = self._create_zip_file(files_paths, temp_path, this_bfm)
+        files_paths = self._save_uploaded_files(
+            files_list=files_list,
+            temp_path=temp_path,
+        )
+        zip_file_path = self._create_zip_file(
+            files_paths=files_paths,
+            temp_path=temp_path,
+            bidfile=this_bfm,
+        )
 
         # Update the BidFile instance with the zip file
-        self._update_bidfile_with_zip(this_bfm, zip_file_path)
+        self._update_bidfile_with_zip(
+            bidfile=this_bfm,
+            zip_file_path=zip_file_path,
+        )
 
         return Response(
             {"detail": "File(s) uploaded and updated successfully."},
@@ -527,8 +539,9 @@ class BidFileAddFileView(APIView):
         """
         Creates and returns the temporary directory path for file uploads.
         """
-        temp_path = os.path.join(settings.MEDIA_ROOT, "uploads/bidfiles")
-        os.makedirs(temp_path, exist_ok=True)
+        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
         return temp_path
 
     @staticmethod
@@ -544,21 +557,33 @@ class BidFileAddFileView(APIView):
         """
         Saves each uploaded file in the temp path and returns list of file paths.
         """
-        return BidFileService.handle_uploaded_files(files_list, temp_path)
+        file_paths = BidFileService.handle_uploaded_files(
+            files_list=files_list,
+            temp_path=temp_path,
+        )
+        return file_paths
 
     @staticmethod
     def _create_zip_file(files_paths, temp_path, bidfile):
         """
         Creates a zip file from uploaded files and returns the path to the zip file.
         """
-        project_clean_name = BidFileService.clean_project_name(bidfile.project.name)
-        return BidFileService.create_zip_file(
-            files_paths, temp_path, f"{bidfile.pk}_{project_clean_name}"
+        project_clean_name = BidFileService.clean_project_name(
+            project_name=bidfile.project.name
         )
+        zip_filename = BidFileService.create_zip_file(
+            filenames=files_paths,
+            path=temp_path,
+            project_name=f"{bidfile.pk}_{project_clean_name}"
+        )
+        return zip_filename
 
     @staticmethod
     def _update_bidfile_with_zip(bidfile, zip_file_path):
         """
         Updates the BidFile instance with the new zip file uploaded to S3.
         """
-        BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
+        BidFileService.update_bidfile_with_zip(
+            bidfile=bidfile,
+            zip_file_path=zip_file_path,
+        )

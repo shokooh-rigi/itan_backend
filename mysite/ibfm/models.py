@@ -1,7 +1,6 @@
-import datetime
-from django.conf import settings
 from django.db import models
 
+from mysite import settings
 from mysite.core.models import Person, User, Project
 
 
@@ -25,7 +24,6 @@ class iBidFile(models.Model):
         blank=False,
         null=True,
     )
-    # Todo: check this path work from settings?
     uploaded_file = models.FileField(
         # todo: change fo get  url instate of file field
         upload_to=settings.UPLOAD_IBID_FILE_PATH,
