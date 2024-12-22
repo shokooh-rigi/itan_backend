@@ -477,7 +477,8 @@ class BidFileAddFileView(APIView):
     def post(self, request, bidfile_id):
         """
         Handles POST request to add files to BidFile and update it with a compressed zip file.
-        """        this_bfm = self._get_bidfile(bidfile_id=bidfile_id)
+        """
+        this_bfm = self._get_bidfile(bidfile_id=bidfile_id)
         serializer = self._validate_request_data(
             request=request,
             instance=this_bfm,
