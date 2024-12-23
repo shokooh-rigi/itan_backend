@@ -3,8 +3,6 @@ import datetime
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -18,36 +16,6 @@ from .serializers import iBidFileSerializer, iBidFileUpdateSerializer
 class BidFileListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Retrieve a list of ibid files with filtering options",
-        manual_parameters=[
-            openapi.Parameter(
-                'search',
-                openapi.IN_QUERY,
-                description="Search term",
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'ordering',
-                openapi.IN_QUERY,
-                description="Order by a field",
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'fromDate',
-                openapi.IN_QUERY,
-                description="From date in mm/dd/yyyy",
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'toDate',
-                openapi.IN_QUERY,
-                description="To date in mm/dd/yyyy",
-                type=openapi.TYPE_STRING
-            ),
-        ],
-        responses={200: iBidFileSerializer(many=True)}
-    )
     def get(self, request) -> Response:
         search: str = request.GET.get('search', '')
         ordering: str = request.GET.get('ordering', 'due_date')
@@ -114,11 +82,7 @@ class BidFileUpdateView(APIView):
         """
         return get_object_or_404(iBidFile, id=id)
 
-    @swagger_auto_schema(
-        request_body=iBidFileUpdateSerializer,
-        operation_description="Update an existing ibid file",
-        responses={200: iBidFileUpdateSerializer}
-    )
+
     def put(self, request, id: int) -> Response:
         """
         PUT method to update an existing ibid file.
@@ -142,10 +106,6 @@ class BidFileDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Delete an existing ibid file",
-        responses={204: 'No Content'}
-    )
     def delete(self, request, id: int) -> Response:
         """
         DELETE method to remove a ibid file.

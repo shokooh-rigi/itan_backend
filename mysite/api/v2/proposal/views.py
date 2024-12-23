@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -33,24 +31,6 @@ class ProposalListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="List proposals",
-        manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY,
-                              description="Search term (estimate ID, project, or customer name)",
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('fromDate', openapi.IN_QUERY, description="Start date for filtering (MM/DD/YYYY)",
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('toDate', openapi.IN_QUERY, description="End date for filtering (MM/DD/YYYY)",
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('paginate_by', openapi.IN_QUERY, description="Number of items per page",
-                              type=openapi.TYPE_INTEGER),
-            openapi.Parameter('page', openapi.IN_QUERY, description="Page number to retrieve",
-                              type=openapi.TYPE_INTEGER),
-        ],
-        responses={200: openapi.Response("List of proposals returned successfully."),
-                   400: openapi.Response("Invalid parameters provided.")},
-    )
     def get(self, request):
         search = request.GET.get('search', '')
         paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
@@ -102,14 +82,6 @@ class ProposalListView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        request_body=EmailSerializer,
-        operation_summary="Send proposal email",
-        responses={
-            200: openapi.Response("Email sent successfully."),
-            400: openapi.Response("Invalid email data provided.")
-        }
-    )
     def post(self, request):
         """
         Send a proposal email to specified recipients.
@@ -255,21 +227,6 @@ class ProposalArchiveView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Archives a proposal if the user is authorized and confirms the action.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to archive the proposal')
-            },
-            required=['confirm']
-        ),
-        responses={
-            200: openapi.Response(description="Proposal archived successfully"),
-            400: openapi.Response(description="Confirmation not received for archiving."),
-            403: openapi.Response(description="User is not authorized to archive this record.")
-        }
-    )
     def post(self, request, id):
         proposal = get_object_or_404(Proposal, id=id)
 
@@ -297,21 +254,6 @@ class ProposalDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Deletes a proposal if the user is authorized and confirms the action.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to delete the proposal')
-            },
-            required=['confirm']
-        ),
-        responses={
-            200: openapi.Response(description="Proposal deleted successfully"),
-            400: openapi.Response(description="Confirmation not received for deletion."),
-            403: openapi.Response(description="User is not authorized to delete this record.")
-        }
-    )
     def delete(self, request, proposal_id):
         proposal = get_object_or_404(Proposal, id=proposal_id)
 

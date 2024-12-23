@@ -4,8 +4,6 @@ import os
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -28,38 +26,7 @@ class BidFileListView(APIView):
     - GET: Retrieves a list of bid files based on optional query parameters for search, date range, and ordering.
     """
 
-    # permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Retrieve a list of bid files with filtering options.",
-        manual_parameters=[
-            openapi.Parameter(
-                "search",
-                openapi.IN_QUERY,
-                description="Search term to filter by project name or customer company name.",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "ordering",
-                openapi.IN_QUERY,
-                description="Field to order the results by. Defaults to 'due_date'.",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "fromDate",
-                openapi.IN_QUERY,
-                description="Start date in mm/dd/yyyy format for filtering bid files by due date.",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "toDate",
-                openapi.IN_QUERY,
-                description="End date in mm/dd/yyyy format for filtering bid files by due date.",
-                type=openapi.TYPE_STRING,
-            ),
-        ],
-        responses={200: BidFileSerializer(many=True)},
-    )
+    permission_classes = [IsAuthenticated]
     def get(self, request) -> Response:
         """
         Retrieve a list of bid files, optionally filtered by search term, date range, and ordering.
@@ -153,10 +120,6 @@ class BidFileUpdateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Retrieve a BidFile by ID.",
-        responses={200: BidFileSerializer(), 404: "BidFile not found"},
-    )
     def get(self, request, bidfiles_id):
         """
         Retrieve a BidFile instance by its ID.
@@ -170,11 +133,6 @@ class BidFileUpdateView(APIView):
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    @swagger_auto_schema(
-        operation_description="Update an existing BidFile instance.",
-        request_body=BidFileSerializer(),
-        responses={200: BidFileSerializer(), 400: "Bad request"},
-    )
     def post(self, request, bidfiles_id):
         """
         Update a BidFile instance with the provided data.
@@ -204,15 +162,6 @@ class BidFileDuplicateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Duplicate a BidFile by ID.",
-        request_body=BidFileSerializer(),
-        responses={
-            201: BidFileSerializer(),
-            400: "Bad request",
-            404: "BidFile not found",
-        },
-    )
     def post(self, request, bidfiles_id):
         """
         Duplicate an existing BidFile instance.
@@ -346,37 +295,6 @@ class BidFileCreateView(APIView):
     This view processes the files, creates a zip, and uploads it to S3.
     """
 
-    @swagger_auto_schema(
-        operation_summary="Create a new bid file",
-        operation_description="Uploads files, creates a zip archive, saves it to S3, and registers the bid file entry in the database.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["customer", "project", "due_date"],
-            properties={
-                "customer_id": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="ID of the customer"
-                ),
-                "project_id": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="ID of the project"
-                ),
-                "due_date": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    format="date",
-                    description="Due date in YYYY-MM-DD format",
-                ),
-                "uploaded_file": openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Items(type=openapi.TYPE_FILE),
-                    description="Files to upload",
-                ),
-            },
-        ),
-        responses={
-            201: openapi.Response("Bid file created successfully", BidFileSerializer),
-            400: "Invalid input or files exceeded maximum upload size",
-            500: "Internal server error",
-        },
-    )
     def post(self, request):
         form_data = request.data
         files_list = request.FILES.getlist("uploaded_file")

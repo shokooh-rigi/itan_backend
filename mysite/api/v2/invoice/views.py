@@ -7,9 +7,6 @@ from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
@@ -175,25 +172,6 @@ class InvoiceCreateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Retrieve orders for invoice creation.",
-        manual_parameters=[
-            openapi.Parameter(
-                'order_id',
-                openapi.IN_PATH,
-                description="The ID of the order to retrieve.",
-                type=openapi.TYPE_INTEGER,
-                required=False
-            )
-        ],
-        responses={
-            200: openapi.Response(
-                description="A list of orders.",
-                schema=OrderSerializer(many=True)
-            ),
-            400: "Bad Request"
-        }
-    )
     def get(self, request, *args, **kwargs):
         """
         Retrieve orders for invoice creation.
@@ -212,31 +190,6 @@ class InvoiceCreateView(APIView):
         result = OrderSerializer(orders, many=True).data
         return Response({'orders': result}, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        operation_description="Create a new invoice for a specific order.",
-        request_body=InvoiceSerializer,
-        manual_parameters=[
-            openapi.Parameter(
-                'order_id',
-                openapi.IN_PATH,
-                description="The ID of the order for which the invoice is created.",
-                type=openapi.TYPE_INTEGER,
-                required=True
-            )
-        ],
-        responses={
-            201: openapi.Response(
-                description="Invoice created successfully.",
-                examples={
-                    "application/json": {
-                        "invoice_id": 123,
-                        "status": "success"
-                    }
-                }
-            ),
-            400: "Bad Request"
-        }
-    )
     def post(self, request, *args, **kwargs):
         """
         Create a new invoice for a specific order.
@@ -339,8 +292,6 @@ class InvoiceDetailView(APIView):
         - GET: Retrieves the invoice details and processes the invoice if no history exists.
     """
 
-    @swagger_auto_schema(
-        operation_description="Retrieves the details of the specified invoice and processes it if necessary.")
     def get(self, request, invoice_id):
         """
         Retrieves the details of the specified invoice and processes it if necessary.
@@ -780,39 +731,6 @@ class AccountSummaryDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Delete an account summary",
-        description=(
-            "Deletes an account summary if the requesting user is the creator. "
-            "Requires confirmation via a 'confirm' parameter in the request body."
-        ),
-        parameters=[
-            OpenApiParameter(
-                name="account_summary_id",
-                description="ID of the account summary to delete",
-                required=True,
-                type=int,
-            ),
-        ],
-        request={
-            "application/json": {
-                "type": "object",
-                "properties": {
-                    "confirm": {
-                        "type": "boolean",
-                        "description": "Confirmation to delete the account summary.",
-                    }
-                },
-                "required": ["confirm"],
-            }
-        },
-        responses={
-            204: "Account summary deleted successfully.",
-            400: "Bad request. Confirmation required.",
-            403: "Forbidden. User not authorized to delete the account summary.",
-            404: "Not found. Account summary does not exist.",
-        },
-    )
     def delete(self, request, account_summary_id):
         """
         Delete an account summary if the user is the creator and provides confirmation.

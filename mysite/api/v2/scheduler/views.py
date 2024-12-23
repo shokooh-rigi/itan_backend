@@ -4,8 +4,6 @@ import logging
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -27,42 +25,6 @@ class ScheduleListView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Retrieve a list of schedules with filtering options.",
-        manual_parameters=[
-            openapi.Parameter(
-                "search",
-                openapi.IN_QUERY,
-                description="Search by project number or contractor name.",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "ordering",
-                openapi.IN_QUERY,
-                description="Field to order results (e.g., '-created_on').",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "fromDate",
-                openapi.IN_QUERY,
-                description="Start date for filtering (format: mm/dd/yyyy).",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "toDate",
-                openapi.IN_QUERY,
-                description="End date for filtering (format: mm/dd/yyyy).",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "page_size",
-                openapi.IN_QUERY,
-                description="Number of results per page.",
-                type=openapi.TYPE_INTEGER,
-            ),
-        ],
-        responses={200: ScheduleSerializer(many=True)},
-    )
     def get(self, request):
         """
         Handles GET requests to retrieve schedules based on the provided filters and pagination options.
@@ -124,15 +86,6 @@ class ScheduleUpdateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Update an existing Schedule instance.",
-        request_body=ScheduleSerializer,
-        responses={
-            200: "Schedule updated successfully",
-            400: "Invalid input data",
-            404: "Schedule not found",
-        },
-    )
     def put(self, request, schedule_id):
         """
         Update the Schedule instance with the provided data.

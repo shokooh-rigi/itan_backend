@@ -8,8 +8,6 @@ from django.core.paginator import Paginator
 from django.db import DatabaseError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -41,22 +39,6 @@ class EstimateListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="List estimates",
-        manual_parameters=[
-            openapi.Parameter(
-                'search', openapi.IN_QUERY, description="Search term for estimates", type=openapi.TYPE_STRING),
-            openapi.Parameter(
-                'fromDate', openapi.IN_QUERY, description="Start date for filtering", type=openapi.TYPE_STRING),
-            openapi.Parameter(
-                'toDate', openapi.IN_QUERY, description="End date for filtering", type=openapi.TYPE_STRING),
-            openapi.Parameter(
-                'paginate_by', openapi.IN_QUERY, description="Number of items per page", type=openapi.TYPE_INTEGER),
-            openapi.Parameter(
-                'page', openapi.IN_QUERY, description="Page number to retrieve", type=openapi.TYPE_INTEGER),
-        ],
-        responses={200: openapi.Response("List of estimates returned successfully.")}
-    )
     def get(self, request):
         search = request.GET.get('search', '')
         paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
@@ -92,14 +74,6 @@ class EstimateListView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        operation_summary="Send an email related to an estimate",
-        request_body=EmailSerializer,
-        responses={
-            200: openapi.Response("Email sent successfully."),
-            400: openapi.Response("Invalid email data provided."),
-        },
-    )
     def post(self, request):
         """
         Sends an email based on the provided validated data in the request.
@@ -150,22 +124,6 @@ class EstimateCreateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Create a new estimate.",
-        request_body=EstimateSerializer,
-        responses={
-            status.HTTP_201_CREATED: openapi.Response(
-                description="Estimate created successfully",
-                schema=EstimateSerializer(),
-            ),
-            status.HTTP_400_BAD_REQUEST: openapi.Response(
-                description="Invalid data provided",
-            ),
-            status.HTTP_404_NOT_FOUND: openapi.Response(
-                description="BidFile not found",
-            ),
-        }
-    )
     def post(self, request, bid_file_id=None):
         """
         Handle POST request to create an estimate.
@@ -256,35 +214,6 @@ class EstimateUpdateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="Update an existing estimate",
-        operation_description=(
-            "This endpoint allows updating an existing estimate by ID. "
-            "Frontend developers can use this to send updated estimate data "
-            "to the server and receive confirmation of the update."
-        ),
-        responses={
-            200: openapi.Response(
-                description="Estimate updated successfully",
-                examples={
-                    "application/json": {
-                        "message": "Estimate updated",
-                        "estimate_id": 1
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad request with validation errors",
-                examples={
-                    "application/json": {
-                        "error": "Validation error details"
-                    }
-                }
-            ),
-            404: "Estimate not found"
-        },
-        request_body=EstimateSerializer,
-    )
     def put(self, request, estimate_id):
         logger.info("Request to update estimate with ID: %s", estimate_id)
         this_estimate = get_object_or_404(Estimate, id=estimate_id)
@@ -335,21 +264,6 @@ class EstimateUpdateView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    @swagger_auto_schema(
-        operation_summary="Retrieve an estimate",
-        operation_description=(
-            "Get details of an existing estimate by ID. "
-            "This endpoint allows frontend developers to fetch the current data "
-            "for an estimate before making updates, facilitating a smoother user workflow."
-        ),
-        responses={
-            200: openapi.Response(
-                description="Estimate retrieved successfully",
-                schema=EstimateSerializer
-            ),
-            404: "Estimate not found"
-        }
-    )
     def get(self, request, estimate_id):
         """
         Handle GET request to retrieve an estimate by ID.
@@ -373,35 +287,6 @@ class EstimateDeleteView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="Delete an existing estimate",
-        operation_description=(
-                "This endpoint allows deletion of an existing estimate by ID. "
-                "Only the creator of the estimate or an authorized user can perform this action. "
-                "The request must include confirmation to proceed with the deletion."
-        ),
-        responses={
-            204: openapi.Response(
-                description="Estimate deleted successfully"
-            ),
-            403: openapi.Response(
-                description="Forbidden: User not authorized to delete this estimate",
-                examples={
-                    "application/json": {
-                        "error": "You are not authorized to delete this record."
-                    }
-                }
-            ),
-            404: "Estimate not found"
-        },
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Confirmation to delete the estimate")
-            },
-            required=['confirm']
-        )
-    )
     def delete(self, request, estimate_id):
         logger.info("Request to delete estimate with ID: %s", estimate_id)
 
@@ -445,21 +330,6 @@ class EstimateArchiveView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Archives an estimate if the user is authorized and confirms the action.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Confirmation to archive the estimate')
-            },
-            required=['confirm']
-        ),
-        responses={
-            200: openapi.Response(description="Estimate archived successfully"),
-            400: openapi.Response(description="Confirmation not received for archiving."),
-            403: openapi.Response(description="User is not authorized to archive this record.")
-        }
-    )
     def post(self, request, estimate_id):
         estimate = get_object_or_404(Estimate, id=estimate_id)
 
@@ -496,7 +366,6 @@ class EstimateHistoryView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(operation_description="Get the history of an estimate.")
     def get(self, request, estimate_id):
         """
         Get the history of an estimate by ID.
@@ -518,7 +387,6 @@ class EstimateDetailsView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(operation_description="Get or update the details of an estimate.")
     def get(self, request, estimate_id):
         """
         Get the details of the estimate.
@@ -542,7 +410,6 @@ class EstimateDetailsView(APIView):
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(operation_description="Update the details of the estimate.")
     def post(self, request, estimate_id):
         """
         Update the details of an estimate.
@@ -565,7 +432,6 @@ class EstimateEquipmentDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(operation_description="Delete the estimate equipment by ID.")
     def delete(self, request, estimate_equipment_id):
         """
         Delete the estimate equipment by ID if confirmed.
@@ -590,14 +456,6 @@ class EstimateDuplicateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Duplicates an estimate with associated records.",
-        responses={
-            200: openapi.Response(description="Estimate duplicated successfully"),
-            400: openapi.Response(description="Invalid data provided for duplication."),
-            403: openapi.Response(description="You are not authorized to duplicate this record.")
-        }
-    )
     def post(self, request, estimate_id):
         this_estimate = get_object_or_404(Estimate, id=estimate_id)
 
@@ -656,29 +514,6 @@ class EstimateEquipmentView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Retrieves equipment details for an estimate service, including pricing information.",
-        responses={
-            200: openapi.Response(
-                description="Returns the equipment details and total estimate price.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'estimate_money': openapi.Schema(type=openapi.TYPE_NUMBER),
-                        'interval_set': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'estimate_service_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'equipments': openapi.Schema(type=openapi.TYPE_ARRAY,
-                                                     items=openapi.Items(type=openapi.TYPE_INTEGER)),
-                        'equipment_in': openapi.Schema(type=openapi.TYPE_ARRAY,
-                                                       items=openapi.Items(type=openapi.TYPE_INTEGER)),
-                    }
-                ),
-            ),
-            404: "Estimate not found.",
-            500: "Internal server error.",
-        }
-    )
     def get(self, request, estimate_id, estimate_service_id):
         """
         Retrieves equipment and pricing data for a specific estimate and service interval.
@@ -720,25 +555,6 @@ class EstimateEquipmentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @swagger_auto_schema(
-        operation_description="Adds or updates equipment for an estimate service.",
-        request_body=EstimateEquipmentSerializer,
-        responses={
-            200: openapi.Response(
-                description="Equipment added/updated successfully.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'message': openapi.Schema(type=openapi.TYPE_STRING),
-                        'estimate_money': openapi.Schema(type=openapi.TYPE_NUMBER),
-                    }
-                )
-            ),
-            400: openapi.Response(description="Invalid input data."),
-            404: "Estimate not found.",
-            500: "Internal server error.",
-        }
-    )
     def post(self, request, estimate_id):
         """
         Adds or updates equipment for a specific estimate and service interval.
@@ -931,7 +747,6 @@ class EstimateBidView(APIView):
             'user_cell': request.user.profile.cell or '',
         }
 
-    @swagger_auto_schema(operation_description="Generate and retrieve the estimate bid.")
     def get(self, request, estimate_id):
         """
         Generate and return the estimate bid with relevant data.
