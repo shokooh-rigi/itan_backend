@@ -113,36 +113,27 @@ class BidFileListView(APIView):
 
 class BidFileUpdateView(APIView):
     """
-    API view to update a BidFile instance.
-    - GET: Retrieve a BidFile's details by its ID.
-    - POST: Update an existing BidFile instance with the provided data.
+    API view to retrieve and update a BidFile instance.
+    - PUT: Retrieve or update a BidFile instance by its ID.
     """
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, bidfiles_id):
+    def put(self, request, bidfiles_id):
         """
-        Retrieve a BidFile instance by its ID.
+        Retrieve or update a BidFile instance with the provided data.
         """
         try:
             bidfile = BidFile.objects.get(id=bidfiles_id)
-            serializer = BidFileSerializer(bidfile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
         except BidFile.DoesNotExist:
             return Response(
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    def post(self, request, bidfiles_id):
-        """
-        Update a BidFile instance with the provided data.
-        """
-        try:
-            bidfile = BidFile.objects.get(id=bidfiles_id)
-        except BidFile.DoesNotExist:
-            return Response(
-                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+        if not request.data:
+            # If no data is provided, return the current BidFile details
+            serializer = BidFileSerializer(bidfile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         # Attempt to update the BidFile instance with the new data
         serializer = BidFileSerializer(
@@ -152,7 +143,6 @@ class BidFileUpdateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class BidFileDuplicateView(APIView):
     """
