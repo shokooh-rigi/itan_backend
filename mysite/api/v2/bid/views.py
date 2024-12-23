@@ -374,14 +374,7 @@ class BidFileAddFileView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Add files to a BidFile and compress them into a zip file.",
-        request_body=BidFileCreateSerializer,
-        responses={
-            200: "File(s) uploaded and updated successfully.",
-            400: "Invalid input or file size exceeded.",
-        },
-    )
+
     def post(self, request, bidfile_id):
         """
         Handles POST request to add files to BidFile and update it with a compressed zip file.
