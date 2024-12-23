@@ -51,7 +51,7 @@ class BidFile(BaseModel):
 
     def __str__(self):
         return (
-            str(self.id) + " - " + self.customer.company.name + ": " + str(self.project)
+            str(self.id) + " - " + (self.customer.company.name if self.customer else "") + ": " + str(self.project)
         )
 
 
