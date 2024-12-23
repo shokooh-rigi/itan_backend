@@ -282,7 +282,7 @@ class BidFileDeleteView(APIView):
 class BidFileCreateView(APIView):
     """
     Create a new bid file with uploaded files.
-    This view processes the files, creates a zip, and uploads it to S3.
+    This view processes the files, validates extensions, creates a zip, and uploads it to S3.
     """
 
     def post(self, request):
@@ -311,6 +311,13 @@ class BidFileCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Validate file extensions
+        if not self._are_valid_extensions(files_list):
+            return Response(
+                {"error": "Invalid file extension. Only zip, pdf, and docx are allowed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Handle file uploads and create zip
         temp_path = self._get_temp_path()
         file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
@@ -331,6 +338,18 @@ class BidFileCreateView(APIView):
         """
         total_size = sum([f.size for f in files_list])
         return total_size <= settings.MAX_UPLOAD_SIZE
+
+    @staticmethod
+    def _are_valid_extensions(files_list):
+        """
+        Check if all uploaded files have valid extensions.
+        """
+        allowed_extensions = {"zip", "pdf", "docx"}
+        for file in files_list:
+            file_extension = os.path.splitext(file.name)[-1].lower().strip(".")
+            if file_extension not in allowed_extensions:
+                return False
+        return True
 
     @staticmethod
     def _get_temp_path():
@@ -373,7 +392,6 @@ class BidFileAddFileView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
-
 
     def post(self, request, bidfile_id):
         """
