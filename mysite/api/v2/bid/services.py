@@ -22,16 +22,19 @@ class BidFileService:
     @staticmethod
     def create_zip_file(filenames, path, project_name):
         """
-        Creates a zip file from the provided file paths.
+        Creates a zip file from the provided file paths and returns the zip file path.
         """
-        zip_filename = os.path.join(path, project_name)
-        zf = zipfile.ZipFile(zip_filename, "w")
-        for file in filenames:
-            fdir, fname = os.path.split(file)
-            zf.write(file, fname)
-            os.remove(file)
-        zf.close()
-        return zf
+        # Ensure the zip filename has a .zip extension
+        zip_filename = os.path.join(path, f"{project_name}.zip")
+        
+        # Create a new zip file
+        with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file in filenames:
+                fdir, fname = os.path.split(file)
+                zf.write(file, fname)  # Store the file in the zip
+                os.remove(file)  # Remove the original file after adding it to the zip
+
+        return zip_filename
 
     @staticmethod
     def clean_project_name(project_name):
@@ -44,6 +47,7 @@ class BidFileService:
 
     @staticmethod
     def update_bidfile_with_zip(bidfile, zip_file_path):
+        print(zip_file_path)
         """
         Uploads the zip file to S3 and updates the bidfile record with the file path.
         """
