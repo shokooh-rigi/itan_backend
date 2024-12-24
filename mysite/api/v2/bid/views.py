@@ -139,6 +139,7 @@ class BidFileUpdateView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class BidFileDuplicateView(APIView):
     """
     API view to duplicate an existing BidFile instance.
@@ -147,33 +148,34 @@ class BidFileDuplicateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, bidfiles_id):
+    def get(self, request, bid_files_id):
         """
         Duplicate an existing BidFile instance.
         """
         try:
-            this_bidfile = BidFile.objects.get(id=bidfiles_id)
+            this_bid_file = BidFile.objects.get(id=bid_files_id)
         except BidFile.DoesNotExist:
             return Response(
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        customer_id = request.data.get("customer")
-        if not customer_id:
-            return Response(
-                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
         # Call internal helper method to handle the duplication process
-        duplicated_bidfile = self._duplicate_bidfile(
-            this_bidfile, customer_id, request.user
+        duplicated_bid_file = self._duplicate_bid_file(
+            this_bid_file,
+            this_bid_file.customer.id,
+            request.user,
         )
 
         # Return the new duplicated BidFile instance
-        serializer = BidFileSerializer(duplicated_bidfile)
+        serializer = BidFileSerializer(duplicated_bid_file)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def _duplicate_bidfile(self, this_bidfile, customer_id, created_by_user):
+    @staticmethod
+    def _duplicate_bid_file(
+            this_bid_file: BidFile,
+            customer_id: int,
+            created_by_user,
+    ):
         """
         Internal helper function to duplicate a BidFile.
         - Duplicates the relevant fields, assigns a new customer, and returns the duplicated instance.
@@ -185,12 +187,12 @@ class BidFileDuplicateView(APIView):
 
         # Create a new BidFile with the same attributes (excluding file, customer, and created_by)
         duplicated_bfm = BidFile.objects.create(
-            project=this_bidfile.project,
+            project=this_bid_file.project,
             customer=customer,
             created_by=created_by_user,
-            due_date=this_bidfile.due_date,
-            note=this_bidfile.note,
-            archive=this_bidfile.archive,  # If archive is required
+            due_date=this_bid_file.due_date,
+            note=this_bid_file.note,
+            archive=this_bid_file.archive,  # If archive is required
             uploaded_file=None,  # Retain the uploaded file if needed
         )
 
