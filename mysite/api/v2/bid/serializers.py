@@ -22,6 +22,7 @@ class BidFileSerializer(serializers.ModelSerializer):
             'due_date',
             'note',
             'created_by',
+            'id',
         ]
 
 
