@@ -130,11 +130,6 @@ class BidFileUpdateView(APIView):
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        if not request.data:
-            # If no data is provided, return the current BidFile details
-            serializer = BidFileSerializer(bidfile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
         # Attempt to update the BidFile instance with the new data
         serializer = BidFileSerializer(
             bidfile, data=request.data, partial=True
