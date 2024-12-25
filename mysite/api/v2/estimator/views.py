@@ -224,14 +224,6 @@ class EstimateUpdateView(APIView):
             partial=True  # Allow partial updates
         )
 
-        # Check for cancel request
-        if request.data.get("cancel"):
-            logger.info("Estimate update operation cancelled.")
-            return Response(
-                {"message": "Operation cancelled"},
-                status=status.HTTP_200_OK,
-            )
-
         # Validate and save the estimate
         if serializer.is_valid():
             updated_estimate = serializer.save(created_by=request.user)
@@ -490,6 +482,7 @@ class EstimateEquipmentView(APIView):
     retrieving equipment pricing details and adding or updating equipment.
     """
     permission_classes = [IsAuthenticated]
+    # todo: Dear Reza is it update or create ?
 
     def get(self, request, estimate_id, estimate_service_id):
         """

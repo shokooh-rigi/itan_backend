@@ -291,6 +291,7 @@ class InvoiceDetailView(APIView):
     Methods:
         - GET: Retrieves the invoice details and processes the invoice if no history exists.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, invoice_id):
         """
@@ -642,6 +643,8 @@ class AccountSummaryCreateView(APIView):
     - Calculates remaining invoices and the total amount using the service layer.
     - Generates and attaches a PDF report for the created account summary.
     """
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, customer_id=None):
         """
         Create an Account Summary.

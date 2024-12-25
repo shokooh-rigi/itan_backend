@@ -59,6 +59,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
         return queryset
 
+
 class EngineerViewSet(viewsets.ModelViewSet):
     """
     API endpoint for creating and editing Engineers.
@@ -216,6 +217,7 @@ class GetEngineerId(APIView):
     """
     Retrieve the engineer ID based on the engineer's name.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         engineer_name = request.GET.get("engineer_name")
@@ -232,6 +234,7 @@ class GetProjectId(APIView):
     """
     Retrieve the project ID based on the project name.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         project_name = request.GET.get("project_name")
@@ -248,6 +251,7 @@ class GetPersonId(APIView):
     """
     Retrieve the person ID based on the person's name.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         person_name = request.GET.get("person_name")
@@ -264,6 +268,7 @@ class GetCompanyId(APIView):
     """
     Retrieve the company ID based on the company name.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         company_name = request.GET.get("company_name")
@@ -280,6 +285,7 @@ class CompanyTypeList(APIView):
     """
     Retrieve all company types.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -300,11 +306,11 @@ class CompanyTypeList(APIView):
             )
 
 
-
 class SignUpAPIView(APIView):
     """
     API for user registration. Creates a new user and sends an activation email.
     """
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
@@ -341,6 +347,7 @@ class AccountActivationSentAPIView(APIView):
     """
     API to confirm that the account activation link has been sent.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         return Response(
@@ -353,6 +360,7 @@ class ActivateAccountAPIView(APIView):
     """
     API for activating user accounts via email link.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, uidb64, token, *args, **kwargs):
         try:
@@ -377,6 +385,7 @@ class ActivateAccountAPIView(APIView):
 
 class DocumentUploadAPIView(APIView):
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = DocumentSerializer(data=request.data)

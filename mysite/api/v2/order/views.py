@@ -40,6 +40,7 @@ class OrderListAPIView(APIView):
     Returns:
         - Paginated list of orders based on filters and ordering.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         project_name = request.query_params.get("project_name", "")
@@ -83,6 +84,7 @@ class OrderAddAPIView(APIView):
     Query Parameters:
         - proposal_id (int): Optional ID of a specific proposal to fetch.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """
@@ -105,8 +107,6 @@ class OrderAddAPIView(APIView):
         Handle the creation of a new order.
         """
         serializer = OrderSerializer(data=request.data)
-        if request.data.get("cancel"):
-            return Response({"message": "Order creation canceled."}, status=status.HTTP_200_OK)
 
         if serializer.is_valid():
             serializer.save()
@@ -127,6 +127,7 @@ class OrderEditAPIView(APIView):
         - order_id (int): The ID of the order to edit.
 
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, order_id):
         """
@@ -170,10 +171,6 @@ class OrderEditAPIView(APIView):
         this_order = OrderEditService.get_order(order_id)
         serializer = OrderSerializer(this_order, data=request.data)
 
-        # Check for cancellation
-        if request.data.get("cancel"):
-            return Response({"message": "Order edit canceled."}, status=status.HTTP_200_OK)
-
         # Redirect actions based on custom keys
         redirection_keys = {
             "co": "changeOrder",
@@ -204,6 +201,7 @@ class OrderDeleteAPIView(APIView):
     Methods:
         - POST: Deletes the specified order.
     """
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, order_id):
         # Fetch the order
@@ -231,6 +229,7 @@ class OrderArchiveAPIView(APIView):
     Methods:
         - POST: Archives the specified order.
     """
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
         # Fetch the order
@@ -355,6 +354,7 @@ class ChangeOrderApproveView(APIView):
 class TechLabelViewSet(ModelViewSet):
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['post'], url_path='update-extra-fields')
     def update_extra_fields(self, request, order_id=None):
@@ -413,9 +413,6 @@ class ControlSystemAPIView(APIView):
         order = get_object_or_404(Order, id=order_id)
         serializer = OrderControlSystemSerializer(order, data=request.data, partial=True)
 
-        if 'cancel' in request.data:
-            return Response({'message': 'Action canceled.'}, status=status.HTTP_200_OK)
-
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Control system updated successfully!'}, status=status.HTTP_200_OK)
@@ -433,20 +430,12 @@ class OrderEquipmentSubmittalView(APIView):
     def post(self, request, order_id):
         """
         Handle POST request to manage equipment submittal for an order.
-        - Cancel action
         - Clear equipment submittal
         - Upload files and update order with equipment submittal.
         """
         try:
             # Fetch the order instance
             order = get_object_or_404(Order, id=order_id)
-
-            # Handle cancel action (redirect is simulated here)
-            if request.data.get("cancel"):
-                return Response(
-                    {"detail": "Order edit canceled."},
-                    status=status.HTTP_200_OK
-                )
 
             # Handle clearing the equipment submittal
             if request.data.get("equipment_submittal-clear"):
@@ -484,7 +473,6 @@ class OrderFieldDrawingView(APIView):
 
     This view handles the following actions:
     - Uploading field drawings as files.
-    - Cancelling the action and redirecting to the order edit page.
     - Validating uploaded files for size and saving them after processing.
     - Creating a zip file of the uploaded field drawings.
     """
@@ -496,8 +484,6 @@ class OrderFieldDrawingView(APIView):
         Handle the POST request to upload and process field drawing files for an order.
 
         Depending on the data passed, the following actions are performed:
-        - If the "cancel" key is present in the request data, the request is cancelled,
-          and a success message is returned.
         - If the field drawings are provided, the files are validated and processed.
           If valid, the files are saved, and a zip file is created and associated with the order.
 
@@ -511,10 +497,6 @@ class OrderFieldDrawingView(APIView):
         try:
             # Fetch the order instance
             order = get_object_or_404(Order, id=order_id)
-
-            # Handle cancel request
-            if request.data.get("cancel"):
-                return Response({"detail": "Order edit canceled."}, status=status.HTTP_200_OK)
 
             # Handle form submission for field drawing files
             if 'field_drawing' in request.FILES:
@@ -548,14 +530,13 @@ class OrderGeneralNotesView(APIView):
     - Retrieving the general notes and comments for an order (GET request).
     - Saving the general notes and comments (POST request with "save" action).
     - Finalizing the general notes and comments (POST request with "finalize" action).
-    - Cancelling the action (POST request with "cancel" action).
     """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
         """
-        Handle POST request to save, finalize, or cancel the general notes and comments.
+        Handle POST request to save, finalize
 
         Args:
             request (Request): The HTTP request object containing the data.
@@ -566,10 +547,6 @@ class OrderGeneralNotesView(APIView):
         """
         # Retrieve the order object by ID
         order = get_object_or_404(Order, id=order_id)
-
-        # If "cancel" is pressed, return a canceled action response
-        if request.data.get("cancel"):
-            return Response({"detail": "Action canceled."}, status=status.HTTP_200_OK)
 
         # Extract general notes and comments from the request data
         general_notes_and_comments = str(request.data.get('general_notes_and_comments', ""))
@@ -628,14 +605,10 @@ class OrderSitePicturesView(APIView):
 
     def post(self, request, order_id):
         """
-        Handle POST request to save site pictures or cancel the action.
+        Handle POST request to save site pictures
         """
         # Retrieve the order object by ID
         order = get_object_or_404(Order, id=order_id)
-
-        # Cancel the action if 'cancel' is present in the request
-        if request.data.get("cancel"):
-            return Response({"detail": "Action canceled."}, status=status.HTTP_200_OK)
 
         # Process the form data and files using the service layer
         try:
@@ -676,6 +649,7 @@ class OrderFullUpdateAPIView(APIView):
     ensuring that all related information is available for the user to make
     necessary changes.
     """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, order_id, *args, **kwargs):
         """

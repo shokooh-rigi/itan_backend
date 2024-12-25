@@ -387,6 +387,7 @@ class BidFileCreateView(APIView):
     Create a new bid file with uploaded files.
     This view processes the files, validates extensions, creates a zip, and uploads it to S3.
     """
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Creates a new BidFile by uploading and processing files. The files are validated, zipped, and stored in S3.",
