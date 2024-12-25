@@ -260,7 +260,7 @@ class DeleteInvoiceService:
             self.update_project_process()
 
             # Delete the invoice record
-            self.invoice.delete()
+            self.invoice.soft_delete()
 
     def delete_invoice_pdf(self):
         """

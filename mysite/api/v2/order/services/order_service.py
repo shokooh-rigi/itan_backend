@@ -84,7 +84,7 @@ class OrderService:
         """
         Delete the given order.
         """
-        order.delete()
+        order.soft_delete()
 
     @staticmethod
     def archive_order(order):

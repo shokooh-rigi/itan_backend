@@ -423,7 +423,7 @@ class EstimateEquipmentDeleteView(APIView):
         """
         # todo: what is used for: interval_id?
         estimate_equipment = get_object_or_404(EstimateEquipment, id=estimate_equipment_id)
-        estimate_equipment.delete()
+        estimate_equipment.soft_delete()
         return Response(status=status.HTTP_200_OK)
 
 

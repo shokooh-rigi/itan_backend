@@ -180,7 +180,7 @@ def update_project_number(sender, instance, created, **kwargs):
         pass
 
 
-class ChangeOrder(models.Model):
+class ChangeOrder(BasicModel):
     """
     Represents a change order linked to an existing order.
     """
@@ -193,7 +193,6 @@ class ChangeOrder(models.Model):
     co_number = models.CharField(max_length=30, blank=False, null=False)
     date = models.DateField(blank=True, null=True)
     confirmed = models.BooleanField(default=False)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ['co_number', 'order']

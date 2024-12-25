@@ -476,11 +476,11 @@ class InvoicePaymentDeleteView(APIView):
                 total_paid=total_paid,
                 balance_due=balance_due,
             )
-            this_invoice_history.delete()
+            this_invoice_history.soft_delete()
         except InvoiceHistory.DoesNotExist:
             pass  # If no history is found, just continue without raising an error
         # Delete the InvoiceTransaction record
-        this_transaction.delete()
+        this_transaction.soft_delete()
         return Response(
             {"detail": "Transaction deleted successfully."},
             status=status.HTTP_200_OK,
@@ -742,7 +742,7 @@ class AccountSummaryDeleteView(APIView):
                 'file_name': 'AccountSummary-' + account_summary.statement_no,
             }
             AccountSummary.delete_account_summary_pdf(parameters)
-            account_summary.delete()
+            account_summary.soft_delete()
             return Response(
                 {"message": "Account summary deleted successfully."},
                 status=status.HTTP_200_OK,

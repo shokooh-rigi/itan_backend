@@ -170,7 +170,7 @@ class DeleteChangeOrderService:
             change_order.delete_change_order_pdf({'file_name': file_name})
 
             # Delete the change order itself
-            change_order.delete()
+            change_order.soft_delete()
 
             # Create a new invoice
             self._create_invoice()
