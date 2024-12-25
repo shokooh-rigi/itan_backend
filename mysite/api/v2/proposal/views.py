@@ -37,7 +37,7 @@ class ProposalListView(APIView):
         ordering = request.GET.get('ordering', '-created_on')
 
         # Basic filters
-        filters = Q(archive=False)
+        filters = Q(archive=False, is_deleted=False)
 
         # Search filter
         if search:
@@ -223,23 +223,18 @@ class ProposalCreateView(APIView):
 
 class ProposalArchiveView(APIView):
     """
-    Archives a proposal if the user is authorized and confirms the action.
-    """
+    Archives a proposal if the user is authorized.
+     """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
         proposal = get_object_or_404(Proposal, id=id)
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            if request.data.get("confirm"):
-                proposal.archive_record()  # Use the archive_record method from BaseModel
-                return Response(
-                    {"message": "Proposal archived successfully"},
-                    status=status.HTTP_200_OK
-                )
+            proposal.archive_record()  # Use the archive_record method from BaseModel
             return Response(
-                {"error": "Confirmation not received for archiving."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Proposal archived successfully"},
+                status=status.HTTP_200_OK
             )
 
         return Response(
@@ -250,7 +245,7 @@ class ProposalArchiveView(APIView):
 
 class ProposalDeleteView(APIView):
     """
-    Deletes a proposal if the user is authorized and confirms the action.
+    Deletes a proposal if the user is authorized.
     """
     permission_classes = [IsAuthenticated]
 
@@ -258,18 +253,13 @@ class ProposalDeleteView(APIView):
         proposal = get_object_or_404(Proposal, id=proposal_id)
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            if request.data.get("confirm"):
-                file_name = pdf_filename_generator(proposal.estimate.id, 'P')
-                proposal_service = ProposalService()
-                proposal_service.delete_proposal_pdf(file_name)
-                proposal.soft_delete()
-                return Response(
-                    {"message": "Proposal soft_delete successfully"},
-                    status=status.HTTP_200_OK
-                )
+            file_name = pdf_filename_generator(proposal.estimate.id, 'P')
+            proposal_service = ProposalService()
+            proposal_service.delete_proposal_pdf(file_name)
+            proposal.soft_delete()
             return Response(
-                {"error": "Confirmation not received for deletion."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Proposal soft_delete successfully"},
+                status=status.HTTP_200_OK
             )
 
         return Response(
