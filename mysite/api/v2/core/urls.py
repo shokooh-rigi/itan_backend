@@ -45,7 +45,7 @@ urlpatterns = [
     path("get-project-id/<str:project_name>/", GetProjectId.as_view(), name="get-project-id"),
     path("get-person-id/<str:person_name>/", GetPersonId.as_view(), name="get-person-id"),
     path("get-company-types/", CompanyTypeList.as_view(), name="get-company-types"),
-    path("signup/", SignUpAPIView.as_view(), name="signup"),
+    # path("signup/", SignUpAPIView.as_view(), name="signup"),
     path("change-password/", ChangePasswordAPIView.as_view(), name="change_password"),
     path(
         "account-activation-sent/",

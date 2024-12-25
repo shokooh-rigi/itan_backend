@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views import defaults as default_views
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
@@ -17,7 +17,7 @@ schema_view = get_schema_view(
    openapi.Info(
       title="iTab",
       default_version='v2',
-      description="Test description",
+      description="schema of ITAB project APIs",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="contact@myapi.local"),
       license=openapi.License(name="BSD License"),
@@ -29,6 +29,8 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
     path('select2/', include("django_select2.urls")),
     path('accounts/password_change/', core_views.change_password, name='password_change'),
@@ -66,6 +68,7 @@ urlpatterns = [
     path('', include('mysite.submittal.urls')),
     path('', include('mysite.mgmreport.urls')),
     path('', include('mysite.api.v2.order.urls')),
+    path('', include('mysite.api.v2.scheduler.urls')),
     path('', include('mysite.coi.urls')),
     path('', include('mysite.gi.urls')),
     path('', include('mysite.report.urls')),
