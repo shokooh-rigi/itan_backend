@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from custom_user.models import User
-from mysite.core.base_model import BaseModel
+from mysite.core.base_model import BaseModel, BasicModel
 from mysite.core.models import ContactInfo, Setting
 from mysite.estimator.models import estimate_number_generator
 from mysite.order.models import Order
@@ -78,7 +78,7 @@ class Invoice(BaseModel):
         return delete_pdf
 
 
-class InvoiceTransaction(models.Model):
+class InvoiceTransaction(BasicModel):
     """
     Represents a transaction associated with an invoice.
     Tracks payment details and user who created the transaction.
@@ -97,7 +97,6 @@ class InvoiceTransaction(models.Model):
         null=False,
     )
     payment_no = models.CharField(max_length=20, blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
     class Meta:
@@ -109,7 +108,7 @@ class InvoiceTransaction(models.Model):
         return str(self.invoice) + " $" + str(self.amount)
 
 
-class AccountSummary(models.Model):
+class AccountSummary(BasicModel):
     """
     Represents a summary of an account, including statements and associated user details.
     """
@@ -126,7 +125,6 @@ class AccountSummary(models.Model):
     )
     attention = models.CharField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
@@ -184,7 +182,7 @@ def update_statement_number(sender, instance, created, **kwargs):
         instance.save()
 
 
-class InvoiceHistory(models.Model):
+class InvoiceHistory(BasicModel):
     """
     Tracks the history of invoices, including amounts invoiced, paid, and the balance due.
     """
@@ -211,8 +209,11 @@ class InvoiceHistory(models.Model):
         blank=False,
         null=False,
     )
-    pdf_filename = models.CharField(max_length=50, blank=False, null=False)
-    created_on = models.DateTimeField(auto_now_add=True)
+    pdf_filename = models.CharField(
+        max_length=50,
+        blank=False,
+        null=False,
+    )
 
     class Meta:
         ordering = ["created_on"]
