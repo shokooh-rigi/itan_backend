@@ -61,7 +61,7 @@ urlpatterns = [
     path('', include('mysite.api.v2.core.urls')),
     path('', include('mysite.api.v2.estimator.urls')),
     path('', include('mysite.api.v2.proposal.urls')),
-    path('', include('mysite.api.v2.ibid.urls')),
+    # path('', include('mysite.api.v2.ibid.urls')),
     path('', include('mysite.api.v2.bid.urls')),
     path('', include('mysite.submittal.urls')),
     path('', include('mysite.mgmreport.urls')),

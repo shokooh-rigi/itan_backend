@@ -27,6 +27,7 @@ class BidFileListView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+
     def get(self, request) -> Response:
         """
         Retrieve a list of bid files, optionally filtered by search term, date range, and ordering.
@@ -108,7 +109,7 @@ class BidFileListView(APIView):
             except ValueError:
                 raise ValueError("Invalid date format. Use mm/dd/yyyy")
         # Filter for non-archived bid files and apply the ordering
-        return BidFile.objects.filter(query).filter(archive=False).order_by(ordering)
+        return BidFile.objects.filter(query).filter(archive=False, is_deleted=False).order_by(ordering)
 
 
 class BidFileUpdateView(APIView):
@@ -148,7 +149,7 @@ class BidFileDuplicateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, bid_files_id):
+    def post(self, request, bid_files_id):
         """
         Duplicate an existing BidFile instance.
         """
@@ -159,6 +160,11 @@ class BidFileDuplicateView(APIView):
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
+        customer_id = request.data.get("customer_id")
+        if not customer_id:
+            return Response(
+                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
         # Call internal helper method to handle the duplication process
         duplicated_bid_file = self._duplicate_bid_file(
             this_bid_file,
@@ -272,7 +278,7 @@ class BidFileDeleteView(APIView):
 
         return Response(
             {"message": "BidFile successfully deleted."},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_200_OK,
         )
 
 
