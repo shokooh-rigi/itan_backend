@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.timezone import now
 
 
 class BaseModel(models.Model):
@@ -52,7 +53,7 @@ class BasicModel(models.Model):
         updated_at (DateTime): Automatically updates to the current timestamp when the record is modified.
         is_deleted (Boolean): Soft delete flag.
     """
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False, help_text="Soft delete flag.")
 
