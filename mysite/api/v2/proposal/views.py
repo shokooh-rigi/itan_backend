@@ -228,7 +228,12 @@ class ProposalArchiveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        proposal = get_object_or_404(Proposal, id=id)
+        proposal = get_object_or_404(
+            Proposal,
+            id=id,
+            is_deleted=False,
+
+        )
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
             proposal.archive_record()  # Use the archive_record method from BaseModel
@@ -250,7 +255,12 @@ class ProposalDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, proposal_id):
-        proposal = get_object_or_404(Proposal, id=proposal_id)
+        proposal = get_object_or_404(
+            Proposal,
+            id=proposal_id,
+            is_deleted=False,
+
+        )
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
             file_name = pdf_filename_generator(proposal.estimate.id, 'P')

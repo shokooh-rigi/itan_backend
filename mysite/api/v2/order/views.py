@@ -278,7 +278,11 @@ class ChangeOrderView(APIView):
             Response: Success or error response based on the validation and execution.
         """
         # Get the order object (ensure it exists)
-        this_order = get_object_or_404(Order, id=order_id)
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
 
         # Validate the incoming data using the serializer
         serializer = ChangeOrderSerializer(data=request.data)
@@ -309,8 +313,17 @@ class ChangeOrderDeleteAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id, change_order_id):
-        order = get_object_or_404(Order, id=order_id)
-        change_order = get_object_or_404(ChangeOrder, id=change_order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        change_order = get_object_or_404(
+            ChangeOrder,
+            id=change_order_id,
+            is_deleted=False,
+
+        )
 
         # Service layer handling change order deletion
         service = DeleteChangeOrderService(order, request.user)
@@ -361,7 +374,11 @@ class TechLabelViewSet(ModelViewSet):
         """
         Updates or creates a TechLabel and its extra fields.
         """
-        this_order = get_object_or_404(Order, id=order_id)
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
         tech_label = TechLabel.objects.filter(order__id=order_id).first()
         service = TechLabelServiceLayer(user=request.user, data=request.data)
 
@@ -379,8 +396,16 @@ class TechLabelViewSet(ModelViewSet):
         """
         Download the PDF associated with a TechLabel.
         """
-        this_order = get_object_or_404(Order, id=order_id)
-        tech_label = TechLabel.objects.filter(order__id=order_id).first()
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        tech_label = TechLabel.objects.filter(
+            order__id=order_id,
+            is_deleted=False,
+
+        ).first()
 
         service = TechLabelServiceLayer()
         try:
@@ -402,7 +427,11 @@ class ControlSystemAPIView(APIView):
         """
         Retrieve the current control system for the given order.
         """
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
         serializer = OrderControlSystemSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -410,7 +439,11 @@ class ControlSystemAPIView(APIView):
         """
         Update the control system for the given order.
         """
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
         serializer = OrderControlSystemSerializer(order, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -435,7 +468,11 @@ class OrderEquipmentSubmittalView(APIView):
         """
         try:
             # Fetch the order instance
-            order = get_object_or_404(Order, id=order_id)
+            order = get_object_or_404(
+                Order,
+                id=order_id,
+                is_deleted=False,
+            )
 
             # Handle clearing the equipment submittal
             if request.data.get("equipment_submittal-clear"):
@@ -496,7 +533,11 @@ class OrderFieldDrawingView(APIView):
         """
         try:
             # Fetch the order instance
-            order = get_object_or_404(Order, id=order_id)
+            order = get_object_or_404(
+                Order,
+                id=order_id,
+                is_deleted=False,
+            )
 
             # Handle form submission for field drawing files
             if 'field_drawing' in request.FILES:
@@ -546,7 +587,11 @@ class OrderGeneralNotesView(APIView):
             Response: DRF Response indicating success or failure of the action.
         """
         # Retrieve the order object by ID
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
 
         # Extract general notes and comments from the request data
         general_notes_and_comments = str(request.data.get('general_notes_and_comments', ""))
@@ -588,7 +633,11 @@ class OrderGeneralNotesView(APIView):
             Response: DRF Response containing the general notes and comments of the order.
         """
         # Retrieve the order object by ID
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
 
         # Return the general notes and comments of the order
         return Response(
@@ -608,7 +657,11 @@ class OrderSitePicturesView(APIView):
         Handle POST request to save site pictures
         """
         # Retrieve the order object by ID
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
 
         # Process the form data and files using the service layer
         try:
@@ -628,7 +681,11 @@ class OrderSitePicturesView(APIView):
         """
         Handle GET request to retrieve the site pictures for a specific order.
         """
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
 
         if order.site_pictures:
             return Response({"site_pictures": order.site_pictures.url}, status=status.HTTP_200_OK)

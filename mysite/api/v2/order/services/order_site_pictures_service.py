@@ -19,7 +19,12 @@ class OrderSitePicturesService:
         """
         Retrieves the order object or raises a 404 if not found.
         """
-        return get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        return order
 
     def validate_files(self):
         """

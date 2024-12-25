@@ -91,7 +91,12 @@ class ScheduleUpdateView(APIView):
         Update the Schedule instance with the provided data.
         """
         # Retrieve the Schedule instance
-        schedule = get_object_or_404(Schedule, id=schedule_id)
+        schedule = get_object_or_404(
+            Schedule,
+            id=schedule_id,
+            is_deleted=False,
+
+        )
 
         # Handle cancellation logic
         if request.data.get("cancel"):
@@ -159,7 +164,12 @@ class ScheduleArchiveView(APIView):
         """
         Archive the schedule if authorized.
         """
-        schedule = get_object_or_404(Schedule, id=id)
+        schedule = get_object_or_404(
+            Schedule,
+            id=id,
+            is_deleted=False,
+
+        )
 
         # Check if the requesting user is the creator of the schedule
         if schedule.created_by != request.user:
@@ -188,7 +198,12 @@ class ScheduleDeleteView(APIView):
         """
         Delete a Schedule instance if the user is authorized.
         """
-        this_schedule = get_object_or_404(Schedule, id=schedule_id)
+        this_schedule = get_object_or_404(
+            Schedule,
+            id=schedule_id,
+            is_deleted=False,
+
+        )
 
         # Check if the user is authorized to delete the schedule
         if this_schedule.created_by != request.user:

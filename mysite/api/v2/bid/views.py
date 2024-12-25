@@ -301,7 +301,12 @@ class BidFileArchiveView(APIView):
         }
     )
     def post(self, request, id):
-        bid_file = get_object_or_404(BidFile, id=id)
+        bid_file = get_object_or_404(
+            BidFile,
+            id=id,
+            is_deleted=False,
+
+        )
 
         # Check if the requesting user is the creator of the bid file
         if bid_file.created_by != request.user:
@@ -349,7 +354,12 @@ class BidFileDeleteView(APIView):
         """
         Delete a BidFile instance.
         """
-        this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
+        this_bidfile = get_object_or_404(
+            BidFile,
+            id=bidfiles_id,
+            is_deleted=False,
+
+        )
 
         # Check if the user is authorized to delete the bid file
         if (
@@ -583,7 +593,7 @@ class BidFileAddFileView(APIView):
         """
         Retrieves the BidFile instance or raises 404 error.
         """
-        return get_object_or_404(BidFile, id=bidfile_id)
+        return get_object_or_404(BidFile, id=bidfile_id, is_deleted=False)
 
     @staticmethod
     def _validate_request_data(request, instance):

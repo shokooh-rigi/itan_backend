@@ -9,7 +9,6 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -202,7 +201,12 @@ class InvoiceCreateView(APIView):
             )
 
         # Fetch the order or return 404
-        order = get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+
+        )
         if not order:
             return Response(
                 {'error': 'order not found '},
@@ -256,7 +260,12 @@ class InvoiceUpdateView(APIView):
         Returns:
             Response: Updated invoice data or validation errors.
         """
-        invoice = get_object_or_404(Invoice, id=invoice_id)
+        invoice = get_object_or_404(
+            Invoice,
+            id=invoice_id,
+            is_deleted=False,
+
+        )
         serializer = InvoiceSerializer(invoice, data=request.data, context={'request': request})
         if serializer.is_valid():
             updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
@@ -275,7 +284,12 @@ class InvoiceUpdateView(APIView):
         Returns:
             Response: Updated invoice data or validation errors.
         """
-        invoice = get_object_or_404(Invoice, id=invoice_id)
+        invoice = get_object_or_404(
+            Invoice,
+            id=invoice_id,
+            is_deleted=False,
+
+        )
         serializer = InvoiceSerializer(invoice, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
@@ -305,7 +319,12 @@ class InvoiceDetailView(APIView):
             Response: The invoice details or a 404 error if not found.
         """
         # Retrieve the invoice
-        invoice = get_object_or_404(Invoice, id=invoice_id)
+        invoice = get_object_or_404(
+            Invoice,
+            id=invoice_id,
+            is_deleted=False,
+
+        )
 
         try:
             data = DetailedInvoiceService.process_invoice(
@@ -343,7 +362,12 @@ class InvoiceDeleteView(APIView):
             Response: A JSON response indicating the result of the deletion attempt.
         """
         # Retrieve the invoice object
-        this_invoice = get_object_or_404(Invoice, id=invoice_id)
+        this_invoice = get_object_or_404(
+            Invoice,
+            id=invoice_id,
+            is_deleted=False,
+
+        )
 
         # Create an InvoiceService instance
         invoice_service = DeleteInvoiceService(request.user, this_invoice)
@@ -378,7 +402,12 @@ class InvoiceArchiveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        invoice = get_object_or_404(Invoice, id=id)
+        invoice = get_object_or_404(
+            Invoice,
+            id=id,
+            is_deleted=False,
+
+        )
 
         # Check if the requesting user is the creator of the bid file
         if invoice.created_by != request.user:
@@ -457,7 +486,12 @@ class InvoicePaymentDeleteView(APIView):
         Deletion of associated InvoiceHistory may also occur if needed.
         """
         # Get the InvoiceTransaction object or return 404 if not found
-        this_transaction = get_object_or_404(InvoiceTransaction, id=transaction_id)
+        this_transaction = get_object_or_404(
+            InvoiceTransaction,
+            id=transaction_id,
+            is_deleted=False,
+
+        )
         invoice_id = this_transaction.invoice.id
 
         # Check if the current user is the one who created the transaction
@@ -476,6 +510,8 @@ class InvoicePaymentDeleteView(APIView):
                 total_invoiced=total_invoiced,
                 total_paid=total_paid,
                 balance_due=balance_due,
+                is_deleted=False,
+
             )
             this_invoice_history.soft_delete()
         except InvoiceHistory.DoesNotExist:
@@ -492,7 +528,12 @@ class InvoiceHistoryListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, invoice_id):
-        invoice = get_object_or_404(Invoice, id=invoice_id)
+        invoice = get_object_or_404(
+            Invoice,
+            id=invoice_id,
+            is_deleted=False,
+
+        )
         invoice_histories = InvoiceHistory.objects.filter(invoice=invoice)
         invoice_history_data = [
             {
@@ -731,7 +772,12 @@ class AccountSummaryDeleteView(APIView):
             Response: A JSON response indicating success or failure of the operation.
         """
         # Retrieve the account summary
-        account_summary = get_object_or_404(AccountSummary, id=account_summary_id)
+        account_summary = get_object_or_404(
+            AccountSummary,
+            id=account_summary_id,
+            is_deleted=False,
+
+        )
 
         # Check if the user is the creator of the account summary
         if account_summary.created_by != request.user:

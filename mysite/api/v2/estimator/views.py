@@ -139,7 +139,10 @@ class EstimateCreateView(APIView):
 
         # Check if the BidFile exists if bid_file_id is provided
         if bid_file_id:
-            bid_file = BidFile.objects.filter(id=bid_file_id).first()
+            bid_file = BidFile.objects.filter(
+                id=bid_file_id,
+                is_deleted=False,
+            ).first()
             if not bid_file:
                 logger.error("BidFile with ID %s not found", bid_file_id)
                 return Response(
@@ -152,7 +155,9 @@ class EstimateCreateView(APIView):
         else:
             # If no bid_file_id is provided, retrieve all relevant BidFiles
             response_bid_files = BidFile.objects.filter(
-                archive=False
+                archive=False,
+                is_deleted=False,
+
             ).exclude(
                 id__in=Estimate.objects.filter(
                     bfm_id__isnull=False
@@ -169,7 +174,9 @@ class EstimateCreateView(APIView):
 
             # Update EstimateDetails after creating the estimate
             EstimateDetails.objects.filter(
-                estimate=new_estimate
+                estimate=new_estimate,
+                is_deleted=False,
+
             ).update(
                 pre_demo=request.data.get(
                     'predemo', 0
@@ -215,7 +222,11 @@ class EstimateUpdateView(APIView):
 
     def put(self, request, estimate_id):
         logger.info("Request to update estimate with ID: %s", estimate_id)
-        this_estimate = get_object_or_404(Estimate, id=estimate_id)
+        this_estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+        )
 
         # Initialize the serializer with the current estimate instance and incoming data
         serializer = EstimateSerializer(
@@ -228,7 +239,8 @@ class EstimateUpdateView(APIView):
         if serializer.is_valid():
             updated_estimate = serializer.save(created_by=request.user)
             EstimateDetails.objects.filter(
-                estimate=updated_estimate
+                estimate=updated_estimate,
+                is_deleted=False,
             ).update(
                 pre_demo=request.data.get(
                     'predemo', 0
@@ -236,7 +248,9 @@ class EstimateUpdateView(APIView):
             )
             # Update EstimateEquipment flags based on services
             estimate_equipments = EstimateEquipment.objects.filter(
-                estimate=updated_estimate
+                estimate=updated_estimate,
+                is_deleted=False,
+
             )
             for equipment in estimate_equipments:
                 equipment.flag = equipment.equipment.service in updated_estimate.service.all()
@@ -259,7 +273,12 @@ class EstimateUpdateView(APIView):
         """
         Handle GET request to retrieve an estimate by ID.
         """
-        this_estimate = get_object_or_404(Estimate, id=estimate_id)
+        this_estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
         serializer = EstimateSerializer(this_estimate)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -282,7 +301,12 @@ class EstimateDeleteView(APIView):
         logger.info("Request to delete estimate with ID: %s", estimate_id)
 
         # Fetch the estimate object
-        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
 
         # Check if the user is authorized to delete the estimate
         if estimate.created_by != request.user and request.user.profile.user_type != 2:
@@ -315,7 +339,12 @@ class EstimateArchiveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, estimate_id):
-        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
 
         # Check user authorization
         if estimate.created_by != request.user and request.user.profile.user_type != 2:
@@ -347,8 +376,16 @@ class EstimateHistoryView(APIView):
         """
         Get the history of an estimate by ID.
         """
-        estimate = get_object_or_404(Estimate, id=estimate_id)
-        estimate_histories = EstimateHistory.objects.filter(estimate=estimate)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
+        estimate_histories = EstimateHistory.objects.filter(
+            estimate=estimate,
+            is_deleted=False,
+        )
 
         data = {
             'estimate_id': estimate.id,
@@ -368,9 +405,22 @@ class EstimateDetailsView(APIView):
         """
         Get the details of the estimate.
         """
-        estimate = get_object_or_404(Estimate, id=estimate_id)
-        estimate_details = get_object_or_404(EstimateDetails, estimate=estimate)
-        estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
+        estimate_details = get_object_or_404(
+            EstimateDetails,
+            estimate=estimate,
+            is_deleted=False,
+        )
+        estimate_equipments_pricing = EstimateEquipment.objects.filter(
+            estimate=estimate,
+            flag=True,
+            is_deleted=False,
+        )
 
         estimate_sub = sum(
             float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
@@ -391,8 +441,17 @@ class EstimateDetailsView(APIView):
         """
         Update the details of an estimate.
         """
-        estimate = get_object_or_404(Estimate, id=estimate_id)
-        estimate_details = get_object_or_404(EstimateDetails, estimate=estimate)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+        )
+        estimate_details = get_object_or_404(
+            EstimateDetails,
+            estimate=estimate,
+            is_deleted=False,
+
+        )
         # Add form processing and save logic here, similar to your original function
 
         # Example of how to update estimate details
@@ -414,7 +473,12 @@ class EstimateEquipmentDeleteView(APIView):
         Delete the estimate equipment by ID
         """
         # todo: what is used for: interval_id?
-        estimate_equipment = get_object_or_404(EstimateEquipment, id=estimate_equipment_id)
+        estimate_equipment = get_object_or_404(
+            EstimateEquipment,
+            id=estimate_equipment_id,
+            is_deleted=False,
+
+        )
         estimate_equipment.soft_delete()
         return Response(status=status.HTTP_200_OK)
 
@@ -426,9 +490,13 @@ class EstimateDuplicateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, estimate_id):
-        this_estimate = get_object_or_404(Estimate, id=estimate_id)
+        this_estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
 
-        # todo: Ask to is directly get the customer from the request data ??
+        )
+
         customer_id = request.data.get("customer_id")
         if not customer_id:
             return Response(
@@ -448,14 +516,23 @@ class EstimateDuplicateView(APIView):
             duplicated_obj.bfm = duplicated_bfm
 
         # Set the new customer for the duplicated estimate
-        duplicated_obj.customer = get_object_or_404(Person, id=customer_id)
+        duplicated_obj.customer = get_object_or_404(
+            Person,
+            id=customer_id,
+            is_deleted=False,
+
+        )
         duplicated_obj.save()
 
         # Duplicate services associated with the estimate
         duplicated_obj.service.set(this_estimate.service.all())
 
         # Duplicate EstimateEquipment records
-        all_equipments = EstimateEquipment.objects.filter(estimate=this_estimate)
+        all_equipments = EstimateEquipment.objects.filter(
+            estimate=this_estimate,
+            is_deleted=False,
+
+        )
         for equipment in all_equipments:
             equipment.pk = None
             equipment.estimate = duplicated_obj
@@ -495,12 +572,22 @@ class EstimateEquipmentView(APIView):
         Returns:
             Response: The equipment details and total pricing.
         """
-        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
         interval_set = estimate.service.all()[estimate_service_id]
 
         try:
             # Get the equipment pricing data
-            estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+            estimate_equipments_pricing = EstimateEquipment.objects.filter(
+                estimate=estimate,
+                flag=True,
+                is_deleted=False,
+
+            )
             estimate_money = sum(
                 (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
                 for e in estimate_equipments_pricing
@@ -535,7 +622,12 @@ class EstimateEquipmentView(APIView):
         Returns:
             Response: Success message and updated estimate pricing.
         """
-        estimate = get_object_or_404(Estimate, id=estimate_id)
+        estimate = get_object_or_404(
+            Estimate,
+            id=estimate_id,
+            is_deleted=False,
+
+        )
         serializer = EstimateEquipmentSerializer(data=request.data, context={'estimate_id': estimate_id})
 
         if serializer.is_valid():
@@ -545,7 +637,12 @@ class EstimateEquipmentView(APIView):
                 price_override = serializer.validated_data['price_override']
 
                 # Check if the equipment already exists in the estimate
-                existing_equipment = EstimateEquipment.objects.filter(estimate=estimate_id, equipment=equipment).first()
+                existing_equipment = EstimateEquipment.objects.filter(
+                    estimate=estimate_id,
+                    equipment=equipment,
+                    is_deleted=False,
+
+                ).first()
                 if existing_equipment:
                     # Update existing equipment pricing
                     existing_equipment.quantity = quantity
@@ -562,7 +659,12 @@ class EstimateEquipmentView(APIView):
                     )
 
                 # Recalculate the total price
-                estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+                estimate_equipments_pricing = EstimateEquipment.objects.filter(
+                    estimate=estimate,
+                    flag=True,
+                    is_deleted=False,
+
+                )
                 estimate_money = sum(
                     (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
                     for e in estimate_equipments_pricing
@@ -617,7 +719,11 @@ class EstimateBidView(APIView):
         """
         Calculate the total work based on estimate equipment.
         """
-        estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
+        estimate_equipments = EstimateEquipment.objects.filter(
+            estimate=estimate_id,
+            flag=True,
+            is_deleted=False,
+        )
         estimate_work = sum(
             int(each_estimate_equipment.quantity) * int(each_estimate_equipment.equipment.estimate_work)
             for each_estimate_equipment in estimate_equipments
@@ -626,7 +732,12 @@ class EstimateBidView(APIView):
 
     @staticmethod
     def _estimate_equipments(estimate_id: int):
-        estimate_equipments = EstimateEquipment.objects.filter(estimate=estimate_id, flag=True)
+        estimate_equipments = EstimateEquipment.objects.filter(
+            estimate=estimate_id,
+            flag=True,
+            is_deleted=False,
+
+        )
         return estimate_equipments
 
     @staticmethod
@@ -658,7 +769,11 @@ class EstimateBidView(APIView):
             invoice.times_estimate_changed += 1
             invoice.save()
 
-            total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+            total_count = InvoiceHistory.objects.filter(
+                invoice=invoice,
+                is_deleted=False,
+
+            ).count() + 1
             invoice_file_name = f"Invoice-{estimate.proposal.order.project_number[3:]:0>3}-{invoice.id:0>3}-{total_count}"
 
             InvoiceHistory.objects.create(
@@ -688,7 +803,12 @@ class EstimateBidView(APIView):
         control_system_calculated, hours_calculated, predemo_calculated, estimate_total = estimate_totals
         estimate_sub = sum(
             float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
-            for eq in EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+            for eq in EstimateEquipment.objects.filter(
+                estimate=estimate,
+                flag=True,
+                is_deleted=False,
+
+            )
         )
         estimate_file_name = pdf_filename_generator(estimate.id, 'E')
 
@@ -723,10 +843,20 @@ class EstimateBidView(APIView):
         """
         try:
             license_info, license_files = self._get_license_info()
-            estimate = get_object_or_404(Estimate, id=estimate_id)
+            estimate = get_object_or_404(
+                Estimate,
+                id=estimate_id,
+                is_deleted=False,
+
+            )
             estimate_sub = sum(
                 float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
-                for eq in EstimateEquipment.objects.filter(estimate=estimate, flag=True)
+                for eq in EstimateEquipment.objects.filter(
+                    estimate=estimate,
+                    flag=True,
+                    is_deleted=False,
+
+                )
             )
             estimate_work = self._estimate_total_work(estimate_id=estimate_id)
             estimate_totals = self._calculate_estimate_totals(estimate, estimate_sub)

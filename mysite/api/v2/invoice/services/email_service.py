@@ -112,7 +112,7 @@ class EmailService:
             model_id (int): The ID of the related model to associate with this service.
             storage_service (S3): An instance of S3 storage service.
         """
-        self.estimate = get_object_or_404(model_name, id=model_id)
+        self.estimate = get_object_or_404(model_name, id=model_id, is_deleted=False)
         self.storage_service = storage_service
         self.s3_key = s3_key
         self.body_content = ""

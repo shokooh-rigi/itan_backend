@@ -69,7 +69,12 @@ class OrderService:
         """
         Retrieve a specific order by ID.
         """
-        return get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        return order
 
     @staticmethod
     def validate_user_permission(order, user):
@@ -105,7 +110,12 @@ class OrderEditService:
         """
         Retrieve a specific order by ID.
         """
-        return get_object_or_404(Order, id=order_id)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        return order
 
     @staticmethod
     def get_proposals():

@@ -29,7 +29,10 @@ class TemplateService:
             str: The email template content or a fallback message if not found.
         """
         try:
-            relation = get_object_or_404(ModulesToEmailTemplateRelation, module=module)
+            relation = get_object_or_404(
+                ModulesToEmailTemplateRelation,
+                module=module
+            )
             return relation.template.content
         except Exception as e:
             logger.error(f"Error fetching template for module {module}: {e}")
@@ -71,7 +74,7 @@ class EstimateEmailService:
             template_service (TemplateService): An instance of a template service.
         """
         self.request = request
-        self.estimate = get_object_or_404(Estimate, id=estimate_id)
+        self.estimate = get_object_or_404(Estimate, id=estimate_id, is_deleted=False)
         self.customer = self.estimate.customer
         self.storage_service = storage_service
         self.template_service = template_service
