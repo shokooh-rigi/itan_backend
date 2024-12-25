@@ -150,14 +150,14 @@ class ScheduleCreateView(APIView):
 
 class ScheduleArchiveView(APIView):
     """
-    Archives a schedule if the user is authorized and confirms the action.
+    Archives a schedule if the user is authorized.
     """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
         """
-        Archive the schedule if authorized and confirmation is received.
+        Archive the schedule if authorized.
         """
         schedule = get_object_or_404(Schedule, id=id)
 
@@ -168,18 +168,11 @@ class ScheduleArchiveView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Confirm archiving action
-        if request.data.get("confirm"):
-            schedule.archive = True
-            schedule.save()
-            return Response(
-                {"message": "schedule archived successfully"},
-                status=status.HTTP_200_OK,
-            )
-
+        schedule.archive = True
+        schedule.save()
         return Response(
-            {"error": "Confirmation not received for archiving."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"message": "schedule archived successfully"},
+            status=status.HTTP_200_OK,
         )
 
 
