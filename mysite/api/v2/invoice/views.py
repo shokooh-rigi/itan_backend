@@ -354,7 +354,7 @@ class InvoiceDeleteView(APIView):
             # Return a successful response
             return Response(
                 {"message": "Invoice deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT,
+                status=status.HTTP_200_OK,
             )
         except PermissionDenied as e:
             # Handle unauthorized deletion attempt
@@ -372,7 +372,7 @@ class InvoiceDeleteView(APIView):
 
 class InvoiceArchiveView(APIView):
     """
-    Archives invoice if the user is authorized and confirms the action.
+    Archives invoice if the user is authorized.
     """
     permission_classes = [IsAuthenticated]
 
@@ -385,20 +385,12 @@ class InvoiceArchiveView(APIView):
                 {"error": "You are not authorized to archive this record."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-
-        # Confirm archiving action
-        if request.data.get("confirm"):
-            invoice.archive = True
-            invoice.save()
-            return Response(
-                {"message": "invoice archived successfully",
-                 "data": invoice},
-                status=status.HTTP_200_OK,
-            )
-
+        invoice.archive = True
+        invoice.save()
         return Response(
-            {"error": "Confirmation not received for archiving."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"message": "invoice archived successfully",
+             "data": invoice},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -460,7 +452,7 @@ class InvoicePaymentDeleteView(APIView):
 
     def delete(self, request, transaction_id):
         """
-        Handle deletion of an InvoiceTransaction. User must confirm by sending "confirm" in the request data.
+        Handle deletion of an InvoiceTransaction.
         Deletion of associated InvoiceHistory may also occur if needed.
         """
         # Get the InvoiceTransaction object or return 404 if not found
@@ -471,34 +463,27 @@ class InvoicePaymentDeleteView(APIView):
         if this_transaction.created_by != request.user:
             raise PermissionDenied("You are not authorized to delete this transaction.")
 
-        # If the user confirms the deletion, proceed with the operation
-        if request.data.get("confirm"):
-            # Calculate totals for the invoice to potentially delete the InvoiceHistory
-            total_invoiced = calculate_total_amount_due(this_transaction.invoice)
-            total_paid = calculate_total_paid(this_transaction.invoice)
-            balance_due = calculate_remaining_invoice_due(this_transaction.invoice)
-            try:
-                # Try to delete the associated InvoiceHistory
-                this_invoice_history = get_object_or_404(
-                    InvoiceHistory,
-                    invoice=this_transaction.invoice,
-                    total_invoiced=total_invoiced,
-                    total_paid=total_paid,
-                    balance_due=balance_due,
-                )
-                this_invoice_history.delete()
-            except InvoiceHistory.DoesNotExist:
-                pass  # If no history is found, just continue without raising an error
-            # Delete the InvoiceTransaction record
-            this_transaction.delete()
-            return Response(
-                {"detail": "Transaction deleted successfully."},
-                status=status.HTTP_204_NO_CONTENT,
+        # Calculate totals for the invoice to potentially delete the InvoiceHistory
+        total_invoiced = calculate_total_amount_due(this_transaction.invoice)
+        total_paid = calculate_total_paid(this_transaction.invoice)
+        balance_due = calculate_remaining_invoice_due(this_transaction.invoice)
+        try:
+            # Try to delete the associated InvoiceHistory
+            this_invoice_history = get_object_or_404(
+                InvoiceHistory,
+                invoice=this_transaction.invoice,
+                total_invoiced=total_invoiced,
+                total_paid=total_paid,
+                balance_due=balance_due,
             )
-        # If confirmation is not provided in the request
+            this_invoice_history.delete()
+        except InvoiceHistory.DoesNotExist:
+            pass  # If no history is found, just continue without raising an error
+        # Delete the InvoiceTransaction record
+        this_transaction.delete()
         return Response(
-            {"error": "Confirmation is required to delete the transaction."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"detail": "Transaction deleted successfully."},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -733,10 +718,10 @@ class AccountSummaryDeleteView(APIView):
 
     def delete(self, request, account_summary_id):
         """
-        Delete an account summary if the user is the creator and provides confirmation.
+        Delete an account summary if the user is the creator.
 
         Args:
-            request (Request): The HTTP request object containing the confirmation data.
+            request (Request): The HTTP request object
             account_summary_id (int): The ID of the account summary to be deleted.
 
         Returns:
@@ -752,13 +737,6 @@ class AccountSummaryDeleteView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        confirm = request.data.get('confirm', False)
-        if not confirm:
-            return Response(
-                {"error": "Confirmation required to delete the account summary."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
             parameters = {
                 'file_name': 'AccountSummary-' + account_summary.statement_no,
@@ -767,7 +745,7 @@ class AccountSummaryDeleteView(APIView):
             account_summary.delete()
             return Response(
                 {"message": "Account summary deleted successfully."},
-                status=status.HTTP_204_NO_CONTENT,
+                status=status.HTTP_200_OK,
             )
         except PermissionDenied as e:
             return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
