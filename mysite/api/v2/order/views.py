@@ -202,7 +202,7 @@ class OrderDeleteAPIView(APIView):
     API view for deleting an order.
 
     Methods:
-        - POST: Deletes the specified order after confirming user permissions.
+        - POST: Deletes the specified order.
     """
 
     def delete(self, request, order_id):
@@ -213,10 +213,8 @@ class OrderDeleteAPIView(APIView):
             # Check user permissions
             OrderService.validate_user_permission(this_order, request.user)
 
-            # Perform deletion if confirmed
-            if request.data.get("confirm"):
-                OrderService.delete_order(this_order)
-                return Response({"message": "Order deleted successfully!"}, status=status.HTTP_200_OK)
+            OrderService.delete_order(this_order)
+            return Response({"message": "Order deleted successfully!"}, status=status.HTTP_200_OK)
 
         except PermissionDenied as e:
             # Return error if the user is unauthorized
@@ -225,19 +223,13 @@ class OrderDeleteAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Redirect to the order home if not confirmed
-        return Response(
-            {"message": "Order deletion canceled."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
 
 class OrderArchiveAPIView(APIView):
     """
     API view for archiving an order.
 
     Methods:
-        - POST: Archives the specified order after confirming user permissions.
+        - POST: Archives the specified order.
     """
 
     def post(self, request, order_id):
@@ -248,10 +240,8 @@ class OrderArchiveAPIView(APIView):
             # Check user permissions
             OrderService.validate_user_permission(this_order, request.user)
 
-            # Perform archiving if confirmed
-            if request.data.get("confirm"):
-                OrderService.archive_order(this_order)
-                return Response({"message": "Order archived successfully!"}, status=status.HTTP_200_OK)
+            OrderService.archive_order(this_order)
+            return Response({"message": "Order archived successfully!"}, status=status.HTTP_200_OK)
 
         except PermissionDenied as e:
             # Return error if the user is unauthorized
@@ -259,12 +249,6 @@ class OrderArchiveAPIView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_403_FORBIDDEN
             )
-
-        # Redirect to the order home if not confirmed
-        return Response(
-            {"message": "Order archiving canceled."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
 
 class ChangeOrderView(APIView):
