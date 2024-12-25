@@ -5,7 +5,7 @@ from django.core.validators import (
 from django.db import models
 
 from custom_user.models import User
-from mysite.core.base_model import BaseModel
+from mysite.core.base_model import BaseModel, BasicModel
 from mysite.order.models import Order
 
 
@@ -132,7 +132,7 @@ class Maintenance(BaseModel):
         return self.order.project_number
 
 
-class ScheduleTech(models.Model):
+class ScheduleTech(BasicModel):
     """
     Represents a technician's involvement in a schedule.
     Includes details about assigned personnel, involvement percentage, and additional notes.
@@ -180,10 +180,6 @@ class ScheduleTech(models.Model):
         blank=True,
         null=True,
         help_text="Additional notes related to the technician's task."
-    )
-    created_on = models.DateTimeField(
-        auto_now_add=True,
-        help_text="The date and time when this record was created."
     )
 
     class Meta:

@@ -1,14 +1,18 @@
 import datetime
-from django.db import models
+
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.dispatch import receiver
+from django.db import models
 from django.db.models.signals import post_save
-from mysite.proposal.models import Proposal
+from django.dispatch import receiver
+
 from mysite.core.models import Person
+from mysite.proposal.models import Proposal
+from ..core.base_model import BasicModel
 from ..core.models import TechLabelModel
+from ..render import Render
 
 
-class ControlSystemManufacturer(models.Model):
+class ControlSystemManufacturer(BasicModel):
     """
     Represents a manufacturer of control systems.
     """
@@ -18,7 +22,6 @@ class ControlSystemManufacturer(models.Model):
     fax = models.CharField(max_length=15, blank=True)
     mail = models.EmailField(max_length=55, blank=True)
     web = models.CharField(max_length=55, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["manufacturer_name"]
@@ -27,7 +30,7 @@ class ControlSystemManufacturer(models.Model):
         return self.manufacturer_name
 
 
-class ControlSystem(models.Model):
+class ControlSystem(BasicModel):
     """
     Represents a control system, including its version and related documentation.
     """
@@ -50,7 +53,6 @@ class ControlSystem(models.Model):
         blank=True,
         null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["manufacturer"]
@@ -59,7 +61,7 @@ class ControlSystem(models.Model):
         return f"{self.manufacturer}, {self.version_number}"
 
 
-class Order(models.Model):
+class Order(BasicModel):
     """
     Represents an order with details such as project information, control system, and documents.
     """
@@ -135,7 +137,6 @@ class Order(models.Model):
         blank=True,
         null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
     archive = models.BooleanField(default=False)
     fully_settled = models.BooleanField(default=False)
     order_settled_value = models.DecimalField(
@@ -164,7 +165,7 @@ class Order(models.Model):
     class Meta:
         ordering = ["-proposal"]
         verbose_name = 'Order List'
-        verbose_name_plural = 'Order List'
+        verbose_name_plural = 'Order Lists'
 
     def __str__(self):
         return self.project_number
@@ -205,7 +206,10 @@ class ChangeOrder(models.Model):
         """
         Generate a PDF for the change order.
         """
-        change_order_pdf = Render.render_to_file('pdfTemplates/changeOrderTemplate.html', parameters, 'changeorder')
+        change_order_pdf = Render.render_to_file(
+            'pdfTemplates/changeOrderTemplate.html',
+            parameters, 'changeorder'
+        )
         return change_order_pdf
 
     @classmethod
@@ -213,11 +217,14 @@ class ChangeOrder(models.Model):
         """
         Delete the PDF for the change order.
         """
-        delete_pdf = Render.delete_file(parameters, 'changeorder')
+        # todo: Dear Reza, please check I import Render correctly?
+        delete_pdf = Render.delete_file(
+            parameters, 'changeorder'
+        )
         return delete_pdf
 
 
-class ChangeOrderService(models.Model):
+class ChangeOrderService(BasicModel):
     """
     Represents a service associated with a change order.
     """
@@ -236,7 +243,7 @@ class ChangeOrderService(models.Model):
     description = models.TextField(max_length=2000, blank=True, null=True)
 
 
-class TechLabel(models.Model):
+class TechLabel(BasicModel):
     """
     Represents a technical label for an order, including drawings and contact information.
     """
@@ -274,7 +281,7 @@ class TechLabel(models.Model):
         return techlabel_pdf
 
 
-class TechLabelExtraFields(models.Model):
+class TechLabelExtraFields(BasicModel):
     """
     Represents additional fields for a technical label.
     """

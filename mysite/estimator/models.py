@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from custom_user.models import User
 from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
-from mysite.core.base_model import BaseModel
+from mysite.core.base_model import BaseModel, BasicModel
 from mysite.core.models import Person, Project, Service
 from mysite.equipments.models import Equipment
 
@@ -81,7 +81,7 @@ class Estimate(BaseModel):
         return estimate_number_generator(self.id)
 
 
-class EstimateHistory(models.Model):
+class EstimateHistory(BasicModel):
     """Model for tracking history of an estimate."""
 
     estimate = models.ForeignKey(
@@ -89,7 +89,6 @@ class EstimateHistory(models.Model):
         on_delete=models.CASCADE,
         blank=False,
     )
-    # todo : import it : MinValueValidator
     total = models.DecimalField(
         max_digits=8,
         decimal_places=2,
@@ -98,7 +97,6 @@ class EstimateHistory(models.Model):
         null=False,
     )
     version = models.IntegerField(blank=False, null=False)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_on"]
@@ -109,7 +107,7 @@ class EstimateHistory(models.Model):
         return str(self.estimate) + ": History " + str(self.version)
 
 
-class EstimateEquipment(models.Model):
+class EstimateEquipment(BasicModel):
     """Model representing equipment used in an estimate."""
 
     estimate = models.ForeignKey(
@@ -130,12 +128,9 @@ class EstimateEquipment(models.Model):
         null=True,
     )
     quantity = models.FloatField(blank=False)
-    created_on = models.DateTimeField(auto_now_add=True)
     # if flag is True means it counts in estimate price (its service is in the estimate services)
     # todo: ENHANCEMENT: differentiate between Quantity (integer) and Number of Days (float) (flag)
     flag = models.BooleanField(default=True)
-    is_deleted = models.BooleanField(default=False, help_text="Soft delete flag.")
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Estimated Equipment List"
@@ -144,14 +139,15 @@ class EstimateEquipment(models.Model):
     def __str__(self):
         return estimate_number_generator(self.estimate.id) + " " + self.equipment.name
 
-    def soft_delete(self):
-        """Marks the record as deleted without actually removing it from the database."""
-        self.is_deleted = True
-        self.save(update_fields=["is_deleted", "updated_at"])
 
-
-class EstimateDetails(models.Model):
+class EstimateDetails(BasicModel):
     """Model for additional details of an estimate."""
+    hours_choices = (
+        (0, 'Regular Hours'),
+        (5, 'Off Hours'),
+        (10, 'Saturday/Holidays'),
+        (15, 'Sunday'),
+    )
 
     estimate = models.OneToOneField(
         Estimate,
@@ -161,10 +157,9 @@ class EstimateDetails(models.Model):
         choices=[(choice.value[0], choice.value[1]) for choice in ControlSystemChoices],
         default=ControlSystemChoices.ZERO.value[0],
     )
-
     hours = models.PositiveSmallIntegerField(
-        choices=[(choice.value[0], choice.value[1]) for choice in HoursChoices],
-        default=HoursChoices.REGULAR_HOURS.value[0],
+        choices=hours_choices,
+        default=0,
     )
     customer_adjustment = models.DecimalField(
         default=0,
@@ -182,7 +177,6 @@ class EstimateDetails(models.Model):
     remark = models.TextField(max_length=500, blank=True)
     validity = models.IntegerField(blank=False, default=30)
     saved_flag = models.BooleanField(default=False)
-    created_on = models.DateTimeField(auto_now_add=True)
     flag = models.BooleanField(default=True)
 
     class Meta:

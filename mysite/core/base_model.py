@@ -43,3 +43,23 @@ class BaseModel(models.Model):
         self.archive = False
         self.save(update_fields=['archive', 'updated_at'])
 
+
+class BasicModel(models.Model):
+    """
+    Abstract basic model that includes common fields for other models.
+    Fields:
+        created_at (DateTime): Automatically stores when the record was created.
+        updated_at (DateTime): Automatically updates to the current timestamp when the record is modified.
+        is_deleted (Boolean): Soft delete flag.
+    """
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False, help_text="Soft delete flag.")
+
+    class Meta:
+        abstract = True
+
+    def soft_delete(self):
+        """Marks the record as deleted without actually removing it from the database."""
+        self.is_deleted = True
+        self.save(update_fields=['is_deleted', 'updated_at'])
