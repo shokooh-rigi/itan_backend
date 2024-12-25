@@ -1,6 +1,6 @@
 import logging
 import os
-from plistlib import Dict
+from typing import Dict
 from typing import List
 
 from django.conf import settings

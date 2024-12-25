@@ -68,6 +68,7 @@ urlpatterns = [
     path('', include('mysite.submittal.urls')),
     path('', include('mysite.mgmreport.urls')),
     path('', include('mysite.api.v2.order.urls')),
+    path('', include('mysite.api.v2.invoice.urls')),
     path('', include('mysite.api.v2.scheduler.urls')),
     path('', include('mysite.coi.urls')),
     path('', include('mysite.gi.urls')),

@@ -25,7 +25,6 @@ from mysite.s3_file_manager import S3
 from .serializers import EstimateSerializer, EmailSerializer, EstimateEquipmentSerializer, EstimateDetailsSerializer, \
     EstimateHistorySerializer
 from .services import EstimateEmailService, TemplateService
-from ..proposal.services import ProposalService
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class EstimateListView(APIView):
         from_date = request.GET.get("fromDate")
         to_date = request.GET.get("toDate")
 
-        filters = Q(archive=False)
+        filters = Q(archive=False, is_deleted=False)
         if search:
             filters &= Q(id__icontains=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search)
 
@@ -301,13 +300,6 @@ class EstimateDeleteView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Check if the confirmation flag is set
-        if not request.data.get("confirm"):
-            return Response(
-                {"error": "Deletion must be confirmed."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         # Archive related BFM data if applicable
         if estimate.bfm:
             estimate.bfm.unarchive_record()
@@ -320,13 +312,13 @@ class EstimateDeleteView(APIView):
         logger.info("Estimate with ID %s deleted.", estimate_id)
         return Response(
             {"message": "Estimate  soft deleted"},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_200_OK,
         )
 
 
 class EstimateArchiveView(APIView):
     """
-    Archives an estimate if the user is authorized and confirms the action.
+    Archives an estimate if the user is authorized.
     """
     permission_classes = [IsAuthenticated]
 
@@ -338,13 +330,6 @@ class EstimateArchiveView(APIView):
             return Response(
                 {"error": "You are not authorized to archive this record."},
                 status=status.HTTP_403_FORBIDDEN
-            )
-
-        # Check for confirmation
-        if not request.data.get("confirm"):
-            return Response(
-                {"error": "Confirmation not received for archiving."},
-                status=status.HTTP_400_BAD_REQUEST
             )
 
         # Archive associated BFM record if it exists
@@ -434,20 +419,12 @@ class EstimateEquipmentDeleteView(APIView):
 
     def delete(self, request, estimate_equipment_id):
         """
-        Delete the estimate equipment by ID if confirmed.
+        Delete the estimate equipment by ID
         """
         # todo: what is used for: interval_id?
         estimate_equipment = get_object_or_404(EstimateEquipment, id=estimate_equipment_id)
-
-        # Ensure confirmation is received before proceeding with deletion
-        if request.data.get("confirm"):
-            estimate_equipment.soft_delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(
-            {"detail": "Confirmation required to delete."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        estimate_equipment.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class EstimateDuplicateView(APIView):
@@ -460,7 +437,7 @@ class EstimateDuplicateView(APIView):
         this_estimate = get_object_or_404(Estimate, id=estimate_id)
 
         # todo: Ask to is directly get the customer from the request data ??
-        customer_id = request.data.get("customer")
+        customer_id = request.data.get("customer_id")
         if not customer_id:
             return Response(
                 {"error": "Customer ID is required for duplication."},
