@@ -1,10 +1,10 @@
 from django.db import models
 
-from mysite.core.base_model import BaseModel
+from mysite.core.base_model import BaseModelWithCreatedByUser
 from mysite.estimator.models import Estimate, estimate_number_generator
 
 
-class Proposal(BaseModel):
+class Proposal(BaseModelWithCreatedByUser):
     """Model representing a proposal related to an estimate."""
 
     estimate = models.OneToOneField(

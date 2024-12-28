@@ -5,14 +5,14 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from custom_user.models import User
-from mysite.core.base_model import BaseModel, BasicModel
+from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
 from mysite.core.models import ContactInfo, Setting
 from mysite.estimator.models import estimate_number_generator
 from mysite.order.models import Order
 from mysite.render import Render
 
 
-class Invoice(BaseModel):
+class Invoice(BaseModelWithCreatedByUser):
     """
     Represents an invoice for an order. Includes details such as dates,
     description, invoice type, and the associated user who created the invoice.
@@ -78,7 +78,7 @@ class Invoice(BaseModel):
         return delete_pdf
 
 
-class InvoiceTransaction(BasicModel):
+class InvoiceTransaction(BaseModel):
     """
     Represents a transaction associated with an invoice.
     Tracks payment details and user who created the transaction.
@@ -108,7 +108,7 @@ class InvoiceTransaction(BasicModel):
         return str(self.invoice) + " $" + str(self.amount)
 
 
-class AccountSummary(BasicModel):
+class AccountSummary(BaseModel):
     """
     Represents a summary of an account, including statements and associated user details.
     """
@@ -182,7 +182,7 @@ def update_statement_number(sender, instance, created, **kwargs):
         instance.save()
 
 
-class InvoiceHistory(BasicModel):
+class InvoiceHistory(BaseModel):
     """
     Tracks the history of invoices, including amounts invoiced, paid, and the balance due.
     """

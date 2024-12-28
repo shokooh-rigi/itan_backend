@@ -3,11 +3,11 @@ import datetime
 from django.conf import settings
 from django.db import models
 
-from mysite.core.base_model import BaseModel
+from mysite.core.base_model import BaseModelWithCreatedByUser
 from mysite.core.models import Person, User, Project
 
 
-class BidFile(BaseModel):
+class BidFile(BaseModelWithCreatedByUser):
     """
     Model representing ibid files associated with a customer and project.
     Includes details such as the customer, project, due date, uploaded file,
@@ -55,7 +55,7 @@ class BidFile(BaseModel):
         )
 
 
-class EquipmentSubmittal(BaseModel):
+class EquipmentSubmittal(BaseModelWithCreatedByUser):
     """
     Model representing an equipment submittal associated with a ibid file.
     Stores the file related to equipment and tracks the creation timestamp.

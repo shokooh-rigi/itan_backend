@@ -236,7 +236,7 @@ class ProposalArchiveView(APIView):
         )
 
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            proposal.archive_record()  # Use the archive_record method from BaseModel
+            proposal.archive_record()
             return Response(
                 {"message": "Proposal archived successfully"},
                 status=status.HTTP_200_OK

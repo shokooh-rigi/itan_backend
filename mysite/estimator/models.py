@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from custom_user.models import User
 from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
-from mysite.core.base_model import BaseModel, BasicModel
+from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
 from mysite.core.models import Person, Project, Service
 from mysite.equipments.models import Equipment
 
@@ -29,7 +29,7 @@ def estimate_number_generator(estimate_id: int):
     return estimate_date_created + str(estimator_long_id) + str(estimate.id).zfill(3)
 
 
-class Estimate(BaseModel):
+class Estimate(BaseModelWithCreatedByUser):
     """Model representing an estimate."""
 
     bfm = models.OneToOneField(
@@ -81,7 +81,7 @@ class Estimate(BaseModel):
         return estimate_number_generator(self.id)
 
 
-class EstimateHistory(BasicModel):
+class EstimateHistory(BaseModel):
     """Model for tracking history of an estimate."""
 
     estimate = models.ForeignKey(
@@ -107,7 +107,7 @@ class EstimateHistory(BasicModel):
         return str(self.estimate) + ": History " + str(self.version)
 
 
-class EstimateEquipment(BasicModel):
+class EstimateEquipment(BaseModel):
     """Model representing equipment used in an estimate."""
 
     estimate = models.ForeignKey(
@@ -140,7 +140,7 @@ class EstimateEquipment(BasicModel):
         return estimate_number_generator(self.estimate.id) + " " + self.equipment.name
 
 
-class EstimateDetails(BasicModel):
+class EstimateDetails(BaseModel):
     """Model for additional details of an estimate."""
     hours_choices = (
         (0, 'Regular Hours'),

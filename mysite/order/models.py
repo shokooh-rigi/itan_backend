@@ -7,12 +7,12 @@ from django.dispatch import receiver
 
 from mysite.core.models import Person
 from mysite.proposal.models import Proposal
-from ..core.base_model import BasicModel
+from ..core.base_model import BaseModel
 from ..core.models import TechLabelModel
 from ..render import Render
 
 
-class ControlSystemManufacturer(BasicModel):
+class ControlSystemManufacturer(BaseModel):
     """
     Represents a manufacturer of control systems.
     """
@@ -30,7 +30,7 @@ class ControlSystemManufacturer(BasicModel):
         return self.manufacturer_name
 
 
-class ControlSystem(BasicModel):
+class ControlSystem(BaseModel):
     """
     Represents a control system, including its version and related documentation.
     """
@@ -61,7 +61,7 @@ class ControlSystem(BasicModel):
         return f"{self.manufacturer}, {self.version_number}"
 
 
-class Order(BasicModel):
+class Order(BaseModel):
     """
     Represents an order with details such as project information, control system, and documents.
     """
@@ -180,7 +180,7 @@ def update_project_number(sender, instance, created, **kwargs):
         pass
 
 
-class ChangeOrder(BasicModel):
+class ChangeOrder(BaseModel):
     """
     Represents a change order linked to an existing order.
     """
@@ -223,7 +223,7 @@ class ChangeOrder(BasicModel):
         return delete_pdf
 
 
-class ChangeOrderService(BasicModel):
+class ChangeOrderService(BaseModel):
     """
     Represents a service associated with a change order.
     """
@@ -242,7 +242,7 @@ class ChangeOrderService(BasicModel):
     description = models.TextField(max_length=2000, blank=True, null=True)
 
 
-class TechLabel(BasicModel):
+class TechLabel(BaseModel):
     """
     Represents a technical label for an order, including drawings and contact information.
     """
@@ -280,7 +280,7 @@ class TechLabel(BasicModel):
         return techlabel_pdf
 
 
-class TechLabelExtraFields(BasicModel):
+class TechLabelExtraFields(BaseModel):
     """
     Represents additional fields for a technical label.
     """
