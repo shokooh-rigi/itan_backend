@@ -152,11 +152,11 @@ MIDDLEWARE = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": env("MYSQL_DB"),
-        "USER": env("MYSQL_USER"),
-        "PASSWORD": env("MYSQL_PASSWORD"),
-        "HOST": env("MYSQL_HOST"),
-        "PORT": env("MYSQL_PORT"),
+        "NAME": env("MYSQL_DB", default=""),
+        "USER": env("MYSQL_USER", default=""),
+        "PASSWORD": env("MYSQL_PASSWORD", default=""),
+        "HOST": env("MYSQL_HOST", default="localhost"),
+        "PORT": env("MYSQL_PORT", default="3306"),
     }
 }
 

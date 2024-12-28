@@ -1,7 +1,5 @@
 import os
 from io import BytesIO
-
-import xhtml2pdf.pisa as pisa
 from django.http import HttpResponse
 from django.template.loader import get_template
 
@@ -13,6 +11,8 @@ class Render:
 
     @staticmethod
     def render(path: str, params: dict):
+
+        import xhtml2pdf.pisa as pisa
         template = get_template(path)
         html = template.render(params)
         response = BytesIO()
@@ -24,6 +24,8 @@ class Render:
 
     @staticmethod
     def render_to_file(path: str, params: dict, pdf_type: str, delete_file=True):
+
+        import xhtml2pdf.pisa as pisa
         template = get_template(path)
         html = template.render(params)
         file_name = "{0}.pdf".format(params.get('file_name'))
