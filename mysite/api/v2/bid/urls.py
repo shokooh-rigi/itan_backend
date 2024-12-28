@@ -12,11 +12,11 @@ from .views import (
 
 
 urlpatterns = [
-    path('bidfiles/get/', BidFileListView.as_view(), name='bidfile-list'),
-    path('bidfiles/create/', BidFileCreateView.as_view(), name='bidfile-create'),
-    path('bidfiles/add/file/<int:id>/', BidFileAddFileView.as_view(), name='bidfile-add-file'),
-    path('bidfiles/update/<int:bidfiles_id>/', BidFileUpdateView.as_view(), name='bidfile-update'),
-    path('bidfiles/duplicate/<int:bidfiles_id>/', BidFileDuplicateView.as_view(), name='bidfile-duplicate'),
-    path('bidfiles/archive/<int:id>/', BidFileArchiveView.as_view(), name='bidfile-archive'),
-    path('bidfiles/delete/<int:bidfiles_id>/', BidFileDeleteView.as_view(), name='bidfile-delete'),
+    path('bid/get/', BidFileListView.as_view(), name='bid-list'),
+    path('bid/create/', BidFileCreateView.as_view(), name='bid-create'),
+    path('bid/add/file/<int:id>/', BidFileAddFileView.as_view(), name='bid-add-file'),
+    path('bid/update/<int:bid_id>/', BidFileUpdateView.as_view(), name='bid-update'),
+    path('bid/duplicate/<int:bid_id>/', BidFileDuplicateView.as_view(), name='bid-duplicate'),
+    path('bid/archive/<int:id>/', BidFileArchiveView.as_view(), name='bid-archive'),
+    path('bid/delete/<int:bid_id>/', BidFileDeleteView.as_view(), name='bid-delete'),
 ]
