@@ -23,7 +23,7 @@ from .views import (
     PersonViewSet,
     EngineerViewSet,
     ManufacturerViewSet,
-    ProjectViewSet, CompanyTypeList,
+    ProjectViewSet, CompanyTypeList, UserViewSet,
 )
 
 router = DefaultRouter()
@@ -31,6 +31,7 @@ router = DefaultRouter()
 router.register(r"companies", CompanyViewSet, basename="company")
 router.register(r"customer", CustomerViewSet, basename="customer")
 router.register(r"engineer", EngineerViewSet, basename="engineer")
+router.register(r"user", UserViewSet, basename="user")
 # router.register(r"persons", PersonViewSet, basename="persons")
 router.register(r"profiles", ProfileViewSet, basename="profile")
 router.register(r"credit-card", CreditCardViewSet, basename="credit-card")

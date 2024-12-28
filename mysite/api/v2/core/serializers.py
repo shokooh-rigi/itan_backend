@@ -180,8 +180,6 @@ class UserSerializer(BaseSerializer):
         model = User
         fields = ["username", "email", "password", "first_name", "last_name"]
 
-    # todo: ask for we have capcha or not?
-
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         user.is_active = False

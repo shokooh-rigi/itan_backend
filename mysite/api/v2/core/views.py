@@ -1,5 +1,4 @@
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
@@ -18,6 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
+from custom_user.models import User
 from mysite import settings
 from mysite.core.models import (
     Person,
@@ -204,6 +204,22 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing User.
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
