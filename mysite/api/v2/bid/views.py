@@ -237,7 +237,7 @@ class BidFileDuplicateView(APIView):
         # Call internal helper method to handle the duplication process
         duplicated_bid_file = self._duplicate_bid_file(
             this_bid_file=this_bid_file,
-            customer_id=customer_id,
+            customer_id=int(customer_id),
             created_by_user=request.user,
         )
 
