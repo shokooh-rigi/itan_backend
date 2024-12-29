@@ -168,12 +168,12 @@ class BidFileUpdateView(APIView):
             404: "BidFile not found",
         },
     )
-    def put(self, request, bidfiles_id):
+    def put(self, request, bid_id):
         """
         Retrieve or update a BidFile instance with the provided data.
         """
         try:
-            bidfile = BidFile.objects.get(id=bidfiles_id)
+            bidfile = BidFile.objects.get(id=bid_id)
         except BidFile.DoesNotExist:
             return Response(
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
@@ -276,7 +276,7 @@ class BidFileDuplicateView(APIView):
 
 class BidFileArchiveView(APIView):
     """
-    Archives a bid file if the user is authorized and confirms the action.
+    Archives a bid file if the user is authorized
     """
 
     permission_classes = [IsAuthenticated]
@@ -291,7 +291,6 @@ class BidFileArchiveView(APIView):
                 "Successfully archived the bid file",
                 schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
             ),
-            400: "Confirmation not received for archiving.",
             403: "User is not authorized to archive this record.",
             404: "BidFile not found."
         }
@@ -535,14 +534,14 @@ class BidFileAddFileView(APIView):
             400: "Selected files exceeded maximum upload size!",
         }
     )
-    def post(self, request, bidfile_id):
+    def post(self, request, bid_id):
         """
         Handles POST request to add files to BidFile and update it with a compressed zip file.
         """
-        this_bfm = self._get_bidfile(bidfile_id=bidfile_id)
+        bid = self._get_bidfile(bidfile_id=bid_id)
         serializer = self._validate_request_data(
             request=request,
-            instance=this_bfm,
+            instance=bid,
         )
 
         temp_path = self._create_temp_path()
@@ -563,12 +562,12 @@ class BidFileAddFileView(APIView):
         zip_file_path = self._create_zip_file(
             files_paths=files_paths,
             temp_path=temp_path,
-            bidfile=this_bfm,
+            bidfile=bid,
         )
 
         # Update the BidFile instance with the zip file
         self._update_bidfile_with_zip(
-            bidfile=this_bfm,
+            bidfile=bid,
             zip_file_path=zip_file_path,
         )
 
