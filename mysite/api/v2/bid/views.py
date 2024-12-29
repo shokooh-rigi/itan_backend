@@ -218,12 +218,12 @@ class BidFileDuplicateView(APIView):
             404: openapi.Response(description="BidFile or Customer not found"),
         }
     )
-    def post(self, request, bid_files_id):
+    def post(self, request, bid_id):
         """
         Duplicate an existing BidFile instance.
         """
         try:
-            this_bid_file = BidFile.objects.get(id=bid_files_id)
+            this_bid_file = BidFile.objects.get(id=bid_id)
         except BidFile.DoesNotExist:
             return Response(
                 {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
@@ -285,10 +285,6 @@ class BidFileArchiveView(APIView):
         operation_description="Archives a BidFile if the user is authorized and confirms the action.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            properties={
-                'confirm': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Confirmation for archiving the bid file")
-            },
-            required=['confirm']
         ),
         responses={
             200: openapi.Response(
@@ -300,10 +296,10 @@ class BidFileArchiveView(APIView):
             404: "BidFile not found."
         }
     )
-    def post(self, request, id):
+    def post(self, request, bid_id):
         bid_file = get_object_or_404(
             BidFile,
-            id=id,
+            id=bid_id,
             is_deleted=False,
 
         )
@@ -315,18 +311,11 @@ class BidFileArchiveView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Confirm archiving action
-        if request.data.get("confirm"):
-            bid_file.archive = True
-            bid_file.save()
-            return Response(
-                {"message": "Bid file archived successfully"},
-                status=status.HTTP_200_OK,
-            )
-
+        bid_file.archive = True
+        bid_file.save()
         return Response(
-            {"error": "Confirmation not received for archiving."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"message": "Bid file archived successfully"},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -350,13 +339,13 @@ class BidFileDeleteView(APIView):
             500: "Error deleting file from S3."
         }
     )
-    def delete(self, request, bidfiles_id):
+    def delete(self, request, bid_id):
         """
         Delete a BidFile instance.
         """
         this_bidfile = get_object_or_404(
             BidFile,
-            id=bidfiles_id,
+            id=bid_id,
             is_deleted=False,
 
         )
