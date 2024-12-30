@@ -655,7 +655,6 @@ class EstimateDetailsView(APIView):
             Estimate,
             id=estimate_id,
             is_deleted=False,
-
         )
         estimate_details = get_object_or_404(
             EstimateDetails,
@@ -735,12 +734,11 @@ class EstimateDuplicateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, estimate_id):
+    def post(self, request, id):
         this_estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
-
         )
 
         customer_id = request.data.get("customer_id")
@@ -764,9 +762,8 @@ class EstimateDuplicateView(APIView):
         # Set the new customer for the duplicated estimate
         duplicated_obj.customer = get_object_or_404(
             Person,
-            id=customer_id,
+            id=int(customer_id),
             is_deleted=False,
-
         )
         duplicated_obj.save()
 
@@ -777,7 +774,6 @@ class EstimateDuplicateView(APIView):
         all_equipments = EstimateEquipment.objects.filter(
             estimate=this_estimate,
             is_deleted=False,
-
         )
         for equipment in all_equipments:
             equipment.pk = None
