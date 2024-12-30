@@ -8,6 +8,8 @@ from django.core.paginator import Paginator
 from django.db import DatabaseError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -38,6 +40,80 @@ class EstimateListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Get a list of estimates",
+        operation_description="Retrieve a paginated list of estimates with optional search and date filters.",
+        manual_parameters=[
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search term for filtering estimates by ID, project name, or customer company name.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "paginate_by",
+                openapi.IN_QUERY,
+                description="Number of estimates to display per page. Default is set in settings.PAGE_SIZE.",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Field to order the estimates by. Default is '-created_on'.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering estimates (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering estimates (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number to retrieve. Default is 1.",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="List of estimates with pagination.",
+                examples={
+                    "application/json": {
+                        "estimates": [
+                            {
+                                "bfm": "value",
+                                "customer": "customer_data",
+                                "project": "project_data",
+                                "engineer": "engineer_data",
+                                "service": "service_data",
+                                "note": "note_data",
+                                "due_date": "YYYY-MM-DD",
+                                "drawing_date": "YYYY-MM-DD",
+                                "predemo": 0,
+                                "created_by": "user_id",
+                            }
+                        ],
+                        "pagination": {
+                            "total_rows": 100,
+                            "total_pages": 10,
+                            "current_page": 1,
+                            "page_size": 10,
+                        },
+                    }
+                },
+            ),
+            status.HTTP_400_BAD_REQUEST: openapi.Response(
+                description="Invalid parameters.",
+            ),
+        },
+    )
     def get(self, request):
         search = request.GET.get('search', '')
         paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
@@ -73,6 +149,21 @@ class EstimateListView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary="Send an email for an estimate",
+        operation_description="Sends an email based on the provided validated data in the request body.",
+        request_body=EmailSerializer,
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="Email sent successfully.",
+                examples={"application/json": {"message": "Email sent successfully."}},
+            ),
+            status.HTTP_400_BAD_REQUEST: openapi.Response(
+                description="Invalid input or email sending error.",
+                examples={"application/json": {"error": "Invalid email data."}},
+            ),
+        },
+    )
     def post(self, request):
         """
         Sends an email based on the provided validated data in the request.
@@ -117,13 +208,53 @@ class EstimateCreateView(APIView):
 
     This view handles the creation of a new estimate based on provided data.
     It accepts a POST request and returns the newly created estimate's ID along with associated BidFiles.
-
-    Attributes:
-        permission_classes (list): List of permissions required for this view.
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, bid_file_id=None):
+    @swagger_auto_schema(
+        operation_summary="Create a new estimate",
+        operation_description="Create a new estimate based on the provided data. Optionally associate it with a BidFile.",
+        request_body=EstimateSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                "bid_id",
+                openapi.IN_QUERY,
+                description="ID of the BidFile to associate with the estimate.",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
+        ],
+        responses={
+            status.HTTP_201_CREATED: openapi.Response(
+                description="Estimate created successfully.",
+                examples={
+                    "application/json": {
+                        "message": "Estimate created",
+                        "estimate_id": 123,
+                        "bid_id": [1, 2, 3],
+                    }
+                },
+            ),
+            status.HTTP_400_BAD_REQUEST: openapi.Response(
+                description="Invalid input data.",
+                examples={
+                    "application/json": {
+                        "error": "Validation errors",
+                        "field_name": ["This field is required."],
+                    }
+                },
+            ),
+            status.HTTP_404_NOT_FOUND: openapi.Response(
+                description="BidFile not found.",
+                examples={
+                    "application/json": {
+                        "error": "BidFile not found",
+                    }
+                },
+            ),
+        },
+    )
+    def post(self, request, bid_id=None):
         """
         Handle POST request to create an estimate.
 
@@ -135,16 +266,16 @@ class EstimateCreateView(APIView):
             Response: A response containing either the newly created estimate's ID or an error message,
                       along with the list of BidFiles if applicable.
         """
-        logger.info("Request to create an estimate with bid_file_id: %s", bid_file_id)
+        logger.info("Request to create an estimate with bid_id: %s", bid_id)
 
         # Check if the BidFile exists if bid_file_id is provided
-        if bid_file_id:
+        if bid_id:
             bid_file = BidFile.objects.filter(
-                id=bid_file_id,
+                id=bid_id,
                 is_deleted=False,
             ).first()
             if not bid_file:
-                logger.error("BidFile with ID %s not found", bid_file_id)
+                logger.error("BidFile with ID %s not found", bid_id)
                 return Response(
                     {"error": "BidFile not found"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -207,24 +338,51 @@ class EstimateCreateView(APIView):
 
 class EstimateUpdateView(APIView):
     """
-    API view to update or retrieve an existing estimate.
-
-    This view handles the updating and retrieval of an existing estimate identified by estimate_id.
-    It accepts PUT requests to update the estimate and GET requests to retrieve the estimate details.
-
-    **Why use this view for frontend developers:**
-    - **Unified API Endpoint**: This view provides both the update and retrieval functionalities for an estimate in one place, simplifying the API structure.
-    - **Efficient Data Handling**: Frontend applications can easily fetch an estimate's current data and submit updates to the same endpoint, reducing the need for multiple API calls.
-    - **Improved User Experience**: Users can load an estimate, make changes, and save them without navigating between different endpoints, leading to a more seamless experience.
-    - **Maintainability**: Keeping related functionalities together in a single class makes it easier to manage and understand the codebase, promoting better collaboration between frontend and backend developers.
+    API view to update an existing estimate.
     """
+
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, estimate_id):
-        logger.info("Request to update estimate with ID: %s", estimate_id)
+    @swagger_auto_schema(
+        operation_description="Update an existing estimate by its ID.",
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_PATH,
+                description="The ID of the estimate to update",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        request_body=EstimateSerializer,
+        responses={
+            200: openapi.Response(
+                description="Estimate updated successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING, description="A success message"),
+                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the updated estimate")
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="Bad request, invalid data",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'detail': openapi.Schema(type=openapi.TYPE_STRING, description="Error message")
+                    }
+                )
+            ),
+            404: "Estimate not found",
+        }
+    )
+    def put(self, request, id):
+        logger.info("Request to update estimate with ID: %s", id)
         this_estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
         )
 
@@ -269,43 +427,63 @@ class EstimateUpdateView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    def get(self, request, estimate_id):
-        """
-        Handle GET request to retrieve an estimate by ID.
-        """
-        this_estimate = get_object_or_404(
-            Estimate,
-            id=estimate_id,
-            is_deleted=False,
-
-        )
-        serializer = EstimateSerializer(this_estimate)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class EstimateDeleteView(APIView):
     """
     API view to delete an existing estimate.
 
-    This view handles the deletion of an existing estimate identified by estimate_id.
+    This view handles the deletion of an existing estimate identified by id.
     It accepts a DELETE request and returns a success message upon deletion.
 
     **Authorization Logic**:
     - Only the user who created the estimate or users with a specific user type (e.g., admin) can delete the estimate.
-    - If the estimate has associated BFM data, it will be archived before deletion.
+    - If the estimate has associated Bid data, it will be archived before deletion.
     """
 
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, estimate_id):
-        logger.info("Request to delete estimate with ID: %s", estimate_id)
+    @swagger_auto_schema(
+        operation_summary="Delete an existing estimate",
+        operation_description=(
+            "Delete an estimate identified by its ID. Only the user who created the estimate "
+            "or admin users (user_type=2) are authorized to perform this action. "
+            "If the estimate has associated Bid data, it will be archived before deletion."
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="Estimate soft deleted successfully.",
+                examples={
+                    "application/json": {
+                        "message": "Estimate soft deleted"
+                    }
+                },
+            ),
+            status.HTTP_403_FORBIDDEN: openapi.Response(
+                description="Unauthorized deletion attempt.",
+                examples={
+                    "application/json": {
+                        "error": "You are not authorized to delete this record."
+                    }
+                },
+            ),
+            status.HTTP_404_NOT_FOUND: openapi.Response(
+                description="Estimate not found.",
+                examples={
+                    "application/json": {
+                        "error": "Estimate not found"
+                    }
+                },
+            ),
+        },
+    )
+    def delete(self, request, id):
+        logger.info("Request to delete estimate with ID: %s", id)
 
         # Fetch the estimate object
         estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
-
         )
 
         # Check if the user is authorized to delete the estimate
@@ -323,11 +501,11 @@ class EstimateDeleteView(APIView):
         # todo: check PDF deletion (assumed method from old code) is work ok?
         estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(estimate.id, 'E')})
 
-        # Delete the estimate
+        # Soft delete the estimate
         estimate.soft_delete()
-        logger.info("Estimate with ID %s deleted.", estimate_id)
+        logger.info("Estimate with ID %s deleted.", id)
         return Response(
-            {"message": "Estimate  soft deleted"},
+            {"message": "Estimate soft deleted"},
             status=status.HTTP_200_OK,
         )
 
@@ -338,12 +516,43 @@ class EstimateArchiveView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, estimate_id):
+    @swagger_auto_schema(
+        operation_summary="Archive an Estimate",
+        operation_description="Archives an existing estimate identified by `id` if the user is authorized. If the estimate has an associated Bid record, it will also be archived.",
+        tags=["Estimates"],
+        responses={
+            200: openapi.Response(
+                description="Estimate archived successfully.",
+                examples={
+                    "application/json": {
+                        "message": "Estimate archived successfully"
+                    }
+                },
+            ),
+            403: openapi.Response(
+                description="Authorization error.",
+                examples={
+                    "application/json": {
+                        "error": "You are not authorized to archive this record."
+                    }
+                },
+            ),
+            404: openapi.Response(
+                description="Estimate not found.",
+                examples={
+                    "application/json": {
+                        "error": "Not found."
+                    }
+                },
+            ),
+        },
+
+    )
+    def post(self, request, id):
         estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
-
         )
 
         # Check user authorization
@@ -372,6 +581,44 @@ class EstimateHistoryView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Get the history of an estimate by its ID.",
+        manual_parameters=[
+            openapi.Parameter(
+                'estimate_id',
+                openapi.IN_PATH,
+                description="The ID of the estimate",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Success",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='The ID of the estimate'),
+                        'estimate_histories': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'estimate': openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                               description='The ID of the associated estimate'),
+                                    'total': openapi.Schema(type=openapi.TYPE_NUMBER,
+                                                            description='Total amount of the estimate history'),
+                                    'version': openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                              description='The version number of the estimate history')
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            404: "Estimate not found",
+        }
+    )
     def get(self, request, estimate_id):
         """
         Get the history of an estimate by ID.
@@ -380,7 +627,6 @@ class EstimateHistoryView(APIView):
             Estimate,
             id=estimate_id,
             is_deleted=False,
-
         )
         estimate_histories = EstimateHistory.objects.filter(
             estimate=estimate,
