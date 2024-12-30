@@ -8,7 +8,9 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from rest_framework import status, viewsets
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -215,9 +217,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for managing User.
-    """
+    - `create`: Creates a new user with the provided data, marking them as inactive by default.
+        Handles the creation of a new user.
 
+        Inserts the following during user creation:
+        - `username`, `email`, `password`, `first_name`, `last_name` are taken from the request data.
+
+    - `update`: Updates an existing user with the provided data. Does not modify fields that are not provided in the request.
+            Inserts the following during user update:
+        - Fields like `username`, `email`, `first_name`, `last_name`
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
