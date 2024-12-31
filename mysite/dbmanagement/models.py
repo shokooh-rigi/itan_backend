@@ -177,7 +177,7 @@ class EquipmentManufacturer(models.Model):
 
 
 class Equipment(models.Model):
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True, related_name='service_equipments')
     test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255, blank=False)
     price = models.DecimalField(max_digits=8, decimal_places=2)

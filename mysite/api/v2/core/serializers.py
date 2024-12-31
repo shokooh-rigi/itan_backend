@@ -12,6 +12,7 @@ from mysite.core.models import (
     CreditCard,
     LicenseFiles, CompanyType, Service,
 )
+from mysite.equipments.api.serializers import EquipmentSerializer
 from mysite.s3_file_manager import S3
 
 
@@ -358,6 +359,7 @@ class CompanyTypeSerializer(BaseSerializer):
 
 
 class ServiceSerializer(BaseSerializer):
+    service_equipments = EquipmentSerializer(many=True, read_only=True)
     class Meta:
         model = Service
         fields = "__all__"

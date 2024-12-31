@@ -44,6 +44,7 @@ class EstimateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Estimate
         fields = [
+            'id',
             'bfm',
             'customer',
             'project',

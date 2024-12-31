@@ -574,13 +574,13 @@ class EstimateHistoryView(APIView):
             404: "Estimate not found",
         }
     )
-    def get(self, request, estimate_id):
+    def get(self, request, id):
         """
         Get the history of an estimate by ID.
         """
         estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
         )
         estimate_histories = EstimateHistory.objects.filter(
@@ -602,13 +602,13 @@ class EstimateDetailsView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, estimate_id):
+    def get(self, request, id):
         """
         Get the details of the estimate.
         """
         estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
         )
         estimate_details = get_object_or_404(
@@ -628,7 +628,7 @@ class EstimateDetailsView(APIView):
         )
 
         data = {
-            "estimate_id": estimate_id,
+            "estimate_id": id,
             "estimate": EstimateSerializer(estimate).data,
             "estimate_details": EstimateDetailsSerializer(estimate_details).data,
             "estimate_sub": estimate_sub,
@@ -756,15 +756,14 @@ class EstimateEquipmentView(APIView):
     retrieving equipment pricing details and adding or updating equipment.
     """
     permission_classes = [IsAuthenticated]
-    # todo: Dear Reza is it update or create ?
 
-    def get(self, request, estimate_id, estimate_service_id):
+    def get(self, request, estimate_id, service_id):
         """
-        Retrieves equipment and pricing data for a specific estimate and service interval.
+        Retrieves equipment and pricing data for a specific estimate and service.
 
         Arguments:
             estimate_id (int): The ID of the estimate.
-            estimate_service_id (int): The ID of the service interval.
+            service_id (int): The ID of the service.
 
         Returns:
             Response: The equipment details and total pricing.
@@ -775,7 +774,7 @@ class EstimateEquipmentView(APIView):
             is_deleted=False,
 
         )
-        interval_set = estimate.service.all()[estimate_service_id]
+        interval_set = estimate.service.all()[service_id]
 
         try:
             # Get the equipment pricing data
@@ -798,7 +797,7 @@ class EstimateEquipmentView(APIView):
                 'estimate_id': estimate_id,
                 'estimate_money': estimate_money,
                 'interval_set': interval_set.id,
-                'estimate_service_id': estimate_service_id,
+                'service_id': service_id,
                 'equipments': [equipment.id for equipment in equipments],
                 'equipment_in': equipment_in
             })
@@ -809,12 +808,19 @@ class EstimateEquipmentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def post(self, request, estimate_id):
+    
+    @swagger_auto_schema(
+        operation_summary="Create/Update estimate equipment",
+        operation_description="Create/Update estimate equipment based on the provided data.",
+        request_body=EstimateEquipmentSerializer(many=True)
+    )
+    def post(self, request, estimate_id, service_id):
         """
-        Adds or updates equipment for a specific estimate and service interval.
+        Adds or updates equipment for a specific estimate and service.
 
         Arguments:
             estimate_id (int): The ID of the estimate.
+            service_id (int): The ID of the service.
 
         Returns:
             Response: Success message and updated estimate pricing.
@@ -823,37 +829,37 @@ class EstimateEquipmentView(APIView):
             Estimate,
             id=estimate_id,
             is_deleted=False,
-
         )
-        serializer = EstimateEquipmentSerializer(data=request.data, context={'estimate_id': estimate_id})
+        serializer = EstimateEquipmentSerializer(data=request.data, many=True, context={'estimate_id': estimate_id})
 
         if serializer.is_valid():
             try:
-                equipment = serializer.validated_data['equipment']
-                quantity = serializer.validated_data['quantity']
-                price_override = serializer.validated_data['price_override']
+                for equipment_data in serializer.validated_data:
+                    equipment = equipment_data['equipment']
+                    quantity = equipment_data['quantity']
+                    price_override = equipment_data.get('price_override')
 
-                # Check if the equipment already exists in the estimate
-                existing_equipment = EstimateEquipment.objects.filter(
-                    estimate=estimate_id,
-                    equipment=equipment,
-                    is_deleted=False,
-
-                ).first()
-                if existing_equipment:
-                    # Update existing equipment pricing
-                    existing_equipment.quantity = quantity
-                    existing_equipment.price_override = price_override
-                    existing_equipment.save()
-                else:
-                    # Create a new EstimateEquipment entry
-                    EstimateEquipment.objects.create(
-                        estimate=estimate,
+                    # Check if the equipment already exists in the estimate
+                    existing_equipment = EstimateEquipment.objects.filter(
+                        estimate=estimate_id,
                         equipment=equipment,
-                        quantity=quantity,
-                        price_override=price_override,
-                        flag=True
-                    )
+                        is_deleted=False,
+                    ).first()
+
+                    if existing_equipment:
+                        # Update existing equipment pricing
+                        existing_equipment.quantity = quantity
+                        existing_equipment.price_override = price_override
+                        existing_equipment.save()
+                    else:
+                        # Create a new EstimateEquipment entry
+                        EstimateEquipment.objects.create(
+                            estimate=estimate,
+                            equipment=equipment,
+                            quantity=quantity,
+                            price_override=price_override,
+                            flag=True,
+                        )
 
                 # Recalculate the total price
                 estimate_equipments_pricing = EstimateEquipment.objects.filter(
