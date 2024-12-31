@@ -23,7 +23,7 @@ from .views import (
     PersonViewSet,
     EngineerViewSet,
     ManufacturerViewSet,
-    ProjectViewSet, CompanyTypeList, UserViewSet,
+    ProjectViewSet, CompanyTypeList, UserViewSet, ServiceViewSet,
 )
 
 router = DefaultRouter()
@@ -37,6 +37,8 @@ router.register(r"profiles", ProfileViewSet, basename="profile")
 router.register(r"credit-card", CreditCardViewSet, basename="credit-card")
 router.register(r"manufacturer", ManufacturerViewSet, basename="manufacturer")
 router.register(r"project", ProjectViewSet, basename="project")
+router.register(r"service", ServiceViewSet, basename="service")
+
 
 
 urlpatterns = [

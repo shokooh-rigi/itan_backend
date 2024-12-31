@@ -27,7 +27,7 @@ from mysite.core.models import (
     Company,
     Profile,
     CreditCard,
-    LicenseInfo, CompanyType,
+    LicenseInfo, CompanyType, Service,
 )
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
@@ -38,7 +38,7 @@ from .serializers import (
     CreditCardSerializer,
     ProfileSerializer,
     UserSerializer,
-    DocumentSerializer, CompanyTypeSerializer,
+    DocumentSerializer, CompanyTypeSerializer, ServiceSerializer,
 )
 
 
@@ -213,6 +213,22 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save()
+
+
+class ServiceViewSet(ModelViewSet):
+    """
+    ViewSet for managing Service model CRUD operations.
+    """
+    queryset = Service.objects.filter(is_deleted=False)
+    serializer_class = ServiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        """
+        Soft delete the service by setting `is_deleted` to True.
+        """
+        instance.soft_delete()
+        instance.save()
 
 
 class UserViewSet(viewsets.ModelViewSet):
