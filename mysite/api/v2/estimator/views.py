@@ -206,8 +206,7 @@ class EstimateCreateView(APIView):
     """
     API view to create a new estimate.
 
-    This view handles the creation of a new estimate based on provided data.
-    It accepts a POST request and returns the newly created estimate's ID along with associated BidFiles.
+    Handles creation of a new estimate and optionally associates it with a BidFile.
     """
     permission_classes = [IsAuthenticated]
 
@@ -231,7 +230,7 @@ class EstimateCreateView(APIView):
                     "application/json": {
                         "message": "Estimate created",
                         "estimate_id": 123,
-                        "bid_id": [1, 2, 3],
+                        "bid_files_id": [1, 2, 3],
                     }
                 },
             ),
@@ -260,7 +259,7 @@ class EstimateCreateView(APIView):
 
         Args:
             request (Request): The request object containing data to create the estimate.
-            bid_file_id (int, optional): The ID of the BidFile associated with the estimate.
+            bid_id (int, optional): The ID of the BidFile associated with the estimate.
 
         Returns:
             Response: A response containing either the newly created estimate's ID or an error message,
@@ -268,31 +267,22 @@ class EstimateCreateView(APIView):
         """
         logger.info("Request to create an estimate with bid_id: %s", bid_id)
 
-        # Check if the BidFile exists if bid_file_id is provided
+        # Check if the BidFile exists if bid_id is provided
         if bid_id:
-            bid_file = BidFile.objects.filter(
-                id=bid_id,
-                is_deleted=False,
-            ).first()
+            bid_file = BidFile.objects.filter(id=bid_id, is_deleted=False).first()
             if not bid_file:
                 logger.error("BidFile with ID %s not found", bid_id)
                 return Response(
                     {"error": "BidFile not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-
-            # Prepare the response with the single BidFile
-            response_bid_files = [bid_file]  # Wrap in a list to maintain consistency
+            response_bid_files = [bid_file]
         else:
-            # If no bid_file_id is provided, retrieve all relevant BidFiles
             response_bid_files = BidFile.objects.filter(
                 archive=False,
                 is_deleted=False,
-
             ).exclude(
-                id__in=Estimate.objects.filter(
-                    bfm_id__isnull=False
-                ).values_list('bfm_id')
+                id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')
             ).order_by('due_date')
 
         # Initialize the serializer with the request data
@@ -300,40 +290,34 @@ class EstimateCreateView(APIView):
 
         # Validate and save the estimate
         if serializer.is_valid():
-            new_estimate = serializer.save(created_by=request.user)  # Save with user information
-            logger.info("New estimate created with ID %s", new_estimate.pk)
+            # Handle the creation process
+            try:
+                new_estimate = serializer.save(created_by=request.user)  # Save with user information
+                logger.info("New estimate created with ID %s", new_estimate.pk)
 
-            # Update EstimateDetails after creating the estimate
-            EstimateDetails.objects.filter(
-                estimate=new_estimate,
-                is_deleted=False,
+                # Update EstimateDetails if required
+                pre_demo = request.data.get('predemo', 0)
+                EstimateDetails.objects.filter(
+                    estimate=new_estimate,
+                    is_deleted=False,
+                ).update(pre_demo=pre_demo)
 
-            ).update(
-                pre_demo=request.data.get(
-                    'predemo', 0
+                # Prepare the response
+                response_data = {
+                    "message": "Estimate created",
+                    "estimate_id": new_estimate.pk,
+                    "bid_files_id": [bid.pk for bid in response_bid_files],
+                }
+                return Response(response_data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error("Error creating estimate: %s", str(e))
+                return Response(
+                    {"error": "An unexpected error occurred."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            )
 
-            # Prepare the response
-            response_data = {
-                "message": "Estimate created",
-                "estimate_id": new_estimate.pk,
-                "bid_files_id": [bid_file.pk for bid_file in response_bid_files],  # Send only IDs for brevity
-            }
-
-            return Response(
-                response_data,
-                status=status.HTTP_201_CREATED,
-            )
-
-        logger.error(
-            "Error creating estimate: %s",
-            serializer.errors,
-        )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        logger.error("Validation errors: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EstimateUpdateView(APIView):

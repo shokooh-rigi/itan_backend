@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mysite.bidfilemgm.models import BidFile
+from mysite.core.models import Service
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
 
@@ -33,8 +33,18 @@ class EmailSerializer(serializers.Serializer):
     email_id = serializers.IntegerField()
     subject = serializers.CharField(max_length=255)
 
+class ServiceSerializer(serializers.ModelSerializer):
+    """Serializer for the Service model."""
+    class Meta:
+        model = Service
+        fields = '__all__'
+
 
 class EstimateSerializer(serializers.ModelSerializer):
+    """Serializer for the Estimate model."""
+    service = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Service.objects.all()
+    )  # Allow passing a list of service IDs
     predemo = serializers.FloatField(initial=0)
 
     class Meta:
@@ -51,6 +61,20 @@ class EstimateSerializer(serializers.ModelSerializer):
             'predemo',
             'created_by',
         ]
+
+    def create(self, validated_data):
+        services = validated_data.pop('service', [])
+        estimate = Estimate.objects.create(**validated_data)
+        estimate.service.set(services)  # Associate services with the estimate
+        return estimate
+
+    def update(self, instance, validated_data):
+        services = validated_data.pop('service', [])
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.service.set(services)  # Update associated services
+        instance.save()
+        return instance
 
 
 class EstimateDetailsSerializer(serializers.ModelSerializer):
