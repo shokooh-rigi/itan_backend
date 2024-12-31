@@ -33,11 +33,6 @@ class EmailSerializer(serializers.Serializer):
     email_id = serializers.IntegerField()
     subject = serializers.CharField(max_length=255)
 
-class ServiceSerializer(serializers.ModelSerializer):
-    """Serializer for the Service model."""
-    class Meta:
-        model = Service
-        fields = '__all__'
 
 
 class EstimateSerializer(serializers.ModelSerializer):
