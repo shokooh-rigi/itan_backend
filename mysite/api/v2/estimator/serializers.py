@@ -54,7 +54,7 @@ class EstimateSerializer(serializers.ModelSerializer):
             'due_date',
             'drawing_date',
             'predemo',
-            'created_by',
+            # 'created_by',
         ]
 
     def create(self, validated_data):
