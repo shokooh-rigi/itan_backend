@@ -214,15 +214,6 @@ class EstimateCreateView(APIView):
         operation_summary="Create a new estimate",
         operation_description="Create a new estimate based on the provided data. Optionally associate it with a BidFile.",
         request_body=EstimateSerializer,
-        manual_parameters=[
-            openapi.Parameter(
-                "bid_id",
-                openapi.IN_QUERY,
-                description="ID of the BidFile to associate with the estimate.",
-                type=openapi.TYPE_INTEGER,
-                required=False,
-            ),
-        ],
         responses={
             status.HTTP_201_CREATED: openapi.Response(
                 description="Estimate created successfully.",
@@ -253,37 +244,18 @@ class EstimateCreateView(APIView):
             ),
         },
     )
-    def post(self, request, bid_id=None):
+    def post(self, request):
         """
         Handle POST request to create an estimate.
 
         Args:
             request (Request): The request object containing data to create the estimate.
-            bid_id (int, optional): The ID of the BidFile associated with the estimate.
 
         Returns:
             Response: A response containing either the newly created estimate's ID or an error message,
                       along with the list of BidFiles if applicable.
         """
-        logger.info("Request to create an estimate with bid_id: %s", bid_id)
-
-        # Check if the BidFile exists if bid_id is provided
-        if bid_id:
-            bid_file = BidFile.objects.filter(id=bid_id, is_deleted=False).first()
-            if not bid_file:
-                logger.error("BidFile with ID %s not found", bid_id)
-                return Response(
-                    {"error": "BidFile not found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            response_bid_files = [bid_file]
-        else:
-            response_bid_files = BidFile.objects.filter(
-                archive=False,
-                is_deleted=False,
-            ).exclude(
-                id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')
-            ).order_by('due_date')
+        logger.info("Request to create an estimate")
 
         # Initialize the serializer with the request data
         serializer = EstimateSerializer(data=request.data)
@@ -306,7 +278,6 @@ class EstimateCreateView(APIView):
                 response_data = {
                     "message": "Estimate created",
                     "estimate_id": new_estimate.pk,
-                    "bid_files_id": [bid.pk for bid in response_bid_files],
                 }
                 return Response(response_data, status=status.HTTP_201_CREATED)
             except Exception as e:

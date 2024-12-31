@@ -40,7 +40,6 @@ class EstimateSerializer(serializers.ModelSerializer):
     service = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Service.objects.all()
     )  # Allow passing a list of service IDs
-    predemo = serializers.FloatField(initial=0)
 
     class Meta:
         model = Estimate
@@ -53,7 +52,6 @@ class EstimateSerializer(serializers.ModelSerializer):
             'note',
             'due_date',
             'drawing_date',
-            'predemo',
             # 'created_by',
         ]
 
