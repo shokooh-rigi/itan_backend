@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('flag', models.BooleanField(default=True)),
             ],
             options={
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                 ('state', models.CharField(blank=True, max_length=55)),
                 ('zip', models.CharField(blank=True, max_length=10, null=True)),
                 ('customer_adjustment_in_percentage', models.IntegerField(default=0)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={
                 'verbose_name': 'Company Contact info',
@@ -150,7 +150,7 @@ class Migration(migrations.Migration):
                 ('fax', models.CharField(blank=True, max_length=15)),
                 ('mail', models.EmailField(blank=True, max_length=55)),
                 ('web', models.CharField(blank=True, max_length=55)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('flag', models.BooleanField(default=True)),
             ],
             options={
@@ -207,7 +207,7 @@ class Migration(migrations.Migration):
                 ('fax', models.CharField(blank=True, max_length=15)),
                 ('mail', models.EmailField(blank=True, max_length=55)),
                 ('note', models.TextField(blank=True, max_length=500)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('flag', models.BooleanField(default=True)),
             ],
             options={
@@ -222,7 +222,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('priority', models.IntegerField(blank=True)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('flag', models.BooleanField(default=True)),
             ],
             options={
