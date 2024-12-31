@@ -7,7 +7,7 @@ class BaseModel(models.Model):
     """
     Abstract basic model that includes common fields for other models.
     Fields:
-        created_at (DateTime): Automatically stores when the record was created.
+        created_on (DateTime): Automatically stores when the record was created.
         updated_at (DateTime): Automatically updates to the current timestamp when the record is modified.
         is_deleted (Boolean): Soft delete flag.
         archive (Boolean): Archive flag.

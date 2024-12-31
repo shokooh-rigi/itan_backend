@@ -12,6 +12,7 @@ from django.dispatch import receiver
 from tinymce.models import HTMLField
 
 from custom_user.models import User
+from mysite.core.base_model import BaseModelWithCreatedByUser
 
 
 class UserTypeChoices(models.IntegerChoices):
@@ -285,24 +286,7 @@ class CountryCode(models.TextChoices):
     AX = "AX", "Åland Islands"
 
 
-class BaseAbstractModel(models.Model):
-    archive = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        blank=False,
-        null=True,
-        related_name="%(class)s_created_by",
-    )
-
-    class Meta:
-        abstract = True
-        ordering = ["-created_at"]
-
-
-class CompanyType(BaseAbstractModel):
+class CompanyType(BaseModelWithCreatedByUser):
     """Represents all company types in this system."""
 
     name = models.CharField(max_length=100, blank=False)
@@ -314,7 +298,7 @@ class CompanyType(BaseAbstractModel):
         return self.name
 
 
-class Address(BaseAbstractModel):
+class Address(BaseModelWithCreatedByUser):
     """Represents address in database."""
 
     address_line_1 = models.CharField(max_length=255, blank=True)
@@ -327,7 +311,7 @@ class Address(BaseAbstractModel):
     )
 
 
-class ContactInfo(BaseAbstractModel):
+class ContactInfo(BaseModelWithCreatedByUser):
     """Represents contact information in database."""
 
     tel = models.CharField(max_length=15, blank=True, null=True)
@@ -337,7 +321,7 @@ class ContactInfo(BaseAbstractModel):
     web = models.CharField(max_length=55, blank=True, null=True)
 
 
-class Company(BaseAbstractModel):
+class Company(BaseModelWithCreatedByUser):
     """Represents company details."""
 
     name = models.CharField(max_length=255, blank=False, null=False)
@@ -365,7 +349,7 @@ class Company(BaseAbstractModel):
         return self.name
 
 
-class Person(BaseAbstractModel):
+class Person(BaseModelWithCreatedByUser):
     """Represents a person associated with a company."""
 
     company = models.ForeignKey(
@@ -394,7 +378,7 @@ class Person(BaseAbstractModel):
         return self.company.name + ", " + self.name
 
 
-class Profile(BaseAbstractModel):
+class Profile(BaseModelWithCreatedByUser):
     """Represents a user profile with additional information."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -482,7 +466,7 @@ def update_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 
-class CreditCard(BaseAbstractModel):
+class CreditCard(BaseModelWithCreatedByUser):
     user_profile = models.ForeignKey(
         Profile, on_delete=models.CASCADE, blank=False, null=False
     )
@@ -499,7 +483,7 @@ class CreditCard(BaseAbstractModel):
         return str(self.user_profile.user) + " at " + str(self.card_nickname)
 
 
-class BusinessCheckingAccount(BaseAbstractModel):
+class BusinessCheckingAccount(BaseModelWithCreatedByUser):
     user_profile = models.ForeignKey(
         Profile, on_delete=models.CASCADE, blank=False, null=False
     )
@@ -516,7 +500,7 @@ class BusinessCheckingAccount(BaseAbstractModel):
         return str(self.user_profile.user) + " at " + str(self.name_of_account)
 
 
-class Project(BaseAbstractModel):
+class Project(BaseModelWithCreatedByUser):
     name = models.CharField(
         max_length=255,
         blank=False,
@@ -537,7 +521,7 @@ class Project(BaseAbstractModel):
         return self.name
 
 
-class Service(BaseAbstractModel):
+class Service(BaseModelWithCreatedByUser):
     name = models.CharField(max_length=100, blank=False)
     priority = models.IntegerField(blank=True)
 
@@ -548,7 +532,7 @@ class Service(BaseAbstractModel):
         return self.name
 
 
-class LicenseInfo(BaseAbstractModel):
+class LicenseInfo(BaseModelWithCreatedByUser):
     key = models.CharField(max_length=255, blank=False, null=False, unique=True)
     value = models.CharField(max_length=255, null=True, blank=True)
 
@@ -556,7 +540,7 @@ class LicenseInfo(BaseAbstractModel):
         return self.key
 
 
-class LicenseFiles(BaseAbstractModel):
+class LicenseFiles(BaseModelWithCreatedByUser):
     key = models.CharField(max_length=255, blank=False, unique=True, editable=True)
     value = models.FileField(upload_to="uploads/")
 
@@ -568,7 +552,7 @@ class LicenseFiles(BaseAbstractModel):
         return self.key
 
 
-class CompanySubmittalForm(BaseAbstractModel):
+class CompanySubmittalForm(BaseModelWithCreatedByUser):
     form_name = models.CharField(max_length=255, blank=True)
     form_file = models.FileField(upload_to="uploads/submittalforms")
     related_services = models.ManyToManyField(Service, blank=False)
@@ -577,7 +561,7 @@ class CompanySubmittalForm(BaseAbstractModel):
         return self.form_name
 
 
-class EmailBodyTemplate(BaseAbstractModel):
+class EmailBodyTemplate(BaseModelWithCreatedByUser):
     name = models.CharField(max_length=255, blank=False, unique=True)
     content = HTMLField(
         null=True,
@@ -618,7 +602,7 @@ class EmailBodyTemplate(BaseAbstractModel):
         return self.name
 
 
-class ModulesToEmailTemplateRelation(BaseAbstractModel):
+class ModulesToEmailTemplateRelation(BaseModelWithCreatedByUser):
     template = models.ForeignKey(
         EmailBodyTemplate, on_delete=models.PROTECT, blank=False
     )
@@ -645,7 +629,7 @@ class ModulesToEmailTemplateRelation(BaseAbstractModel):
         return self.get_module_display()
 
 
-class Setting(BaseAbstractModel):
+class Setting(BaseModelWithCreatedByUser):
     key = models.CharField(max_length=255, blank=False, unique=True)
     value = models.CharField(max_length=255, null=True, blank=True)
 
@@ -657,7 +641,7 @@ class Setting(BaseAbstractModel):
         return self.key
 
 
-class TechLabelModel(BaseAbstractModel):
+class TechLabelModel(BaseModelWithCreatedByUser):
     name = models.CharField(max_length=50, blank=False, null=False, unique=True)
     model_no = models.CharField(max_length=50, null=False, blank=False, unique=True)
     size = models.CharField(

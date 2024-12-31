@@ -108,7 +108,7 @@ class ContactInfoAdmin(ImportExportModelAdmin):
     ]
     readonly_fields = (
         "created_by",
-        "created_at",
+        "created_on",
     )
 
     def save_model(self, request, obj, form, change):
@@ -124,7 +124,7 @@ class PersonAdmin(ImportExportModelAdmin):
     search_fields = ["company__name", "name"]
     readonly_fields = (
         "created_by",
-        "created_at",
+        "created_on",
     )
 
     def save_model(self, request, obj, form, change):
@@ -151,7 +151,7 @@ admin.site.register(Profile, ProfileAdmin)
 class ProjectAdmin(ImportExportModelAdmin):
     readonly_fields = (
         "created_by",
-        "created_at",
+        "created_on",
     )
 
     def save_model(self, request, obj, form, change):

@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('archive', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('address_line_1', models.CharField(blank=True, max_length=255)),
                 ('address_line_2', models.CharField(blank=True, max_length=255)),
@@ -30,17 +30,17 @@ class Migration(migrations.Migration):
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ['-created_at'],
+                'ordering': ['-created_on'],
                 'abstract': False,
             },
         ),
         migrations.AlterModelOptions(
             name='businesscheckingaccount',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='companysubmittalform',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='companytype',
@@ -48,15 +48,15 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='contactinfo',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='creditcard',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='licenseinfo',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='person',
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='profile',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.AlterModelOptions(
             name='project',
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='techlabelmodel',
-            options={'ordering': ['-created_at']},
+            options={'ordering': ['-created_on']},
         ),
         migrations.RenameField(
             model_name='businesscheckingaccount',
@@ -86,17 +86,17 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='companysubmittalform',
             old_name='uploaded_at',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='companytype',
             old_name='created_on',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='contactinfo',
             old_name='created_on',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='creditcard',
@@ -106,12 +106,12 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='licensefiles',
             old_name='uploaded_at',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='person',
             old_name='created_on',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='profile',
@@ -126,12 +126,12 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='project',
             old_name='created_on',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RenameField(
             model_name='service',
             old_name='created_on',
-            new_name='created_at',
+            new_name='created_on',
         ),
         migrations.RemoveField(
             model_name='companytype',
@@ -316,7 +316,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='businesscheckingaccount',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -382,7 +382,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='creditcard',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -403,7 +403,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='emailbodytemplate',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -439,7 +439,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='licenseinfo',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -460,7 +460,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='modulestoemailtemplaterelation',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -502,7 +502,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='profile',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -559,7 +559,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='setting',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -580,7 +580,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='techlabelmodel',
-            name='created_at',
+            name='created_on',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
@@ -659,7 +659,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('archive', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=255)),
                 ('customer_id', models.PositiveIntegerField(blank=True, help_text="Old Accounting System's Customer ID", null=True, unique=True)),
