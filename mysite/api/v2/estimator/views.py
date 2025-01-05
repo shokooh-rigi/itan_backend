@@ -14,6 +14,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import Person, LicenseFiles, LicenseInfo
@@ -668,6 +669,27 @@ class EstimateEquipmentDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="delete_estimate_equipment",
+        summary="Delete Estimate Equipment",
+        description=(
+            "Deletes an Estimate Equipment record by its ID. "
+            "Marks the record as deleted instead of physically removing it from the database."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="estimate_equipment_id",
+                description="ID of the Estimate Equipment to delete.",
+                required=True,
+                type=int,
+            ),
+        ],
+        responses={
+            200: "The Estimate Equipment was successfully deleted.",
+            404: "The requested Estimate Equipment was not found.",
+            401: "Authentication credentials were not provided or are invalid.",
+        },
+    )
     def delete(self, request, estimate_equipment_id):
         """
         Delete the estimate equipment by ID
