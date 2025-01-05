@@ -707,8 +707,24 @@ class EstimateEquipmentDeleteView(APIView):
 
 class EstimateDuplicateView(APIView):
     """
-    Duplicates an estimate along with associated records if the user is authorized.
-    """
+       Duplicates an estimate along with associated records if the user is authorized.
+
+       Input (POST request body):
+           - customer_id (int): The ID of the customer to assign to the duplicated estimate.
+
+       Returns:
+           - message: Success message if duplication is successful.
+
+       Example Request:
+           {
+               "customer_id": 1
+           }
+
+       Example Response:
+           {
+               "message": "Estimate duplicated successfully"
+           }
+       """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
