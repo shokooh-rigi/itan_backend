@@ -82,13 +82,6 @@ class EstimateEquipmentSerializer(serializers.ModelSerializer):
         model = EstimateEquipment
         fields = ['equipment', 'quantity', 'price_override']
 
-    def validate_equipment(self, value):
-        # Ensure the equipment is related to the given estimate
-        estimate_id = self.context['estimate_id']
-        if not Equipment.objects.filter(id=value.id, service__estimate__id=estimate_id).exists():
-            raise serializers.ValidationError("Invalid equipment for this estimate.")
-        return value
-
 
 class EstimateHistorySerializer(serializers.ModelSerializer):
     class Meta:

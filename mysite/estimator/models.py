@@ -10,7 +10,7 @@ from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
 from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
 from mysite.core.models import Person, Project, Service
-from mysite.equipments.models import Equipment
+from mysite.dbmanagement.models import Equipment
 
 
 def estimate_number_generator(estimate_id: int):
@@ -131,10 +131,6 @@ class EstimateEquipment(BaseModel):
     # if flag is True means it counts in estimate price (its service is in the estimate services)
     # todo: ENHANCEMENT: differentiate between Quantity (integer) and Number of Days (float) (flag)
     flag = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = "Estimated Equipment List"
-        verbose_name_plural = "Estimated Equipment Lists"
 
     def __str__(self):
         return estimate_number_generator(self.estimate.id) + " " + self.equipment.name

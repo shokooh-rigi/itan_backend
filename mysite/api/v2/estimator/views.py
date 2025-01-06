@@ -871,56 +871,48 @@ class EstimateEquipmentView(APIView):
         serializer = EstimateEquipmentSerializer(data=request.data, many=True, context={'estimate_id': estimate_id})
 
         if serializer.is_valid():
-            try:
-                for equipment_data in serializer.validated_data:
-                    equipment = equipment_data['equipment']
-                    quantity = equipment_data['quantity']
-                    price_override = equipment_data.get('price_override')
+            for equipment_data in serializer.validated_data:
+                equipment = equipment_data['equipment']
+                quantity = equipment_data['quantity']
+                price_override = equipment_data.get('price_override')
 
-                    # Check if the equipment already exists in the estimate
-                    existing_equipment = EstimateEquipment.objects.filter(
-                        estimate=estimate_id,
-                        equipment=equipment,
-                        is_deleted=False,
-                    ).first()
-
-                    if existing_equipment:
-                        # Update existing equipment pricing
-                        existing_equipment.quantity = quantity
-                        existing_equipment.price_override = price_override
-                        existing_equipment.save()
-                    else:
-                        # Create a new EstimateEquipment entry
-                        EstimateEquipment.objects.create(
-                            estimate=estimate,
-                            equipment=equipment,
-                            quantity=quantity,
-                            price_override=price_override,
-                            flag=True,
-                        )
-
-                # Recalculate the total price
-                estimate_equipments_pricing = EstimateEquipment.objects.filter(
-                    estimate=estimate,
-                    flag=True,
+                # Check if the equipment already exists in the estimate
+                existing_equipment = EstimateEquipment.objects.filter(
+                    estimate=estimate_id,
+                    equipment=equipment,
                     is_deleted=False,
-
-                )
-                estimate_money = sum(
-                    (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
-                    for e in estimate_equipments_pricing
                 )
 
-                return Response({
-                    'message': 'Estimate equipment updated successfully.',
-                    'estimate_money': estimate_money
-                }, status=status.HTTP_200_OK)
+                if len(existing_equipment) > 0:
+                    # Update existing equipment pricing
+                    existing_equipment.quantity = quantity
+                    existing_equipment.price_override = price_override
+                    existing_equipment.save()
+                else:
+                    # Create a new EstimateEquipment entry
+                    EstimateEquipment.objects.create(
+                        estimate=estimate,
+                        equipment=equipment,
+                        quantity=quantity,
+                        price_override=price_override
+                    )
 
-            except DatabaseError:
-                return Response(
-                    {"error": "An error occurred while updating the equipment."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            # Recalculate the total price
+            estimate_equipments_pricing = EstimateEquipment.objects.filter(
+                estimate=estimate,
+                flag=True,
+                is_deleted=False,
+
+            )
+            estimate_money = sum(
+                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                for e in estimate_equipments_pricing
+            )
+
+            return Response({
+                'message': 'Estimate equipment updated successfully.',
+                'estimate_money': estimate_money
+            }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
