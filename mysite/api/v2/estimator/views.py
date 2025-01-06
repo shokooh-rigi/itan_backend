@@ -881,9 +881,9 @@ class EstimateEquipmentView(APIView):
                     estimate=estimate_id,
                     equipment=equipment,
                     is_deleted=False,
-                )
+                ).first()
 
-                if len(existing_equipment) > 0:
+                if existing_equipment:
                     # Update existing equipment pricing
                     existing_equipment.quantity = quantity
                     existing_equipment.price_override = price_override
