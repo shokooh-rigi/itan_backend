@@ -637,22 +637,19 @@ class EstimateDetailsView(APIView):
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-
-class EstimateDetailsCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-
     @swagger_auto_schema(
         operation_summary="Create/Update estimate detail",
         operation_description="Create/Update estimate detail based on the provided data.",
-        request_body=EstimateDetailsSerializer(many=True),
+        request_body=EstimateDetailsSerializer,
     )
-    def post(self, request, estimate_id):
+    
+    def post(self, request, id):
         """
         Update the details of an estimate.
         """
         estimate = get_object_or_404(
             Estimate,
-            id=estimate_id,
+            id=id,
             is_deleted=False,
         )
         estimate_details = get_object_or_404(
@@ -661,15 +658,14 @@ class EstimateDetailsCreateView(APIView):
             is_deleted=False,
 
         )
-        # Add form processing and save logic here, similar to your original function
 
-        # Example of how to update estimate details
         serializer = EstimateDetailsSerializer(estimate_details, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    
 
 class EstimateEquipmentDeleteView(APIView):
     """
