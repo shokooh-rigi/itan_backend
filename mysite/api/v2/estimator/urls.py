@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import EstimateListView, EstimateCreateView, EstimateUpdateView, EstimateDeleteView, EstimateArchiveView, \
     EstimateDuplicateView, EstimateEquipmentView, EstimateDetailsView, EstimateBidView, EstimateHistoryView, \
-    EstimateEquipmentDeleteView
+    EstimateEquipmentDeleteView, EstimateDetailsCreateView
 
 urlpatterns = [
     path('estimate/get/', EstimateListView.as_view(), name='estimate-list'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('estimate/archive/<int:id>/', EstimateArchiveView.as_view(), name='estimate-archive'),
     path('estimate/duplicate/<int:id>/', EstimateDuplicateView.as_view(), name='estimate-duplicate'),
     path('estimate/details/<int:id>/', EstimateDetailsView.as_view(), name='estimate-details'),
+    path('estimate/details/<int:estimate_id>', EstimateDetailsCreateView.as_view(), name='estimate-details-create'),
     path('estimate/bid/<int:estimate_id>/', EstimateBidView.as_view(), name='estimate-bid'),
     path('estimate/history/<int:estimate_id>/', EstimateHistoryView.as_view(), name='estimate-history'),
     path('estimate/equipment/<int:estimate_id>/<int:service_id>/', EstimateEquipmentView.as_view(),
