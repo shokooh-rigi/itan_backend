@@ -90,7 +90,9 @@ class EstimateListView(APIView):
                             {
                                 "bfm": "value",
                                 "customer": "customer_data",
+                                "customer_name": "customer_name",
                                 "project": "project_data",
+                                "project_name": "project_name",
                                 "engineer": "engineer_data",
                                 "service": "service_data",
                                 "note": "note_data",

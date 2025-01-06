@@ -40,6 +40,8 @@ class EstimateSerializer(serializers.ModelSerializer):
     service = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Service.objects.all()
     )  # Allow passing a list of service IDs
+    customer_name = serializers.SerializerMethodField()
+    project_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Estimate
@@ -47,13 +49,14 @@ class EstimateSerializer(serializers.ModelSerializer):
             'id',
             'bfm',
             'customer',
+            'customer_name',
             'project',
+            'project_name'
             'engineer',
             'service',
             'note',
             'due_date',
             'drawing_date',
-            # 'created_by',
         ]
 
     def create(self, validated_data):
@@ -69,6 +72,14 @@ class EstimateSerializer(serializers.ModelSerializer):
         instance.service.set(services)  # Update associated services
         instance.save()
         return instance
+
+    def get_customer_name(self, obj):
+        """Get the name of the customer."""
+        return obj.customer.name if obj.customer else None
+
+    def get_project_name(self, obj):
+        """Get the name of the project."""
+        return obj.project.name if obj.project else None
 
 
 class EstimateDetailsSerializer(serializers.ModelSerializer):
