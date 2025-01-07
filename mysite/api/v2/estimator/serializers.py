@@ -50,7 +50,7 @@ class EstimateSerializer(serializers.ModelSerializer):
             'customer',
             'customer_name',
             'project',
-            'project_name'
+            'project_name',
             'engineer',
             'service',
             'note',
