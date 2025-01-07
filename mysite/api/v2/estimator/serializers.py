@@ -34,7 +34,6 @@ class EmailSerializer(serializers.Serializer):
     subject = serializers.CharField(max_length=255)
 
 
-
 class EstimateSerializer(serializers.ModelSerializer):
     """Serializer for the Estimate model."""
     service = serializers.PrimaryKeyRelatedField(
@@ -81,7 +80,19 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Get the name of the project."""
         return obj.project.name if obj.project else None
 
+    def to_representation(self, instance):
+        """Customize the serialized output."""
+        representation = super().to_representation(instance)
 
+        # Remove customer_name and project_name for non-GET requests
+        request = self.context.get('request')
+        if request and request.method not in ['GET']:
+            representation.pop('customer_name', None)
+            representation.pop('project_name', None)
+
+        return representation
+
+    
 class EstimateDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = EstimateDetails
