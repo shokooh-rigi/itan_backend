@@ -455,9 +455,6 @@ class EstimateDeleteView(APIView):
         if estimate.bfm:
             estimate.bfm.unarchive_record()
 
-        # todo: check PDF deletion (assumed method from old code) is work ok?
-        estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(estimate.id, 'E')})
-
         # Soft delete the estimate
         estimate.soft_delete()
         logger.info("Estimate with ID %s deleted.", id)
@@ -476,7 +473,6 @@ class EstimateArchiveView(APIView):
     @swagger_auto_schema(
         operation_summary="Archive an Estimate",
         operation_description="Archives an existing estimate identified by `id` if the user is authorized. If the estimate has an associated Bid record, it will also be archived.",
-        tags=["Estimates"],
         responses={
             200: openapi.Response(
                 description="Estimate archived successfully.",
