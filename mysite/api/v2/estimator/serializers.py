@@ -92,7 +92,7 @@ class EstimateSerializer(serializers.ModelSerializer):
 
         return representation
 
-    
+
 class EstimateDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = EstimateDetails
