@@ -100,9 +100,16 @@ class EstimateDetailsSerializer(serializers.ModelSerializer):
 
 
 class EstimateEquipmentSerializer(serializers.ModelSerializer):
+    service_id = serializers.SerializerMethodField()
     class Meta:
         model = EstimateEquipment
-        fields = ['equipment', 'quantity', 'price_override']
+        fields = ['equipment', 'quantity', 'price_override', 'service_id']
+
+    def get_service_id(self, obj):
+        # Ensure `obj.equipment` exists to avoid errors
+        if obj.equipment and obj.equipment.service:
+            return obj.equipment.service.id
+        return None
 
 
 class EstimateHistorySerializer(serializers.ModelSerializer):
