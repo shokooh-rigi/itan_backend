@@ -614,7 +614,7 @@ class EstimateDetailsView(APIView):
             estimate=estimate,
             is_deleted=False,
         )
-        estimate_equipments_pricing = EstimateEquipment.objects.filter(
+        estimate_equipments = EstimateEquipment.objects.filter(
             estimate=estimate,
             flag=True,
             is_deleted=False,
@@ -622,7 +622,7 @@ class EstimateDetailsView(APIView):
 
         estimate_sub = sum(
             float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
-            for eq in estimate_equipments_pricing
+            for eq in estimate_equipments
         )
 
         data = {
@@ -630,7 +630,7 @@ class EstimateDetailsView(APIView):
             "estimate": EstimateSerializer(estimate).data,
             "estimate_details": EstimateDetailsSerializer(estimate_details).data,
             "estimate_sub": estimate_sub,
-            "estimate_equipments_pricing": EstimateEquipmentSerializer(estimate_equipments_pricing, many=True).data
+            "estimate_equipments": EstimateEquipmentSerializer(estimate_equipments, many=True).data
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
