@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -205,69 +204,32 @@ class ProposalCreateView(APIView):
             'user_cell': user_profile.cell if user_profile and user_profile.cell else '',
         }
 
-    @extend_schema(
-        summary="Retrieve available estimates",
-        description=(
-                "Retrieves estimates that are not archived or associated with a proposal. "
-                "Optional filtering by estimate ID is supported."
-        ),
-        responses={
-            200: EstimateSerializer(many=True),
-            400: {"description": "Invalid request"},
-        },
-    )
     def get(self, request):
         """
         Retrieves available estimates that are not archived or associated with a proposal.
 
-        Parameters:
-            - estimate_id form request (int): Optional; filters by specific estimate ID.
-
         Returns:
             - Response: Serialized data of estimates.
         """
-        estimate_id = request.data.get("estimate_id", None)
-        if estimate_id:
-            estimate = Estimate.objects.filter(id=estimate_id)
-        else:
-            estimate = Estimate.objects.filter(
-                archive=False
-            ).exclude(
-                id__in=Proposal.objects.values_list('estimate_id', flat=True)
-            ).order_by('-created_on')
+        estimate = Estimate.objects.filter(
+            archive=False
+        ).exclude(
+            id__in=Proposal.objects.values_list('estimate_id', flat=True)
+        ).order_by('-created_on')
 
         serializer = EstimateSerializer(estimate, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(
-        summary="Create a new proposal",
-        description=(
-                "Creates a new proposal and generates a PDF document. The proposal is associated "
-                "with an estimate, and additional license and user information is included in the PDF."
-        ),
-        request=ProposalSerializer,
+    @swagger_auto_schema(
+        operation_description="create a proposal instance.",
+        request_body=ProposalSerializer,
         responses={
-            201: ProposalResponseModel,
-            400: {"description": "Validation error or invalid data."},
+            200: openapi.Response(
+                "Successfully created the Proposal instance", ProposalSerializer
+            ),
+            400: "Validation error in input data",
+            404: "Proposal not found",
         },
-        examples=[
-            OpenApiExample(
-                name="Successful Response",
-                value={
-                    "proposal_id": 1,
-                    "pdf_path": "/path/to/proposal.pdf",
-                    "message": "Proposal created successfully.",
-                },
-                response_only=True,
-                status_codes=["201"],
-            ),
-            OpenApiExample(
-                name="Validation Error",
-                value={"non_field_errors": ["Invalid data provided."]},
-                response_only=True,
-                status_codes=["400"],
-            ),
-        ],
     )
     def post(self, request):
         """
