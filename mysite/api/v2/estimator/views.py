@@ -455,9 +455,6 @@ class EstimateDeleteView(APIView):
         if estimate.bfm:
             estimate.bfm.unarchive_record()
 
-        # todo: check PDF deletion (assumed method from old code) is work ok?
-        estimate.delete_estimate_pdf({'file_name': pdf_filename_generator(estimate.id, 'E')})
-
         # Soft delete the estimate
         estimate.soft_delete()
         logger.info("Estimate with ID %s deleted.", id)
@@ -476,7 +473,6 @@ class EstimateArchiveView(APIView):
     @swagger_auto_schema(
         operation_summary="Archive an Estimate",
         operation_description="Archives an existing estimate identified by `id` if the user is authorized. If the estimate has an associated Bid record, it will also be archived.",
-        tags=["Estimates"],
         responses={
             200: openapi.Response(
                 description="Estimate archived successfully.",
@@ -712,26 +708,20 @@ class EstimateEquipmentDeleteView(APIView):
 
 
 class EstimateDuplicateView(APIView):
-    """
-       Duplicates an estimate along with associated records if the user is authorized.
 
-       Input (POST request body):
-           - customer_id (int): The ID of the customer to assign to the duplicated estimate.
-
-       Returns:
-           - message: Success message if duplication is successful.
-
-       Example Request:
-           {
-               "customer_id": 1
-           }
-
-       Example Response:
-           {
-               "message": "Estimate duplicated successfully"
-           }
-       """
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Duplicate estimate",
+        operation_description="Duplicate estimate based on the provided data.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the new customer')
+            },
+            required=['customer_id']
+        ),
+    )
 
     def post(self, request, id):
         this_estimate = get_object_or_404(
@@ -781,12 +771,14 @@ class EstimateDuplicateView(APIView):
 
         # Duplicate EstimateDetails if it exists
         try:
+            EstimateDetails.objects.get(estimate=duplicated_obj.pk).delete()
             estimate_detail = deepcopy(EstimateDetails.objects.get(estimate=this_estimate))
             estimate_detail.id = None
             estimate_detail.estimate = duplicated_obj
             estimate_detail.save()
         except EstimateDetails.DoesNotExist:
             pass
+
 
         return Response(
             {"message": "Estimate duplicated successfully"},
