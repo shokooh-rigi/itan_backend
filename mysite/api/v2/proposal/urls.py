@@ -4,7 +4,7 @@ from .views import ProposalListView, ProposalCreateView, ProposalArchiveView, Pr
 
 urlpatterns = [
     path('proposal/get/', ProposalListView.as_view(), name='proposal-list'),
-    path('proposal/create/<int:estimate_id>', ProposalCreateView.as_view(), name='proposal-create'),
+    path('proposal/create/', ProposalCreateView.as_view(), name='proposal-create'),
     path('proposal/archive/<int:id>/', ProposalArchiveView.as_view(), name='proposal-archive'),
     path('proposal/delete/<int:id>/', ProposalDeleteView.as_view(), name='proposal-delete'),
 ]

@@ -211,28 +211,22 @@ class ProposalCreateView(APIView):
                 "Retrieves estimates that are not archived or associated with a proposal. "
                 "Optional filtering by estimate ID is supported."
         ),
-        parameters=[
-            OpenApiParameter(
-                name="estimate_id",
-                description="Optional; filter by specific estimate ID",
-                type=int,
-            )
-        ],
         responses={
             200: EstimateSerializer(many=True),
             400: {"description": "Invalid request"},
         },
     )
-    def get(self, request, estimate_id=None):
+    def get(self, request):
         """
         Retrieves available estimates that are not archived or associated with a proposal.
 
         Parameters:
-            - estimate_id (int): Optional; filters by specific estimate ID.
+            - estimate_id form request (int): Optional; filters by specific estimate ID.
 
         Returns:
             - Response: Serialized data of estimates.
         """
+        estimate_id = request.data.get("estimate_id", None)
         if estimate_id:
             estimate = Estimate.objects.filter(id=estimate_id)
         else:
