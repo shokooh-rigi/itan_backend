@@ -17,9 +17,7 @@ from mysite.estimator.models import Estimate
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
 from mysite.proposal.models import Proposal
 from mysite.s3_file_manager import S3
-from .schemas import ProposalResponseModel
 from .serializers import ProposalSerializer
-from .services import ProposalService
 from ..estimator.serializers import EmailSerializer, EstimateSerializer
 from ..estimator.services import TemplateService, EstimateEmailService
 
@@ -164,6 +162,46 @@ class ProposalListView(APIView):
         return Response(email_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ProposalEstimateListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve non-archived and unassociated estimates",
+        operation_description=(
+            "This endpoint retrieves estimates that are not archived and not associated with any proposal."
+        ),
+        responses={
+            200: openapi.Response(
+                description="List of available estimates",
+                schema=EstimateSerializer(many=True),
+            ),
+            401: "Unauthorized - User must be authenticated",
+        },
+    )
+    def get(self, request):
+        """
+        Retrieves available estimates that are not archived or associated with a proposal.
+
+        Returns:
+            - Response: Serialized data of estimates.
+        """
+        try:
+            estimates = Estimate.objects.filter(
+                archive=False
+            ).exclude(
+                id__in=Proposal.objects.values_list('estimate_id', flat=True)
+            ).order_by('-created_on')
+
+            serializer = EstimateSerializer(estimates, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"detail": "An error occurred while retrieving estimates.", "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class ProposalCreateView(APIView):
     """
     API endpoint for creating a proposal.
@@ -204,22 +242,6 @@ class ProposalCreateView(APIView):
             'user_cell': user_profile.cell if user_profile and user_profile.cell else '',
         }
 
-    def get(self, request):
-        """
-        Retrieves available estimates that are not archived or associated with a proposal.
-
-        Returns:
-            - Response: Serialized data of estimates.
-        """
-        estimate = Estimate.objects.filter(
-            archive=False
-        ).exclude(
-            id__in=Proposal.objects.values_list('estimate_id', flat=True)
-        ).order_by('-created_on')
-
-        serializer = EstimateSerializer(estimate, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     @swagger_auto_schema(
         operation_description="create a proposal instance.",
         request_body=ProposalSerializer,
@@ -233,40 +255,12 @@ class ProposalCreateView(APIView):
     )
     def post(self, request):
         """
-        Creates a new proposal and generates a PDF document.
+        Creates a new proposal.
         """
-        # Proposal creation logic
         serializer = ProposalSerializer(data=request.data)
         if serializer.is_valid():
             proposal = serializer.save()
-
-            # Fetch license and user information
-            license_info = self.get_license_info()
-            user_info = self.get_user_info(request.user)
-
-            # Prepare parameters for the proposal PDF
-            parameters = {
-                'file_name': pdf_filename_generator(proposal.estimate.id, 'P'),
-                'other_than_dalt_services': proposal.estimate.service.exclude(name__iexact="DALT"),
-                'has_dalt': proposal.estimate.service.filter(name__iexact="DALT").exists(),
-                'proposal': proposal,
-                'estimate': proposal.estimate,
-                'predemo_calculated': proposal.estimate.estimatedetails.pre_demo * 1200,
-                **license_info,
-                **user_info,
-            }
-
-            # Generate the proposal PDF
-            proposal_service = ProposalService()
-            pdf_path = proposal_service.create_proposal_pdf(parameters=parameters)
-
-            # Prepare and return response
-            response_data = ProposalResponseModel(
-                proposal_id=proposal.id,
-                pdf_path=pdf_path,
-                message="Proposal created successfully."
-            )
-            return Response(response_data.dict(), status=status.HTTP_201_CREATED)
+            return Response(proposal, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
