@@ -43,6 +43,8 @@ class EstimateSerializer(serializers.ModelSerializer):
     project_name = serializers.SerializerMethodField()
     engineer_name= serializers.SerializerMethodField(read_only=True)
     service_names = serializers.SerializerMethodField(read_only=True)
+    pre_demo = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Estimate
@@ -59,6 +61,8 @@ class EstimateSerializer(serializers.ModelSerializer):
             'service_names',
             'note',
             'due_date',
+            'pre_demo',
+            'total_amount',
             'drawing_date',
         ]
 
@@ -88,9 +92,24 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Get the name of the engineer."""
         return obj.engineer.name if obj.engineer else None
 
-    def get_services_names(self, obj):
+    def get_service_names(self, obj):
         """Get name about associated services."""
         return [{"id": service.id, "name": service.name} for service in obj.service.all()]
+
+    def get_pre_demo(self, obj):
+        """Get pre_demo from the related EstimateDetail."""
+        estimate_detail = getattr(obj, 'estimatedetails', None)
+        return estimate_detail.pre_demo if estimate_detail else None
+
+    def get_total_amount(self, obj):
+        """Calculate the total amount based on related EstimateEquipment."""
+        estimate_equipments = EstimateEquipment.objects.filter(estimate=obj, flag=True)
+        total = sum(
+            (equipment.price_override or 0) * equipment.quantity
+            for equipment in estimate_equipments
+        )
+        return total
+
 
     def to_representation(self, instance):
         """Customize the serialized output."""
@@ -102,6 +121,9 @@ class EstimateSerializer(serializers.ModelSerializer):
             representation.pop('customer_name', None)
             representation.pop('project_name', None)
             representation.pop('engineer_name', None)
+            representation.pop('service_names', None)
+            representation.pop('pre_demo', None)
+            representation.pop('total_amount', None)
 
         return representation
 
