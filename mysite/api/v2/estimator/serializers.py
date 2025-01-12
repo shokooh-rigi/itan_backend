@@ -41,6 +41,8 @@ class EstimateSerializer(serializers.ModelSerializer):
     )  # Allow passing a list of service IDs
     customer_name = serializers.SerializerMethodField()
     project_name = serializers.SerializerMethodField()
+    engineer_name= serializers.SerializerMethodField(read_only=True)
+    service_names = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Estimate
@@ -52,7 +54,9 @@ class EstimateSerializer(serializers.ModelSerializer):
             'project',
             'project_name',
             'engineer',
+            'engineer_name',
             'service',
+            'service_names',
             'note',
             'due_date',
             'drawing_date',
@@ -80,15 +84,24 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Get the name of the project."""
         return obj.project.name if obj.project else None
 
+    def get_engineer_name(self, obj):
+        """Get the name of the engineer."""
+        return obj.engineer.name if obj.engineer else None
+
+    def get_services_names(self, obj):
+        """Get name about associated services."""
+        return [{"id": service.id, "name": service.name} for service in obj.service.all()]
+
     def to_representation(self, instance):
         """Customize the serialized output."""
         representation = super().to_representation(instance)
 
-        # Remove customer_name and project_name for non-GET requests
+        # Remove customer_name and project_name and engineer_name for non-GET requests
         request = self.context.get('request')
         if request and request.method not in ['GET']:
             representation.pop('customer_name', None)
             representation.pop('project_name', None)
+            representation.pop('engineer_name', None)
 
         return representation
 
