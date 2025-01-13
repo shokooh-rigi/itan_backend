@@ -7,8 +7,9 @@ from rest_framework_simplejwt.views import (
 
 from .views import (
     CompanyViewSet,
-    ProfileViewSet,
+    ProfileView,
     CreditCardViewSet,
+    ProfilesViewSet,
     SignUpAPIView,
     ChangePasswordAPIView,
     AccountActivationSentAPIView,
@@ -31,9 +32,9 @@ router = DefaultRouter()
 router.register(r"companies", CompanyViewSet, basename="company")
 router.register(r"customer", CustomerViewSet, basename="customer")
 router.register(r"engineer", EngineerViewSet, basename="engineer")
-router.register(r"user", UserViewSet, basename="user")
+# router.register(r"user", UserViewSet, basename="user")
 # router.register(r"persons", PersonViewSet, basename="persons")
-router.register(r"profiles", ProfileViewSet, basename="profile")
+router.register(r"profiles", ProfilesViewSet, basename="profiles")
 router.register(r"credit-card", CreditCardViewSet, basename="credit-card")
 router.register(r"manufacturer", ManufacturerViewSet, basename="manufacturer")
 router.register(r"project", ProjectViewSet, basename="project")
@@ -42,6 +43,7 @@ router.register(r"service", ServiceViewSet, basename="service")
 
 
 urlpatterns = [
+    path("profile/", ProfileView.as_view(), name="profile"),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("get-engineer-id/<str:engineer_name>/", GetEngineerId.as_view(), name="get-engineer-id"),

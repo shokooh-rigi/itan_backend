@@ -40,7 +40,7 @@ urlpatterns = [
     path('account_activation_sent/', core_views.account_activation_sent, name='account_activation_sent'),
     path('activate/<slug:uidb64>/<slug:token>/', core_views.activate, name='activate'),
     path('license/upload/', core_views.model_form_upload, name='LicenseInfoFiles'),
-    path('profile/', core_views.profile_edit, name='ProfileEdit'),
+    # path('profile/', core_views.profile_edit, name='ProfileEdit'),
     path('activities/', core_views.activities, name='Activities'),
     path('djrichtextfield/', include('djrichtextfield.urls')),
     path('tinymce/', include('tinymce.urls')),

@@ -10,7 +10,6 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -42,7 +41,7 @@ from .serializers import (
 )
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
+class CustomerViewSet(ModelViewSet):
     """
     API endpoint for creating and editing Customers.
     """
@@ -62,7 +61,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class EngineerViewSet(viewsets.ModelViewSet):
+class EngineerViewSet(ModelViewSet):
     """
     API endpoint for creating and editing Engineers.
     """
@@ -119,7 +118,7 @@ class PersonViewSet(ModelViewSet):
         return queryset
 
 
-class ProfileViewSet(ModelViewSet):
+class ProfilesViewSet(ModelViewSet):
     queryset = Profile.objects.select_related(
         "user",
         "customer",
@@ -169,9 +168,25 @@ class ProfileViewSet(ModelViewSet):
             if file:
                 s3.delete_file_from_bucket(file.name)
         return super().delete(*args, **kwargs)
+    
+
+class ProfileView(APIView):
+    """
+    Get current user's profile.
+    """
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+
+        profile = Profile.objects.get(user=request.user)
+
+        serializer = ProfileSerializer(profile)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 
-class CreditCardViewSet(viewsets.ModelViewSet):
+
+class CreditCardViewSet(ModelViewSet):
     queryset = CreditCard.objects.all()
     serializer_class = CreditCardSerializer
     permission_classes = [IsOwnerOrAdmin]
@@ -183,7 +198,7 @@ class CreditCardViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class ManufacturerViewSet(viewsets.ModelViewSet):
+class ManufacturerViewSet(ModelViewSet):
     """
     API endpoint for managing Manufacturer Persons.
     """
@@ -199,7 +214,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(ModelViewSet):
     """
     API endpoint for managing Projects.
     """
@@ -231,7 +246,7 @@ class ServiceViewSet(ModelViewSet):
         instance.save()
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(ModelViewSet):
     """
     - `create`: Creates a new user with the provided data, marking them as inactive by default.
         Handles the creation of a new user.
