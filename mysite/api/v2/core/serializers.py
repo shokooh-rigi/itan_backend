@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 from mysite import settings
 from mysite.core.models import (
@@ -10,10 +10,14 @@ from mysite.core.models import (
     Address,
     Profile,
     CreditCard,
-    LicenseFiles, CompanyType, Service,
+    LicenseFiles,
+    CompanyType,
+    Service,
 )
 from mysite.equipments.api.serializers import EquipmentSerializer
 from mysite.s3_file_manager import S3
+
+User = get_user_model()
 
 
 class BaseSerializer(serializers.ModelSerializer):
@@ -98,7 +102,7 @@ class ProjectSerializer(BaseSerializer):
 
     class Meta:
         model = Project
-        fields = ["id","name", "address", "contact_info", "note", "created_by"]
+        fields = ["id", "name", "address", "contact_info", "note", "created_by"]
 
     def create(self, validated_data):
         address_data = validated_data.pop("address")
@@ -194,7 +198,7 @@ class ProfileSerializer(BaseSerializer):
     Handles nested relationships for related models and file validations.
     """
 
-    user = serializers.StringRelatedField(read_only=True)
+    user = UserSerializer()
     customer = serializers.PrimaryKeyRelatedField(
         queryset=Person.objects.all(), required=False
     )
@@ -219,6 +223,8 @@ class ProfileSerializer(BaseSerializer):
     e_sign_url = serializers.SerializerMethodField()
     wallpaper_url = serializers.SerializerMethodField()
 
+    user_type_title = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = [
@@ -241,6 +247,7 @@ class ProfileSerializer(BaseSerializer):
             "birth_date",
             "email_confirmed",
             "user_type",
+            "user_type_title",
             "worker_status",
             "id_number",
             "physical_address",
@@ -250,6 +257,10 @@ class ProfileSerializer(BaseSerializer):
             "photo_url",
             "e_sign_url",
         ]
+
+    def get_user_type_title(self, obj):
+        # Use Django's `get_FOO_display` to retrieve the title
+        return obj.get_user_type_display()
 
     # File validation
     def validate_file_size(self, value):
@@ -360,7 +371,7 @@ class CompanyTypeSerializer(BaseSerializer):
 
 class ServiceSerializer(BaseSerializer):
     service_equipments = EquipmentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Service
         fields = "__all__"
-
