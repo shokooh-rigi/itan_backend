@@ -105,8 +105,8 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Calculate the total amount based on related EstimateEquipment."""
         estimate_equipments = EstimateEquipment.objects.filter(estimate=obj, flag=True)
         total = sum(
-            (equipment.price_override or 0) * equipment.quantity
-            for equipment in estimate_equipments
+            float(estimate_equipment.price_override or estimate_equipment.equipment.price) * estimate_equipment.quantity
+            for estimate_equipment in estimate_equipments
         )
         return total
 
