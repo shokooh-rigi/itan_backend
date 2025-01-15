@@ -1,6 +1,32 @@
 from rest_framework import serializers
 
-from mysite.order.models import Order, TechLabel, ChangeOrderService, ChangeOrder, TechLabelExtraFields, ControlSystem
+from mysite.api.v2.core.serializers import PersonSerializer
+from mysite.api.v2.proposal.serializers import ProposalSerializer
+from mysite.order.models import Order, TechLabel, ChangeOrderService, ChangeOrder, TechLabelExtraFields, ControlSystem, \
+    ControlSystemManufacturer
+
+
+class ControlSystemManufacturerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ControlSystemManufacturer
+        fields = '__all__'
+
+
+class ControlSystemSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the ControlSystem model.
+    """
+    manufacturer = ControlSystemManufacturerSerializer(read_only=True)
+
+    class Meta:
+        model = ControlSystem
+        fields = [
+            "id",
+            "version_number",
+            "control_file_url",
+            "documentation",
+            "manufacturer",
+        ]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -9,6 +35,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
     - Validates and processes Order data.
     """
+    proposal = ProposalSerializer(read_only=True)
+    architect_name = PersonSerializer(read_only=True)
+    control_system = ControlSystemSerializer(read_only=True)
+
     class Meta:
         model = Order
 

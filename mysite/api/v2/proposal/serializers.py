@@ -5,7 +5,7 @@ from mysite.proposal.models import Proposal
 
 
 class ProposalSerializer(serializers.ModelSerializer):
-    estimate = EstimateSerializer()
+    estimate = EstimateSerializer(read_only=True)
 
     class Meta:
         model = Proposal
