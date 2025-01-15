@@ -212,36 +212,6 @@ class ProposalCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
-    @staticmethod
-    def get_license_info():
-        """Fetches license and owner information for the proposal document."""
-        return {
-            'license_owner': LicenseInfo.objects.get(key='OwnerName').value,
-            'owner_title': LicenseInfo.objects.get(key='OwnerTitle').value,
-            'owner_address_line1': LicenseInfo.objects.get(key='OwnerAddressLine1').value,
-            'owner_address_line2': LicenseInfo.objects.get(key='OwnerAddressLine2').value,
-            'owner_tel': LicenseInfo.objects.get(key='OwnerTel').value,
-            'owner_fax': LicenseInfo.objects.get(key='OwnerFax').value,
-            'owner_web': LicenseInfo.objects.get(key='OwnerWeb').value,
-            'owner_mail': LicenseInfo.objects.get(key='OwnerMail').value,
-            'owner_signature': LicenseFiles.objects.get(key='OwnerSignature').value,
-            'owner_logo': LicenseFiles.objects.get(key='OwnerLogo').value,
-            'company_name': LicenseInfo.objects.get(key='CompanyName').value,
-            'pdf_header_logo': LicenseFiles.objects.get(key='PDFHeaderLogo').value,
-            'pdf_header_text': LicenseInfo.objects.get(key='PDFHeaderText').value,
-        }
-
-    @staticmethod
-    def get_user_info(user):
-        """Fetches user information for proposal document, providing defaults if values are missing."""
-        user_profile = getattr(user, 'profile', None)
-        return {
-            'user_name': f"{user.first_name} {user.last_name}" if user.last_name else "TAB Technologies, INC. Operator",
-            'user_title': user_profile.title if user_profile and user_profile.title else 'Estimator',
-            'user_signature': user_profile.e_sign if user_profile else None,
-            'user_cell': user_profile.cell if user_profile and user_profile.cell else '',
-        }
-
     @swagger_auto_schema(
         operation_description="create a proposal instance.",
         request_body=ProposalSerializer,
@@ -331,11 +301,7 @@ class ProposalDeleteView(APIView):
             is_deleted=False,
 
         )
-
         if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
-            file_name = pdf_filename_generator(proposal.estimate.id, 'P')
-            proposal_service = ProposalService()
-            proposal_service.delete_proposal_pdf(file_name)
             proposal.soft_delete()
             return Response(
                 {"message": "Proposal soft_delete successfully"},
