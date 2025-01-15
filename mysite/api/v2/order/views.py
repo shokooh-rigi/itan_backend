@@ -356,8 +356,6 @@ class OrderEditAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "message": openapi.Schema(type=openapi.TYPE_STRING),
-                        "redirect_to": openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                        "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
                     }
                 )
             ),
@@ -376,25 +374,9 @@ class OrderEditAPIView(APIView):
         """
         this_order = OrderEditService.get_order(order_id)
         serializer = OrderSerializer(this_order, data=request.data)
-        # todo: Dear Reza: is this redirection_keys need to be or not?
-        # Redirect actions based on custom keys
-        redirection_keys = {
-            "co": "changeOrder",
-            "cs": "controlSystem",
-            "es": "equipmentSubmittal",
-            "tl": "techLabel",
-            "ucd": "fieldDrawing",
-            "usp": "sitePictures",
-            "uts": "testSheets",
-        }
-        for key, redirect_url in redirection_keys.items():
-            if request.data.get(key):
-                return Response({"redirect_to": redirect_url, "order_id": order_id}, status=status.HTTP_200_OK)
-
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Order updated successfully!"}, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
