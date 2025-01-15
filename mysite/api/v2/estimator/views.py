@@ -868,13 +868,13 @@ class EstimateEquipmentView(APIView):
             )
 
     @swagger_auto_schema(
-        operation_summary="Create/Update estimate equipment",
-        operation_description="Create/Update estimate equipment based on the provided data.",
+        operation_summary="Create estimate equipment",
+        operation_description="Create estimate equipment based on the provided data.",
         request_body=EstimateEquipmentSerializer(many=True)
     )
     def post(self, request, estimate_id, service_id):
         """
-        Adds or updates equipment for a specific estimate and service.
+        Adds equipment for a specific estimate and service.
 
         Arguments:
             estimate_id (int): The ID of the estimate.
@@ -930,7 +930,7 @@ class EstimateEquipmentView(APIView):
             )
 
             return Response({
-                'message': 'Estimate equipment updated successfully.',
+                'message': 'Estimate equipment created successfully.',
                 'estimate_money': estimate_money
             }, status=status.HTTP_200_OK)
 
