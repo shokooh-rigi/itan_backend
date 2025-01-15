@@ -636,14 +636,13 @@ class EstimateDetailsView(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_summary="Create/Update estimate detail",
-        operation_description="Create/Update estimate detail based on the provided data.",
+        operation_summary="Create estimate detail",
+        operation_description="Create estimate detail based on the provided data.",
         request_body=EstimateDetailsSerializer,
     )
-    
     def post(self, request, id):
         """
-        Update the details of an estimate.
+        create the details of an estimate.
         """
         estimate = get_object_or_404(
             Estimate,
@@ -663,7 +662,31 @@ class EstimateDetailsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+    @swagger_auto_schema(
+        operation_summary="Update estimate details",
+        operation_description="Update estimate details for the given estimate ID.",
+        request_body=EstimateDetailsSerializer,
+    )
+    def put(self, request, id):
+        """
+        Update the details of an estimate.
+        """
+        estimate = get_object_or_404(
+            Estimate,
+            id=id,
+            is_deleted=False,
+        )
+        estimate_details = get_object_or_404(
+            EstimateDetails,
+            estimate=estimate,
+            is_deleted=False,
+        )
+        serializer = EstimateDetailsSerializer(estimate_details, data=request.data, partial=False)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class EstimateEquipmentDeleteView(APIView):
     """
@@ -844,7 +867,6 @@ class EstimateEquipmentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    
     @swagger_auto_schema(
         operation_summary="Create/Update estimate equipment",
         operation_description="Create/Update estimate equipment based on the provided data.",
@@ -901,6 +923,65 @@ class EstimateEquipmentView(APIView):
                 flag=True,
                 is_deleted=False,
 
+            )
+            estimate_money = sum(
+                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                for e in estimate_equipments_pricing
+            )
+
+            return Response({
+                'message': 'Estimate equipment updated successfully.',
+                'estimate_money': estimate_money
+            }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_summary="Update estimate equipment",
+        operation_description="Updates the details of existing equipment for an estimate.",
+        request_body=EstimateEquipmentSerializer(many=True)
+    )
+    def put(self, request, estimate_id, service_id):
+        """
+        Updates existing equipment details for a specific estimate and service.
+
+        Arguments:
+            estimate_id (int): The ID of the estimate.
+            service_id (int): The ID of the service.
+
+        Returns:
+            Response: Success message and updated estimate pricing.
+        """
+        estimate = get_object_or_404(Estimate, id=estimate_id, is_deleted=False)
+        serializer = EstimateEquipmentSerializer(data=request.data, many=True, context={'estimate_id': estimate_id})
+
+        if serializer.is_valid():
+            for equipment_data in serializer.validated_data:
+                equipment = equipment_data['equipment']
+                quantity = equipment_data['quantity']
+                price_override = equipment_data.get('price_override')
+
+                # Check if the equipment exists in the estimate
+                existing_equipment = EstimateEquipment.objects.filter(
+                    estimate=estimate,
+                    equipment=equipment,
+                    is_deleted=False,
+                ).first()
+
+                if existing_equipment:
+                    # Update existing equipment details
+                    existing_equipment.quantity = quantity
+                    existing_equipment.price_override = price_override
+                    existing_equipment.save()
+                else:
+                    return Response(
+                        {"error": f"Equipment with ID {equipment.id} does not exist in this estimate."},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
+            # Recalculate the total price
+            estimate_equipments_pricing = EstimateEquipment.objects.filter(
+                estimate=estimate, flag=True, is_deleted=False
             )
             estimate_money = sum(
                 (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
