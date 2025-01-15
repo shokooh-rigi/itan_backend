@@ -29,44 +29,50 @@ class ProposalListView(APIView):
     Provides endpoints for authenticated users to retrieve and filter a paginated list of proposals.
     Allows optional search by estimate ID, project name, and customer company name, with date filtering.
     """
+
     permission_classes = [IsAuthenticated]
-    manual_parameters = [
-                        openapi.Parameter(
-                            "search",
-                            openapi.IN_QUERY,
-                            description="Filter by project name or customer company name",
-                            type=openapi.TYPE_STRING,
-                        ),
-                        openapi.Parameter(
-                            "ordering",
-                            openapi.IN_QUERY,
-                            description="Order the results by a field (default is 'due_date')",
-                            type=openapi.TYPE_STRING,
-                        ),
-                        openapi.Parameter(
-                            "fromDate",
-                            openapi.IN_QUERY,
-                            description="Start date for filtering proposal by due date (mm/dd/yyyy)",
-                            type=openapi.TYPE_STRING,
-                        ),
-                        openapi.Parameter(
-                            "toDate",
-                            openapi.IN_QUERY,
-                            description="End date for filtering proposal by due date (mm/dd/yyyy)",
-                            type=openapi.TYPE_STRING,
-                        ),
-                    ],
-    responses = {
-                    200: openapi.Response(
-                        "A paginated list of proposal",
-                        ProposalSerializer(many=True),
-                    ),
-                    400: "Invalid date format or other error",
-                },
+    manual_parameters = (
+        [
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Filter by project name or customer company name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Order the results by a field (default is 'due_date')",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering proposal by due date (mm/dd/yyyy)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering proposal by due date (mm/dd/yyyy)",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+    )
+    responses = (
+        {
+            200: openapi.Response(
+                "A paginated list of proposal",
+                ProposalSerializer(many=True),
+            ),
+            400: "Invalid date format or other error",
+        },
+    )
+
     def get(self, request):
-        search = request.GET.get('search', '')
-        paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
-        ordering = request.GET.get('ordering', '-created_on')
+        search = request.GET.get("search", "")
+        paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
+        ordering = request.GET.get("ordering", "-created_on")
 
         # Basic filters
         filters = Q(archive=False, is_deleted=False)
@@ -74,11 +80,15 @@ class ProposalListView(APIView):
         # Search filter
         if search:
             if search.isnumeric():
-                filters &= Q(estimate__id=search) | Q(estimate__project__name__icontains=search) | Q(
-                    estimate__customer__company__name__icontains=search)
+                filters &= (
+                    Q(estimate__id=search)
+                    | Q(estimate__project__name__icontains=search)
+                    | Q(estimate__customer__company__name__icontains=search)
+                )
             else:
                 filters &= Q(estimate__project__name__icontains=search) | Q(
-                    estimate__customer__company__name__icontains=search)
+                    estimate__customer__company__name__icontains=search
+                )
 
         # Date range filtering
         from_date = request.GET.get("fromDate")
@@ -86,31 +96,38 @@ class ProposalListView(APIView):
 
         if from_date and to_date:
             try:
-                from_date_obj = datetime.strptime(from_date, '%m/%d/%Y')
-                to_date_obj = datetime.strptime(to_date, '%m/%d/%Y') + timedelta(days=1) - timedelta(seconds=1)
+                from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = (
+                    datetime.strptime(to_date, "%m/%d/%Y")
+                    + timedelta(days=1)
+                    - timedelta(seconds=1)
+                )
                 filters &= Q(estimate__due_date__range=(from_date_obj, to_date_obj))
             except ValueError:
-                return Response({"error": "Invalid date format. Use MM/DD/YYYY."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Invalid date format. Use MM/DD/YYYY."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         # Fetch and order proposals
         proposals = Proposal.objects.filter(filters).order_by(ordering)
 
         # Pagination
         paginator = Paginator(proposals, paginate_by)
-        page_number = request.GET.get('page', 1)
+        page_number = request.GET.get("page", 1)
         paginated_proposals = paginator.get_page(page_number)
 
         serializer = ProposalSerializer(paginated_proposals, many=True)
 
         # Response structure
         data = {
-            'proposals': serializer.data,
-            'pagination': {
-                'total_rows': paginator.count,
-                'total_pages': paginator.num_pages,
-                'current_page': paginated_proposals.number,
-                'page_size': paginate_by,
-            }
+            "proposals": serializer.data,
+            "pagination": {
+                "total_rows": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": paginated_proposals.number,
+                "page_size": paginate_by,
+            },
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -135,10 +152,10 @@ class ProposalListView(APIView):
         email_serializer = EmailSerializer(data=request.data)
         if email_serializer.is_valid():
             email_data = email_serializer.validated_data
-            to_email = email_data['to_email']
-            cc = email_data['cc'] + ['est@tabtechinc.com', 'a.behehsti@tabtechinc.com']
-            email_id = email_data['email_id']
-            subject = email_data['subject']
+            to_email = email_data["to_email"]
+            cc = email_data["cc"] + ["est@tabtechinc.com", "a.behehsti@tabtechinc.com"]
+            email_id = email_data["email_id"]
+            subject = email_data["subject"]
 
             template_service = TemplateService()
             email_service = EstimateEmailService(
@@ -147,8 +164,8 @@ class ProposalListView(APIView):
                 storage_service=S3(),
                 template_service=template_service,
                 modules_to_email_template=5,
-                pdf_path='/pdfs/proposal/',
-                pdf_prefix='P',
+                pdf_path="/pdfs/proposal/",
+                pdf_prefix="P",
             )
             try:
                 email_service.send_email(
@@ -156,7 +173,9 @@ class ProposalListView(APIView):
                     cc=cc,
                     subject=subject,
                 )
-                return Response({"message": "Email sent successfully."}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Email sent successfully."}, status=status.HTTP_200_OK
+                )
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(email_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -178,7 +197,7 @@ class ProposalEstimateListView(APIView):
             401: "Unauthorized - User must be authenticated",
         },
     )
-    def get(self, request):
+    def get(self, request, estimate_id=None):
         """
         Retrieves available estimates that are not archived or associated with a proposal.
 
@@ -186,18 +205,30 @@ class ProposalEstimateListView(APIView):
             - Response: Serialized data of estimates.
         """
         try:
-            estimates = Estimate.objects.filter(
-                archive=False
-            ).exclude(
-                id__in=Proposal.objects.values_list('estimate_id', flat=True)
-            ).order_by('-created_on')
+            estimates = (
+                Estimate.objects.filter(archive=False)
+                .exclude(id__in=Proposal.objects.values_list("estimate_id", flat=True))
+                .order_by("-created_on")
+            )
+
+            if estimate_id:
+                estimates = estimates.filter(id=estimate_id)
+
+            if estimates.count() == 0:
+                return Response(
+                    {"detail": "No estimates available."},
+                    status=status.HTTP_200_OK,
+                )
 
             serializer = EstimateSerializer(estimates, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(
-                {"detail": "An error occurred while retrieving estimates.", "error": str(e)},
+                {
+                    "detail": "An error occurred while retrieving estimates.",
+                    "error": str(e),
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -209,6 +240,7 @@ class ProposalCreateView(APIView):
     Handles form data for creating a new proposal, associates it with an estimate,
     and generates a proposal PDF if the form data is valid.
     """
+
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
@@ -238,7 +270,8 @@ class ProposalCreateView(APIView):
 class ProposalArchiveView(APIView):
     """
     Archives a proposal if the user is authorized.
-     """
+    """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -249,30 +282,34 @@ class ProposalArchiveView(APIView):
         responses={
             200: openapi.Response(
                 "Successfully archived the proposal",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             403: "User is not authorized to archive this record.",
-            404: "proposal not found."
-        }
+            404: "proposal not found.",
+        },
     )
     def post(self, request, id):
         proposal = get_object_or_404(
             Proposal,
             id=id,
             is_deleted=False,
-
         )
 
-        if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
+        if (
+            proposal.estimate.created_by == request.user
+            or request.user.profile.user_type == 2
+        ):
             proposal.archive_record()
             return Response(
-                {"message": "Proposal archived successfully"},
-                status=status.HTTP_200_OK
+                {"message": "Proposal archived successfully"}, status=status.HTTP_200_OK
             )
 
         return Response(
             {"error": "You are not authorized to archive this record."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
 
@@ -280,35 +317,41 @@ class ProposalDeleteView(APIView):
     """
     Deletes a proposal if the user is authorized.
     """
+
     permission_classes = [IsAuthenticated]
-    
+
     @swagger_auto_schema(
         operation_description="Deletes a proposal instance if the user is authorized.",
         responses={
             200: openapi.Response(
                 "Successfully deleted the proposal",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             403: "User is not authorized to delete this record.",
             404: "proposal not found.",
-            500: "Error deleting file from S3."
-        }
+            500: "Error deleting file from S3.",
+        },
     )
     def delete(self, request, proposal_id):
         proposal = get_object_or_404(
             Proposal,
             id=proposal_id,
             is_deleted=False,
-
         )
-        if proposal.estimate.created_by == request.user or request.user.profile.user_type == 2:
+        if (
+            proposal.estimate.created_by == request.user
+            or request.user.profile.user_type == 2
+        ):
             proposal.soft_delete()
             return Response(
                 {"message": "Proposal soft_delete successfully"},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         return Response(
             {"error": "You are not authorized to delete this record."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
