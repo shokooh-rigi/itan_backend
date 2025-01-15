@@ -1,11 +1,14 @@
 import datetime
 import os
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -42,6 +45,81 @@ class OrderListAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Retrieve a paginated list of orders with optional filters and ordering.",
+        manual_parameters=[
+            openapi.Parameter(
+                "project_name",
+                openapi.IN_QUERY,
+                description="Search orders by project name or related fields.",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "type",
+                openapi.IN_QUERY,
+                description="Type of orders to filter (all, inprogress, invoiced, notinvoiced, reported).",
+                type=openapi.TYPE_STRING,
+                enum=["all", "inprogress", "invoiced", "notinvoiced", "reported"],
+                default="all"
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Field to order the results by (default: '-created_on').",
+                type=openapi.TYPE_STRING,
+                default="-created_on"
+            ),
+            openapi.Parameter(
+                "paginate_by",
+                openapi.IN_QUERY,
+                description="Number of orders per page (default: 20).",
+                type=openapi.TYPE_INTEGER,
+                default=20
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="The page number to return (default: 1).",
+                type=openapi.TYPE_INTEGER,
+                default=1
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Paginated list of orders",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "orders": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "project_number": openapi.Schema(type=openapi.TYPE_STRING),
+                                    "po_number": openapi.Schema(type=openapi.TYPE_STRING),
+                                    "date_po_received": openapi.Schema(type=openapi.FORMAT_DATE),
+                                    "estimated_date_of_project": openapi.Schema(type=openapi.FORMAT_DATE),
+                                    "completion_percentage": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "fully_settled": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                    "archive": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                    "state": openapi.Schema(type=openapi.TYPE_STRING),
+                                    "start_date": openapi.Schema(type=openapi.FORMAT_DATE),
+                                    "end_date": openapi.Schema(type=openapi.FORMAT_DATE),
+                                    "created_on": openapi.Schema(type=openapi.FORMAT_DATETIME)
+                                }
+                            )
+                        ),
+                        "WEB_URL": openapi.Schema(type=openapi.TYPE_STRING),
+                        "MEDIA_URL": openapi.Schema(type=openapi.TYPE_STRING),
+                        "now": openapi.Schema(type=openapi.FORMAT_DATETIME)
+                    }
+                )
+            ),
+            401: "Unauthorized",
+            400: "Bad Request"
+        }
+    )
     def get(self, request):
         project_name = request.query_params.get("project_name", "")
         order_type = request.query_params.get("type", "all")
@@ -63,7 +141,7 @@ class OrderListAPIView(APIView):
         context = {
             "WEB_URL": settings.WEB_URL,
             "MEDIA_URL": settings.MEDIA_URL,
-            "now": datetime.datetime.now()
+            "now": datetime.now()
         }
 
         # Return the paginated response with serialized data and additional context
@@ -86,6 +164,38 @@ class OrderAddAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Retrieve a list of proposals or a specific proposal using the proposal_id query parameter.",
+        manual_parameters=[
+            openapi.Parameter(
+                "proposal_id",
+                openapi.IN_QUERY,
+                description="Optional ID of a specific proposal to fetch.",
+                type=openapi.TYPE_INTEGER
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of proposals",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "proposals": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING),  # Replace with the actual field name
+                                    "created_on": openapi.Schema(type=openapi.FORMAT_DATETIME)
+                                }
+                            )
+                        )
+                    }
+                )
+            )
+        }
+    )
     def get(self, request):
         """
         Retrieve proposals based on the provided proposal_id.
@@ -102,6 +212,28 @@ class OrderAddAPIView(APIView):
         ]
         return Response({"proposals": data}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Create a new order by providing the required data.",
+        request_body=OrderSerializer,
+        responses={
+            201: openapi.Response(
+                description="Order created successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "message": openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="Validation errors",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING)
+                )
+            )
+        }
+    )
     def post(self, request):
         """
         Handle the creation of a new order.
@@ -110,8 +242,7 @@ class OrderAddAPIView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            if request.data.get("next"):
-                return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -125,10 +256,61 @@ class OrderEditAPIView(APIView):
 
     Path Parameters:
         - order_id (int): The ID of the order to edit.
-
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Retrieve details of a specific order, including proposals and change orders.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The ID of the order to edit.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Order details with associated proposals and change orders.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "order": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                "proposal": openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                                "order_number": openapi.Schema(type=openapi.TYPE_STRING),
+                                "status": openapi.Schema(type=openapi.TYPE_STRING),
+                                "description": openapi.Schema(type=openapi.TYPE_STRING),
+                            }
+                        ),
+                        "proposals": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                }
+                            )
+                        ),
+                        "change_orders": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                }
+                            )
+                        )
+                    }
+                )
+            )
+        }
+    )
     def get(self, request, order_id):
         """
         Retrieve order details, associated proposals, and change orders.
@@ -164,13 +346,37 @@ class OrderEditAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+    @swagger_auto_schema(
+        operation_description="Update an existing order by providing the updated fields.",
+        request_body=OrderSerializer,
+        responses={
+            200: openapi.Response(
+                description="Order updated successfully or redirection details.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "message": openapi.Schema(type=openapi.TYPE_STRING),
+                        "redirect_to": openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        "order_id": openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="Validation errors.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING)
+                )
+            )
+        }
+    )
     def put(self, request, order_id):
         """
         Update an existing order.
         """
         this_order = OrderEditService.get_order(order_id)
         serializer = OrderSerializer(this_order, data=request.data)
-
+        # todo: Dear Reza: is this redirection_keys need to be or not?
         # Redirect actions based on custom keys
         redirection_keys = {
             "co": "changeOrder",
@@ -185,11 +391,9 @@ class OrderEditAPIView(APIView):
             if request.data.get(key):
                 return Response({"redirect_to": redirect_url, "order_id": order_id}, status=status.HTTP_200_OK)
 
-        # Save the order if valid
         if serializer.is_valid():
-            if request.data.get("save"):
-                serializer.save()
-                return Response({"message": "Order updated successfully!"}, status=status.HTTP_200_OK)
+            serializer.save()
+            return Response({"message": "Order updated successfully!"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -199,14 +403,44 @@ class OrderDeleteAPIView(APIView):
     API view for deleting an order.
 
     Methods:
-        - POST: Deletes the specified order.
+        - DELETE: Deletes the specified order.
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Delete a specified order by its ID.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The ID of the order to delete.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Order deleted successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "message": openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ),
+            ),
+            403: openapi.Response(
+                description="User is not authorized to delete the order.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "error": openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ),
+            ),
+        }
+    )
     def delete(self, request, order_id):
-        # Fetch the order
         this_order = OrderService.get_order(order_id)
-
         try:
             # Check user permissions
             OrderService.validate_user_permission(this_order, request.user)
@@ -231,6 +465,38 @@ class OrderArchiveAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Archive a specified order by its ID.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The ID of the order to archive.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Order archived successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "message": openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ),
+            ),
+            403: openapi.Response(
+                description="User is not authorized to archive the order.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "error": openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ),
+            ),
+        }
+    )
     def post(self, request, order_id):
         # Fetch the order
         this_order = OrderService.get_order(order_id)
@@ -277,14 +543,12 @@ class ChangeOrderView(APIView):
         Returns:
             Response: Success or error response based on the validation and execution.
         """
-        # Get the order object (ensure it exists)
         this_order = get_object_or_404(
             Order,
             id=order_id,
             is_deleted=False,
         )
 
-        # Validate the incoming data using the serializer
         serializer = ChangeOrderSerializer(data=request.data)
         if serializer.is_valid():
             # Instantiate the service layer and pass the required data
@@ -346,8 +610,6 @@ class ChangeOrderApproveView(APIView):
                 action=action,
                 user=request.user,
             )
-
-            # Return a success response
             return Response(
                 {"message": f"Change order approved and invoice generated successfully.", "file_name": new_file_name},
                 status=status.HTTP_200_OK
@@ -632,7 +894,6 @@ class OrderGeneralNotesView(APIView):
         Returns:
             Response: DRF Response containing the general notes and comments of the order.
         """
-        # Retrieve the order object by ID
         order = get_object_or_404(
             Order,
             id=order_id,
@@ -656,7 +917,6 @@ class OrderSitePicturesView(APIView):
         """
         Handle POST request to save site pictures
         """
-        # Retrieve the order object by ID
         order = get_object_or_404(
             Order,
             id=order_id,

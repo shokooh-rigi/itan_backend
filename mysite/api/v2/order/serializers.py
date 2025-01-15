@@ -41,21 +41,23 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-
-    fields = [
-        "id",
-        "project_number",
-        "po_number",
-        "date_po_received",
-        "estimated_date_of_project",
-        "completion_percentage",
-        "fully_settled",
-        "archive",
-        "state",
-        "start_date",
-        "end_date",
-        "created_on",
-    ]
+        fields = [
+            "id",
+            "project_number",
+            "po_number",
+            "date_po_received",
+            "estimated_date_of_project",
+            "completion_percentage",
+            "fully_settled",
+            "archive",
+            "state",
+            "start_date",
+            "end_date",
+            "created_on",
+            "proposal",
+            "architect_name",
+            "control_system",
+        ]
 
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):
