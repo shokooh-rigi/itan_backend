@@ -558,7 +558,7 @@ class ChangeOrderDeleteAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, order_id, change_order_id):
+    def delete(self, request, order_id, change_order_id):
         order = get_object_or_404(
             Order,
             id=order_id,
