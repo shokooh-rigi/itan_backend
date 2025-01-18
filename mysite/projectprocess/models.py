@@ -1,9 +1,10 @@
-from mysite.order.models import *
+from mysite.core.base_model import BaseModel
+from django.db import models
 
-# Create your models here.
+from mysite.order.models import Order
 
 
-class ProjectProcess(models.Model):
+class ProjectProcess(BaseModel):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False, null=False, unique=True)
     tech_package = models.BooleanField(default=False, blank=False, null=False)
     tech_package_date = models.DateField(blank=True, null=True)
@@ -17,7 +18,6 @@ class ProjectProcess(models.Model):
     invoiced_date = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=False, blank=False, null=False)
     completed_date = models.DateField(blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
@@ -28,7 +28,7 @@ class ProjectProcess(models.Model):
         return self.order.project_number
 
 
-class ProjectProcessPreDemo(models.Model):
+class ProjectProcessPreDemo(BaseModel):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, blank=False, null=False, unique=True)
     tech_package = models.BooleanField(default=False, blank=False, null=False)
     tech_package_date = models.DateField(blank=True, null=True)
@@ -42,7 +42,6 @@ class ProjectProcessPreDemo(models.Model):
     invoiced_date = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=False, blank=False, null=False)
     completed_date = models.DateField(blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
