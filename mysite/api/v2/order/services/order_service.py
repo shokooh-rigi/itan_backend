@@ -25,9 +25,9 @@ class OrderService:
             QuerySet: A filtered and ordered queryset of orders.
         """
         object_list = Order.objects.filter(
-            Q(proposal__estimate__project__name__icontains=project_name) |
-            Q(project_number__icontains=project_name) |
-            Q(proposal__estimate__customer__company__name__icontains=project_name)
+            Q(proposal__estimate__project__name__icontains=project_name)
+            | Q(project_number__icontains=project_name)
+            | Q(proposal__estimate__customer__company__name__icontains=project_name)
         ).order_by(ordering)
 
         if order_type == "all" or order_type is None:
@@ -40,7 +40,7 @@ class OrderService:
             return object_list.filter(
                 invoice__isnull=True,
                 colored_drawing__isnull=False,
-                report_colored_drawing__isnull=False
+                report_colored_drawing__isnull=False,
             )
         if order_type == "reported":
             return object_list.filter(report__isnull=False)
@@ -60,9 +60,11 @@ class OrderService:
         """
         if proposal_id:
             return Proposal.objects.filter(id=proposal_id)
-        return Proposal.objects.filter(
-            archive=False
-        ).exclude(id__in=Order.objects.values_list('proposal_id', flat=True)).order_by('-created_on')
+        return (
+            Proposal.objects.filter(archive=False)
+            .exclude(id__in=Order.objects.values_list("proposal_id", flat=True))
+            .order_by("-created_on")
+        )
 
     @staticmethod
     def get_order(order_id):
@@ -89,7 +91,7 @@ class OrderService:
         """
         Delete the given order.
         """
-        order.soft_delete()
+        order.delete()
 
     @staticmethod
     def archive_order(order):
@@ -122,9 +124,9 @@ class OrderEditService:
         """
         Retrieve active proposals not linked to existing orders.
         """
-        return Proposal.objects.filter(
-            archive=False
-        ).exclude(id__in=Order.objects.values_list('proposal_id', flat=True))
+        return Proposal.objects.filter(archive=False).exclude(
+            id__in=Order.objects.values_list("proposal_id", flat=True)
+        )
 
     @staticmethod
     def get_change_orders(order_id):

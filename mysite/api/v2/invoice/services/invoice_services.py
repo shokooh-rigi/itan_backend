@@ -9,8 +9,11 @@ from django.db import transaction
 from mysite.core.models import LicenseInfo, LicenseFiles
 from mysite.gi.models import Invoice, InvoiceHistory
 from mysite.order.models import ChangeOrder, Order
-from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
-    calculate_remaining_invoice_due
+from mysite.order.templatetags.order_tags import (
+    calculate_total_amount_due,
+    calculate_total_paid,
+    calculate_remaining_invoice_due,
+)
 from mysite.projectprocess.models import ProjectProcess
 
 logger = logging.getLogger(__name__)
@@ -78,9 +81,13 @@ class InvoiceService:
             instance.invoice_type = invoice_type
             instance.save()
             total_count = InvoiceHistory.objects.filter(invoice=instance).count() + 1
-            InvoiceService.create_invoice_history(invoice=instance, total_count=total_count)
+            InvoiceService.create_invoice_history(
+                invoice=instance, total_count=total_count
+            )
             pdf_params = InvoiceService.create_invoice_pdf(instance, request_user)
-            orders = Order.objects.filter(archive=False).exclude(id__in=Invoice.objects.all().values_list('order_id'))
+            orders = Order.objects.filter(archive=False).exclude(
+                id__in=Invoice.objects.all().values_list("order_id")
+            )
         response = {
             "invoice": instance,
             "orders": orders,
@@ -105,7 +112,7 @@ class InvoiceService:
             total_invoiced=total_invoiced,
             total_paid=total_paid,
             balance_due=balance_due,
-            pdf_filename=f'Invoice-{invoice.order.project_number[3:]:03}-{invoice.id:03}-{total_count}'
+            pdf_filename=f"Invoice-{invoice.order.project_number[3:]:03}-{invoice.id:03}-{total_count}",
         )
 
     @staticmethod
@@ -121,64 +128,77 @@ class InvoiceService:
             dict: Parameters for generating the invoice PDF.
         """
         # Check user details
-        if request_user.last_name == '' or request_user.last_name is None:
-            user_name = 'TAB Technologies, INC. Operator'
+        if request_user.last_name == "" or request_user.last_name is None:
+            user_name = "TAB Technologies, INC. Operator"
         else:
             user_name = request_user.first_name + " " + request_user.last_name
-        if request_user.profile.title == '' or request_user.profile.title is None:
-            user_title = 'Estimator'
+        if request_user.profile.title == "" or request_user.profile.title is None:
+            user_title = "Estimator"
         else:
             user_title = request_user.profile.title
         user_signature = request_user.profile.e_sign
 
         # Fetch all LicenseInfo at once to reduce DB hits
         license_info_keys = [
-            'OwnerName', 'OwnerTitle', 'OwnerAddressLine1', 'OwnerAddressLine2',
-            'OwnerTel', 'OwnerFax', 'OwnerWeb', 'OwnerMail', 'PDFHeaderText',
-            'CompanyName'
+            "OwnerName",
+            "OwnerTitle",
+            "OwnerAddressLine1",
+            "OwnerAddressLine2",
+            "OwnerTel",
+            "OwnerFax",
+            "OwnerWeb",
+            "OwnerMail",
+            "PDFHeaderText",
+            "CompanyName",
         ]
-        license_info_dict = {info.key: info.value for info in LicenseInfo.objects.filter(key__in=license_info_keys)}
+        license_info_dict = {
+            info.key: info.value
+            for info in LicenseInfo.objects.filter(key__in=license_info_keys)
+        }
 
         # Fetch LicenseFiles required for PDF generation
-        license_files_keys = ['OwnerSignature', 'OwnerLogo', 'PDFHeaderLogo']
-        license_files_dict = {file.key: file.value for file in LicenseFiles.objects.filter(key__in=license_files_keys)}
+        license_files_keys = ["OwnerSignature", "OwnerLogo", "PDFHeaderLogo"]
+        license_files_dict = {
+            file.key: file.value
+            for file in LicenseFiles.objects.filter(key__in=license_files_keys)
+        }
         change_orders = ChangeOrder.objects.filter(order=invoice.order, confirmed=True)
 
         # Prepare parameters for the invoice PDF
         parameters = {
-            'file_name': f'Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-1',
-            'total_count': '1',
-            'invoice': invoice,
-            'order': invoice.order,
-            'change_orders': change_orders,
-            'total_amount_due': calculate_total_amount_due(invoice),
-            'estimate': invoice.order.proposal.estimate,
-            'license_owner': license_info_dict.get('OwnerName'),
-            'owner_title': license_info_dict.get('OwnerTitle'),
-            'owner_address_line1': license_info_dict.get('OwnerAddressLine1'),
-            'owner_address_line2': license_info_dict.get('OwnerAddressLine2'),
-            'owner_tel': license_info_dict.get('OwnerTel'),
-            'owner_fax': license_info_dict.get('OwnerFax'),
-            'owner_web': license_info_dict.get('OwnerWeb'),
-            'owner_mail': license_info_dict.get('OwnerMail'),
-            'owner_signature': license_files_dict.get('OwnerSignature'),
-            'owner_logo': license_files_dict.get('OwnerLogo'),
-            'pdf_header_logo': license_files_dict.get('PDFHeaderLogo'),
-            'pdf_header_text': license_info_dict.get('PDFHeaderText'),
-            'company_name': license_info_dict.get('CompanyName'),
-            'user_name': user_name,
-            'user_title': user_title,
-            'user_signature': user_signature,
-            'WEB_URL': settings.WEB_URL,
-            'STATIC_URL': settings.STATIC_URL,
-            'MEDIA_URL': settings.MEDIA_URL,
-            'os': system(),
-            'invoice_view_page': True,
+            "file_name": f"Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-1",
+            "total_count": "1",
+            "invoice": invoice,
+            "order": invoice.order,
+            "change_orders": change_orders,
+            "total_amount_due": calculate_total_amount_due(invoice),
+            "estimate": invoice.order.proposal.estimate,
+            "license_owner": license_info_dict.get("OwnerName"),
+            "owner_title": license_info_dict.get("OwnerTitle"),
+            "owner_address_line1": license_info_dict.get("OwnerAddressLine1"),
+            "owner_address_line2": license_info_dict.get("OwnerAddressLine2"),
+            "owner_tel": license_info_dict.get("OwnerTel"),
+            "owner_fax": license_info_dict.get("OwnerFax"),
+            "owner_web": license_info_dict.get("OwnerWeb"),
+            "owner_mail": license_info_dict.get("OwnerMail"),
+            "owner_signature": license_files_dict.get("OwnerSignature"),
+            "owner_logo": license_files_dict.get("OwnerLogo"),
+            "pdf_header_logo": license_files_dict.get("PDFHeaderLogo"),
+            "pdf_header_text": license_info_dict.get("PDFHeaderText"),
+            "company_name": license_info_dict.get("CompanyName"),
+            "user_name": user_name,
+            "user_title": user_title,
+            "user_signature": user_signature,
+            "WEB_URL": settings.WEB_URL,
+            "STATIC_URL": settings.STATIC_URL,
+            "MEDIA_URL": settings.MEDIA_URL,
+            "os": system(),
+            "invoice_view_page": True,
         }
 
         # Generate the PDF
         invoice_pdf = Invoice.create_invoice_pdf(parameters)
-        parameters['invoice_pdf'] = invoice_pdf[1]
+        parameters["invoice_pdf"] = invoice_pdf[1]
         return parameters
 
     @staticmethod
@@ -210,9 +230,13 @@ class InvoiceService:
         Returns:
             int: The determined invoice type.
         """
-        if validated_data.get("predemo_selected") and not validated_data.get("final_selected"):
+        if validated_data.get("predemo_selected") and not validated_data.get(
+            "final_selected"
+        ):
             return 2
-        elif validated_data.get("dalt_selected") and not validated_data.get("final_selected"):
+        elif validated_data.get("dalt_selected") and not validated_data.get(
+            "final_selected"
+        ):
             return 4
         return 1
 
@@ -249,7 +273,9 @@ class DeleteInvoiceService:
         """
         # Ensure that the user is authorized to delete the invoice
         if self.invoice.created_by != self.user:
-            raise PermissionDenied("This record was created by another user, you are not authorized to delete it.")
+            raise PermissionDenied(
+                "This record was created by another user, you are not authorized to delete it."
+            )
 
         # Begin a transaction to ensure all actions are atomic
         with transaction.atomic():
@@ -260,7 +286,7 @@ class DeleteInvoiceService:
             self.update_project_process()
 
             # Delete the invoice record
-            self.invoice.soft_delete()
+            self.invoice.delete()
 
     def delete_invoice_pdf(self):
         """
@@ -270,7 +296,7 @@ class DeleteInvoiceService:
         calls the appropriate method to delete the PDF.
         """
         parameters = {
-            'file_name': f"invoice-{str(self.invoice.order.project_number[3:]).zfill(3)}{str(self.invoice.id).zfill(3)}",
+            "file_name": f"invoice-{str(self.invoice.order.project_number[3:]).zfill(3)}{str(self.invoice.id).zfill(3)}",
         }
         Invoice.delete_invoice_pdf(parameters)
 
@@ -289,5 +315,3 @@ class DeleteInvoiceService:
             self.invoice.order.projectprocess.save()
         except Exception as e:
             raise Exception("Error updating the project process") from e
-
-

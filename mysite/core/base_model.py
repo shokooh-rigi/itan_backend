@@ -3,6 +3,12 @@ from django.db import models
 from django.utils.timezone import now
 
 
+class BaseModelManager(models.Manager):
+    def get_queryset(self):
+        """Override the default queryset to exclude soft-deleted records."""
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class BaseModel(models.Model):
     """
     Abstract basic model that includes common fields for other models.
@@ -12,10 +18,14 @@ class BaseModel(models.Model):
         is_deleted (Boolean): Soft delete flag.
         archive (Boolean): Archive flag.
     """
+
     created_on = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
     archive = models.BooleanField(default=False, help_text="Archive flag.")
     is_deleted = models.BooleanField(default=False, help_text="Soft delete flag.")
+
+    objects = BaseModelManager()
+    all_objects = models.Manager()
 
     class Meta:
         abstract = True
@@ -23,17 +33,17 @@ class BaseModel(models.Model):
     def soft_delete(self):
         """Marks the record as deleted without actually removing it from the database."""
         self.is_deleted = True
-        self.save(update_fields=['is_deleted', 'updated_at'])
+        self.save(update_fields=["is_deleted", "updated_at"])
 
     def archive_record(self):
         """Marks the record as archived."""
         self.archive = True
-        self.save(update_fields=['archive', 'updated_at'])
+        self.save(update_fields=["archive", "updated_at"])
 
     def unarchive_record(self):
         """Marks the record as unarchived."""
         self.archive = False
-        self.save(update_fields=['archive', 'updated_at'])
+        self.save(update_fields=["archive", "updated_at"])
 
 
 class BaseModelWithCreatedByUser(BaseModel):
@@ -42,13 +52,14 @@ class BaseModelWithCreatedByUser(BaseModel):
     Fields:
         created_by (ForeignKey): Stores the user who created the record.
     """
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="%(class)s_created_by",
-        help_text="User who created this record."
+        help_text="User who created this record.",
     )
 
     class Meta:

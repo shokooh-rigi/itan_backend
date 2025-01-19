@@ -375,7 +375,7 @@ class ProposalDeleteView(APIView):
         ):
             proposal.delete()
             return Response(
-                {"message": "Proposal soft_delete successfully"},
+                {"message": "Proposal Deleted successfully"},
                 status=status.HTTP_200_OK,
             )
 

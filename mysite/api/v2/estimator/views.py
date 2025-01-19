@@ -18,14 +18,27 @@ from rest_framework.views import APIView
 
 from mysite.core.models import Person, LicenseFiles, LicenseInfo
 from mysite.equipments.models import Equipment
-from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
+from mysite.estimator.models import (
+    Estimate,
+    EstimateDetails,
+    EstimateEquipment,
+    EstimateHistory,
+)
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
 from mysite.gi.models import InvoiceHistory
-from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
-    calculate_remaining_invoice_due
+from mysite.order.templatetags.order_tags import (
+    calculate_total_amount_due,
+    calculate_total_paid,
+    calculate_remaining_invoice_due,
+)
 from mysite.s3_file_manager import S3
-from .serializers import EstimateSerializer, EmailSerializer, EstimateEquipmentSerializer, EstimateDetailsSerializer, \
-    EstimateHistorySerializer
+from .serializers import (
+    EstimateSerializer,
+    EmailSerializer,
+    EstimateEquipmentSerializer,
+    EstimateDetailsSerializer,
+    EstimateHistorySerializer,
+)
 from .services import EstimateEmailService, TemplateService
 
 logger = logging.getLogger(__name__)
@@ -38,6 +51,7 @@ class EstimateListView(APIView):
     This view provides an endpoint for authenticated users to retrieve a paginated
     list of estimates with search and date filters, and to send emails related to estimates.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -117,37 +131,45 @@ class EstimateListView(APIView):
         },
     )
     def get(self, request):
-        search = request.GET.get('search', '')
-        paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
-        ordering = request.GET.get('ordering', '-created_on')
+        search = request.GET.get("search", "")
+        paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
+        ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate")
         to_date = request.GET.get("toDate")
 
         filters = Q(archive=False, is_deleted=False)
         if search:
-            filters &= Q(id__icontains=search) | Q(project__name__icontains=search) | Q(customer__company__name__icontains=search)
+            filters &= (
+                Q(id__icontains=search)
+                | Q(project__name__icontains=search)
+                | Q(customer__company__name__icontains=search)
+            )
 
         if from_date:
-            from_date_obj = datetime.strptime(from_date, '%m/%d/%Y')
+            from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
             filters &= Q(due_date__gte=from_date_obj)
         if to_date:
-            to_date_obj = datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(days=1) - timedelta(seconds=1)
+            to_date_obj = (
+                datetime.strptime(to_date, "%m/%d/%Y")
+                + datetime.timedelta(days=1)
+                - timedelta(seconds=1)
+            )
             filters &= Q(due_date__lte=to_date_obj)
 
         object_list = Estimate.objects.filter(filters).order_by(ordering)
         paginator = Paginator(object_list, paginate_by)
-        page_number = request.GET.get('page', 1)
+        page_number = request.GET.get("page", 1)
         paginated_estimates = paginator.get_page(page_number)
 
         serializer = EstimateSerializer(paginated_estimates, many=True)
         data = {
-            'estimates': serializer.data,
-            'pagination': {
-                'total_rows': paginator.count,
-                'total_pages': paginator.num_pages,
-                'current_page': paginated_estimates.number,
-                'page_size': paginate_by,
-            }
+            "estimates": serializer.data,
+            "pagination": {
+                "total_rows": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": paginated_estimates.number,
+                "page_size": paginate_by,
+            },
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -178,10 +200,12 @@ class EstimateListView(APIView):
         """
         serializer = EmailSerializer(data=request.data)
         if serializer.is_valid():
-            to_emails = serializer.validated_data['to_email'].replace(" ", "").split(',')
-            cc_emails = serializer.validated_data['cc'].replace(" ", "").split(',')
-            email_id = serializer.validated_data['email_id']
-            subject = serializer.validated_data['subject']
+            to_emails = (
+                serializer.validated_data["to_email"].replace(" ", "").split(",")
+            )
+            cc_emails = serializer.validated_data["cc"].replace(" ", "").split(",")
+            email_id = serializer.validated_data["email_id"]
+            subject = serializer.validated_data["subject"]
 
             email_service = EstimateEmailService(
                 estimate_id=email_id,
@@ -189,8 +213,8 @@ class EstimateListView(APIView):
                 template_service=TemplateService(),
                 request=request,
                 modules_to_email_template=1,
-                pdf_path='/pdfs/estimate/',
-                pdf_prefix='E',
+                pdf_path="/pdfs/estimate/",
+                pdf_prefix="E",
             )
             try:
                 email_service.send_email(
@@ -198,7 +222,9 @@ class EstimateListView(APIView):
                     cc=cc_emails,
                     subject=subject,
                 )
-                return Response({"message": "Email sent successfully."}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Email sent successfully."}, status=status.HTTP_200_OK
+                )
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -210,6 +236,7 @@ class EstimateCreateView(APIView):
 
     Handles creation of a new estimate and optionally associates it with a BidFile.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -266,11 +293,13 @@ class EstimateCreateView(APIView):
         if serializer.is_valid():
             # Handle the creation process
             try:
-                new_estimate = serializer.save(created_by=request.user)  # Save with user information
+                new_estimate = serializer.save(
+                    created_by=request.user
+                )  # Save with user information
                 logger.info("New estimate created with ID %s", new_estimate.pk)
 
                 # Update EstimateDetails if required
-                pre_demo = request.data.get('predemo', 0)
+                pre_demo = request.data.get("predemo", 0)
                 EstimateDetails.objects.filter(
                     estimate=new_estimate,
                     is_deleted=False,
@@ -304,11 +333,11 @@ class EstimateUpdateView(APIView):
         operation_description="Update an existing estimate by its ID.",
         manual_parameters=[
             openapi.Parameter(
-                'id',
+                "id",
                 openapi.IN_PATH,
                 description="The ID of the estimate to update",
                 type=openapi.TYPE_INTEGER,
-                required=True
+                required=True,
             )
         ],
         request_body=EstimateSerializer,
@@ -318,22 +347,29 @@ class EstimateUpdateView(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'message': openapi.Schema(type=openapi.TYPE_STRING, description="A success message"),
-                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="The ID of the updated estimate")
-                    }
-                )
+                        "message": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="A success message"
+                        ),
+                        "estimate_id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The ID of the updated estimate",
+                        ),
+                    },
+                ),
             ),
             400: openapi.Response(
                 description="Bad request, invalid data",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'detail': openapi.Schema(type=openapi.TYPE_STRING, description="Error message")
-                    }
-                )
+                        "detail": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="Error message"
+                        )
+                    },
+                ),
             ),
             404: "Estimate not found",
-        }
+        },
     )
     def put(self, request, id):
         logger.info("Request to update estimate with ID: %s", id)
@@ -345,9 +381,7 @@ class EstimateUpdateView(APIView):
 
         # Initialize the serializer with the current estimate instance and incoming data
         serializer = EstimateSerializer(
-            this_estimate,
-            data=request.data,
-            partial=True  # Allow partial updates
+            this_estimate, data=request.data, partial=True  # Allow partial updates
         )
 
         # Validate and save the estimate
@@ -356,33 +390,26 @@ class EstimateUpdateView(APIView):
             EstimateDetails.objects.filter(
                 estimate=updated_estimate,
                 is_deleted=False,
-            ).update(
-                pre_demo=request.data.get(
-                    'predemo', 0
-                )
-            )
+            ).update(pre_demo=request.data.get("predemo", 0))
             # Update EstimateEquipment flags based on services
             estimate_equipments = EstimateEquipment.objects.filter(
                 estimate=updated_estimate,
                 is_deleted=False,
-
             )
             for equipment in estimate_equipments:
-                equipment.flag = equipment.equipment.service in updated_estimate.service.all()
+                equipment.flag = (
+                    equipment.equipment.service in updated_estimate.service.all()
+                )
                 equipment.save()
 
             logger.info("Estimate with ID %s updated.", updated_estimate.pk)
             return Response(
-                {"message": "Estimate updated",
-                 "estimate_id": updated_estimate.pk},
+                {"message": "Estimate updated", "estimate_id": updated_estimate.pk},
                 status=status.HTTP_200_OK,
             )
 
         logger.error("Error updating estimate: %s", serializer.errors)
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EstimateDeleteView(APIView):
@@ -409,11 +436,7 @@ class EstimateDeleteView(APIView):
         responses={
             status.HTTP_200_OK: openapi.Response(
                 description="Estimate soft deleted successfully.",
-                examples={
-                    "application/json": {
-                        "message": "Estimate soft deleted"
-                    }
-                },
+                examples={"application/json": {"message": "Estimate soft deleted"}},
             ),
             status.HTTP_403_FORBIDDEN: openapi.Response(
                 description="Unauthorized deletion attempt.",
@@ -425,11 +448,7 @@ class EstimateDeleteView(APIView):
             ),
             status.HTTP_404_NOT_FOUND: openapi.Response(
                 description="Estimate not found.",
-                examples={
-                    "application/json": {
-                        "error": "Estimate not found"
-                    }
-                },
+                examples={"application/json": {"error": "Estimate not found"}},
             ),
         },
     )
@@ -445,10 +464,12 @@ class EstimateDeleteView(APIView):
 
         # Check if the user is authorized to delete the estimate
         if estimate.created_by != request.user and request.user.profile.user_type != 2:
-            logger.warning("Unauthorized deletion attempt by user: %s", request.user.username)
+            logger.warning(
+                "Unauthorized deletion attempt by user: %s", request.user.username
+            )
             return Response(
                 {"error": "You are not authorized to delete this record."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         # Archive related BFM data if applicable
@@ -456,7 +477,7 @@ class EstimateDeleteView(APIView):
             estimate.bfm.unarchive_record()
 
         # Soft delete the estimate
-        estimate.soft_delete()
+        estimate.delete()
         logger.info("Estimate with ID %s deleted.", id)
         return Response(
             {"message": "Estimate soft deleted"},
@@ -468,6 +489,7 @@ class EstimateArchiveView(APIView):
     """
     Archives an estimate if the user is authorized.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -477,9 +499,7 @@ class EstimateArchiveView(APIView):
             200: openapi.Response(
                 description="Estimate archived successfully.",
                 examples={
-                    "application/json": {
-                        "message": "Estimate archived successfully"
-                    }
+                    "application/json": {"message": "Estimate archived successfully"}
                 },
             ),
             403: openapi.Response(
@@ -492,14 +512,9 @@ class EstimateArchiveView(APIView):
             ),
             404: openapi.Response(
                 description="Estimate not found.",
-                examples={
-                    "application/json": {
-                        "error": "Not found."
-                    }
-                },
+                examples={"application/json": {"error": "Not found."}},
             ),
         },
-
     )
     def post(self, request, id):
         estimate = get_object_or_404(
@@ -512,7 +527,7 @@ class EstimateArchiveView(APIView):
         if estimate.created_by != request.user and request.user.profile.user_type != 2:
             return Response(
                 {"error": "You are not authorized to archive this record."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         # Archive associated BFM record if it exists
@@ -523,8 +538,7 @@ class EstimateArchiveView(APIView):
         estimate.archive_record()
 
         return Response(
-            {"message": "Estimate archived successfully"},
-            status=status.HTTP_200_OK
+            {"message": "Estimate archived successfully"}, status=status.HTTP_200_OK
         )
 
 
@@ -532,17 +546,18 @@ class EstimateHistoryView(APIView):
     """
     View the history of an estimate.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Get the history of an estimate by its ID.",
         manual_parameters=[
             openapi.Parameter(
-                'estimate_id',
+                "estimate_id",
                 openapi.IN_PATH,
                 description="The ID of the estimate",
                 type=openapi.TYPE_INTEGER,
-                required=True
+                required=True,
             )
         ],
         responses={
@@ -551,26 +566,35 @@ class EstimateHistoryView(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'estimate_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='The ID of the estimate'),
-                        'estimate_histories': openapi.Schema(
+                        "estimate_id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The ID of the estimate",
+                        ),
+                        "estimate_histories": openapi.Schema(
                             type=openapi.TYPE_ARRAY,
                             items=openapi.Schema(
                                 type=openapi.TYPE_OBJECT,
                                 properties={
-                                    'estimate': openapi.Schema(type=openapi.TYPE_INTEGER,
-                                                               description='The ID of the associated estimate'),
-                                    'total': openapi.Schema(type=openapi.TYPE_NUMBER,
-                                                            description='Total amount of the estimate history'),
-                                    'version': openapi.Schema(type=openapi.TYPE_INTEGER,
-                                                              description='The version number of the estimate history')
-                                }
-                            )
-                        )
-                    }
-                )
+                                    "estimate": openapi.Schema(
+                                        type=openapi.TYPE_INTEGER,
+                                        description="The ID of the associated estimate",
+                                    ),
+                                    "total": openapi.Schema(
+                                        type=openapi.TYPE_NUMBER,
+                                        description="Total amount of the estimate history",
+                                    ),
+                                    "version": openapi.Schema(
+                                        type=openapi.TYPE_INTEGER,
+                                        description="The version number of the estimate history",
+                                    ),
+                                },
+                            ),
+                        ),
+                    },
+                ),
             ),
             404: "Estimate not found",
-        }
+        },
     )
     def get(self, request, id):
         """
@@ -587,8 +611,10 @@ class EstimateHistoryView(APIView):
         )
 
         data = {
-            'estimate_id': estimate.id,
-            'estimate_histories': EstimateHistorySerializer(estimate_histories, many=True).data
+            "estimate_id": estimate.id,
+            "estimate_histories": EstimateHistorySerializer(
+                estimate_histories, many=True
+            ).data,
         }
 
         return Response(data)
@@ -598,6 +624,7 @@ class EstimateDetailsView(APIView):
     """
     View and update details of an estimate.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
@@ -621,7 +648,8 @@ class EstimateDetailsView(APIView):
         )
 
         estimate_sub = sum(
-            float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+            float(eq.price_override if eq.price_override else eq.equipment.price)
+            * float(eq.quantity)
             for eq in estimate_equipments
         )
 
@@ -630,7 +658,9 @@ class EstimateDetailsView(APIView):
             "estimate": EstimateSerializer(estimate).data,
             "estimate_details": EstimateDetailsSerializer(estimate_details).data,
             "estimate_sub": estimate_sub,
-            "estimate_equipments": EstimateEquipmentSerializer(estimate_equipments, many=True).data
+            "estimate_equipments": EstimateEquipmentSerializer(
+                estimate_equipments, many=True
+            ).data,
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
@@ -653,10 +683,11 @@ class EstimateDetailsView(APIView):
             EstimateDetails,
             estimate=estimate,
             is_deleted=False,
-
         )
 
-        serializer = EstimateDetailsSerializer(estimate_details, data=request.data, partial=True)
+        serializer = EstimateDetailsSerializer(
+            estimate_details, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -681,7 +712,9 @@ class EstimateDetailsView(APIView):
             estimate=estimate,
             is_deleted=False,
         )
-        serializer = EstimateDetailsSerializer(estimate_details, data=request.data, partial=False)
+        serializer = EstimateDetailsSerializer(
+            estimate_details, data=request.data, partial=False
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -692,6 +725,7 @@ class EstimateEquipmentDeleteView(APIView):
     """
     Delete the Estimate Equipment record.
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -724,9 +758,8 @@ class EstimateEquipmentDeleteView(APIView):
             EstimateEquipment,
             id=estimate_equipment_id,
             is_deleted=False,
-
         )
-        estimate_equipment.soft_delete()
+        estimate_equipment.delete()
         return Response(status=status.HTTP_200_OK)
 
 
@@ -740,12 +773,13 @@ class EstimateDuplicateView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the new customer')
+                "customer_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="ID of the new customer"
+                )
             },
-            required=['customer_id']
+            required=["customer_id"],
         ),
     )
-
     def post(self, request, id):
         this_estimate = get_object_or_404(
             Estimate,
@@ -757,7 +791,7 @@ class EstimateDuplicateView(APIView):
         if not customer_id:
             return Response(
                 {"error": "Customer ID is required for duplication."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Duplicate the estimate object
@@ -795,17 +829,17 @@ class EstimateDuplicateView(APIView):
         # Duplicate EstimateDetails if it exists
         try:
             EstimateDetails.objects.get(estimate=duplicated_obj.pk).delete()
-            estimate_detail = deepcopy(EstimateDetails.objects.get(estimate=this_estimate))
+            estimate_detail = deepcopy(
+                EstimateDetails.objects.get(estimate=this_estimate)
+            )
             estimate_detail.id = None
             estimate_detail.estimate = duplicated_obj
             estimate_detail.save()
         except EstimateDetails.DoesNotExist:
             pass
 
-
         return Response(
-            {"message": "Estimate duplicated successfully"},
-            status=status.HTTP_200_OK
+            {"message": "Estimate duplicated successfully"}, status=status.HTTP_200_OK
         )
 
 
@@ -814,6 +848,7 @@ class EstimateEquipmentView(APIView):
     Handles equipment-related operations for an estimate, including
     retrieving equipment pricing details and adding or updating equipment.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, estimate_id, service_id):
@@ -831,7 +866,6 @@ class EstimateEquipmentView(APIView):
             Estimate,
             id=estimate_id,
             is_deleted=False,
-
         )
         interval_set = estimate.service.all()[service_id]
 
@@ -841,10 +875,14 @@ class EstimateEquipmentView(APIView):
                 estimate=estimate,
                 flag=True,
                 is_deleted=False,
-
             )
             estimate_money = sum(
-                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                (
+                    float(e.price_override)
+                    if e.price_override
+                    else float(e.equipment.price)
+                )
+                * float(e.quantity)
                 for e in estimate_equipments_pricing
             )
 
@@ -852,25 +890,27 @@ class EstimateEquipmentView(APIView):
             equipments = Equipment.objects.filter(service=interval_set.id)
             equipment_in = [item.equipment.id for item in estimate_equipments_pricing]
 
-            return Response({
-                'estimate_id': estimate_id,
-                'estimate_money': estimate_money,
-                'interval_set': interval_set.id,
-                'service_id': service_id,
-                'equipments': [equipment.id for equipment in equipments],
-                'equipment_in': equipment_in
-            })
+            return Response(
+                {
+                    "estimate_id": estimate_id,
+                    "estimate_money": estimate_money,
+                    "interval_set": interval_set.id,
+                    "service_id": service_id,
+                    "equipments": [equipment.id for equipment in equipments],
+                    "equipment_in": equipment_in,
+                }
+            )
 
         except DatabaseError:
             return Response(
                 {"error": "An error occurred while retrieving the equipment details."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     @swagger_auto_schema(
         operation_summary="Create estimate equipment",
         operation_description="Create estimate equipment based on the provided data.",
-        request_body=EstimateEquipmentSerializer(many=True)
+        request_body=EstimateEquipmentSerializer(many=True),
     )
     def post(self, request, estimate_id, service_id):
         """
@@ -888,13 +928,15 @@ class EstimateEquipmentView(APIView):
             id=estimate_id,
             is_deleted=False,
         )
-        serializer = EstimateEquipmentSerializer(data=request.data, many=True, context={'estimate_id': estimate_id})
+        serializer = EstimateEquipmentSerializer(
+            data=request.data, many=True, context={"estimate_id": estimate_id}
+        )
 
         if serializer.is_valid():
             for equipment_data in serializer.validated_data:
-                equipment = equipment_data['equipment']
-                quantity = equipment_data['quantity']
-                price_override = equipment_data.get('price_override')
+                equipment = equipment_data["equipment"]
+                quantity = equipment_data["quantity"]
+                price_override = equipment_data.get("price_override")
 
                 # Check if the equipment already exists in the estimate
                 existing_equipment = EstimateEquipment.objects.filter(
@@ -914,7 +956,7 @@ class EstimateEquipmentView(APIView):
                         estimate=estimate,
                         equipment=equipment,
                         quantity=quantity,
-                        price_override=price_override
+                        price_override=price_override,
                     )
 
             # Recalculate the total price
@@ -922,24 +964,31 @@ class EstimateEquipmentView(APIView):
                 estimate=estimate,
                 flag=True,
                 is_deleted=False,
-
             )
             estimate_money = sum(
-                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                (
+                    float(e.price_override)
+                    if e.price_override
+                    else float(e.equipment.price)
+                )
+                * float(e.quantity)
                 for e in estimate_equipments_pricing
             )
 
-            return Response({
-                'message': 'Estimate equipment created successfully.',
-                'estimate_money': estimate_money
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "Estimate equipment created successfully.",
+                    "estimate_money": estimate_money,
+                },
+                status=status.HTTP_200_OK,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary="Update estimate equipment",
         operation_description="Updates the details of existing equipment for an estimate.",
-        request_body=EstimateEquipmentSerializer(many=True)
+        request_body=EstimateEquipmentSerializer(many=True),
     )
     def put(self, request, estimate_id, service_id):
         """
@@ -953,13 +1002,15 @@ class EstimateEquipmentView(APIView):
             Response: Success message and updated estimate pricing.
         """
         estimate = get_object_or_404(Estimate, id=estimate_id, is_deleted=False)
-        serializer = EstimateEquipmentSerializer(data=request.data, many=True, context={'estimate_id': estimate_id})
+        serializer = EstimateEquipmentSerializer(
+            data=request.data, many=True, context={"estimate_id": estimate_id}
+        )
 
         if serializer.is_valid():
             for equipment_data in serializer.validated_data:
-                equipment = equipment_data['equipment']
-                quantity = equipment_data['quantity']
-                price_override = equipment_data.get('price_override')
+                equipment = equipment_data["equipment"]
+                quantity = equipment_data["quantity"]
+                price_override = equipment_data.get("price_override")
 
                 # Check if the equipment exists in the estimate
                 existing_equipment = EstimateEquipment.objects.filter(
@@ -975,8 +1026,10 @@ class EstimateEquipmentView(APIView):
                     existing_equipment.save()
                 else:
                     return Response(
-                        {"error": f"Equipment with ID {equipment.id} does not exist in this estimate."},
-                        status=status.HTTP_404_NOT_FOUND
+                        {
+                            "error": f"Equipment with ID {equipment.id} does not exist in this estimate."
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
                     )
 
             # Recalculate the total price
@@ -984,14 +1037,22 @@ class EstimateEquipmentView(APIView):
                 estimate=estimate, flag=True, is_deleted=False
             )
             estimate_money = sum(
-                (float(e.price_override) if e.price_override else float(e.equipment.price)) * float(e.quantity)
+                (
+                    float(e.price_override)
+                    if e.price_override
+                    else float(e.equipment.price)
+                )
+                * float(e.quantity)
                 for e in estimate_equipments_pricing
             )
 
-            return Response({
-                'message': 'Estimate equipment updated successfully.',
-                'estimate_money': estimate_money
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "Estimate equipment updated successfully.",
+                    "estimate_money": estimate_money,
+                },
+                status=status.HTTP_200_OK,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1000,6 +1061,7 @@ class EstimateBidView(APIView):
     """
     Generate the bid for an estimate.
     """
+
     permission_classes = [IsAuthenticated]
 
     @staticmethod
@@ -1008,20 +1070,31 @@ class EstimateBidView(APIView):
         Retrieve required license information and files.
         """
         required_keys = [
-            'OwnerName', 'OwnerTitle', 'OwnerAddressLine1', 'OwnerAddressLine2',
-            'OwnerTel', 'OwnerFax', 'OwnerWeb', 'OwnerMail', 'PDFHeaderText',
-            'CompanyName'
+            "OwnerName",
+            "OwnerTitle",
+            "OwnerAddressLine1",
+            "OwnerAddressLine2",
+            "OwnerTel",
+            "OwnerFax",
+            "OwnerWeb",
+            "OwnerMail",
+            "PDFHeaderText",
+            "CompanyName",
         ]
-        required_files = ['OwnerSignature', 'OwnerLogo', 'PDFHeaderLogo']
+        required_files = ["OwnerSignature", "OwnerLogo", "PDFHeaderLogo"]
 
         license_info = {
-            info['key']: info['value']
-            for info in LicenseInfo.objects.filter(key__in=required_keys).values('key', 'value')
+            info["key"]: info["value"]
+            for info in LicenseInfo.objects.filter(key__in=required_keys).values(
+                "key", "value"
+            )
         }
 
         license_files = {
-            file['key']: file['value']
-            for file in LicenseFiles.objects.filter(key__in=required_files).values('key', 'value')
+            file["key"]: file["value"]
+            for file in LicenseFiles.objects.filter(key__in=required_files).values(
+                "key", "value"
+            )
         }
 
         return license_info, license_files
@@ -1037,7 +1110,8 @@ class EstimateBidView(APIView):
             is_deleted=False,
         )
         estimate_work = sum(
-            int(each_estimate_equipment.quantity) * int(each_estimate_equipment.equipment.estimate_work)
+            int(each_estimate_equipment.quantity)
+            * int(each_estimate_equipment.equipment.estimate_work)
             for each_estimate_equipment in estimate_equipments
         )
         return estimate_work
@@ -1048,7 +1122,6 @@ class EstimateBidView(APIView):
             estimate=estimate_id,
             flag=True,
             is_deleted=False,
-
         )
         return estimate_equipments
 
@@ -1058,18 +1131,31 @@ class EstimateBidView(APIView):
         Calculate control system, hours, predemo, and final estimate total.
         """
         control_system_calculated = round(
-            (estimate_sub * (1 + estimate.estimatedetails.control_system / 100)) - estimate_sub, 2
+            (estimate_sub * (1 + estimate.estimatedetails.control_system / 100))
+            - estimate_sub,
+            2,
         )
         hours_calculated = round(
-            (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub, 2
+            (estimate_sub * (1 + estimate.estimatedetails.hours / 100)) - estimate_sub,
+            2,
         )
         predemo_calculated = estimate.estimatedetails.pre_demo * 1200
 
         estimate_total = round(
-            estimate_sub + control_system_calculated + hours_calculated + predemo_calculated +
-            float(estimate.estimatedetails.adjustment) + float(estimate.estimatedetails.customer_adjustment), 2
+            estimate_sub
+            + control_system_calculated
+            + hours_calculated
+            + predemo_calculated
+            + float(estimate.estimatedetails.adjustment)
+            + float(estimate.estimatedetails.customer_adjustment),
+            2,
         )
-        return control_system_calculated, hours_calculated, predemo_calculated, estimate_total
+        return (
+            control_system_calculated,
+            hours_calculated,
+            predemo_calculated,
+            estimate_total,
+        )
 
     @staticmethod
     def _generate_invoice_history(estimate):
@@ -1081,11 +1167,13 @@ class EstimateBidView(APIView):
             invoice.times_estimate_changed += 1
             invoice.save()
 
-            total_count = InvoiceHistory.objects.filter(
-                invoice=invoice,
-                is_deleted=False,
-
-            ).count() + 1
+            total_count = (
+                InvoiceHistory.objects.filter(
+                    invoice=invoice,
+                    is_deleted=False,
+                ).count()
+                + 1
+            )
             invoice_file_name = f"Invoice-{estimate.proposal.order.project_number[3:]:0>3}-{invoice.id:0>3}-{total_count}"
 
             InvoiceHistory.objects.create(
@@ -1093,7 +1181,7 @@ class EstimateBidView(APIView):
                 total_invoiced=calculate_total_amount_due(invoice),
                 total_paid=calculate_total_paid(invoice),
                 balance_due=calculate_remaining_invoice_due(invoice),
-                pdf_filename=invoice_file_name
+                pdf_filename=invoice_file_name,
             )
             return None
         except Exception as e:
@@ -1101,52 +1189,57 @@ class EstimateBidView(APIView):
 
     @staticmethod
     def _prepare_response_data(
-            request,
-            estimate,
-            license_info,
-            license_files,
-            estimate_totals,
-            estimate_work,
-            estimate_equipments,
+        request,
+        estimate,
+        license_info,
+        license_files,
+        estimate_totals,
+        estimate_work,
+        estimate_equipments,
     ):
         """
         Prepare the final response data dictionary.
         """
-        control_system_calculated, hours_calculated, predemo_calculated, estimate_total = estimate_totals
+        (
+            control_system_calculated,
+            hours_calculated,
+            predemo_calculated,
+            estimate_total,
+        ) = estimate_totals
         estimate_sub = sum(
-            float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+            float(eq.price_override if eq.price_override else eq.equipment.price)
+            * float(eq.quantity)
             for eq in EstimateEquipment.objects.filter(
                 estimate=estimate,
                 flag=True,
                 is_deleted=False,
-
             )
         )
-        estimate_file_name = pdf_filename_generator(estimate.id, 'E')
+        estimate_file_name = pdf_filename_generator(estimate.id, "E")
 
         return {
-            'file_name': estimate_file_name,
-            'estimate': estimate,
-            'other_than_dalt_services': estimate.service.exclude(name__iexact="DALT"),
-            'has_dalt': estimate.service.filter(name__iexact="DALT").exists(),
-            'estimate_equipments_pricing': estimate_equipments(estimate_id=estimate.id),
-            'estimate_work_in_hours': int(estimate_work / 60),
-            'estimate_work_in_minutes': int(estimate_work % 60),
+            "file_name": estimate_file_name,
+            "estimate": estimate,
+            "other_than_dalt_services": estimate.service.exclude(name__iexact="DALT"),
+            "has_dalt": estimate.service.filter(name__iexact="DALT").exists(),
+            "estimate_equipments_pricing": estimate_equipments(estimate_id=estimate.id),
+            "estimate_work_in_hours": int(estimate_work / 60),
+            "estimate_work_in_minutes": int(estimate_work % 60),
             **license_info,
             **license_files,
-            'pdf_header_logo': license_files.get('PDFHeaderLogo'),
-            'company_name': license_info.get('CompanyName'),
-            'estimate_id': estimate.id,
-            'estimate_sub': estimate_sub,
-            'estimate_total': estimate_total,
-            'control_system_calculated': control_system_calculated,
-            'hours_calculated': hours_calculated,
-            'predemo_calculated': predemo_calculated,
-            'datetime': datetime.datetime.now(),
-            'user_name': f"{request.user.first_name} {request.user.last_name or 'TAB Technologies, INC. Operator'}",
-            'user_title': request.user.profile.title or 'Estimator',
-            'user_signature': request.user.profile.e_sign,
-            'user_cell': request.user.profile.cell or '',
+            "pdf_header_logo": license_files.get("PDFHeaderLogo"),
+            "company_name": license_info.get("CompanyName"),
+            "estimate_id": estimate.id,
+            "estimate_sub": estimate_sub,
+            "estimate_total": estimate_total,
+            "control_system_calculated": control_system_calculated,
+            "hours_calculated": hours_calculated,
+            "predemo_calculated": predemo_calculated,
+            "datetime": datetime.datetime.now(),
+            "user_name": f"{request.user.first_name} {request.user.last_name or 'TAB Technologies, INC. Operator'}",
+            "user_title": request.user.profile.title or "Estimator",
+            "user_signature": request.user.profile.e_sign,
+            "user_cell": request.user.profile.cell or "",
         }
 
     def get(self, request, estimate_id):
@@ -1159,15 +1252,14 @@ class EstimateBidView(APIView):
                 Estimate,
                 id=estimate_id,
                 is_deleted=False,
-
             )
             estimate_sub = sum(
-                float(eq.price_override if eq.price_override else eq.equipment.price) * float(eq.quantity)
+                float(eq.price_override if eq.price_override else eq.equipment.price)
+                * float(eq.quantity)
                 for eq in EstimateEquipment.objects.filter(
                     estimate=estimate,
                     flag=True,
                     is_deleted=False,
-
                 )
             )
             estimate_work = self._estimate_total_work(estimate_id=estimate_id)
@@ -1186,11 +1278,15 @@ class EstimateBidView(APIView):
             )
 
             if invoice_error:
-                response_data['invoice_error'] = invoice_error
+                response_data["invoice_error"] = invoice_error
 
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Estimate.DoesNotExist:
-            return Response({"error": "Estimate not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Estimate not found."}, status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
