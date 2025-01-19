@@ -245,23 +245,56 @@ class ProposalCreateView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
-        operation_description="create a proposal instance.",
-        request_body=ProposalSerializer,
+        operation_description="Create a proposal instance.",
+        manual_parameters=[
+            openapi.Parameter(
+                "estimate_id",
+                in_=openapi.IN_FORM,
+                description="ID of the estimate to associate with the proposal",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "validity",
+                in_=openapi.IN_FORM,
+                description="Number of days of validity for the proposal",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),openapi.Parameter(
+                "note",
+                in_=openapi.IN_FORM,
+                description="Note",
+                type=openapi.TYPE_STRING,
+                required=False,
+            ),
+        ],
         responses={
-            200: openapi.Response(
+            201: openapi.Response(
                 "Successfully created the Proposal instance", ProposalSerializer
             ),
             400: "Validation error in input data",
-            404: "Proposal not found",
+            404: "Estimate not found",
         },
     )
     def post(self, request):
         """
         Creates a new proposal.
         """
+        estimate_id = request.data.get("estimate_id")
+
+        # Fetch the Estimate instance
+        try:
+            estimate = Estimate.objects.get(id=estimate_id)
+        except Estimate.DoesNotExist:
+            return Response(
+                {"detail": "Estimate not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Pass estimate to the serializer
         serializer = ProposalSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(estimate=estimate)  # Explicitly set the estimate
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
