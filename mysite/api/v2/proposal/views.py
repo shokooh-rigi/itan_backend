@@ -373,7 +373,7 @@ class ProposalDeleteView(APIView):
             proposal.estimate.created_by == request.user
             or request.user.profile.user_type == 2
         ):
-            proposal.soft_delete()
+            proposal.delete()
             return Response(
                 {"message": "Proposal soft_delete successfully"},
                 status=status.HTTP_200_OK,
