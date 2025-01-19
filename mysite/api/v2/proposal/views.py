@@ -237,37 +237,32 @@ class ProposalCreateView(APIView):
     """
     API endpoint for creating a proposal.
 
-    Handles form data for creating a new proposal, associates it with an estimate,
-    and generates a proposal PDF if the form data is valid.
+    Handles JSON data for creating a new proposal, associates it with an estimate,
+    and generates a proposal PDF if the JSON data is valid.
     """
 
     permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
         operation_description="Create a proposal instance.",
-        manual_parameters=[
-            openapi.Parameter(
-                "estimate_id",
-                in_=openapi.IN_FORM,
-                description="ID of the estimate to associate with the proposal",
-                type=openapi.TYPE_INTEGER,
-                required=True,
-            ),
-            openapi.Parameter(
-                "validity",
-                in_=openapi.IN_FORM,
-                description="Number of days of validity for the proposal",
-                type=openapi.TYPE_INTEGER,
-                required=False,
-            ),openapi.Parameter(
-                "note",
-                in_=openapi.IN_FORM,
-                description="Note",
-                type=openapi.TYPE_STRING,
-                required=False,
-            ),
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "estimate_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the estimate to associate with the proposal. Must be valid.",
+                ),
+                "validity": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Number of days of validity for the proposal",
+                ),
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Note",
+                ),
+            },
+            required=["estimate_id"],
+        ),
         responses={
             201: openapi.Response(
                 "Successfully created the Proposal instance", ProposalSerializer
@@ -368,10 +363,10 @@ class ProposalDeleteView(APIView):
             500: "Error deleting file from S3.",
         },
     )
-    def delete(self, request, proposal_id):
+    def delete(self, request, id):
         proposal = get_object_or_404(
             Proposal,
-            id=proposal_id,
+            id=id,
             is_deleted=False,
         )
         if (
