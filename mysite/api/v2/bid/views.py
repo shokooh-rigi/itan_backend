@@ -1,11 +1,10 @@
-import datetime
 import os
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from django.conf import settings
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -19,6 +18,51 @@ from mysite.core.models import Person, Project
 from mysite.s3_file_manager import S3
 from .serializers import BidFileSerializer, BidFileCreateSerializer
 from .services import BidFileService
+
+
+class BidListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Retrieve a Bid File",
+        description="Retrieve a specific bid file by its ID if it exists and is not deleted or archived.",
+        parameters=[
+            OpenApiParameter(name="id", description="The ID of the bid file", required=True, type=int),
+        ],
+        responses={
+            200: BidFileSerializer,
+            404: dict,
+        },
+    )
+    def get(self, request, id: int) -> Response:
+        """
+        Retrieve a bid file by bid ID.
+
+        Args:
+            id (int): The ID of the bid file.
+
+        Returns:
+            - 200: Bid file data if found.
+            - 404: Error message if the bid file is not found.
+        """
+        try:
+            bid_file = BidFile.objects.get(
+                id=id,
+                is_deleted=False,
+                archive=False,
+            )
+        except BidFile.DoesNotExist:
+            return Response(
+                {"error": "Bid not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Serialize the retrieved object
+        serializer = BidFileSerializer(bid_file)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class BidFileListView(APIView):
@@ -84,17 +128,18 @@ class BidFileListView(APIView):
         to_date = request.GET.get("toDate")
 
         try:
-            # Get the filtered query set based on the parameters
-            object_list = self.get_filtered_query(search, from_date, to_date, ordering)
-
-            # Pagination
+            bid_service = BidFileService()
+            object_list = bid_service.get_filtered_query(
+                search=search,
+                from_date=from_date,
+                to_date=to_date,
+                ordering=ordering,
+            )
             paginator = PageNumberPagination()
             paginator.page_size = (
                 settings.PAGE_SIZE
-            )  # Ensure PAGE_SIZE is set in settings
+            )
             result_page = paginator.paginate_queryset(object_list, request)
-
-            # Serialize the results
             serializer = BidFileSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
 
@@ -105,48 +150,6 @@ class BidFileListView(APIView):
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @staticmethod
-    def get_filtered_query(search, from_date, to_date, ordering):
-        """
-        Helper method to build and return a filtered queryset for BidFiles based on the provided filters.
-
-        Filters the BidFiles based on:
-        - search: Filters by project name or customer company name.
-        - from_date and to_date: Filters by the due date range.
-        - ordering: Orders the results by the specified field.
-
-        Args:
-            search (str): The search term for filtering project names or customer company names.
-            from_date (str): The start date for filtering by due date in mm/dd/yyyy format.
-            to_date (str): The end date for filtering by due date in mm/dd/yyyy format.
-            ordering (str): The field by which to order the results.
-
-        Returns:
-            QuerySet: A filtered and ordered queryset of BidFile instances.
-
-        Raises:
-            ValueError: If the date format is invalid.
-        """
-        # Build the initial query for filtering by search term
-        query = Q()
-        if search:
-            query = Q(project__name__icontains=search) | Q(
-                customer__company__name__icontains=search
-            )
-
-        # Handle the fromDate and toDate filtering
-        if from_date and to_date:
-            try:
-                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
-                to_date_obj = datetime.datetime.strptime(
-                    to_date, "%m/%d/%Y"
-                ) + datetime.timedelta(days=1)
-                query &= Q(due_date__range=(from_date_obj, to_date_obj))
-            except ValueError:
-                raise ValueError("Invalid date format. Use mm/dd/yyyy")
-        # Filter for non-archived bid files and apply the ordering
-        return BidFile.objects.filter(query).filter(archive=False, is_deleted=False).order_by(ordering)
 
 
 class BidFileUpdateView(APIView):

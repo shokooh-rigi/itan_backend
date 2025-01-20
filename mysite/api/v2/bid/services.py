@@ -1,6 +1,10 @@
+import datetime
 import os
 import zipfile
 
+from django.db.models import Q
+
+from mysite.bidfilemgm.models import BidFile
 from mysite.s3_file_manager import S3
 
 
@@ -55,3 +59,55 @@ class BidFileService:
         with open(zip_file_path, 'rb') as file:
             bidfile.uploaded_file.save(os.path.basename(zip_file_path), file)
         os.remove(zip_file_path)  # Cleanup zip file after upload
+
+    @staticmethod
+    def get_filtered_query(
+            search,
+            from_date,
+            to_date,
+            ordering,
+    ):
+        """
+        Helper method to build and return a filtered queryset for BidFiles based on the provided filters.
+
+        Filters the BidFiles based on:
+        - search: Filters by project name or customer company name.
+        - from_date and to_date: Filters by the due date range.
+        - ordering: Orders the results by the specified field.
+
+        Args:
+            search (str): The search term for filtering project names or customer company names.
+            from_date (str): The start date for filtering by due date in mm/dd/yyyy format.
+            to_date (str): The end date for filtering by due date in mm/dd/yyyy format.
+            ordering (str): The field by which to order the results.
+
+        Returns:
+            QuerySet: A filtered and ordered queryset of BidFile instances.
+
+        Raises:
+            ValueError: If the date format is invalid.
+        """
+        # Build the initial query for filtering by search term
+        query = Q()
+        if search:
+            query = Q(project__name__icontains=search) | Q(
+                customer__company__name__icontains=search
+            )
+
+        # Handle the fromDate and toDate filtering
+        if from_date and to_date:
+            try:
+                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = datetime.datetime.strptime(
+                    to_date, "%m/%d/%Y"
+                ) + datetime.timedelta(days=1)
+                query &= Q(due_date__range=(from_date_obj, to_date_obj))
+            except ValueError:
+                raise ValueError("Invalid date format. Use mm/dd/yyyy")
+        # Filter for non-archived bid files and apply the ordering
+        response = BidFile.objects.filter(query).filter(
+            archive=False,
+            is_deleted=False
+        ).order_by(ordering)
+        return response
+
