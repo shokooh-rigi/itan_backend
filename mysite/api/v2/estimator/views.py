@@ -40,6 +40,7 @@ from .serializers import (
     EstimateHistorySerializer,
 )
 from .services import EstimateEmailService, TemplateService
+from ..bid.serializers import BidFileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1055,6 +1056,63 @@ class EstimateEquipmentView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EstimateBidListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Retrieve Available Bids for Estimates",
+        description="Fetch a list of bids that are not archived and are not associated with any existing estimate.",
+        parameters=[
+            OpenApiParameter(name="bid_id", description="The ID of a specific bid to retrieve (optional)",
+                             required=False, type=int),
+        ],
+        responses={
+            200: BidFileSerializer(many=True),
+            500: dict,
+        },
+    )
+    def get(self, request, bid_id=None):
+        """
+        Retrieve available bids that are not archived or associated with an estimate.
+
+        Args:
+            bid_id (int, optional): The ID of a specific bid to retrieve.
+
+        Returns:
+            - 200: Serialized data of available bids.
+            - 500: Error message if an exception occurs.
+        """
+        try:
+            # Query for available bids
+            bids = (
+                Estimate.objects.filter(archive=False)
+                    .exclude(id__in=Estimate.objects.values_list("bfm_id", flat=True))
+                    .order_by("-created_on")
+            )
+
+            # Filter by bid_id if provided
+            if bid_id:
+                bids = bids.filter(id=bid_id)
+
+            if not bids.exists():
+                return Response(
+                    {"detail": "No bids available."},
+                    status=status.HTTP_200_OK,
+                )
+
+            serializer = BidFileSerializer(bids, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {
+                    "detail": "An error occurred while retrieving bids.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class EstimateBidView(APIView):

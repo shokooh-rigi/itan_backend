@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import EstimateListView, EstimateCreateView, EstimateUpdateView, EstimateDeleteView, EstimateArchiveView, \
     EstimateDuplicateView, EstimateEquipmentView, EstimateDetailsView, EstimateBidView, EstimateHistoryView, \
-    EstimateEquipmentDeleteView
+    EstimateEquipmentDeleteView, EstimateBidListView
 
 urlpatterns = [
     path('estimate/get/', EstimateListView.as_view(), name='estimate-list'),
@@ -12,7 +12,8 @@ urlpatterns = [
     path('estimate/archive/<int:id>/', EstimateArchiveView.as_view(), name='estimate-archive'),
     path('estimate/duplicate/<int:id>/', EstimateDuplicateView.as_view(), name='estimate-duplicate'),
     path('estimate/details/<int:id>/', EstimateDetailsView.as_view(), name='estimate-details'),
-    path('estimate/bid/<int:estimate_id>/', EstimateBidView.as_view(), name='estimate-bid'),
+    path('estimate/bid/total/<int:estimate_id>/', EstimateBidView.as_view(), name='estimate-bid-total'),# todo: dear reza: is it need to be or not?
+    path('estimate/bid/<int:estimate_id>/', EstimateBidListView.as_view(), name='estimate-bid-list'),
     path('estimate/history/<int:estimate_id>/', EstimateHistoryView.as_view(), name='estimate-history'),
     path('estimate/equipment/<int:estimate_id>/<int:service_id>/', EstimateEquipmentView.as_view(),
          name='estimate-equipment'),
