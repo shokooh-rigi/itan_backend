@@ -1,10 +1,6 @@
-import os
-
-from django.conf import settings
 from rest_framework import serializers
 
 from mysite.bidfilemgm.models import BidFile
-from mysite.s3_file_manager import S3
 
 
 class BidFileSerializer(serializers.ModelSerializer):
