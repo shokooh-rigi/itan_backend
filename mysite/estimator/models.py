@@ -1,13 +1,11 @@
-import datetime
-
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from custom_user.models import User
-from mysite.bidfilemgm.models import BidFile
-from .enums import ControlSystemChoices, HoursChoices
+from mysite.bid.models import Bid
+from .enums import ControlSystemChoices
 from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
 from mysite.core.models import Person, Project, Service
 from mysite.dbmanagement.models import Equipment
@@ -32,8 +30,8 @@ def estimate_number_generator(estimate_id: int):
 class Estimate(BaseModelWithCreatedByUser):
     """Model representing an estimate."""
 
-    bfm = models.OneToOneField(
-        BidFile,
+    bid = models.OneToOneField(
+        Bid,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -129,7 +127,6 @@ class EstimateEquipment(BaseModel):
     )
     quantity = models.FloatField(blank=False)
     # if flag is True means it counts in estimate price (its service is in the estimate services)
-    # todo: ENHANCEMENT: differentiate between Quantity (integer) and Number of Days (float) (flag)
     flag = models.BooleanField(default=True)
 
     def __str__(self):

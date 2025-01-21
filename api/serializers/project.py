@@ -10,10 +10,10 @@ from mysite.report.models import Report
 def get_project_step(project):
     steps_date = [1, '', '', '', '', '', '', '', '', '']
     steps_date[1] = project.created_on
-    if Proposal.objects.filter(estimate__bfm__id=project.id).exists():
+    if Proposal.objects.filter(estimate__bid__id=project.id).exists():
         steps_date[0] = 2
         steps_date[2] = project.estimate.proposal.created_on
-    if Order.objects.filter(proposal__estimate__bfm__id=project.id).exists():
+    if Order.objects.filter(proposal__estimate__bid__id=project.id).exists():
         steps_date[0] = 4
         steps_date[3] = project.estimate.proposal.order.date_po_received
         steps_date[4] = project.estimate.proposal.order.estimated_date_of_project

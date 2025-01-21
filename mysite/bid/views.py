@@ -10,8 +10,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from mysite.core.models import UserTypeChoices
 
-from .forms import BidFileForm, BidFileEditForm, Person
-from .models import BidFile
+from .forms import BidForm, BidEditForm, Person
+from .models import Bid
 from django.conf import settings
 from django.core.files import File
 from io import BytesIO
@@ -40,12 +40,12 @@ def bid_files_list(request):
         to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y')
         to_date_obj = to_date_obj + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
-        object_list = BidFile.objects.filter(Q(project__name__icontains=search)
+        object_list = Bid.objects.filter(Q(project__name__icontains=search)
                                              | Q(customer__company__name__icontains=search)) \
             .filter(due_date__range=(from_date_obj, to_date_obj)).filter(archive=False).order_by(ordering)
 
     else:
-        object_list = BidFile.objects.filter(Q(project__name__icontains=search)
+        object_list = Bid.objects.filter(Q(project__name__icontains=search)
                                              | Q(customer__company__name__icontains=search)) \
             .filter(archive=False).order_by(ordering)
 
@@ -65,7 +65,7 @@ def bid_files_list(request):
 
 @login_required
 def bidfiles_add(request):
-    form = BidFileForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
+    form = BidForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -108,10 +108,10 @@ def bidfiles_add(request):
                 zip_file_name = str(entry.pk) + '. ' + project_clean_name + '.zip'
                 zf = create_zip_file(files, temp_path, zip_file_name)
                 s3 = S3()
-                if BidFile.objects.get(id=entry.pk).uploaded_file:
-                    s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(BidFile.objects.get(id=entry.pk).uploaded_file))
+                if Bid.objects.get(id=entry.pk).uploaded_file:
+                    s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(Bid.objects.get(id=entry.pk).uploaded_file))
                 file = open(temp_path + '/' + zip_file_name, 'rb')
-                BidFile.objects.get(id=entry.pk).uploaded_file.save(zip_file_name, file)
+                Bid.objects.get(id=entry.pk).uploaded_file.save(zip_file_name, file)
                 os.remove(temp_path + '/' + zip_file_name)
                 return redirect('bidFilesHome')
     parameters = {'form': form,
@@ -121,8 +121,8 @@ def bidfiles_add(request):
 
 @login_required
 def bidfiles_addfile(request, bidfiles_id):
-    this_bfm = get_object_or_404(BidFile, id=bidfiles_id)
-    form = BidFileEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
+    this_bfm = get_object_or_404(Bid, id=bidfiles_id)
+    form = BidEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('bidFilesHome')
@@ -165,10 +165,10 @@ def bidfiles_addfile(request, bidfiles_id):
             f.write(response.content)
             f.close()
             addto_zip_file(files, temp_path, zip_file_name)
-            if BidFile.objects.get(id=this_bfm.pk).uploaded_file:
-                s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(BidFile.objects.get(id=this_bfm.pk).uploaded_file))
+            if Bid.objects.get(id=this_bfm.pk).uploaded_file:
+                s3.delete_file_from_bucket(key=settings.MEDIA_URL + str(Bid.objects.get(id=this_bfm.pk).uploaded_file))
             file = open(temp_path + '/' + zip_file_name, 'rb')
-            BidFile.objects.get(id=this_bfm.pk).uploaded_file.save(zip_file_name, file)
+            Bid.objects.get(id=this_bfm.pk).uploaded_file.save(zip_file_name, file)
             os.remove(temp_path + '/' + zip_file_name)
             return redirect('bidFilesHome')
         else:
@@ -180,8 +180,8 @@ def bidfiles_addfile(request, bidfiles_id):
 
 @login_required
 def bidfiles_edit(request, bidfiles_id):
-    this_bfm = get_object_or_404(BidFile, id=bidfiles_id)
-    form = BidFileEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
+    this_bfm = get_object_or_404(Bid, id=bidfiles_id)
+    form = BidEditForm(request.POST or None, request.FILES or None, instance=this_bfm)
     if request.method == 'POST':
         if request.POST.get("cancel"):
             return redirect('bidFilesHome')
@@ -197,7 +197,7 @@ def bidfiles_edit(request, bidfiles_id):
 
 @login_required
 def bidfiles_duplicate(request, bidfiles_id):
-    this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
+    this_bidfile = get_object_or_404(Bid, id=bidfiles_id)
     form = BidFileForm(request.POST or None, instance=this_bidfile)
     form.fields['project'].widget = forms.HiddenInput()
     form.fields['uploaded_file'].widget = forms.HiddenInput()
@@ -224,7 +224,7 @@ def bidfiles_duplicate(request, bidfiles_id):
 
 @login_required
 def bidfiles_archive(request, bidfiles_id):
-    this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
+    this_bidfile = get_object_or_404(Bid, id=bidfiles_id)
     if request.method == "POST":
         if request.POST.get("confirm"):
             if request.user.is_authenticated:
@@ -250,7 +250,7 @@ def bidfiles_archive(request, bidfiles_id):
 
 @login_required
 def bidfiles_delete(request, bidfiles_id):
-    this_bidfile = get_object_or_404(BidFile, id=bidfiles_id)
+    this_bidfile = get_object_or_404(Bid, id=bidfiles_id)
     if request.method == "POST":
         if request.POST.get("confirm"):
             if request.user.is_authenticated:

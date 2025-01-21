@@ -40,7 +40,7 @@ from .serializers import (
     EstimateHistorySerializer,
 )
 from .services import EstimateEmailService, TemplateService
-from ..bid.serializers import BidFileSerializer
+from ..bid.serializers import BidSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ class EstimateListView(APIView):
                     "application/json": {
                         "estimates": [
                             {
-                                "bfm": "value",
+                                "bid": "value",
                                 "customer": "customer_data",
                                 "customer_name": "customer_name",
                                 "project": "project_data",
@@ -235,14 +235,14 @@ class EstimateCreateView(APIView):
     """
     API view to create a new estimate.
 
-    Handles creation of a new estimate and optionally associates it with a BidFile.
+    Handles creation of a new estimate and optionally associates it with a Bid.
     """
 
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Create a new estimate",
-        operation_description="Create a new estimate based on the provided data. Optionally associate it with a BidFile.",
+        operation_description="Create a new estimate based on the provided data. Optionally associate it with a Bid.",
         request_body=EstimateSerializer,
         responses={
             status.HTTP_201_CREATED: openapi.Response(
@@ -265,10 +265,10 @@ class EstimateCreateView(APIView):
                 },
             ),
             status.HTTP_404_NOT_FOUND: openapi.Response(
-                description="BidFile not found.",
+                description="Bid not found.",
                 examples={
                     "application/json": {
-                        "error": "BidFile not found",
+                        "error": "Bid not found",
                     }
                 },
             ),
@@ -283,7 +283,7 @@ class EstimateCreateView(APIView):
 
         Returns:
             Response: A response containing either the newly created estimate's ID or an error message,
-                      along with the list of BidFiles if applicable.
+                      along with the list of Bids if applicable.
         """
         logger.info("Request to create an estimate")
 
@@ -473,9 +473,9 @@ class EstimateDeleteView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Archive related BFM data if applicable
-        if estimate.bfm:
-            estimate.bfm.unarchive_record()
+        # Archive related bid data if applicable
+        if estimate.bid:
+            estimate.bid.unarchive_record()
 
         # Soft delete the estimate
         estimate.delete()
@@ -531,9 +531,9 @@ class EstimateArchiveView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Archive associated BFM record if it exists
-        if estimate.bfm:
-            estimate.bfm.archive_record()
+        # Archive associated bid record if it exists
+        if estimate.bid:
+            estimate.bid.archive_record()
 
         # Archive the estimate using archive_record()
         estimate.archive_record()
@@ -798,12 +798,12 @@ class EstimateDuplicateView(APIView):
         duplicated_obj = deepcopy(this_estimate)
         duplicated_obj.id = None  # Reset the ID to create a new instance
 
-        # Duplicate BidFile if it exists
-        if this_estimate.bfm:
-            duplicated_bfm = deepcopy(this_estimate.bfm)
-            duplicated_bfm.id = None
-            duplicated_bfm.save()
-            duplicated_obj.bfm = duplicated_bfm
+        # Duplicate Bid if it exists
+        if this_estimate.bid:
+            duplicated_bid = deepcopy(this_estimate.bid)
+            duplicated_bid.id = None
+            duplicated_bid.save()
+            duplicated_obj.bid = duplicated_bid
 
         # Set the new customer for the duplicated estimate
         duplicated_obj.customer = get_object_or_404(
@@ -1068,7 +1068,7 @@ class EstimateBidListView(APIView):
                              required=False, type=int),
         ],
         responses={
-            200: BidFileSerializer(many=True),
+            200: BidSerializer(many=True),
             500: dict,
         },
     )
@@ -1087,7 +1087,7 @@ class EstimateBidListView(APIView):
             # Query for available bids
             bids = (
                 Estimate.objects.filter(archive=False)
-                    .exclude(id__in=Estimate.objects.values_list("bfm_id", flat=True))
+                    .exclude(id__in=Estimate.objects.values_list("bid_id", flat=True))
                     .order_by("-created_on")
             )
 
@@ -1101,7 +1101,7 @@ class EstimateBidListView(APIView):
                     status=status.HTTP_200_OK,
                 )
 
-            serializer = BidFileSerializer(bids, many=True)
+            serializer = BidSerializer(bids, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:

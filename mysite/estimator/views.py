@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import *
+from ..core.models import LicenseFiles, LicenseInfo, ModulesToEmailTemplateRelation
 from ..gi.models import *
 from ..core.forms import EmailForm
 from ..core.views import htmlbodytemplate_tag_converter
@@ -214,10 +215,10 @@ def proposal_list(request):
 def estimator_add(request, bfm_id=None):
     if bfm_id:
         form = EstimateFullForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-        bfms = BidFile.objects.filter(id=bfm_id)
+        bfms = Bid.objects.filter(id=bfm_id)
     else:
         form = EstimateForm(request.POST or None, request.FILES or None, initial={'created_by': request.user})
-        bfms = BidFile.objects.filter(archive=False).exclude(id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
+        bfms = Bid.objects.filter(archive=False).exclude(id__in=Estimate.objects.filter(bfm_id__isnull=False).values_list('bfm_id')).order_by('due_date')
     if request.method == 'POST':
         form.fields['created_by'].widget = forms.HiddenInput()
         if request.POST.get("cancel"):
@@ -243,7 +244,7 @@ def estimator_edit(request, estimate_id):
     form = EstimateForm(request.POST or None, instance=this_estimate, initial={'predemo': this_estimate.estimatedetails.pre_demo if this_estimate.estimatedetails.pre_demo else 0})
     no_bfm = 1
     if this_estimate.bfm:
-        bfms = BidFile.objects.filter(id=this_estimate.bfm.id)
+        bfms = Bid.objects.filter(id=this_estimate.bfm.id)
         no_bfm = 0
     else:
         bfms = None
@@ -351,7 +352,7 @@ def estimate_duplicate(request, estimate_id):
         if request.POST.get("next"):
             duplicated_obj = deepcopy(this_estimate)
             if this_estimate.bfm:
-                # bfm = get_object_or_404(BidFile, id=this_estimate.bfm.id)
+                # bfm = get_object_or_404(Bid, id=this_estimate.bfm.id)
                 duplicated_bfm = deepcopy(this_estimate.bfm)
                 duplicated_bfm.id = None
                 duplicated_bfm.save()
@@ -381,7 +382,7 @@ def estimate_duplicate(request, estimate_id):
     }
     return render(request, "estimatorDuplicate.html", parameters)
 
-\
+
 @login_required
 @csrf_exempt
 def get_person_id(request):

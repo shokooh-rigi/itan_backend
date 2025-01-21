@@ -1,6 +1,6 @@
 from django.urls import path
 
-from mysite.bidfilemgm import views
+from mysite.bid import views
 
 urlpatterns = [
     path('bfm/', views.bid_files_list, name='bidFilesHome'),

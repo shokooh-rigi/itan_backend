@@ -95,7 +95,7 @@ LOCAL_APPS = [
     "mysite.coi",
     "mysite.gi",
     "mysite.report",
-    "mysite.bidfilemgm",
+    "mysite.bid",
     "mysite.ibfm",
     "mysite.administrative",
     "mysite.scheduler",

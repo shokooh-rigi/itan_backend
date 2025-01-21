@@ -8,7 +8,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     invoice_number = serializers.SerializerMethodField()
     project_number = serializers.CharField(source='order.project_number')
     project_name = serializers.CharField(
-        source='order.proposal.estimate.bfm.project.name')
+        source='order.proposal.estimate.bid.project.name')
     total_ordered = serializers.SerializerMethodField()
     total_invoiced = serializers.SerializerMethodField()
 

@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from mysite.bidfilemgm.models import BidFile
+from mysite.bidmgm.models import Bid
 
 
-class BidFileSerializer(serializers.ModelSerializer):
+class BidSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='customer.name', read_only=True)
     project_name = serializers.CharField(source='project.name', read_only=True)
 
     class Meta:
-        model = BidFile
+        model = Bid
         fields = [
             'customer',
             'customer_name',
@@ -22,14 +22,14 @@ class BidFileSerializer(serializers.ModelSerializer):
         ]
 
 
-class BidFileCreateSerializer(serializers.ModelSerializer):
+class BidCreateSerializer(serializers.ModelSerializer):
     """
-        Serializer for  create BidFile model.
+        Serializer for  create Bid model.
         Handles validation and data transformation for creating and updating bid files.
         """
 
     class Meta:
-        model = BidFile
+        model = Bid
         fields = [
             'customer',
             'project',
