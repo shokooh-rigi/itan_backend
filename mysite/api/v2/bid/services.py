@@ -4,7 +4,7 @@ import zipfile
 
 from django.db.models import Q
 
-from mysite.bidmgm.models import Bid
+from mysite.bid.models import Bid
 from mysite.s3_file_manager import S3
 
 
