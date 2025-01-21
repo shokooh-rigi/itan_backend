@@ -12,12 +12,12 @@ class CustomerWidget(s2forms.ModelSelect2Widget):
     ]
 
 
-class BidForm(ModelForm):
+class BidFileForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
     uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}))
 
     class Meta:
-        model = Bid
+        model = BidFile
         fields = [
             'customer',
             'project',
@@ -31,7 +31,7 @@ class BidForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(BidForm, self).__init__(*args, **kwargs)
+        super(BidFileForm, self).__init__(*args, **kwargs)
         self.fields['customer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'
@@ -44,12 +44,12 @@ class BidForm(ModelForm):
         self.fields['project'].widget.attrs['class'] = 'select2'
 
 
-class BidEditForm(ModelForm):
+class BidFileEditForm(ModelForm):
     due_date = forms.DateField(widget=forms.DateInput(format='%m/%d/%Y'), input_formats=('%m/%d/%Y',))
     uploaded_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'allow_multiple_selected': True}))
 
     class Meta:
-        model = Bid
+        model = BidFile
         fields = [
             'customer',
             'project',
@@ -61,7 +61,7 @@ class BidEditForm(ModelForm):
         exclude = ('uploaded_file',)
 
     def __init__(self, *args, **kwargs):
-        super(BidEditForm, self).__init__(*args, **kwargs)
+        super(BidFileEditForm, self).__init__(*args, **kwargs)
         self.fields['customer'].queryset = Person.objects.all()
         self.fields['due_date'].widget.attrs['placeholder'] = 'mm/dd/YYYY'
         self.fields['due_date'].widget.attrs['pattern'] = '\d{2}[\/]\d{2}[\/]\d{4}'

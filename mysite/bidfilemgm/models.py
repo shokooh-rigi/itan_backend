@@ -7,9 +7,9 @@ from mysite.core.base_model import BaseModelWithCreatedByUser
 from mysite.core.models import Person, User, Project
 
 
-class Bid(BaseModelWithCreatedByUser):
+class BidFile(BaseModelWithCreatedByUser):
     """
-    Model representing bid associated with a customer and project.
+    Model representing ibid files associated with a customer and project.
     Includes details such as the customer, project, due date, uploaded file,
     creator, and additional notes. Also contains flags for archiving and
     controlling visibility to customers.
@@ -46,8 +46,8 @@ class Bid(BaseModelWithCreatedByUser):
 
     class Meta:
         ordering = ["-due_date"]
-        verbose_name = "Bids Management"
-        verbose_name_plural = "Bids Managements"
+        verbose_name = "Bid Files Management"
+        verbose_name_plural = "Bid Files Managements"
 
     def __str__(self):
         return (
@@ -57,12 +57,12 @@ class Bid(BaseModelWithCreatedByUser):
 
 class EquipmentSubmittal(BaseModelWithCreatedByUser):
     """
-    Model representing an equipment submittal associated with a bid.
+    Model representing an equipment submittal associated with a ibid file.
     Stores the file related to equipment and tracks the creation timestamp.
     """
 
-    bid = models.OneToOneField(
-        Bid,
+    bidfile = models.OneToOneField(
+        BidFile,
         on_delete=models.SET_NULL,
         blank=False,
         null=True,
@@ -77,4 +77,4 @@ class EquipmentSubmittal(BaseModelWithCreatedByUser):
         ordering = ["-created_on"]
 
     def __str__(self):
-        return self.bid
+        return self.bidfile

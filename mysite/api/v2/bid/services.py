@@ -4,11 +4,11 @@ import zipfile
 
 from django.db.models import Q
 
-from mysite.bid.models import Bid
+from mysite.bidfilemgm.models import BidFile
 from mysite.s3_file_manager import S3
 
 
-class BidService:
+class BidFileService:
     @staticmethod
     def handle_uploaded_files(files_list, temp_path):
         """
@@ -50,14 +50,14 @@ class BidService:
             .replace('%', '').replace('^', '').replace('&', '').replace('*', '').replace("/", '')
 
     @staticmethod
-    def update_bid_with_zip(bid, zip_file_path):
+    def update_bidfile_with_zip(bidfile, zip_file_path):
         print(zip_file_path)
         """
-        Uploads the zip file to S3 and updates the bid record with the file path.
+        Uploads the zip file to S3 and updates the bidfile record with the file path.
         """
         s3 = S3()
         with open(zip_file_path, 'rb') as file:
-            bid.uploaded_file.save(os.path.basename(zip_file_path), file)
+            bidfile.uploaded_file.save(os.path.basename(zip_file_path), file)
         os.remove(zip_file_path)  # Cleanup zip file after upload
 
     @staticmethod
@@ -68,9 +68,9 @@ class BidService:
             ordering,
     ):
         """
-        Helper method to build and return a filtered queryset for Bids based on the provided filters.
+        Helper method to build and return a filtered queryset for BidFiles based on the provided filters.
 
-        Filters the Bids based on:
+        Filters the BidFiles based on:
         - search: Filters by project name or customer company name.
         - from_date and to_date: Filters by the due date range.
         - ordering: Orders the results by the specified field.
@@ -82,7 +82,7 @@ class BidService:
             ordering (str): The field by which to order the results.
 
         Returns:
-            QuerySet: A filtered and ordered queryset of Bid instances.
+            QuerySet: A filtered and ordered queryset of BidFile instances.
 
         Raises:
             ValueError: If the date format is invalid.
@@ -104,8 +104,8 @@ class BidService:
                 query &= Q(due_date__range=(from_date_obj, to_date_obj))
             except ValueError:
                 raise ValueError("Invalid date format. Use mm/dd/yyyy")
-        # Filter for non-archived bid and apply the ordering
-        response = Bid.objects.filter(query).filter(
+        # Filter for non-archived bid files and apply the ordering
+        response = BidFile.objects.filter(query).filter(
             archive=False,
             is_deleted=False
         ).order_by(ordering)

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
-from mysite.api.v2.bid.serializers import BidSerializer
+from mysite.api.v2.bid.serializers import BidFileSerializer
 from mysite.core.models import Service
+from mysite.equipments.models import Equipment
 from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
 
 
@@ -36,7 +37,7 @@ class EmailSerializer(serializers.Serializer):
 
 class EstimateSerializer(serializers.ModelSerializer):
     """Serializer for the Estimate model."""
-    bid = BidSerializer(read_only=True)
+    bfm = BidFileSerializer(read_only=True)
     service = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Service.objects.all()
     )  # Allow passing a list of service IDs
@@ -51,7 +52,7 @@ class EstimateSerializer(serializers.ModelSerializer):
         model = Estimate
         fields = [
             'id',
-            'bid',
+            'bfm',
             'customer',
             'customer_name',
             'project',

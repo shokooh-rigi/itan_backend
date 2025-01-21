@@ -4,18 +4,20 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import *
 
+# Register your models here.
 
-class BidResource(resources.ModelResource):
+
+class BidFileResource(resources.ModelResource):
     class Meta:
-        model = Bid
+        model = BidFile
 
 
-class BidAdmin(ImportExportModelAdmin):
-    resource_class = BidResource
+class BidFileAdmin(ImportExportModelAdmin):
+    resource_class = BidFileResource
     search_fields = ('project__name',)
 
 
-admin.site.register(Bid, BidAdmin)
+admin.site.register(BidFile, BidFileAdmin)
 
 
 class EquipmentSubmittalResource(resources.ModelResource):
