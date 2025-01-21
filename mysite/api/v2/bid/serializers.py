@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mysite.bidmgm.models import Bid
+from mysite.bid.models import Bid
 
 
 class BidSerializer(serializers.ModelSerializer):
