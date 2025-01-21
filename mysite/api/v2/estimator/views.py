@@ -754,7 +754,6 @@ class EstimateEquipmentDeleteView(APIView):
         """
         Delete the estimate equipment by ID
         """
-        # todo: what is used for: interval_id?
         estimate_equipment = get_object_or_404(
             EstimateEquipment,
             id=estimate_equipment_id,
