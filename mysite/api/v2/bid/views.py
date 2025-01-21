@@ -152,237 +152,6 @@ class BidFileListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BidFileUpdateView(APIView):
-    """
-    API view to retrieve and update a BidFile instance.
-    - PUT: Retrieve or update a BidFile instance by its ID.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Retrieve or update a BidFile instance by its ID.",
-        request_body=BidFileSerializer,  # Input schema
-        responses={
-            200: openapi.Response(
-                "Successfully updated the BidFile instance", BidFileSerializer
-            ),
-            400: "Validation error in input data",
-            404: "BidFile not found",
-        },
-    )
-    def put(self, request, bid_id):
-        """
-        Retrieve or update a BidFile instance with the provided data.
-        """
-        try:
-            bidfile = BidFile.objects.get(id=bid_id)
-        except BidFile.DoesNotExist:
-            return Response(
-                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Attempt to update the BidFile instance with the new data
-        serializer = BidFileSerializer(
-            bidfile, data=request.data, partial=True
-        )  # partial=True allows partial updates
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class BidFileDuplicateView(APIView):
-    """
-    API view to duplicate an existing BidFile instance.
-    - POST: Duplicate an existing BidFile by copying its fields and creating a new instance.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Duplicate an existing BidFile instance by copying its fields and creating a new instance.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'customer_id': openapi.Schema(
-                    type=openapi.TYPE_INTEGER,
-                    description="ID of the new customer to assign the duplicated BidFile"
-                ),
-            },
-            required=['customer_id'],
-        ),
-        responses={
-            201: openapi.Response(
-                description="The duplicated BidFile instance",
-                schema=BidFileSerializer(),
-            ),
-            400: openapi.Response(description="Invalid input"),
-            404: openapi.Response(description="BidFile or Customer not found"),
-        }
-    )
-    def post(self, request, bid_id):
-        """
-        Duplicate an existing BidFile instance.
-        """
-        try:
-            this_bid_file = BidFile.objects.get(id=bid_id)
-        except BidFile.DoesNotExist:
-            return Response(
-                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        customer_id = request.data.get("customer_id")
-        if not customer_id:
-            return Response(
-                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        # Call internal helper method to handle the duplication process
-        duplicated_bid_file = self._duplicate_bid_file(
-            this_bid_file=this_bid_file,
-            customer_id=int(customer_id),
-            created_by_user=request.user,
-        )
-
-        # Return the new duplicated BidFile instance
-        serializer = BidFileSerializer(duplicated_bid_file)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @staticmethod
-    def _duplicate_bid_file(
-            this_bid_file: BidFile,
-            customer_id: int,
-            created_by_user,
-    ):
-        """
-        Internal helper function to duplicate a BidFile.
-        - Duplicates the relevant fields, assigns a new customer, and returns the duplicated instance.
-        """
-        try:
-            customer = Person.objects.get(id=customer_id)
-        except Person.DoesNotExist:
-            raise ValueError("Customer not found")
-
-        # Create a new BidFile with the same attributes (excluding file, customer, and created_by)
-        duplicated_bfm = BidFile.objects.create(
-            project=this_bid_file.project,
-            customer=customer,
-            created_by=created_by_user,
-            due_date=this_bid_file.due_date,
-            note=this_bid_file.note,
-            archive=this_bid_file.archive,  # If archive is required
-            uploaded_file=None,  # Retain the uploaded file if needed
-        )
-
-        return duplicated_bfm
-
-
-class BidFileArchiveView(APIView):
-    """
-    Archives a bid file if the user is authorized
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Archives a BidFile if the user is authorized and confirms the action.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-        ),
-        responses={
-            200: openapi.Response(
-                "Successfully archived the bid file",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            403: "User is not authorized to archive this record.",
-            404: "BidFile not found."
-        }
-    )
-    def post(self, request, bid_id):
-        bid_file = get_object_or_404(
-            BidFile,
-            id=bid_id,
-            is_deleted=False,
-
-        )
-
-        # Check if the requesting user is the creator of the bid file
-        if bid_file.created_by != request.user:
-            return Response(
-                {"error": "You are not authorized to archive this record."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        bid_file.archive = True
-        bid_file.save()
-        return Response(
-            {"message": "Bid file archived successfully"},
-            status=status.HTTP_200_OK,
-        )
-
-
-class BidFileDeleteView(APIView):
-    """
-    API view to delete a BidFile instance.
-    - DELETE: Deletes a BidFile instance by ID if the user is authorized.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Deletes a BidFile instance if the user is authorized.",
-        responses={
-            200: openapi.Response(
-                "Successfully deleted the BidFile",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            403: "User is not authorized to delete this record.",
-            404: "BidFile not found.",
-            500: "Error deleting file from S3."
-        }
-    )
-    def delete(self, request, bid_id):
-        """
-        Delete a BidFile instance.
-        """
-        this_bidfile = get_object_or_404(
-            BidFile,
-            id=bid_id,
-            is_deleted=False,
-
-        )
-
-        # Check if the user is authorized to delete the bid file
-        if (
-            this_bidfile.created_by != request.user
-            and request.user.profile.user_type != 2
-        ):
-            return Response(
-                {"error": "You are not authorized to delete this record."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        # Proceed to delete the file from S3 and then the BidFile
-        s3 = S3()
-        file_key = str(this_bidfile.uploaded_file)
-
-        # Delete the file from S3
-        try:
-            s3.delete_file_from_bucket(key=settings.MEDIA_URL + file_key)
-        except Exception as e:
-            return Response(
-                {"error": f"Error deleting file from S3: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        this_bidfile.soft_delete()
-
-        return Response(
-            {"message": "BidFile successfully deleted."},
-            status=status.HTTP_200_OK,
-        )
-
-
 class BidFileCreateView(APIView):
     """
     Create a new bid file with uploaded files.
@@ -651,3 +420,236 @@ class BidFileAddFileView(APIView):
             bidfile=bidfile,
             zip_file_path=zip_file_path,
         )
+
+
+class BidFileUpdateView(APIView):
+    """
+    API view to retrieve and update a BidFile instance.
+    - PUT: Retrieve or update a BidFile instance by its ID.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve or update a BidFile instance by its ID.",
+        request_body=BidFileSerializer,  # Input schema
+        responses={
+            200: openapi.Response(
+                "Successfully updated the BidFile instance", BidFileSerializer
+            ),
+            400: "Validation error in input data",
+            404: "BidFile not found",
+        },
+    )
+    def put(self, request, bid_id):
+        """
+        Retrieve or update a BidFile instance with the provided data.
+        """
+        try:
+            bidfile = BidFile.objects.get(id=bid_id)
+        except BidFile.DoesNotExist:
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Attempt to update the BidFile instance with the new data
+        serializer = BidFileSerializer(
+            bidfile, data=request.data, partial=True
+        )  # partial=True allows partial updates
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BidFileDuplicateView(APIView):
+    """
+    API view to duplicate an existing BidFile instance.
+    - POST: Duplicate an existing BidFile by copying its fields and creating a new instance.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Duplicate an existing BidFile instance by copying its fields and creating a new instance.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'customer_id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the new customer to assign the duplicated BidFile"
+                ),
+            },
+            required=['customer_id'],
+        ),
+        responses={
+            201: openapi.Response(
+                description="The duplicated BidFile instance",
+                schema=BidFileSerializer(),
+            ),
+            400: openapi.Response(description="Invalid input"),
+            404: openapi.Response(description="BidFile or Customer not found"),
+        }
+    )
+    def post(self, request, bid_id):
+        """
+        Duplicate an existing BidFile instance.
+        """
+        try:
+            this_bid_file = BidFile.objects.get(id=bid_id)
+        except BidFile.DoesNotExist:
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        customer_id = request.data.get("customer_id")
+        if not customer_id:
+            return Response(
+                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        # Call internal helper method to handle the duplication process
+        duplicated_bid_file = self._duplicate_bid_file(
+            this_bid_file=this_bid_file,
+            customer_id=int(customer_id),
+            created_by_user=request.user,
+        )
+
+        # Return the new duplicated BidFile instance
+        serializer = BidFileSerializer(duplicated_bid_file)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @staticmethod
+    def _duplicate_bid_file(
+            this_bid_file: BidFile,
+            customer_id: int,
+            created_by_user,
+    ):
+        """
+        Internal helper function to duplicate a BidFile.
+        - Duplicates the relevant fields, assigns a new customer, and returns the duplicated instance.
+        """
+        try:
+            customer = Person.objects.get(id=customer_id)
+        except Person.DoesNotExist:
+            raise ValueError("Customer not found")
+
+        # Create a new BidFile with the same attributes (excluding file, customer, and created_by)
+        duplicated_bfm = BidFile.objects.create(
+            project=this_bid_file.project,
+            customer=customer,
+            created_by=created_by_user,
+            due_date=this_bid_file.due_date,
+            note=this_bid_file.note,
+            archive=this_bid_file.archive,  # If archive is required
+            uploaded_file=None,  # Retain the uploaded file if needed
+        )
+
+        return duplicated_bfm
+
+
+class BidFileArchiveView(APIView):
+    """
+    Archives a bid file if the user is authorized
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Archives a BidFile if the user is authorized and confirms the action.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+        ),
+        responses={
+            200: openapi.Response(
+                "Successfully archived the bid file",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+            ),
+            403: "User is not authorized to archive this record.",
+            404: "BidFile not found."
+        }
+    )
+    def post(self, request, bid_id):
+        bid_file = get_object_or_404(
+            BidFile,
+            id=bid_id,
+            is_deleted=False,
+
+        )
+
+        # Check if the requesting user is the creator of the bid file
+        if bid_file.created_by != request.user:
+            return Response(
+                {"error": "You are not authorized to archive this record."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        bid_file.archive = True
+        bid_file.save()
+        return Response(
+            {"message": "Bid file archived successfully"},
+            status=status.HTTP_200_OK,
+        )
+
+
+class BidFileDeleteView(APIView):
+    """
+    API view to delete a BidFile instance.
+    - DELETE: Deletes a BidFile instance by ID if the user is authorized.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Deletes a BidFile instance if the user is authorized.",
+        responses={
+            200: openapi.Response(
+                "Successfully deleted the BidFile",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+            ),
+            403: "User is not authorized to delete this record.",
+            404: "BidFile not found.",
+            500: "Error deleting file from S3."
+        }
+    )
+    def delete(self, request, bid_id):
+        """
+        Delete a BidFile instance.
+        """
+        this_bidfile = get_object_or_404(
+            BidFile,
+            id=bid_id,
+            is_deleted=False,
+
+        )
+
+        # Check if the user is authorized to delete the bid file
+        if (
+            this_bidfile.created_by != request.user
+            and request.user.profile.user_type != 2
+        ):
+            return Response(
+                {"error": "You are not authorized to delete this record."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Proceed to delete the file from S3 and then the BidFile
+        s3 = S3()
+        file_key = str(this_bidfile.uploaded_file)
+
+        # Delete the file from S3
+        try:
+            s3.delete_file_from_bucket(key=settings.MEDIA_URL + file_key)
+        except Exception as e:
+            return Response(
+                {"error": f"Error deleting file from S3: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        this_bidfile.soft_delete()
+
+        return Response(
+            {"message": "BidFile successfully deleted."},
+            status=status.HTTP_200_OK,
+        )
+
+
