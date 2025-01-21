@@ -20,7 +20,7 @@ from .serializers import BidSerializer, BidCreateSerializer
 from .services import BidService
 
 
-class BidListView(APIView):
+class BidGetView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -150,237 +150,6 @@ class BidListView(APIView):
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class BidUpdateView(APIView):
-    """
-    API view to retrieve and update a Bid instance.
-    - PUT: Retrieve or update a Bid instance by its ID.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Retrieve or update a Bid instance by its ID.",
-        request_body=BidSerializer,  # Input schema
-        responses={
-            200: openapi.Response(
-                "Successfully updated the Bid instance", BidSerializer
-            ),
-            400: "Validation error in input data",
-            404: "Bid not found",
-        },
-    )
-    def put(self, request, bid_id):
-        """
-        Retrieve or update a Bid instance with the provided data.
-        """
-        try:
-            bid = Bid.objects.get(id=bid_id)
-        except Bid.DoesNotExist:
-            return Response(
-                {"error": "Bid not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Attempt to update the Bid instance with the new data
-        serializer = BidSerializer(
-            bid, data=request.data, partial=True
-        )  # partial=True allows partial updates
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class BidDuplicateView(APIView):
-    """
-    API view to duplicate an existing Bid instance.
-    - POST: Duplicate an existing Bid by copying its fields and creating a new instance.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Duplicate an existing Bid instance by copying its fields and creating a new instance.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'customer_id': openapi.Schema(
-                    type=openapi.TYPE_INTEGER,
-                    description="ID of the new customer to assign the duplicated Bid"
-                ),
-            },
-            required=['customer_id'],
-        ),
-        responses={
-            201: openapi.Response(
-                description="The duplicated Bid instance",
-                schema=BidSerializer(),
-            ),
-            400: openapi.Response(description="Invalid input"),
-            404: openapi.Response(description="Bid or Customer not found"),
-        }
-    )
-    def post(self, request, bid_id):
-        """
-        Duplicate an existing Bid instance.
-        """
-        try:
-            this_bid_file = Bid.objects.get(id=bid_id)
-        except Bid.DoesNotExist:
-            return Response(
-                {"error": "Bid not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        customer_id = request.data.get("customer_id")
-        if not customer_id:
-            return Response(
-                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        # Call internal helper method to handle the duplication process
-        duplicated_bid_file = self._duplicate_bid_file(
-            this_bid_file=this_bid_file,
-            customer_id=int(customer_id),
-            created_by_user=request.user,
-        )
-
-        # Return the new duplicated Bid instance
-        serializer = BidSerializer(duplicated_bid_file)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @staticmethod
-    def _duplicate_bid_file(
-            this_bid_file: Bid,
-            customer_id: int,
-            created_by_user,
-    ):
-        """
-        Internal helper function to duplicate a Bid.
-        - Duplicates the relevant fields, assigns a new customer, and returns the duplicated instance.
-        """
-        try:
-            customer = Person.objects.get(id=customer_id)
-        except Person.DoesNotExist:
-            raise ValueError("Customer not found")
-
-        # Create a new Bid with the same attributes (excluding file, customer, and created_by)
-        duplicated_bfm = Bid.objects.create(
-            project=this_bid_file.project,
-            customer=customer,
-            created_by=created_by_user,
-            due_date=this_bid_file.due_date,
-            note=this_bid_file.note,
-            archive=this_bid_file.archive,  # If archive is required
-            uploaded_file=None,  # Retain the uploaded file if needed
-        )
-
-        return duplicated_bfm
-
-
-class BidArchiveView(APIView):
-    """
-    Archives a bid if the user is authorized
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Archives a Bid if the user is authorized and confirms the action.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-        ),
-        responses={
-            200: openapi.Response(
-                "Successfully archived the bid",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            403: "User is not authorized to archive this record.",
-            404: "Bid not found."
-        }
-    )
-    def post(self, request, bid_id):
-        bid_file = get_object_or_404(
-            Bid,
-            id=bid_id,
-            is_deleted=False,
-
-        )
-
-        # Check if the requesting user is the creator of the bid
-        if bid_file.created_by != request.user:
-            return Response(
-                {"error": "You are not authorized to archive this record."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        bid_file.archive = True
-        bid_file.save()
-        return Response(
-            {"message": "bid archived successfully"},
-            status=status.HTTP_200_OK,
-        )
-
-
-class BidDeleteView(APIView):
-    """
-    API view to delete a Bid instance.
-    - DELETE: Deletes a Bid instance by ID if the user is authorized.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Deletes a Bid instance if the user is authorized.",
-        responses={
-            200: openapi.Response(
-                "Successfully deleted the Bid",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            403: "User is not authorized to delete this record.",
-            404: "Bid not found.",
-            500: "Error deleting file from S3."
-        }
-    )
-    def delete(self, request, bid_id):
-        """
-        Delete a Bid instance.
-        """
-        this_bid = get_object_or_404(
-            Bid,
-            id=bid_id,
-            is_deleted=False,
-
-        )
-
-        # Check if the user is authorized to delete the bid
-        if (
-            this_bid.created_by != request.user
-            and request.user.profile.user_type != 2
-        ):
-            return Response(
-                {"error": "You are not authorized to delete this record."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        # Proceed to delete the file from S3 and then the Bid
-        s3 = S3()
-        file_key = str(this_bid.uploaded_file)
-
-        # Delete the file from S3
-        try:
-            s3.delete_file_from_bucket(key=settings.MEDIA_URL + file_key)
-        except Exception as e:
-            return Response(
-                {"error": f"Error deleting file from S3: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        this_bid.soft_delete()
-
-        return Response(
-            {"message": "Bid successfully deleted."},
-            status=status.HTTP_200_OK,
-        )
 
 
 class BidCreateView(APIView):
@@ -522,137 +291,6 @@ class BidCreateView(APIView):
         return bid
 
 
-class BidAddFileView(APIView):
-    """
-    APIView for adding files to an existing Bid.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Handles POST request to add files to Bid and update it with a compressed zip file.",
-        request_body=BidCreateSerializer,
-        responses={
-            200: "File(s) uploaded and updated successfully.",
-            400: "Selected files exceeded maximum upload size!",
-        }
-    )
-    def post(self, request, bid_id):
-        """
-        Handles POST request to add files to Bid and update it with a compressed zip file.
-        """
-        bid = self._get_bid(bid_id=bid_id)
-        serializer = self._validate_request_data(
-            request=request,
-            instance=bid,
-        )
-
-        temp_path = self._create_temp_path()
-        files_list = request.FILES.getlist("uploaded_file")
-
-        # Check file size limit
-        if not self._validate_file_size(files_list):
-            return Response(
-                {"error": "Selected files exceeded maximum upload size!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Process file uploads and create zip file
-        files_paths = self._save_uploaded_files(
-            files_list=files_list,
-            temp_path=temp_path,
-        )
-        zip_file_path = self._create_zip_file(
-            files_paths=files_paths,
-            temp_path=temp_path,
-            bid=bid,
-        )
-
-        # Update the Bid instance with the zip file
-        self._update_bid_with_zip(
-            bid=bid,
-            zip_file_path=zip_file_path,
-        )
-
-        return Response(
-            {"detail": "File(s) uploaded and updated successfully."},
-            status=status.HTTP_200_OK,
-        )
-
-    @staticmethod
-    def _get_bid(bid_id):
-        """
-        Retrieves the Bid instance or raises 404 error.
-        """
-        return get_object_or_404(Bid, id=bid_id, is_deleted=False)
-
-    @staticmethod
-    def _validate_request_data(request, instance):
-        """
-        Validates incoming data with BidCreateSerializer.
-        """
-        serializer = BidCreateSerializer(
-            instance=instance, data=request.data, partial=True
-        )
-        if not serializer.is_valid():
-            raise serializers.ValidationError(serializer.errors)
-        return serializer
-
-    @staticmethod
-    def _create_temp_path():
-        """
-        Creates and returns the temporary directory path for file uploads.
-        """
-        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bids")
-        if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
-        return temp_path
-
-    @staticmethod
-    def _validate_file_size(files_list):
-        """
-        Validates that total file size does not exceed maximum allowed size.
-        """
-        size_sum = sum(f.size for f in files_list)
-        return size_sum <= settings.MAX_UPLOAD_SIZE
-
-    @staticmethod
-    def _save_uploaded_files(files_list, temp_path):
-        """
-        Saves each uploaded file in the temp path and returns list of file paths.
-        """
-        file_paths = BidService.handle_uploaded_files(
-            files_list=files_list,
-            temp_path=temp_path,
-        )
-        return file_paths
-
-    @staticmethod
-    def _create_zip_file(files_paths, temp_path, bid):
-        """
-        Creates a zip file from uploaded files and returns the path to the zip file.
-        """
-        project_clean_name = BidService.clean_project_name(
-            project_name=bid.project.name
-        )
-        zip_filename = BidService.create_zip_file(
-            filenames=files_paths,
-            path=temp_path,
-            project_name=f"{bid.pk}_{project_clean_name}"
-        )
-        return zip_filename
-
-    @staticmethod
-    def _update_bid_with_zip(bid, zip_file_path):
-        """
-        Updates the Bid instance with the new zip file uploaded to S3.
-        """
-        BidService.update_bid_with_zip(
-            bid=bid,
-            zip_file_path=zip_file_path,
-        )
-
-
 class BidUpdateView(APIView):
     """
     API view to retrieve and update a Bid instance.
@@ -881,6 +519,137 @@ class BidDeleteView(APIView):
         return Response(
             {"message": "Bid successfully deleted."},
             status=status.HTTP_200_OK,
+        )
+
+
+class BidAddFileView(APIView):
+    """
+    APIView for adding files to an existing Bid.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Handles POST request to add files to Bid and update it with a compressed zip file.",
+        request_body=BidCreateSerializer,
+        responses={
+            200: "File(s) uploaded and updated successfully.",
+            400: "Selected files exceeded maximum upload size!",
+        }
+    )
+    def post(self, request, bid_id):
+        """
+        Handles POST request to add files to Bid and update it with a compressed zip file.
+        """
+        bid = self._get_bid(bid_id=bid_id)
+        serializer = self._validate_request_data(
+            request=request,
+            instance=bid,
+        )
+
+        temp_path = self._create_temp_path()
+        files_list = request.FILES.getlist("uploaded_file")
+
+        # Check file size limit
+        if not self._validate_file_size(files_list):
+            return Response(
+                {"error": "Selected files exceeded maximum upload size!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Process file uploads and create zip file
+        files_paths = self._save_uploaded_files(
+            files_list=files_list,
+            temp_path=temp_path,
+        )
+        zip_file_path = self._create_zip_file(
+            files_paths=files_paths,
+            temp_path=temp_path,
+            bid=bid,
+        )
+
+        # Update the Bid instance with the zip file
+        self._update_bid_with_zip(
+            bid=bid,
+            zip_file_path=zip_file_path,
+        )
+
+        return Response(
+            {"detail": "File(s) uploaded and updated successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+    @staticmethod
+    def _get_bid(bid_id):
+        """
+        Retrieves the Bid instance or raises 404 error.
+        """
+        return get_object_or_404(Bid, id=bid_id, is_deleted=False)
+
+    @staticmethod
+    def _validate_request_data(request, instance):
+        """
+        Validates incoming data with BidCreateSerializer.
+        """
+        serializer = BidCreateSerializer(
+            instance=instance, data=request.data, partial=True
+        )
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+        return serializer
+
+    @staticmethod
+    def _create_temp_path():
+        """
+        Creates and returns the temporary directory path for file uploads.
+        """
+        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bids")
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
+        return temp_path
+
+    @staticmethod
+    def _validate_file_size(files_list):
+        """
+        Validates that total file size does not exceed maximum allowed size.
+        """
+        size_sum = sum(f.size for f in files_list)
+        return size_sum <= settings.MAX_UPLOAD_SIZE
+
+    @staticmethod
+    def _save_uploaded_files(files_list, temp_path):
+        """
+        Saves each uploaded file in the temp path and returns list of file paths.
+        """
+        file_paths = BidService.handle_uploaded_files(
+            files_list=files_list,
+            temp_path=temp_path,
+        )
+        return file_paths
+
+    @staticmethod
+    def _create_zip_file(files_paths, temp_path, bid):
+        """
+        Creates a zip file from uploaded files and returns the path to the zip file.
+        """
+        project_clean_name = BidService.clean_project_name(
+            project_name=bid.project.name
+        )
+        zip_filename = BidService.create_zip_file(
+            filenames=files_paths,
+            path=temp_path,
+            project_name=f"{bid.pk}_{project_clean_name}"
+        )
+        return zip_filename
+
+    @staticmethod
+    def _update_bid_with_zip(bid, zip_file_path):
+        """
+        Updates the Bid instance with the new zip file uploaded to S3.
+        """
+        BidService.update_bid_with_zip(
+            bid=bid,
+            zip_file_path=zip_file_path,
         )
 
 
