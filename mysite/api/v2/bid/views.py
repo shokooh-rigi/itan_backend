@@ -16,7 +16,7 @@ from mysite import settings
 from mysite.bid.models import Bid
 from mysite.core.models import Person, Project
 from mysite.s3_file_manager import S3
-from .serializers import BidSerializer, BidCreateSerializer
+from .serializers import BidSerializer
 from .services import BidService
 
 
@@ -531,7 +531,7 @@ class BidAddFileView(APIView):
 
     @swagger_auto_schema(
         operation_description="Handles POST request to add files to Bid and update it with a compressed zip file.",
-        request_body=BidCreateSerializer,
+        request_body=BidSerializer,
         responses={
             200: "File(s) uploaded and updated successfully.",
             400: "Selected files exceeded maximum upload size!",
@@ -589,9 +589,9 @@ class BidAddFileView(APIView):
     @staticmethod
     def _validate_request_data(request, instance):
         """
-        Validates incoming data with BidCreateSerializer.
+        Validates incoming data with BidSerializer.
         """
-        serializer = BidCreateSerializer(
+        serializer = BidSerializer(
             instance=instance, data=request.data, partial=True
         )
         if not serializer.is_valid():
