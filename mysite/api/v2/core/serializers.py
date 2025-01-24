@@ -14,7 +14,7 @@ from mysite.core.models import (
     CompanyType,
     Service,
 )
-from mysite.equipments.api.serializers import EquipmentSerializer
+from mysite.equipments.models import Equipment
 from mysite.s3_file_manager import S3
 
 User = get_user_model()
@@ -61,64 +61,6 @@ class ContactInfoSerializer(BaseSerializer):
     class Meta:
         model = ContactInfo
         fields = "__all__"
-
-
-class CustomerSerializer(BaseSerializer):
-    class Meta:
-        model = Person
-        fields = [
-            "name",
-            "company_type",
-            "contact_info",
-            "address",
-            "customer_id",
-            "customer_adjustment_in_percentage",
-        ]
-
-
-class PersonSerializer(BaseSerializer):
-    """
-    Serializer for the Person model.
-    """
-
-    contact_info = ContactInfoSerializer()
-
-    class Meta:
-        model = Person
-        fields = "__all__"
-
-    def create(self, validated_data):
-        contact_info_data = validated_data.pop("contact_info")
-        # Create the related ContactInfo object
-        contact_info = ContactInfo.objects.create(**contact_info_data)
-        # Now create the Person object and associate the created ContactInfo
-        person = Person.objects.create(**validated_data, contact_info=contact_info)
-        return person
-
-
-class ProjectSerializer(BaseSerializer):
-    address = AddressSerializer()
-    contact_info = ContactInfoSerializer()
-
-    class Meta:
-        model = Project
-        fields = ["id", "name", "address", "contact_info", "note", "created_by"]
-
-    def create(self, validated_data):
-        address_data = validated_data.pop("address")
-        contact_info_data = validated_data.pop("contact_info")
-
-        # Create the related Address and ContactInfo objects
-        address = Address.objects.create(**address_data)
-        contact_info = ContactInfo.objects.create(**contact_info_data)
-
-        # Now create the Project object
-        project = Project.objects.create(
-            address=address, contact_info=contact_info, **validated_data
-        )
-
-        return project
-
 
 class CompanySerializer(BaseSerializer):
     """Serializer for the Company model."""
@@ -176,6 +118,51 @@ class CompanySerializer(BaseSerializer):
         instance.save()
 
         return instance
+
+
+
+class PersonSerializer(BaseSerializer):
+    """
+    Serializer for the Person model.
+    """
+    company = CompanySerializer()
+    contact_info = ContactInfoSerializer()
+
+    class Meta:
+        model = Person
+        fields = "__all__"
+
+    def create(self, validated_data):
+        contact_info_data = validated_data.pop("contact_info")
+        # Create the related ContactInfo object
+        contact_info = ContactInfo.objects.create(**contact_info_data)
+        # Now create the Person object and associate the created ContactInfo
+        person = Person.objects.create(**validated_data, contact_info=contact_info)
+        return person
+
+
+class ProjectSerializer(BaseSerializer):
+    address = AddressSerializer()
+    contact_info = ContactInfoSerializer()
+
+    class Meta:
+        model = Project
+        fields = ["id", "name", "address", "contact_info", "note", "created_by"]
+
+    def create(self, validated_data):
+        address_data = validated_data.pop("address")
+        contact_info_data = validated_data.pop("contact_info")
+
+        # Create the related Address and ContactInfo objects
+        address = Address.objects.create(**address_data)
+        contact_info = ContactInfo.objects.create(**contact_info_data)
+
+        # Now create the Project object
+        project = Project.objects.create(
+            address=address, contact_info=contact_info, **validated_data
+        )
+
+        return project
 
 
 class UserSerializer(BaseSerializer):
@@ -369,9 +356,24 @@ class CompanyTypeSerializer(BaseSerializer):
         fields = "__all__"
 
 
+
 class ServiceSerializer(BaseSerializer):
-    service_equipments = EquipmentSerializer(many=True, read_only=True)
+    service_equipments = serializers.SerializerMethodField()
+    def get_service_equipments(self, obj):
+        equipments = Equipment.objects.filter(service=obj)
+        return EquipmentSerializer(equipments, many=True).data
+
+    service_equipments = serializers.SerializerMethodField()
 
     class Meta:
         model = Service
         fields = "__all__"
+
+
+class EquipmentSerializer(BaseSerializer):
+    service = ServiceSerializer()
+
+    class Meta:
+        model = Equipment
+        fields = "__all__"
+

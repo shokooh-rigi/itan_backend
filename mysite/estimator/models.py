@@ -72,6 +72,45 @@ class Estimate(BaseModelWithCreatedByUser):
     note = models.TextField(max_length=255, blank=True, null=True)
     flag = models.BooleanField(default=True)
 
+    @property
+    def sub_total(self):
+        estimate_equipments = self.estimateequipment_set.filter(flag=True)
+        total = sum(
+            float(estimate_equipment.price_override or estimate_equipment.equipment.price) * estimate_equipment.quantity
+            for estimate_equipment in estimate_equipments
+        )
+        return total
+    
+    @property
+    def control_system_calculated(self):
+        if not self.estimatedetails:
+            return 0
+        return round(self.sub_total * (self.estimatedetails.control_system / 100), 2)
+    
+    @property
+    def hours_calculated(self):
+        return round(self.sub_total * (self.estimatedetails.hours / 100), 2)
+    
+    @property
+    def predemo_calculated(self):
+        return self.estimatedetails.pre_demo * 1200
+    
+    @property
+    def total_calculated(self):
+        return round(
+            self.sub_total
+            + self.control_system_calculated
+            + self.hours_calculated
+            + self.predemo_calculated
+            + float(self.estimatedetails.adjustment)
+            + float(self.estimatedetails.customer_adjustment),
+            2,
+        )
+    
+    @property
+    def estimate_id(self):
+        estimate_number_generator(self.id)
+
     class Meta:
         ordering = ["-due_date"]
         verbose_name = "Estimate List"
@@ -157,6 +196,7 @@ class EstimateDetails(BaseModel):
         choices=hours_choices,
         default=0,
     )
+    # TODO: remove customer_adjustment
     customer_adjustment = models.DecimalField(
         default=0,
         max_digits=8,

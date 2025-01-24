@@ -637,34 +637,7 @@ class EstimateDetailsView(APIView):
             id=id,
             is_deleted=False,
         )
-        estimate_details = get_object_or_404(
-            EstimateDetails,
-            estimate=estimate,
-            is_deleted=False,
-        )
-        estimate_equipments = EstimateEquipment.objects.filter(
-            estimate=estimate,
-            flag=True,
-            is_deleted=False,
-        )
-
-        estimate_sub = sum(
-            float(eq.price_override if eq.price_override else eq.equipment.price)
-            * float(eq.quantity)
-            for eq in estimate_equipments
-        )
-
-        data = {
-            "estimate_id": id,
-            "estimate": EstimateSerializer(estimate).data,
-            "estimate_details": EstimateDetailsSerializer(estimate_details).data,
-            "estimate_sub": estimate_sub,
-            "estimate_equipments": EstimateEquipmentSerializer(
-                estimate_equipments, many=True
-            ).data,
-        }
-
-        return Response(data=data, status=status.HTTP_200_OK)
+        return Response(data=EstimateSerializer(estimate).data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="Create estimate detail",

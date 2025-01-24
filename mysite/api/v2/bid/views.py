@@ -395,8 +395,8 @@ class BidFileCreateView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'customer_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the customer'),
-                'project_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the project'),
+                'customer': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the customer'),
+                'project': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the project'),
                 'due_date': openapi.Schema(type=openapi.TYPE_STRING, description='Due date for the bid file'),
                 'uploaded_file': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
@@ -404,7 +404,7 @@ class BidFileCreateView(APIView):
                     description='List of uploaded files'
                 )
             },
-            required=['customer_id', 'project_id', 'due_date', 'uploaded_file']
+            required=['customer', 'project', 'due_date', 'uploaded_file']
         ),
         responses={
             201: openapi.Response(

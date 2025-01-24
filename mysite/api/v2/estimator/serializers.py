@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from mysite.api.v2.bid.serializers import BidFileSerializer
+from mysite.api.v2.core.serializers import PersonSerializer, ProjectSerializer, ServiceSerializer, EquipmentSerializer
 from mysite.core.models import Service
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import Estimate, EstimateDetails, EstimateEquipment, EstimateHistory
@@ -35,38 +36,47 @@ class EmailSerializer(serializers.Serializer):
     subject = serializers.CharField(max_length=255)
 
 
+
+
+class EstimateEquipmentSerializer(serializers.ModelSerializer):
+    equipment = EquipmentSerializer()
+    class Meta:
+        model = EstimateEquipment
+        fields = ['equipment', 'quantity', 'price_override']
+
+    def get_service_id(self, obj):
+        # Ensure `obj.equipment` exists to avoid errors
+        if obj.equipment and obj.equipment.service:
+            return obj.equipment.service.id
+        return None
+    
+
+class EstimateDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EstimateDetails
+        fields = "__all__"
+
+
 class EstimateSerializer(serializers.ModelSerializer):
     """Serializer for the Estimate model."""
+    estimate_id = serializers.SerializerMethodField()
     bfm = BidFileSerializer(read_only=True)
-    service = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Service.objects.all()
-    )  # Allow passing a list of service IDs
-    customer_name = serializers.SerializerMethodField()
-    project_name = serializers.SerializerMethodField()
-    engineer_name= serializers.SerializerMethodField(read_only=True)
-    service_names = serializers.SerializerMethodField(read_only=True)
+    customer = PersonSerializer()
+    project = ProjectSerializer()
+    engineer = PersonSerializer()
     pre_demo = serializers.SerializerMethodField()
     total_amount = serializers.SerializerMethodField()
+    estimate_equipments = EstimateEquipmentSerializer(many=True, source='estimateequipment_set')
+    estimate_details = EstimateDetailsSerializer(source='estimatedetails')
+    sub_total = serializers.SerializerMethodField()
+    control_system_calculated = serializers.SerializerMethodField()
+    hours_calculated = serializers.SerializerMethodField()
+    predemo_calculated = serializers.SerializerMethodField()
+    total_calculated = serializers.SerializerMethodField()
 
     class Meta:
         model = Estimate
-        fields = [
-            'id',
-            'bfm',
-            'customer',
-            'customer_name',
-            'project',
-            'project_name',
-            'engineer',
-            'engineer_name',
-            'service',
-            'service_names',
-            'note',
-            'due_date',
-            'pre_demo',
-            'total_amount',
-            'drawing_date',
-        ]
+        fields = "__all__"
 
     def create(self, validated_data):
         services = validated_data.pop('service', [])
@@ -81,22 +91,9 @@ class EstimateSerializer(serializers.ModelSerializer):
         instance.service.set(services)  # Update associated services
         instance.save()
         return instance
-
-    def get_customer_name(self, obj):
-        """Get the name of the customer."""
-        return obj.customer.name if obj.customer else None
-
-    def get_project_name(self, obj):
-        """Get the name of the project."""
-        return obj.project.name if obj.project else None
-
-    def get_engineer_name(self, obj):
-        """Get the name of the engineer."""
-        return obj.engineer.name if obj.engineer else None
-
-    def get_service_names(self, obj):
-        """Get name about associated services."""
-        return [{"id": service.id, "name": service.name} for service in obj.service.all()]
+    
+    def get_estimate_id(self, obj):
+        return obj.estimate_id
 
     def get_pre_demo(self, obj):
         """Get pre_demo from the related EstimateDetail."""
@@ -111,6 +108,21 @@ class EstimateSerializer(serializers.ModelSerializer):
             for estimate_equipment in estimate_equipments
         )
         return total
+    
+    def get_sub_total(self, obj):
+        return obj.sub_total
+    
+    def get_control_system_calculated(self, obj):
+        return obj.control_system_calculated
+    
+    def get_hours_calculated(self, obj):
+        return obj.hours_calculated
+    
+    def get_predemo_calculated(self, obj):
+        return obj.predemo_calculated
+    
+    def get_total_calculated(self, obj):
+        return obj.total_calculated
 
 
     def to_representation(self, instance):
@@ -128,25 +140,6 @@ class EstimateSerializer(serializers.ModelSerializer):
             representation.pop('total_amount', None)
 
         return representation
-
-
-class EstimateDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EstimateDetails
-        fields = '__all__'
-
-
-class EstimateEquipmentSerializer(serializers.ModelSerializer):
-    service_id = serializers.SerializerMethodField()
-    class Meta:
-        model = EstimateEquipment
-        fields = ['equipment', 'quantity', 'price_override', 'service_id']
-
-    def get_service_id(self, obj):
-        # Ensure `obj.equipment` exists to avoid errors
-        if obj.equipment and obj.equipment.service:
-            return obj.equipment.service.id
-        return None
 
 
 class EstimateHistorySerializer(serializers.ModelSerializer):
