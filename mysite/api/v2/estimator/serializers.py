@@ -62,6 +62,7 @@ class EstimateSerializer(serializers.ModelSerializer):
     estimate_id = serializers.SerializerMethodField()
     bfm = BidFileSerializer(read_only=True)
     customer = PersonSerializer()
+    company_name = serializers.SerializerMethodField(read_only=True)
     project = ProjectSerializer()
     engineer = PersonSerializer()
     pre_demo = serializers.SerializerMethodField()
@@ -123,6 +124,11 @@ class EstimateSerializer(serializers.ModelSerializer):
     
     def get_total_calculated(self, obj):
         return obj.total_calculated
+
+    def get_company_name(self, obj):
+        if obj.customer and getattr(obj.customer, 'company', None):
+            return obj.customer.company.name
+        return None
 
 
     def to_representation(self, instance):
