@@ -6,11 +6,18 @@ from .views import (
     ProposalArchiveView,
     ProposalDeleteView,
     ProposalListView,
+    ProposalDetailView,
 )
 
 urlpatterns = [
-    path("proposal/get/", ProposalListView.as_view(), name="proposal-list"),
-    path("proposal/create/", ProposalCreateView.as_view(), name="proposal-create"),
+    path("proposal/list/",
+         ProposalListView.as_view(),
+         name="proposal-list"
+         ),
+    path("proposal/create/",
+         ProposalCreateView.as_view(),
+         name="proposal-create"
+         ),
     path(
         "proposal/archive/<int:id>/",
         ProposalArchiveView.as_view(),
@@ -31,4 +38,10 @@ urlpatterns = [
         ProposalEstimateListView.as_view(),
         name="proposal-estimate",
     ),
+    path(
+        'proposal/list/<int:id>/',
+        ProposalDetailView.as_view(),
+        name='proposal-list_by_id',
+    ),
+
 ]

@@ -4,17 +4,15 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mysite.core.models import LicenseFiles, LicenseInfo
 from mysite.estimator.models import Estimate
-from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
 from mysite.proposal.models import Proposal
 from mysite.s3_file_manager import S3
 from .serializers import ProposalSerializer
@@ -179,6 +177,52 @@ class ProposalListView(APIView):
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(email_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProposalDetailView(APIView):
+    
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        summary="Retrieve a Proposal",
+        description="Retrieve a specific Proposal by its ID if it exists and is not deleted or archived.",
+        parameters=[
+            OpenApiParameter(name="id", description="The ID of the bid file", required=True, type=int),
+        ],
+        responses={
+            200: ProposalSerializer,
+            404: dict,
+        },
+    )
+    def get(self, request, id: int) -> Response:
+        """
+        Retrieve a Proposal by Proposal ID.
+
+        Args:
+            id (int): The ID of the Proposal.
+
+        Returns:
+            - 200: Proposal data if found.
+            - 404: Error message if the Proposal is not found.
+        """
+        try:
+            proposal = Proposal.objects.get(
+                id=id,
+                is_deleted=False,
+                archive=False,
+            )
+        except Proposal.DoesNotExist:
+            return Response(
+                {"error": "Proposal not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Serialize the retrieved object
+        serializer = ProposalSerializer(proposal)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class ProposalEstimateListView(APIView):
