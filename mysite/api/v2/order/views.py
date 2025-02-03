@@ -225,6 +225,12 @@ class OrderProposalListView(APIView):
                 is_deleted=False
             )
 
+            if not proposals.exists():
+                return Response(
+                    {"detail": "No proposals available."},
+                    status=status.HTTP_200_OK,
+                )
+
             if proposal_id:
                 proposals = proposals.filter(id=proposal_id)
 
@@ -234,13 +240,6 @@ class OrderProposalListView(APIView):
                     flat=True
                 )
             )
-
-            if not proposals.exists():
-                return Response(
-                    {"detail": "No proposals available."},
-                    status=status.HTTP_200_OK,
-                )
-
             serializer = ProposalSerializer(proposals, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
