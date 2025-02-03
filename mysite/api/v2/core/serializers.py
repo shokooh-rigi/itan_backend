@@ -62,6 +62,7 @@ class ContactInfoSerializer(BaseSerializer):
         model = ContactInfo
         fields = "__all__"
 
+
 class CompanySerializer(BaseSerializer):
     """Serializer for the Company model."""
 
@@ -118,7 +119,6 @@ class CompanySerializer(BaseSerializer):
         instance.save()
 
         return instance
-
 
 
 class PersonSerializer(BaseSerializer):
@@ -354,7 +354,6 @@ class CompanyTypeSerializer(BaseSerializer):
     class Meta:
         model = CompanyType
         fields = "__all__"
-
 
 
 class ServiceSerializer(BaseSerializer):

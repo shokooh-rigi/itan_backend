@@ -36,8 +36,6 @@ class EmailSerializer(serializers.Serializer):
     subject = serializers.CharField(max_length=255)
 
 
-
-
 class EstimateEquipmentSerializer(serializers.ModelSerializer):
     equipment = EquipmentSerializer()
     class Meta:

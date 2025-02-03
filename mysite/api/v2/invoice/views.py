@@ -1,5 +1,6 @@
 import datetime
 import logging
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -7,6 +8,7 @@ from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
@@ -14,8 +16,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mysite.api.v2.invoice.serializers import InvoiceSerializer, AccountSummarySerializer
-from mysite.core.models import ModulesToEmailTemplateRelation, LicenseInfo, ContactInfo
+from mysite.api.v2.invoice.serializers import InvoiceSerializer, AccountSummarySerializer, \
+    AccountSummaryCreateSerializer
+from mysite.core.models import ModulesToEmailTemplateRelation, LicenseInfo, Person
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction, AccountSummary
 from mysite.order.models import Order
 from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
@@ -675,6 +678,36 @@ class AccountSummaryAPIView(APIView):
         return Response(form_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class AccountSummaryListView(generics.ListAPIView):
+    """
+    Retrieve a paginated list of account summaries with optional filters:
+    - Filter by date range (`fromDate`, `toDate`).
+    - Order by a specified field (`ordering`).
+    - Manual pagination instead of using a separate pagination class.
+    """
+    serializer_class = AccountSummarySerializer
+
+    def get(self, request, *args, **kwargs):
+        ordering = request.GET.get('ordering', '-created_on')
+        from_date = request.GET.get("fromDate", '04/01/2020')
+        to_date = request.GET.get("toDate", '01/01/2100')
+
+        from_date_obj = datetime.strptime(from_date, '%m/%d/%Y')
+        to_date_obj = datetime.strptime(to_date, '%m/%d/%Y') + timedelta(hours=23, minutes=59, seconds=59)
+
+        object_list = AccountSummary.objects.filter(
+            created_on__range=(from_date_obj, to_date_obj)
+        ).order_by(ordering)
+
+        paginator = PageNumberPagination()
+        paginator.page_size = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
+        page = paginator.paginate_queryset(object_list, request)
+
+        serialized_data = AccountSummarySerializer(page, many=True).data
+
+        return paginator.get_paginated_response(serialized_data)
+
+
 class AccountSummaryCreateView(APIView):
     """
     Handles the creation of account summaries for customers.
@@ -698,16 +731,17 @@ class AccountSummaryCreateView(APIView):
         - Output:
           - A created account summary object with a downloadable PDF file
         """
-        serializer = AccountSummarySerializer(data=request.data)
+        serializer = AccountSummaryCreateSerializer(data=request.data)
 
         if serializer.is_valid():
             # Handle customers dynamically if not provided
             customer = serializer.validated_data.get('customer')
             if not customer:
                 if customer_id:
-                    customer = ContactInfo.objects.filter(id=customer_id).first()
+                    # todo: dear reza check if it is ok?? and is need update api for account summery??
+                    customer = Person.objects.filter(id=customer_id).first()
                 else:
-                    customer = ContactInfo.objects.filter(
+                    customer = Person.objects.filter(
                         company_type__name__iexact='mechanical contractor'
                     ).first()
                 if not customer:

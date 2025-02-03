@@ -77,7 +77,7 @@ class InvoicePaymentSerializer(serializers.Serializer):
     ]
 
 
-class AccountSummarySerializer(serializers.ModelSerializer):
+class AccountSummaryCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating Account Summaries.
 
@@ -110,3 +110,10 @@ class AccountSummarySerializer(serializers.ModelSerializer):
             'attention',
             'created_by',
         ]
+
+
+# Serializer for AccountSummary
+class AccountSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccountSummary
+        fields = "__all__"
