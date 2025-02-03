@@ -17,8 +17,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from mysite.order.models import Order, TechLabel, ChangeOrder
-from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer
+from mysite.order.models import Order, TechLabel, ChangeOrder, ControlSystem
+from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer, ControlSystemSerializer
 from .serializers import TechLabelSerializer
 from .services.change_order_service import ChangeOrderServiceLayer, DeleteChangeOrderService
 from .services.order_equipment_submittal_service import OrderEquipmentSubmittalService
@@ -695,6 +695,14 @@ class ControlSystemAPIView(APIView):
             return Response({'message': 'Control system updated successfully!'}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ControlSystemViewSet(ModelViewSet):
+    """
+    API for managing control systems, including listing, creating, updating, and deleting.
+    """
+    queryset = ControlSystem.objects.all()
+    serializer_class = ControlSystemSerializer
 
 
 class OrderEquipmentSubmittalView(APIView):

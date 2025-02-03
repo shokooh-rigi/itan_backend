@@ -16,12 +16,13 @@ from .views import (
     OrderFieldDrawingView,
     OrderGeneralNotesView,
     OrderSitePicturesView,
-    OrderFullUpdateAPIView,
+    OrderFullUpdateAPIView, ControlSystemViewSet,
 )
 
 router = DefaultRouter()
 
 router.register(r"tech-label", TechLabelViewSet, basename="tech-label")
+router.register(r'control-systems', ControlSystemViewSet, basename="control-systems")
 
 urlpatterns = [
     path('orders/',

@@ -23,6 +23,8 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "version_number",
+            "os",
+            "release_date",
             "control_file_url",
             "documentation",
             "manufacturer",
