@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -10,6 +10,7 @@ from mysite.coi.models import Coi
 from mysite.core.models import ModulesToEmailTemplateRelation
 from mysite.core.views import htmlbodytemplate_tag_converter
 from .serializers import CoiSerializer
+
 
 class CoiListView(ListAPIView):
     """
@@ -73,3 +74,20 @@ class CoiCreateView(APIView):
         email.send()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CoiUpdateView(UpdateAPIView):
+    """
+    API endpoint to update a COI object.
+    """
+    serializer_class = CoiSerializer
+    queryset = Coi.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class CoiDeleteView(DestroyAPIView):
+    """
+    API endpoint to delete a COI object.
+    """
+    queryset = Coi.objects.all()
+    permission_classes = [IsAuthenticated]
