@@ -201,9 +201,16 @@ class OrderProposalListView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Retrieve non-archived and unassociated proposals",
-        operation_description=(
-            "This endpoint retrieves proposals that are not archived and not associated with any order."
-        ),
+        operation_description="Endpoint retrieves proposals that are not archived and not associated with any order.",
+        manual_parameters=[
+            openapi.Parameter(
+                'proposal_id',
+                openapi.IN_QUERY,
+                description="Filter proposals by ID (optional)",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
+        ],
         responses={
             200: openapi.Response(
                 description="List of available proposals",
