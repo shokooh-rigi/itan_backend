@@ -32,5 +32,5 @@ urlpatterns = [
          name='account-summary-create'),
     path('account/summary/delete/<int:account_summary_id>/', AccountSummaryDeleteView.as_view(),
          name='account-summary-delete'),
-    path('account-summaries/', AccountSummaryListView.as_view(), name='account-summary-list'),
+    path('account/summary/list/', AccountSummaryListView.as_view(), name='account-summary-list'),
 ]
