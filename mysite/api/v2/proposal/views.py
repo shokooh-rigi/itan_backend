@@ -233,6 +233,15 @@ class ProposalEstimateListView(APIView):
         operation_description=(
             "This endpoint retrieves estimates that are not archived and not associated with any proposal."
         ),
+        manual_parameters=[
+            openapi.Parameter(
+                'estimate_id',
+                openapi.IN_QUERY,
+                description="Filter estimate by ID (optional)",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
+        ],
         responses={
             200: openapi.Response(
                 description="List of available estimates",
