@@ -1,13 +1,14 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
+from custom_user.models import User
+from mysite.core.base_model import BaseModel, BaseModelWithCreatedByUser
 from mysite.render import Render
-from mysite.scheduler.models import *
+from mysite.scheduler.models import Schedule, Maintenance
 
 
-# Create your models here.
-
-
-class Settlement(models.Model):
+class Settlement(BaseModelWithCreatedByUser):
     contractor = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -15,11 +16,19 @@ class Settlement(models.Model):
         null=False,
         related_name="settlement_contractor",
     )
-    settlement_start = models.DateTimeField(blank=False, null=True)
-    settlement_end = models.DateTimeField(blank=False, null=True)
-    fixed_expenses = models.DecimalField(default=0, max_digits=8, decimal_places=2)
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
+    settlement_start = models.DateTimeField(
+        blank=False,
+        null=True
+    )
+    settlement_end = models.DateTimeField(
+        blank=False,
+        null=True
+    )
+    fixed_expenses = models.DecimalField(
+        default=0,
+        max_digits=8,
+        decimal_places=2
+    )
 
     class Meta:
         ordering = ["-created_on"]
@@ -40,26 +49,46 @@ class Settlement(models.Model):
         return delete_pdf
 
 
-class SettledSchedule(models.Model):
+class SettledSchedule(BaseModel):
     settlement = models.ForeignKey(
-        Settlement, on_delete=models.CASCADE, blank=False, null=False
+        Settlement,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
     )
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, blank=True)
-    settled_total = models.DecimalField(max_digits=8, decimal_places=2)
-    settled_value = models.DecimalField(max_digits=8, decimal_places=2)
+    schedule = models.ForeignKey(
+        Schedule,
+        on_delete=models.CASCADE,
+        blank=True
+    )
+    settled_total = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    settled_value = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
     # 0 means Hourly and 1 means By Percentage
     settled_type = models.BooleanField(default=False)
     settled_hours = models.FloatField(default=0)
     previous_payment = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
+        max_digits=8,
+        decimal_places=2,
+        blank=True,
+        null=True
     )
     settle_override = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
+        max_digits=8,
+        decimal_places=2,
+        blank=True,
+        null=True
     )
     completion_percentage = models.PositiveIntegerField(
-        validators=[MaxValueValidator(100), MinValueValidator(0)], blank=True, null=True
+        validators=[MaxValueValidator(100), MinValueValidator(0)],
+        blank=True,
+        null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
@@ -68,14 +97,23 @@ class SettledSchedule(models.Model):
         return str(self.schedule) + ": $" + str(intcomma(self.settled_value))
 
 
-class SettledMaintenances(models.Model):
+class SettledMaintenances(BaseModel):
     settlement = models.ForeignKey(
-        Settlement, on_delete=models.CASCADE, blank=False, null=False
+        Settlement,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
     )
-    maintenance = models.ForeignKey(Maintenance, on_delete=models.CASCADE, blank=True)
-    settled_value = models.DecimalField(max_digits=8, decimal_places=2)
+    maintenance = models.ForeignKey(
+        Maintenance,
+        on_delete=models.CASCADE,
+        blank=True
+    )
+    settled_value = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
     settled_hours = models.FloatField(default=0)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_on"]
