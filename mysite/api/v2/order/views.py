@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from mysite.order.models import Order, TechLabel, ChangeOrder, ControlSystem
+from mysite.proposal.models import Proposal
 from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer, ControlSystemSerializer
 from .serializers import TechLabelSerializer
 from .services.change_order_service import ChangeOrderServiceLayer, DeleteChangeOrderService
@@ -27,6 +28,7 @@ from .services.order_full_update_service import OrderFullUpdateService
 from .services.order_service import OrderService, OrderEditService
 from .services.order_site_pictures_service import OrderSitePicturesService
 from .services.tech_label_service import TechLabelServiceLayer
+from ..proposal.serializers import ProposalSerializer
 
 
 class OrderListAPIView(APIView):
@@ -156,61 +158,9 @@ class OrderAddAPIView(APIView):
     API view for adding a new order.
 
     Methods:
-        - GET: Retrieves a list of proposals.
         - POST: Creates a new order.
-
-    Query Parameters:
-        - proposal_id (int): Optional ID of a specific proposal to fetch.
     """
     permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Retrieve a list of proposals or a specific proposal using the proposal_id query parameter.",
-        manual_parameters=[
-            openapi.Parameter(
-                "proposal_id",
-                openapi.IN_QUERY,
-                description="Optional ID of a specific proposal to fetch.",
-                type=openapi.TYPE_INTEGER
-            )
-        ],
-        responses={
-            200: openapi.Response(
-                description="List of proposals",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "proposals": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    "name": openapi.Schema(type=openapi.TYPE_STRING),  # Replace with the actual field name
-                                    "created_on": openapi.Schema(type=openapi.FORMAT_DATETIME)
-                                }
-                            )
-                        )
-                    }
-                )
-            )
-        }
-    )
-    def get(self, request):
-        """
-        Retrieve proposals based on the provided proposal_id.
-        """
-        proposal_id = request.query_params.get("proposal_id", None)
-        proposals = OrderService.get_proposals(proposal_id)
-        data = [
-            {
-                "id": proposal.id,
-                "name": proposal.name,  # Replace `name` with appropriate fields.
-                "created_on": proposal.created_on,
-            }
-            for proposal in proposals
-        ]
-        return Response({"proposals": data}, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Create a new order by providing the required data.",
@@ -244,6 +194,64 @@ class OrderAddAPIView(APIView):
             serializer.save()
             return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderProposalListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve non-archived and unassociated proposals",
+        operation_description=(
+            "This endpoint retrieves proposals that are not archived and not associated with any order."
+        ),
+        responses={
+            200: openapi.Response(
+                description="List of available proposals",
+                schema=ProposalSerializer(many=True),
+            ),
+            401: "Unauthorized - User must be authenticated",
+        },
+    )
+    def get(self, request, proposal_id=None):
+        """
+        Retrieves available proposals that are not archived or associated with an order.
+
+        Returns:
+            - Response: Serialized data of proposals.
+        """
+        try:
+            proposals = Proposal.objects.filter(
+                archive=False,
+                is_deleted=False
+            )
+
+            if proposal_id:
+                proposals = proposals.filter(id=proposal_id)
+
+            proposals = proposals.exclude(
+                id__in=Order.objects.values_list(
+                    "proposal_id",
+                    flat=True
+                )
+            )
+
+            if not proposals.exists():
+                return Response(
+                    {"detail": "No proposals available."},
+                    status=status.HTTP_200_OK,
+                )
+
+            serializer = ProposalSerializer(proposals, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {
+                    "detail": "An error occurred while retrieving proposals.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class OrderEditAPIView(APIView):

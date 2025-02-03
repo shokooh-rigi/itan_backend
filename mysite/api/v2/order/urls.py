@@ -16,7 +16,7 @@ from .views import (
     OrderFieldDrawingView,
     OrderGeneralNotesView,
     OrderSitePicturesView,
-    OrderFullUpdateAPIView, ControlSystemViewSet,
+    OrderFullUpdateAPIView, ControlSystemViewSet, OrderProposalListView,
 )
 
 router = DefaultRouter()
@@ -28,6 +28,9 @@ urlpatterns = [
     path('orders/',
          OrderListAPIView.as_view(),
          name='order-list'),  # List orders
+    path('orders/proposals/<int:proposal_id>/',
+         OrderProposalListView.as_view(),
+         name='order-proposal-detail'),
     path('orders/add/',
          OrderAddAPIView.as_view()
          , name='order-add'),  # Add a new order
