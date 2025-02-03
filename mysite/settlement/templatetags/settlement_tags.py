@@ -1,8 +1,10 @@
 from django import template
 
-from ..models import SettledSchedule, Schedule, Order, ScheduleTech, SettledMaintenances
-from ...order.templatetags.order_tags import order_total_calculator
+from ..models import SettledSchedule, SettledMaintenances
 from ...estimator.templatetags.estimator_tags import estimate_predemo_calculator
+from ...order.templatetags.order_tags import order_total_calculator
+from ...scheduler.models import ScheduleTech
+
 register = template.Library()
 
 
