@@ -201,15 +201,7 @@ class OrderProposalListView(APIView):
     @swagger_auto_schema(
         operation_summary="Retrieve non-archived and unassociated proposals",
         operation_description="Endpoint retrieves proposals that are not archived and not associated with any order.",
-        manual_parameters=[
-            openapi.Parameter(
-                'proposal_id',
-                openapi.IN_QUERY,
-                description="Filter proposals by ID (optional)",
-                type=openapi.TYPE_INTEGER,
-                required=False,
-            ),
-        ],
+
         responses={
             200: openapi.Response(
                 description="List of available proposals",
@@ -218,12 +210,11 @@ class OrderProposalListView(APIView):
             401: "Unauthorized - User must be authenticated",
         },
     )
-    def get(self, request):
+    def get(self, request, proposal_id=None):
         """
         Retrieves available proposals that are not archived or associated with an order.
         """
         try:
-            proposal_id = request.GET.get("proposal_id")
 
             proposals = Proposal.objects.filter(
                 archive=False,

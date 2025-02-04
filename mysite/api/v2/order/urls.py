@@ -31,6 +31,9 @@ urlpatterns = [
     path('orders/proposals/',
          OrderProposalListView.as_view(),
          name='order-proposal-list'),
+    path('orders/proposals/<int:proposal_id>/',
+         OrderProposalListView.as_view(),
+         name='order-proposal-by-proposal_id'),
     path('orders/add/',
          OrderAddAPIView.as_view()
          , name='order-add'),  # Add a new order
