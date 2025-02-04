@@ -195,7 +195,6 @@ class OrderAddAPIView(APIView):
             return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class OrderProposalListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -219,14 +218,13 @@ class OrderProposalListView(APIView):
             401: "Unauthorized - User must be authenticated",
         },
     )
-    def get(self, request, proposal_id=None):
+    def get(self, request):
         """
         Retrieves available proposals that are not archived or associated with an order.
-
-        Returns:
-            - Response: Serialized data of proposals.
         """
         try:
+            proposal_id = request.GET.get("proposal_id")
+
             proposals = Proposal.objects.filter(
                 archive=False,
                 is_deleted=False
@@ -247,6 +245,7 @@ class OrderProposalListView(APIView):
                     flat=True
                 )
             )
+
             serializer = ProposalSerializer(proposals, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
