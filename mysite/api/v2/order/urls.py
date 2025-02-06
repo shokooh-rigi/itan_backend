@@ -16,13 +16,15 @@ from .views import (
     OrderFieldDrawingView,
     OrderGeneralNotesView,
     OrderSitePicturesView,
-    OrderFullUpdateAPIView, ControlSystemViewSet, OrderProposalListView,
+    OrderFullUpdateAPIView,
+    OrderProposalListView,
+    ControlSystemListCreateView,
+    ControlSystemDetailView, ControlSystemManufacturerListCreateView, ControlSystemManufacturerDetailView,
 )
 
 router = DefaultRouter()
 
 router.register(r"tech-label", TechLabelViewSet, basename="tech-label")
-router.register(r'control-systems', ControlSystemViewSet, basename="control-systems")
 
 urlpatterns = [
     path('orders/',
@@ -73,5 +75,18 @@ urlpatterns = [
     path('orders/<int:order_id>/update/',
          OrderFullUpdateAPIView.as_view(),
          name='order-full-update'),
+    path('orders/control-systems/',
+         ControlSystemListCreateView.as_view(),
+         name='control-system-list'),
+    path('orders/control-systems/<int:pk>/',
+         ControlSystemDetailView.as_view(),
+         name='control-system-detail'),
+    path('orders/control-systems/manufacturer/',
+      ControlSystemManufacturerListCreateView.as_view(),
+      name='control-system-manufacturer-list'),
+    path('orders/control-systems/manufacturer/<int:pk>/',
+         ControlSystemManufacturerDetailView.as_view(),
+         name='control-system-manufacturer-detail'),
+
 ]
 urlpatterns += router.urls

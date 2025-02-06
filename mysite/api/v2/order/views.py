@@ -11,15 +11,17 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from mysite.order.models import Order, TechLabel, ChangeOrder, ControlSystem
+from mysite.order.models import Order, TechLabel, ChangeOrder, ControlSystem, ControlSystemManufacturer
 from mysite.proposal.models import Proposal
-from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer, ControlSystemSerializer
+from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer, ControlSystemSerializer, \
+    ControlSystemManufacturerSerializer
 from .serializers import TechLabelSerializer
 from .services.change_order_service import ChangeOrderServiceLayer, DeleteChangeOrderService
 from .services.order_equipment_submittal_service import OrderEquipmentSubmittalService
@@ -164,7 +166,19 @@ class OrderAddAPIView(APIView):
 
     @swagger_auto_schema(
         operation_description="Create a new order by providing the required data.",
-        request_body=OrderSerializer,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "architect_name": openapi.Schema(type=openapi.TYPE_STRING, description="Architect's name"),
+                "po_number": openapi.Schema(type=openapi.TYPE_STRING, description="PO order number"),
+                "date_po_received": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Date PO was received"),
+                "final_offset": openapi.Schema(type=openapi.TYPE_NUMBER, description="Final offset value"),
+                "note": openapi.Schema(type=openapi.TYPE_STRING, description="Additional notes"),
+                "estimated_date_of_project": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Estimated project date"),
+                "proposal_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the associated proposal"),
+            },
+            required=["po_number"]
+        ),
         responses={
             201: openapi.Response(
                 description="Order created successfully",
@@ -194,6 +208,7 @@ class OrderAddAPIView(APIView):
             serializer.save()
             return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderProposalListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -701,12 +716,36 @@ class ControlSystemAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ControlSystemViewSet(ModelViewSet):
+class ControlSystemListCreateView(ListCreateAPIView):
     """
-    API for managing control systems, including listing, creating, updating, and deleting.
+    API for listing and creating Control Systems
     """
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
+
+
+class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    API for retrieving, updating, and deleting a specific Control System.
+    """
+    queryset = ControlSystem.objects.all()
+    serializer_class = ControlSystemSerializer
+
+
+class ControlSystemManufacturerListCreateView(ListCreateAPIView):
+    """
+    API for listing and creating Control System Manufacturers.
+    """
+    queryset = ControlSystemManufacturer.objects.all()
+    serializer_class = ControlSystemManufacturerSerializer
+
+
+class ControlSystemManufacturerDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    API for retrieving, updating, and deleting a specific Control System Manufacturer.
+    """
+    queryset = ControlSystemManufacturer.objects.all()
+    serializer_class = ControlSystemManufacturerSerializer
 
 
 class OrderEquipmentSubmittalView(APIView):
