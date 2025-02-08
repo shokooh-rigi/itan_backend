@@ -4,6 +4,7 @@ from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
 from mysite.order.models import Order, TechLabel, ChangeOrderService, ChangeOrder, TechLabelExtraFields, ControlSystem, \
     ControlSystemManufacturer
+from mysite.proposal.models import Proposal
 
 
 class ControlSystemManufacturerSerializer(serializers.ModelSerializer):
@@ -38,6 +39,7 @@ class OrderSerializer(serializers.ModelSerializer):
     - Validates and processes Order data.
     """
     proposal = ProposalSerializer(read_only=True)
+    proposal_id = serializers.IntegerField(write_only=True)
     architect_name = PersonSerializer(read_only=True)
     control_system = ControlSystemSerializer(read_only=True)
     project_number = serializers.CharField(read_only=True)
@@ -46,6 +48,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             "proposal",
+            "proposal_id",
             "architect_name",
             "id",
             "project_number",
@@ -64,6 +67,20 @@ class OrderSerializer(serializers.ModelSerializer):
             "control_system",
         ]
 
+    def create(self, validated_data):
+        """Override create method to link proposal using proposal_id"""
+        proposal_id = validated_data.pop("proposal_id", None)
+        if not proposal_id:
+            raise serializers.ValidationError({"proposal_id": "This field is required."})
+
+        try:
+            proposal = Proposal.objects.get(id=proposal_id)
+        except Proposal.DoesNotExist:
+            raise serializers.ValidationError({"proposal_id": "Invalid proposal_id."})
+
+        validated_data["proposal"] = proposal
+        return super().create(validated_data)
+
     def to_representation(self, instance):
         """Customize response for create requests"""
         representation = super().to_representation(instance)
@@ -77,7 +94,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
                 "estimated_date_of_project": representation.get("estimated_date_of_project"),
-                "proposal_id": representation.get("proposal_id"),
+                "proposal_id": instance.proposal.id if instance.proposal else None,  # Ensure proposal_id is included
             }
 
         return representation
