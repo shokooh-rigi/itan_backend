@@ -71,7 +71,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
         if request and request.method == 'POST':
             return {
-                "architect_name": representation.get("architect_name"' "'),
+                "architect_name": representation.get("architect_name", ''),
                 "po_number": representation.get("po_number"),
                 "date_po_received": representation.get("date_po_received"),
                 "final_offset": representation.get("final_offset"),
