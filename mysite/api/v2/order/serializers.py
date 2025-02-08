@@ -70,17 +70,14 @@ class OrderSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         if request and request.method == 'POST':
-            proposal_data = representation.get("proposal", {})
-            architect_data = representation.get("architect_name", {})
-
             return {
-                "architect_name": architect_data.get("name"' "'),
+                "architect_name": representation.get("architect_name"' "'),
                 "po_number": representation.get("po_number"),
                 "date_po_received": representation.get("date_po_received"),
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
                 "estimated_date_of_project": representation.get("estimated_date_of_project"),
-                "proposal_id": proposal_data.get("id", 0),
+                "proposal_id": representation.get("proposal_id", 0),
             }
 
         return representation
