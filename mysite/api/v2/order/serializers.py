@@ -40,6 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
     proposal = ProposalSerializer(read_only=True)
     architect_name = PersonSerializer(read_only=True)
     control_system = ControlSystemSerializer(read_only=True)
+    project_number = serializers.CharField(read_only=True)
 
     class Meta:
         model = Order
@@ -69,17 +70,21 @@ class OrderSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         if request and request.method == 'POST':
+            proposal_data = representation.get("proposal", {})
+            architect_data = representation.get("architect_name", {})
+
             return {
-                "architect_name": representation.get("architect_name", {}).get("name"),  # Extract only name
+                "architect_name": architect_data.get("name"' "'),
                 "po_number": representation.get("po_number"),
                 "date_po_received": representation.get("date_po_received"),
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
                 "estimated_date_of_project": representation.get("estimated_date_of_project"),
-                "proposal_id": representation.get("proposal", {}).get("id"),  # Extract proposal ID only
+                "proposal_id": proposal_data.get("id", 0),
             }
 
         return representation
+
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):
     """
