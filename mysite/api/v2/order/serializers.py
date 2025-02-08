@@ -77,7 +77,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
                 "estimated_date_of_project": representation.get("estimated_date_of_project"),
-                "proposal_id": representation.get("proposal_id", 0),
+                "proposal_id": representation.get("proposal_id"),
             }
 
         return representation
