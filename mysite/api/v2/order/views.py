@@ -162,7 +162,7 @@ class OrderAddAPIView(APIView):
     Methods:
         - POST: Creates a new order.
     """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Create a new order by providing the required data.",
