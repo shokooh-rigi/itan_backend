@@ -18,6 +18,9 @@ class ControlSystemSerializer(serializers.ModelSerializer):
     Serializer for the ControlSystem model.
     """
     manufacturer = ControlSystemManufacturerSerializer(read_only=True)
+    manufacturer_id = serializers.PrimaryKeyRelatedField(
+        queryset=ControlSystemManufacturer.objects.all(), write_only=True
+    )
 
     class Meta:
         model = ControlSystem
@@ -29,7 +32,13 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             "control_file_url",
             "documentation",
             "manufacturer",
+            "manufacturer_id",
         ]
+
+    def create(self, validated_data):
+        manufacturer = validated_data.pop("manufacturer_id")
+        control_system = ControlSystem.objects.create(manufacturer=manufacturer, **validated_data)
+        return control_system
 
 
 class OrderSerializer(serializers.ModelSerializer):
