@@ -44,6 +44,15 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         control_system = ControlSystem.objects.create(manufacturer=manufacturer, **validated_data)
         return control_system
 
+    def to_representation(self, instance):
+        """
+        Ensures 'manufacturer' is only included in the response, not in requests.
+        """
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and request.method in ["POST", "PUT", "PATCH"]:
+            data.pop("manufacturer", None)
+        return data
 
 class OrderSerializer(serializers.ModelSerializer):
     """
