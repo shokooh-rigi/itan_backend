@@ -723,6 +723,24 @@ class ControlSystemListCreateView(ListCreateAPIView):
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["version_number", "os", "release_date", "control_file_url", "manufacturer_id"],
+            properties={
+                "version_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "os": openapi.Schema(type=openapi.TYPE_STRING),
+                "release_date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
+                "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
+                "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+        responses={
+            201: ControlSystemSerializer(),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     """
