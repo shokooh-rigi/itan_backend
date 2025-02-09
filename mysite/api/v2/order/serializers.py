@@ -23,7 +23,7 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
     )
-    documentation = serializers.FileField( required=False, write_only=True)
+    documentation = serializers.FileField(write_only=True)
 
 
     class Meta:
