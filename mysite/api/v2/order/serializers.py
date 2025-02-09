@@ -39,7 +39,6 @@ class ControlSystemSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
             "manufacturer": {"required": False},
-            "documentation": {"required": False},
         }
 
     def create(self, validated_data):
