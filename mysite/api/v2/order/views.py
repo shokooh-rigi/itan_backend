@@ -729,6 +729,7 @@ class ControlSystemListCreateView(ListCreateAPIView):
             required=["version_number", "os", "release_date", "control_file_url", "manufacturer_id"],
             properties={
                 "version_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "documentation": openapi.Schema(type=openapi.TYPE_FILE),
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
                 "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
