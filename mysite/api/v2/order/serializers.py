@@ -23,7 +23,7 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
     )
-    documentation = serializers.FileField( required=False)
+    documentation = serializers.FileField( required=False, write_only=True)
 
 
     class Meta:
@@ -35,8 +35,8 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             "release_date",
             "control_file_url",
             "documentation",
-            "manufacturer",
             "manufacturer_id",
+            "manufacturer",
         ]
 
         extra_kwargs = {
