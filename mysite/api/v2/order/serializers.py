@@ -19,9 +19,11 @@ class ControlSystemSerializer(serializers.ModelSerializer):
     """
     manufacturer = ControlSystemManufacturerSerializer(read_only=True)
     manufacturer_id = serializers.PrimaryKeyRelatedField(
-        queryset=ControlSystemManufacturer.objects.all(), write_only=True
+        queryset=ControlSystemManufacturer.objects.all(),
+        write_only=True,
+        required=True,
     )
-    documentation = serializers.FileField( write_only=True)
+    documentation = serializers.FileField( required=False)
 
 
     class Meta:
