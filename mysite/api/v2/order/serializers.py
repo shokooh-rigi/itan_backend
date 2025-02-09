@@ -21,7 +21,7 @@ class ControlSystemSerializer(serializers.ModelSerializer):
     manufacturer_id = serializers.PrimaryKeyRelatedField(
         queryset=ControlSystemManufacturer.objects.all(), write_only=True
     )
-    documentation = serializers.FileField(required=False)
+    documentation = serializers.FileField( write_only=True)
 
 
     class Meta:
