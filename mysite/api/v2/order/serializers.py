@@ -35,6 +35,10 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             "manufacturer_id",
         ]
 
+        extra_kwargs = {
+            "manufacturer": {"required": False},
+        }
+
     def create(self, validated_data):
         manufacturer = validated_data.pop("manufacturer_id")
         control_system = ControlSystem.objects.create(manufacturer=manufacturer, **validated_data)
