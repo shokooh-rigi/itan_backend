@@ -21,6 +21,8 @@ class ControlSystemSerializer(serializers.ModelSerializer):
     manufacturer_id = serializers.PrimaryKeyRelatedField(
         queryset=ControlSystemManufacturer.objects.all(), write_only=True
     )
+    documentation = serializers.FileField(required=False)
+
 
     class Meta:
         model = ControlSystem
@@ -37,6 +39,7 @@ class ControlSystemSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
             "manufacturer": {"required": False},
+            "documentation": {"required": False},
         }
 
     def create(self, validated_data):

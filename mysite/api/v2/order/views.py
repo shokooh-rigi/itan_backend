@@ -726,7 +726,7 @@ class ControlSystemListCreateView(ListCreateAPIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["version_number", "os", "release_date", "control_file_url", "manufacturer_id"],
+            required=["manufacturer_id"],
             properties={
                 "version_number": openapi.Schema(type=openapi.TYPE_STRING),
                 "documentation": openapi.Schema(type=openapi.TYPE_FILE),
