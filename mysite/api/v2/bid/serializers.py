@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mysite.bidfilemgm.models import BidFile
+from mysite.bidfilemgm.models import BidFile, BidAttachment
 
 
 class BidFileSerializer(serializers.ModelSerializer):
@@ -14,7 +14,6 @@ class BidFileSerializer(serializers.ModelSerializer):
             'customer_name',
             'project',
             'project_name',
-            'uploaded_file',
             'due_date',
             'note',
             'created_by',
@@ -33,8 +32,14 @@ class BidFileCreateSerializer(serializers.ModelSerializer):
         fields = [
             'customer',
             'project',
-            'uploaded_file',
             'due_date',
             'note',
             'created_by',
         ]
+
+
+
+class BidAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BidAttachment
+        fields = "__all__"

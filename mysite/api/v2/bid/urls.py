@@ -7,8 +7,11 @@ from .views import (
     BidFileArchiveView,
     BidFileDeleteView,
     BidFileCreateView,
-    BidFileAddFileView, 
+    BidFileAddFileView,
     BidListView,
+    BidAttachmentRetrieveUpdateDestroyView,
+    BidAttachmentRetrieveView,
+    BidAttachmentListCreateView,
 )
 
 
@@ -21,4 +24,8 @@ urlpatterns = [
     path('bid/duplicate/<int:bid_id>/', BidFileDuplicateView.as_view(), name='bid-duplicate'),
     path('bid/archive/<int:bid_id>/', BidFileArchiveView.as_view(), name='bid-archive'),
     path('bid/delete/<int:bid_id>/', BidFileDeleteView.as_view(), name='bid-delete'),
+    path('bid/attachments/', BidAttachmentListCreateView.as_view(), name='bid-attachment-list-create'),
+    path('bid/attachments/<int:pk>/', BidAttachmentRetrieveView.as_view(), name='bid-attachment-retrieve'),
+    path('bid/attachments/<int:pk>/update/', BidAttachmentRetrieveUpdateDestroyView.as_view(),
+         name='bid-attachment-update-delete'),
 ]

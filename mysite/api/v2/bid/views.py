@@ -1,5 +1,5 @@
 import os
-
+from rest_framework.parsers import MultiPartParser
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -7,16 +7,17 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework import status
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mysite import settings
-from mysite.bidfilemgm.models import BidFile
+from mysite.bidfilemgm.models import BidFile, BidAttachment
 from mysite.core.models import Person, Project
 from mysite.s3_file_manager import S3
-from .serializers import BidFileSerializer, BidFileCreateSerializer
+from .serializers import BidFileSerializer, BidFileCreateSerializer, BidAttachmentSerializer
 from .services import BidFileService
 
 
@@ -271,7 +272,6 @@ class BidFileDuplicateView(APIView):
             due_date=this_bid_file.due_date,
             note=this_bid_file.note,
             archive=this_bid_file.archive,  # If archive is required
-            uploaded_file=None,  # Retain the uploaded file if needed
         )
 
         return duplicated_bfm
@@ -343,13 +343,12 @@ class BidFileDeleteView(APIView):
     )
     def delete(self, request, bid_id):
         """
-        Delete a BidFile instance.
+        Delete a BidFile instance and all related BidAttachment instances.
         """
         this_bidfile = get_object_or_404(
             BidFile,
             id=bid_id,
             is_deleted=False,
-
         )
 
         # Check if the user is authorized to delete the bid file
@@ -362,23 +361,29 @@ class BidFileDeleteView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Proceed to delete the file from S3 and then the BidFile
+        # Proceed to delete the file and all related BidAttachments from S3
         s3 = S3()
         file_key = str(this_bidfile.uploaded_file)
 
-        # Delete the file from S3
-        try:
-            s3.delete_file_from_bucket(key=settings.MEDIA_URL + file_key)
-        except Exception as e:
-            return Response(
-                {"error": f"Error deleting file from S3: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        # Delete related BidAttachment files from S3
+        related_attachments = BidAttachment.objects.filter(bid_file=this_bidfile)
+        for attachment in related_attachments:
+            try:
+                s3.delete_file_from_bucket(key=settings.MEDIA_URL + attachment.file_path)
+            except Exception as e:
+                return Response(
+                    {"error": f"Error deleting file from S3: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
+            # Delete the attachment record from the database
+            attachment.delete()
+
+        # Soft delete the BidFile
         this_bidfile.soft_delete()
 
         return Response(
-            {"message": "BidFile successfully deleted."},
+            {"message": "BidFile and related attachments successfully deleted."},
             status=status.HTTP_200_OK,
         )
 
@@ -651,3 +656,92 @@ class BidFileAddFileView(APIView):
             bidfile=bidfile,
             zip_file_path=zip_file_path,
         )
+
+
+class BidAttachmentRetrieveView(RetrieveAPIView):
+    """
+    API view for retrieving a specific BidAttachment.
+    """
+    queryset = BidAttachment.objects.all()
+    serializer_class = BidAttachmentSerializer
+
+    @swagger_auto_schema(operation_description="Retrieve a specific BidAttachment")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class BidAttachmentListCreateView(ListCreateAPIView):
+    """
+    API view for listing all BidAttachments and creating a new one.
+    """
+    queryset = BidAttachment.objects.all()
+    serializer_class = BidAttachmentSerializer
+    parser_classes = [MultiPartParser]  # Support file uploads
+
+    @swagger_auto_schema(
+        operation_description="List all BidAttachments and create a new one",
+        request_body=BidAttachmentSerializer
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        file = self.request.FILES.get("file")
+        if file:
+            # Upload to S3
+            s3 = S3()
+            file_path = s3.upload_file(file)
+            serializer.save(file_path=file_path)  # Save the file path to the DB
+        else:
+            # Handle the case where no file is uploaded
+            serializer.save(file_path=None)  # Or handle this logic as per your requirements
+
+
+class BidAttachmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    API view for retrieving, updating, and deleting a specific BidAttachment.
+    """
+    queryset = BidAttachment.objects.all()
+    serializer_class = BidAttachmentSerializer
+    parser_classes = [MultiPartParser]  # Support file uploads
+
+    @swagger_auto_schema(
+        operation_description="Retrieve, update, or delete a specific BidAttachment",
+        request_body=BidAttachmentSerializer
+    )
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        file = request.FILES.get("file")
+
+        if file:
+            # Delete the old file from S3 if it exists
+            s3 = S3()
+            if instance.file_path:
+                s3.delete_file_from_bucket(key=instance.file_path)
+
+            # Upload the new file to S3
+            new_file_path = s3.upload_file(file)
+            request.data["file_path"] = new_file_path  # Set the new file path in DB
+
+        # Perform the update
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_destroy(self, instance):
+        s3 = S3()
+        # Delete file from S3 if it exists
+        if instance.file_path:
+            s3.delete_file_from_bucket(key=instance.file_path)
+
+        # Perform the actual deletion of the model instance
+        instance.delete()
+
+    @swagger_auto_schema(operation_description="Delete a specific BidAttachment")
+    def destroy(self, request, *args, **kwargs):
+        # Ensure the file is deleted from S3 before deleting the instance
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)

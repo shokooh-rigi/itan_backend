@@ -24,7 +24,6 @@ class BidFile(BaseModelWithCreatedByUser):
         + str(settings.MAX_UPLOAD_SIZE / 1048576)
         + "MB",
     )
-    # todo: whats this hard code : 1048576 ????
 
     project = models.ForeignKey(
         Project,
@@ -34,11 +33,6 @@ class BidFile(BaseModelWithCreatedByUser):
     )
     due_date = models.DateField(
         blank=False,
-        null=True,
-    )
-    uploaded_file = models.FileField(
-        upload_to=settings.UPLOAD_BID_FILE_PATH,
-        blank=True,
         null=True,
     )
     note = models.TextField(max_length=1000, blank=True, null=True)
@@ -53,6 +47,28 @@ class BidFile(BaseModelWithCreatedByUser):
         return (
             str(self.id) + " - " + (self.customer.company.name if self.customer else "") + ": " + str(self.project)
         )
+
+
+class BidAttachment(BaseModelWithCreatedByUser):
+    """
+    Model representing uploaded files related to a BidFile.
+    """
+    bid = models.ForeignKey(
+        BidFile,
+        on_delete=models.CASCADE,
+        related_name="attachments"
+    )
+    uploaded_file = models.FileField(
+        upload_to=settings.UPLOAD_BID_FILE_PATH,
+        blank=False,
+        null=False,
+    )
+
+    class Meta:
+        ordering = ["-created_on"]
+
+    def __str__(self):
+        return f"Attachment for BidFile {self.bid.id}"
 
 
 class EquipmentSubmittal(BaseModelWithCreatedByUser):
