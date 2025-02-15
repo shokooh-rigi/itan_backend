@@ -177,7 +177,7 @@ class OrderAddAPIView(APIView):
                 "estimated_date_of_project": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Estimated project date"),
                 "proposal_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the associated proposal"),
             },
-            required=["po_number"]
+            required=["po_number","proposal_id" ]
         ),
         responses={
             201: openapi.Response(
