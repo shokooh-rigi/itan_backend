@@ -8,6 +8,8 @@ from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
@@ -168,60 +170,163 @@ class InvoiceListView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class InvoiceOrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve non-archived and unassociated orders",
+        operation_description=(
+                "This endpoint retrieves orders that are not archived and not associated with any invoice."
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                'order_id',
+                openapi.IN_QUERY,
+                description="Filter order by ID (optional)",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of available orders",
+                schema=OrderSerializer(many=True),
+            ),
+            401: "Unauthorized - User must be authenticated",
+        },
+    )
+    def get(self, request, order_id=None):
+        """
+        Retrieves available orders that are not archived or associated with a invoice.
+
+        Returns:
+            - Response: Serialized data of orders.
+        """
+        try:
+            orders = (
+                Order.objects.filter(archive=False)
+                    .exclude(id__in=Invoice.objects.values_list("order_id", flat=True))
+                    .order_by("-created_on")
+            )
+
+            if order_id:
+                orders = orders.filter(id=order_id)
+
+            if orders.count() == 0:
+                return Response(
+                    {"detail": "No orders available."},
+                    status=status.HTTP_200_OK,
+                )
+
+            serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {
+                    "detail": "An error occurred while retrieving orders.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class InvoiceCreateView(APIView):
     """
-    Handles the creation and retrieval of invoices.
+    Handles the creation of invoices.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        """
-        Retrieve orders for invoice creation.
-        """
-        order_id = kwargs.get('order_id')
-        if order_id:
-            orders = Order.objects.filter(id=order_id)
-        else:
-            orders = Order.objects.filter(
-                archive=False
-            ).exclude(
-                id__in=Invoice.objects.values_list('order_id', flat=True)
-            ).order_by('-created_on')
 
-        # Serialize the orders
-        result = OrderSerializer(orders, many=True).data
-        return Response({'orders': result}, status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_summary="Create a new invoice",
+        operation_description="This endpoint creates a new invoice for a specific order.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "order_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the order for which the invoice is being created",
+                ),
+                "date_started": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format="date",
+                    description="Start date of the invoice",
+                ),
+                "date_completed": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format="date",
+                    description="Completion date of the invoice",
+                ),
+                "terms": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Terms and conditions for the invoice",
+                ),
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Description of the invoice",
+                ),
+                "percent_of_performance_completed": openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    format="float",
+                    description="Percentage of performance completed",
+                ),
+                "attention": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Attention notes",
+                ),
+            },
+            required=["order_id", "date_started", "date_completed", "terms", "description"],
+        ),
+        responses={
+            201: openapi.Response(
+                description="Invoice successfully created",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "invoice_id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="ID of the created invoice",
+                        ),
+                        "parameters": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            description="Parameters used for generating the invoice PDF",
+                        ),
+                        "status": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Status of the invoice creation",
+                            example="success",
+                        ),
+                    },
+                ),
+            ),
+            400: "Bad request - Validation failed",
+            401: "Unauthorized - User must be authenticated",
+            404: "Order not found",
+        },
+    )
+    def post(self, request):
         """
         Create a new invoice for a specific order.
         """
-        order_id = kwargs.get('order_id')
+        order_id = request.data.get('order_id')
         if not order_id:
             return Response(
                 {'error': 'order_id is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Fetch the order or return 404
         order = get_object_or_404(
             Order,
             id=order_id,
             is_deleted=False,
-
         )
-        if not order:
-            return Response(
-                {'error': 'order not found '},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         serializer = InvoiceSerializer(
             data=request.data,
             context={'request': request},
         )
         if serializer.is_valid():
-            # Call the service layer to create the invoice
             invoice, pdf_params = InvoiceService.create_invoice(
                 validated_data=serializer.validated_data,
                 request_user=request.user,
@@ -231,7 +336,7 @@ class InvoiceCreateView(APIView):
                  "parameters": pdf_params,
                  'status': 'success'},
                 status=status.HTTP_201_CREATED
-                            )
+            )
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,

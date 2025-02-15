@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from mysite.core.models import ContactInfo
 from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary
-from mysite.api.v2.invoice.services.invoice_services import InvoiceService
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -14,24 +13,28 @@ class InvoiceSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Invoice
-
-    fields = [
-        'order',
-        'date_started',
-        'date_completed',
-        'terms',
-        'description',
-        'percent_of_performance_completed',
-        'attention',
-        'edited_on',
-        'created_by',
-    ]
+        fields = [
+            'order',
+            'date_started',
+            'date_completed',
+            'terms',
+            'description',
+            'percent_of_performance_completed',
+            'attention',
+            'edited_on',
+            'created_by',
+        ]
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoiceHistory
-        fields = ['total_invoiced', 'total_paid', 'balance_due', 'pdf_filename']
+        fields = [
+            'total_invoiced',
+            'total_paid',
+            'balance_due',
+            'pdf_filename',
+        ]
 
 
 class EmailSerializer(serializers.Serializer):
