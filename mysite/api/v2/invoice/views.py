@@ -30,7 +30,7 @@ from .services.email_service import InvoiceEmailService
 from .services.invoice_detail_service import DetailedInvoiceService
 from .services.invoice_payment_service import InvoicePaymentService
 from .services.invoice_services import InvoiceService, DeleteInvoiceService
-from .services.ivnoice_list_service import ListInvoiceService
+from .services.invoice_list_service import ListInvoiceService
 from ..estimator.serializers import EmailSerializer
 from ..order.serializers import OrderSerializer
 
@@ -288,15 +288,6 @@ class InvoiceCreateView(APIView):
                             type=openapi.TYPE_INTEGER,
                             description="ID of the created invoice",
                         ),
-                        "parameters": openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            description="Parameters used for generating the invoice PDF",
-                        ),
-                        "status": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Status of the invoice creation",
-                            example="success",
-                        ),
                     },
                 ),
             ),
@@ -327,14 +318,13 @@ class InvoiceCreateView(APIView):
             context={'request': request},
         )
         if serializer.is_valid():
-            # invoice, pdf_params = InvoiceService.create_invoice(
-            #     validated_data=serializer.validated_data,
-            #     request_user=request.user,
-            # )
+            invoice = InvoiceService.create_invoice(
+                validated_data=serializer.validated_data,
+                request_user=request.user,
+            )
             return Response(
                 {
-                    'invoice': serializer.validated_data,
-                    'status': 'success'
+                    'invoice_id': invoice.id,
                 },
                 status=status.HTTP_201_CREATED
             )

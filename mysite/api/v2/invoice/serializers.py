@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
+from mysite.api.v2.order.serializers import OrderSerializer
 from mysite.core.models import ContactInfo
 from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary
+from mysite.order.models import Order
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -11,10 +13,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
     - Validates and processes invoice data.
     - Integrates with the service layer to handle related business logic.
     """
+    order = OrderSerializer(read_only=True)
+    order_id = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = Invoice
         fields = [
             'order',
+            'order_id',
             'invoice_type',
             'date_started',
             'date_completed',
@@ -25,6 +31,20 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'edited_on',
             'created_by',
         ]
+
+    def create(self, validated_data):
+        """Override create method to link order using order_id"""
+        order_id = validated_data.pop("order_id", None)
+        if not order_id:
+            raise serializers.ValidationError({"order_id": "This field is required."})
+
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            raise serializers.ValidationError({"order_id": "Invalid order_id."})
+
+        validated_data["order"] = order
+        return super().create(validated_data)
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):

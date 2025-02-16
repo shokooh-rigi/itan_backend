@@ -55,9 +55,9 @@ class InvoiceService:
             # Handle other related logic (e.g., change orders, invoice history, and project processes)
             InvoiceService.create_invoice_history(invoice=invoice, total_count=1)
             InvoiceService.update_project_process(invoice)
-            pdf_params = InvoiceService.create_invoice_pdf(invoice, request_user)
+            # pdf_params = InvoiceService.create_invoice_pdf(invoice, request_user)
 
-        return invoice, pdf_params
+        return invoice
 
     @staticmethod
     def update_invoice(instance, validated_data, request_user):
@@ -84,7 +84,7 @@ class InvoiceService:
             InvoiceService.create_invoice_history(
                 invoice=instance, total_count=total_count
             )
-            pdf_params = InvoiceService.create_invoice_pdf(instance, request_user)
+            # pdf_params = InvoiceService.create_invoice_pdf(instance, request_user)
             orders = Order.objects.filter(archive=False).exclude(
                 id__in=Invoice.objects.all().values_list("order_id")
             )
