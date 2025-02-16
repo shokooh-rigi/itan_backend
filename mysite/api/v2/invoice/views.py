@@ -248,6 +248,10 @@ class InvoiceCreateView(APIView):
                     type=openapi.TYPE_INTEGER,
                     description="ID of the order for which the invoice is being created",
                 ),
+                "invoice_type": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Invoice type number",
+                ),
                 "date_started": openapi.Schema(
                     type=openapi.TYPE_STRING,
                     format="date",
@@ -276,7 +280,7 @@ class InvoiceCreateView(APIView):
                     description="Attention notes",
                 ),
             },
-            required=["order_id", "date_started", "date_completed", "terms", "description"],
+            required=["order_id", "invoice_type", "date_started", "date_completed", "terms", "description"],
         ),
         responses={
             201: openapi.Response(
