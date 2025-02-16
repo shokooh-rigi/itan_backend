@@ -327,14 +327,15 @@ class InvoiceCreateView(APIView):
             context={'request': request},
         )
         if serializer.is_valid():
-            invoice, pdf_params = InvoiceService.create_invoice(
-                validated_data=serializer.validated_data,
-                request_user=request.user,
-            )
+            # invoice, pdf_params = InvoiceService.create_invoice(
+            #     validated_data=serializer.validated_data,
+            #     request_user=request.user,
+            # )
             return Response(
-                {'invoice_id': invoice.id,
-                 "parameters": pdf_params,
-                 'status': 'success'},
+                {
+                    'invoice': serializer.validated_data,
+                    'status': 'success'
+                },
                 status=status.HTTP_201_CREATED
             )
         return Response(

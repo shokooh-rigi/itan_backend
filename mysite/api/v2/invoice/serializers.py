@@ -15,6 +15,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             'order',
+            'invoice_type',
             'date_started',
             'date_completed',
             'terms',

@@ -71,6 +71,7 @@ class EstimateSerializer(serializers.ModelSerializer):
     control_system_calculated = serializers.SerializerMethodField()
     hours_calculated = serializers.SerializerMethodField()
     predemo_calculated = serializers.SerializerMethodField()
+    dalt_calculated = serializers.SerializerMethodField()
     total_calculated = serializers.SerializerMethodField()
 
     class Meta:
@@ -119,6 +120,9 @@ class EstimateSerializer(serializers.ModelSerializer):
     
     def get_predemo_calculated(self, obj):
         return obj.predemo_calculated
+    
+    def get_dalt_calculated(self, obj):
+        return obj.dalt_calculated
     
     def get_total_calculated(self, obj):
         return obj.total_calculated
