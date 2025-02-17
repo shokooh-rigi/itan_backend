@@ -9,10 +9,7 @@ from .views import (
 
 
 urlpatterns = [
-    path('account-summary/',
-         AccountSummaryAPIView.as_view(),
-         name='invoice-summary'
-         ),
+
     path('account-summary/create/<int:customer_id>/',
          AccountSummaryCreateView.as_view(),
          name='account-summary-create'
