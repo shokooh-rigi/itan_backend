@@ -13,19 +13,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mysite.api.v2.invoice.serializers import InvoiceSerializer, AccountSummarySerializer, \
-    AccountSummaryCreateSerializer
-from mysite.core.models import ModulesToEmailTemplateRelation, LicenseInfo, Person
-from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction, AccountSummary
+from mysite.api.v2.invoice.serializers import InvoiceSerializer
+from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
 from mysite.order.models import Order
 from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
     calculate_remaining_invoice_due
-from .services.account_summary_service import AccountSummaryService
 from .services.email_service import InvoiceEmailService
 from .services.invoice_detail_service import DetailedInvoiceService
 from .services.invoice_payment_service import InvoicePaymentService
