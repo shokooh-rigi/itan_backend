@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from mysite.core.models import Person
 from mysite.proposal.models import Proposal
 from ..core.base_model import BaseModel
-from ..core.models import TechLabelModel
+from ..core.models import Setting, TechLabelModel
 from ..render import Render
 
 
@@ -173,11 +173,13 @@ class Order(BaseModel):
 
 @receiver(post_save, sender=Order)
 def update_project_number(sender, instance, created, **kwargs):
-    """
-    Signal to update project number when an order is created.
-    """
     if created:
-        pass
+        new_number = Setting.objects.get(key='Project Number Last Digit')
+        new_number.value = int(Setting.objects.get(key='Project Number Last Digit').value) + 1
+        new_number.save()
+        instance.project_number = Setting.objects.get(key='Project Number Pre Text').value + \
+                                  Setting.objects.get(key='Project Number Last Digit').value.zfill(3)
+        instance.save()
 
 
 class ChangeOrder(BaseModel):
