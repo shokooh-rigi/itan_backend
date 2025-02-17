@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from mysite.api.v2.order.serializers import OrderSerializer
-from mysite.core.models import ContactInfo
 from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary
 from mysite.order.models import Order
+from django.shortcuts import get_object_or_404
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -63,14 +63,32 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for Invoice History.
+    - Requires `invoice_id` to create a history record.
+    """
+    invoice_id = serializers.IntegerField(write_only=True, required=True)
+    invoice = InvoiceSerializer(read_only=True)
+
     class Meta:
         model = InvoiceHistory
         fields = [
+            'invoice',
+            'invoice_id',
             'total_invoiced',
             'total_paid',
             'balance_due',
             'pdf_filename',
         ]
+
+    def create(self, validated_data):
+        """
+        Create InvoiceHistory entry and attach it to the Invoice.
+        """
+        invoice_id = validated_data.pop("invoice_id")
+        invoice = get_object_or_404(Invoice, id=invoice_id)
+        validated_data["invoice"] = invoice
+        return super().create(validated_data)
 
 
 class EmailSerializer(serializers.Serializer):

@@ -7,10 +7,9 @@ from .views import (
     InvoiceArchiveView,
     InvoiceDeleteView,
     InvoiceCreateView,
-    InvoicePaymentView,
     InvoicePaymentDeleteView,
     InvoiceHistoryListView,
-    InvoiceOrderListView,
+    InvoiceOrderListView, InvoiceHistoryCreateView,
 )
 
 
@@ -49,10 +48,10 @@ urlpatterns = [
          InvoiceArchiveView.as_view(),
          name='invoice-archive'
          ),
-    path('invoice/payment/get/<int:invoice_id>/',
-         InvoicePaymentView.as_view(),
-         name='invoice-payment-get'
-         ),
+    path('invoice/history/create/<int:invoice_id>/',
+         InvoiceHistoryCreateView.as_view(),
+         name='invoice-history-create'),
+
     path('invoice/payment/delete/<int:invoice_id>/',
          InvoicePaymentDeleteView.as_view(),
          name='invoice-payment-delete'
