@@ -18,7 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mysite.api.v2.invoice.serializers import AccountSummarySerializer, \
+from .serializers import AccountSummarySerializer, \
     AccountSummaryCreateSerializer
 from mysite.core.models import ModulesToEmailTemplateRelation, LicenseInfo, Person
 from mysite.gi.models import AccountSummary
