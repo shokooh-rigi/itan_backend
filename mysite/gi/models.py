@@ -77,6 +77,18 @@ class Invoice(BaseModelWithCreatedByUser):
         delete_pdf = Render.delete_file(parameters, "invoice")
         return delete_pdf
 
+    @property
+    def invoice_number(self):
+        """
+        Generates a formatted invoice number based on the order's project number
+        and the invoice ID. The project number is truncated to the first three
+        characters, and the invoice ID is zero-padded to three digits.
+
+        Returns:
+            str: Formatted invoice number (e.g., "ABC-001").
+        """
+        return f"{self.order.project_number[:3]}-{self.id:03d}"
+
 
 class InvoiceTransaction(BaseModel):
     """

@@ -15,6 +15,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     """
     order = OrderSerializer(read_only=True)
     order_id = serializers.IntegerField(write_only=True)
+    invoice_number = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Invoice
@@ -30,7 +31,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'attention',
             'edited_on',
             'created_by',
+            'invoice_number',
         ]
+        read_only_fields = ["invoice_number"]
 
     def create(self, validated_data):
         """Override create method to link order using order_id"""
@@ -45,6 +48,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
         validated_data["order"] = order
         return super().create(validated_data)
+
+    def get_invoice_number(self, obj):
+        """
+        Retrieves the formatted invoice number for the given invoice object.
+
+        Args:
+            obj (Invoice): The invoice instance.
+
+        Returns:
+            str: The formatted invoice number.
+        """
+        return obj.invoice_number
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
