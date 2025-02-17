@@ -7,13 +7,13 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from mysite.api.v2.invoice.serializers import InvoiceSerializer, InvoiceHistorySerializer
+from mysite.api.v2.invoice.serializers import InvoiceSerializer, InvoiceHistorySerializer, InvoiceTransactionSerializer
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
 from mysite.order.models import Order
 from .services.email_service import InvoiceEmailService
@@ -542,62 +542,208 @@ class InvoiceArchiveView(APIView):
         )
 
 
-class InvoiceHistoryCreateView(CreateAPIView):
+class InvoiceTransactionCreateView(CreateAPIView):
     """
-    API View to create an invoice history entry for a given invoice.
+    API View to create an invoice transaction and log the related invoice history.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = InvoiceHistorySerializer
+    serializer_class = InvoiceTransactionSerializer
 
     @extend_schema(
-        summary="Create an Invoice History Record by Invoice ID",
-        description="Creates an invoice history record for a given invoice ID, automatically calculating invoiced amount,"
-                    " paid amount, and balance due.",
-        responses={201: InvoiceHistorySerializer},
+        summary="Create an Invoice Transaction and Log Invoice History",
+        description="Takes `invoice_id` from request input, validates the invoice, saves the transaction, and logs the history.",
+        request=InvoiceTransactionSerializer,
+        responses={201: {
+            "transaction": InvoiceTransactionSerializer,
+            "invoice_history": InvoiceHistorySerializer
+        }},
         parameters=[
             OpenApiParameter(
                 name="invoice_id",
-                description="The ID of the invoice to create a history entry for.",
+                description="The ID of the invoice to create a transaction for.",
+                required=True,
+                type=int,
+                location=OpenApiParameter.QUERY,
+            )
+        ],
+    )
+    def post(self, request):
+        """
+        Creates an InvoiceTransaction and updates the InvoiceHistory.
+
+        Args:
+            request (Request): The incoming HTTP request.
+
+        Returns:
+            Response: JSON response containing the new transaction and updated history.
+        """
+        invoice_id = request.data.get("invoice_id")
+        if not invoice_id:
+            return Response({"error": "invoice_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate that the invoice exists and is not deleted
+        invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
+
+        # Serialize and save transaction
+        transaction_serializer = InvoiceTransactionSerializer(data=request.data, context={"request": request})
+        if transaction_serializer.is_valid():
+            transaction_serializer.save()
+
+            # Calculate updated invoice amounts
+            total_invoiced = calculate_total_amount_due(invoice)
+            total_paid = calculate_total_paid(invoice)
+            balance_due = calculate_remaining_invoice_due(invoice)
+
+            # Generate a unique PDF filename for history
+            total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+            new_file_name = f'Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}'
+
+            # Create invoice history log
+            history_data = {
+                "invoice_id": invoice.id,
+                "total_invoiced": total_invoiced,
+                "total_paid": total_paid,
+                "balance_due": balance_due,
+                "pdf_filename": new_file_name,
+            }
+            history_serializer = InvoiceHistorySerializer(data=history_data)
+            if history_serializer.is_valid():
+                history_serializer.save()
+                return Response(
+                    {
+                        "transaction": transaction_serializer.data,
+                        "invoice_history": history_serializer.data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+
+        return Response(transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InvoiceTransactionUpdateView(APIView):
+    """
+    API View to update an existing InvoiceTransaction.
+
+    - If `amount` or `payment_date` is updated, update the related InvoiceHistory.
+    - Otherwise, update only the transaction itself.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Fully Update an Invoice Transaction",
+        description="Replaces all fields of an existing invoice transaction with new data. If amount or payment_date is changed, the related InvoiceHistory will be updated.",
+        request=InvoiceTransactionSerializer,
+        responses={200: InvoiceTransactionSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="transaction_id",
+                description="The ID of the transaction to update.",
                 required=True,
                 type=int,
                 location=OpenApiParameter.PATH,
             )
         ],
     )
-    def post(self, request, invoice_id):
+    def put(self, request, transaction_id):
         """
-        Create an InvoiceHistory record for the given invoice.
-        """
-        invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
+        Fully update an InvoiceTransaction.
 
-        # Calculate invoice amounts
+        - If `amount` or `payment_date` is updated, update InvoiceHistory.
+        """
+        transaction = get_object_or_404(InvoiceTransaction, id=transaction_id)
+
+        # Ensure the transaction was created by the current user
+        if transaction.created_by != request.user:
+            return Response(
+                {"error": "You are not authorized to update this transaction."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        old_amount = transaction.amount
+        old_payment_date = transaction.payment_date
+
+        serializer = InvoiceTransactionSerializer(transaction, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            updated_transaction = serializer.save()
+
+            # Check if payment amount or date changed
+            if (
+                old_amount != updated_transaction.amount
+                or old_payment_date != updated_transaction.payment_date
+            ):
+                self._update_invoice_history(updated_transaction.invoice)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="Partially Update an Invoice Transaction",
+        description="Modifies only the provided fields of an existing invoice transaction. If amount or payment_date is changed, the related InvoiceHistory will be updated.",
+        request=InvoiceTransactionSerializer,
+        responses={200: InvoiceTransactionSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="transaction_id",
+                description="The ID of the transaction to update.",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            )
+        ],
+    )
+    def patch(self, request, transaction_id):
+        """
+        Partially update an InvoiceTransaction.
+
+        - If `amount` or `payment_date` is updated, update InvoiceHistory.
+        """
+        transaction = get_object_or_404(InvoiceTransaction, id=transaction_id)
+
+        # Ensure the transaction was created by the current user
+        if transaction.created_by != request.user:
+            return Response(
+                {"error": "You are not authorized to update this transaction."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        old_amount = transaction.amount
+        old_payment_date = transaction.payment_date
+
+        serializer = InvoiceTransactionSerializer(transaction, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            updated_transaction = serializer.save()
+
+            # Check if payment amount or date changed
+            if (
+                old_amount != updated_transaction.amount
+                or old_payment_date != updated_transaction.payment_date
+            ):
+                self._update_invoice_history(updated_transaction.invoice)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _update_invoice_history(self, invoice):
+        """
+        Recalculates invoice history when a transaction is updated.
+        """
         total_invoiced = calculate_total_amount_due(invoice)
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
 
-        # Generate unique PDF filename
-        total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-        new_file_name =f'Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}'
+        # Fetch or create InvoiceHistory for the invoice
+        history, created = InvoiceHistory.objects.get_or_create(invoice=invoice)
 
-        # Prepare serializer data
-        data = {
-            "invoice_id": invoice.id,
-            "total_invoiced": total_invoiced,
-            "total_paid": total_paid,
-            "balance_due": balance_due,
-            "pdf_filename": new_file_name,
-        }
-
-        serializer = self.get_serializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Update values
+        history.total_invoiced = total_invoiced
+        history.total_paid = total_paid
+        history.balance_due = balance_due
+        history.save()
 
 
-
-class InvoicePaymentDeleteView(APIView):
+class InvoiceTransactionDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, transaction_id):
@@ -639,20 +785,21 @@ class InvoicePaymentDeleteView(APIView):
         )
 
 
-class InvoiceHistoryListView(APIView):
+class InvoiceTransactionListView(ListAPIView):
     """
-    API View to retrieve the history of a specific invoice.
+    API View to list all transactions for a specific invoice.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = InvoiceTransactionSerializer
 
     @extend_schema(
-        summary="Retrieve Invoice History List",
-        description="Fetches a list of all history records associated with a specific invoice.",
-        responses={200: InvoiceHistorySerializer(many=True)},
+        summary="List Invoice Transactions",
+        description="Fetches a list of all transactions associated with a specific invoice.",
+        responses={200: InvoiceTransactionSerializer(many=True)},
         parameters=[
             OpenApiParameter(
                 name="invoice_id",
-                description="The ID of the invoice whose history should be retrieved.",
+                description="The ID of the invoice whose transactions should be retrieved.",
                 required=True,
                 type=int,
                 location=OpenApiParameter.PATH,
@@ -661,19 +808,58 @@ class InvoiceHistoryListView(APIView):
     )
     def get(self, request, invoice_id):
         """
-        Retrieve a list of invoice history records.
+        Retrieve all transactions for a given invoice.
 
         Args:
             request (Request): The incoming HTTP request.
-            invoice_id (int): The ID of the invoice whose history is being requested.
+            invoice_id (int): The ID of the invoice.
 
         Returns:
-            Response: A list of invoice history records.
+            Response: List of transactions related to the invoice.
         """
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
-        invoice_histories = InvoiceHistory.objects.filter(invoice=invoice)
+        transactions = InvoiceTransaction.objects.filter(invoice=invoice)
+        serializer = InvoiceTransactionSerializer(transactions, many=True)
 
-        serializer = InvoiceHistorySerializer(invoice_histories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class InvoiceHistoryListView(ListAPIView):
+    """
+    API View to list all invoice history records for a specific invoice.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = InvoiceHistorySerializer
+
+    @extend_schema(
+        summary="List Invoice History Records",
+        description="Fetches a list of all history records associated with a specific invoice.",
+        responses={200: InvoiceHistorySerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="invoice_id",
+                description="The ID of the invoice whose history records should be retrieved.",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH,
+            )
+        ],
+    )
+    def get(self, request, invoice_id):
+        """
+        Retrieve all invoice history records for a given invoice.
+
+        Args:
+            request (Request): The incoming HTTP request.
+            invoice_id (int): The ID of the invoice.
+
+        Returns:
+            Response: List of history records related to the invoice.
+        """
+        invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
+
+        history_records = InvoiceHistory.objects.filter(invoice=invoice)
+        serializer = InvoiceHistorySerializer(history_records, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

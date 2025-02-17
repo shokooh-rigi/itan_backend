@@ -7,9 +7,12 @@ from .views import (
     InvoiceArchiveView,
     InvoiceDeleteView,
     InvoiceCreateView,
-    InvoicePaymentDeleteView,
     InvoiceHistoryListView,
-    InvoiceOrderListView, InvoiceHistoryCreateView,
+    InvoiceOrderListView,
+    InvoiceTransactionCreateView,
+    InvoiceTransactionUpdateView,
+    InvoiceTransactionListView,
+    InvoiceTransactionDeleteView,
 )
 
 
@@ -48,16 +51,24 @@ urlpatterns = [
          InvoiceArchiveView.as_view(),
          name='invoice-archive'
          ),
-    path('invoice/history/create/<int:invoice_id>/',
-         InvoiceHistoryCreateView.as_view(),
-         name='invoice-history-create'),
-
-    path('invoice/payment/delete/<int:invoice_id>/',
-         InvoicePaymentDeleteView.as_view(),
+    path('invoice/transaction/create/',
+         InvoiceTransactionCreateView.as_view(),
+         name='invoice-transaction-create'
+         ),
+    path('invoice/transaction/update/<int:transaction_id>/',
+         InvoiceTransactionUpdateView.as_view(),
+         name='invoice-transaction-update'
+         ),
+    path('invoice/transactions/<int:invoice_id>/',
+         InvoiceTransactionListView.as_view(),
+         name='invoice-transaction-list'
+         ),
+    path('invoice/transaction/delete/<int:invoice_id>/',
+         InvoiceTransactionDeleteView.as_view(),
          name='invoice-payment-delete'
          ),
-    path('invoice/history/get/<int:invoice_id>/',
+    path('invoice/histories/<int:invoice_id>/',
          InvoiceHistoryListView.as_view(),
-         name='invoice-history-get'
+         name='invoice-history-list'
          ),
 ]

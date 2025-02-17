@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from mysite.api.v2.order.serializers import OrderSerializer
-from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary
+from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary, InvoiceTransaction
 from mysite.order.models import Order
 from django.shortcuts import get_object_or_404
 
@@ -103,32 +103,56 @@ class EmailSerializer(serializers.Serializer):
         return data
 
 
-class InvoicePaymentSerializer(serializers.Serializer):
+class InvoiceTransactionSerializer(serializers.ModelSerializer):
     """
-    Serializer to validate and serialize invoice payment data.
-
-    Fields:
-        - created_by (HiddenField): The user who created the payment record
-          (auto-assigned to the current user).
-        - invoice (PrimaryKeyRelatedField): Reference to the invoice being paid.
-        - amount_paid (DecimalField): The amount paid for the invoice.
-        - payment_method (ChoiceField): The method of payment (Credit Card,
-          Cash, Bank Transfer).
-        - fields (list): List of required fields for the serializer.
-
-    Example Usage:
-        serializer = InvoicePaymentSerializer(data=request.data)
-        if serializer.is_valid():
-            # Process the data
+    Serializer for InvoiceTransaction.
+    - `invoice_id` is required only for creation, not updates.
+    - Validates invoice existence before attaching it.
     """
-    created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    invoice = serializers.PrimaryKeyRelatedField(queryset=Invoice.objects.all())
-    amount_paid = serializers.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = serializers.ChoiceField(choices=['Credit Card', 'Cash', 'Bank Transfer'])
-    fields = [
-        'invoice',
-        'amount',
-        'payment_date',
-        'payment_no',
-        'created_by',
-    ]
+    invoice_id = serializers.IntegerField(write_only=True, required=False)
+    invoice = InvoiceSerializer(read_only=True)
+
+    class Meta:
+        model = InvoiceTransaction
+        fields = [
+            'id',
+            'invoice',
+            'invoice_id',
+            'payment_date',
+            'amount',
+            'payment_no',
+            'created_by',
+            'created_on',
+            'updated_at',
+        ]
+
+    def validate_invoice_id(self, value):
+        """
+        Validate that the invoice exists and is not deleted.
+        """
+        invoice = get_object_or_404(Invoice, id=value, is_deleted=False)
+        return invoice.id
+
+    def create(self, validated_data):
+        """
+        Create an InvoiceTransaction and attach it to the provided invoice.
+        """
+        invoice_id = validated_data.pop("invoice_id", None)
+        invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False) if invoice_id else None
+
+        validated_data["invoice"] = invoice
+        validated_data["created_by"] = self.context["request"].user
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """
+        Update an InvoiceTransaction, ensuring only valid fields are modified.
+        """
+        invoice_id = validated_data.pop("invoice_id", None)
+
+        # Prevent invoice_id updates but allow other changes
+        if invoice_id:
+            raise serializers.ValidationError({"invoice_id": "Updating invoice_id is not allowed."})
+
+        return super().update(instance, validated_data)

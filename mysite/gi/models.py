@@ -90,7 +90,7 @@ class Invoice(BaseModelWithCreatedByUser):
         return f"{self.order.project_number[:3]}-{self.id:03d}"
 
 
-class InvoiceTransaction(BaseModel):
+class InvoiceTransaction(BaseModelWithCreatedByUser):
     """
     Represents a transaction associated with an invoice.
     Tracks payment details and user who created the transaction.
@@ -109,7 +109,6 @@ class InvoiceTransaction(BaseModel):
         null=False,
     )
     payment_no = models.CharField(max_length=20, blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
     class Meta:
         ordering = ["-created_on"]
