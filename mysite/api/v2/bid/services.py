@@ -8,7 +8,7 @@ from mysite.bidfilemgm.models import BidFile
 from mysite.s3_file_manager import S3
 
 
-class BidFileService:
+class BidService:
     @staticmethod
     def handle_uploaded_files(files_list, temp_path):
         """
@@ -50,14 +50,14 @@ class BidFileService:
             .replace('%', '').replace('^', '').replace('&', '').replace('*', '').replace("/", '')
 
     @staticmethod
-    def update_bidfile_with_zip(bidfile, zip_file_path):
+    def update_bid_with_zip(bid, zip_file_path):
         print(zip_file_path)
         """
-        Uploads the zip file to S3 and updates the bidfile record with the file path.
+        Uploads the zip file to S3 and updates the bid record with the file path.
         """
         s3 = S3()
         with open(zip_file_path, 'rb') as file:
-            bidfile.uploaded_file.save(os.path.basename(zip_file_path), file)
+            bid.uploaded_file.save(os.path.basename(zip_file_path), file)
         os.remove(zip_file_path)  # Cleanup zip file after upload
 
     @staticmethod
@@ -68,9 +68,9 @@ class BidFileService:
             ordering,
     ):
         """
-        Helper method to build and return a filtered queryset for BidFiles based on the provided filters.
+        Helper method to build and return a filtered queryset for Bids based on the provided filters.
 
-        Filters the BidFiles based on:
+        Filters the Bids based on:
         - search: Filters by project name or customer company name.
         - from_date and to_date: Filters by the due date range.
         - ordering: Orders the results by the specified field.
@@ -82,7 +82,7 @@ class BidFileService:
             ordering (str): The field by which to order the results.
 
         Returns:
-            QuerySet: A filtered and ordered queryset of BidFile instances.
+            QuerySet: A filtered and ordered queryset of Bid instances.
 
         Raises:
             ValueError: If the date format is invalid.

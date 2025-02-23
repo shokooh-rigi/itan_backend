@@ -112,3 +112,12 @@ class S3:
             logger.info(f"File with key '{key}' deleted from bucket '{self.bucket_name}'.")
         except ClientError as e:
             logger.error(f"Failed to delete file with key '{key}' from bucket '{self.bucket_name}': {e}")
+
+    def upload_file(self, file):
+        try:
+            file_name = file.name
+            self.s3.meta.client.upload_fileobj(file, self.bucket_name, file_name)
+            return file_name  # The path where the file is saved in S3
+        except ClientError as e:
+            logger.error(f"Failed to upload file '{file}' to bucket '{self.bucket_name}': {e}")
+            raise Exception(f"Failed to upload file to S3: {str(e)}")  # Raise exception or return an error
