@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from mysite.bidfilemgm.models import BidFile, BidAttachment
@@ -42,4 +43,8 @@ class BidCreateSerializer(serializers.ModelSerializer):
 class BidAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = BidAttachment
-        fields = "__all__"
+        exclude = ["bid"]  # Exclude bid from request body
+
+    def create(self, validated_data):
+        bid_id = self.context["view"].kwargs.get("bid_id")  # Get bid_id from URL
+        return BidAttachment.objects.create(bid_id=bid_id, **validated_data)

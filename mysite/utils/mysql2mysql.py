@@ -55,7 +55,6 @@ tables = [
     'core_techlabelmodel',  
     'submittal_companysubmittal',
     'submittal_submittalforms',
-    'ibfm_ibidfile',
     'bidfilemgm_bidfile',
     'bidfilemgm_equipmentsubmittal',
     'estimator_estimate',

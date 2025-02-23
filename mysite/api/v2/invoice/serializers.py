@@ -20,6 +20,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
+            'id',
             'order',
             'order_id',
             'invoice_type',

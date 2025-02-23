@@ -25,7 +25,7 @@ urlpatterns = [
     path('bid/duplicate/<int:bid_id>/', BidDuplicateView.as_view(), name='bid-duplicate'),
     path('bid/archive/<int:bid_id>/', BidArchiveView.as_view(), name='bid-archive'),
     path('bid/delete/<int:bid_id>/', BidDeleteView.as_view(), name='bid-delete'),
-    path('bid/attachments/', BidAttachmentListCreateView.as_view(), name='bid-attachment-list-create'),
+    path('bid/<int:bid_id>/attachments/', BidAttachmentListCreateView.as_view(), name='bid-attachment-list-create'),
     path('bid/attachments/<int:pk>/', BidAttachmentRetrieveView.as_view(), name='bid-attachment-retrieve'),
     path('bid/attachments/<int:pk>/update/', BidAttachmentRetrieveUpdateDestroyView.as_view(),
          name='bid-attachment-update-delete'),

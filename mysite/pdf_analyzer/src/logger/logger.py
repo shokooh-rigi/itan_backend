@@ -7,7 +7,7 @@ import json
 from shutil import copyfile
 from pathlib import Path
 
-from mysite.ibfm.models import iBidFile
+from mysite.bidfilemgm.models import BidFile
 
 from ...models import AddressExtractionRun
 
@@ -23,7 +23,7 @@ class AddressLogger:
     __process_images: Dict[int, Dict[str, Any]] = {}
     __process_variables: Dict[int, Dict[str, Any]] = {}
 
-    def __init__(self, bidfile: iBidFile, project_name: str, logger_is_active: bool = True):
+    def __init__(self, bidfile: BidFile, project_name: str, logger_is_active: bool = True):
         self.__is_active = logger_is_active
         if self.__is_active:
             self.__run = AddressExtractionRun(file=bidfile, project_name=project_name)

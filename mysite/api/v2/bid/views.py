@@ -642,7 +642,7 @@ class BidAddFileView(APIView):
         project_clean_name = BidService.clean_project_name(
             project_name=bid.project.name
         )
-        zip_filename = BidFileService.create_zip_file(
+        zip_filename = BidService.create_zip_file(
             filenames=files_paths,
             path=temp_path,
             project_name=f"{bid.pk}_{project_clean_name}"
@@ -676,27 +676,36 @@ class BidAttachmentListCreateView(ListCreateAPIView):
     """
     API view for listing all BidAttachments and creating a new one.
     """
-    queryset = BidAttachment.objects.all()
     serializer_class = BidAttachmentSerializer
     parser_classes = [MultiPartParser]  # Support file uploads
 
+    def get_queryset(self):
+        bid_id = self.kwargs.get("bid_id")  # Get bid_id from URL
+        return BidAttachment.objects.filter(bid=bid_id)
+
     @swagger_auto_schema(
         operation_description="List all BidAttachments and create a new one",
+        parameters=[
+            OpenApiParameter(name="bid_id", description="The ID of the bid", required=True, type=int),
+        ],
         request_body=BidAttachmentSerializer
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        file = self.request.FILES.get("file")
+        bid_id = self.kwargs.get("bid_id")  # Get bid_id from URL
+        bid = get_object_or_404(BidFile, id=bid_id)  # Fetch the BidFile instance
+
+        file = self.request.FILES.get("uploaded_file")
+
         if file:
             # Upload to S3
             s3 = S3()
-            file_path = s3.upload_file(file)
-            serializer.save(file_path=file_path)  # Save the file path to the DB
-        else:
-            # Handle the case where no file is uploaded
-            serializer.save(file_path=None)  # Or handle this logic as per your requirements
+            uploaded_file = s3.upload_file(file)
+            serializer.save(bid=bid, uploaded_file=uploaded_file)  # Save the file path to the DB
+
+
 
 
 class BidAttachmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):

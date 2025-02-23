@@ -96,7 +96,6 @@ LOCAL_APPS = [
     "mysite.gi",
     "mysite.report",
     "mysite.bidfilemgm",
-    "mysite.ibfm",
     "mysite.administrative",
     "mysite.scheduler",
     "mysite.settlement",
@@ -285,10 +284,10 @@ RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
 TINYMCE_SPELLCHECKER = False
 TINYMCE_COMPRESSOR = True
 
-AWS_ACCESS_KEY_ID = "EA8U7ESW7BOLAMRCJBPD"
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = "reza-local"
-AWS_REGION_NAME = "eu-central-1"
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+AWS_REGION_NAME = env("AWS_REGION_NAME")
 AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_REGION_NAME
 AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.wasabisys.com" % (
     AWS_STORAGE_BUCKET_NAME,
@@ -318,41 +317,29 @@ if ENV != "local":
 MEDIA_URL = "media/"
 
 
-# upload file paths:
-UPLOAD_IBID_FILE_PATH: str = os.getenv(
-    "UPLOAD_IBID_FILE_PATH",
-    "uploads/ibidfiles",
-)
-UPLOAD_BID_FILE_PATH: str = os.getenv(
+UPLOAD_BID_FILE_PATH: str = env(
     "UPLOAD_BID_FILE_PATH",
-    "uploads/bidfiles",
+    default="uploads/bidfiles"
 )
-UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = os.getenv(
+UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = env(
     "UPLOAD_BID_FILE_PATH",
-    "uploads/equipmentsubmittal",
+    default="uploads/equipmentsubmittal",
 )
-STORAGE_ESTIMATE_PDFS_PATH: str = os.getenv(
+STORAGE_ESTIMATE_PDFS_PATH: str = env(
     "STORAGE_ESTIMATE_PDFS_PATH",
-    "media/pdfs/estimate/",
+    default="media/pdfs/estimate/",
 )
-STORAGE_INVOICE_PDFS_PATH: str = os.getenv(
+STORAGE_INVOICE_PDFS_PATH: str = env(
     "STORAGE_INVOICE_PDFS_PATH",
-    "media/pdfs/invoice/",
+    default="media/pdfs/invoice/",
 )
 # page size
-PAGE_SIZE: int = os.getenv("PAGE_SIZE", 20)
-LIMIT_FILE_SIZE: int = os.getenv(
-    "LIMIT_FILE_SIZE", 5 * 1024 * 1024
+PAGE_SIZE: int = env("PAGE_SIZE", default=20)
+LIMIT_FILE_SIZE: int = env(
+    "LIMIT_FILE_SIZE", default= 5 * 1024 * 1024
 )  # Limit file size to 5MB
 
 # S3 Configuration
-AWS_S3_DOMAIN = os.getenv("AWS_S3_DOMAIN", "https://s3.us-central-1.wasabisys.com")
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "912TIXQPRLEFEDLWGSXM")
-AWS_SECRET_ACCESS_KEY = os.getenv(
-    "AWS_SECRET_ACCESS_KEY", "BggzC2hjvtr1DMQjjAk6k7ZnDua9wXw8B0RciN0R"
-)
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-central-1")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "airtab-test")
 ROOT_URLCONF = "config.urls"
 
 SIMPLE_JWT = {

@@ -7,7 +7,8 @@ from django.db import models
 from django.utils.encoding import filepath_to_uri
 from django.conf import settings
 
-from mysite.ibfm.models import iBidFile
+from mysite.bidfilemgm.models import BidFile
+
 
 MAX_TEXT_LENGTH = 4096
 
@@ -39,7 +40,7 @@ def safe_join(base, *paths):
 
 
 class AddressExtractionRun(models.Model):
-    file = models.ForeignKey(iBidFile, on_delete=models.CASCADE)
+    file = models.ForeignKey(BidFile, on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     processed_images = models.CharField(max_length=MAX_TEXT_LENGTH, null=True)
     process_variables = models.CharField(max_length=MAX_TEXT_LENGTH, null=True)
