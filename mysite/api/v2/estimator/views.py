@@ -40,7 +40,7 @@ from .serializers import (
     EstimateHistorySerializer,
 )
 from .services import EstimateEmailService, TemplateService
-from ..bid.serializers import BidFileSerializer
+from ..bid.serializers import BidSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1041,7 +1041,7 @@ class EstimateBidListView(APIView):
                              required=False, type=int),
         ],
         responses={
-            200: BidFileSerializer(many=True),
+            200: BidSerializer(many=True),
             500: dict,
         },
     )
@@ -1074,7 +1074,7 @@ class EstimateBidListView(APIView):
                     status=status.HTTP_200_OK,
                 )
 
-            serializer = BidFileSerializer(bids, many=True)
+            serializer = BidSerializer(bids, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
