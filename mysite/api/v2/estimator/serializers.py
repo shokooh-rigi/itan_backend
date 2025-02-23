@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mysite.api.v2.bid.serializers import BidFileSerializer
+from mysite.api.v2.bid.serializers import BidSerializer
 from mysite.api.v2.core.serializers import PersonSerializer, ProjectSerializer, ServiceSerializer, EquipmentSerializer
 from mysite.core.models import Service
 from mysite.equipments.models import Equipment
@@ -58,7 +58,7 @@ class EstimateDetailsSerializer(serializers.ModelSerializer):
 class EstimateSerializer(serializers.ModelSerializer):
     """Serializer for the Estimate model."""
     estimate_id = serializers.SerializerMethodField()
-    bfm = BidFileSerializer(read_only=True)
+    bfm = BidSerializer(read_only=True)
     customer = PersonSerializer()
     company_name = serializers.SerializerMethodField(read_only=True)
     project = ProjectSerializer()
