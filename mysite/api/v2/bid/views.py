@@ -46,7 +46,7 @@ class BidListView(APIView):
             - 404: Error message if the bid file is not found.
         """
         try:
-            bid_file = BidFile.objects.get(
+            bid_file = BidFile.objects.filter(
                 id=id,
                 is_deleted=False,
                 archive=False,
@@ -56,13 +56,15 @@ class BidListView(APIView):
                 {"error": "Bid not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
         # Serialize the retrieved object
-        serializer = BidFileSerializer(bid_file)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK,
+        serializer = BidFileSerializer(bid_file, many=True)
+        paginator = PageNumberPagination()
+        paginator.page_size = (
+            settings.PAGE_SIZE
         )
+        result_page = paginator.paginate_queryset(bid_file, request)
+        serializer = BidFileSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class BidFileListView(APIView):
