@@ -77,8 +77,20 @@ class Invoice(BaseModelWithCreatedByUser):
         delete_pdf = Render.delete_file(parameters, "invoice")
         return delete_pdf
 
+    @property
+    def invoice_number(self):
+        """
+        Generates a formatted invoice number based on the order's project number
+        and the invoice ID. The project number is truncated to the first three
+        characters, and the invoice ID is zero-padded to three digits.
 
-class InvoiceTransaction(BaseModel):
+        Returns:
+            str: Formatted invoice number (e.g., "ABC-001").
+        """
+        return f"{self.order.project_number[:3]}-{self.id:03d}"
+
+
+class InvoiceTransaction(BaseModelWithCreatedByUser):
     """
     Represents a transaction associated with an invoice.
     Tracks payment details and user who created the transaction.
@@ -97,7 +109,6 @@ class InvoiceTransaction(BaseModel):
         null=False,
     )
     payment_no = models.CharField(max_length=20, blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
 
     class Meta:
         ordering = ["-created_on"]

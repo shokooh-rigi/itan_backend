@@ -70,6 +70,10 @@ class InvoicePaymentService:
         """
         now_time = datetime.datetime.now().strftime("%m/%d/%Y")
 
+        # Exit if the form is canceled
+        if self.form_data.get("cancel"):
+            return None
+
         # Gather user and invoice-specific data
         user_info = {
             "user_name": f"{self.user.first_name or ''} {self.user.last_name or 'TAB Technologies, INC. Operator'}",
@@ -83,25 +87,25 @@ class InvoicePaymentService:
         total_count = InvoiceHistory.objects.filter(invoice=self.invoice).count() + 1
         new_file_name = f'Invoice-{str(self.invoice.order.project_number[3:]).zfill(3)}-{str(self.invoice.id).zfill(3)}-{str(total_count)}'
 
-        # parameters = {
-        #     "now_time": now_time,
-        #     "file_name": new_file_name,
-        #     "total_count": total_count,
-        #     "revision_date": InvoiceHistory.objects.filter(invoice=self.invoice).order_by("-id").first(),
-        #     "invoice": self.invoice,
-        #     "change_orders": change_orders,
-        #     "total_amount_due": total_amount_due,
-        #     "estimate": self.invoice.order.proposal.estimate,
-        #     **license_data,
-        #     **user_info,
-        #     "WEB_URL": settings.WEB_URL,
-        #     "STATIC_URL": settings.STATIC_URL,
-        #     "MEDIA_URL": settings.MEDIA_URL,
-        #     "os": system(),
-        # }
+        parameters = {
+            "now_time": now_time,
+            "file_name": new_file_name,
+            "total_count": total_count,
+            "revision_date": InvoiceHistory.objects.filter(invoice=self.invoice).order_by("-id").first(),
+            "invoice": self.invoice,
+            "change_orders": change_orders,
+            "total_amount_due": total_amount_due,
+            "estimate": self.invoice.order.proposal.estimate,
+            **license_data,
+            **user_info,
+            "WEB_URL": settings.WEB_URL,
+            "STATIC_URL": settings.STATIC_URL,
+            "MEDIA_URL": settings.MEDIA_URL,
+            "os": system(),
+        }
 
         # Generate PDF and save invoice history
-        # Invoice.create_invoice_pdf(parameters) #todo: consider it in future
+        Invoice.create_invoice_pdf(parameters)
         total_invoiced = calculate_total_amount_due(self.invoice)
         total_paid = calculate_total_paid(self.invoice)
         balance_due = calculate_remaining_invoice_due(self.invoice)

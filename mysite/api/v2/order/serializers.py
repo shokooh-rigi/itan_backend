@@ -120,7 +120,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
                 "estimated_date_of_project": representation.get("estimated_date_of_project"),
-                "proposal_id": instance.proposal.id if instance.proposal else None,  # Ensure proposal_id is included
+                "proposal_id": instance.proposal.id if instance.proposal else None,
             }
 
         return representation

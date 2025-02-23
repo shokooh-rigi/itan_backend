@@ -96,6 +96,18 @@ class Estimate(BaseModelWithCreatedByUser):
         return self.estimatedetails.pre_demo * 1200
     
     @property
+    def dalt_calculated(self):
+        estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=self, flag=True)\
+            .filter(equipment__service__name__iexact="DALT")
+        estimate_sub = 0
+        for estimate_equipment_pricing in estimate_equipments_pricing:
+            equipment_total = float(estimate_equipment_pricing.price_override) * float(estimate_equipment_pricing.quantity)
+            estimate_sub += float(equipment_total)
+
+        estimate_total = round(estimate_sub, 2)
+        return estimate_total
+    
+    @property
     def total_calculated(self):
         return round(
             self.sub_total
