@@ -20,6 +20,146 @@ from .serializers import BidFileSerializer, BidFileCreateSerializer
 from .services import BidFileService
 
 
+
+class BidFileCreateView(APIView):
+    """
+    Create a new bid file with uploaded files.
+    This view processes the files, validates extensions, creates a zip, and uploads it to S3.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Creates a new BidFile by uploading and processing files. The files are validated, zipped, and stored in S3.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'customer': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the customer'),
+                'project': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the project'),
+                'due_date': openapi.Schema(type=openapi.TYPE_STRING, description='Due date for the bid file'),
+                'uploaded_file': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_FILE),
+                    description='List of uploaded files'
+                )
+            },
+            required=['customer', 'project', 'due_date', 'uploaded_file']
+        ),
+        responses={
+            201: openapi.Response(
+                "Bid file created successfully.",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+            ),
+            400: openapi.Response(
+                "Bad Request - Missing required fields, invalid file size or extension.",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
+            ),
+            500: openapi.Response(
+                "Internal Server Error - Error during file upload or zip creation.",
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
+            ),
+        }
+    )
+    def post(self, request):
+        form_data = request.data
+        files_list = request.FILES.getlist("uploaded_file")
+        customer_id = form_data.get("customer_id")
+        project_id = form_data.get("project_id")
+        due_date = form_data.get("due_date")
+
+        # Validate required fields
+        missing_fields = [
+            field
+            for field in ["customer_id", "project_id", "due_date"]
+            if not form_data.get(field)
+        ]
+        if missing_fields:
+            return Response(
+                {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate file size
+        if not self._is_valid_file_size(files_list):
+            return Response(
+                {"error": "Selected files exceeded maximum upload size!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate file extensions
+        if not self._are_valid_extensions(files_list):
+            return Response(
+                {"error": "Invalid file extension. Only zip, pdf, and docx are allowed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Handle file uploads and create zip
+        temp_path = self._get_temp_path()
+        file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
+        zip_file_path = self._create_project_zip(project_id, file_paths, temp_path)
+
+        # Save bid file to database and S3
+        self._save_bidfile_to_db(customer_id, project_id, due_date, zip_file_path)
+
+        return Response(
+            {"message": "Bid file created successfully."},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def _is_valid_file_size(files_list):
+        """
+        Check if the total size of uploaded files is within the allowed limit.
+        """
+        total_size = sum([f.size for f in files_list])
+        return total_size <= settings.MAX_UPLOAD_SIZE
+
+    @staticmethod
+    def _are_valid_extensions(files_list):
+        """
+        Check if all uploaded files have valid extensions.
+        """
+        allowed_extensions = {"zip", "pdf", "docx"}
+        for file in files_list:
+            file_extension = os.path.splitext(file.name)[-1].lower().strip(".")
+            if file_extension not in allowed_extensions:
+                return False
+        return True
+
+    @staticmethod
+    def _get_temp_path():
+        """
+        Generate or retrieve the temporary path for storing uploaded files.
+        """
+        temp_path = os.path.join(
+            os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
+        )
+        os.makedirs(temp_path, exist_ok=True)
+        return temp_path
+
+    @staticmethod
+    def _create_project_zip(project_id, file_paths, temp_path):
+        """
+        Clean the project name and create a zip file from the uploaded files.
+        """
+        project_clean_name = BidFileService.clean_project_name(
+            Project.objects.get(id=project_id).name
+        )
+        return BidFileService.create_zip_file(file_paths, temp_path, project_clean_name)
+
+    def _save_bidfile_to_db(self, customer_id, project_id, due_date, zip_file_path):
+        """
+        Save the bid file entry to the database and upload the zip to S3.
+        """
+        bidfile = BidFile.objects.create(
+            customer_id=customer_id,
+            project_id=project_id,
+            due_date=due_date,
+            created_by=self.request.user,
+        )
+        BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
+        return bidfile
+
+
 class BidListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -152,46 +292,6 @@ class BidFileListView(APIView):
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class BidFileUpdateView(APIView):
-    """
-    API view to retrieve and update a BidFile instance.
-    - PUT: Retrieve or update a BidFile instance by its ID.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Retrieve or update a BidFile instance by its ID.",
-        request_body=BidFileSerializer,  # Input schema
-        responses={
-            200: openapi.Response(
-                "Successfully updated the BidFile instance", BidFileSerializer
-            ),
-            400: "Validation error in input data",
-            404: "BidFile not found",
-        },
-    )
-    def put(self, request, bid_id):
-        """
-        Retrieve or update a BidFile instance with the provided data.
-        """
-        try:
-            bidfile = BidFile.objects.get(id=bid_id)
-        except BidFile.DoesNotExist:
-            return Response(
-                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Attempt to update the BidFile instance with the new data
-        serializer = BidFileSerializer(
-            bidfile, data=request.data, partial=True
-        )  # partial=True allows partial updates
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BidFileDuplicateView(APIView):
@@ -385,144 +485,6 @@ class BidFileDeleteView(APIView):
         )
 
 
-class BidFileCreateView(APIView):
-    """
-    Create a new bid file with uploaded files.
-    This view processes the files, validates extensions, creates a zip, and uploads it to S3.
-    """
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_description="Creates a new BidFile by uploading and processing files. The files are validated, zipped, and stored in S3.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'customer': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the customer'),
-                'project': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the project'),
-                'due_date': openapi.Schema(type=openapi.TYPE_STRING, description='Due date for the bid file'),
-                'uploaded_file': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Items(type=openapi.TYPE_FILE),
-                    description='List of uploaded files'
-                )
-            },
-            required=['customer', 'project', 'due_date', 'uploaded_file']
-        ),
-        responses={
-            201: openapi.Response(
-                "Bid file created successfully.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            400: openapi.Response(
-                "Bad Request - Missing required fields, invalid file size or extension.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-            500: openapi.Response(
-                "Internal Server Error - Error during file upload or zip creation.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
-            ),
-        }
-    )
-    def post(self, request):
-        form_data = request.data
-        files_list = request.FILES.getlist("uploaded_file")
-        customer_id = form_data.get("customer_id")
-        project_id = form_data.get("project_id")
-        due_date = form_data.get("due_date")
-
-        # Validate required fields
-        missing_fields = [
-            field
-            for field in ["customer_id", "project_id", "due_date"]
-            if not form_data.get(field)
-        ]
-        if missing_fields:
-            return Response(
-                {"error": f"Missing required fields: {', '.join(missing_fields)}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Validate file size
-        if not self._is_valid_file_size(files_list):
-            return Response(
-                {"error": "Selected files exceeded maximum upload size!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Validate file extensions
-        if not self._are_valid_extensions(files_list):
-            return Response(
-                {"error": "Invalid file extension. Only zip, pdf, and docx are allowed."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Handle file uploads and create zip
-        temp_path = self._get_temp_path()
-        file_paths = BidFileService.handle_uploaded_files(files_list, temp_path)
-        zip_file_path = self._create_project_zip(project_id, file_paths, temp_path)
-
-        # Save bid file to database and S3
-        self._save_bidfile_to_db(customer_id, project_id, due_date, zip_file_path)
-
-        return Response(
-            {"message": "Bid file created successfully."},
-            status=status.HTTP_201_CREATED,
-        )
-
-    @staticmethod
-    def _is_valid_file_size(files_list):
-        """
-        Check if the total size of uploaded files is within the allowed limit.
-        """
-        total_size = sum([f.size for f in files_list])
-        return total_size <= settings.MAX_UPLOAD_SIZE
-
-    @staticmethod
-    def _are_valid_extensions(files_list):
-        """
-        Check if all uploaded files have valid extensions.
-        """
-        allowed_extensions = {"zip", "pdf", "docx"}
-        for file in files_list:
-            file_extension = os.path.splitext(file.name)[-1].lower().strip(".")
-            if file_extension not in allowed_extensions:
-                return False
-        return True
-
-    @staticmethod
-    def _get_temp_path():
-        """
-        Generate or retrieve the temporary path for storing uploaded files.
-        """
-        temp_path = os.path.join(
-            os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
-        )
-        os.makedirs(temp_path, exist_ok=True)
-        return temp_path
-
-    @staticmethod
-    def _create_project_zip(project_id, file_paths, temp_path):
-        """
-        Clean the project name and create a zip file from the uploaded files.
-        """
-        project_clean_name = BidFileService.clean_project_name(
-            Project.objects.get(id=project_id).name
-        )
-        return BidFileService.create_zip_file(file_paths, temp_path, project_clean_name)
-
-    def _save_bidfile_to_db(self, customer_id, project_id, due_date, zip_file_path):
-        """
-        Save the bid file entry to the database and upload the zip to S3.
-        """
-        bidfile = BidFile.objects.create(
-            customer_id=customer_id,
-            project_id=project_id,
-            due_date=due_date,
-            created_by=self.request.user,
-        )
-        BidFileService.update_bidfile_with_zip(bidfile, zip_file_path)
-        return bidfile
-
 
 class BidFileAddFileView(APIView):
     """
@@ -653,3 +615,43 @@ class BidFileAddFileView(APIView):
             bidfile=bidfile,
             zip_file_path=zip_file_path,
         )
+
+
+class BidFileUpdateView(APIView):
+    """
+    API view to retrieve and update a BidFile instance.
+    - PUT: Retrieve or update a BidFile instance by its ID.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve or update a BidFile instance by its ID.",
+        request_body=BidFileSerializer,  # Input schema
+        responses={
+            200: openapi.Response(
+                "Successfully updated the BidFile instance", BidFileSerializer
+            ),
+            400: "Validation error in input data",
+            404: "BidFile not found",
+        },
+    )
+    def put(self, request, bid_id):
+        """
+        Retrieve or update a BidFile instance with the provided data.
+        """
+        try:
+            bidfile = BidFile.objects.get(id=bid_id)
+        except BidFile.DoesNotExist:
+            return Response(
+                {"error": "BidFile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Attempt to update the BidFile instance with the new data
+        serializer = BidFileSerializer(
+            bidfile, data=request.data, partial=True
+        )  # partial=True allows partial updates
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
