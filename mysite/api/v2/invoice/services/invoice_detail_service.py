@@ -47,8 +47,8 @@ class DetailedInvoiceService:
             )
 
             # Generate the invoice PDF
-            invoice_pdf = Invoice.create_invoice_pdf(parameters)
-            parameters["invoice_pdf"] = invoice_pdf[1]
+            # invoice_pdf = Invoice.create_invoice_pdf(parameters)
+            # parameters["invoice_pdf"] = invoice_pdf[1]
 
             # Calculate totals
             total_invoiced = calculate_total_amount_due(invoice)

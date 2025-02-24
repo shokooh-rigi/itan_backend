@@ -441,24 +441,27 @@ class InvoiceDetailView(APIView):
             Invoice,
             id=invoice_id,
             is_deleted=False,
-
         )
 
-        try:
-            data = DetailedInvoiceService.process_invoice(
-                invoice=invoice,
-                user=request.user,
-            )
-            return Response(data, status=status.HTTP_200_OK)
+        serializer = InvoiceSerializer(invoice, many=False)
 
-        except Exception as e:
-            logger.error(
-                f"Error processing invoice {invoice_id}: {str(e)}"
-            )
-            return Response(
-                {"error": "An error occurred while processing the invoice."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # try:
+        #     data = DetailedInvoiceService.process_invoice(
+        #         invoice=invoice,
+        #         user=request.user,
+        #     )
+        #     return Response(invoice, status=status.HTTP_200_OK)
+
+        # except Exception as e:
+        #     logger.error(
+        #         f"Error processing invoice {invoice_id}: {str(e)}"
+        #     )
+        #     return Response(
+        #         {"error": "An error occurred while processing the invoice."},
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     )
 
 
 class InvoiceDeleteView(APIView):
