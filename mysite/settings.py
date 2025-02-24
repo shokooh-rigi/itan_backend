@@ -189,13 +189,6 @@ USE_I18N = True
 USE_TZ = True
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
-# Static and Media Files
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [APPS_DIR / "static"]
-WEB_URL = ""  # todo: complete it later
-MEDIA_URL = "/media/"
-MEDIA_ROOT = APPS_DIR / "media"
 
 # Templates
 TEMPLATES = [
@@ -287,17 +280,17 @@ TINYMCE_COMPRESSOR = True
 AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-AWS_REGION_NAME = env("AWS_REGION_NAME")
-AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_REGION_NAME
+AWS_S3_REGION_NAME  = env("AWS_REGION_NAME")
+AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_S3_REGION_NAME 
 AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.wasabisys.com" % (
     AWS_STORAGE_BUCKET_NAME,
-    AWS_REGION_NAME,
+    AWS_S3_REGION_NAME,
 )
 AWS_S3_OBJECT_PARAMETERS = {
     "CacheControl": "max-age=86400",
 }
 AWS_S3_OBJECT_PARAMETERS
-AWS_LOCATION = "static/"
+AWS_LOCATION = ""
 AWS_DEFAULT_ACL = "public-read"
 AWS_QUERYSTRING_AUTH = True
 
@@ -306,33 +299,23 @@ STATICFILES_DIRS = [
 ]
 
 
-if ENV == "local":
-    STATIC_URL = "/mysite/static/"
-if ENV != "local":
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
-    STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-if ENV != "local":
-    DEFAULT_FILE_STORAGE = "mysite.storage_backends.MediaStorage"
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 MEDIA_URL = "media/"
+MEDIA_ROOT = APPS_DIR / "media"
 
 
-UPLOAD_BID_FILE_PATH: str = env(
-    "UPLOAD_BID_FILE_PATH",
-    default="uploads/bidfiles"
-)
-UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = env(
-    "UPLOAD_BID_FILE_PATH",
-    default="uploads/equipmentsubmittal",
-)
-STORAGE_ESTIMATE_PDFS_PATH: str = env(
-    "STORAGE_ESTIMATE_PDFS_PATH",
-    default="media/pdfs/estimate/",
-)
-STORAGE_INVOICE_PDFS_PATH: str = env(
-    "STORAGE_INVOICE_PDFS_PATH",
-    default="media/pdfs/invoice/",
-)
+UPLOAD_BID_FILE_PATH: str = "uploads/bid/"
+
+UPLOAD_EQUIPMENT_SUBMITTAL_PATH: str = "uploads/equipmentsubmittal/"
+
+STORAGE_ESTIMATE_PDFS_PATH: str = "media/pdfs/estimate/"
+
+STORAGE_INVOICE_PDFS_PATH: str = "media/pdfs/invoice/"
+
 # page size
 PAGE_SIZE: int = env("PAGE_SIZE", default=20)
 LIMIT_FILE_SIZE: int = env(

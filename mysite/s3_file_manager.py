@@ -18,7 +18,7 @@ class S3:
         self.endpoint_url = settings.AWS_S3_ENDPOINT_URL or "https://s3.wasabisys.com"
         self.aws_access_key_id = settings.AWS_ACCESS_KEY_ID
         self.aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-        self.region_name = settings.AWS_REGION_NAME
+        self.region_name = settings.AWS_S3_REGION_NAME 
         self.bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
         self.s3 = boto3.resource(

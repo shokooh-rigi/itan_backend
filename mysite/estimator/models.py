@@ -120,6 +120,18 @@ class Estimate(BaseModelWithCreatedByUser):
         )
     
     @property
+    def total_without_dalt_and_predemo_calculated(self):
+        return round(
+            self.sub_total
+            + self.control_system_calculated
+            + self.hours_calculated
+            + float(self.estimatedetails.adjustment)
+            + float(self.estimatedetails.customer_adjustment)
+            - self.dalt_calculated,
+            2,
+        )
+    
+    @property
     def estimate_id(self):
         estimate_number_generator(self.id)
 

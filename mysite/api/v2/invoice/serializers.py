@@ -14,15 +14,19 @@ class InvoiceSerializer(serializers.ModelSerializer):
     - Integrates with the service layer to handle related business logic.
     """
     order = OrderSerializer(read_only=True)
-    order_id = serializers.IntegerField(write_only=True)
     invoice_number = serializers.SerializerMethodField(read_only=True)
+    revision_date = serializers.SerializerMethodField(read_only=True)
+    amount = serializers.SerializerMethodField(read_only=True)
+    sub_total = serializers.SerializerMethodField(read_only=True)
+    total_paid = serializers.SerializerMethodField(read_only=True)
+    total_invoiced = serializers.SerializerMethodField(read_only=True)
+    remaining_due = serializers.SerializerMethodField(read_only=True)
+    amount_due = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Invoice
         fields = [
             'id',
-            'order',
-            'order_id',
             'invoice_type',
             'date_started',
             'date_completed',
@@ -32,9 +36,17 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'attention',
             'edited_on',
             'created_by',
+            'created_on',
             'invoice_number',
+            'revision_date',
+            'order',
+            'amount',
+            'sub_total',
+            'total_paid',
+            'total_invoiced',
+            'remaining_due',
+            'amount_due',
         ]
-        read_only_fields = ["invoice_number"]
 
     def create(self, validated_data):
         """Override create method to link order using order_id"""
@@ -49,18 +61,31 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
         validated_data["order"] = order
         return super().create(validated_data)
+    
+
+    def get_revision_date(self, obj):
+        return obj.revision_date
 
     def get_invoice_number(self, obj):
-        """
-        Retrieves the formatted invoice number for the given invoice object.
-
-        Args:
-            obj (Invoice): The invoice instance.
-
-        Returns:
-            str: The formatted invoice number.
-        """
         return obj.invoice_number
+    
+    def get_amount(self, obj):
+        return obj.amount
+    
+    def get_sub_total(self, obj):
+        return obj.sub_total
+    
+    def get_total_paid(self, obj):
+        return obj.total_paid
+    
+    def get_total_invoiced(self, obj):
+        return obj.total_invoiced
+    
+    def get_remaining_due(self, obj):
+        return obj.remaining_due
+    
+    def get_amount_due(self, obj):
+        return obj.amount_due
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):

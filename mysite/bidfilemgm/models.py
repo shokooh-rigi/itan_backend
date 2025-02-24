@@ -1,10 +1,12 @@
 import datetime
+import os
 
 from django.conf import settings
 from django.db import models
 
 from mysite.core.base_model import BaseModelWithCreatedByUser
 from mysite.core.models import Person, User, Project
+from django.core.files.base import ContentFile
 
 
 class BidFile(BaseModelWithCreatedByUser):
@@ -59,10 +61,13 @@ class BidAttachment(BaseModelWithCreatedByUser):
         related_name="attachments"
     )
     uploaded_file = models.FileField(
-        upload_to=settings.UPLOAD_BID_FILE_PATH,
+        upload_to=lambda instance, filename: BidAttachment.bid_attachment_upload_path(instance, filename),
         blank=False,
         null=False,
     )
+    
+    def bid_attachment_upload_path(instance, filename):
+        return os.path.join(settings.UPLOAD_BID_FILE_PATH, str(instance.bid.id), filename)
 
     class Meta:
         ordering = ["-created_on"]

@@ -693,20 +693,6 @@ class BidAttachmentListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        bid_id = self.kwargs.get("bid_id")  # Get bid_id from URL
-        bid = get_object_or_404(BidFile, id=bid_id)  # Fetch the BidFile instance
-
-        file = self.request.FILES.get("uploaded_file")
-
-        if file:
-            # Upload to S3
-            s3 = S3()
-            uploaded_file = s3.upload_file(file)
-            serializer.save(bid=bid, uploaded_file=uploaded_file)  # Save the file path to the DB
-
-
-
 
 class BidAttachmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
@@ -742,10 +728,10 @@ class BidAttachmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_destroy(self, instance):
-        s3 = S3()
+        # s3 = S3()
         # Delete file from S3 if it exists
-        if instance.file_path:
-            s3.delete_file_from_bucket(key=instance.file_path)
+        # if instance.file_path:
+        #     s3.delete_file_from_bucket(key=instance.file_path)
 
         # Perform the actual deletion of the model instance
         instance.delete()

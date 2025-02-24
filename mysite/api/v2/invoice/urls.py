@@ -21,6 +21,10 @@ urlpatterns = [
          InvoiceListView.as_view(),
          name='invoice-list'
          ),
+    path('invoice/detail/<int:invoice_id>/',
+         InvoiceDetailView.as_view(),
+         name='invoice-detail'
+         ),
     path('invoice/create/',
          InvoiceCreateView.as_view(),
          name='invoice-create'
@@ -38,10 +42,6 @@ urlpatterns = [
     path('invoice/update/<int:invoice_id>/',
          InvoiceUpdateView.as_view(),
          name='invoice-update'
-         ),
-    path('invoice/detail/<int:invoice_id>/',
-         InvoiceDetailView.as_view(),
-         name='invoice-detail'
          ),
     path('invoice/delete/<int:id>/',
          InvoiceDeleteView.as_view(),

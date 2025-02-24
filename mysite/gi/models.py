@@ -88,6 +88,57 @@ class Invoice(BaseModelWithCreatedByUser):
             str: Formatted invoice number (e.g., "ABC-001").
         """
         return f"{self.order.project_number[:3]}-{self.id:03d}"
+    
+
+    @property
+    def revision_date(self):
+        return self.edited_on if self.edited_on else self.created_on
+
+    @property
+    def amount(self):
+        match self.invoice_type:
+            case 1:
+                return self.order.proposal.estimate.total_calculated
+            case 2:
+                return self.order.proposal.estimate.predemo_calculated
+            case 4:
+                return self.order.proposal.estimate.dalt_calculated
+            case _:
+                return self.order.proposal.estimate.total_without_dalt_and_predemo_calculated
+            
+
+    @property
+    def sub_total(self):
+        match self.invoice_type:
+            case 1:
+                return self.order.total
+            case 2:
+                return self.order.predemo_total
+            case 4:
+                return self.order.dalt_total
+            case _:
+                return self.order.final_total
+            
+
+    @property
+    def total_paid(self):
+        transactions = InvoiceTransaction.objects.filter(invoice=self)
+        total = 0
+        for transaction in transactions:
+            total += transaction.amount
+        return total
+    
+    @property
+    def total_invoiced(self):
+        return self.sub_total * self.percent_of_performance_completed / 100
+    
+    @property
+    def remaining_due(self):
+        return self.total_invoiced - self.total_paid
+    
+    @property
+    def amount_due(self):
+        return self.remaining_due
 
 
 class InvoiceTransaction(BaseModelWithCreatedByUser):

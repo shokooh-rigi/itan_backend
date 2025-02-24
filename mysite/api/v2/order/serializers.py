@@ -69,6 +69,11 @@ class OrderSerializer(serializers.ModelSerializer):
     architect_name = PersonSerializer(read_only=True)
     control_system = ControlSystemSerializer(read_only=True)
     project_number = serializers.CharField(read_only=True)
+    change_orders_total = serializers.SerializerMethodField(read_only=True)
+    predemo_total = serializers.SerializerMethodField(read_only=True)
+    dalt_total = serializers.SerializerMethodField(read_only=True)
+    final_total = serializers.SerializerMethodField(read_only=True)
+    total = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Order
@@ -91,6 +96,11 @@ class OrderSerializer(serializers.ModelSerializer):
             "end_date",
             "created_on",
             "control_system",
+            "change_orders_total",
+            "predemo_total",
+            "dalt_total",
+            "final_total",
+            "total",
         ]
 
     def create(self, validated_data):
@@ -124,6 +134,21 @@ class OrderSerializer(serializers.ModelSerializer):
             }
 
         return representation
+    
+    def get_change_orders_total(self, obj):
+        return obj.change_orders_total
+    
+    def get_predemo_total(self, obj):
+        return obj.predemo_total
+    
+    def get_dalt_total(self, obj):
+        return obj.dalt_total
+    
+    def get_final_total(self, obj):
+        return obj.final_total
+    
+    def get_total(self, obj):
+        return obj.total
 
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):

@@ -162,6 +162,31 @@ class Order(BaseModel):
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
 
+    @property
+    def change_orders_total(self):
+        change_orders = ChangeOrder.objects.filter(order=self, confirmed=True)
+        total = 0
+        for change_order in change_orders:
+            total += change_order.change_order_total
+        return total
+
+    @property
+    def predemo_total(self):
+        return self.proposal.estimate.predemo_calculated
+
+    @property
+    def dalt_total(self):
+        return self.proposal.estimate.dalt_calculated
+
+    @property
+    def final_total(self):
+        return self.total - self.predemo_total
+
+    @property
+    def total(self):
+        order_total = float(self.proposal.estimate.total_calculated) + float(self.change_orders_total)
+        return round(order_total, 2)
+
     class Meta:
         ordering = ["-proposal"]
         verbose_name = 'Order List'
@@ -195,6 +220,15 @@ class ChangeOrder(BaseModel):
     co_number = models.CharField(max_length=30, blank=False, null=False)
     date = models.DateField(blank=True, null=True)
     confirmed = models.BooleanField(default=False)
+
+    @property
+    def change_order_total(self):
+        change_order = ChangeOrder.objects.get(id=self.order.id)
+        change_order_services = ChangeOrderService.objects.filter(change_order=change_order)
+        co_total = 0
+        for change_order_service in change_order_services:
+            co_total += change_order_service.amount
+        return co_total
 
     class Meta:
         unique_together = ['co_number', 'order']
