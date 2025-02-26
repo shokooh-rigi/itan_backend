@@ -18,12 +18,26 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from mysite.order.models import Order, TechLabel, ChangeOrder, ControlSystem, ControlSystemManufacturer
+from mysite.order.models import (
+    Order,
+    TechLabel,
+    ChangeOrder,
+    ControlSystem,
+    ControlSystemManufacturer,
+)
 from mysite.proposal.models import Proposal
-from .serializers import OrderSerializer, ChangeOrderSerializer, OrderControlSystemSerializer, ControlSystemSerializer, \
-    ControlSystemManufacturerSerializer
+from .serializers import (
+    OrderSerializer,
+    ChangeOrderSerializer,
+    OrderControlSystemSerializer,
+    ControlSystemSerializer,
+    ControlSystemManufacturerSerializer,
+)
 from .serializers import TechLabelSerializer
-from .services.change_order_service import ChangeOrderServiceLayer, DeleteChangeOrderService
+from .services.change_order_service import (
+    ChangeOrderServiceLayer,
+    DeleteChangeOrderService,
+)
 from .services.order_equipment_submittal_service import OrderEquipmentSubmittalService
 from .services.order_field_drawing_service import OrderFieldDrawingService
 from .services.order_full_update_service import OrderFullUpdateService
@@ -47,6 +61,7 @@ class OrderListAPIView(APIView):
     Returns:
         - Paginated list of orders based on filters and ordering.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -56,7 +71,7 @@ class OrderListAPIView(APIView):
                 "project_name",
                 openapi.IN_QUERY,
                 description="Search orders by project name or related fields.",
-                type=openapi.TYPE_STRING
+                type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "type",
@@ -64,29 +79,29 @@ class OrderListAPIView(APIView):
                 description="Type of orders to filter (all, inprogress, invoiced, notinvoiced, reported).",
                 type=openapi.TYPE_STRING,
                 enum=["all", "inprogress", "invoiced", "notinvoiced", "reported"],
-                default="all"
+                default="all",
             ),
             openapi.Parameter(
                 "ordering",
                 openapi.IN_QUERY,
                 description="Field to order the results by (default: '-created_on').",
                 type=openapi.TYPE_STRING,
-                default="-created_on"
+                default="-created_on",
             ),
             openapi.Parameter(
                 "paginate_by",
                 openapi.IN_QUERY,
                 description="Number of orders per page (default: 20).",
                 type=openapi.TYPE_INTEGER,
-                default=settings.PAGE_SIZE
+                default=settings.PAGE_SIZE,
             ),
             openapi.Parameter(
                 "page",
                 openapi.IN_QUERY,
                 description="The page number to return (default: 1).",
                 type=openapi.TYPE_INTEGER,
-                default=1
-            )
+                default=1,
+            ),
         ],
         responses={
             200: openapi.Response(
@@ -120,6 +135,7 @@ class OrderAddAPIView(APIView):
     Methods:
         - POST: Creates a new order.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -127,34 +143,51 @@ class OrderAddAPIView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "architect_name": openapi.Schema(type=openapi.TYPE_STRING, description="Architect's name"),
-                "po_number": openapi.Schema(type=openapi.TYPE_STRING, description="PO order number"),
-                "date_po_received": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Date PO was received"),
-                "final_offset": openapi.Schema(type=openapi.TYPE_NUMBER, description="Final offset value"),
-                "note": openapi.Schema(type=openapi.TYPE_STRING, description="Additional notes"),
-                "estimated_date_of_project": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Estimated project date"),
-                "proposal_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the associated proposal"),
+                "architect_name": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Architect's name"
+                ),
+                "po_number": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="PO order number"
+                ),
+                "date_po_received": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_DATE,
+                    description="Date PO was received",
+                ),
+                "final_offset": openapi.Schema(
+                    type=openapi.TYPE_NUMBER, description="Final offset value"
+                ),
+                "note": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Additional notes"
+                ),
+                "estimated_date_of_project": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_DATE,
+                    description="Estimated project date",
+                ),
+                "proposal_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the associated proposal",
+                ),
             },
-            required=["po_number","proposal_id" ]
+            required=["po_number", "proposal_id"],
         ),
         responses={
             201: openapi.Response(
                 description="Order created successfully",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    properties={
-                        "message": openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             400: openapi.Response(
                 description="Validation errors",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING)
-                )
-            )
-        }
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING),
+                ),
+            ),
+        },
     )
     def post(self, request):
         """
@@ -164,7 +197,10 @@ class OrderAddAPIView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Order created successfully!"}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "Order created successfully!"},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -174,7 +210,6 @@ class OrderProposalListView(APIView):
     @swagger_auto_schema(
         operation_summary="Retrieve non-archived and unassociated proposals",
         operation_description="Endpoint retrieves proposals that are not archived and not associated with any order.",
-
         responses={
             200: openapi.Response(
                 description="List of available proposals",
@@ -189,10 +224,7 @@ class OrderProposalListView(APIView):
         """
         try:
 
-            proposals = Proposal.objects.filter(
-                archive=False,
-                is_deleted=False
-            )
+            proposals = Proposal.objects.filter(archive=False, is_deleted=False)
 
             if not proposals.exists():
                 return Response(
@@ -204,10 +236,7 @@ class OrderProposalListView(APIView):
                 proposals = proposals.filter(id=proposal_id)
 
             proposals = proposals.exclude(
-                id__in=Order.objects.values_list(
-                    "proposal_id",
-                    flat=True
-                )
+                id__in=Order.objects.values_list("proposal_id", flat=True)
             )
 
             serializer = ProposalSerializer(proposals, many=True)
@@ -234,6 +263,7 @@ class OrderEditAPIView(APIView):
     Path Parameters:
         - order_id (int): The ID of the order to edit.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -257,11 +287,15 @@ class OrderEditAPIView(APIView):
                             type=openapi.TYPE_OBJECT,
                             properties={
                                 "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                "proposal": openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True),
-                                "order_number": openapi.Schema(type=openapi.TYPE_STRING),
+                                "proposal": openapi.Schema(
+                                    type=openapi.TYPE_INTEGER, nullable=True
+                                ),
+                                "order_number": openapi.Schema(
+                                    type=openapi.TYPE_STRING
+                                ),
                                 "status": openapi.Schema(type=openapi.TYPE_STRING),
                                 "description": openapi.Schema(type=openapi.TYPE_STRING),
-                            }
+                            },
                         ),
                         "proposals": openapi.Schema(
                             type=openapi.TYPE_ARRAY,
@@ -270,8 +304,8 @@ class OrderEditAPIView(APIView):
                                 properties={
                                     "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                                     "name": openapi.Schema(type=openapi.TYPE_STRING),
-                                }
-                            )
+                                },
+                            ),
                         ),
                         "change_orders": openapi.Schema(
                             type=openapi.TYPE_ARRAY,
@@ -280,13 +314,13 @@ class OrderEditAPIView(APIView):
                                 properties={
                                     "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                                     "name": openapi.Schema(type=openapi.TYPE_STRING),
-                                }
-                            )
-                        )
-                    }
-                )
+                                },
+                            ),
+                        ),
+                    },
+                ),
             )
-        }
+        },
     )
     def get(self, request, order_id):
         """
@@ -311,7 +345,8 @@ class OrderEditAPIView(APIView):
         ]
 
         change_orders_data = [
-            {"id": change_order.id, "name": change_order.name} for change_order in change_orders
+            {"id": change_order.id, "name": change_order.name}
+            for change_order in change_orders
         ]
 
         return Response(
@@ -333,17 +368,17 @@ class OrderEditAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "message": openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                )
+                    },
+                ),
             ),
             400: openapi.Response(
                 description="Validation errors.",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING)
-                )
-            )
-        }
+                    additional_properties=openapi.Schema(type=openapi.TYPE_STRING),
+                ),
+            ),
+        },
     )
     def put(self, request, order_id):
         """
@@ -353,7 +388,9 @@ class OrderEditAPIView(APIView):
         serializer = OrderSerializer(this_order, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Order updated successfully!"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Order updated successfully!"}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -364,6 +401,7 @@ class OrderDeleteAPIView(APIView):
     Methods:
         - DELETE: Deletes the specified order.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -384,7 +422,7 @@ class OrderDeleteAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "message": openapi.Schema(type=openapi.TYPE_STRING),
-                    }
+                    },
                 ),
             ),
             403: openapi.Response(
@@ -393,10 +431,10 @@ class OrderDeleteAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "error": openapi.Schema(type=openapi.TYPE_STRING),
-                    }
+                    },
                 ),
             ),
-        }
+        },
     )
     def delete(self, request, order_id):
         this_order = OrderService.get_order(order_id)
@@ -405,14 +443,13 @@ class OrderDeleteAPIView(APIView):
             OrderService.validate_user_permission(this_order, request.user)
 
             OrderService.delete_order(this_order)
-            return Response({"message": "Order deleted successfully!"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Order deleted successfully!"}, status=status.HTTP_200_OK
+            )
 
         except PermissionDenied as e:
             # Return error if the user is unauthorized
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
 class OrderArchiveAPIView(APIView):
@@ -422,6 +459,7 @@ class OrderArchiveAPIView(APIView):
     Methods:
         - POST: Archives the specified order.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -442,7 +480,7 @@ class OrderArchiveAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "message": openapi.Schema(type=openapi.TYPE_STRING),
-                    }
+                    },
                 ),
             ),
             403: openapi.Response(
@@ -451,10 +489,10 @@ class OrderArchiveAPIView(APIView):
                     type=openapi.TYPE_OBJECT,
                     properties={
                         "error": openapi.Schema(type=openapi.TYPE_STRING),
-                    }
+                    },
                 ),
             ),
-        }
+        },
     )
     def post(self, request, order_id):
         # Fetch the order
@@ -465,14 +503,13 @@ class OrderArchiveAPIView(APIView):
             OrderService.validate_user_permission(this_order, request.user)
 
             OrderService.archive_order(this_order)
-            return Response({"message": "Order archived successfully!"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Order archived successfully!"}, status=status.HTTP_200_OK
+            )
 
         except PermissionDenied as e:
             # Return error if the user is unauthorized
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ChangeOrderCreateApiView(APIView):
@@ -489,6 +526,7 @@ class ChangeOrderCreateApiView(APIView):
     Parameters:
         - order_id (int): The ID of the order to associate with the change order.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -513,29 +551,31 @@ class ChangeOrderCreateApiView(APIView):
         Returns:
             Response: Success or error response based on the validation and execution.
         """
+        # Retrieve the order from the URL parameter (order_id)
         this_order = get_object_or_404(
             Order,
             id=order_id,
             is_deleted=False,
         )
 
+        # Don't include order_id in the request body; it should be in the URL
         request_data = request.data.copy()
         request_data["order"] = this_order.id
 
+        # Initialize the serializer with the request data
         serializer = ChangeOrderSerializer(data=request_data)
         if serializer.is_valid():
+            # Save the change order and return a success response
             change_order = serializer.save(order=this_order)
             return Response(
                 {
-                    'status': 'Change order created successfully',
-                    'change_order_id': change_order.id
+                    "status": "Change order created successfully",
+                    "change_order_id": change_order.id,
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED,
             )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangeOrderDeleteAPIView(APIView):
@@ -555,7 +595,6 @@ class ChangeOrderDeleteAPIView(APIView):
             ChangeOrder,
             id=change_order_id,
             is_deleted=False,
-
         )
 
         # Service layer handling change order deletion
@@ -563,9 +602,14 @@ class ChangeOrderDeleteAPIView(APIView):
         success = service.delete_change_order(change_order)
 
         if success:
-            return Response({"detail": "Change order deleted successfully."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Change order deleted successfully."},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({"detail": "Change order not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Change order not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class ChangeOrderApproveView(APIView):
@@ -580,19 +624,18 @@ class ChangeOrderApproveView(APIView):
                 user=request.user,
             )
             return Response(
-                {"message": f"Change order approved and invoice generated successfully.", "file_name": new_file_name},
-                status=status.HTTP_200_OK
+                {
+                    "message": f"Change order approved and invoice generated successfully.",
+                    "file_name": new_file_name,
+                },
+                status=status.HTTP_200_OK,
             )
         except ChangeOrder.DoesNotExist:
             return Response(
-                {"message": "Change order not found."},
-                status=status.HTTP_404_NOT_FOUND
+                {"message": "Change order not found."}, status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            return Response(
-                {"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TechLabelViewSet(ModelViewSet):
@@ -600,7 +643,7 @@ class TechLabelViewSet(ModelViewSet):
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
-    @action(detail=True, methods=['post'], url_path='update-extra-fields')
+    @action(detail=True, methods=["post"], url_path="update-extra-fields")
     def update_extra_fields(self, request, order_id=None):
         """
         Updates or creates a TechLabel and its extra fields.
@@ -615,14 +658,17 @@ class TechLabelViewSet(ModelViewSet):
 
         try:
             updated_tech_label = service.update_tech_label(tech_label, this_order)
-            return Response({
-                'message': 'TechLabel updated successfully!',
-                'data': TechLabelSerializer(updated_tech_label).data
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "TechLabel updated successfully!",
+                    "data": TechLabelSerializer(updated_tech_label).data,
+                },
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'], url_path='download-pdf')
+    @action(detail=True, methods=["get"], url_path="download-pdf")
     def download_pdf(self, request, order_id=None):
         """
         Download the PDF associated with a TechLabel.
@@ -635,20 +681,27 @@ class TechLabelViewSet(ModelViewSet):
         tech_label = TechLabel.objects.filter(
             order__id=order_id,
             is_deleted=False,
-
         ).first()
 
         service = TechLabelServiceLayer()
         try:
             local_path = service.generate_pdf(tech_label, this_order)
             if os.path.exists(local_path):
-                with open(local_path, 'rb') as pdf_file:
-                    response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-                    response['Content-Disposition'] = f'inline; filename={os.path.basename(local_path)}'
+                with open(local_path, "rb") as pdf_file:
+                    response = HttpResponse(
+                        pdf_file.read(), content_type="application/pdf"
+                    )
+                    response["Content-Disposition"] = (
+                        f"inline; filename={os.path.basename(local_path)}"
+                    )
                     return response
-            return Response({'error': 'PDF not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "PDF not found."}, status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ControlSystemAPIView(APIView):
@@ -675,11 +728,16 @@ class ControlSystemAPIView(APIView):
             id=order_id,
             is_deleted=False,
         )
-        serializer = OrderControlSystemSerializer(order, data=request.data, partial=True)
+        serializer = OrderControlSystemSerializer(
+            order, data=request.data, partial=True
+        )
 
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'Control system updated successfully!'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Control system updated successfully!"},
+                status=status.HTTP_200_OK,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -688,6 +746,7 @@ class ControlSystemListCreateView(ListCreateAPIView):
     """
     API for listing and creating Control Systems
     """
+
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
 
@@ -700,7 +759,9 @@ class ControlSystemListCreateView(ListCreateAPIView):
                 "documentation": openapi.Schema(type=openapi.TYPE_FILE),
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
-                "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
+                "control_file_url": openapi.Schema(
+                    type=openapi.TYPE_STRING, format="url"
+                ),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
         ),
@@ -711,10 +772,12 @@ class ControlSystemListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+
 class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     """
     API for retrieving, updating, and deleting a specific Control System.
     """
+
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
 
@@ -723,6 +786,7 @@ class ControlSystemManufacturerListCreateView(ListCreateAPIView):
     """
     API for listing and creating Control System Manufacturers.
     """
+
     queryset = ControlSystemManufacturer.objects.all()
     serializer_class = ControlSystemManufacturerSerializer
 
@@ -731,6 +795,7 @@ class ControlSystemManufacturerDetailView(RetrieveUpdateDestroyAPIView):
     """
     API for retrieving, updating, and deleting a specific Control System Manufacturer.
     """
+
     queryset = ControlSystemManufacturer.objects.all()
     serializer_class = ControlSystemManufacturerSerializer
 
@@ -740,6 +805,7 @@ class OrderEquipmentSubmittalView(APIView):
     API view to handle order equipment submittal actions including
     uploading files, clearing submittal, and updating the order.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
@@ -761,28 +827,27 @@ class OrderEquipmentSubmittalView(APIView):
                 OrderEquipmentSubmittalService.clear_equipment_submittal(order_id)
                 return Response(
                     {"detail": "Equipment submittal cleared."},
-                    status=status.HTTP_200_OK
+                    status=status.HTTP_200_OK,
                 )
 
             # Handle files upload and processing
-            files = request.FILES.getlist('equipment_submittal')
-            OrderEquipmentSubmittalService.update_order_with_equipment_submittal(order, files)
+            files = request.FILES.getlist("equipment_submittal")
+            OrderEquipmentSubmittalService.update_order_with_equipment_submittal(
+                order, files
+            )
 
             return Response(
                 {"detail": "Equipment submittal updated successfully."},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         except ValidationError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response(
                 {"detail": "An error occurred."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -822,17 +887,16 @@ class OrderFieldDrawingView(APIView):
             )
 
             # Handle form submission for field drawing files
-            if 'field_drawing' in request.FILES:
-                files = request.FILES.getlist('field_drawing')
+            if "field_drawing" in request.FILES:
+                files = request.FILES.getlist("field_drawing")
                 OrderFieldDrawingService.process_field_drawing_files(order, files)
                 return Response(
                     {"detail": "Field drawing updated successfully."},
-                    status=status.HTTP_200_OK
+                    status=status.HTTP_200_OK,
                 )
 
             return Response(
-                {"detail": "No files provided."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST
             )
 
         except ValidationError as e:
@@ -841,7 +905,7 @@ class OrderFieldDrawingView(APIView):
         except Exception as e:
             return Response(
                 {"detail": "An error occurred."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -876,16 +940,18 @@ class OrderGeneralNotesView(APIView):
         )
 
         # Extract general notes and comments from the request data
-        general_notes_and_comments = str(request.data.get('general_notes_and_comments', ""))
+        general_notes_and_comments = str(
+            request.data.get("general_notes_and_comments", "")
+        )
 
         # If "finalize" action is pressed, finalize the general notes and save them
-        if request.data.get('finalize'):
+        if request.data.get("finalize"):
             order.general_notes_and_comments = general_notes_and_comments
             order.general_notes_and_comments_finalize = True
             order.save()
             return Response(
                 {"detail": "General notes finalized and saved."},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         # If "save" action is pressed, save the general notes without finalizing
@@ -894,13 +960,13 @@ class OrderGeneralNotesView(APIView):
             order.save()
             return Response(
                 {"detail": "General notes saved successfully."},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         # If no valid action is found, return a bad request error
         return Response(
             {"detail": "Invalid action or missing data."},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     def get(self, request, order_id):
@@ -923,7 +989,7 @@ class OrderGeneralNotesView(APIView):
         # Return the general notes and comments of the order
         return Response(
             {"general_notes_and_comments": order.general_notes_and_comments},
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
 
@@ -931,6 +997,7 @@ class OrderSitePicturesView(APIView):
     """
     API View to handle uploading and saving site pictures for an order.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
@@ -945,17 +1012,23 @@ class OrderSitePicturesView(APIView):
 
         # Process the form data and files using the service layer
         try:
-            service = OrderSitePicturesService(order_id, request.FILES.getlist('site_pictures'))
+            service = OrderSitePicturesService(
+                order_id, request.FILES.getlist("site_pictures")
+            )
             zip_file_name = service.process_upload()
-            return Response({"detail": f"Site pictures uploaded and saved as {zip_file_name}."},
-                            status=status.HTTP_200_OK)
+            return Response(
+                {"detail": f"Site pictures uploaded and saved as {zip_file_name}."},
+                status=status.HTTP_200_OK,
+            )
 
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return Response({"error": "An error occurred during the upload process."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "An error occurred during the upload process."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def get(self, request, order_id):
         """
@@ -968,9 +1041,14 @@ class OrderSitePicturesView(APIView):
         )
 
         if order.site_pictures:
-            return Response({"site_pictures": order.site_pictures.url}, status=status.HTTP_200_OK)
+            return Response(
+                {"site_pictures": order.site_pictures.url}, status=status.HTTP_200_OK
+            )
 
-        return Response({"message": "No site pictures available for this order."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"message": "No site pictures available for this order."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 class OrderFullUpdateAPIView(APIView):
@@ -986,6 +1064,7 @@ class OrderFullUpdateAPIView(APIView):
     ensuring that all related information is available for the user to make
     necessary changes.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, order_id, *args, **kwargs):
@@ -1020,11 +1099,7 @@ class OrderFullUpdateAPIView(APIView):
 
         except Order.DoesNotExist:
             return Response(
-                {"detail": "Order not found."},
-                status=status.HTTP_404_NOT_FOUND
+                {"detail": "Order not found."}, status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

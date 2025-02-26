@@ -3,21 +3,29 @@ from rest_framework import serializers
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
-from mysite.order.models import Order, TechLabel, ChangeOrderService, ChangeOrder, TechLabelExtraFields, ControlSystem, \
-    ControlSystemManufacturer
+from mysite.order.models import (
+    Order,
+    TechLabel,
+    ChangeOrderService,
+    ChangeOrder,
+    TechLabelExtraFields,
+    ControlSystem,
+    ControlSystemManufacturer,
+)
 from mysite.proposal.models import Proposal
 
 
 class ControlSystemManufacturerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ControlSystemManufacturer
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ControlSystemSerializer(serializers.ModelSerializer):
     """
     Serializer for the ControlSystem model.
     """
+
     manufacturer = ControlSystemManufacturerSerializer(read_only=True)
     manufacturer_id = serializers.PrimaryKeyRelatedField(
         queryset=ControlSystemManufacturer.objects.all(),
@@ -25,7 +33,6 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         required=True,
     )
     documentation = serializers.FileField(write_only=True)
-
 
     class Meta:
         model = ControlSystem
@@ -46,7 +53,9 @@ class ControlSystemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         manufacturer = validated_data.pop("manufacturer_id")
-        control_system = ControlSystem.objects.create(manufacturer=manufacturer, **validated_data)
+        control_system = ControlSystem.objects.create(
+            manufacturer=manufacturer, **validated_data
+        )
         return control_system
 
     def to_representation(self, instance):
@@ -59,12 +68,14 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             data.pop("manufacturer", None)
         return data
 
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     Serializer for handling Order creation and updates.
 
     - Validates and processes Order data.
     """
+
     proposal = ProposalSerializer(read_only=True)
     proposal_id = serializers.IntegerField(write_only=True)
     architect_name = PersonSerializer(read_only=True)
@@ -108,7 +119,9 @@ class OrderSerializer(serializers.ModelSerializer):
         """Override create method to link proposal using proposal_id"""
         proposal_id = validated_data.pop("proposal_id", None)
         if not proposal_id:
-            raise serializers.ValidationError({"proposal_id": "This field is required."})
+            raise serializers.ValidationError(
+                {"proposal_id": "This field is required."}
+            )
 
         try:
             proposal = Proposal.objects.get(id=proposal_id)
@@ -121,33 +134,35 @@ class OrderSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Customize response for create requests"""
         representation = super().to_representation(instance)
-        request = self.context.get('request')
+        request = self.context.get("request")
 
-        if request and request.method == 'POST':
+        if request and request.method == "POST":
             return {
-                "architect_name": representation.get("architect_name", ''),
+                "architect_name": representation.get("architect_name", ""),
                 "po_number": representation.get("po_number"),
                 "date_po_received": representation.get("date_po_received"),
                 "final_offset": representation.get("final_offset"),
                 "note": representation.get("note"),
-                "estimated_date_of_project": representation.get("estimated_date_of_project"),
+                "estimated_date_of_project": representation.get(
+                    "estimated_date_of_project"
+                ),
                 "proposal_id": instance.proposal.id if instance.proposal else None,
             }
 
         return representation
-    
+
     def get_change_orders_total(self, obj):
         return obj.change_orders_total
-    
+
     def get_predemo_total(self, obj):
         return obj.predemo_total
-    
+
     def get_dalt_total(self, obj):
         return obj.dalt_total
-    
+
     def get_final_total(self, obj):
         return obj.final_total
-    
+
     def get_total(self, obj):
         return obj.total
 
@@ -156,41 +171,34 @@ class ChangeOrderServiceSerializer(serializers.ModelSerializer):
     """
     Serializer for ChangeOrderService.
     """
+
     class Meta:
         model = ChangeOrderService
-        fields = ['amount', 'description']
+        fields = ["amount", "description"]
 
 
 class ChangeOrderSerializer(serializers.ModelSerializer):
     """
     Serializer for ChangeOrder with nested services.
     """
+
     services = ChangeOrderServiceSerializer(many=True)
-    order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ChangeOrder
         fields = [
-            'order',
-            'co_number',
-            'confirmed',
-            'date',
-            'services',
+            "co_number",
+            "confirmed",
+            "date",
+            "services",
         ]
-        extra_kwargs = {'order': {'read_only': True}}
 
     def create(self, validated_data):
         """
         Create a ChangeOrder along with associated services.
         """
-        order_id = validated_data.pop('order_id')
-        order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False
-        )
-        services_data = validated_data.pop('services')
-        change_order = ChangeOrder.objects.create(order=order, **validated_data)
+        services_data = validated_data.pop("services")
+        change_order = ChangeOrder.objects.create(**validated_data)
         for service_data in services_data:
             ChangeOrderService.objects.create(change_order=change_order, **service_data)
         return change_order
@@ -199,7 +207,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
         """
         Update a ChangeOrder and its associated services.
         """
-        services_data = validated_data.pop('services', [])
+        services_data = validated_data.pop("services", [])
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -215,7 +223,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
 class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechLabelExtraFields
-        fields = ['title', 'content']
+        fields = ["title", "content"]
 
 
 class TechLabelSerializer(serializers.ModelSerializer):
@@ -223,16 +231,15 @@ class TechLabelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TechLabel
-        fields = ['id', 'order', 'extra_fields']
+        fields = ["id", "order", "extra_fields"]
 
 
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem
     control_system = serializers.PrimaryKeyRelatedField(
-        queryset=ControlSystem.objects.all(),
-        required=True
+        queryset=ControlSystem.objects.all(), required=True
     )
 
     class Meta:
         model = Order
-        fields = ['control_system']
+        fields = ["control_system"]
