@@ -78,7 +78,7 @@ class OrderListAPIView(APIView):
                 openapi.IN_QUERY,
                 description="Number of orders per page (default: 20).",
                 type=openapi.TYPE_INTEGER,
-                default=20
+                default=settings.PAGE_SIZE
             ),
             openapi.Parameter(
                 "page",
@@ -90,69 +90,27 @@ class OrderListAPIView(APIView):
         ],
         responses={
             200: openapi.Response(
-                description="Paginated list of orders",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "orders": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    "project_number": openapi.Schema(type=openapi.TYPE_STRING),
-                                    "po_number": openapi.Schema(type=openapi.TYPE_STRING),
-                                    "date_po_received": openapi.Schema(type=openapi.FORMAT_DATE),
-                                    "estimated_date_of_project": openapi.Schema(type=openapi.FORMAT_DATE),
-                                    "completion_percentage": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    "fully_settled": openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                                    "archive": openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                                    "state": openapi.Schema(type=openapi.TYPE_STRING),
-                                    "start_date": openapi.Schema(type=openapi.FORMAT_DATE),
-                                    "end_date": openapi.Schema(type=openapi.FORMAT_DATE),
-                                    "created_on": openapi.Schema(type=openapi.FORMAT_DATETIME)
-                                }
-                            )
-                        ),
-                        "WEB_URL": openapi.Schema(type=openapi.TYPE_STRING),
-                        "MEDIA_URL": openapi.Schema(type=openapi.TYPE_STRING),
-                        "now": openapi.Schema(type=openapi.FORMAT_DATETIME)
-                    }
-                )
+                "A paginated list of orders",
+                OrderSerializer(many=True),
             ),
-            401: "Unauthorized",
-            400: "Bad Request"
-        }
+            400: "Invalid date format or other error",
+        },
     )
     def get(self, request):
         project_name = request.query_params.get("project_name", "")
         order_type = request.query_params.get("type", "all")
         ordering = request.query_params.get("ordering", "-created_on")
-        paginate_by = int(request.query_params.get("paginate_by", 20))
-
-        # Get filtered and ordered orders using the service layer
-        orders_queryset = OrderService.get_filtered_orders(project_name, order_type, ordering)
-
-        # Paginate the results
+        paginate_by = int(request.query_params.get("paginate_by", settings.PAGE_SIZE))
+        orders_queryset = OrderService.get_filtered_orders(
+            project_name=project_name,
+            order_type=order_type,
+            ordering=ordering,
+        )
         paginator = PageNumberPagination()
         paginator.page_size = paginate_by
         paginated_orders = paginator.paginate_queryset(orders_queryset, request)
-
-        # Serialize the data
         serializer = OrderSerializer(paginated_orders, many=True)
-
-        # Add additional context parameters
-        context = {
-            "WEB_URL": settings.WEB_URL,
-            "MEDIA_URL": settings.MEDIA_URL,
-            "now": datetime.now()
-        }
-
-        # Return the paginated response with serialized data and additional context
-        return paginator.get_paginated_response({
-            "orders": serializer.data,
-            **context
-        })
+        return paginator.get_paginated_response(serializer.data)
 
 
 class OrderAddAPIView(APIView):
