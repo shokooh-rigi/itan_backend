@@ -23,7 +23,7 @@ env = environ.Env()
 # Read environment variables from a .env file if it exists
 environ.Env.read_env()
 
-PROXY_ENABLE = bool(env("PROXY_ENABLE", default="False"))
+PROXY_ENABLE = bool(env("PROXY_ENABLE", default=""))
 PROXY_HOST = env("PROXY_HOST", default='127.0.0.1')
 PROXY_PORT = int(env("PROXY_PORT", default=10808))
 
