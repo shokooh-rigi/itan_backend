@@ -510,18 +510,12 @@ class ChangeOrderView(APIView):
 
         serializer = ChangeOrderSerializer(data=request.data)
         if serializer.is_valid():
-            # Instantiate the service layer and pass the required data
-            change_order_service = ChangeOrderServiceLayer(
-                order=this_order,
-                user=request.user,
-                data=request.data,
-            )
-
-            # Create the change order and associated services
-            change_order = change_order_service.create_change_order()
-
+            change_order = serializer.save()
             return Response(
-                {'status': 'Change order created successfully', 'change_order_id': change_order.id},
+                {
+                    'status': 'Change order created successfully',
+                    'change_order_id': change_order.id
+                },
                 status=status.HTTP_201_CREATED
             )
         else:

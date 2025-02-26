@@ -48,10 +48,10 @@ urlpatterns = [
     path('orders/archive/<int:order_id>/',
          OrderArchiveAPIView.as_view(),
          name='order-archive'),  # Archive an order
-    path('orders/<int:order_id>/change/',
+    path('change-orders/<int:order_id>/',
          ChangeOrderView.as_view(),
-         name='change-order'),  # Create a change order
-    path('orders/<int:order_id>/change-orders/<int:change_order_id>/delete/',
+         name='change-order-create'),  # Create a change order
+    path('change-orders/<int:order_id>/delete/<int:change_order_id>/',
          ChangeOrderDeleteAPIView.as_view(),
          name='change-order-delete'),
     path('change-orders/<int:change_order_id>/approve/<str:action>/',
