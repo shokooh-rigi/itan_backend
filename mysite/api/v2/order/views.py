@@ -475,7 +475,7 @@ class OrderArchiveAPIView(APIView):
             )
 
 
-class ChangeOrderView(APIView):
+class ChangeOrderCreateApiView(APIView):
     """
     API endpoint for creating a change order.
 
@@ -491,6 +491,26 @@ class ChangeOrderView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Create a change-order instance.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "order_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the order to associate with the change-order. Must be valid.",
+                ),
+            },
+            required=["order_id"],
+        ),
+        responses={
+            201: openapi.Response(
+                "Successfully created the change-order instance", ChangeOrderSerializer
+            ),
+            400: "Validation error in input data",
+            404: "Estimate not found",
+        },
+    )
     def post(self, request, order_id):
         """
         Handles the creation of a change order.

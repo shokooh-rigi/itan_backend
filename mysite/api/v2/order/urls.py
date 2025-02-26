@@ -7,7 +7,7 @@ from .views import (
     OrderEditAPIView,
     OrderDeleteAPIView,
     OrderArchiveAPIView,
-    ChangeOrderView,
+    ChangeOrderCreateApiView,
     ChangeOrderDeleteAPIView,
     ChangeOrderApproveView,
     TechLabelViewSet,
@@ -49,7 +49,7 @@ urlpatterns = [
          OrderArchiveAPIView.as_view(),
          name='order-archive'),  # Archive an order
     path('change-orders/<int:order_id>/',
-         ChangeOrderView.as_view(),
+         ChangeOrderCreateApiView.as_view(),
          name='change-order-create'),  # Create a change order
     path('change-orders/<int:order_id>/delete/<int:change_order_id>/',
          ChangeOrderDeleteAPIView.as_view(),
