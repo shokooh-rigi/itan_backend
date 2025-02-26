@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from mysite.api.v2.core.serializers import PersonSerializer
@@ -165,17 +166,31 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
     Serializer for ChangeOrder with nested services.
     """
     services = ChangeOrderServiceSerializer(many=True)
+    order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ChangeOrder
-        fields = ['order', 'co_number', 'confirmed', 'date', 'services']
+        fields = [
+            'order',
+            'co_number',
+            'confirmed',
+            'date',
+            'services',
+        ]
+        extra_kwargs = {'order': {'read_only': True}}
 
     def create(self, validated_data):
         """
         Create a ChangeOrder along with associated services.
         """
+        order_id = validated_data.pop('order_id')
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False
+        )
         services_data = validated_data.pop('services')
-        change_order = ChangeOrder.objects.create(**validated_data)
+        change_order = ChangeOrder.objects.create(order=order, **validated_data)
         for service_data in services_data:
             ChangeOrderService.objects.create(change_order=change_order, **service_data)
         return change_order

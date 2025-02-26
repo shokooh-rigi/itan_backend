@@ -493,22 +493,13 @@ class ChangeOrderCreateApiView(APIView):
 
     @swagger_auto_schema(
         operation_description="Create a change-order instance.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "order_id": openapi.Schema(
-                    type=openapi.TYPE_INTEGER,
-                    description="ID of the order to associate with the change-order. Must be valid.",
-                ),
-            },
-            required=["order_id"],
-        ),
+        request_body=ChangeOrderSerializer,
         responses={
             201: openapi.Response(
                 "Successfully created the change-order instance", ChangeOrderSerializer
             ),
             400: "Validation error in input data",
-            404: "Estimate not found",
+            404: "Order not found",
         },
     )
     def post(self, request, order_id):
@@ -528,9 +519,12 @@ class ChangeOrderCreateApiView(APIView):
             is_deleted=False,
         )
 
-        serializer = ChangeOrderSerializer(data=request.data)
+        request_data = request.data.copy()
+        request_data["order"] = this_order.id
+
+        serializer = ChangeOrderSerializer(data=request_data)
         if serializer.is_valid():
-            change_order = serializer.save()
+            change_order = serializer.save(order=this_order)
             return Response(
                 {
                     'status': 'Change order created successfully',
@@ -538,8 +532,10 @@ class ChangeOrderCreateApiView(APIView):
                 },
                 status=status.HTTP_201_CREATED
             )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ChangeOrderDeleteAPIView(APIView):
