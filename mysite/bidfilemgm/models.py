@@ -6,7 +6,13 @@ from django.db import models
 
 from mysite.core.base_model import BaseModelWithCreatedByUser
 from mysite.core.models import Person, User, Project
-from django.core.files.base import ContentFile
+
+
+class BidTypeChoices(models.IntegerChoices):
+    TAB = 0, "TAB"
+    MECHANICAL = 1, "Mechanical"
+    ELECTRICAL = 2, "Electrical"
+    PLUMBING = 3, "Plumbing"
 
 
 class BidFile(BaseModelWithCreatedByUser):
@@ -17,6 +23,9 @@ class BidFile(BaseModelWithCreatedByUser):
     controlling visibility to customers.
     """
 
+    type = models.PositiveSmallIntegerField(
+        choices=BidTypeChoices.choices, default=BidTypeChoices.TAB
+    )
     customer = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,

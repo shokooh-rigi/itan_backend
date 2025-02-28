@@ -5,39 +5,39 @@ from mysite.bidfilemgm.models import BidFile, BidAttachment
 
 
 class BidSerializer(serializers.ModelSerializer):
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
-    project_name = serializers.CharField(source='project.name', read_only=True)
+    customer_name = serializers.CharField(source="customer.name", read_only=True)
+    project_name = serializers.CharField(source="project.name", read_only=True)
 
     class Meta:
         model = BidFile
         fields = [
-            'customer',
-            'customer_name',
-            'project',
-            'project_name',
-            'due_date',
-            'note',
-            'created_by',
-            'id',
+            "id",
+            "type",
+            "customer",
+            "customer_name",
+            "project",
+            "project_name",
+            "due_date",
+            "note",
+            "created_by",
         ]
 
 
 class BidCreateSerializer(serializers.ModelSerializer):
     """
-        Serializer for  create Bid model.
-        Handles validation and data transformation for creating and updating bid files.
-        """
+    Serializer for  create Bid model.
+    Handles validation and data transformation for creating and updating bid files.
+    """
 
     class Meta:
         model = BidFile
         fields = [
-            'customer',
-            'project',
-            'due_date',
-            'note',
-            'created_by',
+            "customer",
+            "project",
+            "due_date",
+            "note",
+            "created_by",
         ]
-
 
 
 class BidAttachmentSerializer(serializers.ModelSerializer):
