@@ -7,7 +7,11 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -28,7 +32,9 @@ class BidDetailListView(APIView):
         summary="Retrieve a Bid ",
         description="Retrieve a specific bid  by its ID if it exists and is not deleted or archived.",
         parameters=[
-            OpenApiParameter(name="id", description="The ID of the bid file", required=True, type=int),
+            OpenApiParameter(
+                name="id", description="The ID of the bid file", required=True, type=int
+            ),
         ],
         responses={
             200: BidSerializer,
@@ -60,9 +66,7 @@ class BidDetailListView(APIView):
         # Serialize the retrieved object
         serializer = BidSerializer(bid_file, many=True)
         paginator = PageNumberPagination()
-        paginator.page_size = (
-            settings.PAGE_SIZE
-        )
+        paginator.page_size = settings.PAGE_SIZE
         result_page = paginator.paginate_queryset(bid_file, request)
         serializer = BidSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -139,9 +143,7 @@ class BidListView(APIView):
                 ordering=ordering,
             )
             paginator = PageNumberPagination()
-            paginator.page_size = (
-                settings.PAGE_SIZE
-            )
+            paginator.page_size = settings.PAGE_SIZE
             result_page = paginator.paginate_queryset(object_list, request)
             serializer = BidSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
@@ -208,12 +210,12 @@ class BidDuplicateView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'customer_id': openapi.Schema(
+                "customer_id": openapi.Schema(
                     type=openapi.TYPE_INTEGER,
-                    description="ID of the new customer to assign the duplicated Bid"
+                    description="ID of the new customer to assign the duplicated Bid",
                 ),
             },
-            required=['customer_id'],
+            required=["customer_id"],
         ),
         responses={
             201: openapi.Response(
@@ -222,7 +224,7 @@ class BidDuplicateView(APIView):
             ),
             400: openapi.Response(description="Invalid input"),
             404: openapi.Response(description="Bid or Customer not found"),
-        }
+        },
     )
     def post(self, request, bid_id):
         """
@@ -253,9 +255,9 @@ class BidDuplicateView(APIView):
 
     @staticmethod
     def _duplicate_bid(
-            this_bid: BidFile,
-            customer_id: int,
-            created_by_user,
+        this_bid: BidFile,
+        customer_id: int,
+        created_by_user,
     ):
         """
         Internal helper function to duplicate a Bid.
@@ -294,18 +296,20 @@ class BidArchiveView(APIView):
         responses={
             200: openapi.Response(
                 "Successfully archived the bid file",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             403: "User is not authorized to archive this record.",
-            404: "Bid not found."
-        }
+            404: "Bid not found.",
+        },
     )
     def post(self, request, bid_id):
         bid = get_object_or_404(
             BidFile,
             id=bid_id,
             is_deleted=False,
-
         )
 
         # Check if the requesting user is the creator of the bid file
@@ -336,12 +340,15 @@ class BidDeleteView(APIView):
         responses={
             200: openapi.Response(
                 "Successfully deleted the Bid",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             403: "User is not authorized to delete this record.",
             404: "Bid not found.",
-            500: "Error deleting file from S3."
-        }
+            500: "Error deleting file from S3.",
+        },
     )
     def delete(self, request, bid_id):
         """
@@ -354,10 +361,7 @@ class BidDeleteView(APIView):
         )
 
         # Check if the user is authorized to delete the bid
-        if (
-            this_bid.created_by != request.user
-            and request.user.profile.user_type != 2
-        ):
+        if this_bid.created_by != request.user and request.user.profile.user_type != 2:
             return Response(
                 {"error": "You are not authorized to delete this record."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -371,7 +375,9 @@ class BidDeleteView(APIView):
         related_attachments = BidAttachment.objects.filter(bid=this_bid)
         for attachment in related_attachments:
             try:
-                s3.delete_file_from_bucket(key=settings.MEDIA_URL + attachment.file_path)
+                s3.delete_file_from_bucket(
+                    key=settings.MEDIA_URL + attachment.file_path
+                )
             except Exception as e:
                 return Response(
                     {"error": f"Error deleting file from S3: {str(e)}"},
@@ -395,6 +401,7 @@ class BidCreateView(APIView):
     Create a new bid file with uploaded files.
     This view processes the files, validates extensions, creates a zip, and uploads it to S3.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -402,31 +409,46 @@ class BidCreateView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'customer': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the customer'),
-                'project': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the project'),
-                'due_date': openapi.Schema(type=openapi.TYPE_STRING, description='Due date for the bid file'),
-                'uploaded_file': openapi.Schema(
+                "customer": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="ID of the customer"
+                ),
+                "project": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="ID of the project"
+                ),
+                "due_date": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Due date for the bid file"
+                ),
+                "uploaded_file": openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Items(type=openapi.TYPE_FILE),
-                    description='List of uploaded files'
-                )
+                    description="List of uploaded files",
+                ),
             },
-            required=['customer', 'project', 'due_date', 'uploaded_file']
+            required=["customer", "project", "due_date", "uploaded_file"],
         ),
         responses={
             201: openapi.Response(
                 "Bid file created successfully.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'message': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"message": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             400: openapi.Response(
                 "Bad Request - Missing required fields, invalid file size or extension.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             500: openapi.Response(
                 "Internal Server Error - Error during file upload or zip creation.",
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
-        }
+        },
     )
     def post(self, request):
         form_data = request.data
@@ -457,17 +479,33 @@ class BidCreateView(APIView):
         # Validate file extensions
         if not self._are_valid_extensions(files_list):
             return Response(
-                {"error": "Invalid file extension. Only zip, pdf, and docx are allowed."},
+                {
+                    "error": "Invalid file extension. Only zip, pdf, and docx are allowed."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Handle file uploads and create zip
-        temp_path = self._get_temp_path()
-        file_paths = BidService.handle_uploaded_files(files_list, temp_path)
-        zip_file_path = self._create_project_zip(project_id, file_paths, temp_path)
+        # # Handle file uploads
+        # temp_path = self._get_temp_path()
+        # file_paths = BidService.handle_uploaded_files(files_list, temp_path)
+        # zip_file_path = self._create_project_zip(project_id, file_paths, temp_path)
 
-        # Save bid file to database and S3
-        self._save_bid_to_db(customer_id, project_id, due_date, zip_file_path)
+        # # Save bid file to database and S3
+        # self._save_bid_to_db(customer_id, project_id, due_date, zip_file_path)
+
+        # Create Bid instance
+        bid = BidFile.objects.create(
+            customer_id=customer_id,
+            project_id=project_id,
+            due_date=due_date,
+        )
+
+        # Create BidAttachment for each file
+        for file in files_list:
+            BidAttachment.objects.create(
+                bid=bid,
+                uploaded_file=file,
+            )
 
         return Response(
             {"message": "Bid created successfully."},
@@ -494,39 +532,39 @@ class BidCreateView(APIView):
                 return False
         return True
 
-    @staticmethod
-    def _get_temp_path():
-        """
-        Generate or retrieve the temporary path for storing uploaded files.
-        """
-        temp_path = os.path.join(
-            os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
-        )
-        os.makedirs(temp_path, exist_ok=True)
-        return temp_path
+    # @staticmethod
+    # def _get_temp_path():
+    #     """
+    #     Generate or retrieve the temporary path for storing uploaded files.
+    #     """
+    #     temp_path = os.path.join(
+    #         os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
+    #     )
+    #     os.makedirs(temp_path, exist_ok=True)
+    #     return temp_path
 
-    @staticmethod
-    def _create_project_zip(project_id, file_paths, temp_path):
-        """
-        Clean the project name and create a zip file from the uploaded files.
-        """
-        project_clean_name = BidService.clean_project_name(
-            Project.objects.get(id=project_id).name
-        )
-        return BidService.create_zip_file(file_paths, temp_path, project_clean_name)
+    # @staticmethod
+    # def _create_project_zip(project_id, file_paths, temp_path):
+    #     """
+    #     Clean the project name and create a zip file from the uploaded files.
+    #     """
+    #     project_clean_name = BidService.clean_project_name(
+    #         Project.objects.get(id=project_id).name
+    #     )
+    #     return BidService.create_zip_file(file_paths, temp_path, project_clean_name)
 
-    def _save_bid_to_db(self, customer_id, project_id, due_date, zip_file_path):
-        """
-        Save the bid file entry to the database and upload the zip to S3.
-        """
-        bid = BidFile.objects.create(
-            customer_id=customer_id,
-            project_id=project_id,
-            due_date=due_date,
-            created_by=self.request.user,
-        )
-        BidService.update_bid_with_zip(bid, zip_file_path)
-        return bid
+    # def _save_bid_to_db(self, customer_id, project_id, due_date, zip_file_path):
+    #     """
+    #     Save the bid file entry to the database and upload the zip to S3.
+    #     """
+    #     bid = BidFile.objects.create(
+    #         customer_id=customer_id,
+    #         project_id=project_id,
+    #         due_date=due_date,
+    #         created_by=self.request.user,
+    #     )
+    #     BidService.update_bid_with_zip(bid, zip_file_path)
+    #     return bid
 
 
 class BidAddFileView(APIView):
@@ -542,7 +580,7 @@ class BidAddFileView(APIView):
         responses={
             200: "File(s) uploaded and updated successfully.",
             400: "Selected files exceeded maximum upload size!",
-        }
+        },
     )
     def post(self, request, bid_id):
         """
@@ -610,7 +648,9 @@ class BidAddFileView(APIView):
         """
         Creates and returns the temporary directory path for file uploads.
         """
-        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles")
+        temp_path = os.path.join(
+            os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
+        )
         if not os.path.exists(temp_path):
             os.makedirs(temp_path)
         return temp_path
@@ -645,7 +685,7 @@ class BidAddFileView(APIView):
         zip_filename = BidService.create_zip_file(
             filenames=files_paths,
             path=temp_path,
-            project_name=f"{bid.pk}_{project_clean_name}"
+            project_name=f"{bid.pk}_{project_clean_name}",
         )
         return zip_filename
 
@@ -664,6 +704,7 @@ class BidAttachmentRetrieveView(RetrieveAPIView):
     """
     API view for retrieving a specific BidAttachment.
     """
+
     queryset = BidAttachment.objects.all()
     serializer_class = BidAttachmentSerializer
 
@@ -676,6 +717,7 @@ class BidAttachmentListCreateView(ListCreateAPIView):
     """
     API view for listing all BidAttachments and creating a new one.
     """
+
     serializer_class = BidAttachmentSerializer
     parser_classes = [MultiPartParser]  # Support file uploads
 
@@ -686,9 +728,11 @@ class BidAttachmentListCreateView(ListCreateAPIView):
     @swagger_auto_schema(
         operation_description="List all BidAttachments and create a new one",
         parameters=[
-            OpenApiParameter(name="bid_id", description="The ID of the bid", required=True, type=int),
+            OpenApiParameter(
+                name="bid_id", description="The ID of the bid", required=True, type=int
+            ),
         ],
-        request_body=BidAttachmentSerializer
+        request_body=BidAttachmentSerializer,
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -698,13 +742,14 @@ class BidAttachmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
     API view for retrieving, updating, and deleting a specific BidAttachment.
     """
+
     queryset = BidAttachment.objects.all()
     serializer_class = BidAttachmentSerializer
     parser_classes = [MultiPartParser]  # Support file uploads
 
     @swagger_auto_schema(
         operation_description="Retrieve, update, or delete a specific BidAttachment",
-        request_body=BidAttachmentSerializer
+        request_body=BidAttachmentSerializer,
     )
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

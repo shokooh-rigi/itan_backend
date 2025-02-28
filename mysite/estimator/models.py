@@ -76,61 +76,67 @@ class Estimate(BaseModelWithCreatedByUser):
     def sub_total(self):
         estimate_equipments = self.estimateequipment_set.filter(flag=True)
         total = sum(
-            float(estimate_equipment.price_override or estimate_equipment.equipment.price) * estimate_equipment.quantity
+            float(
+                estimate_equipment.price_override or estimate_equipment.equipment.price
+            )
+            * estimate_equipment.quantity
             for estimate_equipment in estimate_equipments
         )
         return total
-    
+
     @property
     def control_system_calculated(self):
         if not self.estimatedetails:
             return 0
         return round(self.sub_total * (self.estimatedetails.control_system / 100), 2)
-    
+
     @property
     def hours_calculated(self):
         return round(self.sub_total * (self.estimatedetails.hours / 100), 2)
-    
+
     @property
     def predemo_calculated(self):
         return self.estimatedetails.pre_demo * 1200
-    
+
     @property
     def dalt_calculated(self):
-        estimate_equipments_pricing = EstimateEquipment.objects.filter(estimate=self, flag=True)\
-            .filter(equipment__service__name__iexact="DALT")
+        estimate_equipments_pricing = EstimateEquipment.objects.filter(
+            estimate=self, flag=True
+        ).filter(equipment__service__name__iexact="DALT")
         estimate_sub = 0
         for estimate_equipment_pricing in estimate_equipments_pricing:
-            equipment_total = float(estimate_equipment_pricing.price_override) * float(estimate_equipment_pricing.quantity)
+            equipment_total = float(estimate_equipment_pricing.price_override) * float(
+                estimate_equipment_pricing.quantity
+            )
             estimate_sub += float(equipment_total)
 
         estimate_total = round(estimate_sub, 2)
         return estimate_total
-    
+
     @property
     def total_calculated(self):
         return round(
-            self.sub_total
-            + self.control_system_calculated
-            + self.hours_calculated
-            + self.predemo_calculated
+            float(self.sub_total)
+            + float(self.control_system_calculated)
+            + float(self.hours_calculated)
+            + float(self.predemo_calculated)
             + float(self.estimatedetails.adjustment)
             + float(self.estimatedetails.customer_adjustment),
             2,
         )
-    
+
     @property
     def total_without_dalt_and_predemo_calculated(self):
         return round(
-            self.sub_total
-            + self.control_system_calculated
-            + self.hours_calculated
+            float(self.sub_total)
+            + float(self.control_system_calculated)
+            + float(self.hours_calculated)
             + float(self.estimatedetails.adjustment)
             + float(self.estimatedetails.customer_adjustment)
-            - self.dalt_calculated,
+            - float(self.dalt_calculated),
             2,
         )
-    
+
     @property
     def estimate_id(self):
         estimate_number_generator(self.id)
@@ -201,11 +207,12 @@ class EstimateEquipment(BaseModel):
 
 class EstimateDetails(BaseModel):
     """Model for additional details of an estimate."""
+
     hours_choices = (
-        (0, 'Regular Hours'),
-        (5, 'Off Hours'),
-        (10, 'Saturday/Holidays'),
-        (15, 'Sunday'),
+        (0, "Regular Hours"),
+        (5, "Off Hours"),
+        (10, "Saturday/Holidays"),
+        (15, "Sunday"),
     )
 
     estimate = models.OneToOneField(

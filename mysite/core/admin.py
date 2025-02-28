@@ -12,6 +12,22 @@ admin.site.register(EmailBodyTemplate)
 admin.site.register(ModulesToEmailTemplateRelation)
 
 
+class AutoAssignCreatedByAdmin(ImportExportModelAdmin):
+    """Automatically assigns `created_by` to the logged-in user on object creation."""
+
+    def get_exclude(self, request, obj=None):
+        """Dynamically exclude `created_by` if it exists in the model."""
+        exclude_fields = super().get_exclude(request, obj) or []
+        if hasattr(self.model, "created_by"):
+            exclude_fields = list(exclude_fields) + ["created_by"]
+        return exclude_fields
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk and hasattr(obj, "created_by"):  # Check if field exists
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
 class LogEntryAdmin(admin.ModelAdmin):
     readonly_fields = (
         "content_type",
@@ -37,7 +53,7 @@ class LogEntryAdmin(admin.ModelAdmin):
 admin.site.register(LogEntry, LogEntryAdmin)
 
 
-class LicenseInfoAdmin(ImportExportModelAdmin):
+class LicenseInfoAdmin(AutoAssignCreatedByAdmin):
 
     def has_add_permission(self, request):
         return True
@@ -49,7 +65,7 @@ class LicenseInfoAdmin(ImportExportModelAdmin):
 admin.site.register(LicenseInfo, LicenseInfoAdmin)
 
 
-class LicenseFilesAdmin(ImportExportModelAdmin):
+class LicenseFilesAdmin(AutoAssignCreatedByAdmin):
 
     def has_add_permission(self, request):
         return True
@@ -61,7 +77,7 @@ class LicenseFilesAdmin(ImportExportModelAdmin):
 admin.site.register(LicenseFiles, LicenseFilesAdmin)
 
 
-class SettingAdmin(ImportExportModelAdmin):
+class SettingAdmin(AutoAssignCreatedByAdmin):
     def has_add_permission(self, request):
         return True
 
@@ -77,7 +93,7 @@ class ServiceResource(resources.ModelResource):
         model = Service
 
 
-class ServiceAdmin(ImportExportModelAdmin):
+class ServiceAdmin(AutoAssignCreatedByAdmin):
     resource_class = ServiceResource
 
 
@@ -89,14 +105,14 @@ class CompanyTypeResource(resources.ModelResource):
         model = CompanyType
 
 
-class CompanyTypeAdmin(ImportExportModelAdmin):
+class CompanyTypeAdmin(AutoAssignCreatedByAdmin):
     resource_class = CompanyTypeResource
 
 
 admin.site.register(CompanyType, CompanyTypeAdmin)
 
 
-class ContactInfoAdmin(ImportExportModelAdmin):
+class ContactInfoAdmin(AutoAssignCreatedByAdmin):
     search_fields = [
         "tel",
         "cel",
@@ -118,7 +134,7 @@ class ContactInfoAdmin(ImportExportModelAdmin):
 admin.site.register(ContactInfo, ContactInfoAdmin)
 
 
-class PersonAdmin(ImportExportModelAdmin):
+class PersonAdmin(AutoAssignCreatedByAdmin):
     search_fields = ["company__name", "name"]
     readonly_fields = (
         "created_by",
@@ -139,14 +155,14 @@ class ProfileResource(resources.ModelResource):
         model = Profile
 
 
-class ProfileAdmin(ImportExportModelAdmin):
+class ProfileAdmin(AutoAssignCreatedByAdmin):
     resource_class = ProfileResource
 
 
 admin.site.register(Profile, ProfileAdmin)
 
 
-class ProjectAdmin(ImportExportModelAdmin):
+class ProjectAdmin(AutoAssignCreatedByAdmin):
     readonly_fields = (
         "created_by",
         "created_on",
@@ -160,6 +176,25 @@ class ProjectAdmin(ImportExportModelAdmin):
 
 admin.site.register(Project, ProjectAdmin)
 
-admin.site.register(CreditCard)
-admin.site.register(BusinessCheckingAccount)
-admin.site.register(TechLabelModel)
+
+class CreditCardAdmin(AutoAssignCreatedByAdmin):
+    pass
+
+
+class BusinessCheckingAccountAdmin(AutoAssignCreatedByAdmin):
+    pass
+
+
+class TechLabelModelAdmin(AutoAssignCreatedByAdmin):
+    pass
+
+
+class AnnouncementAdmin(AutoAssignCreatedByAdmin):
+    pass
+
+
+# Register them
+admin.site.register(CreditCard, CreditCardAdmin)
+admin.site.register(BusinessCheckingAccount, BusinessCheckingAccountAdmin)
+admin.site.register(TechLabelModel, TechLabelModelAdmin)
+admin.site.register(Announcement, AnnouncementAdmin)

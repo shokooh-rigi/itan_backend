@@ -17,27 +17,38 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from django.db.models import Sum
 
 from custom_user.models import User
 from mysite import settings
+from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import (
+    Announcement,
+    AnnouncementSeen,
     Person,
     Project,
     Company,
     Profile,
     CreditCard,
-    LicenseInfo, CompanyType, Service,
+    LicenseInfo,
+    CompanyType,
+    Service,
 )
+from mysite.estimator.models import Estimate
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
+from django.utils.timezone import now
 from .serializers import (
+    AnnouncementSerializer,
     ProjectSerializer,
     CompanySerializer,
     PersonSerializer,
     CreditCardSerializer,
     ProfileSerializer,
     UserSerializer,
-    DocumentSerializer, CompanyTypeSerializer, ServiceSerializer,
+    DocumentSerializer,
+    CompanyTypeSerializer,
+    ServiceSerializer,
 )
 
 
@@ -168,13 +179,15 @@ class ProfilesViewSet(ModelViewSet):
             if file:
                 s3.delete_file_from_bucket(file.name)
         return super().delete(*args, **kwargs)
-    
+
 
 class ProfileView(APIView):
     """
     Get current user's profile.
     """
+
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
 
         profile = Profile.objects.get(user=request.user)
@@ -182,8 +195,88 @@ class ProfileView(APIView):
         serializer = ProfileSerializer(profile)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
 
+    def post(self, request):
+        profile = Profile.objects.get(user=request.user)
+
+        # Extract firstName and lastName from the request data
+        first_name = request.data.get("firstName")
+        last_name = request.data.get("lastName")
+
+        # Update the profile fields if provided
+        if first_name:
+            profile.user.first_name = first_name
+        if last_name:
+            profile.user.last_name = last_name
+
+        profile.user.save()
+
+        # Serialize the updated profile
+        serializer = ProfileSerializer(profile)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class HomeView(APIView):
+    """
+    Get user's data for the home page
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Fetch all announcements (don't filter out unseen at this stage)
+        announcements = Announcement.objects.filter(archive=False)
+
+        # Get the IDs of announcements the user has already seen
+        seen_announcement_ids = AnnouncementSeen.objects.filter(user=user).values_list(
+            "announcement_id", flat=True
+        )
+
+        # Serialize announcements and include the 'seen' status
+        announcements_serializer = AnnouncementSerializer(
+            announcements,
+            many=True,
+            context={
+                "request": request,
+                "seen_announcement_ids": seen_announcement_ids,
+            },
+        )
+
+        # Cache the serialized response data
+        response_data = announcements_serializer.data
+
+        # Record unseen announcements
+        unseen_announcements = announcements.exclude(id__in=seen_announcement_ids)
+
+        # Bulk create AnnouncementSeen records for unseen announcements
+        AnnouncementSeen.objects.bulk_create(
+            [
+                AnnouncementSeen(user=user, announcement=announcement)
+                for announcement in unseen_announcements
+            ]
+        )
+
+        # Fetch bids for the current year
+        current_year = now().year
+        total_bids = BidFile.objects.filter(created_on__year=current_year)
+
+        # Fetch estimates related to bids
+        estimates = Estimate.objects.filter(bfm__in=total_bids)
+
+        # Manually sum up the total_calculated values
+        bids_total = sum(estimate.total_calculated for estimate in estimates)
+
+        return Response(
+            {
+                "announcements": response_data,  # Return the cached response data
+                "bidsCount": total_bids.count(),
+                "bidsTotal": bids_total,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class CreditCardViewSet(ModelViewSet):
@@ -234,6 +327,7 @@ class ServiceViewSet(ModelViewSet):
     """
     ViewSet for managing Service model CRUD operations.
     """
+
     queryset = Service.objects.filter(is_deleted=False)
     serializer_class = ServiceSerializer
     permission_classes = [IsAuthenticated]
@@ -258,6 +352,7 @@ class UserViewSet(ModelViewSet):
             Inserts the following during user update:
         - Fields like `username`, `email`, `first_name`, `last_name`
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -273,6 +368,7 @@ class GetEngineerId(APIView):
     """
     Retrieve the engineer ID based on the engineer's name.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -290,6 +386,7 @@ class GetProjectId(APIView):
     """
     Retrieve the project ID based on the project name.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -307,6 +404,7 @@ class GetPersonId(APIView):
     """
     Retrieve the person ID based on the person's name.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -324,6 +422,7 @@ class GetCompanyId(APIView):
     """
     Retrieve the company ID based on the company name.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -341,6 +440,7 @@ class CompanyTypeList(APIView):
     """
     Retrieve all company types.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -358,7 +458,7 @@ class CompanyTypeList(APIView):
         except Exception as e:
             return Response(
                 {"error": f"An error occurred in get company types: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -366,6 +466,7 @@ class SignUpAPIView(APIView):
     """
     API for user registration. Creates a new user and sends an activation email.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -403,6 +504,7 @@ class AccountActivationSentAPIView(APIView):
     """
     API to confirm that the account activation link has been sent.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -416,6 +518,7 @@ class ActivateAccountAPIView(APIView):
     """
     API for activating user accounts via email link.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, uidb64, token, *args, **kwargs):

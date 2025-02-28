@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from tinymce.models import HTMLField
 
 from custom_user.models import User
-from mysite.core.base_model import BaseModelWithCreatedByUser
+from mysite.core.base_model import BaseModel, BaseModelWithCreatedByUser
 
 
 class UserTypeChoices(models.IntegerChoices):
@@ -284,6 +284,11 @@ class CountryCode(models.TextChoices):
     ZM = "ZM", "Zambia"
     ZW = "ZW", "Zimbabwe"
     AX = "AX", "Åland Islands"
+
+
+class AnnouncementTypeChoices(models.IntegerChoices):
+    MAINTENANCE = 0, "Maintenance"
+    NOTIFICATION = 1, "Notification"
 
 
 class CompanyType(BaseModelWithCreatedByUser):
@@ -650,3 +655,19 @@ class TechLabelModel(BaseModelWithCreatedByUser):
 
     def __str__(self):
         return self.name
+
+
+class Announcement(BaseModelWithCreatedByUser):
+    type = models.PositiveSmallIntegerField(
+        choices=AnnouncementTypeChoices.choices,
+        default=AnnouncementTypeChoices.MAINTENANCE,
+    )
+    title = models.CharField(max_length=200, blank=False, null=False)
+    context = models.TextField(blank=False, null=False)
+
+
+class AnnouncementSeen(BaseModel):
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE, blank=False
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

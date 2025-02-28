@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 
 from mysite import settings
 from mysite.core.models import (
+    Announcement,
+    AnnouncementSeen,
     ContactInfo,
     Person,
     Project,
@@ -125,6 +127,7 @@ class PersonSerializer(BaseSerializer):
     """
     Serializer for the Person model.
     """
+
     company = CompanySerializer()
     contact_info = ContactInfoSerializer()
 
@@ -358,6 +361,7 @@ class CompanyTypeSerializer(BaseSerializer):
 
 class ServiceSerializer(BaseSerializer):
     service_equipments = serializers.SerializerMethodField()
+
     def get_service_equipments(self, obj):
         equipments = Equipment.objects.filter(service=obj)
         return EquipmentSerializer(equipments, many=True).data
@@ -376,3 +380,17 @@ class EquipmentSerializer(BaseSerializer):
         model = Equipment
         fields = "__all__"
 
+
+class AnnouncementSerializer(BaseSerializer):
+    seen = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Announcement
+        fields = "__all__"
+
+    def get_seen(self, obj):
+        """
+        Determine if the current user has seen the announcement.
+        """
+        seen_announcement_ids = self.context.get("seen_announcement_ids", [])
+        return obj.id in seen_announcement_ids
