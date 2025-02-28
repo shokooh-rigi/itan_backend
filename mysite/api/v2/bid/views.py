@@ -367,23 +367,9 @@ class BidDeleteView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Proceed to delete the file and all related BidAttachments from S3
-        s3 = S3()
-        file_key = str(this_bid.uploaded_file)
-
         # Delete related BidAttachment files from S3
         related_attachments = BidAttachment.objects.filter(bid=this_bid)
         for attachment in related_attachments:
-            try:
-                s3.delete_file_from_bucket(
-                    key=settings.MEDIA_URL + attachment.file_path
-                )
-            except Exception as e:
-                return Response(
-                    {"error": f"Error deleting file from S3: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-
             # Delete the attachment record from the database
             attachment.delete()
 
@@ -453,14 +439,15 @@ class BidCreateView(APIView):
     def post(self, request):
         form_data = request.data
         files_list = request.FILES.getlist("uploaded_file")
-        customer_id = form_data.get("customer_id")
-        project_id = form_data.get("project_id")
+        customer = form_data.get("customer")
+        project = form_data.get("project")
         due_date = form_data.get("due_date")
+        type = form_data.get("type")
 
         # Validate required fields
         missing_fields = [
             field
-            for field in ["customer_id", "project_id", "due_date"]
+            for field in ["customer", "project", "due_date"]
             if not form_data.get(field)
         ]
         if missing_fields:
@@ -495,9 +482,11 @@ class BidCreateView(APIView):
 
         # Create Bid instance
         bid = BidFile.objects.create(
-            customer_id=customer_id,
-            project_id=project_id,
+            type=type if type else None,
+            customer_id=customer,
+            project_id=project,
             due_date=due_date,
+            created_by=request.user,
         )
 
         # Create BidAttachment for each file
@@ -505,6 +494,7 @@ class BidCreateView(APIView):
             BidAttachment.objects.create(
                 bid=bid,
                 uploaded_file=file,
+                created_by=request.user,
             )
 
         return Response(
