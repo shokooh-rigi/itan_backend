@@ -20,11 +20,10 @@ pymysql.install_as_MySQLdb()
 
 env = environ.Env()
 
-# Read environment variables from a .env file if it exists
 environ.Env.read_env()
 
 PROXY_ENABLE = bool(env("PROXY_ENABLE", default=""))
-PROXY_HOST = env("PROXY_HOST", default='127.0.0.1')
+PROXY_HOST = env("PROXY_HOST", default="127.0.0.1")
 PROXY_PORT = int(env("PROXY_PORT", default=10808))
 
 # Paths
@@ -47,18 +46,21 @@ if ENV == "local":
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
-    CORS_ORIGIN_ALLOW_ALL = False
+    # CORS_ORIGIN_ALLOW_ALL = False
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CORS_ORIGIN_WHITELIST = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CSRF_TRUSTED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
+# CORS_ALLOWED_ORIGINS = env.list(
+#     "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+# )
+# CORS_ORIGIN_WHITELIST = env.list(
+#     "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+# )
+# CSRF_TRUSTED_ORIGINS = env.list(
+#     "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+# )
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -231,7 +233,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
 
 # CORS
@@ -284,8 +286,8 @@ TINYMCE_COMPRESSOR = True
 AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME  = env("AWS_REGION_NAME")
-AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_S3_REGION_NAME 
+AWS_S3_REGION_NAME = env("AWS_REGION_NAME")
+AWS_S3_ENDPOINT_URL = "https://s3.%s.wasabisys.com" % AWS_S3_REGION_NAME
 AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.wasabisys.com" % (
     AWS_STORAGE_BUCKET_NAME,
     AWS_S3_REGION_NAME,
@@ -323,7 +325,7 @@ STORAGE_INVOICE_PDFS_PATH: str = "media/pdfs/invoice/"
 # page size
 PAGE_SIZE: int = env("PAGE_SIZE", default=20)
 LIMIT_FILE_SIZE: int = env(
-    "LIMIT_FILE_SIZE", default= 5 * 1024 * 1024
+    "LIMIT_FILE_SIZE", default=5 * 1024 * 1024
 )  # Limit file size to 5MB
 
 # S3 Configuration
