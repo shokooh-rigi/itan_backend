@@ -199,6 +199,27 @@ class ProjectSerializer(BaseSerializer):
         return project
 
 
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop("address", None)
+        contact_info_data = validated_data.pop("contact_info", None)
+
+        if address_data:
+            for attr, value in address_data.items():
+                setattr(instance.address, attr, value)
+            instance.address.save()
+
+        if contact_info_data:
+            for attr, value in contact_info_data.items():
+                setattr(instance.contact_info, attr, value)
+            instance.contact_info.save()
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
+
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(write_only=True)
 
