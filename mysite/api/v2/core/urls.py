@@ -23,7 +23,6 @@ from .views import (
     CustomerViewSet,
     EngineerViewSet,
     PersonViewSet,
-    EngineerViewSet,
     ManufacturerViewSet,
     ProjectViewSet,
     CompanyTypeList,
