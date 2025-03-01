@@ -128,20 +128,51 @@ class PersonSerializer(BaseSerializer):
     Serializer for the Person model.
     """
 
-    company = CompanySerializer()
+    company = serializers.SerializerMethodField()
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(), write_only=True
+    )
     contact_info = ContactInfoSerializer()
 
     class Meta:
         model = Person
         fields = "__all__"
 
+    def get_company(self, obj):
+        """Return full company data for GET requests, but expect an ID for writes."""
+        request = self.context.get("request")
+        if request and request.method in ["GET"]:
+            return CompanySerializer(obj.company).data
+        return obj.company.id if obj.company else None
+
     def create(self, validated_data):
         contact_info_data = validated_data.pop("contact_info")
-        # Create the related ContactInfo object
+        company = validated_data.pop("company_id")  # Get the Company
+
+        company = Company.objects.get(id=company.id)  # Fetch Company object
+
+        # Create ContactInfo instance
         contact_info = ContactInfo.objects.create(**contact_info_data)
-        # Now create the Person object and associate the created ContactInfo
-        person = Person.objects.create(**validated_data, contact_info=contact_info)
+
+        # Create Person instance
+        person = Person.objects.create(
+            **validated_data, contact_info=contact_info, company=company
+        )
         return person
+
+    def update(self, instance, validated_data):
+        contact_info_data = validated_data.pop("contact_info", None)
+        company = validated_data.pop("company_id", None)
+
+        if contact_info_data:
+            for attr, value in contact_info_data.items():
+                setattr(instance.contact_info, attr, value)
+            instance.contact_info.save()
+
+        if company:
+            instance.company = Company.objects.get(id=company.id)
+
+        return super().update(instance, validated_data)
 
 
 class ProjectSerializer(BaseSerializer):
