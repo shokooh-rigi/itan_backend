@@ -153,3 +153,5 @@ static/customer/
 !.envs/.dev/*
 mysite/.env
 *.env
+
+.htaccess
