@@ -5,7 +5,7 @@ from mysite.bidfilemgm.models import BidFile, BidAttachment
 
 
 class BidSerializer(serializers.ModelSerializer):
-    customer_name = serializers.CharField(source="customer.name", read_only=True)
+    customer_name = serializers.SerializerMethodField()
     project_name = serializers.CharField(source="project.name", read_only=True)
 
     class Meta:
@@ -21,6 +21,9 @@ class BidSerializer(serializers.ModelSerializer):
             "note",
             "created_by",
         ]
+
+    def get_customer_name(self, obj):
+        return f"{obj.customer.company.name} - {obj.customer.name}"
 
 
 class BidCreateSerializer(serializers.ModelSerializer):

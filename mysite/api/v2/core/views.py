@@ -316,6 +316,16 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        """
+        Optionally filter the queryset based on query parameters.
+        """
+        queryset = super().get_queryset()
+        name = self.request.query_params.get("name", None)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
