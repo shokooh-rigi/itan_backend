@@ -1,31 +1,70 @@
 from django import template
-from mysite.dbmanagement.models import EquipmentTypeCustomField, EquipmentCustomField, FieldTypeChoices, DataTypeChoices
+from mysite.dbmanagement.models import (
+    EquipmentTypeCustomField,
+    EquipmentCustomField,
+    FieldTypeChoices,
+    DataTypeChoices,
+)
 from django.shortcuts import get_object_or_404
 
 from mysite.sheetcreator.models import *
+
+from mysite.sheetcreator.models import SheetEquipmentActualData
 
 register = template.Library()
 
 
 @register.simple_tag
+def get_field_type(field):
+    field_type = 0
+    if type(field) == EquipmentCustomField:
+        field_type = field.equipment.equipment_type.equipmenttypecustomfield_set.get(
+            field_name=field.equipment_value_name
+        ).field_type
+    elif type(field) == SheetEquipmentActualData:
+        field_type = (
+            field.key.equipment.equipment_type.equipmenttypecustomfield_set.get(
+                field_name=field.key.equipment_value_name
+            ).field_type
+        )
+    elif type(field) == EquipmentTypeCustomField:
+        field_type = field.field_type
+
+    if field_type == FieldTypeChoices.Integer.value:
+        return "type=number"
+    elif field_type == FieldTypeChoices.Float.value:
+        return "type=number step=any"
+    return "type=text"
+
+
+@register.simple_tag
 def get_design_value(request, design_field, equipment, request_page):
-    print(design_field, ' | ', equipment)
+    print(design_field, " | ", equipment)
     if request_page == 1:
-        return_value = EquipmentDbDesignData.objects.filter(equipment=equipment, key=design_field)
+        return_value = EquipmentDbDesignData.objects.filter(
+            equipment=equipment, key=design_field
+        )
         if return_value.exists():
-            return EquipmentDbDesignData.objects.get(equipment=equipment, key=design_field).value
+            return EquipmentDbDesignData.objects.get(
+                equipment=equipment, key=design_field
+            ).value
         else:
             return TestSheetField.objects.get(id=design_field.id).default_value
     elif request_page == 2:
-        if request.method == 'POST':
-            return request.POST.get(f'company_value_{design_field.id}')
-        return_value = TestSheetData.objects.filter(data_type=DataTypeChoices.Design.value, sheet_equipment=equipment,
-                                                    sheet_field=design_field)
+        if request.method == "POST":
+            return request.POST.get(f"company_value_{design_field.id}")
+        return_value = TestSheetData.objects.filter(
+            data_type=DataTypeChoices.Design.value,
+            sheet_equipment=equipment,
+            sheet_field=design_field,
+        )
         if return_value.count() > 0:
             return return_value.first().value
         else:
             if equipment.equipment:
-                return_value = EquipmentDbDesignData.objects.filter(equipment=equipment.equipment, key=design_field)
+                return_value = EquipmentDbDesignData.objects.filter(
+                    equipment=equipment.equipment, key=design_field
+                )
                 if return_value.exists():
                     return return_value.first().value
             else:
@@ -36,9 +75,11 @@ def get_design_value(request, design_field, equipment, request_page):
 @register.simple_tag
 def get_terminal_design_value(request, design_field, air_terminal_equipment):
     terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment)
-    return_value = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Design.value,
-                                                       air_terminal_equipment=terminal_equipment,
-                                                       sheet_field=design_field)
+    return_value = AirTerminalSheetData.objects.filter(
+        data_type=DataTypeChoices.Design.value,
+        air_terminal_equipment=terminal_equipment,
+        sheet_field=design_field,
+    )
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -49,9 +90,11 @@ def get_terminal_design_value(request, design_field, air_terminal_equipment):
 @register.simple_tag
 def get_terminal_actual_value(request, actual_field, air_terminal_equipment):
     terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment)
-    return_value = AirTerminalSheetData.objects.filter(data_type=DataTypeChoices.Actual.value,
-                                                       air_terminal_equipment=terminal_equipment,
-                                                       sheet_field=actual_field)
+    return_value = AirTerminalSheetData.objects.filter(
+        data_type=DataTypeChoices.Actual.value,
+        air_terminal_equipment=terminal_equipment,
+        sheet_field=actual_field,
+    )
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -61,23 +104,30 @@ def get_terminal_actual_value(request, actual_field, air_terminal_equipment):
 
 @register.simple_tag
 def get_terminal_code_value(request, air_terminal_equipment):
-    terminal_equipment_count = AirTerminalEquipment.objects.filter(id=air_terminal_equipment).count()
+    terminal_equipment_count = AirTerminalEquipment.objects.filter(
+        id=air_terminal_equipment
+    ).count()
     if terminal_equipment_count > 0:
-        terminal_equipment = AirTerminalEquipment.objects.get(id=air_terminal_equipment).code
+        terminal_equipment = AirTerminalEquipment.objects.get(
+            id=air_terminal_equipment
+        ).code
         if terminal_equipment:
             return terminal_equipment.id
         else:
-            return ''
+            return ""
     else:
-        return ''
+        return ""
 
 
 @register.simple_tag
 def get_actual_value(request, actual_field, equipment):
-    if request.method == 'POST':
-        return request.POST.get(f'actual_value_{actual_field.id}')
-    return_value = TestSheetData.objects.filter(data_type=DataTypeChoices.Actual.value, sheet_equipment=equipment,
-                                                sheet_field=actual_field)
+    if request.method == "POST":
+        return request.POST.get(f"actual_value_{actual_field.id}")
+    return_value = TestSheetData.objects.filter(
+        data_type=DataTypeChoices.Actual.value,
+        sheet_equipment=equipment,
+        sheet_field=actual_field,
+    )
     if return_value.count() > 0:
         return return_value.first().value
     else:
@@ -90,12 +140,12 @@ def get_field_type(field):
     field_type = field.field_type
 
     if field_type == FieldTypeChoices.Integer.value:
-        return 'type=number'
+        return "type=number"
     elif field_type == FieldTypeChoices.Float.value:
-        return 'type=number step=any'
+        return "type=number step=any"
     elif field_type == FieldTypeChoices.SelectOption.value:
-        return 'type=checkbox'
-    return 'type=text'
+        return "type=checkbox"
+    return "type=text"
 
 
 @register.filter()
@@ -104,7 +154,7 @@ def concatenate(value, arg):
     try:
         return str(value) + str(arg)
     except Exception:
-        return ''
+        return ""
 
 
 @register.filter

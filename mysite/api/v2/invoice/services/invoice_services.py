@@ -116,6 +116,36 @@ class InvoiceService:
         )
 
     @staticmethod
+    def _generate_invoice_history(estimate):
+        """
+        Generate and log the invoice history for the estimate.
+        """
+        try:
+            invoice = estimate.proposal.order.invoice
+            invoice.times_estimate_changed += 1
+            invoice.save()
+
+            total_count = (
+                InvoiceHistory.objects.filter(
+                    invoice=invoice,
+                    is_deleted=False,
+                ).count()
+                + 1
+            )
+            invoice_file_name = f"Invoice-{estimate.proposal.order.project_number[3:]:0>3}-{invoice.id:0>3}-{total_count}"
+
+            InvoiceHistory.objects.create(
+                invoice=invoice,
+                total_invoiced=calculate_total_amount_due(invoice),
+                total_paid=calculate_total_paid(invoice),
+                balance_due=calculate_remaining_invoice_due(invoice),
+                pdf_filename=invoice_file_name,
+            )
+            return None
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
     def create_invoice_pdf(invoice, request_user):
         """
         Generates a PDF for the invoice, including license info and user details.

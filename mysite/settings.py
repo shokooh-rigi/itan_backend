@@ -25,6 +25,7 @@ environ.Env.read_env()
 PROXY_ENABLE = bool(env("PROXY_ENABLE", default=""))
 PROXY_HOST = env("PROXY_HOST", default="127.0.0.1")
 PROXY_PORT = int(env("PROXY_PORT", default=10808))
+TAB_SYSTEM = bool(env("TAB_SYSTEM", default=""))
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,23 +89,28 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "corsheaders",
 ]
-LOCAL_APPS = [
+CORE_APPS = [
     "mysite.core",
-    "mysite.estimator",
-    "mysite.proposal",
-    "mysite.submittal",
-    "mysite.mgmreport",
-    "mysite.order",
-    "mysite.coi",
-    "mysite.gi",
-    "mysite.report",
-    "mysite.bidfilemgm",
-    "mysite.administrative",
-    "mysite.scheduler",
-    "mysite.settlement",
-    "mysite.techupload",
     "mysite.dbmanagement",
     "mysite.equipments",
+    "mysite.estimator.templatetags",
+    "mysite.pdf_analyzer",
+    "mysite.masspayment",
+    "mysite.submittal",
+    "mysite.coi",
+    "api",
+    "mysite.bidfilemgm",
+    "mysite.estimator",
+    "mysite.proposal",
+]
+TAB_APPS = [
+    "mysite.mgmreport",
+    "mysite.order",
+    "mysite.gi",
+    "mysite.report",
+    "mysite.administrative",
+    "mysite.settlement",
+    "mysite.techupload",
     "mysite.sheetcreator",
     "mysite.testsheetsetup",
     "mysite.testsheetvav",
@@ -124,17 +130,17 @@ LOCAL_APPS = [
     "mysite.testsheetpitottraverse",
     "mysite.testsheethotwaterboiler",
     "mysite.generatereport",
+    "mysite.dashboardtech",
     "mysite.projectprocess",
-    "mysite.masspayment",
     "mysite.jobcosting",
+    "mysite.scheduler",
     "mysite.companyperformance",
     "mysite.revenueperformance",
-    "mysite.dashboardtech",
-    "mysite.estimator.templatetags",
-    "mysite.pdf_analyzer",
-    "api",
 ]
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + CORE_APPS
+if TAB_SYSTEM:
+    INSTALLED_APPS += TAB_APPS
 
 # Middleware
 MIDDLEWARE = [

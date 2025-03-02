@@ -164,3 +164,24 @@ def past_30_days(order):
 @register.filter
 def enumerate_list(value):
     return enumerate(value)
+
+
+@register.simple_tag
+def changeorder_filename_generator(co_id):
+    co = ChangeOrder.objects.get(id=co_id)
+
+    new_file_name = (
+        "ChangeOrder-" + str(co.order.project_number[3:]).zfill(3) + "-" + co.co_number
+    )
+    return (
+        new_file_name.replace(" ", "_")
+        .replace("!", "")
+        .replace("@", "")
+        .replace("#", "")
+        .replace("$", "")
+        .replace("%", "")
+        .replace("^", "")
+        .replace("&", "")
+        .replace("*", "")
+        .replace("/", "")
+    )

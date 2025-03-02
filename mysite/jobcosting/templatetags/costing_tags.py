@@ -2,7 +2,6 @@ from django import template
 
 from mysite.estimator.templatetags.estimator_tags import estimate_total_calculator
 from ...estimator.models import EstimateEquipment
-from ...gi.models import InvoiceTransaction
 from ...scheduler.models import Schedule, Maintenance
 from ...order.templatetags.order_tags import calculate_total_amount_due
 

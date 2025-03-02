@@ -16,6 +16,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+if settings.TAB_SYSTEM:
+    from mysite.api.v2.invoice.services.invoice_services import InvoiceService
 from mysite.core.models import Person, LicenseFiles, LicenseInfo
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import (
@@ -25,12 +27,6 @@ from mysite.estimator.models import (
     EstimateHistory,
 )
 from mysite.estimator.templatetags.estimator_tags import pdf_filename_generator
-from mysite.gi.models import InvoiceHistory
-from mysite.order.templatetags.order_tags import (
-    calculate_total_amount_due,
-    calculate_total_paid,
-    calculate_remaining_invoice_due,
-)
 from mysite.s3_file_manager import S3
 from .serializers import (
     EstimateSerializer,
@@ -637,7 +633,9 @@ class EstimateDetailsView(APIView):
             id=id,
             is_deleted=False,
         )
-        return Response(data=EstimateSerializer(estimate).data, status=status.HTTP_200_OK)
+        return Response(
+            data=EstimateSerializer(estimate).data, status=status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         operation_summary="Create estimate detail",
@@ -1037,8 +1035,12 @@ class EstimateBidListView(APIView):
         summary="Retrieve Available Bids for Estimates",
         description="Fetch a list of bids that are not archived and are not associated with any existing estimate.",
         parameters=[
-            OpenApiParameter(name="bid_id", description="The ID of a specific bid to retrieve (optional)",
-                             required=False, type=int),
+            OpenApiParameter(
+                name="bid_id",
+                description="The ID of a specific bid to retrieve (optional)",
+                required=False,
+                type=int,
+            ),
         ],
         responses={
             200: BidSerializer(many=True),
@@ -1060,8 +1062,8 @@ class EstimateBidListView(APIView):
             # Query for available bids
             bids = (
                 Estimate.objects.filter(archive=False)
-                    .exclude(id__in=Estimate.objects.values_list("bfm_id", flat=True))
-                    .order_by("-created_on")
+                .exclude(id__in=Estimate.objects.values_list("bfm_id", flat=True))
+                .order_by("-created_on")
             )
 
             # Filter by bid_id if provided
@@ -1188,36 +1190,6 @@ class EstimateBidView(APIView):
         )
 
     @staticmethod
-    def _generate_invoice_history(estimate):
-        """
-        Generate and log the invoice history for the estimate.
-        """
-        try:
-            invoice = estimate.proposal.order.invoice
-            invoice.times_estimate_changed += 1
-            invoice.save()
-
-            total_count = (
-                InvoiceHistory.objects.filter(
-                    invoice=invoice,
-                    is_deleted=False,
-                ).count()
-                + 1
-            )
-            invoice_file_name = f"Invoice-{estimate.proposal.order.project_number[3:]:0>3}-{invoice.id:0>3}-{total_count}"
-
-            InvoiceHistory.objects.create(
-                invoice=invoice,
-                total_invoiced=calculate_total_amount_due(invoice),
-                total_paid=calculate_total_paid(invoice),
-                balance_due=calculate_remaining_invoice_due(invoice),
-                pdf_filename=invoice_file_name,
-            )
-            return None
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
     def _prepare_response_data(
         request,
         estimate,
@@ -1296,7 +1268,8 @@ class EstimateBidView(APIView):
             estimate_totals = self._calculate_estimate_totals(estimate, estimate_sub)
             estimate_equipments = self._estimate_equipments(estimate_id=estimate_id)
 
-            invoice_error = self._generate_invoice_history(estimate)
+            if settings.TAB_SYSTEM:
+                invoice_error = InvoiceService._generate_invoice_history(estimate)
             response_data = self._prepare_response_data(
                 request=request,
                 estimate=estimate,
