@@ -2,6 +2,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
+from drf_yasg import openapi
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
@@ -56,10 +57,25 @@ class CustomerViewSet(ModelViewSet):
     """
     API endpoint for creating and editing Customers.
     """
-
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "name",
+                openapi.IN_QUERY,
+                description="Search for customers by name or company name",
+                type=openapi.TYPE_STRING,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieve a list of customers, optionally filtered by name.
+        """
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         """
@@ -72,7 +88,6 @@ class CustomerViewSet(ModelViewSet):
                 Q(name__icontains=name) | Q(company__name__icontains=name)
             )
         return queryset
-
 
 class EngineerViewSet(ModelViewSet):
     """
