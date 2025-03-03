@@ -66,6 +66,25 @@ if settings.TAB_SYSTEM:
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("select2/", include("django_select2.urls")),
+    path(
+        "accounts/password_change/", core_views.change_password, name="password_change"
+    ),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/signup/", core_views.signup, name="signup"),
+    path(
+        "login/",
+        views.LoginView.as_view(
+            template_name="registration/login.html", authentication_form=UserLoginForm
+        ),
+        name="login",
+    ),
+    path(
+        "account_activation_sent/",
+        core_views.account_activation_sent,
+        name="account_activation_sent",
+    ),
+    path("activate/<slug:uidb64>/<slug:token>/", core_views.activate, name="activate"),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
