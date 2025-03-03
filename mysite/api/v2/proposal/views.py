@@ -29,8 +29,9 @@ class ProposalListView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
-    manual_parameters = (
-        [
+
+    @swagger_auto_schema(
+        manual_parameters=[
             openapi.Parameter(
                 "search",
                 openapi.IN_QUERY,
@@ -46,27 +47,29 @@ class ProposalListView(APIView):
             openapi.Parameter(
                 "fromDate",
                 openapi.IN_QUERY,
-                description="Start date for filtering proposal by due date (mm/dd/yyyy)",
+                description="Start date for filtering proposal by due date (MM/DD/YYYY)",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "toDate",
                 openapi.IN_QUERY,
-                description="End date for filtering proposal by due date (mm/dd/yyyy)",
+                description="End date for filtering proposal by due date (MM/DD/YYYY)",
                 type=openapi.TYPE_STRING,
             ),
-        ],
-    )
-    responses = (
-        {
-            200: openapi.Response(
-                "A paginated list of proposal",
-                ProposalSerializer(many=True),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number for pagination",
+                type=openapi.TYPE_INTEGER,
             ),
-            400: "Invalid date format or other error",
-        },
+            openapi.Parameter(
+                "paginate_by",
+                openapi.IN_QUERY,
+                description="Number of items per page",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ]
     )
-
     def get(self, request):
         search = request.GET.get("search", "")
         paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
