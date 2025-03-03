@@ -88,7 +88,66 @@ class InvoiceListView(APIView):
             return Response({"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    @swagger_auto_schema(
+        operation_description="Retrieve a filtered and paginated list of invoices.",
+        manual_parameters=[
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Filter invoices by project name or project number",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "paginate_by",
+                openapi.IN_QUERY,
+                description="Number of records per page (default: `settings.PAGE_SIZE`)",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Order results by a field (default: `-created_on`)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering invoices (`MM/DD/YYYY` format)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering invoices (`MM/DD/YYYY` format)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "type",
+                openapi.IN_QUERY,
+                description="Filter by invoice status (e.g., `fully-paid`, `partial-paid`, `not-paid`, `old-estimate`)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "overdue",
+                openapi.IN_QUERY,
+                description="Filter overdue invoices (pass `1` for true, default is false)",
+                type=openapi.TYPE_BOOLEAN,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number for pagination (default: `1`)",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                "Successful response with paginated list of invoices",
+                InvoiceSerializer(many=True),
+            ),
+            400: "Invalid request parameters",
+        },
+    )
     def get(self, request):
         """
         Retrieves a filtered and paginated list of invoices based on query parameters.
