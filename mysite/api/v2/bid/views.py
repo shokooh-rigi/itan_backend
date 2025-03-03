@@ -107,6 +107,20 @@ class BidListView(APIView):
                 description="End date for filtering bids by due date (mm/dd/yyyy)",
                 type=openapi.TYPE_STRING,
             ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number for pagination",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of items per page",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            ),
         ],
         responses={
             200: openapi.Response(
@@ -125,6 +139,8 @@ class BidListView(APIView):
             - ordering: Order the results by a field (default is 'due_date').
             - fromDate: Start date for filtering bids by due date (mm/dd/yyyy).
             - toDate: End date for filtering bids by due date (mm/dd/yyyy).
+            - page: Page number for pagination.
+            - page_size: Number of items per page.
 
         Returns:
             - A paginated list of bids that match the filter criteria.
