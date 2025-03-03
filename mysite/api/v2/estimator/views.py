@@ -128,6 +128,7 @@ class EstimateListView(APIView):
         },
     )
     def get(self, request):
+
         search = request.GET.get("search", "")
         paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
         ordering = request.GET.get("ordering", "-created_on")
@@ -158,17 +159,24 @@ class EstimateListView(APIView):
         page_number = request.GET.get("page", 1)
         paginated_estimates = paginator.get_page(page_number)
 
-        serializer = EstimateSerializer(paginated_estimates, many=True)
-        data = {
-            "estimates": serializer.data,
-            "pagination": {
-                "total_rows": paginator.count,
-                "total_pages": paginator.num_pages,
-                "current_page": paginated_estimates.number,
-                "page_size": paginate_by,
-            },
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        try:
+            serializer = EstimateSerializer(paginated_estimates, many=True)
+            data = {
+                "estimates": serializer.data,
+                "pagination": {
+                    "total_rows": paginator.count,
+                    "total_pages": paginator.num_pages,
+                    "current_page": paginated_estimates.number,
+                    "page_size": paginate_by,
+                },
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(
+                {"error": "An error occurred while retrieving the estimates."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     @swagger_auto_schema(
         operation_summary="Send an email for an estimate",

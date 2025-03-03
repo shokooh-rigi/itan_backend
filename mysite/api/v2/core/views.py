@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from custom_user.models import User
 from mysite import settings
@@ -68,7 +68,9 @@ class CustomerViewSet(ModelViewSet):
         queryset = super().get_queryset()
         name = self.request.query_params.get("name", None)
         if name:
-            queryset = queryset.filter(name__icontains=name)
+            queryset = queryset.filter(
+                Q(name__icontains=name) | Q(company__name__icontains=name)
+            )
         return queryset
 
 
