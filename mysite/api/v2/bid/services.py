@@ -91,7 +91,8 @@ class BidService:
         query = Q()
         if search:
             query = Q(project__name__icontains=search) | Q(
-                customer__company__name__icontains=search
+                customer__company__name__icontains=search) | Q (
+                customer__name__icontains=search
             )
 
         # Handle the fromDate and toDate filtering
