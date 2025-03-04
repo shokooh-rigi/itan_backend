@@ -294,6 +294,14 @@ class BidDuplicateView(APIView):
             archive=this_bid.archive,  # If archive is required
         )
 
+        # for each attachment in the original bid, create a new attachment for the duplicated bid
+        for attachment in BidAttachment.objects.filter(bid=this_bid):
+            BidAttachment.objects.create(
+                bid=duplicated_bfm,
+                uploaded_file=attachment.uploaded_file,
+                created_by=created_by_user,
+            )
+
         return duplicated_bfm
 
 
