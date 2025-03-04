@@ -74,7 +74,7 @@ class AccountSummaryAPIView(APIView):
             created_on__range=(from_date_obj, to_date_obj)
         ).order_by(ordering)
         paginator = PageNumberPagination()
-        paginator.page_size = int(request.GET.get('page_size', 20))
+        paginator.page_size = int(request.GET.get('page_size', settings.PAGE_SIZE))
         page = paginator.paginate_queryset(object_list, request)
 
         # Serialize results

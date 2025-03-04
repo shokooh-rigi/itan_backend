@@ -62,7 +62,7 @@ class EstimateListView(APIView):
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
-                "paginate_by",
+                "page_size",
                 openapi.IN_QUERY,
                 description="Number of estimates to display per page. Default is set in settings.PAGE_SIZE.",
                 type=openapi.TYPE_INTEGER,
@@ -130,7 +130,7 @@ class EstimateListView(APIView):
     def get(self, request):
 
         search = request.GET.get("search", "")
-        paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
+        page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
         ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate")
         to_date = request.GET.get("toDate")
@@ -155,7 +155,7 @@ class EstimateListView(APIView):
             filters &= Q(due_date__lte=to_date_obj)
 
         object_list = Estimate.objects.filter(filters).order_by(ordering)
-        paginator = Paginator(object_list, paginate_by)
+        paginator = Paginator(object_list, page_size)
         page_number = request.GET.get("page", 1)
         paginated_estimates = paginator.get_page(page_number)
 
@@ -167,7 +167,7 @@ class EstimateListView(APIView):
                     "total_rows": paginator.count,
                     "total_pages": paginator.num_pages,
                     "current_page": paginated_estimates.number,
-                    "page_size": paginate_by,
+                    "page_size": page_size,
                 },
             }
             return Response(data, status=status.HTTP_200_OK)
