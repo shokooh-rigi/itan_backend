@@ -66,7 +66,7 @@ class BidDetailListView(APIView):
         # Serialize the retrieved object
         serializer = BidSerializer(bid_file, many=True)
         paginator = PageNumberPagination()
-        paginator.page_size = settings.PAGE_SIZE
+        paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
         result_page = paginator.paginate_queryset(bid_file, request)
         serializer = BidSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -159,7 +159,7 @@ class BidListView(APIView):
                 ordering=ordering,
             )
             paginator = PageNumberPagination()
-            paginator.page_size = settings.PAGE_SIZE
+            paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
             result_page = paginator.paginate_queryset(object_list, request)
             serializer = BidSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)

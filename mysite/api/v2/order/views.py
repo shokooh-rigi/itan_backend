@@ -89,7 +89,7 @@ class OrderListAPIView(APIView):
                 default="-created_on",
             ),
             openapi.Parameter(
-                "paginate_by",
+                "page_size",
                 openapi.IN_QUERY,
                 description="Number of orders per page (default: 20).",
                 type=openapi.TYPE_INTEGER,
@@ -115,14 +115,14 @@ class OrderListAPIView(APIView):
         project_name = request.query_params.get("project_name", "")
         order_type = request.query_params.get("type", "all")
         ordering = request.query_params.get("ordering", "-created_on")
-        paginate_by = int(request.query_params.get("paginate_by", settings.PAGE_SIZE))
+        page_size = int(request.query_params.get("page_size", settings.PAGE_SIZE))
         orders_queryset = OrderService.get_filtered_orders(
             project_name=project_name,
             order_type=order_type,
             ordering=ordering,
         )
         paginator = PageNumberPagination()
-        paginator.page_size = paginate_by
+        paginator.page_size = page_size
         paginated_orders = paginator.paginate_queryset(orders_queryset, request)
         serializer = OrderSerializer(paginated_orders, many=True)
         return paginator.get_paginated_response(serializer.data)
