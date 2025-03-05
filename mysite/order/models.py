@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import Sum
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -164,11 +165,9 @@ class Order(BaseModel):
 
     @property
     def change_orders_total(self):
-        change_orders = ChangeOrder.objects.filter(order=self, confirmed=True)
-        total = 0
-        for change_order in change_orders:
-            total += change_order.change_order_total
-        return total
+        return ChangeOrder.objects.filter(order=self, confirmed=True).aggregate(
+            total=Sum('change_order_total')
+        )['total'] or 0
 
     @property
     def predemo_total(self):
@@ -223,12 +222,13 @@ class ChangeOrder(BaseModel):
 
     @property
     def change_order_total(self):
-        change_order = ChangeOrder.objects.get(id=self.order.id)
-        change_order_services = ChangeOrderService.objects.filter(change_order=change_order)
-        co_total = 0
-        for change_order_service in change_order_services:
-            co_total += change_order_service.amount
-        return co_total
+        change_order = ChangeOrder.objects.filter(order=self.order).first()
+        if not change_order:
+            return 0
+
+        return ChangeOrderService.objects.filter(change_order=change_order).aggregate(
+            total=Sum('amount')
+        )['total'] or 0
 
     class Meta:
         unique_together = ['co_number', 'order']
