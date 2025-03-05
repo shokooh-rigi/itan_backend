@@ -81,7 +81,7 @@ class OrderSerializer(serializers.ModelSerializer):
     architect_name = PersonSerializer(read_only=True)
     control_system = ControlSystemSerializer(read_only=True)
     project_number = serializers.CharField(read_only=True)
-    change_orders_total = serializers.SerializerMethodField(read_only=True)
+    change_orders_total = serializers.ReadOnlyField()
     predemo_total = serializers.SerializerMethodField(read_only=True)
     dalt_total = serializers.SerializerMethodField(read_only=True)
     final_total = serializers.SerializerMethodField(read_only=True)
@@ -150,12 +150,6 @@ class OrderSerializer(serializers.ModelSerializer):
             }
 
         return representation
-
-    def get_change_orders_total(self, obj):
-        return ChangeOrderService.objects.filter(
-            change_order__order=obj,
-            change_order__confirmed=True
-        ).aggregate(total=Sum('amount'))['total'] or 0
 
     def get_predemo_total(self, obj):
         return obj.predemo_total
