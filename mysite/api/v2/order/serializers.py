@@ -152,9 +152,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return representation
 
     def get_change_orders_total(self, obj):
-        return ChangeOrder.objects.filter(order=obj, confirmed=True).aggregate(
-            total=Sum('change_order_total')
-        )['total'] or 0
+        return ChangeOrderService.objects.filter(
+            change_order__order=obj,
+            change_order__confirmed=True
+        ).aggregate(total=Sum('amount'))['total'] or 0
 
     def get_predemo_total(self, obj):
         return obj.predemo_total
