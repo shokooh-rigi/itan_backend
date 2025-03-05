@@ -164,12 +164,6 @@ class Order(BaseModel):
     end_date = models.DateField(blank=True, null=True)
 
     @property
-    def change_orders_total(self):
-        return ChangeOrder.objects.filter(order=self, confirmed=True).aggregate(
-            total=Sum('change_order_total')
-        )['total'] or 0
-
-    @property
     def predemo_total(self):
         return self.proposal.estimate.predemo_calculated
 

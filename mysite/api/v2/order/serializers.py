@@ -1,5 +1,5 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from django.db.models import Sum
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
@@ -152,7 +152,9 @@ class OrderSerializer(serializers.ModelSerializer):
         return representation
 
     def get_change_orders_total(self, obj):
-        return obj.change_orders_total
+        return ChangeOrder.objects.filter(order=obj, confirmed=True).aggregate(
+            total=Sum('change_order_total')
+        )['total'] or 0
 
     def get_predemo_total(self, obj):
         return obj.predemo_total
