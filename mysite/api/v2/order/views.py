@@ -33,7 +33,7 @@ from .serializers import (
     ControlSystemSerializer,
     ControlSystemManufacturerSerializer,
 )
-from .serializers import TechLabelSerializer
+# from .serializers import TechLabelSerializer
 from .services.change_order_service import (
     ChangeOrderServiceLayer,
     DeleteChangeOrderService,
