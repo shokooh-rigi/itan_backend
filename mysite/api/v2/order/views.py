@@ -647,13 +647,13 @@ class ChangeOrderApproveView(APIView):
 #         instance.extra_fields.all().delete()
 #         super().perform_destroy(instance)
 #
-class TechLabelListCreateView(generics.ListCreateAPIView):
-    """
-    API to list and create TechLabel instances.
-    """
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
+# class TechLabelListCreateView(generics.ListCreateAPIView):
+#     """
+#     API to list and create TechLabel instances.
+#     """
+#     queryset = TechLabel.objects.all()
+#     serializer_class = TechLabelSerializer
+#     permission_classes = [IsAuthenticated]
 
 
 # class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
