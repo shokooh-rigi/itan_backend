@@ -165,7 +165,15 @@ DATABASES = {
         "PASSWORD": env("MYSQL_PASSWORD", default=""),
         "HOST": env("MYSQL_HOST", default="localhost"),
         "PORT": env("MYSQL_PORT", default="3306"),
-    }
+    },
+    "old_db": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("OLD_MYSQL_DB", default=""),
+        "USER": env("OLD_MYSQL_USER", default=""),
+        "PASSWORD": env("OLD_MYSQL_PASSWORD", default=""),
+        "HOST": env("OLD_MYSQL_HOST", default="localhost"),
+        "PORT": env("OLD_MYSQL_PORT", default="3306"),
+    },
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
