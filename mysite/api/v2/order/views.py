@@ -637,24 +637,24 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TechLabelDeleteView(DestroyAPIView):
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_destroy(self, instance):
-        # Optional: Delete related extra fields if needed
-        instance.extra_fields.all().delete()
-        super().perform_destroy(instance)
-#
-# class TechLabelListCreateView(generics.ListCreateAPIView):
-#     """
-#     API to list and create TechLabel instances.
-#     """
+# class TechLabelDeleteView(DestroyAPIView):
 #     queryset = TechLabel.objects.all()
 #     serializer_class = TechLabelSerializer
 #     permission_classes = [IsAuthenticated]
 #
+#     def perform_destroy(self, instance):
+#         # Optional: Delete related extra fields if needed
+#         instance.extra_fields.all().delete()
+#         super().perform_destroy(instance)
+#
+class TechLabelListCreateView(generics.ListCreateAPIView):
+    """
+    API to list and create TechLabel instances.
+    """
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
+
 
 # class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
 #     """
