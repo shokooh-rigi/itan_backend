@@ -43,7 +43,6 @@ from .services.order_field_drawing_service import OrderFieldDrawingService
 from .services.order_full_update_service import OrderFullUpdateService
 from .services.order_service import OrderService, OrderEditService
 from .services.order_site_pictures_service import OrderSitePicturesService
-from .services.tech_label_service import TechLabelServiceLayer
 from ..proposal.serializers import ProposalSerializer
 
 
