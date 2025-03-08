@@ -642,6 +642,10 @@ class TechLabelDeleteView(DestroyAPIView):
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_destroy(self, instance):
+        # Optional: Delete related extra fields if needed
+        instance.extra_fields.all().delete()
+        super().perform_destroy(instance)
 #
 # class TechLabelListCreateView(generics.ListCreateAPIView):
 #     """
