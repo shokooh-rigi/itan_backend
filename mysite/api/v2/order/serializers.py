@@ -224,40 +224,33 @@ class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
 
 
 class TechLabelSerializer(serializers.ModelSerializer):
-    extra_fields = TechLabelExtraFieldsSerializer(many=True, required=False)
+    extra_fields = TechLabelExtraFieldsSerializer(
+        many=True,
+        required=False,
+        source="techlabelextrafields_set",
+    )
 
     class Meta:
         model = TechLabel
         fields = ["id", "order", "extra_fields"]
 
     def create(self, validated_data):
-        """
-        Create a TechLabel along with associated extra_fields.
-        """
-        extra_fields_data = validated_data.pop("extra_fields", [])
+        extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
         tech_label = TechLabel.objects.create(**validated_data)
-        for extra_field_data in extra_fields_data:
-            TechLabelExtraFields.objects.create(tech_label=tech_label, **extra_field_data)
+        for extra_data in extra_fields_data:
+            TechLabelExtraFields.objects.create(tech_label=tech_label, **extra_data)
         return tech_label
 
     def update(self, instance, validated_data):
-        """
-        Update a TechLabel and its associated extra_fields.
-        """
-        extra_fields_data = validated_data.pop("extra_fields", [])
+        extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
 
-        # Update basic fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Handle extra_fields: delete old and create new ones
-        # First delete old extra fields
-        instance.extra_fields.all().delete()
-
-        # Then create new extra fields
-        for extra_field_data in extra_fields_data:
-            TechLabelExtraFields.objects.create(tech_label=instance, **extra_field_data)
+        instance.techlabelextrafields_set.all().delete()
+        for extra_data in extra_fields_data:
+            TechLabelExtraFields.objects.create(tech_label=instance, **extra_data)
 
         return instance
 
