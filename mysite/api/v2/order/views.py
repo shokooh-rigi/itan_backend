@@ -638,70 +638,58 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TechLabelViewSet(ModelViewSet):
+class TechLabelDeleteView(DestroyAPIView):
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
-    @action(detail=True, methods=["post"], url_path="update-extra-fields")
-    def update_extra_fields(self, request, order_id=None):
-        """
-        Updates or creates a TechLabel and its extra fields.
-        """
-        this_order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False,
-        )
-        tech_label = TechLabel.objects.filter(order__id=order_id).first()
-        service = TechLabelServiceLayer(user=request.user, data=request.data)
 
-        try:
-            updated_tech_label = service.update_tech_label(tech_label, this_order)
-            return Response(
-                {
-                    "message": "TechLabel updated successfully!",
-                    "data": TechLabelSerializer(updated_tech_label).data,
-                },
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+class TechLabelListCreateView(generics.ListCreateAPIView):
+    """
+    API to list and create TechLabel instances.
+    """
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
 
-    @action(detail=True, methods=["get"], url_path="download-pdf")
-    def download_pdf(self, request, order_id=None):
-        """
-        Download the PDF associated with a TechLabel.
-        """
-        this_order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False,
-        )
-        tech_label = TechLabel.objects.filter(
-            order__id=order_id,
-            is_deleted=False,
-        ).first()
 
-        service = TechLabelServiceLayer()
-        try:
-            local_path = service.generate_pdf(tech_label, this_order)
-            if os.path.exists(local_path):
-                with open(local_path, "rb") as pdf_file:
-                    response = HttpResponse(
-                        pdf_file.read(), content_type="application/pdf"
-                    )
-                    response["Content-Disposition"] = (
-                        f"inline; filename={os.path.basename(local_path)}"
-                    )
-                    return response
-            return Response(
-                {"error": "PDF not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
+    """
+    API for retrieving and updating a TechLabel instance
+    (including removing and adding extra fields).
+    """
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update method for TechLabel, implementing the previous service logic:
+        - Deletes old extra fields.
+        - Creates new extra fields.
+        - Saves the updated TechLabel instance.
+        """
+        tech_label = get_object_or_404(TechLabel, pk=kwargs.get('pk'))
+        extra_fields_data = request.data.get("extra_fields", [])
+
+        with transaction.atomic():
+            # Delete old extra fields
+            TechLabelExtraFields.objects.filter(tech_label=tech_label).delete()
+
+            # Create new extra fields
+            for field in extra_fields_data:
+                TechLabelExtraFields.objects.create(
+                    tech_label=tech_label,
+                    title=field["title"],
+                    content=field["content"],
+                )
+
+            # Save changes to TechLabel
+            serializer = self.get_serializer(tech_label, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ControlSystemAPIView(APIView):

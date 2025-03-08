@@ -220,7 +220,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
 class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechLabelExtraFields
-        fields = ["title", "content"]
+        fields = ["id","title", "content"]
 
 
 class TechLabelSerializer(serializers.ModelSerializer):

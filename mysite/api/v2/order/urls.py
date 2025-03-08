@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
 
 from .views import (
     OrderListAPIView,
@@ -10,7 +9,6 @@ from .views import (
     ChangeOrderCreateApiView,
     ChangeOrderDeleteAPIView,
     ChangeOrderApproveView,
-    TechLabelViewSet,
     ControlSystemAPIView,
     OrderEquipmentSubmittalView,
     OrderFieldDrawingView,
@@ -19,12 +17,14 @@ from .views import (
     OrderFullUpdateAPIView,
     OrderProposalListView,
     ControlSystemListCreateView,
-    ControlSystemDetailView, ControlSystemManufacturerListCreateView, ControlSystemManufacturerDetailView,
+    ControlSystemDetailView,
+    ControlSystemManufacturerListCreateView,
+    ControlSystemManufacturerDetailView,
+    TechLabelRetrieveUpdateView,
+    TechLabelDeleteView,
+    TechLabelListCreateView,
 )
 
-router = DefaultRouter()
-
-router.register(r"tech-label", TechLabelViewSet, basename="tech-label")
 
 urlpatterns = [
     path('orders/',
@@ -87,6 +87,13 @@ urlpatterns = [
     path('orders/control-systems/manufacturer/<int:pk>/',
          ControlSystemManufacturerDetailView.as_view(),
          name='control-system-manufacturer-detail'),
-
+    path('orders/techlabels/',
+         TechLabelListCreateView.as_view(),
+         name='techlabel-list-create'),
+    path('orders/techlabels/<int:pk>/',
+         TechLabelRetrieveUpdateView.as_view(),
+         name='techlabel-detail'),
+    path('orders/techlabels/<int:pk>/',
+         TechLabelDeleteView.as_view(),
+         name='techlabel-delete'),
 ]
-urlpatterns += router.urls
