@@ -669,7 +669,7 @@ class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
         - Creates new extra fields.
         - Saves the updated TechLabel instance.
         """
-        tech_label = get_object_or_404(TechLabel, pk=kwargs.get('pk'))
+        tech_label = get_object_or_404(TechLabel, id=kwargs.get('pk'))
         extra_fields_data = request.data.get("extra_fields", [])
 
         with transaction.atomic():
