@@ -642,15 +642,15 @@ class TechLabelDeleteView(DestroyAPIView):
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
-
-class TechLabelListCreateView(generics.ListCreateAPIView):
-    """
-    API to list and create TechLabel instances.
-    """
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
-
+#
+# class TechLabelListCreateView(generics.ListCreateAPIView):
+#     """
+#     API to list and create TechLabel instances.
+#     """
+#     queryset = TechLabel.objects.all()
+#     serializer_class = TechLabelSerializer
+#     permission_classes = [IsAuthenticated]
+#
 
 # class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
 #     """
