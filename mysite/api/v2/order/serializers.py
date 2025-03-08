@@ -230,6 +230,37 @@ class TechLabelSerializer(serializers.ModelSerializer):
         model = TechLabel
         fields = ["id", "order", "extra_fields"]
 
+    def create(self, validated_data):
+        """
+        Create a TechLabel along with associated extra_fields.
+        """
+        extra_fields_data = validated_data.pop("extra_fields", [])
+        tech_label = TechLabel.objects.create(**validated_data)
+        for extra_field_data in extra_fields_data:
+            TechLabelExtraFields.objects.create(tech_label=tech_label, **extra_field_data)
+        return tech_label
+
+    def update(self, instance, validated_data):
+        """
+        Update a TechLabel and its associated extra_fields.
+        """
+        extra_fields_data = validated_data.pop("extra_fields", [])
+
+        # Update basic fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Handle extra_fields: delete old and create new ones
+        # First delete old extra fields
+        instance.extra_fields.all().delete()
+
+        # Then create new extra fields
+        for extra_field_data in extra_fields_data:
+            TechLabelExtraFields.objects.create(tech_label=instance, **extra_field_data)
+
+        return instance
+
 
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem
