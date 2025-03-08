@@ -638,58 +638,58 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TechLabelDeleteView(DestroyAPIView):
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class TechLabelListCreateView(generics.ListCreateAPIView):
-    """
-    API to list and create TechLabel instances.
-    """
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
-    """
-    API for retrieving and updating a TechLabel instance
-    (including removing and adding extra fields).
-    """
-    queryset = TechLabel.objects.all()
-    serializer_class = TechLabelSerializer
-    permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        """
-        Update method for TechLabel, implementing the previous service logic:
-        - Deletes old extra fields.
-        - Creates new extra fields.
-        - Saves the updated TechLabel instance.
-        """
-        tech_label = get_object_or_404(TechLabel, id=kwargs.get('pk'))
-        extra_fields_data = request.data.get("extra_fields", [])
-
-        with transaction.atomic():
-            # Delete old extra fields
-            TechLabelExtraFields.objects.filter(tech_label=tech_label).delete()
-
-            # Create new extra fields
-            for field in extra_fields_data:
-                TechLabelExtraFields.objects.create(
-                    tech_label=tech_label,
-                    title=field["title"],
-                    content=field["content"],
-                )
-
-            # Save changes to TechLabel
-            serializer = self.get_serializer(tech_label, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class TechLabelDeleteView(DestroyAPIView):
+#     queryset = TechLabel.objects.all()
+#     serializer_class = TechLabelSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#
+# class TechLabelListCreateView(generics.ListCreateAPIView):
+#     """
+#     API to list and create TechLabel instances.
+#     """
+#     queryset = TechLabel.objects.all()
+#     serializer_class = TechLabelSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#
+# class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
+#     """
+#     API for retrieving and updating a TechLabel instance
+#     (including removing and adding extra fields).
+#     """
+#     queryset = TechLabel.objects.all()
+#     serializer_class = TechLabelSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#     def update(self, request, *args, **kwargs):
+#         """
+#         Update method for TechLabel, implementing the previous service logic:
+#         - Deletes old extra fields.
+#         - Creates new extra fields.
+#         - Saves the updated TechLabel instance.
+#         """
+#         tech_label = get_object_or_404(TechLabel, id=kwargs.get('pk'))
+#         extra_fields_data = request.data.get("extra_fields", [])
+#
+#         with transaction.atomic():
+#             # Delete old extra fields
+#             TechLabelExtraFields.objects.filter(tech_label=tech_label).delete()
+#
+#             # Create new extra fields
+#             for field in extra_fields_data:
+#                 TechLabelExtraFields.objects.create(
+#                     tech_label=tech_label,
+#                     title=field["title"],
+#                     content=field["content"],
+#                 )
+#
+#             # Save changes to TechLabel
+#             serializer = self.get_serializer(tech_label, data=request.data, partial=True)
+#             serializer.is_valid(raise_exception=True)
+#             self.perform_update(serializer)
+#
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ControlSystemAPIView(APIView):
