@@ -33,7 +33,7 @@ from .serializers import (
     ControlSystemSerializer,
     ControlSystemManufacturerSerializer,
 )
-# from .serializers import TechLabelSerializer
+from .serializers import TechLabelSerializer
 from .services.change_order_service import (
     ChangeOrderServiceLayer,
     DeleteChangeOrderService,
@@ -637,21 +637,21 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class TechLabelDeleteView(DestroyAPIView):
-#     queryset = TechLabel.objects.all()
-#     serializer_class = TechLabelSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#
-# class TechLabelListCreateView(generics.ListCreateAPIView):
-#     """
-#     API to list and create TechLabel instances.
-#     """
-#     queryset = TechLabel.objects.all()
-#     serializer_class = TechLabelSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#
+class TechLabelDeleteView(DestroyAPIView):
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class TechLabelListCreateView(generics.ListCreateAPIView):
+    """
+    API to list and create TechLabel instances.
+    """
+    queryset = TechLabel.objects.all()
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
+
+
 # class TechLabelRetrieveUpdateView(RetrieveUpdateAPIView):
 #     """
 #     API for retrieving and updating a TechLabel instance

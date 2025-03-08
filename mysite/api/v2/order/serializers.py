@@ -216,19 +216,19 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
 
         return instance
 
-#
-# class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = TechLabelExtraFields
-#         fields = ["id","title", "content"]
-#
-#
-# class TechLabelSerializer(serializers.ModelSerializer):
-#     extra_fields = TechLabelExtraFieldsSerializer(many=True, required=False)
-#
-#     class Meta:
-#         model = TechLabel
-#         fields = ["id", "order", "extra_fields"]
+
+class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TechLabelExtraFields
+        fields = ["id","title", "content"]
+
+
+class TechLabelSerializer(serializers.ModelSerializer):
+    extra_fields = TechLabelExtraFieldsSerializer(many=True, required=False)
+
+    class Meta:
+        model = TechLabel
+        fields = ["id", "order", "extra_fields"]
 
 
 class OrderControlSystemSerializer(serializers.ModelSerializer):
