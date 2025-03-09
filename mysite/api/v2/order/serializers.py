@@ -232,7 +232,21 @@ class TechLabelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TechLabel
-        fields = ["id", "order", "extra_fields"]
+        fields = [
+            "id",
+            "order",
+            "label_model",
+            "detailed_drawing",
+            "schedule_drawing",
+            "mechanical_drawing",
+            "tech_test_sheets",
+            "point_of_contact_name",
+            "point_of_contact_cell_phone",
+            "point_of_contact_office_phone",
+            "schedule_date",
+            "tech_notes",
+            "extra_fields",
+        ]
 
     def create(self, validated_data):
         extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
