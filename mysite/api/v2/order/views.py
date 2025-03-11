@@ -813,28 +813,28 @@ class OrderEquipmentSubmittalView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # Supports file uploads
 
-    @swagger_auto_schema(
-        operation_summary="Manage equipment submittal for an order",
-        operation_description="""
-            - **Clear equipment submittal**: If `equipment_submittal_clear` is `true`, it removes existing submittals.
-            - **Upload files**: If `equipment_submittal` contains files, they will be uploaded.
-        """,
-        manual_parameters=[
-            openapi.Parameter(
-                "order_id",
-                openapi.IN_PATH,
-                description="The unique identifier for the order",
-                type=openapi.TYPE_INTEGER,
-                required=True,
-            ),
-        ],
-        request_body=EquipmentSubmittalSerializer,
-        responses={
-            200: openapi.Response("Equipment submittal updated successfully."),
-            400: openapi.Response("Invalid input"),
-            500: openapi.Response("Server error"),
-        },
-    )
+    # @swagger_auto_schema(
+    #     operation_summary="Manage equipment submittal for an order",
+    #     operation_description="""
+    #         - **Clear equipment submittal**: If `equipment_submittal_clear` is `true`, it removes existing submittals.
+    #         - **Upload files**: If `equipment_submittal` contains files, they will be uploaded.
+    #     """,
+    #     manual_parameters=[
+    #         openapi.Parameter(
+    #             "order_id",
+    #             openapi.IN_PATH,
+    #             description="The unique identifier for the order",
+    #             type=openapi.TYPE_INTEGER,
+    #             required=True,
+    #         ),
+    #     ],
+    #     request_body=EquipmentSubmittalSerializer,
+    #     responses={
+    #         200: openapi.Response("Equipment submittal updated successfully."),
+    #         400: openapi.Response("Invalid input"),
+    #         500: openapi.Response("Server error"),
+    #     },
+    # )
     def post(self, request, order_id):
         """
         Handle POST request to manage equipment submittal for an order.
