@@ -814,28 +814,41 @@ class OrderEquipmentSubmittalView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # Supports file uploads
 
-    # @swagger_auto_schema(
-    #     operation_summary="Manage equipment submittal for an order",
-    #     operation_description="""
-    #         - **Clear equipment submittal**: If `equipment_submittal_clear` is `true`, it removes existing submittals.
-    #         - **Upload files**: If `equipment_submittal` contains files, they will be uploaded.
-    #     """,
-    #     manual_parameters=[
-    #         openapi.Parameter(
-    #             "order_id",
-    #             openapi.IN_PATH,
-    #             description="The unique identifier for the order",
-    #             type=openapi.TYPE_INTEGER,
-    #             required=True,
-    #         ),
-    #     ],
-    #     request_body=EquipmentSubmittalSerializer,
-    #     responses={
-    #         200: openapi.Response("Equipment submittal updated successfully."),
-    #         400: openapi.Response("Invalid input"),
-    #         500: openapi.Response("Server error"),
-    #     },
-    # )
+    @swagger_auto_schema(
+        operation_summary="Manage equipment submittal for an order",
+        operation_description="""
+            - **Clear equipment submittal**: If `equipment_submittal_clear` is `true`, it removes existing submittals.
+            - **Upload files**: If `equipment_submittal` contains files, they will be uploaded.
+        """,
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "equipment_submittal_clear",
+                openapi.IN_QUERY,
+                description="Set to true to clear all existing submittals",
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                "equipment_submittal",
+                openapi.IN_FORM,
+                description="Equipment submittal files",
+                type=openapi.TYPE_FILE,
+                required=False,
+            ),
+        ],
+        responses={
+            200: openapi.Response("Equipment submittal updated successfully."),
+            400: openapi.Response("Invalid input"),
+            500: openapi.Response("Server error"),
+        },
+    )
     def post(self, request, order_id):
         """
         Handle POST request to manage equipment submittal for an order.
@@ -865,6 +878,11 @@ class OrderEquipmentSubmittalView(APIView):
 
             # Handle files upload and processing
             files = request.FILES.getlist("equipment_submittal")
+            if not files:
+                return Response(
+                    {"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST
+                )
+
             OrderEquipmentSubmittalService.update_order_with_equipment_submittal(
                 order, files
             )
