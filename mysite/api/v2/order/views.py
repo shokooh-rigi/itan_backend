@@ -1038,29 +1038,6 @@ class OrderGeneralNotesView(APIView):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    def get(self, request, order_id):
-        """
-        Handle GET request to retrieve the general notes and comments for an order.
-
-        Args:
-            request (Request): The HTTP request object.
-            order_id (int): The ID of the order to retrieve.
-
-        Returns:
-            Response: DRF Response containing the general notes and comments of the order.
-        """
-        order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False,
-        )
-
-        # Return the general notes and comments of the order
-        return Response(
-            {"general_notes_and_comments": order.general_notes_and_comments},
-            status=status.HTTP_200_OK,
-        )
-
 
 class OrderSitePicturesView(APIView):
     """
