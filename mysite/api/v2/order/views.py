@@ -804,8 +804,8 @@ class ControlSystemManufacturerDetailView(RetrieveUpdateDestroyAPIView):
 class OrderEquipmentSubmittalView(APIView):
     """
     API for managing order equipment submittal.
-    - Clears submitted equipment data.
-    - Uploads files and updates the order with submitted equipment.
+    - Clear submitted equipment data.
+    - Upload files and update the order with submitted equipment.
     """
 
     permission_classes = [IsAuthenticated]
@@ -814,9 +814,9 @@ class OrderEquipmentSubmittalView(APIView):
     @extend_schema(
         summary="Manage equipment submittal for an order",
         description="""
-            - Clear equipment submittal
-            - Upload files and update order with equipment submittal.
-        """,
+                - Clear equipment submittal
+                - Upload files and update order with equipment submittal.
+            """,
         parameters=[
             OpenApiParameter(
                 name="order_id",
@@ -826,9 +826,24 @@ class OrderEquipmentSubmittalView(APIView):
                 location=OpenApiParameter.PATH
             ),
         ],
-        request=EquipmentSubmittalSerializer,
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "equipment_submittal-clear": {
+                        "type": "boolean",
+                        "description": "If `true`, the existing equipment submittal data will be cleared."
+                    },
+                    "equipment_submittal": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "binary"},
+                        "description": "List of uploaded files",
+                    },
+                },
+            }
+        },
         responses={
-            200: {"description": "Equipment submittal updated successfully."},
+            201: {"description": "Equipment submittal updated successfully."},
             400: {"description": "Invalid input"},
             500: {"description": "Server error"},
         },
@@ -841,15 +856,14 @@ class OrderEquipmentSubmittalView(APIView):
         """
         try:
             # Fetch the order instance
-            order = get_object_or_404(Order, id=order_id, is_deleted=False)
-
-            # Validate request data using the serializer
-            serializer = EquipmentSubmittalSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            data = serializer.validated_data
+            order = get_object_or_404(
+                Order,
+                id=order_id,
+                is_deleted=False,
+            )
 
             # Handle clearing the equipment submittal
-            if data.get("equipment_submittal_clear"):
+            if request.data.get("equipment_submittal-clear"):
                 OrderEquipmentSubmittalService.clear_equipment_submittal(order_id)
                 return Response(
                     {"detail": "Equipment submittal cleared."},
@@ -867,11 +881,15 @@ class OrderEquipmentSubmittalView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except Exception:
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
             return Response(
                 {"detail": "An error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 class OrderFieldDrawingView(APIView):
     """
