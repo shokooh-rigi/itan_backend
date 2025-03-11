@@ -37,6 +37,7 @@ from .serializers import (
     OrderControlSystemSerializer,
     ControlSystemSerializer,
     ControlSystemManufacturerSerializer,
+    GeneralNotesSerializer,
 )
 from .serializers import TechLabelSerializer
 from .services.change_order_service import (
