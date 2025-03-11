@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Sum
+from rest_framework.serializers import Serializer, BooleanField, ListField, FileField
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
@@ -278,3 +279,13 @@ class OrderControlSystemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["control_system"]
+
+
+class EquipmentSubmittalSerializer(Serializer):
+    """Serializer for equipment submittal file uploads"""
+    equipment_submittal_clear = BooleanField(
+        required=False, help_text="If true, clears the equipment submittal."
+    )
+    equipment_submittal = ListField(
+        child=FileField(), required=False, help_text="List of uploaded files."
+    )
