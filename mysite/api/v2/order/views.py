@@ -960,19 +960,19 @@ class OrderGeneralNotesView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Retrieve general notes for an order",
-        description="Returns the general notes and comments associated with the order.",
-        parameters=[
-            OpenApiParameter(
-                name="order_id",
+    @swagger_auto_schema(
+        operation_summary="Retrieve general notes for an order",
+        operation_description="Returns the general notes and comments associated with the order.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
                 description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
                 required=True,
-                type=int,
-                location=OpenApiParameter.PATH
             ),
         ],
-        responses={200: {"description": "General notes retrieved successfully."}},
+        responses={200: openapi.Response("General notes retrieved successfully.", GeneralNotesSerializer)},
     )
     def get(self, request, order_id):
         """Retrieve the general notes and comments for an order."""
@@ -983,26 +983,26 @@ class OrderGeneralNotesView(APIView):
             status=status.HTTP_200_OK,
         )
 
-    @extend_schema(
-        summary="Save or finalize general notes for an order",
-        description="""
-            - Use `save=true` to save notes without finalizing.
-            - Use `finalize=true` to finalize and save notes.
+    @swagger_auto_schema(
+        operation_summary="Save or finalize general notes for an order",
+        operation_description="""
+            - Use `"save": true` to save notes without finalizing.
+            - Use `"finalize": true` to finalize and save notes.
         """,
-        parameters=[
-            OpenApiParameter(
-                name="order_id",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
                 description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
                 required=True,
-                type=int,
-                location=OpenApiParameter.PATH
             ),
         ],
         request=GeneralNotesSerializer,
         responses={
-            200: {"description": "General notes updated successfully."},
-            400: {"description": "Invalid input"},
-            500: {"description": "Server error"},
+            200: openapi.Response("General notes updated successfully."),
+            400: openapi.Response("Invalid input"),
+            500: openapi.Response("Server error"),
         },
     )
     def post(self, request, order_id):
@@ -1037,7 +1037,6 @@ class OrderGeneralNotesView(APIView):
             {"detail": "Invalid action or missing data."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
 
 class OrderSitePicturesView(APIView):
     """
