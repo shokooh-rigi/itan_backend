@@ -812,10 +812,19 @@ class OrderEquipmentSubmittalView(APIView):
     parser_classes = [MultiPartParser]  # Supports file uploads
 
     @extend_schema(
-        summary="Submit equipment data for an order",
-        description="Upload equipment-related files or clear previously submitted equipment data.",
+        summary="Manage equipment submittal for an order",
+        description="""
+                - Clear equipment submittal
+                - Upload files and update order with equipment submittal.
+            """,
         parameters=[
-            OpenApiParameter(name="order_id", description="Order ID", required=True, type=int),
+            OpenApiParameter(
+                name="order_id",
+                description="The unique identifier for the order",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH
+            ),
         ],
         request={
             "multipart/form-data": {
@@ -823,7 +832,7 @@ class OrderEquipmentSubmittalView(APIView):
                 "properties": {
                     "equipment_submittal-clear": {
                         "type": "boolean",
-                        "description": "If `true`, the submitted equipment data will be cleared."
+                        "description": "If `true`, the existing equipment submittal data will be cleared."
                     },
                     "equipment_submittal": {
                         "type": "array",
@@ -834,8 +843,8 @@ class OrderEquipmentSubmittalView(APIView):
             }
         },
         responses={
-            200: {"description": "Operation successful"},
-            400: {"description": "Invalid data"},
+            201: {"description": "Equipment submittal updated successfully."},
+            400: {"description": "Invalid input"},
             500: {"description": "Server error"},
         },
     )
