@@ -1,6 +1,7 @@
 import datetime
 import os
 from datetime import datetime
+from rest_framework.parsers import MultiPartParser
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -797,17 +798,6 @@ class ControlSystemManufacturerDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = ControlSystemManufacturer.objects.all()
     serializer_class = ControlSystemManufacturerSerializer
-
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.generics import get_object_or_404
-from rest_framework.views import APIView
-
-from .models import Order
-from .services import OrderEquipmentSubmittalService
 
 
 class OrderEquipmentSubmittalView(APIView):
