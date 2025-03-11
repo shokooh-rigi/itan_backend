@@ -302,3 +302,12 @@ class GeneralNotesSerializer(Serializer):
     save = BooleanField(
         required=False, default=False, help_text="If true, save the notes."
     )
+
+
+class FieldDrawingUploadSerializer(Serializer):
+    """Serializer for handling field drawing file uploads."""
+    field_drawing = ListField(
+        child=FileField(),
+        required=True,
+        help_text="List of field drawing files to upload."
+    )

@@ -39,6 +39,7 @@ from .serializers import (
     ControlSystemManufacturerSerializer,
     GeneralNotesSerializer,
     EquipmentSubmittalSerializer,
+    FieldDrawingUploadSerializer,
 )
 from .serializers import TechLabelSerializer
 from .services.change_order_service import (
@@ -882,32 +883,48 @@ class OrderEquipmentSubmittalView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
 class OrderFieldDrawingView(APIView):
     """
     API View to handle the field drawing upload process for an order.
 
-    This view handles the following actions:
-    - Uploading field drawings as files.
-    - Validating uploaded files for size and saving them after processing.
-    - Creating a zip file of the uploaded field drawings.
+    - Upload field drawings as files.
+    - Validate uploaded files for size and format.
+    - Save processed files and create a ZIP archive.
     """
 
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]  # Supports file uploads
 
+    @swagger_auto_schema(
+        operation_summary="Upload field drawings for an order",
+        operation_description="""
+            - Accepts multiple files as field drawings.
+            - Validates and processes uploaded files.
+            - Creates a ZIP archive for the uploaded files.
+        """,
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
+        request_body=FieldDrawingUploadSerializer,  # ✅ Using Serializer
+        responses={
+            200: openapi.Response("Field drawing updated successfully."),
+            400: openapi.Response("Invalid input or no files provided."),
+            500: openapi.Response("Server error"),
+        },
+    )
     def post(self, request, order_id):
         """
         Handle the POST request to upload and process field drawing files for an order.
 
-        Depending on the data passed, the following actions are performed:
         - If the field drawings are provided, the files are validated and processed.
-          If valid, the files are saved, and a zip file is created and associated with the order.
-
-        Args:
-            request (Request): The HTTP request object containing the data and files.
-            order_id (int): The ID of the order to which the field drawings belong.
-
-        Returns:
-            Response: A DRF Response object with either success or error details.
+        - Valid files are saved, and a ZIP archive is created for the order.
         """
         try:
             # Fetch the order instance
@@ -917,17 +934,22 @@ class OrderFieldDrawingView(APIView):
                 is_deleted=False,
             )
 
-            # Handle form submission for field drawing files
-            if "field_drawing" in request.FILES:
-                files = request.FILES.getlist("field_drawing")
-                OrderFieldDrawingService.process_field_drawing_files(order, files)
+            # Validate request data using serializer
+            serializer = FieldDrawingUploadSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            files = request.FILES.getlist("field_drawing")
+
+            if not files:
                 return Response(
-                    {"detail": "Field drawing updated successfully."},
-                    status=status.HTTP_200_OK,
+                    {"detail": "No files provided."},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
 
+            OrderFieldDrawingService.process_field_drawing_files(order, files)
+
             return Response(
-                {"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Field drawing updated successfully."},
+                status=status.HTTP_200_OK,
             )
 
         except ValidationError as e:
