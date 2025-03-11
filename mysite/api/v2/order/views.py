@@ -38,6 +38,7 @@ from .serializers import (
     ControlSystemSerializer,
     ControlSystemManufacturerSerializer,
     GeneralNotesSerializer,
+    EquipmentSubmittalSerializer,
 )
 from .serializers import TechLabelSerializer
 from .services.change_order_service import (
@@ -812,41 +813,26 @@ class OrderEquipmentSubmittalView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # Supports file uploads
 
-    @extend_schema(
-        summary="Manage equipment submittal for an order",
-        description="""
-                - Clear equipment submittal
-                - Upload files and update order with equipment submittal.
-            """,
-        parameters=[
-            OpenApiParameter(
-                name="order_id",
+    @swagger_auto_schema(
+        operation_summary="Manage equipment submittal for an order",
+        operation_description="""
+            - **Clear equipment submittal**: If `equipment_submittal_clear` is `true`, it removes existing submittals.
+            - **Upload files**: If `equipment_submittal` contains files, they will be uploaded.
+        """,
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
                 description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
                 required=True,
-                type=int,
-                location=OpenApiParameter.PATH
             ),
         ],
-        request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "equipment_submittal-clear": {
-                        "type": "boolean",
-                        "description": "If `true`, the existing equipment submittal data will be cleared."
-                    },
-                    "equipment_submittal": {
-                        "type": "array",
-                        "items": {"type": "string", "format": "binary"},
-                        "description": "List of uploaded files",
-                    },
-                },
-            }
-        },
+        request_body=EquipmentSubmittalSerializer,
         responses={
-            201: {"description": "Equipment submittal updated successfully."},
-            400: {"description": "Invalid input"},
-            500: {"description": "Server error"},
+            200: openapi.Response("Equipment submittal updated successfully."),
+            400: openapi.Response("Invalid input"),
+            500: openapi.Response("Server error"),
         },
     )
     def post(self, request, order_id):
@@ -863,8 +849,13 @@ class OrderEquipmentSubmittalView(APIView):
                 is_deleted=False,
             )
 
+            # Validate request data using serializer
+            serializer = EquipmentSubmittalSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data
+
             # Handle clearing the equipment submittal
-            if request.data.get("equipment_submittal-clear"):
+            if data.get("equipment_submittal_clear"):
                 OrderEquipmentSubmittalService.clear_equipment_submittal(order_id)
                 return Response(
                     {"detail": "Equipment submittal cleared."},
@@ -890,7 +881,6 @@ class OrderEquipmentSubmittalView(APIView):
                 {"detail": "An error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
 
 class OrderFieldDrawingView(APIView):
     """
