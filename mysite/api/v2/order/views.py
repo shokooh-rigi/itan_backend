@@ -798,15 +798,56 @@ class ControlSystemManufacturerDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ControlSystemManufacturer.objects.all()
     serializer_class = ControlSystemManufacturerSerializer
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
+from rest_framework.views import APIView
+
+from .models import Order
+from .services import OrderEquipmentSubmittalService
+
 
 class OrderEquipmentSubmittalView(APIView):
     """
-    API view to handle order equipment submittal actions including
-    uploading files, clearing submittal, and updating the order.
+    API for managing order equipment submittal.
+    - Clear submitted equipment data.
+    - Upload files and update the order with submitted equipment.
     """
 
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]  # Supports file uploads
 
+    @extend_schema(
+        summary="Submit equipment data for an order",
+        description="Upload equipment-related files or clear previously submitted equipment data.",
+        parameters=[
+            OpenApiParameter(name="order_id", description="Order ID", required=True, type=int),
+        ],
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "equipment_submittal-clear": {
+                        "type": "boolean",
+                        "description": "If `true`, the submitted equipment data will be cleared."
+                    },
+                    "equipment_submittal": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "binary"},
+                        "description": "List of uploaded files",
+                    },
+                },
+            }
+        },
+        responses={
+            200: {"description": "Operation successful"},
+            400: {"description": "Invalid data"},
+            500: {"description": "Server error"},
+        },
+    )
     def post(self, request, order_id):
         """
         Handle POST request to manage equipment submittal for an order.
