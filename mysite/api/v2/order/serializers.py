@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Sum
-from rest_framework.serializers import Serializer, BooleanField, ListField, FileField
+from rest_framework.serializers import Serializer, BooleanField, ListField, FileField, CharField
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
@@ -288,4 +288,17 @@ class EquipmentSubmittalSerializer(Serializer):
     )
     equipment_submittal = ListField(
         child=FileField(), required=False, help_text="List of uploaded files."
+    )
+
+
+class GeneralNotesSerializer(Serializer):
+    """Serializer for saving and finalizing general notes"""
+    general_notes_and_comments = CharField(
+        required=True, help_text="The general notes and comments for the order."
+    )
+    finalize = BooleanField(
+        required=False, default=False, help_text="If true, finalize the notes."
+    )
+    save = BooleanField(
+        required=False, default=False, help_text="If true, save the notes."
     )

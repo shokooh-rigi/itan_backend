@@ -953,39 +953,69 @@ class OrderGeneralNotesView(APIView):
     """
     API View to handle the general notes and comments for an order.
 
-    This view allows:
-    - Retrieving the general notes and comments for an order (GET request).
-    - Saving the general notes and comments (POST request with "save" action).
-    - Finalizing the general notes and comments (POST request with "finalize" action).
+    - `GET`: Retrieve the general notes and comments.
+    - `POST`: Save or finalize the general notes.
     """
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Retrieve general notes for an order",
+        description="Returns the general notes and comments associated with the order.",
+        parameters=[
+            OpenApiParameter(
+                name="order_id",
+                description="The unique identifier for the order",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH
+            ),
+        ],
+        responses={200: {"description": "General notes retrieved successfully."}},
+    )
+    def get(self, request, order_id):
+        """Retrieve the general notes and comments for an order."""
+        order = get_object_or_404(Order, id=order_id, is_deleted=False)
+
+        return Response(
+            {"general_notes_and_comments": order.general_notes_and_comments},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        summary="Save or finalize general notes for an order",
+        description="""
+            - Use `save=true` to save notes without finalizing.
+            - Use `finalize=true` to finalize and save notes.
+        """,
+        parameters=[
+            OpenApiParameter(
+                name="order_id",
+                description="The unique identifier for the order",
+                required=True,
+                type=int,
+                location=OpenApiParameter.PATH
+            ),
+        ],
+        request=GeneralNotesSerializer,
+        responses={
+            200: {"description": "General notes updated successfully."},
+            400: {"description": "Invalid input"},
+            500: {"description": "Server error"},
+        },
+    )
     def post(self, request, order_id):
-        """
-        Handle POST request to save, finalize
+        """Save or finalize general notes for an order."""
+        order = get_object_or_404(Order, id=order_id, is_deleted=False)
 
-        Args:
-            request (Request): The HTTP request object containing the data.
-            order_id (int): The ID of the order to update.
+        # Validate request data using serializer
+        serializer = GeneralNotesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
-        Returns:
-            Response: DRF Response indicating success or failure of the action.
-        """
-        # Retrieve the order object by ID
-        order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False,
-        )
+        general_notes_and_comments = data.get("general_notes_and_comments","")
 
-        # Extract general notes and comments from the request data
-        general_notes_and_comments = str(
-            request.data.get("general_notes_and_comments", "")
-        )
-
-        # If "finalize" action is pressed, finalize the general notes and save them
-        if request.data.get("finalize"):
+        if data.get("finalize", False):
             order.general_notes_and_comments = general_notes_and_comments
             order.general_notes_and_comments_finalize = True
             order.save()
@@ -994,8 +1024,7 @@ class OrderGeneralNotesView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        # If "save" action is pressed, save the general notes without finalizing
-        if request.data.get("save"):
+        if data.get("save", False):
             order.general_notes_and_comments = general_notes_and_comments
             order.save()
             return Response(
@@ -1003,7 +1032,6 @@ class OrderGeneralNotesView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        # If no valid action is found, return a bad request error
         return Response(
             {"detail": "Invalid action or missing data."},
             status=status.HTTP_400_BAD_REQUEST,
