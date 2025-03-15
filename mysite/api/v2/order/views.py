@@ -19,6 +19,7 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     DestroyAPIView,
+    RetrieveAPIView,
 )
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -660,6 +661,24 @@ class TechLabelDeleteView(DestroyAPIView):
         # Optional: Delete related extra fields if needed
         instance.extra_fields.all().delete()
         super().perform_destroy(instance)
+
+
+class TechLabelByOrderView(RetrieveAPIView):
+
+    serializer_class = TechLabelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id, *args, **kwargs):
+        try:
+            tech_label = TechLabel.objects.get(order_id=order_id)
+            serializer = self.get_serializer(tech_label)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except TechLabel.DoesNotExist:
+            return Response(
+                {"detail": "TechLabel not found for this order_id"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class TechLabelListView(ListAPIView):
