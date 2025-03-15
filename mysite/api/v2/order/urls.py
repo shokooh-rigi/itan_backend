@@ -121,7 +121,7 @@ urlpatterns = [
         name="techlabel-list",
     ),
     path(
-        "orders/techlabels/<int:order_id>/",
+        "orders/techlabel/<int:order_id>/",
         TechLabelCreateUpdateView.as_view(),
         name="techlabel-create-update",
     ),
