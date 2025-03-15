@@ -225,17 +225,22 @@ class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
 
 
 class TechLabelSerializer(serializers.ModelSerializer):
+    """
+    Serializer for TechLabel model. Supports create or update based on order_id.
+    """
     extra_fields = TechLabelExtraFieldsSerializer(
         many=True,
         required=False,
         source="techlabelextrafields_set",
     )
+    order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = TechLabel
         fields = [
             "id",
             "order",
+            "order_id",
             "label_model",
             "detailed_drawing",
             "schedule_drawing",
@@ -248,27 +253,36 @@ class TechLabelSerializer(serializers.ModelSerializer):
             "tech_notes",
             "extra_fields",
         ]
+        extra_kwargs = {
+            "order": {"read_only": True},
+        }
+
+    def validate_order_id(self, value):
+        """
+        Ensure the order_id is valid and exists in the database.
+        """
+        if not Order.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Invalid order_id: Order does not exist.")
+        return value
 
     def create(self, validated_data):
+        """
+        Create a new TechLabel instance or update an existing one based on order_id.
+        """
         extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
-        tech_label = TechLabel.objects.create(**validated_data)
+        order = Order.objects.get(id=validated_data.pop("order_id"))  # Fetch order object
+
+        # Check if TechLabel already exists for this order
+        tech_label, created = TechLabel.objects.update_or_create(
+            order=order, defaults=validated_data
+        )
+
+        # Delete old extra fields and add new ones
+        tech_label.techlabelextrafields_set.all().delete()
         for extra_data in extra_fields_data:
             TechLabelExtraFields.objects.create(tech_label=tech_label, **extra_data)
+
         return tech_label
-
-    def update(self, instance, validated_data):
-        extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        instance.techlabelextrafields_set.all().delete()
-        for extra_data in extra_fields_data:
-            TechLabelExtraFields.objects.create(tech_label=instance, **extra_data)
-
-        return instance
-
 
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem

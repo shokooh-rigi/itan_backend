@@ -20,9 +20,9 @@ from .views import (
     ControlSystemDetailView,
     ControlSystemManufacturerListCreateView,
     ControlSystemManufacturerDetailView,
-    TechLabelRetrieveUpdateView,
     TechLabelDeleteView,
-    TechLabelListCreateView,
+    TechLabelListView,
+    TechLabelCreateUpdateView,
 )
 
 
@@ -117,13 +117,13 @@ urlpatterns = [
     ),
     path(
         "orders/techlabels/",
-        TechLabelListCreateView.as_view(),
-        name="techlabel-list-create",
+        TechLabelListView.as_view(),
+        name="techlabel-list",
     ),
     path(
-        "orders/techlabels/<int:pk>/",
-        TechLabelRetrieveUpdateView.as_view(),
-        name="techlabel-detail",
+        "orders/techlabels/<int:order_id>/",
+        TechLabelCreateUpdateView.as_view(),
+        name="techlabel-create-update",
     ),
     path(
         "orders/techlabels/<int:pk>/",

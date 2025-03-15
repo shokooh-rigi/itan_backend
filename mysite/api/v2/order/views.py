@@ -656,56 +656,28 @@ class TechLabelDeleteView(RetrieveUpdateDestroyAPIView):
         super().perform_destroy(instance)
 
 
-class TechLabelListCreateView(ListCreateAPIView):
+class TechLabelListView(ListAPIView):
     """
-    API to list and create TechLabel instances.
+    API to list TechLabel instances.
     """
-
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
 
-class TechLabelRetrieveUpdateView(RetrieveUpdateDestroyAPIView):
+class TechLabelCreateUpdateView(CreateAPIView):
     """
-    API for retrieving and updating a TechLabel instance
-    (including removing and adding extra fields).
+    API to create or update TechLabel based on order_id.
+    If a TechLabel already exists for the given order_id, it will be updated.
     """
-
-    queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
-    def update(self, request, *args, **kwargs):
+    def get_serializer_class(self):
         """
-        Update method for TechLabel, implementing the previous service logic:
-        - Deletes old extra fields.
-        - Creates new extra fields.
-        - Saves the updated TechLabel instance.
+        Use the TechLabelSerializer, which handles both create and update.
         """
-        tech_label = get_object_or_404(TechLabel, id=kwargs.get("pk"))
-        extra_fields_data = request.data.get("extra_fields", [])
-
-        with transaction.atomic():
-            # Delete old extra fields
-            TechLabelExtraFields.objects.filter(tech_label=tech_label).delete()
-
-            # Create new extra fields
-            for field in extra_fields_data:
-                TechLabelExtraFields.objects.create(
-                    tech_label=tech_label,
-                    title=field["title"],
-                    content=field["content"],
-                )
-
-            # Save changes to TechLabel
-            serializer = self.get_serializer(
-                tech_label, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return TechLabelSerializer
 
 
 class ControlSystemAPIView(APIView):
