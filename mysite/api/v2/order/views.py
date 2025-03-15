@@ -13,7 +13,13 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    CreateAPIView,
+    ListAPIView,
+    DestroyAPIView,
+)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -645,7 +651,7 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TechLabelDeleteView(RetrieveUpdateDestroyAPIView):
+class TechLabelDeleteView(DestroyAPIView):
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
