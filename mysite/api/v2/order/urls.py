@@ -126,7 +126,7 @@ urlpatterns = [
         name="techlabel-create-update",
     ),
     path(
-        "orders/techlabels/<int:pk>/",
+        "orders/techlabel/<int:pk>/",
         TechLabelDeleteView.as_view(),
         name="techlabel-delete",
     ),
