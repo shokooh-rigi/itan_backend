@@ -22,7 +22,8 @@ from .views import (
     ControlSystemManufacturerDetailView,
     TechLabelDeleteView,
     TechLabelListView,
-    TechLabelCreateUpdateView, TechLabelByOrderView,
+    TechLabelCreateUpdateView,
+    TechLabelByOrderView,
 )
 
 
@@ -131,8 +132,8 @@ urlpatterns = [
         name="techlabel-delete",
     ),
     path(
-        "orders/techlabel/<int:order_id>/",
+        "orders/techlabel/<int:order_id>/detail/",
         TechLabelByOrderView.as_view(),
-        name="techlabel-list-by-order_id",
+        name="techlabel-detail-by-order_id",
     ),
 ]
