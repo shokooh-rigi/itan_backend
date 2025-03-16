@@ -182,3 +182,55 @@ class InvoiceTransactionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"invoice_id": "Updating invoice_id is not allowed."})
 
         return super().update(instance, validated_data)
+
+
+class MassPaymentSerializer(serializers.Serializer):
+    """Serializer for processing mass payments"""
+
+    payment_no = serializers.CharField(max_length=50, required=True)
+    payment_date = serializers.DateField(format="%Y-%m-%d", input_formats=["%Y-%m-%d"], required=True)
+    payment_desc = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    payments = serializers.ListField(
+        child=serializers.DictField(
+            child=serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
+        ),
+        required=True
+    )
+
+    def validate_payments(self, value):
+        """Ensure at least one valid payment exists"""
+        if not value:
+            raise serializers.ValidationError("At least one payment entry is required.")
+        return value
+
+    def create(self, validated_data):
+        """Create payment transactions for invoices"""
+        user = self.context['request'].user
+        payment_no = validated_data['payment_no']
+        payment_date = validated_data['payment_date']
+        payment_desc = validated_data.get('payment_desc', "")
+
+        transactions = []
+        for payment in validated_data['payments']:
+            invoice_id = payment.get("invoice_id")
+            amount = payment.get("amount")
+
+            try:
+                invoice = Invoice.objects.get(id=invoice_id)
+            except Invoice.DoesNotExist:
+                raise serializers.ValidationError(f"Invoice with ID {invoice_id} does not exist.")
+
+            if amount <= 0:
+                raise serializers.ValidationError(f"Invalid amount for invoice {invoice_id}.")
+
+            transaction = InvoiceTransaction.objects.create(
+                invoice=invoice,
+                amount=amount,
+                payment_date=payment_date,
+                payment_no=payment_no,
+                created_by=user
+            )
+            transactions.append(transaction)
+
+        return transactions
+
