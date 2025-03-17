@@ -99,6 +99,10 @@ class Estimate(BaseModelWithCreatedByUser):
         return self.estimatedetails.pre_demo * 1200
 
     @property
+    def pre_demo_value(self):
+        return True if self.estimatedetails.pre_demo > 0 else False
+
+    @property
     def dalt_calculated(self):
         estimate_equipments_pricing = EstimateEquipment.objects.filter(
             estimate=self, flag=True

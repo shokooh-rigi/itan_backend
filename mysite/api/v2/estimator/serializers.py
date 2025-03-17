@@ -64,6 +64,7 @@ class EstimateSerializer(serializers.ModelSerializer):
     project = ProjectSerializer()
     engineer = PersonSerializer()
     pre_demo = serializers.SerializerMethodField()
+    pre_demo_value = serializers.SerializerMethodField(read_only=True)
     total_amount = serializers.SerializerMethodField()
     estimate_equipments = EstimateEquipmentSerializer(many=True, source='estimateequipment_set')
     estimate_details = EstimateDetailsSerializer(source='estimatedetails')
@@ -99,6 +100,9 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Get pre_demo from the related EstimateDetail."""
         estimate_detail = getattr(obj, 'estimatedetails', None)
         return estimate_detail.pre_demo if estimate_detail else None
+
+    def get_pre_demo_value(self, obj):
+        return obj.pre_demo_value
 
     def get_total_amount(self, obj):
         """Calculate the total amount based on related EstimateEquipment."""
