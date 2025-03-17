@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from django.db.models import Sum
-from rest_framework.serializers import Serializer, BooleanField, ListField, FileField, CharField
+from rest_framework.serializers import (
+    Serializer,
+    BooleanField,
+    ListField,
+    FileField,
+    CharField,
+)
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
@@ -228,18 +234,19 @@ class TechLabelSerializer(serializers.ModelSerializer):
     """
     Serializer for TechLabel model. Supports create or update based on order_id.
     """
+
     extra_fields = TechLabelExtraFieldsSerializer(
         many=True,
         required=False,
         source="techlabelextrafields_set",
     )
     order_id = serializers.IntegerField(write_only=True)
+    order = OrderSerializer(read_only=True)
 
     class Meta:
         model = TechLabel
         fields = [
             "id",
-            "order",
             "order_id",
             "label_model",
             "detailed_drawing",
@@ -252,6 +259,8 @@ class TechLabelSerializer(serializers.ModelSerializer):
             "schedule_date",
             "tech_notes",
             "extra_fields",
+            "created_on",
+            "order",
         ]
         extra_kwargs = {
             "order": {"read_only": True},
@@ -270,7 +279,9 @@ class TechLabelSerializer(serializers.ModelSerializer):
         Create a new TechLabel instance or update an existing one based on order_id.
         """
         extra_fields_data = validated_data.pop("techlabelextrafields_set", [])
-        order = Order.objects.get(id=validated_data.pop("order_id"))  # Fetch order object
+        order = Order.objects.get(
+            id=validated_data.pop("order_id")
+        )  # Fetch order object
 
         # Check if TechLabel already exists for this order
         tech_label, created = TechLabel.objects.update_or_create(
@@ -283,6 +294,7 @@ class TechLabelSerializer(serializers.ModelSerializer):
             TechLabelExtraFields.objects.create(tech_label=tech_label, **extra_data)
 
         return tech_label
+
 
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem
@@ -297,6 +309,7 @@ class OrderControlSystemSerializer(serializers.ModelSerializer):
 
 class EquipmentSubmittalSerializer(Serializer):
     """Serializer for equipment submittal file uploads"""
+
     equipment_submittal_clear = BooleanField(
         required=False, help_text="If true, clears the equipment submittal."
     )
@@ -307,6 +320,7 @@ class EquipmentSubmittalSerializer(Serializer):
 
 class GeneralNotesSerializer(Serializer):
     """Serializer for saving and finalizing general notes"""
+
     general_notes_and_comments = CharField(
         required=True, help_text="The general notes and comments for the order."
     )
@@ -320,8 +334,9 @@ class GeneralNotesSerializer(Serializer):
 
 class FieldDrawingUploadSerializer(Serializer):
     """Serializer for handling field drawing file uploads."""
+
     field_drawing = ListField(
         child=FileField(),
         required=True,
-        help_text="List of field drawing files to upload."
+        help_text="List of field drawing files to upload.",
     )
