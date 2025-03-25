@@ -188,8 +188,11 @@ class AccountSummaryListView(generics.ListAPIView):
         from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
         to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(hours=23, minutes=59, seconds=59)
 
-        # Fetch account summaries
-        object_list = AccountSummary.objects.filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
+        # Fetch account summaries filtered by company_id
+        object_list = AccountSummary.objects.filter(
+            created_on__range=(from_date_obj, to_date_obj),
+            customer__company_id=company_id
+        ).order_by(ordering)
 
         # Paginate results
         paginator = PageNumberPagination()
@@ -199,16 +202,10 @@ class AccountSummaryListView(generics.ListAPIView):
         # Serialize paginated data
         serializer = AccountSummarySerializer(page, many=True)
 
-        # Extract the customer from the first account summary (assuming at least one exists)
-        customer = page[0].customer if page else None
-        company = customer.company if customer else None
+        if not page:
+            return paginator.get_paginated_response({"account_summaries": [], "total_due": 0, "company_invoices": []})
 
-        # If company is not found, apply fallback logic
-        if not company:
-            if company_id:
-                company = Person.objects.filter(company=company_id).first()
-            else:
-                company = Person.objects.filter(company__company_type__name__iexact="mechanical contractor").first()
+        company = Person.objects.filter(company=company_id).first()
 
         if not company:
             return Response(
@@ -218,7 +215,7 @@ class AccountSummaryListView(generics.ListAPIView):
 
         # Fetch invoices related to the company
         company_invoices = Invoice.objects.filter(
-            order__proposal__estimate__customer__company=company,
+            order__proposal__estimate__customer__company_id=company_id,
             order__proposal__estimate__due_date__gt="2020-01-04",
         ).order_by("created_on")
 
