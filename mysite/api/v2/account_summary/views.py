@@ -224,7 +224,7 @@ class AccountSummaryListView(generics.ListAPIView):
         if not page:
             return paginator.get_paginated_response({"account_summaries": [], "total_due": 0, "company_invoices": []})
 
-        company = Person.objects.filter(company=company_id).first()
+        company = Person.objects.filter(company__id=company_id).first()
 
         if not company:
             return Response(
@@ -234,7 +234,7 @@ class AccountSummaryListView(generics.ListAPIView):
 
         # Fetch invoices related to the company
         company_invoices = Invoice.objects.filter(
-            order__proposal__estimate__customer__company_id=company_id,
+            order__proposal__estimate__customer__company__id=company_id,
             order__proposal__estimate__due_date__gt="2020-01-04",
         ).order_by("created_on")
 
