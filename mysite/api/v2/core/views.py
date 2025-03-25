@@ -40,9 +40,12 @@ from mysite.core.models import (
     Service,
 )
 from mysite.estimator.models import Estimate
+from mysite.proposal.models import Proposal
 from mysite.s3_file_manager import S3
 from .permissions import IsOwnerOrAdmin
 from django.utils.timezone import now
+from django.db.models.functions import TruncMonth, TruncDay
+from django.db.models import Count
 from .serializers import (
     AnnouncementSerializer,
     ProjectSerializer,
@@ -61,6 +64,7 @@ class CustomerViewSet(ModelViewSet):
     """
     API endpoint for creating and editing Customers.
     """
+
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
@@ -93,6 +97,7 @@ class CustomerViewSet(ModelViewSet):
             )
         return queryset
 
+
 class EngineerViewSet(ModelViewSet):
     """
     API endpoint for creating and editing Engineers.
@@ -123,6 +128,7 @@ class CompanyViewSet(ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
         return queryset
 
+
 class CompanyListView(APIView):
     """
     API View to list, filter, and paginate companies.
@@ -131,7 +137,9 @@ class CompanyListView(APIView):
     with optional search, sorting, and date filtering.
     """
 
-    permission_classes = [permissions.IsAuthenticated]  # Require authentication for access
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]  # Require authentication for access
 
     @swagger_auto_schema(
         operation_summary="Retrieve a list of companies",
@@ -215,7 +223,9 @@ class CompanyListView(APIView):
         # Build filter conditions
         filters = Q()
         if search:
-            filters &= Q(name__icontains=search) | Q(id__icontains=search)  # Search by name or ID
+            filters &= Q(name__icontains=search) | Q(
+                id__icontains=search
+            )  # Search by name or ID
 
         # Filter by date range if provided
         if from_date:
@@ -223,7 +233,11 @@ class CompanyListView(APIView):
             filters &= Q(created_on__gte=from_date_obj)
 
         if to_date:
-            to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(days=1) - timedelta(seconds=1)
+            to_date_obj = (
+                datetime.strptime(to_date, "%m/%d/%Y")
+                + timedelta(days=1)
+                - timedelta(seconds=1)
+            )
             filters &= Q(created_on__lte=to_date_obj)
 
         # Query the database with filters and ordering
@@ -414,19 +428,82 @@ class HomeView(APIView):
 
         # Fetch bids for the current year
         current_year = now().year
+        current_month = now().month
+        today = now().date()
+        start_date = today - timedelta(days=6)
         total_bids = BidFile.objects.filter(created_on__year=current_year)
 
-        # Fetch estimates related to bids
-        estimates = Estimate.objects.filter(bfm__in=total_bids)
-
         # Manually sum up the total_calculated values
-        bids_total = sum(estimate.total_calculated for estimate in estimates)
+        bids_total_amount = sum(
+            estimate.total_calculated
+            for estimate in Estimate.objects.filter(bfm__in=total_bids)
+        )
+
+        bids_by_day = (
+            BidFile.objects.filter(created_on__date__range=[start_date, today])
+            .annotate(day=TruncDay("created_on"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .order_by("day")
+        )
+
+        daily_bid_counts = {
+            str((today - timedelta(days=i)).strftime("%a")): 0 for i in range(6, -1, -1)
+        }
+        for entry in bids_by_day:
+            day_str = entry["day"].strftime("%a")  # Convert to abbreviated weekday name
+            daily_bid_counts[day_str] = entry["count"]
+
+        estimates = Estimate.objects.filter(
+            bfm__created_on__year=current_year, archive=False
+        )
+        # Get estimates grouped by month
+        estimates_by_month = (
+            estimates.annotate(month=TruncMonth("created_on"))
+            .values("month")
+            .annotate(count=Count("id"))
+            .order_by("month")
+        )
+
+        # Create a dictionary with counts for each month up to the current month
+        monthly_estimates = {
+            (now().replace(month=i).strftime("%b")): 0
+            for i in range(1, current_month + 1)
+        }
+        for entry in estimates_by_month:
+            month_name = entry["month"].strftime(
+                "%b"
+            )  # Extract month name (3-letter abbreviation) from datetime
+            monthly_estimates[month_name] = entry["count"]
+
+        proposals = Proposal.objects.filter(estimate__in=estimates)
+
+        proposals_by_month = (
+            proposals.annotate(month=TruncMonth("created_on"))
+            .values("month")
+            .annotate(count=Count("id"))
+            .order_by("month")
+        )
+
+        # Create a dictionary with counts for each month up to the current month
+        monthly_proposals = {
+            (now().replace(month=i).strftime("%b")): 0
+            for i in range(1, current_month + 1)
+        }
+        for entry in proposals_by_month:
+            month_name = entry["month"].strftime(
+                "%b"
+            )  # Extract month name (3-letter abbreviation) from datetime
+            monthly_proposals[month_name] = entry["count"]
 
         return Response(
             {
                 "announcements": response_data,  # Return the cached response data
                 "bidsCount": total_bids.count(),
-                "bidsTotal": bids_total,
+                "bidsTotal": bids_total_amount,
+                "dailyBidCounts": daily_bid_counts,
+                "totalEstimatesByMonth": monthly_estimates,
+                "totalProposalsByMonth": monthly_proposals,
             },
             status=status.HTTP_200_OK,
         )
