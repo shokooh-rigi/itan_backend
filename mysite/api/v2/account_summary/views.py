@@ -184,7 +184,7 @@ class AccountSummaryListView(generics.ListAPIView):
         ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate", "04/01/2020")
         to_date = request.GET.get("toDate", "01/01/2100")
-        company_id = kwargs.get("compony_id")
+        company_id = kwargs.get("company_id")
 
         # Convert date strings to datetime objects
         from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")

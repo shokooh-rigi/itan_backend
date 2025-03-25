@@ -13,7 +13,7 @@ urlpatterns = [
          name='account-summary-create'
          ),
 
-    path('account-summary/<int:compony_id>/',
+    path('account-summary/<int:company_id>/',
          AccountSummaryListView.as_view(),
          name='account-summary-list'
          ),
