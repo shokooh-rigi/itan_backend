@@ -99,7 +99,7 @@ urlpatterns = [
          DocumentUploadAPIView.as_view(),
          name="upload_document"
          ),
-    path("company/list/",
+    path("companies/list/",
          CompanyListView.as_view(),
          name="company-list"
          ),
