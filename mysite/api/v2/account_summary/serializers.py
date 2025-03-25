@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.core.models import ContactInfo
 from mysite.gi.models import AccountSummary
 
@@ -38,8 +39,17 @@ class AccountSummaryCreateSerializer(serializers.ModelSerializer):
         ]
 
 
-# Serializer for AccountSummary
 class AccountSummarySerializer(serializers.ModelSerializer):
+    customer = PersonSerializer(read_only=True)
     class Meta:
         model = AccountSummary
-        fields = "__all__"
+        fields = [
+            'customer',
+            'statement_no',
+            'total',
+            'attention',
+            'created_by',
+            'created_on',
+            'archive',
+            'is_deleted',
+        ]

@@ -1,8 +1,6 @@
 from django.urls import path
 
 from .views import (
-    AccountSummaryAPIView,
-    AccountSummaryDeleteView,
     AccountSummaryCreateView,
     AccountSummaryListView,
 )
@@ -14,10 +12,7 @@ urlpatterns = [
          AccountSummaryCreateView.as_view(),
          name='account-summary-create'
          ),
-    path('account-summary/delete/<int:account_summary_id>/',
-         AccountSummaryDeleteView.as_view(),
-         name='account-summary-delete'
-         ),
+
     path('account-summary/list/',
          AccountSummaryListView.as_view(),
          name='account-summary-list'

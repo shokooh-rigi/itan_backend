@@ -326,7 +326,7 @@ class ContactInfo(BaseModelWithCreatedByUser):
     web = models.CharField(max_length=55, blank=True, null=True)
 
 
-class Company(BaseModelWithCreatedByUser):
+class   Company(BaseModelWithCreatedByUser):
     """Represents company details."""
 
     name = models.CharField(max_length=255, blank=False, null=False)

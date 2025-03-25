@@ -3,7 +3,6 @@ import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
@@ -12,16 +11,16 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mysite.order.templatetags.order_tags import calculate_remaining_invoice_due
 from .serializers import AccountSummarySerializer, \
     AccountSummaryCreateSerializer
 from mysite.core.models import ModulesToEmailTemplateRelation, LicenseInfo, Person
-from mysite.gi.models import AccountSummary
+from mysite.gi.models import AccountSummary, Invoice
 from .services.account_summary_service import AccountSummaryService
 from ..estimator.serializers import EmailSerializer
 
@@ -154,27 +153,91 @@ class AccountSummaryListView(generics.ListAPIView):
     - Order by a specified field (`ordering`).
     - Manual pagination instead of using a separate pagination class.
     """
+
     serializer_class = AccountSummarySerializer
 
+    @swagger_auto_schema(
+        operation_summary="Retrieve a list of account summaries",
+        operation_description="Fetch paginated account summaries with optional filters like date range and ordering.",
+        manual_parameters=[
+            openapi.Parameter(
+                "fromDate", openapi.IN_QUERY, description="Start date (MM/DD/YYYY)", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "toDate", openapi.IN_QUERY, description="End date (MM/DD/YYYY)", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "ordering", openapi.IN_QUERY, description="Order by field (default: '-created_on')", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "page_size", openapi.IN_QUERY, description="Number of items per page", type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                "company_id", openapi.IN_QUERY, description="Filter by company ID", type=openapi.TYPE_INTEGER
+            ),
+        ],
+    )
     def get(self, request, *args, **kwargs):
-        ordering = request.GET.get('ordering', '-created_on')
-        from_date = request.GET.get("fromDate", '04/01/2020')
-        to_date = request.GET.get("toDate", '01/01/2100')
+        """Retrieve a paginated list of account summaries with filters and company-related invoices."""
 
-        from_date_obj = datetime.strptime(from_date, '%m/%d/%Y')
-        to_date_obj = datetime.strptime(to_date, '%m/%d/%Y') + timedelta(hours=23, minutes=59, seconds=59)
+        # Fetch query parameters
+        ordering = request.GET.get("ordering", "-created_on")
+        from_date = request.GET.get("fromDate", "04/01/2020")
+        to_date = request.GET.get("toDate", "01/01/2100")
+        company_id = request.GET.get("company_id", None)
 
-        object_list = AccountSummary.objects.filter(
-            created_on__range=(from_date_obj, to_date_obj)
-        ).order_by(ordering)
+        # Convert date strings to datetime objects
+        from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+        to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(hours=23, minutes=59, seconds=59)
 
+        # Fetch account summaries
+        object_list = AccountSummary.objects.filter(created_on__range=(from_date_obj, to_date_obj)).order_by(ordering)
+
+        # Paginate results
         paginator = PageNumberPagination()
-        paginator.page_size = int(request.GET.get('page_size', settings.PAGE_SIZE))
+        paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
         page = paginator.paginate_queryset(object_list, request)
 
-        serialized_data = AccountSummarySerializer(page, many=True).data
+        # Serialize paginated data
+        serializer = AccountSummarySerializer(page, many=True)
 
-        return paginator.get_paginated_response(serialized_data)
+        # Extract the customer from the first account summary (assuming at least one exists)
+        customer = page[0].customer if page else None
+        company = customer.company if customer else None
+
+        # If company is not found, apply fallback logic
+        if not company:
+            if company_id:
+                company = Person.objects.filter(company=company_id).first()
+            else:
+                company = Person.objects.filter(company__company_type__name__iexact="mechanical contractor").first()
+
+        if not company:
+            return Response(
+                {"error": "No valid company found for the provided criteria."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Fetch invoices related to the company
+        company_invoices = Invoice.objects.filter(
+            order__proposal__estimate__customer__company=company,
+            order__proposal__estimate__due_date__gt="2020-01-04",
+        ).order_by("created_on")
+
+        # Calculate remaining invoice amounts and filter non-zero invoices
+        remaining_due_list = [
+            (invoice, calculate_remaining_invoice_due(invoice)) for invoice in company_invoices
+        ]
+        total_due = sum(due for _, due in remaining_due_list)
+        company_invoices = [invoice for invoice, due in remaining_due_list if due > 0]
+
+        # Construct response
+        result = {
+            "account_summaries": serializer.data,
+            "total_due": total_due,
+            "company_invoices": company_invoices,
+        }
+        return paginator.get_paginated_response(result)
 
 
 class AccountSummaryCreateView(APIView):
@@ -255,50 +318,3 @@ class AccountSummaryCreateView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AccountSummaryDeleteView(APIView):
-    """
-    API view for deleting an account summary.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, account_summary_id):
-        """
-        Delete an account summary if the user is the creator.
-
-        Args:
-            request (Request): The HTTP request object
-            account_summary_id (int): The ID of the account summary to be deleted.
-
-        Returns:
-            Response: A JSON response indicating success or failure of the operation.
-        """
-        # Retrieve the account summary
-        account_summary = get_object_or_404(
-            AccountSummary,
-            id=account_summary_id,
-            is_deleted=False,
-
-        )
-
-        # Check if the user is the creator of the account summary
-        if account_summary.created_by != request.user:
-            return Response(
-                {"error": "You are not authorized to delete this account summary."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        try:
-            parameters = {
-                'file_name': 'AccountSummary-' + account_summary.statement_no,
-            }
-            AccountSummary.delete_account_summary_pdf(parameters)
-            account_summary.soft_delete()
-            return Response(
-                {"message": "Account summary deleted successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except PermissionDenied as e:
-            return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
-
