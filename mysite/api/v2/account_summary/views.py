@@ -210,7 +210,7 @@ class AccountSummaryListView(generics.ListAPIView):
         # Fetch account summaries filtered by company_id
         object_list = AccountSummary.objects.filter(
             created_on__range=(from_date_obj, to_date_obj),
-            customer__company_id=company_id
+            customer__company__id=company_id
         ).order_by(ordering)
 
         # Paginate results
