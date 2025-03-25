@@ -2,20 +2,24 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
-from drf_yasg import openapi
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.core.paginator import Paginator
+from django.conf import settings
+from datetime import datetime, timedelta
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.db.models import Sum, Q
@@ -118,6 +122,138 @@ class CompanyViewSet(ModelViewSet):
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset
+
+class CompanyListView(APIView):
+    """
+    API View to list, filter, and paginate companies.
+
+    This API allows authenticated users to retrieve a paginated list of companies
+    with optional search, sorting, and date filtering.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]  # Require authentication for access
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve a list of companies",
+        operation_description="Get a paginated list of companies with search and filter capabilities.",
+        manual_parameters=[
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search query to filter companies by name or ID.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of companies per page. Defaults to the project setting.",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Sort companies by a specific field. Default is '-created_on'.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering companies (Format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering companies (Format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number to retrieve. Default is 1.",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="List of companies with pagination info.",
+                examples={
+                    "application/json": {
+                        "companies": [
+                            {
+                                "id": 1,
+                                "name": "Company A",
+                                "created_on": "YYYY-MM-DD",
+                                "owner": "User ID",
+                                "address": "Some Address",
+                            }
+                        ],
+                        "pagination": {
+                            "total_rows": 50,
+                            "total_pages": 5,
+                            "current_page": 1,
+                            "page_size": 10,
+                        },
+                    }
+                },
+            ),
+            status.HTTP_400_BAD_REQUEST: openapi.Response(
+                description="Invalid request parameters.",
+            ),
+        },
+    )
+    def get(self, request):
+        """Retrieve a paginated list of companies with search and filter options."""
+
+        # Extract query parameters
+        search = request.GET.get("search", "")
+        page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
+        ordering = request.GET.get("ordering", "-created_on")
+        from_date = request.GET.get("fromDate")
+        to_date = request.GET.get("toDate")
+
+        # Build filter conditions
+        filters = Q()
+        if search:
+            filters &= Q(name__icontains=search) | Q(id__icontains=search)  # Search by name or ID
+
+        # Filter by date range if provided
+        if from_date:
+            from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+            filters &= Q(created_on__gte=from_date_obj)
+
+        if to_date:
+            to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(days=1) - timedelta(seconds=1)
+            filters &= Q(created_on__lte=to_date_obj)
+
+        # Query the database with filters and ordering
+        object_list = Company.objects.filter(filters).order_by(ordering)
+
+        # Apply pagination
+        paginator = Paginator(object_list, page_size)
+        page_number = request.GET.get("page", 1)
+        paginated_companies = paginator.get_page(page_number)
+
+        try:
+            # Serialize the paginated results
+            serializer = CompanySerializer(paginated_companies, many=True)
+            data = {
+                "companies": serializer.data,
+                "pagination": {
+                    "total_rows": paginator.count,
+                    "total_pages": paginator.num_pages,
+                    "current_page": paginated_companies.number,
+                    "page_size": page_size,
+                },
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Handle unexpected errors
+            return Response(
+                {"error": "An error occurred while retrieving companies."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class PersonViewSet(ModelViewSet):

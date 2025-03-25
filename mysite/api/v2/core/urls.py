@@ -27,7 +27,7 @@ from .views import (
     ProjectViewSet,
     CompanyTypeList,
     UserViewSet,
-    ServiceViewSet,
+    ServiceViewSet, CompanyListView,
 )
 
 router = DefaultRouter()
@@ -45,10 +45,22 @@ router.register(r"service", ServiceViewSet, basename="service")
 
 
 urlpatterns = [
-    path("profile/", ProfileView.as_view(), name="profile"),
-    path("home/", HomeView.as_view(), name="home"),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("profile/",
+         ProfileView.as_view(),
+         name="profile"
+         ),
+    path("home/",
+         HomeView.as_view(),
+         name="home"
+         ),
+    path("api/token/",
+         TokenObtainPairView.as_view(),
+         name="token_obtain_pair"
+         ),
+    path("api/token/refresh/",
+         TokenRefreshView.as_view(),
+         name="token_refresh"
+         ),
     path(
         "get-engineer-id/<str:engineer_name>/",
         GetEngineerId.as_view(),
@@ -60,11 +72,19 @@ urlpatterns = [
         name="get-project-id",
     ),
     path(
-        "get-person-id/<str:person_name>/", GetPersonId.as_view(), name="get-person-id"
+        "get-person-id/<str:person_name>/",
+        GetPersonId.as_view(),
+        name="get-person-id"
     ),
-    path("get-company-types/", CompanyTypeList.as_view(), name="get-company-types"),
+    path("get-company-types/",
+         CompanyTypeList.as_view(),
+         name="get-company-types"
+         ),
     # path("signup/", SignUpAPIView.as_view(), name="signup"),
-    path("change-password/", ChangePasswordAPIView.as_view(), name="change_password"),
+    path("change-password/",
+         ChangePasswordAPIView.as_view(),
+         name="change_password"
+         ),
     path(
         "account-activation-sent/",
         AccountActivationSentAPIView.as_view(),
@@ -75,6 +95,14 @@ urlpatterns = [
         ActivateAccountAPIView.as_view(),
         name="activate_account",
     ),
-    path("upload-document/", DocumentUploadAPIView.as_view(), name="upload_document"),
+    path("upload-document/",
+         DocumentUploadAPIView.as_view(),
+         name="upload_document"
+         ),
+    path("companies/",
+         CompanyListView.as_view(),
+         name="company-list"
+         ),
+
 ]
 urlpatterns += router.urls
