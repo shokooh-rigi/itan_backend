@@ -172,9 +172,7 @@ class AccountSummaryListView(generics.ListAPIView):
             openapi.Parameter(
                 "page_size", openapi.IN_QUERY, description="Number of items per page", type=openapi.TYPE_INTEGER
             ),
-            openapi.Parameter(
-                "company_id", openapi.IN_QUERY, description="Filter by company ID", type=openapi.TYPE_INTEGER
-            ),
+
         ],
     )
     def get(self, request, *args, **kwargs):
