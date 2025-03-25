@@ -172,8 +172,21 @@ class AccountSummaryListView(generics.ListAPIView):
             openapi.Parameter(
                 "page_size", openapi.IN_QUERY, description="Number of items per page", type=openapi.TYPE_INTEGER
             ),
-
         ],
+        responses={
+            200: openapi.Response(
+                description="Paginated account summaries with total due and company invoices.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "account_summaries": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT)),
+                        "total_due": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "company_invoices": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT)),
+                    }
+                ),
+            ),
+            400: openapi.Response(description="Invalid request, company not found."),
+        }
     )
     def get(self, request, *args, **kwargs):
         """Retrieve a paginated list of account summaries with filters and company-related invoices."""
@@ -184,9 +197,15 @@ class AccountSummaryListView(generics.ListAPIView):
         to_date = request.GET.get("toDate", "01/01/2100")
         company_id = kwargs.get("company_id")
 
-        # Convert date strings to datetime objects
-        from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
-        to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(hours=23, minutes=59, seconds=59)
+        try:
+            # Convert date strings to datetime objects
+            from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+            to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(hours=23, minutes=59, seconds=59)
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Please use MM/DD/YYYY."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Fetch account summaries filtered by company_id
         object_list = AccountSummary.objects.filter(
