@@ -30,8 +30,6 @@ def estimate_number_generator(estimate_id: int):
 
 
 class Estimate(BaseModelWithCreatedByUser):
-    """Model representing an estimate."""
-
     bfm = models.OneToOneField(
         BidFile,
         on_delete=models.CASCADE,

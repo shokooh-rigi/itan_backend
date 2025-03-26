@@ -13,11 +13,6 @@ from mysite.render import Render
 
 
 class Invoice(BaseModelWithCreatedByUser):
-    """
-    Represents an invoice for an order. Includes details such as dates,
-    description, invoice type, and the associated user who created the invoice.
-    """
-
     order = models.OneToOneField(
         Order,
         on_delete=models.CASCADE,
@@ -88,7 +83,6 @@ class Invoice(BaseModelWithCreatedByUser):
             str: Formatted invoice number (e.g., "ABC-001").
         """
         return f"{self.order.project_number[:3]}-{self.id:03d}"
-    
 
     @property
     def revision_date(self):
@@ -104,8 +98,9 @@ class Invoice(BaseModelWithCreatedByUser):
             case 4:
                 return self.order.proposal.estimate.dalt_calculated
             case _:
-                return self.order.proposal.estimate.total_without_dalt_and_predemo_calculated
-            
+                return (
+                    self.order.proposal.estimate.total_without_dalt_and_predemo_calculated
+                )
 
     @property
     def sub_total(self):
@@ -118,7 +113,6 @@ class Invoice(BaseModelWithCreatedByUser):
                 return self.order.dalt_total
             case _:
                 return self.order.final_total
-            
 
     @property
     def total_paid(self):
@@ -127,15 +121,15 @@ class Invoice(BaseModelWithCreatedByUser):
         for transaction in transactions:
             total += transaction.amount
         return total
-    
+
     @property
     def total_invoiced(self):
         return self.sub_total * self.percent_of_performance_completed / 100
-    
+
     @property
     def remaining_due(self):
         return self.total_invoiced - self.total_paid
-    
+
     @property
     def amount_due(self):
         return self.remaining_due

@@ -326,9 +326,7 @@ class ContactInfo(BaseModelWithCreatedByUser):
     web = models.CharField(max_length=55, blank=True, null=True)
 
 
-class   Company(BaseModelWithCreatedByUser):
-    """Represents company details."""
-
+class Company(BaseModelWithCreatedByUser):
     name = models.CharField(max_length=255, blank=False, null=False)
     company_type = models.ForeignKey(
         CompanyType, on_delete=models.PROTECT, blank=False, null=False
@@ -355,8 +353,6 @@ class   Company(BaseModelWithCreatedByUser):
 
 
 class Person(BaseModelWithCreatedByUser):
-    """Represents a person associated with a company."""
-
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
