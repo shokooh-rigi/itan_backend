@@ -8,19 +8,19 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
-from django.utils.dateparse import parse_date
+from datetime import datetime, timedelta
 
 from mysite.api.v2.invoice.serializers import InvoiceSerializer, InvoiceHistorySerializer, InvoiceTransactionSerializer, \
     MassPaymentSerializer
-from mysite.core.models import ContactInfo
+from mysite.core.models import ContactInfo, Company
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
 from mysite.order.models import Order
 from .services.email_service import InvoiceEmailService
-from .services.invoice_detail_service import DetailedInvoiceService
 from .services.invoice_services import InvoiceService, DeleteInvoiceService
 from .services.invoice_list_service import ListInvoiceService
 from ..estimator.serializers import EmailSerializer
@@ -982,4 +982,53 @@ class MassPaymentAPIView(APIView):
             return Response({"message": "Payment processed successfully"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def get(self, request, *args, **kwargs):
+        """Retrieve a paginated list of math payment with filters and company-related invoices."""
+
+        # Fetch query parameters
+        ordering = request.GET.get("ordering", "-created_on")
+        from_date = request.GET.get("fromDate", "04/01/2020")
+        to_date = request.GET.get("toDate", "01/01/2100")
+        company_id = kwargs.get("company_id")
+
+        try:
+            # Convert date strings to datetime objects
+            from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+            to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(
+                hours=23, minutes=59, seconds=59
+            )
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Please use MM/DD/YYYY."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Fetch account summaries filtered by company_id
+        object_list = Invoice.objects.filter(
+            created_on__range=(from_date_obj, to_date_obj),
+            order__proposal__estimate__customer__company__id=company_id,
+        ).order_by(ordering)
+
+        # Paginate results
+        paginator = PageNumberPagination()
+        paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
+        page = paginator.paginate_queryset(object_list, request)
+
+        # Serialize paginated data
+        company = Company.objects.get(id=company_id)
+
+        if not company:
+            return Response(
+                {"error": "No valid company found for the provided criteria."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = MassPaymentSerializer(company)
+
+        if not page:
+            return paginator.get_paginated_response(serializer.data)
+
+        return paginator.get_paginated_response(serializer.data)
 

@@ -5,8 +5,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
-from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
@@ -16,7 +14,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mysite.order.templatetags.order_tags import calculate_remaining_invoice_due
 from .serializers import AccountSummarySerializer, AccountSummaryCreateSerializer
 from mysite.core.models import (
     Company,
@@ -24,7 +21,7 @@ from mysite.core.models import (
     LicenseInfo,
     Person,
 )
-from mysite.gi.models import AccountSummary, Invoice
+from mysite.gi.models import AccountSummary
 from .services.account_summary_service import AccountSummaryService
 from ..estimator.serializers import EmailSerializer
 
