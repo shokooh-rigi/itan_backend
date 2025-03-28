@@ -13,7 +13,8 @@ from .views import (
     InvoiceTransactionUpdateView,
     InvoiceTransactionListView,
     InvoiceTransactionDeleteView,
-    MassPaymentAPIView,
+    MassPaymentCreateView,
+    MassPaymentListView,
 )
 
 
@@ -73,8 +74,13 @@ urlpatterns = [
          name='invoice-history-list'
          ),
     path('invoice/mass-payment/<int:contact_id>/',
-         MassPaymentAPIView.as_view(),
+         MassPaymentCreateView.as_view(),
          name='invoice-mass_payment'
+         ),
+
+    path('invoice/mass-payment/<int:company_id>/',
+         MassPaymentListView.as_view(),
+         name='invoice-math-payments'
          ),
 
 ]

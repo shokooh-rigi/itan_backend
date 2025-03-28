@@ -930,7 +930,7 @@ class InvoiceHistoryListView(ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class MassPaymentAPIView(APIView):
+class MassPaymentCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -984,9 +984,42 @@ class MassPaymentAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def get(self, request, *args, **kwargs):
-        """Retrieve a paginated list of math payment with filters and company-related invoices."""
+class MassPaymentListView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Retrieve a list of math payments",
+        operation_description="Fetch paginated math payments with optional filters like date range and ordering.",
+        manual_parameters=[
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date (MM/DD/YYYY)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date (MM/DD/YYYY)",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Order by field (default: '-created_on')",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of items per page",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+    )
+
+    def get(self, request, *args, **kwargs):
+        """Retrieve a paginated list of math payments with filters and company-related invoices."""
         # Fetch query parameters
         ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate", "04/01/2020")

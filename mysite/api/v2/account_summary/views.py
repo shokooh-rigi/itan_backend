@@ -214,26 +214,6 @@ class AccountSummaryListView(generics.ListAPIView):
                 type=openapi.TYPE_INTEGER,
             ),
         ],
-        responses={
-            200: openapi.Response(
-                description="Paginated account summaries with total due and company invoices.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "account_summaries": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Items(type=openapi.TYPE_OBJECT),
-                        ),
-                        "total_due": openapi.Schema(type=openapi.TYPE_NUMBER),
-                        "company_invoices": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Items(type=openapi.TYPE_OBJECT),
-                        ),
-                    },
-                ),
-            ),
-            400: openapi.Response(description="Invalid request, company not found."),
-        },
     )
     def get(self, request, *args, **kwargs):
         """Retrieve a paginated list of account summaries with filters and company-related invoices."""
