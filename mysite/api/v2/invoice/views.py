@@ -988,8 +988,8 @@ class MassPaymentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="Retrieve a list of math payments",
-        operation_description="Fetch paginated math payments with optional filters like date range and ordering.",
+        operation_summary="Retrieve a list of mass payments",
+        operation_description="Fetch paginated mass payments with optional filters like date range and ordering.",
         manual_parameters=[
             openapi.Parameter(
                 "fromDate",
@@ -1019,7 +1019,7 @@ class MassPaymentListView(APIView):
     )
 
     def get(self, request, *args, **kwargs):
-        """Retrieve a paginated list of math payments with filters and company-related invoices."""
+        """Retrieve a paginated list of mass payments with filters and company-related invoices."""
         # Fetch query parameters
         ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate", "04/01/2020")

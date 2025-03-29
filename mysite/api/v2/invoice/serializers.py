@@ -187,15 +187,36 @@ class InvoiceTransactionSerializer(serializers.ModelSerializer):
 class MassPaymentSerializer(serializers.Serializer):
     """Serializer for processing mass payments"""
 
-    payment_no = serializers.CharField(max_length=50, required=True)
-    payment_date = serializers.DateField(format="%Y-%m-%d", input_formats=["%Y-%m-%d"], required=True)
-    payment_desc = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    payment_no = serializers.CharField(
+        max_length=50,
+        required=True,
+        write_only=True
+    )
+    payment_date = serializers.DateField(
+        format="%Y-%m-%d",
+        input_formats=["%Y-%m-%d"],
+        required=True,
+        write_only=True,
+    )
+    payment_desc = serializers.CharField(
+        max_length=255,
+        required=False,
+        allow_blank=True,
+        write_only=True,
+    )
     payments = serializers.ListField(
         child=serializers.DictField(
-            child=serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
+            child=serializers.DecimalField(
+                max_digits=10,
+                decimal_places=2,
+                min_value=0,
+            )
         ),
-        required=True
+        required=True,
+        write_only=True,
     )
+    invoices = serializers.SerializerMethodField(read_only=True)
+
 
     def validate_payments(self, value):
         """Ensure at least one valid payment exists"""
@@ -234,3 +255,23 @@ class MassPaymentSerializer(serializers.Serializer):
 
         return transactions
 
+    def get_invoices(self, company) -> list:
+        invoices = Invoice.objects.filter(
+            order__proposal__estimate__customer__company=company
+        )
+
+        invoice_list = []
+        for invoice in invoices :
+            if invoice.remaining_due > 0:
+                invoice_dict = {
+                    "id": invoice.id,
+                    "order_id": invoice.order_id,
+                    "invoice_number": invoice.invoice_number,  # Access @property directly
+                    "created_on": invoice.created_on,
+                    "po_number": invoice.order.po_number,  # Adjust if necessary
+                    "project_name": invoice.order.proposal.estimate.project.name,  # Adjust if necessary
+                    "total_invoiced": invoice.total_invoiced,  # Access @property directly
+                    "amount_due": invoice.amount_due,  # Access @property directly
+                }
+                invoice_list.append(invoice_dict)
+        return invoice_list
