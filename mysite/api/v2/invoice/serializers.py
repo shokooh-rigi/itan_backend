@@ -208,6 +208,7 @@ class MassPaymentSerializer(serializers.Serializer):
         allow_blank=True,
         write_only=True,
     )
+
     payments = serializers.ListField(
         child=serializers.DictField(
             child=serializers.DecimalField(
@@ -219,13 +220,20 @@ class MassPaymentSerializer(serializers.Serializer):
         required=True,
         write_only=True,
     )
+
     invoices = serializers.SerializerMethodField(read_only=True)
 
-
     def validate_payments(self, value):
-        """Ensure at least one valid payment exists"""
+        """Ensure payments contain valid invoice_id and amount"""
         if not value:
             raise serializers.ValidationError("At least one payment entry is required.")
+
+        for item in value:
+            if not isinstance(item, dict):
+                raise serializers.ValidationError("Each payment entry must be a dictionary.")
+            if "invoice_id" not in item or "amount" not in item:
+                raise serializers.ValidationError("Each payment must contain 'invoice_id' and 'amount'.")
+
         return value
 
     def create(self, validated_data):

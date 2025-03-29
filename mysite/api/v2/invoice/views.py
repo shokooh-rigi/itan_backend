@@ -933,11 +933,40 @@ class InvoiceHistoryListView(ListAPIView):
 class MassPaymentCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    payment_schema = openapi.Schema(
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "invoice_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the invoice to be paid"
+                ),
+                "amount": openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    format=openapi.FORMAT_DECIMAL,
+                    description="Amount to be paid for the invoice"
+                )
+            },
+            required=["invoice_id", "amount"],
+        ),
+        description="List of payments, each containing an `invoice_id` and `amount`."
+    )
+
     @swagger_auto_schema(
-        request_body=MassPaymentSerializer,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "payment_no": openapi.Schema(type=openapi.TYPE_STRING, description="Unique payment number"),
+                "payment_date": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Date of payment in YYYY-MM-DD format"),
+                "payment_desc": openapi.Schema(type=openapi.TYPE_STRING, description="Optional payment description"),
+                "payments": payment_schema
+            },
+            required=["payment_no", "payment_date", "payments"],
+        ),
         responses={
-            200: "Payment processed successfully",
-            400: "Invalid data provided",
+            200: openapi.Response(description="Payment processed successfully"),
+            400: openapi.Response(description="Invalid data provided"),
         }
     )
     def post(self, request, company_id):
@@ -946,7 +975,7 @@ class MassPaymentCreateView(APIView):
         if not invoices:
             return Response(
                 {"message": "No invoices found for given company_id."},
-                 status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = MassPaymentSerializer(data=request.data)
@@ -994,18 +1023,81 @@ class MassPaymentListView(APIView):
                 type=openapi.TYPE_INTEGER,
             ),
         ],
+        responses={
+            200: openapi.Response(
+                description="Paginated list of invoices related to mass payments.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER, description="Total number of records"
+                        ),
+                        "next": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            format=openapi.FORMAT_URI,
+                            description="URL of the next page (if available)",
+                        ),
+                        "previous": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            format=openapi.FORMAT_URI,
+                            description="URL of the previous page (if available)",
+                        ),
+                        "results": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "created_on": openapi.Schema(
+                                        type=openapi.TYPE_STRING,
+                                        format=openapi.FORMAT_DATE,
+                                        description="Date when the invoice was created"
+                                    ),
+                                    "id": openapi.Schema(
+                                        type=openapi.TYPE_INTEGER,
+                                        description="Invoice ID"
+                                    ),
+                                    "order_id": openapi.Schema(
+                                        type=openapi.TYPE_INTEGER,
+                                        description="Related Order ID"),
+                                    "invoice_number": openapi.Schema(
+                                        type=openapi.TYPE_STRING,
+                                        description="Invoice Number"
+                                    ),
+                                    "po_number": openapi.Schema(
+                                        type=openapi.TYPE_STRING,
+                                        description="Purchase Order Number"
+                                    ),
+                                    "project_name": openapi.Schema(
+                                        type=openapi.TYPE_STRING,
+                                        description="Project Name"
+                                    ),
+                                    "total_invoiced": openapi.Schema(
+                                        type=openapi.TYPE_NUMBER,
+                                        format=openapi.FORMAT_DECIMAL,
+                                        description="Total Invoiced Amount"
+                                    ),
+                                    "amount_due": openapi.Schema(
+                                        type=openapi.TYPE_NUMBER,
+                                        format=openapi.FORMAT_DECIMAL,
+                                        description="Remaining Amount Due"
+                                    ),
+                                },
+                            ),
+                        ),
+                    },
+                ),
+            ),
+            400: openapi.Response(description="Invalid request parameters."),
+        },
     )
-
     def get(self, request, *args, **kwargs):
         """Retrieve a paginated list of mass payments with filters and company-related invoices."""
-        # Fetch query parameters
         ordering = request.GET.get("ordering", "-created_on")
         from_date = request.GET.get("fromDate", "04/01/2020")
         to_date = request.GET.get("toDate", "01/01/2100")
         company_id = kwargs.get("company_id")
 
         try:
-            # Convert date strings to datetime objects
             from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
             to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(
                 hours=23, minutes=59, seconds=59
@@ -1016,30 +1108,17 @@ class MassPaymentListView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Fetch account summaries filtered by company_id
-        object_list = Invoice.objects.filter(
+        invoices = Invoice.objects.filter(
             created_on__range=(from_date_obj, to_date_obj),
             order__proposal__estimate__customer__company__id=company_id,
         ).order_by(ordering)
 
-        # Paginate results
         paginator = PageNumberPagination()
         paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
-        page = paginator.paginate_queryset(object_list, request)
+        paginated_invoices = paginator.paginate_queryset(invoices, request)
 
-        # Serialize paginated data
-        company = Company.objects.get(id=company_id)
+        if not paginated_invoices:
+            return paginator.get_paginated_response([])
 
-        if not company:
-            return Response(
-                {"error": "No valid company found for the provided criteria."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = MassPaymentSerializer(company)
-
-        if not page:
-            return paginator.get_paginated_response(serializer.data)
-
+        serializer = MassPaymentSerializer(paginated_invoices, many=True)
         return paginator.get_paginated_response(serializer.data)
-
