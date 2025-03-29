@@ -78,9 +78,9 @@ urlpatterns = [
          name='invoice-mass_payment'
          ),
 
-    path('invoice/mass-payment/<int:company_id>/',
+    path('invoice/mass-payments/<int:company_id>/',
          MassPaymentListView.as_view(),
-         name='invoice-math-payments'
+         name='invoice-mass-payments'
          ),
 
 ]
