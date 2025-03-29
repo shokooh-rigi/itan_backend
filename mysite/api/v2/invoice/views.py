@@ -940,48 +940,26 @@ class MassPaymentCreateView(APIView):
             400: "Invalid data provided",
         }
     )
-    def post(self, request, contact_id):
-        customer = get_object_or_404(ContactInfo, id=contact_id)
-        invoices = Invoice.objects.filter(order__proposal__estimate__customer__company__id=contact_id)
-
-        invoices = [invoice for invoice in invoices if calculate_remaining_invoice_due(invoice) != 0]
+    def post(self, request, company_id):
+        company = get_object_or_404(Company, id=company_id)
+        invoices = Invoice.objects.filter(order__proposal__estimate__customer__company__id=company_id)
+        if not invoices:
+            return Response(
+                {"message": "No invoices found for given company_id."},
+                 status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = MassPaymentSerializer(data=request.data)
         if serializer.is_valid():
-            payment_no = serializer.validated_data['payment_no']
-            payment_date = serializer.validated_data['payment_date']
-            payments = serializer.validated_data['payments']
+            return Response({
+                "message": "Payment processed successfully"},
+                status=status.HTTP_200_OK
+            )
 
-            for payment in payments:
-                invoice = get_object_or_404(Invoice, id=payment['invoice_id'])
-                paid_amount = payment['amount']
-
-                if paid_amount > 0:
-                    InvoiceTransaction.objects.create(
-                        invoice=invoice,
-                        amount=paid_amount,
-                        payment_date=payment_date,
-                        payment_no=payment_no,
-                        created_by=request.user
-                    )
-
-                    total_invoiced = calculate_total_amount_due(invoice)
-                    total_paid = calculate_total_paid(invoice)
-                    balance_due = calculate_remaining_invoice_due(invoice)
-                    total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-                    new_file_name = f"Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-{str(total_count)}"
-
-                    InvoiceHistory.objects.create(
-                        invoice=invoice,
-                        total_invoiced=total_invoiced,
-                        total_paid=total_paid,
-                        balance_due=balance_due,
-                        pdf_filename=new_file_name
-                    )
-
-            return Response({"message": "Payment processed successfully"}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class MassPaymentListView(APIView):

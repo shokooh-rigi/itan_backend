@@ -1,9 +1,13 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from mysite.api.v2.order.serializers import OrderSerializer
 from mysite.gi.models import Invoice, InvoiceHistory, AccountSummary, InvoiceTransaction
 from mysite.order.models import Order
 from django.shortcuts import get_object_or_404
+
+from mysite.order.templatetags.order_tags import calculate_total_amount_due, calculate_total_paid, \
+    calculate_remaining_invoice_due
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -231,7 +235,7 @@ class MassPaymentSerializer(serializers.Serializer):
         payment_date = validated_data['payment_date']
         payment_desc = validated_data.get('payment_desc', "")
 
-        transactions = []
+        invoice_transactions = []
         for payment in validated_data['payments']:
             invoice_id = payment.get("invoice_id")
             amount = payment.get("amount")
@@ -243,17 +247,30 @@ class MassPaymentSerializer(serializers.Serializer):
 
             if amount <= 0:
                 raise serializers.ValidationError(f"Invalid amount for invoice {invoice_id}.")
+            with transaction.atomic():
+                invoice_transaction = InvoiceTransaction.objects.create(
+                    invoice=invoice,
+                    amount=amount,
+                    payment_date=payment_date,
+                    payment_no=payment_no,
+                    created_by=user
+                )
+                invoice_transactions.append(invoice_transaction)
+                total_invoiced = calculate_total_amount_due(invoice)
+                total_paid = calculate_total_paid(invoice)
+                balance_due = calculate_remaining_invoice_due(invoice)
+                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+                new_file_name = f"Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-{str(total_count)}"
 
-            transaction = InvoiceTransaction.objects.create(
-                invoice=invoice,
-                amount=amount,
-                payment_date=payment_date,
-                payment_no=payment_no,
-                created_by=user
-            )
-            transactions.append(transaction)
+                InvoiceHistory.objects.create(
+                    invoice=invoice,
+                    total_invoiced=total_invoiced,
+                    total_paid=total_paid,
+                    balance_due=balance_due,
+                    pdf_filename=new_file_name
+                )
 
-        return transactions
+        return invoice_transactions
 
     def get_invoices(self, company) -> list:
         invoices = Invoice.objects.filter(

@@ -73,7 +73,7 @@ urlpatterns = [
          InvoiceHistoryListView.as_view(),
          name='invoice-history-list'
          ),
-    path('invoice/mass-payment/<int:contact_id>/',
+    path('invoice/mass-payment/<int:company_id>/',
          MassPaymentCreateView.as_view(),
          name='invoice-mass_payment'
          ),
