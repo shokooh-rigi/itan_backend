@@ -1005,9 +1005,6 @@ class MassPaymentView(APIView):
         company = get_object_or_404(Company, id=company_id)
         serializer = MassPaymentSerializer(company)
         if serializer.is_valid():
-            return Response(
-                {"message": "Payments processed successfully"},
-                status=status.HTTP_200_OK,
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -284,7 +284,7 @@ class MassPaymentSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         payment_no = validated_data["payment_no"]
         payment_date = validated_data["payment_date"]
-        payment_desc = validated_data.get("payment_desc", "")
+        payment_desc = validated_data["payment_desc"]
 
         invoice_transactions = []
         for payment in validated_data["payments"]:
@@ -298,10 +298,12 @@ class MassPaymentSerializer(serializers.ModelSerializer):
                     f"Invoice with ID {invoice_id} does not exist."
                 )
 
-            if amount <= 0:
+            if amount < 0:
                 raise serializers.ValidationError(
                     f"Invalid amount for invoice {invoice_id}."
                 )
+            if amount == 0:
+                pass
             with transaction.atomic():
                 invoice_transaction = InvoiceTransaction.objects.create(
                     invoice=invoice,
@@ -315,15 +317,14 @@ class MassPaymentSerializer(serializers.ModelSerializer):
                 total_invoiced = calculate_total_amount_due(invoice)
                 total_paid = calculate_total_paid(invoice)
                 balance_due = calculate_remaining_invoice_due(invoice)
-                total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-                new_file_name = f"Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-{str(total_count)}"
+                # total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+                # new_file_name = f"Invoice-{str(invoice.order.project_number[3:]).zfill(3)}-{str(invoice.id).zfill(3)}-{str(total_count)}"
 
                 InvoiceHistory.objects.create(
                     invoice=invoice,
                     total_invoiced=total_invoiced,
                     total_paid=total_paid,
                     balance_due=balance_due,
-                    pdf_filename=new_file_name,
                 )
 
         return invoice_transactions
