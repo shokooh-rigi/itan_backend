@@ -10,38 +10,31 @@ from .views import (
 )
 
 urlpatterns = [
-    path("proposal/list/",
-         ProposalListView.as_view(),
-         name="proposal-list"
-         ),
-    path("proposal/create/",
-         ProposalCreateView.as_view(),
-         name="proposal-create"
-         ),
+    path("list/", ProposalListView.as_view(), name="proposal-list"),
+    path("create/", ProposalCreateView.as_view(), name="proposal-create"),
     path(
-        "proposal/archive/<int:id>/",
+        "archive/<int:id>/",
         ProposalArchiveView.as_view(),
         name="proposal-archive",
     ),
     path(
-        "proposal/delete/<int:id>/",
+        "delete/<int:id>/",
         ProposalDeleteView.as_view(),
         name="proposal-delete",
     ),
     path(
-        "proposal/estimate/<int:estimate_id>/",
+        "estimate/<int:estimate_id>/",
         ProposalEstimateListView.as_view(),
         name="proposal-estimate",
     ),
     path(
-        "proposal/estimate/",
+        "estimate/",
         ProposalEstimateListView.as_view(),
         name="proposal-estimate",
     ),
     path(
-        'proposal/list/<int:id>/',
+        "list/<int:id>/",
         ProposalDetailView.as_view(),
-        name='proposal-list_by_id',
+        name="proposal-list_by_id",
     ),
-
 ]

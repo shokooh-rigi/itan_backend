@@ -19,6 +19,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from dateutil.relativedelta import relativedelta
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
@@ -389,10 +390,16 @@ class HomeView(APIView):
     Get user's data for the home page
     """
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
+
+        if user.is_anonymous:
+            return Response(
+                {"message": "Hi."},
+                status=status.HTTP_200_OK,
+            )
 
         # Fetch all announcements (don't filter out unseen at this stage)
         announcements = Announcement.objects.filter(archive=False)
@@ -467,7 +474,7 @@ class HomeView(APIView):
 
         # Create a dictionary with counts for each month up to the current month
         monthly_estimates = {
-            (now().replace(month=i).strftime("%b")): 0
+            (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
             for i in range(1, current_month + 1)
         }
         for entry in estimates_by_month:
@@ -487,7 +494,7 @@ class HomeView(APIView):
 
         # Create a dictionary with counts for each month up to the current month
         monthly_proposals = {
-            (now().replace(month=i).strftime("%b")): 0
+            (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
             for i in range(1, current_month + 1)
         }
         for entry in proposals_by_month:

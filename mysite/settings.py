@@ -38,26 +38,12 @@ SECRET_KEY = env(
 ENV = env("ENV", default="local")
 DEBUG = ENV in ["local", "test"]
 
-if ENV == "local":
-    ALLOWED_HOSTS = env.list(
-        "ALLOWED_HOSTS",
-        default=["127.0.0.1"] if ENV == "local" else ["dashboard.tabtechinc.com"],
-    )
-    CORS_ORIGIN_ALLOW_ALL = True
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["dashboard.tabtechinc.com"])
-    CORS_ORIGIN_ALLOW_ALL = False
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CORS_ORIGIN_WHITELIST = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-)
-CSRF_TRUSTED_ORIGINS = env.list(
-    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=(
+        ["127.0.0.1", "localhost"] if ENV == "local" else ["dashboard.tabtechinc.com"]
+    ),
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -144,16 +130,34 @@ if TAB_SYSTEM:
 
 # Middleware
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
+
+if ENV == "local":
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ORIGIN_WHITELIST = [
+        "http://localhost:3000",
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+    CORS_ORIGIN_WHITELIST = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+    CSRF_TRUSTED_ORIGINS = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Database
