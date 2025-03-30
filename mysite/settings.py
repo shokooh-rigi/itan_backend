@@ -46,10 +46,24 @@ ALLOWED_HOSTS = env.list(
     ),
 )
 
+if ENV == "local":
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+    CORS_ORIGIN_WHITELIST = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+    CSRF_TRUSTED_ORIGINS = env.list(
+        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+    )
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Installed Apps
-DJANGO_APPS = [
+INSTALLED_APPS = [
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -57,8 +71,6 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
-]
-THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "rest_framework",
@@ -73,9 +85,6 @@ THIRD_PARTY_APPS = [
     "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
     "custom_user.apps.CustomUserConfig",
     "drf_yasg",
-    "corsheaders",
-]
-CORE_APPS = [
     "mysite.core",
     "mysite.dbmanagement",
     "mysite.equipments",
@@ -88,8 +97,6 @@ CORE_APPS = [
     "mysite.bidfilemgm",
     "mysite.estimator",
     "mysite.proposal",
-]
-TAB_APPS = [
     "mysite.mgmreport",
     "mysite.order",
     "mysite.gi",
@@ -124,15 +131,11 @@ TAB_APPS = [
     "mysite.revenueperformance",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + CORE_APPS
-if TAB_SYSTEM:
-    INSTALLED_APPS += TAB_APPS
-
 # Middleware
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -140,25 +143,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
-
-if ENV == "local":
-    CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ORIGIN_WHITELIST = [
-        "http://localhost:3000",
-    ]
-else:
-    CORS_ALLOWED_ORIGINS = env.list(
-        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-    )
-    CORS_ORIGIN_WHITELIST = env.list(
-        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-    )
-    CSRF_TRUSTED_ORIGINS = env.list(
-        "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
-    )
-
-CORS_ALLOW_CREDENTIALS = True
-
 
 # Database
 DATABASES = {
@@ -250,9 +234,6 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
-
-# CORS
-CORS_URLS_REGEX = r"^/api/.*$"
 
 # Logging
 LOGGING = {

@@ -390,16 +390,10 @@ class HomeView(APIView):
     Get user's data for the home page
     """
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-
-        if user.is_anonymous:
-            return Response(
-                {"message": "Hi."},
-                status=status.HTTP_200_OK,
-            )
 
         # Fetch all announcements (don't filter out unseen at this stage)
         announcements = Announcement.objects.filter(archive=False)
