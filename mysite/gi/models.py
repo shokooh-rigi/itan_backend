@@ -154,6 +154,7 @@ class InvoiceTransaction(BaseModelWithCreatedByUser):
         null=False,
     )
     payment_no = models.CharField(max_length=20, blank=True, null=True)
+    payment_desc = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         ordering = ["-created_on"]
@@ -267,8 +268,8 @@ class InvoiceHistory(BaseModel):
     )
     pdf_filename = models.CharField(
         max_length=50,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
     )
 
     class Meta:

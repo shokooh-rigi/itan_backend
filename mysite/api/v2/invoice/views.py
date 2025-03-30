@@ -1003,19 +1003,11 @@ class MassPaymentView(APIView):
 
     def post(self, request, company_id):
         company = get_object_or_404(Company, id=company_id)
-        invoices = Invoice.objects.filter(
-            order__proposal__estimate__customer__company__id=company_id
-        )
-        if not invoices:
-            return Response(
-                {"message": "No invoices found for given company_id."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = MassPaymentSerializer(data=request.data)
+        serializer = MassPaymentSerializer(company)
         if serializer.is_valid():
             return Response(
-                {"message": "Payment processed successfully"}, status=status.HTTP_200_OK
+                {"message": "Payments processed successfully"},
+                status=status.HTTP_200_OK,
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -308,6 +308,7 @@ class MassPaymentSerializer(serializers.ModelSerializer):
                     amount=amount,
                     payment_date=payment_date,
                     payment_no=payment_no,
+                    payment_desc=payment_desc,
                     created_by=user,
                 )
                 invoice_transactions.append(invoice_transaction)
