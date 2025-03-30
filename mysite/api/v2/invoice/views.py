@@ -12,11 +12,20 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiParameter,
+    OpenApiExample,
+    OpenApiResponse,
+)
 from datetime import datetime, timedelta
 
-from mysite.api.v2.invoice.serializers import InvoiceSerializer, InvoiceHistorySerializer, InvoiceTransactionSerializer, \
-    MassPaymentSerializer
+from mysite.api.v2.invoice.serializers import (
+    InvoiceSerializer,
+    InvoiceHistorySerializer,
+    InvoiceTransactionSerializer,
+    MassPaymentSerializer,
+)
 from mysite.core.models import ContactInfo, Company
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
 from mysite.order.models import Order
@@ -28,7 +37,7 @@ from ..order.serializers import OrderSerializer
 from mysite.order.templatetags.order_tags import (
     calculate_total_amount_due,
     calculate_total_paid,
-    calculate_remaining_invoice_due
+    calculate_remaining_invoice_due,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,6 +60,7 @@ class InvoiceListView(APIView):
         get(request):
             Filters and lists invoices based on various criteria, with support for pagination.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -79,18 +89,25 @@ class InvoiceListView(APIView):
         """
         serializer = EmailSerializer(data=request.data)
         if serializer.is_valid():
-            invoice_id = serializer.validated_data['email_id']
-            to_email = serializer.validated_data['to_email']
-            cc = serializer.validated_data.get('cc', '')
-            subject = serializer.validated_data['subject']
+            invoice_id = serializer.validated_data["email_id"]
+            to_email = serializer.validated_data["to_email"]
+            cc = serializer.validated_data.get("cc", "")
+            subject = serializer.validated_data["subject"]
 
-            success = InvoiceEmailService.send_invoice_email(invoice_id, to_email, cc, subject)
+            success = InvoiceEmailService.send_invoice_email(
+                invoice_id, to_email, cc, subject
+            )
             if success:
-                return Response({"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK
+                )
 
-            return Response({"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     @swagger_auto_schema(
         operation_description="Retrieve a filtered and paginated list of invoices.",
         manual_parameters=[
@@ -186,13 +203,15 @@ class InvoiceListView(APIView):
                 "overdue_result": true
             }
         """
-        search = request.GET.get('search', '')
-        paginate_by = int(request.GET.get('paginate_by', settings.PAGE_SIZE))
-        ordering = request.GET.get('ordering', '-created_on')
-        from_date = request.GET.get('fromDate')
-        to_date = request.GET.get('toDate')
-        invoice_type = request.GET.get('type')  # e.g., 'fully-paid', 'partial-paid', 'not-paid', 'old-estimate'
-        overdue = request.GET.get('overdue', '0') == '1'
+        search = request.GET.get("search", "")
+        paginate_by = int(request.GET.get("paginate_by", settings.PAGE_SIZE))
+        ordering = request.GET.get("ordering", "-created_on")
+        from_date = request.GET.get("fromDate")
+        to_date = request.GET.get("toDate")
+        invoice_type = request.GET.get(
+            "type"
+        )  # e.g., 'fully-paid', 'partial-paid', 'not-paid', 'old-estimate'
+        overdue = request.GET.get("overdue", "0") == "1"
 
         # Fetch filtered invoices
         invoices = ListInvoiceService.filter_invoices(
@@ -206,24 +225,27 @@ class InvoiceListView(APIView):
 
         # Paginate the filtered results
         paginator = Paginator(object_list=invoices, per_page=paginate_by)
-        page_number = request.GET.get('page', 1)
+        page_number = request.GET.get("page", 1)
         paginated_invoices = paginator.get_page(number=page_number)
 
         # Serialize and return response
         serializer = InvoiceSerializer(paginated_invoices, many=True)
         overdue_days = ListInvoiceService.get_overdue_days()
 
-        return Response({
-            'invoices': serializer.data,
-            'pagination': {
-                'total_rows': paginator.count,
-                'total_pages': paginator.num_pages,
-                'current_page': paginated_invoices.number,
-                'page_size': paginate_by,
+        return Response(
+            {
+                "invoices": serializer.data,
+                "pagination": {
+                    "total_rows": paginator.count,
+                    "total_pages": paginator.num_pages,
+                    "current_page": paginated_invoices.number,
+                    "page_size": paginate_by,
+                },
+                "overdue_days": overdue_days,
+                "overdue_result": overdue,
             },
-            'overdue_days': overdue_days,
-            'overdue_result': overdue
-        }, status=status.HTTP_200_OK)
+            status=status.HTTP_200_OK,
+        )
 
 
 class InvoiceOrderListView(APIView):
@@ -232,11 +254,11 @@ class InvoiceOrderListView(APIView):
     @swagger_auto_schema(
         operation_summary="Retrieve non-archived and unassociated orders",
         operation_description=(
-                "This endpoint retrieves orders that are not archived and not associated with any invoice."
+            "This endpoint retrieves orders that are not archived and not associated with any invoice."
         ),
         manual_parameters=[
             openapi.Parameter(
-                'order_id',
+                "order_id",
                 openapi.IN_QUERY,
                 description="Filter order by ID (optional)",
                 type=openapi.TYPE_INTEGER,
@@ -261,8 +283,8 @@ class InvoiceOrderListView(APIView):
         try:
             orders = (
                 Order.objects.filter(archive=False)
-                    .exclude(id__in=Invoice.objects.values_list("order_id", flat=True))
-                    .order_by("-created_on")
+                .exclude(id__in=Invoice.objects.values_list("order_id", flat=True))
+                .order_by("-created_on")
             )
 
             if order_id:
@@ -291,8 +313,8 @@ class InvoiceCreateView(APIView):
     """
     Handles the creation of invoices.
     """
-    permission_classes = [IsAuthenticated]
 
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Create a new invoice",
@@ -336,7 +358,14 @@ class InvoiceCreateView(APIView):
                     description="Attention notes",
                 ),
             },
-            required=["order_id", "invoice_type", "date_started", "date_completed", "terms", "description"],
+            required=[
+                "order_id",
+                "invoice_type",
+                "date_started",
+                "date_completed",
+                "terms",
+                "description",
+            ],
         ),
         responses={
             201: openapi.Response(
@@ -360,11 +389,10 @@ class InvoiceCreateView(APIView):
         """
         Create a new invoice for a specific order.
         """
-        order_id = request.data.get('order_id')
+        order_id = request.data.get("order_id")
         if not order_id:
             return Response(
-                {'error': 'order_id is required'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "order_id is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         order = get_object_or_404(
@@ -375,7 +403,7 @@ class InvoiceCreateView(APIView):
 
         serializer = InvoiceSerializer(
             data=request.data,
-            context={'request': request},
+            context={"request": request},
         )
         if serializer.is_valid():
             invoice = InvoiceService.create_invoice(
@@ -384,9 +412,9 @@ class InvoiceCreateView(APIView):
             )
             return Response(
                 {
-                    'invoice_id': invoice.id,
+                    "invoice_id": invoice.id,
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED,
             )
         return Response(
             serializer.errors,
@@ -405,6 +433,7 @@ class InvoiceUpdateView(APIView):
     Permissions:
         - Requires authentication (`IsAuthenticated`).
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -435,10 +464,16 @@ class InvoiceUpdateView(APIView):
         """
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
-        serializer = InvoiceSerializer(invoice, data=request.data, context={'request': request})
+        serializer = InvoiceSerializer(
+            invoice, data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
-            updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
-            return Response(InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK)
+            updated_invoice = InvoiceService.update_invoice(
+                invoice, serializer.validated_data, request
+            )
+            return Response(
+                InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -470,10 +505,16 @@ class InvoiceUpdateView(APIView):
         """
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
-        serializer = InvoiceSerializer(invoice, data=request.data, partial=True, context={'request': request})
+        serializer = InvoiceSerializer(
+            invoice, data=request.data, partial=True, context={"request": request}
+        )
         if serializer.is_valid():
-            updated_invoice = InvoiceService.update_invoice(invoice, serializer.validated_data, request)
-            return Response(InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK)
+            updated_invoice = InvoiceService.update_invoice(
+                invoice, serializer.validated_data, request
+            )
+            return Response(
+                InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -485,6 +526,7 @@ class InvoiceDetailView(APIView):
     Methods:
         - GET: Retrieves the invoice details and processes the invoice if no history exists.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, invoice_id):
@@ -549,7 +591,6 @@ class InvoiceDeleteView(APIView):
             Invoice,
             id=invoice_id,
             is_deleted=False,
-
         )
 
         # Create an InvoiceService instance
@@ -582,6 +623,7 @@ class InvoiceArchiveView(APIView):
     """
     Archives invoice if the user is authorized.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
@@ -589,7 +631,6 @@ class InvoiceArchiveView(APIView):
             Invoice,
             id=id,
             is_deleted=False,
-
         )
 
         # Check if the requesting user is the creator of the bid file
@@ -601,8 +642,7 @@ class InvoiceArchiveView(APIView):
         invoice.archive = True
         invoice.save()
         return Response(
-            {"message": "invoice archived successfully",
-             "data": invoice},
+            {"message": "invoice archived successfully", "data": invoice},
             status=status.HTTP_200_OK,
         )
 
@@ -611,6 +651,7 @@ class InvoiceTransactionCreateView(CreateAPIView):
     """
     API View to create an invoice transaction and log the related invoice history.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = InvoiceTransactionSerializer
 
@@ -618,10 +659,12 @@ class InvoiceTransactionCreateView(CreateAPIView):
         summary="Create an Invoice Transaction and Log Invoice History",
         description="Takes `invoice_id` from request input, validates the invoice, saves the transaction, and logs the history.",
         request=InvoiceTransactionSerializer,
-        responses={201: {
-            "transaction": InvoiceTransactionSerializer,
-            "invoice_history": InvoiceHistorySerializer
-        }},
+        responses={
+            201: {
+                "transaction": InvoiceTransactionSerializer,
+                "invoice_history": InvoiceHistorySerializer,
+            }
+        },
         parameters=[
             OpenApiParameter(
                 name="invoice_id",
@@ -644,13 +687,17 @@ class InvoiceTransactionCreateView(CreateAPIView):
         """
         invoice_id = request.data.get("invoice_id")
         if not invoice_id:
-            return Response({"error": "invoice_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "invoice_id is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Validate that the invoice exists and is not deleted
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
         # Serialize and save transaction
-        transaction_serializer = InvoiceTransactionSerializer(data=request.data, context={"request": request})
+        transaction_serializer = InvoiceTransactionSerializer(
+            data=request.data, context={"request": request}
+        )
         if transaction_serializer.is_valid():
             transaction_serializer.save()
 
@@ -661,7 +708,7 @@ class InvoiceTransactionCreateView(CreateAPIView):
 
             # Generate a unique PDF filename for history
             total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-            new_file_name = f'Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}'
+            new_file_name = f"Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}"
 
             # Create invoice history log
             history_data = {
@@ -682,7 +729,9 @@ class InvoiceTransactionCreateView(CreateAPIView):
                     status=status.HTTP_201_CREATED,
                 )
 
-        return Response(transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class InvoiceTransactionUpdateView(APIView):
@@ -692,6 +741,7 @@ class InvoiceTransactionUpdateView(APIView):
     - If `amount` or `payment_date` is updated, update the related InvoiceHistory.
     - Otherwise, update only the transaction itself.
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -727,7 +777,9 @@ class InvoiceTransactionUpdateView(APIView):
         old_amount = transaction.amount
         old_payment_date = transaction.payment_date
 
-        serializer = InvoiceTransactionSerializer(transaction, data=request.data, context={'request': request})
+        serializer = InvoiceTransactionSerializer(
+            transaction, data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             updated_transaction = serializer.save()
 
@@ -775,7 +827,9 @@ class InvoiceTransactionUpdateView(APIView):
         old_amount = transaction.amount
         old_payment_date = transaction.payment_date
 
-        serializer = InvoiceTransactionSerializer(transaction, data=request.data, partial=True, context={'request': request})
+        serializer = InvoiceTransactionSerializer(
+            transaction, data=request.data, partial=True, context={"request": request}
+        )
         if serializer.is_valid():
             updated_transaction = serializer.save()
 
@@ -838,7 +892,6 @@ class InvoiceTransactionDeleteView(APIView):
                 total_paid=total_paid,
                 balance_due=balance_due,
                 is_deleted=False,
-
             )
             this_invoice_history.soft_delete()
         except InvoiceHistory.DoesNotExist:
@@ -854,6 +907,7 @@ class InvoiceTransactionListView(ListAPIView):
     """
     API View to list all transactions for a specific invoice.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = InvoiceTransactionSerializer
 
@@ -894,6 +948,7 @@ class InvoiceHistoryListView(ListAPIView):
     """
     API View to list all invoice history records for a specific invoice.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = InvoiceHistorySerializer
 
@@ -930,48 +985,27 @@ class InvoiceHistoryListView(ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class MassPaymentCreateView(APIView):
+class MassPaymentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    payment_schema = openapi.Schema(
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "invoice_id": openapi.Schema(
-                    type=openapi.TYPE_INTEGER,
-                    description="ID of the invoice to be paid"
-                ),
-                "amount": openapi.Schema(
-                    type=openapi.TYPE_NUMBER,
-                    format=openapi.FORMAT_DECIMAL,
-                    description="Amount to be paid for the invoice"
-                )
-            },
-            required=["invoice_id", "amount"],
-        ),
-        description="List of payments, each containing an `invoice_id` and `amount`."
-    )
-
     @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "payment_no": openapi.Schema(type=openapi.TYPE_STRING, description="Unique payment number"),
-                "payment_date": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description="Date of payment in YYYY-MM-DD format"),
-                "payment_desc": openapi.Schema(type=openapi.TYPE_STRING, description="Optional payment description"),
-                "payments": payment_schema
-            },
-            required=["payment_no", "payment_date", "payments"],
-        ),
-        responses={
-            200: openapi.Response(description="Payment processed successfully"),
-            400: openapi.Response(description="Invalid data provided"),
-        }
+        operation_summary="Retrieve a list of invoices",
+        operation_description="Fetch invoices",
     )
+    def get(self, request, *args, **kwargs):
+        """Retrieve a paginated list of mass payments with filters and company-related invoices."""
+        company_id = kwargs.get("company_id")
+
+        company = Company.objects.get(id=company_id)
+
+        serializer = MassPaymentSerializer(company)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, company_id):
         company = get_object_or_404(Company, id=company_id)
-        invoices = Invoice.objects.filter(order__proposal__estimate__customer__company__id=company_id)
+        invoices = Invoice.objects.filter(
+            order__proposal__estimate__customer__company__id=company_id
+        )
         if not invoices:
             return Response(
                 {"message": "No invoices found for given company_id."},
@@ -980,145 +1014,8 @@ class MassPaymentCreateView(APIView):
 
         serializer = MassPaymentSerializer(data=request.data)
         if serializer.is_valid():
-            return Response({
-                "message": "Payment processed successfully"},
-                status=status.HTTP_200_OK
-            )
-
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-
-class MassPaymentListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_summary="Retrieve a list of mass payments",
-        operation_description="Fetch paginated mass payments with optional filters like date range and ordering.",
-        manual_parameters=[
-            openapi.Parameter(
-                "fromDate",
-                openapi.IN_QUERY,
-                description="Start date (MM/DD/YYYY)",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "toDate",
-                openapi.IN_QUERY,
-                description="End date (MM/DD/YYYY)",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "ordering",
-                openapi.IN_QUERY,
-                description="Order by field (default: '-created_on')",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "page_size",
-                openapi.IN_QUERY,
-                description="Number of items per page",
-                type=openapi.TYPE_INTEGER,
-            ),
-        ],
-        responses={
-            200: openapi.Response(
-                description="Paginated list of invoices related to mass payments.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "count": openapi.Schema(
-                            type=openapi.TYPE_INTEGER, description="Total number of records"
-                        ),
-                        "next": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            format=openapi.FORMAT_URI,
-                            description="URL of the next page (if available)",
-                        ),
-                        "previous": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            format=openapi.FORMAT_URI,
-                            description="URL of the previous page (if available)",
-                        ),
-                        "results": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    "created_on": openapi.Schema(
-                                        type=openapi.TYPE_STRING,
-                                        format=openapi.FORMAT_DATE,
-                                        description="Date when the invoice was created"
-                                    ),
-                                    "id": openapi.Schema(
-                                        type=openapi.TYPE_INTEGER,
-                                        description="Invoice ID"
-                                    ),
-                                    "order_id": openapi.Schema(
-                                        type=openapi.TYPE_INTEGER,
-                                        description="Related Order ID"),
-                                    "invoice_number": openapi.Schema(
-                                        type=openapi.TYPE_STRING,
-                                        description="Invoice Number"
-                                    ),
-                                    "po_number": openapi.Schema(
-                                        type=openapi.TYPE_STRING,
-                                        description="Purchase Order Number"
-                                    ),
-                                    "project_name": openapi.Schema(
-                                        type=openapi.TYPE_STRING,
-                                        description="Project Name"
-                                    ),
-                                    "total_invoiced": openapi.Schema(
-                                        type=openapi.TYPE_NUMBER,
-                                        format=openapi.FORMAT_DECIMAL,
-                                        description="Total Invoiced Amount"
-                                    ),
-                                    "amount_due": openapi.Schema(
-                                        type=openapi.TYPE_NUMBER,
-                                        format=openapi.FORMAT_DECIMAL,
-                                        description="Remaining Amount Due"
-                                    ),
-                                },
-                            ),
-                        ),
-                    },
-                ),
-            ),
-            400: openapi.Response(description="Invalid request parameters."),
-        },
-    )
-    def get(self, request, *args, **kwargs):
-        """Retrieve a paginated list of mass payments with filters and company-related invoices."""
-        ordering = request.GET.get("ordering", "-created_on")
-        from_date = request.GET.get("fromDate", "04/01/2020")
-        to_date = request.GET.get("toDate", "01/01/2100")
-        company_id = kwargs.get("company_id")
-
-        try:
-            from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
-            to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(
-                hours=23, minutes=59, seconds=59
-            )
-        except ValueError:
             return Response(
-                {"error": "Invalid date format. Please use MM/DD/YYYY."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"message": "Payment processed successfully"}, status=status.HTTP_200_OK
             )
 
-        invoices = Invoice.objects.filter(
-            created_on__range=(from_date_obj, to_date_obj),
-            order__proposal__estimate__customer__company__id=company_id,
-        ).order_by(ordering)
-
-        paginator = PageNumberPagination()
-        paginator.page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
-        paginated_invoices = paginator.paginate_queryset(invoices, request)
-
-        if not paginated_invoices:
-            return paginator.get_paginated_response([])
-
-        serializer = MassPaymentSerializer(paginated_invoices, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
