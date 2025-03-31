@@ -30,6 +30,7 @@ if settings.TAB_SYSTEM:
         path("orders/", include("mysite.api.v2.order.urls")),
         path("", include("mysite.api.v2.invoice.urls")),
         path("", include("mysite.api.v2.account_summary.urls")),
+        path("", include("mysite.api.v2.report.urls")),
         path("", include("mysite.api.v2.settlement.urls")),
         path("", include("mysite.api.v2.scheduler.urls")),
         path("", include("mysite.api.v2.coi.urls")),
