@@ -7,8 +7,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
-from mysite.api.v2.report.serializers import PerformanceReportSerializer
+from mysite.api.v2.report.serializers import PerformanceReportSerializer, JobCostingSerializer
 from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import Company, Person
 from mysite.estimator.models import Estimate
@@ -96,3 +97,18 @@ class PerformanceListView(APIView):
 
         serializer = PerformanceReportSerializer(response_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+class JobCostingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Get Job Costing Data",
+        description="Returns a list of job costing details including estimated/actual hours and price.",
+        responses={200: JobCostingSerializer(many=True)},
+    )
+    def get(self, request):
+        orders = Order.objects.filter(invoice__isnull=False).order_by("created_on")
+        serializer = JobCostingSerializer(orders, many=True)
+        return Response(serializer.data)
