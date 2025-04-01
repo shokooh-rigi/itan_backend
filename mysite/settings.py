@@ -157,6 +157,7 @@ DATABASES = {
         "USER": env("SQL_USER", default=""),
         "PASSWORD": env("SQL_PASSWORD", default=""),
         "PORT": env("POSTGRES_PORT", default="5432" if DB_IS_POSTGRES else "3306"),
+        "OPTIONS": {"sslmode": "require"} if DB_IS_POSTGRES else {},
     },
     "old_db": {
         "ENGINE": "django.db.backends.mysql",
