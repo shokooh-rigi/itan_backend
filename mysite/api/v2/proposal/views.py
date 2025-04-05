@@ -183,14 +183,16 @@ class ProposalListView(APIView):
 
 
 class ProposalDetailView(APIView):
-    
+
     permission_classes = [IsAuthenticated]
-    
+
     @extend_schema(
         summary="Retrieve a Proposal",
         description="Retrieve a specific Proposal by its ID if it exists and is not deleted or archived.",
         parameters=[
-            OpenApiParameter(name="id", description="The ID of the bid file", required=True, type=int),
+            OpenApiParameter(
+                name="id", description="The ID of the bid file", required=True, type=int
+            ),
         ],
         responses={
             200: ProposalSerializer,
@@ -238,7 +240,7 @@ class ProposalEstimateListView(APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-                'estimate_id',
+                "estimate_id",
                 openapi.IN_QUERY,
                 description="Filter estimate by ID (optional)",
                 type=openapi.TYPE_INTEGER,
@@ -269,12 +271,6 @@ class ProposalEstimateListView(APIView):
 
             if estimate_id:
                 estimates = estimates.filter(id=estimate_id)
-
-            if estimates.count() == 0:
-                return Response(
-                    {"detail": "No estimates available."},
-                    status=status.HTTP_200_OK,
-                )
 
             serializer = EstimateSerializer(estimates, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)

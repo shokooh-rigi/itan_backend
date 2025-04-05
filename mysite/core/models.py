@@ -661,6 +661,16 @@ class Announcement(BaseModelWithCreatedByUser):
     title = models.CharField(max_length=200, blank=False, null=False)
     context = models.TextField(blank=False, null=False)
 
+    class Meta:
+        ordering = ["-created_on"]
+
+    # on save, it must send an email to all staff users
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        from mysite.core.tasks import send_announcement_email_task
+
+        send_announcement_email_task.delay(self)
+
 
 class AnnouncementSeen(BaseModel):
     announcement = models.ForeignKey(

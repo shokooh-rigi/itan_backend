@@ -427,14 +427,12 @@ class HomeView(APIView):
             ]
         )
 
-        # Fetch bids for the current year
         current_year = now().year
         current_month = now().month
         today = now().date()
         start_date = today - timedelta(days=6)
         total_bids = BidFile.objects.filter(created_on__year=current_year)
 
-        # Manually sum up the total_calculated values
         bids_total_amount = sum(
             estimate.total_calculated
             for estimate in Estimate.objects.filter(bfm__in=total_bids)
@@ -452,50 +450,43 @@ class HomeView(APIView):
             str((today - timedelta(days=i)).strftime("%a")): 0 for i in range(6, -1, -1)
         }
         for entry in bids_by_day:
-            day_str = entry["day"].strftime("%a")  # Convert to abbreviated weekday name
+            day_str = entry["day"].strftime("%a")
             daily_bid_counts[day_str] = entry["count"]
 
         estimates = Estimate.objects.filter(
             bfm__created_on__year=current_year, archive=False
         )
-        # Get estimates grouped by month
         estimates_by_month = (
             estimates.annotate(month=TruncMonth("created_on"))
             .values("month")
-            .annotate(count=Count("id"))
+            .annotate(total_calculated_sum=Sum("total_calculated"))
             .order_by("month")
         )
 
-        # Create a dictionary with counts for each month up to the current month
         monthly_estimates = {
             (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
             for i in range(1, current_month + 1)
         }
         for entry in estimates_by_month:
-            month_name = entry["month"].strftime(
-                "%b"
-            )  # Extract month name (3-letter abbreviation) from datetime
-            monthly_estimates[month_name] = entry["count"]
+            month_name = entry["month"].strftime("%b")
+            monthly_estimates[month_name] = entry["total_calculated_sum"]
 
         proposals = Proposal.objects.filter(estimate__in=estimates)
 
         proposals_by_month = (
             proposals.annotate(month=TruncMonth("created_on"))
             .values("month")
-            .annotate(count=Count("id"))
+            .annotate(total_calculated_sum=Sum("estimate__total_calculated"))
             .order_by("month")
         )
 
-        # Create a dictionary with counts for each month up to the current month
         monthly_proposals = {
             (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
             for i in range(1, current_month + 1)
         }
         for entry in proposals_by_month:
-            month_name = entry["month"].strftime(
-                "%b"
-            )  # Extract month name (3-letter abbreviation) from datetime
-            monthly_proposals[month_name] = entry["count"]
+            month_name = entry["month"].strftime("%b")
+            monthly_proposals[month_name] = entry["total_calculated_sum"]
 
         return Response(
             {

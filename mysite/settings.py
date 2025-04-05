@@ -22,6 +22,8 @@ env = environ.Env()
 
 environ.Env.read_env()
 
+SYSTEM_NAME = env("SYSTEM_NAME", default="iTAB")
+
 PROXY_ENABLE = bool(env("PROXY_ENABLE", default=""))
 PROXY_HOST = env("PROXY_HOST", default="127.0.0.1")
 PROXY_PORT = int(env("PROXY_PORT", default=10808))
