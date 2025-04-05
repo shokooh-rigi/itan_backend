@@ -4,6 +4,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views
 from django.urls import path, include, re_path
+from django.shortcuts import redirect
+from django.contrib.auth import views as auth_views
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -65,7 +67,8 @@ if settings.TAB_SYSTEM:
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("login/", lambda request: redirect("/admin/login/"), name="login"),
+    path("logout/", lambda request: redirect("/admin/logout/"), name="logout"),
     path(
         "account_activation_sent/",
         core_views.account_activation_sent,

@@ -156,6 +156,7 @@ DATABASES = {
         "NAME": env("SQL_DB", default=""),
         "USER": env("SQL_USER", default=""),
         "PASSWORD": env("SQL_PASSWORD", default=""),
+        "HOST": env("SQL_HOST", default="localhost"),
         "PORT": env("POSTGRES_PORT", default="5432" if DB_IS_POSTGRES else "3306"),
         "OPTIONS": {"sslmode": "require"} if DB_IS_POSTGRES else {},
     },
@@ -204,7 +205,7 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [APPS_DIR / "templates"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

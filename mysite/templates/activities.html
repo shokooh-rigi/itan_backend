@@ -1,8 +1,0 @@
-{% extends 'base.html' %}
-
-{% block content %}
-  <h2>Last Activities</h2>
-    {% for log in logs %}
-    <div>{{ log.change_message }}</div>
-    {% endfor %}
-{% endblock %}
