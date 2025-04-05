@@ -80,7 +80,10 @@ urlpatterns = [
          CompanyTypeList.as_view(),
          name="get-company-types"
          ),
-    # path("signup/", SignUpAPIView.as_view(), name="signup"),
+    path("signup/",
+         SignUpAPIView.as_view(),
+         name="signup"
+         ),
     path("change-password/",
          ChangePasswordAPIView.as_view(),
          name="change_password"
