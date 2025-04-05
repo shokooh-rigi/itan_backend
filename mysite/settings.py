@@ -145,14 +145,19 @@ MIDDLEWARE = [
 ]
 
 # Database
+DB_IS_POSTGRES = os.getenv("DB_IS_POSTGRES", "").lower() in ("true", "1")
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": env("MYSQL_DB", default=""),
-        "USER": env("MYSQL_USER", default=""),
-        "PASSWORD": env("MYSQL_PASSWORD", default=""),
-        "HOST": env("MYSQL_HOST", default="localhost"),
-        "PORT": env("MYSQL_PORT", default="3306"),
+        "ENGINE": (
+            "django.db.backends.postgresql_psycopg2"
+            if DB_IS_POSTGRES
+            else "django.db.backends.mysql"
+        ),
+        "NAME": env("SQL_DB", default=""),
+        "USER": env("SQL_USER", default=""),
+        "PASSWORD": env("SQL_PASSWORD", default=""),
+        "PORT": env("POSTGRES_PORT", default="5432" if DB_IS_POSTGRES else "3306"),
+        "OPTIONS": {"sslmode": "require"} if DB_IS_POSTGRES else {},
     },
     "old_db": {
         "ENGINE": "django.db.backends.mysql",
