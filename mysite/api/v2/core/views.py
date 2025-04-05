@@ -1,3 +1,4 @@
+from collections import defaultdict
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
@@ -455,38 +456,44 @@ class HomeView(APIView):
 
         estimates = Estimate.objects.filter(
             bfm__created_on__year=current_year, archive=False
-        )
-        estimates_by_month = (
-            estimates.annotate(month=TruncMonth("created_on"))
-            .values("month")
-            .annotate(total_calculated_sum=Sum("total_calculated"))
-            .order_by("month")
-        )
+        ).annotate(month=TruncMonth("created_on"))
 
-        monthly_estimates = {
-            (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
+        monthly_estimates = defaultdict(int)
+        for est in estimates:
+            month_name = est.month.strftime("%b")
+            monthly_estimates[month_name] += est.total_calculated  # this is safe now
+
+        # Ensure all months are represented
+        final_monthly_estimates = {
+            (now() - relativedelta(months=(current_month - i))).strftime(
+                "%b"
+            ): monthly_estimates.get(
+                (now() - relativedelta(months=(current_month - i))).strftime("%b"), 0
+            )
             for i in range(1, current_month + 1)
         }
-        for entry in estimates_by_month:
-            month_name = entry["month"].strftime("%b")
-            monthly_estimates[month_name] = entry["total_calculated_sum"]
 
-        proposals = Proposal.objects.filter(estimate__in=estimates)
-
-        proposals_by_month = (
-            proposals.annotate(month=TruncMonth("created_on"))
-            .values("month")
-            .annotate(total_calculated_sum=Sum("estimate__total_calculated"))
-            .order_by("month")
+        proposals = Proposal.objects.filter(estimate__in=estimates).annotate(
+            month=TruncMonth("created_on")
         )
 
-        monthly_proposals = {
-            (now() - relativedelta(months=(current_month - i))).strftime("%b"): 0
+        # Group by month and sum the related estimate.total_calculated (Python-side)
+        monthly_proposals = defaultdict(float)
+        for proposal in proposals:
+            month_name = proposal.month.strftime("%b")
+            monthly_proposals[
+                month_name
+            ] += proposal.estimate.total_calculated  # property usage here
+
+        # Fill in zero for months with no data
+        final_monthly_proposals = {
+            (now() - relativedelta(months=(current_month - i))).strftime(
+                "%b"
+            ): monthly_proposals.get(
+                (now() - relativedelta(months=(current_month - i))).strftime("%b"), 0
+            )
             for i in range(1, current_month + 1)
         }
-        for entry in proposals_by_month:
-            month_name = entry["month"].strftime("%b")
-            monthly_proposals[month_name] = entry["total_calculated_sum"]
 
         return Response(
             {
@@ -494,8 +501,8 @@ class HomeView(APIView):
                 "bidsCount": total_bids.count(),
                 "bidsTotal": bids_total_amount,
                 "dailyBidCounts": daily_bid_counts,
-                "totalEstimatesByMonth": monthly_estimates,
-                "totalProposalsByMonth": monthly_proposals,
+                "totalEstimatesByMonth": final_monthly_estimates,
+                "totalProposalsByMonth": final_monthly_proposals,
             },
             status=status.HTTP_200_OK,
         )
