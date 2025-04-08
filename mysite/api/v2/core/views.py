@@ -4,6 +4,8 @@ from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
 from django.contrib.sites.shortcuts import get_current_site
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework import generics
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
@@ -101,10 +103,75 @@ class CustomerViewSet(ModelViewSet):
         return queryset
 
 
-class EngineerViewSet(ModelViewSet):
+class EngineerListAPIView(generics.ListAPIView):
     """
-    API endpoint for creating and editing Engineers.
+    API view for listing engineers.
+    Filters the queryset to only include Persons whose company's company_type name includes 'engineer'.
+    Also supports optional filtering by person's name using the 'name' query parameter.
     """
+    serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="List of Engineers",
+        description="This API returns a list of engineers. You can optionally filter by `name` using the query parameter `?name=...`.",
+        parameters=[
+            OpenApiParameter(
+                name='name',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description='Filter engineers by their name (case-insensitive, partial match allowed)'
+            ),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
+
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
+
+
+@extend_schema(
+    summary="Create Engineer",
+    description="Create a new engineer record."
+)
+class EngineerCreateAPIView(generics.CreateAPIView):
+    queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
+    serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@extend_schema(
+    summary="Retrieve Engineer",
+    description="Retrieve a single engineer by their ID."
+)
+class EngineerRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
+    serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@extend_schema(
+    summary="Update Engineer",
+    description="Update details of an existing engineer using PUT or PATCH."
+)
+class EngineerUpdateAPIView(generics.UpdateAPIView):
+    queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
+    serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@extend_schema(
+    summary="Delete Engineer",
+    description="Delete an engineer by their ID."
+)
+class EngineerDestroyAPIView(generics.DestroyAPIView):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]

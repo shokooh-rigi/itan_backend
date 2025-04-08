@@ -21,20 +21,19 @@ from .views import (
     GetCompanyId,
     GetProjectId,
     CustomerViewSet,
-    EngineerViewSet,
     PersonViewSet,
     ManufacturerViewSet,
     ProjectViewSet,
     CompanyTypeList,
     UserViewSet,
-    ServiceViewSet, CompanyListView,
+    ServiceViewSet, CompanyListView, EngineerListAPIView, EngineerCreateAPIView, EngineerRetrieveAPIView,
+    EngineerUpdateAPIView, EngineerDestroyAPIView,
 )
 
 router = DefaultRouter()
 
 router.register(r"companies", CompanyViewSet, basename="company")
 router.register(r"customer", CustomerViewSet, basename="customer")
-router.register(r"engineer", EngineerViewSet, basename="engineer")
 # router.register(r"user", UserViewSet, basename="user")
 # router.register(r"persons", PersonViewSet, basename="persons")
 router.register(r"profiles", ProfilesViewSet, basename="profiles")
@@ -106,6 +105,25 @@ urlpatterns = [
          CompanyListView.as_view(),
          name="company-list"
          ),
-
+    path('engineers/',
+         EngineerListAPIView.as_view(),
+         name='engineer-list'
+         ),
+    path('engineers/create/',
+         EngineerCreateAPIView.as_view(),
+         name='engineer-create'
+         ),
+    path('engineers/<int:pk>/',
+         EngineerRetrieveAPIView.as_view(),
+         name='engineer-detail'
+         ),
+    path('engineers/<int:pk>/update/',
+         EngineerUpdateAPIView.as_view(),
+         name='engineer-update'
+         ),
+    path('engineers/<int:pk>/delete/',
+         EngineerDestroyAPIView.as_view(),
+         name='engineer-delete'
+         ),
 ]
 urlpatterns += router.urls
