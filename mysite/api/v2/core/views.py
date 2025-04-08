@@ -4,7 +4,6 @@ from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
 from django.contrib.sites.shortcuts import get_current_site
-from django_filters.rest_framework import DjangoFilterBackend
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
