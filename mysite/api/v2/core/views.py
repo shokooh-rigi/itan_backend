@@ -59,7 +59,7 @@ from .serializers import (
     UserSerializer,
     DocumentSerializer,
     CompanyTypeSerializer,
-    ServiceSerializer, EngineerFilter,
+    ServiceSerializer,
 )
 
 
@@ -108,8 +108,6 @@ class EngineerViewSet(ModelViewSet):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = EngineerFilter
 
 
 class CompanyViewSet(ModelViewSet):
