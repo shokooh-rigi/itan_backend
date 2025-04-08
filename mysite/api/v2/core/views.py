@@ -108,6 +108,7 @@ class EngineerListAPIView(generics.ListAPIView):
     Filters the queryset to only include Persons whose company's company_type name includes 'engineer'.
     Also supports optional filtering by person's name using the 'name' query parameter.
     """
+
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
@@ -116,21 +117,23 @@ class EngineerListAPIView(generics.ListAPIView):
         operation_description="This API returns a list of engineers. You can optionally filter by `name` using the query parameter `?name=...`.",
         manual_parameters=[
             openapi.Parameter(
-                'name',
+                "name",
                 openapi.IN_QUERY,
-                description='Filter engineers by their name (case-insensitive, partial match allowed)',
+                description="Filter engineers by their name (case-insensitive, partial match allowed)",
                 type=openapi.TYPE_STRING,
-                required=False
+                required=False,
             ),
-        ]
+        ],
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
+        queryset = Person.objects.filter(
+            company__company_type__name__icontains="engineer"
+        )
 
-        name = self.request.query_params.get('name')
+        name = self.request.query_params.get("name")
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset
@@ -143,7 +146,7 @@ class EngineerCreateAPIView(generics.CreateAPIView):
 
     @swagger_auto_schema(
         operation_summary="Create Engineer",
-        operation_description="Create a new engineer record."
+        operation_description="Create a new engineer record.",
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -156,7 +159,7 @@ class EngineerRetrieveAPIView(generics.RetrieveAPIView):
 
     @swagger_auto_schema(
         operation_summary="Retrieve Engineer",
-        operation_description="Retrieve a single engineer by their ID."
+        operation_description="Retrieve a single engineer by their ID.",
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -169,14 +172,14 @@ class EngineerUpdateAPIView(generics.UpdateAPIView):
 
     @swagger_auto_schema(
         operation_summary="Update Engineer",
-        operation_description="Update details of an existing engineer using PUT."
+        operation_description="Update details of an existing engineer using PUT.",
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_summary="Partially Update Engineer",
-        operation_description="Partially update details of an existing engineer using PATCH."
+        operation_description="Partially update details of an existing engineer using PATCH.",
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -189,10 +192,11 @@ class EngineerDestroyAPIView(generics.DestroyAPIView):
 
     @swagger_auto_schema(
         operation_summary="Delete Engineer",
-        operation_description="Delete an engineer by their ID."
+        operation_description="Delete an engineer by their ID.",
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
 
 class CompanyViewSet(ModelViewSet):
     """
@@ -213,6 +217,23 @@ class CompanyViewSet(ModelViewSet):
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override the create method to handle engineer_company parameter.
+        """
+        engineer_company = self.request.data.get("engineer_company", None)
+        if engineer_company == "1":
+            # Get the first company type that contains "engineer"
+            company_type = CompanyType.objects.filter(
+                name__icontains="engineer"
+            ).first()
+            if company_type:
+                serializer.save(company_type=company_type)
+            else:
+                raise ValueError("No company type found containing 'engineer'.")
+        else:
+            serializer.save()
 
 
 class CompanyListView(APIView):
