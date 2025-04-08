@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+import django_filters
 
 from mysite import settings
 from mysite.core.models import (
@@ -446,3 +447,11 @@ class AnnouncementSerializer(BaseSerializer):
         """
         seen_announcement_ids = self.context.get("seen_announcement_ids", [])
         return obj.id in seen_announcement_ids
+
+
+class EngineerFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Person
+        fields = ['name']
