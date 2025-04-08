@@ -105,23 +105,23 @@ urlpatterns = [
          CompanyListView.as_view(),
          name="company-list"
          ),
-    path('engineers/',
+    path('engineer/list/',
          EngineerListAPIView.as_view(),
          name='engineer-list'
          ),
-    path('engineers/create/',
+    path('engineer/create/',
          EngineerCreateAPIView.as_view(),
          name='engineer-create'
          ),
-    path('engineers/<int:pk>/',
+    path('engineer/<int:pk>/',
          EngineerRetrieveAPIView.as_view(),
          name='engineer-detail'
          ),
-    path('engineers/<int:pk>/update/',
+    path('engineer/<int:pk>/update/',
          EngineerUpdateAPIView.as_view(),
          name='engineer-update'
          ),
-    path('engineers/<int:pk>/delete/',
+    path('engineer/<int:pk>/delete/',
          EngineerDestroyAPIView.as_view(),
          name='engineer-delete'
          ),
