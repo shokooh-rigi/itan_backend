@@ -4,7 +4,6 @@ from django.contrib.auth.tokens import (
     default_token_generator as account_activation_token,
 )
 from django.contrib.sites.shortcuts import get_current_site
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -112,16 +111,16 @@ class EngineerListAPIView(generics.ListAPIView):
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="List of Engineers",
-        description="This API returns a list of engineers. You can optionally filter by `name` using the query parameter `?name=...`.",
-        parameters=[
-            OpenApiParameter(
-                name='name',
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=False,
-                description='Filter engineers by their name (case-insensitive, partial match allowed)'
+    @swagger_auto_schema(
+        operation_summary="List of Engineers",
+        operation_description="This API returns a list of engineers. You can optionally filter by `name` using the query parameter `?name=...`.",
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='Filter engineers by their name (case-insensitive, partial match allowed)',
+                type=openapi.TYPE_STRING,
+                required=False
             ),
         ]
     )
@@ -137,45 +136,63 @@ class EngineerListAPIView(generics.ListAPIView):
         return queryset
 
 
-@extend_schema(
-    summary="Create Engineer",
-    description="Create a new engineer record."
-)
 class EngineerCreateAPIView(generics.CreateAPIView):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Create Engineer",
+        operation_description="Create a new engineer record."
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
-@extend_schema(
-    summary="Retrieve Engineer",
-    description="Retrieve a single engineer by their ID."
-)
+
 class EngineerRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Retrieve Engineer",
+        operation_description="Retrieve a single engineer by their ID."
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
-@extend_schema(
-    summary="Update Engineer",
-    description="Update details of an existing engineer using PUT or PATCH."
-)
+
 class EngineerUpdateAPIView(generics.UpdateAPIView):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Update Engineer",
+        operation_description="Update details of an existing engineer using PUT."
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
 
-@extend_schema(
-    summary="Delete Engineer",
-    description="Delete an engineer by their ID."
-)
+    @swagger_auto_schema(
+        operation_summary="Partially Update Engineer",
+        operation_description="Partially update details of an existing engineer using PATCH."
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+
 class EngineerDestroyAPIView(generics.DestroyAPIView):
     queryset = Person.objects.filter(company__company_type__name__icontains="engineer")
     serializer_class = PersonSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Delete Engineer",
+        operation_description="Delete an engineer by their ID."
+    )
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
 
 class CompanyViewSet(ModelViewSet):
     """
