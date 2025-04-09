@@ -23,6 +23,7 @@ env = environ.Env()
 environ.Env.read_env()
 
 SYSTEM_NAME = env("SYSTEM_NAME", default="iTAB")
+WEB_URL = env("WEB_URL", default="airdec.net")
 
 PROXY_ENABLE = bool(env("PROXY_ENABLE", default=""))
 PROXY_HOST = env("PROXY_HOST", default="127.0.0.1")
@@ -241,7 +242,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
-
 }
 
 # Logging
