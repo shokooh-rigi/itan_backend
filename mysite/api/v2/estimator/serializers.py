@@ -7,6 +7,7 @@ from mysite.api.v2.core.serializers import (
     ServiceSerializer,
     EquipmentSerializer,
 )
+from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import Service
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import (
@@ -68,40 +69,64 @@ class EstimateSerializer(serializers.ModelSerializer):
 
     estimate_id = serializers.SerializerMethodField()
     bfm = BidSerializer(read_only=True)
-    customer = PersonSerializer()
-    company_name = serializers.SerializerMethodField(read_only=True)
-    project = ProjectSerializer()
-    engineer = PersonSerializer()
-    pre_demo = serializers.SerializerMethodField()
-    pre_demo_value = serializers.SerializerMethodField(read_only=True)
-    total_amount = serializers.SerializerMethodField()
-    estimate_equipments = EstimateEquipmentSerializer(
-        many=True, source="estimateequipment_set"
+    bid_id = serializers.PrimaryKeyRelatedField(
+        queryset=BidSerializer.Meta.model.objects.all(), write_only=True, source="bfm"
     )
-    estimate_details = EstimateDetailsSerializer(source="estimatedetails")
+    customer = PersonSerializer(read_only=True)
+    customer_id = serializers.PrimaryKeyRelatedField(
+        queryset=PersonSerializer.Meta.model.objects.all(),
+        write_only=True,
+        source="customer",
+    )
+    project = ProjectSerializer(read_only=True)
+    project_id = serializers.PrimaryKeyRelatedField(
+        queryset=ProjectSerializer.Meta.model.objects.all(),
+        write_only=True,
+        source="project",
+    )
+    engineer = PersonSerializer(read_only=True)
+    engineer_id = serializers.PrimaryKeyRelatedField(
+        queryset=PersonSerializer.Meta.model.objects.all(),
+        write_only=True,
+        source="engineer",
+    )
+    estimate_equipments = EstimateEquipmentSerializer(
+        many=True, source="estimateequipment_set", read_only=True
+    )
+    estimate_details = EstimateDetailsSerializer(
+        source="estimatedetails", read_only=True
+    )
+    pre_demo = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
     sub_total = serializers.SerializerMethodField()
     control_system_calculated = serializers.SerializerMethodField()
     hours_calculated = serializers.SerializerMethodField()
     predemo_calculated = serializers.SerializerMethodField()
     dalt_calculated = serializers.SerializerMethodField()
     total_calculated = serializers.SerializerMethodField()
-    service = ServiceSerializer(many=True)
+    services = ServiceSerializer(many=True, read_only=True)
+    service_ids = serializers.PrimaryKeyRelatedField(
+        queryset=ServiceSerializer.Meta.model.objects.all(),
+        many=True,
+        write_only=True,
+        source="services",
+    )
 
     class Meta:
         model = Estimate
         fields = "__all__"
 
     def create(self, validated_data):
-        services = validated_data.pop("service", [])
+        services = validated_data.pop("services", [])
         estimate = Estimate.objects.create(**validated_data)
-        estimate.service.set(services)  # Associate services with the estimate
+        estimate.services.set(services)
         return estimate
 
     def update(self, instance, validated_data):
-        services = validated_data.pop("service", [])
+        services = validated_data.pop("services", [])
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        instance.service.set(services)  # Update associated services
+        instance.services.set(services)
         instance.save()
         return instance
 
@@ -112,9 +137,6 @@ class EstimateSerializer(serializers.ModelSerializer):
         """Get pre_demo from the related EstimateDetail."""
         estimate_detail = getattr(obj, "estimatedetails", None)
         return estimate_detail.pre_demo if estimate_detail else None
-
-    def get_pre_demo_value(self, obj):
-        return obj.pre_demo_value
 
     def get_total_amount(self, obj):
         """Calculate the total amount based on related EstimateEquipment."""

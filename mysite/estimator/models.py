@@ -56,7 +56,7 @@ class Estimate(BaseModelWithCreatedByUser):
         null=True,
         related_name="en_person",
     )
-    service = models.ManyToManyField(
+    services = models.ManyToManyField(
         Service,
         related_name="estimates",
         blank=False,
@@ -95,10 +95,6 @@ class Estimate(BaseModelWithCreatedByUser):
     @property
     def predemo_calculated(self):
         return self.estimatedetails.pre_demo * 1200
-
-    @property
-    def pre_demo_value(self):
-        return True if self.estimatedetails.pre_demo > 0 else False
 
     @property
     def dalt_calculated(self):

@@ -28,6 +28,11 @@ urlpatterns = [
     ),
     path("details/<int:id>/", EstimateDetailsView.as_view(), name="estimate-details"),
     path(
+        "bid/",
+        EstimateBidListView.as_view(),
+        name="estimate-bid",
+    ),
+    path(
         "bid/<int:estimate_id>/",
         EstimateBidListView.as_view(),
         name="estimate-bid-list",

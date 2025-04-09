@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 
 if settings.TAB_SYSTEM:
     from mysite.api.v2.invoice.services.invoice_services import InvoiceService
+from mysite.bidfilemgm.models import BidFile
 from mysite.core.models import Person, LicenseFiles, LicenseInfo
 from mysite.equipments.models import Equipment
 from mysite.estimator.models import (
@@ -1069,7 +1070,7 @@ class EstimateBidListView(APIView):
         try:
             # Query for available bids
             bids = (
-                Estimate.objects.filter(archive=False)
+                BidFile.objects.filter(archive=False)
                 .exclude(id__in=Estimate.objects.values_list("bfm_id", flat=True))
                 .order_by("-created_on")
             )
