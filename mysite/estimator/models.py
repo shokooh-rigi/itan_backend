@@ -10,7 +10,7 @@ from mysite.bidfilemgm.models import BidFile
 from .enums import ControlSystemChoices, HoursChoices
 from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
 from mysite.core.models import Person, Project, Service
-from mysite.dbmanagement.models import Equipment
+from mysite.equipments.models import Equipment
 
 
 def estimate_number_generator(estimate_id: int):
