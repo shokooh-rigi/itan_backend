@@ -70,6 +70,9 @@ class CompanySerializer(BaseSerializer):
 
     address = AddressSerializer()
     contact_info = ContactInfoSerializer()
+    company_type = serializers.PrimaryKeyRelatedField(
+        queryset=CompanyType.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Company
@@ -197,7 +200,6 @@ class ProjectSerializer(BaseSerializer):
         )
 
         return project
-
 
     def update(self, instance, validated_data):
         address_data = validated_data.pop("address", None)

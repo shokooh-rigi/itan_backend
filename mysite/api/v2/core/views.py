@@ -208,30 +208,45 @@ class CompanyViewSet(ModelViewSet):
     serializer_class = CompanySerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "name",
+                openapi.IN_QUERY,
+                description="Filter companies by name",
+                type=openapi.TYPE_STRING,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
-        """
-        Optionally filter the queryset based on query parameters.
-        """
         queryset = super().get_queryset()
+
+        # Filter by company_type containing "engineer"
+        engineer_type = CompanyType.objects.filter(name__icontains="engineer").first()
+        if engineer_type:
+            queryset = queryset.filter(company_type=engineer_type)
+        else:
+            # If no such type exists, return empty queryset
+            queryset = queryset.none()
+
+        # Optional: Further filter by name if provided
         name = self.request.query_params.get("name", None)
         if name:
             queryset = queryset.filter(name__icontains=name)
+
         return queryset
 
     def perform_create(self, serializer):
         """
         Override the create method to handle engineer_company parameter.
         """
-        engineer_company = self.request.data.get("engineer_company", None)
-        if engineer_company == "1":
-            # Get the first company type that contains "engineer"
-            company_type = CompanyType.objects.filter(
-                name__icontains="engineer"
-            ).first()
-            if company_type:
-                serializer.save(company_type=company_type)
-            else:
-                raise ValueError("No company type found containing 'engineer'.")
+        # Get the first company type that contains "engineer"
+        company_type = CompanyType.objects.filter(name__icontains="engineer").first()
+        if company_type:
+            serializer.save(company_type=company_type)
         else:
             serializer.save()
 
@@ -600,15 +615,29 @@ class HomeView(APIView):
             for i in range(1, current_month + 1)
         }
 
+        if settings.TAB_SYSTEM:
+            from mysite.order.models import Order
+
+            orders = Order.objects.filter(created_on__year=current_year)
+            orders_total_amount = sum(
+                order.proposal.estimate.total_calculated for order in orders
+            )
+
+        response = {
+            "announcements": response_data,  # Return the cached response data
+            "dailyBidCounts": daily_bid_counts,
+            "totalEstimatesByMonth": final_monthly_estimates,
+            "totalProposalsByMonth": final_monthly_proposals,
+            "yearCount": (
+                orders.count() if settings.TAB_SYSTEM else total_bids.count()
+            ),
+            "yearTotal": (
+                orders_total_amount if settings.TAB_SYSTEM else bids_total_amount
+            ),
+        }
+
         return Response(
-            {
-                "announcements": response_data,  # Return the cached response data
-                "bidsCount": total_bids.count(),
-                "bidsTotal": bids_total_amount,
-                "dailyBidCounts": daily_bid_counts,
-                "totalEstimatesByMonth": final_monthly_estimates,
-                "totalProposalsByMonth": final_monthly_proposals,
-            },
+            response,
             status=status.HTTP_200_OK,
         )
 
