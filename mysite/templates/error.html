@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>OOPS, SOMETHING WENT WRONG! DON'T PANIC! PUSH BACK BUTTON!</h2>
+
+    <script src="{% static "js/speech.js" %}"></script>
+    <script>
+        speak("OOPS, SOMETHING WENT WRONG! DON'T PANIC! PUSH BACK BUTTON!");
+    </script>
+{% endblock %}
