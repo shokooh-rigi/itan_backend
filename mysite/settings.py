@@ -161,6 +161,7 @@ DATABASES = {
         "HOST": env("SQL_HOST", default="localhost"),
         "PORT": env("POSTGRES_PORT", default="5432" if DB_IS_POSTGRES else "3306"),
         "OPTIONS": {"sslmode": "require"} if DB_IS_POSTGRES else {},
+        "CONN_MAX_AGE": 600,
     },
     "old_db": {
         "ENGINE": "django.db.backends.mysql",

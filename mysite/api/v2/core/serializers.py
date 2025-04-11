@@ -131,22 +131,15 @@ class PersonSerializer(BaseSerializer):
     Serializer for the Person model.
     """
 
-    company = serializers.SerializerMethodField()
+    company = CompanySerializer(read_only=True)
     company_id = serializers.PrimaryKeyRelatedField(
-        queryset=Company.objects.all(), write_only=True
+        queryset=CompanySerializer.Meta.model.objects.all(), write_only=True
     )
     contact_info = ContactInfoSerializer()
 
     class Meta:
         model = Person
         fields = "__all__"
-
-    def get_company(self, obj):
-        """Return full company data for GET requests, but expect an ID for writes."""
-        request = self.context.get("request")
-        if request and request.method in ["GET"]:
-            return CompanySerializer(obj.company).data
-        return obj.company.id if obj.company else None
 
     def create(self, validated_data):
         contact_info_data = validated_data.pop("contact_info")
@@ -428,8 +421,6 @@ class ServiceSerializer(BaseSerializer):
 
 
 class EquipmentSerializer(BaseSerializer):
-    service = ServiceSerializer()
-
     class Meta:
         model = Equipment
         fields = "__all__"
