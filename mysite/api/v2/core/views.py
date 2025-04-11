@@ -224,6 +224,46 @@ class CompanyViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
 
+        # Optional: Further filter by name if provided
+        name = self.request.query_params.get("name", None)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override the create method to handle engineer_company parameter.
+        """
+        serializer.save()
+
+
+class EngineerCompanyViewSet(ModelViewSet):
+    """
+    API ViewSet for managing Engineer Company objects.
+    Supports CRUD operations.
+    """
+
+    queryset = Company.objects.filter(name__icontains="engineer")
+    serializer_class = CompanySerializer
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "name",
+                openapi.IN_QUERY,
+                description="Filter engineer companies by name",
+                type=openapi.TYPE_STRING,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
         # Filter by company_type containing "engineer"
         engineer_type = CompanyType.objects.filter(name__icontains="engineer").first()
         if engineer_type:

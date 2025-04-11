@@ -49,6 +49,13 @@ class BidFile(BaseModelWithCreatedByUser):
     note = models.TextField(max_length=1000, blank=True, null=True)
     hidden_for_customer = models.BooleanField(default=False)
 
+    @property
+    def has_estimate(self):
+        """
+        Check if the bid file has an estimate associated with it.
+        """
+        return hasattr(self, "estimate")
+
     class Meta:
         ordering = ["-due_date"]
         verbose_name = "Bid Files Management"

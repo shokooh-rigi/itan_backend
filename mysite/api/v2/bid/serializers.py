@@ -7,6 +7,7 @@ from mysite.bidfilemgm.models import BidFile, BidAttachment
 class BidSerializer(serializers.ModelSerializer):
     customer_name = serializers.SerializerMethodField()
     project_name = serializers.CharField(source="project.name", read_only=True)
+    has_estimate = serializers.SerializerMethodField()
 
     class Meta:
         model = BidFile
@@ -20,10 +21,14 @@ class BidSerializer(serializers.ModelSerializer):
             "due_date",
             "note",
             "created_by",
+            "has_estimate",
         ]
 
     def get_customer_name(self, obj):
         return f"{obj.customer.company.name} - {obj.customer.name}"
+
+    def get_has_estimate(self, obj):
+        return obj.has_estimate
 
 
 class BidCreateSerializer(serializers.ModelSerializer):

@@ -33,7 +33,7 @@ urlpatterns = [
         name="estimate-bid",
     ),
     path(
-        "bid/<int:estimate_id>/",
+        "bid/<int:bid_id>/",
         EstimateBidListView.as_view(),
         name="estimate-bid-list",
     ),

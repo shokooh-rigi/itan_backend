@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 
 from .views import (
     CompanyViewSet,
+    EngineerCompanyViewSet,
     HomeView,
     ProfileView,
     CreditCardViewSet,
@@ -37,9 +38,11 @@ from .views import (
 
 router = DefaultRouter()
 
-router.register(r"companies", CompanyViewSet, basename="company")
 router.register(r"customer", CustomerViewSet, basename="customer")
-router.register(r"engineer-company", CompanyViewSet, basename="engineer-company")
+router.register(r"companies", CompanyViewSet, basename="company")
+router.register(
+    r"engineer-company", EngineerCompanyViewSet, basename="engineer-company"
+)
 # router.register(r"user", UserViewSet, basename="user")
 # router.register(r"persons", PersonViewSet, basename="persons")
 router.register(r"profiles", ProfilesViewSet, basename="profiles")
