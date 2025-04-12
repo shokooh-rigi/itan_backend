@@ -45,11 +45,14 @@ class EmailSerializer(serializers.Serializer):
 
 
 class EstimateEquipmentSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer()
+    equipment = EquipmentSerializer(read_only=True)
+    equipment_id = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(), write_only=True, source="equipment"
+    )
 
     class Meta:
         model = EstimateEquipment
-        fields = ["equipment", "quantity", "price_override"]
+        fields = "__all__"
 
     def get_service_id(self, obj):
         # Ensure `obj.equipment` exists to avoid errors
