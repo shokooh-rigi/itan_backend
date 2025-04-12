@@ -36,7 +36,7 @@ if settings.TAB_SYSTEM:
         path("", include("mysite.api.v2.settlement.urls")),
         path("", include("mysite.api.v2.scheduler.urls")),
         path("", include("mysite.api.v2.coi.urls")),
-        path("", include("mysite.api.v2.equipment.urls")),
+        # path("", include("mysite.api.v2.equipment.urls")),
         path("", include("mysite.api.v2.project_process.urls")),
         path("", include("mysite.order.urls")),
         # path('', include('mysite.mgmreport.urls')),
