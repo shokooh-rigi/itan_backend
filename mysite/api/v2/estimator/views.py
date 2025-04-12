@@ -402,11 +402,12 @@ class EstimateUpdateView(APIView):
                 estimate=updated_estimate,
                 is_deleted=False,
             )
-            for equipment in estimate_equipments:
-                equipment.flag = (
-                    equipment.equipment.service in updated_estimate.service.all()
+            for estimate_equipment in estimate_equipments:
+                estimate_equipment.flag = (
+                    estimate_equipment.equipment.service
+                    in updated_estimate.services.all()
                 )
-                equipment.save()
+                estimate_equipment.save()
 
             logger.info("Estimate with ID %s updated.", updated_estimate.pk)
             return Response(
@@ -700,6 +701,38 @@ class EstimateDetailsView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EstimateGetIDView(APIView):
+    """
+    Get the estimate ID for a given estimate.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get estimate ID",
+        operation_description="Retrieve the estimate ID for the given estimate.",
+        responses={
+            200: openapi.Response(
+                description="Estimate ID retrieved successfully.",
+                examples={"application/json": {"estimate_id": 123}},
+            ),
+            404: "Estimate not found",
+        },
+    )
+    def get(self, request, id):
+        """
+        Get the estimate ID for a given estimate.
+        """
+        estimate = get_object_or_404(
+            Estimate,
+            id=id,
+            is_deleted=False,
+        )
+        return Response(
+            {"estimate_id": estimate.estimate_id}, status=status.HTTP_200_OK
+        )
 
 
 class EstimateEquipmentDeleteView(APIView):

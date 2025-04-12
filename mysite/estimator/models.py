@@ -137,7 +137,7 @@ class Estimate(BaseModelWithCreatedByUser):
 
     @property
     def estimate_id(self):
-        estimate_number_generator(self.id)
+        return estimate_number_generator(self.id)
 
     class Meta:
         ordering = ["-due_date"]
