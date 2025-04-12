@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    EstimateGetIDView,
     EstimateListView,
     EstimateCreateView,
     EstimateUpdateView,
@@ -27,6 +28,7 @@ urlpatterns = [
         name="estimate-duplicate",
     ),
     path("details/<int:id>/", EstimateDetailsView.as_view(), name="estimate-details"),
+    path("fullId/<int:id>/", EstimateGetIDView.as_view(), name="estimate-details"),
     path(
         "bid/",
         EstimateBidListView.as_view(),
