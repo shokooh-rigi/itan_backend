@@ -176,13 +176,34 @@ class EquipmentManufacturer(models.Model):
         return self.name
 
 
-class Equipment(models.Model):
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=False, null=True, related_name='service_equipments')
-    test_sheet = models.ForeignKey(TestSheet, on_delete=models.SET_NULL, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=False)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
-    estimate_work = models.IntegerField(default=10, blank=False, null=False, verbose_name='Estimate Work in Minutes')
-    created_on = models.DateTimeField(auto_now_add=True)
+class Equipment(BaseModel):
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.SET_NULL,
+        blank=False,
+        null=True,
+        related_name='service_equipments'
+    )
+    test_sheet = models.ForeignKey(
+        TestSheet,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    name = models.CharField(
+        max_length=255,
+        blank=False
+    )
+    price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    estimate_work = models.IntegerField(
+        default=10,
+        blank=False,
+        null=False,
+        verbose_name='Estimate Work in Minutes'
+    )
     flag = models.BooleanField(default=True)
 
     class Meta:
