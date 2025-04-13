@@ -152,19 +152,30 @@ class Order(BaseModel):
     def __str__(self):
         return self.project_number
 
-
 @receiver(post_save, sender=Order)
 def update_project_number(sender, instance, created, **kwargs):
-    if created:
-        new_number = Setting.objects.get(key="Project Number Last Digit")
-        new_number.value = (
-            int(Setting.objects.get(key="Project Number Last Digit").value) + 1
-        )
-        new_number.save()
-        instance.project_number = Setting.objects.get(
-            key="Project Number Pre Text"
-        ).value + Setting.objects.get(key="Project Number Last Digit").value.zfill(3)
-        instance.save()
+    if not created:
+        return
+
+    last_digit_setting = Setting.objects.filter(key="Project Number Last Digit").first()
+    pre_text_setting = Setting.objects.filter(key="Project Number Pre Text").first()
+
+    if not last_digit_setting or not pre_text_setting:
+        print("[ERROR] Missing required settings for project number generation.")
+        return
+
+    try:
+        last_digit = int(last_digit_setting.value)
+    except ValueError:
+        print("[ERROR] Invalid integer in Project Number Last Digit setting.")
+        return
+
+    last_digit += 1
+    last_digit_setting.value = str(last_digit)
+    last_digit_setting.save()
+
+    instance.project_number = f"{pre_text_setting.value}{str(last_digit).zfill(3)}"
+    instance.save()
 
 
 class ChangeOrder(BaseModel):
