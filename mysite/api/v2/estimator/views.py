@@ -1264,8 +1264,8 @@ class EstimateBidView(APIView):
         return {
             "file_name": estimate_file_name,
             "estimate": estimate,
-            "other_than_dalt_services": estimate.service.exclude(name__iexact="DALT"),
-            "has_dalt": estimate.service.filter(name__iexact="DALT").exists(),
+            "other_than_dalt_services": estimate.services.exclude(name__iexact="DALT"),
+            "has_dalt": estimate.services.filter(name__iexact="DALT").exists(),
             "estimate_equipments_pricing": estimate_equipments(estimate_id=estimate.id),
             "estimate_work_in_hours": int(estimate_work / 60),
             "estimate_work_in_minutes": int(estimate_work % 60),

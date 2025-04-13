@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
 from mysite import settings
@@ -21,6 +22,19 @@ from mysite.equipments.models import Equipment
 from mysite.s3_file_manager import S3
 
 User = get_user_model()
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add more user info into the response
+        data["email"] = self.user.email
+        data["first_name"] = self.user.first_name
+        data["last_name"] = self.user.last_name
+        data["user_type_title"] = self.user.profile.get_user_type_display()
+
+        return data
 
 
 class BaseSerializer(serializers.ModelSerializer):
