@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 from mysite import settings
+from mysite.api.v2.equipment.serializers import EquipmentSerializer
 from mysite.core.models import (
     Announcement,
     AnnouncementSeen,
@@ -417,12 +418,6 @@ class ServiceSerializer(BaseSerializer):
 
     class Meta:
         model = Service
-        fields = "__all__"
-
-
-class EquipmentSerializer(BaseSerializer):
-    class Meta:
-        model = Equipment
         fields = "__all__"
 
 

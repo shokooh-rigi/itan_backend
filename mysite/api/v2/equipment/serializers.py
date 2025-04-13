@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mysite.dbmanagement.models import Equipment
+from mysite.equipments.models import Equipment
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
