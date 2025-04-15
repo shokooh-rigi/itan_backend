@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from mysite.api.v2.core.serializers import PersonSerializer, ProjectSerializer
 from mysite.bidfilemgm.models import BidFile, BidAttachment
 
 
 class BidSerializer(serializers.ModelSerializer):
-    customer_name = serializers.SerializerMethodField()
-    project_name = serializers.CharField(source="project.name", read_only=True)
+    customer = PersonSerializer(read_only=True)
+    project = ProjectSerializer(read_only=True)
     has_estimate = serializers.SerializerMethodField()
 
     class Meta:
@@ -15,17 +16,12 @@ class BidSerializer(serializers.ModelSerializer):
             "id",
             "type",
             "customer",
-            "customer_name",
             "project",
-            "project_name",
             "due_date",
             "note",
             "created_by",
             "has_estimate",
         ]
-
-    def get_customer_name(self, obj):
-        return f"{obj.customer.company.name} - {obj.customer.name}"
 
     def get_has_estimate(self, obj):
         return obj.has_estimate
