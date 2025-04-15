@@ -297,40 +297,9 @@ class OrderEditAPIView(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        "order": openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                "proposal": openapi.Schema(
-                                    type=openapi.TYPE_INTEGER, nullable=True
-                                ),
-                                "order_number": openapi.Schema(
-                                    type=openapi.TYPE_STRING
-                                ),
-                                "status": openapi.Schema(type=openapi.TYPE_STRING),
-                                "description": openapi.Schema(type=openapi.TYPE_STRING),
-                            },
-                        ),
-                        "proposals": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
-                                },
-                            ),
-                        ),
-                        "change_orders": openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
-                                },
-                            ),
-                        ),
+                        "order": OrderSerializer(),
+                        "proposals": ProposalSerializer(many=True),
+                        "change_orders": ChangeOrderSerializer(many=True),
                     },
                 ),
             )
@@ -340,28 +309,17 @@ class OrderEditAPIView(APIView):
         """
         Retrieve order details, associated proposals, and change orders.
         """
-        # Fetch the order and related data
-        this_order = OrderEditService.get_order(order_id)
-        proposals = OrderService.get_proposals()
-        change_orders = OrderEditService.get_change_orders(order_id)
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        proposals = OrderService.get_proposals(proposal_id=this_order.proposal.id)
+        change_orders = OrderEditService.get_change_orders(order_id=order_id)
 
-        # Serialize the data for the frontend
-        order_data = {
-            "id": this_order.id,
-            "proposal": this_order.proposal.id if this_order.proposal else None,
-            "order_number": this_order.order_number,
-            "status": this_order.status,
-            "description": this_order.description,
-        }
-
-        proposals_data = [
-            {"id": proposal.id, "name": proposal.name} for proposal in proposals
-        ]
-
-        change_orders_data = [
-            {"id": change_order.id, "name": change_order.name}
-            for change_order in change_orders
-        ]
+        order_data = OrderSerializer(this_order).data
+        proposals_data = ProposalSerializer(proposals, many=True).data
+        change_orders_data = ChangeOrderSerializer(change_orders, many=True).data
 
         return Response(
             {
@@ -377,7 +335,7 @@ class OrderEditAPIView(APIView):
         request_body=OrderSerializer,
         responses={
             200: openapi.Response(
-                description="Order updated successfully or redirection details.",
+                description="Order updated successfully.",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
