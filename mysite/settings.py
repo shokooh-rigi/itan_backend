@@ -338,6 +338,7 @@ LIMIT_FILE_SIZE: int = env(
 ROOT_URLCONF = "config.urls"
 
 SIMPLE_JWT = {
+    "TOKEN_OBTAIN_SERIALIZER": "mysite.api.v2.core.serializers.MyTokenObtainPairSerializer",
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }

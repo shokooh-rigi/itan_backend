@@ -1,14 +1,13 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 from .views import (
     CompanyViewSet,
     EngineerCompanyViewSet,
     HomeView,
+    MyTokenObtainPairView,
     ProfileView,
     CreditCardViewSet,
     ProfilesViewSet,
@@ -55,7 +54,7 @@ router.register(r"service", ServiceViewSet, basename="service")
 urlpatterns = [
     path("profile/", ProfileView.as_view(), name="profile"),
     path("home/", HomeView.as_view(), name="home"),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
         "get-engineer-id/<str:engineer_name>/",

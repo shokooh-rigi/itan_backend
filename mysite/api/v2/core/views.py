@@ -50,6 +50,8 @@ from .permissions import IsOwnerOrAdmin
 from django.utils.timezone import now
 from django.db.models.functions import TruncMonth, TruncDay
 from django.db.models import Count
+
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import (
     AnnouncementSerializer,
     ProjectSerializer,
@@ -61,7 +63,12 @@ from .serializers import (
     DocumentSerializer,
     CompanyTypeSerializer,
     ServiceSerializer,
+    MyTokenObtainPairSerializer,
 )
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 class CustomerViewSet(ModelViewSet):
