@@ -31,6 +31,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     total_invoiced = serializers.SerializerMethodField(read_only=True)
     remaining_due = serializers.SerializerMethodField(read_only=True)
     amount_due = serializers.SerializerMethodField(read_only=True)
+    order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Invoice
@@ -49,6 +50,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "invoice_number",
             "revision_date",
             "order",
+            "order_id",
             "amount",
             "sub_total",
             "total_paid",
