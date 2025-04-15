@@ -277,58 +277,39 @@ class OrderEditAPIView(APIView):
     Path Parameters:
         - order_id (int): The ID of the order to edit.
     """
-
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="Retrieve details of a specific order, including proposals and change orders.",
+        operation_description="Retrieve details of a specific order.",
         manual_parameters=[
             openapi.Parameter(
                 "order_id",
                 openapi.IN_PATH,
-                description="The ID of the order to edit.",
+                description="The ID of the order to retrieve.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
             )
         ],
         responses={
             200: openapi.Response(
-                description="Order details with associated proposals and change orders.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "order": OrderSerializer(),
-                        "proposals": ProposalSerializer(many=True),
-                        "change_orders": ChangeOrderSerializer(many=True),
-                    },
-                ),
+                description="Order details.",
+                schema=OrderSerializer(),
             )
         },
     )
     def get(self, request, order_id):
         """
-        Retrieve order details, associated proposals, and change orders.
+        Retrieve order details.
         """
         this_order = get_object_or_404(
             Order,
             id=order_id,
             is_deleted=False,
         )
-        proposals = OrderService.get_proposals(proposal_id=this_order.proposal.id)
-        change_orders = OrderEditService.get_change_orders(order_id=order_id)
 
         order_data = OrderSerializer(this_order).data
-        proposals_data = ProposalSerializer(proposals, many=True).data
-        change_orders_data = ChangeOrderSerializer(change_orders, many=True).data
 
-        return Response(
-            {
-                "order": order_data,
-                "proposals": proposals_data,
-                "change_orders": change_orders_data,
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response(order_data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Update an existing order by providing the updated fields.",
