@@ -31,6 +31,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     total_invoiced = serializers.SerializerMethodField(read_only=True)
     remaining_due = serializers.SerializerMethodField(read_only=True)
     amount_due = serializers.SerializerMethodField(read_only=True)
+    balance_due = serializers.SerializerMethodField(read_only=True)
     order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
@@ -57,6 +58,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "total_invoiced",
             "remaining_due",
             "amount_due",
+            "balance_due",
         ]
 
     def create(self, validated_data):
@@ -96,6 +98,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     def get_amount_due(self, obj):
         return obj.amount_due
+
+    def get_balance_due(self, obj):
+        balance_due = calculate_remaining_invoice_due(obj)
+        return balance_due
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
