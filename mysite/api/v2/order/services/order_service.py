@@ -27,7 +27,9 @@ class OrderService:
         object_list = Order.objects.filter(
             Q(proposal__estimate__project__name__icontains=project_name)
             | Q(project_number__icontains=project_name)
-            | Q(proposal__estimate__customer__company__name__icontains=project_name)
+            | Q(proposal__estimate__customer__company__name__icontains=project_name),
+            is_deleted=False,
+            archive=False,
         ).order_by(ordering)
 
         if order_type == "all" or order_type is None:
