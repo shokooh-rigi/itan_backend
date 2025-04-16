@@ -23,35 +23,22 @@ from .views import (
     TechLabelDeleteView,
     TechLabelListView,
     TechLabelCreateUpdateView,
-    TechLabelByOrderView, ChangeOrderList,
+    TechLabelByOrderView,
+    ChangeOrderList,
 )
 
 
 urlpatterns = [
-    path(
-        "",
-        OrderListAPIView.as_view(),
-        name="order-list"
-    ),
-    path(
-        "proposals/",
-        OrderProposalListView.as_view(),
-        name="order-proposal-list"
-    ),
+    path("", OrderListAPIView.as_view(), name="order-list"),
+    path("proposals/", OrderProposalListView.as_view(), name="order-proposal-list"),
     path(
         "proposals/<int:proposal_id>/",
         OrderProposalListView.as_view(),
         name="order-proposal-by-proposal_id",
     ),
+    path("add/", OrderAddAPIView.as_view(), name="order-add"),
     path(
-        "add/",
-        OrderAddAPIView.as_view(),
-        name="order-add"
-    ),
-    path(
-        "edit/<int:order_id>/",
-        OrderEditAPIView.as_view(),
-        name="order-edit"
+        "edit/<int:order_id>/", OrderEditAPIView.as_view(), name="order-edit"
     ),  # Edit an existing order
     path(
         "delete/<int:order_id>/",
@@ -63,25 +50,25 @@ urlpatterns = [
         OrderArchiveAPIView.as_view(),
         name="order-archive",
     ),  # Archive an order
-    path(
-        "change-<int:order_id>/",
-        ChangeOrderCreateApiView.as_view(),
-        name="change-order-create",
-    ),  # Create a change order
-    path(
-        "change-<int:order_id>/delete/<int:change_order_id>/",
-        ChangeOrderDeleteAPIView.as_view(),
-        name="change-order-delete",
-    ),
-    path(
-        "change-<int:change_order_id>/approve/<str:action>/",
-        ChangeOrderApproveView.as_view(),
-        name="change-order-approve",
-    ),
+    # path(
+    #     "change-<int:order_id>/delete/<int:change_order_id>/",
+    #     ChangeOrderDeleteAPIView.as_view(),
+    #     name="change-order-delete",
+    # ),
+    # path(
+    #     "change-<int:change_order_id>/approve/<str:action>/",
+    #     ChangeOrderApproveView.as_view(),
+    #     name="change-order-approve",
+    # ),
     path(
         "change-orders/<int:order_id>/",
         ChangeOrderList.as_view(),
         name="change-orders",
+    ),
+    path(
+        "add-change-order/<int:order_id>/",
+        ChangeOrderCreateApiView.as_view(),
+        name="change-order-create",
     ),
     path(
         "<int:order_id>/control-system/",
