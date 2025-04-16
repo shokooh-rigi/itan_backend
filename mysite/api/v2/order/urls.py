@@ -79,7 +79,7 @@ urlpatterns = [
         name="change-order-approve",
     ),
     path(
-        "change-orders-<int:order_id>/",
+        "change-orders/<int:order_id>/",
         ChangeOrderList.as_view(),
         name="change-orders",
     ),
