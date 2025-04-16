@@ -76,7 +76,7 @@ urlpatterns = [
         name="change-order-create",
     ),
     path(
-        "change-order/<int:change_order_id>/",
+        "change-order/<int:change_order_id>/delete/",
         ChangeOrderDeleteAPIView.as_view(),
         name="change-order-remove",
     ),

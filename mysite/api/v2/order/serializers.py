@@ -161,7 +161,7 @@ class ChangeOrderServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChangeOrderService
-        fields = "__all__"
+        exclude = ["change_order"]
 
 
 class ChangeOrderSerializer(serializers.ModelSerializer):
@@ -173,13 +173,13 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChangeOrder
-        fields = "__all__"
+        exclude = ["order"]
 
     def create(self, validated_data):
         """
         Create a ChangeOrder along with associated services.
         """
-        services_data = validated_data.pop("services")
+        services_data = validated_data.pop("changeorderservice_set", [])
         change_order = ChangeOrder.objects.create(**validated_data)
         for service_data in services_data:
             ChangeOrderService.objects.create(change_order=change_order, **service_data)
@@ -189,7 +189,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
         """
         Update a ChangeOrder and its associated services.
         """
-        services_data = validated_data.pop("services", [])
+        services_data = validated_data.pop("changeorderservice_set", [])
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
