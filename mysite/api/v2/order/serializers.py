@@ -97,31 +97,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = [
-            "proposal",
-            "proposal_id",
-            "architect_name",
-            "id",
-            "project_number",
-            "po_number",
-            "date_po_received",
-            "final_offset",
-            "note",
-            "estimated_date_of_project",
-            "completion_percentage",
-            "fully_settled",
-            "archive",
-            "state",
-            "start_date",
-            "end_date",
-            "created_on",
-            "control_system",
-            "change_orders_total",
-            "predemo_total",
-            "dalt_total",
-            "final_total",
-            "total",
-        ]
+        fields = "__all__"
 
     def create(self, validated_data):
         """Override create method to link proposal using proposal_id"""
