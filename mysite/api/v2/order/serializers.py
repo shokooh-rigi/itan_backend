@@ -169,7 +169,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
     Serializer for ChangeOrder with nested services.
     """
 
-    services = ChangeOrderServiceSerializer(many=True)
+    services = ChangeOrderServiceSerializer(many=True, required=False)
 
     class Meta:
         model = ChangeOrder
