@@ -563,6 +563,49 @@ class ChangeOrderDeleteAPIView(APIView):
             )
 
 
+class ChangeOrderList(APIView):
+    permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(
+        operation_description="Retrieve all change orders for a specific order.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The ID of the order to retrieve change orders for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of change orders for the specified order.",
+                schema=ChangeOrderSerializer(many=True),
+            ),
+            404: openapi.Response(
+                description="Order not found.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+        },
+    )
+    def get(self, request, order_id):
+        """
+        Get all change orders for a specific order.
+        """
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        change_orders = ChangeOrder.objects.filter(order=order)
+        serializer = ChangeOrderSerializer(change_orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ChangeOrderApproveView(APIView):
     permission_classes = [IsAuthenticated]
 

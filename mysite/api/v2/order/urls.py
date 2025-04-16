@@ -23,7 +23,7 @@ from .views import (
     TechLabelDeleteView,
     TechLabelListView,
     TechLabelCreateUpdateView,
-    TechLabelByOrderView,
+    TechLabelByOrderView, ChangeOrderList,
 )
 
 
@@ -77,6 +77,11 @@ urlpatterns = [
         "change-<int:change_order_id>/approve/<str:action>/",
         ChangeOrderApproveView.as_view(),
         name="change-order-approve",
+    ),
+    path(
+        "change-orders-<int:order_id>/",
+        ChangeOrderList.as_view(),
+        name="change-orders",
     ),
     path(
         "<int:order_id>/control-system/",
