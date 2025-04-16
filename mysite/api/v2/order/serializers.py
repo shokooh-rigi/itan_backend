@@ -93,6 +93,7 @@ class OrderSerializer(serializers.ModelSerializer):
     dalt_total = serializers.SerializerMethodField(read_only=True)
     final_total = serializers.SerializerMethodField(read_only=True)
     total = serializers.SerializerMethodField(read_only=True)
+    has_invoice = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Order
@@ -169,6 +170,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_total(self, obj):
         return obj.total
+
+    def get_has_invoice(self, obj):
+        """
+        Check if the order has an associated invoice.
+        """
+        return obj.has_invoice
 
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):

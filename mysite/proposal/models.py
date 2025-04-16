@@ -13,6 +13,13 @@ class Proposal(BaseModelWithCreatedByUser):
     validity = models.IntegerField(blank=False, default=180)
     note = models.TextField(max_length=255, blank=True, null=True)
 
+    @property
+    def has_order(self):
+        """
+        Check if the proposal has an associated order.
+        """
+        return hasattr(self, "order")
+
     class Meta:
         ordering = ["-estimate"]
         verbose_name = "Proposal List"
