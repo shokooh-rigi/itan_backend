@@ -63,7 +63,8 @@ class OrderEquipmentSubmittalService:
         )
 
         # Save the zip file to the order model
-        with open(os.path.join(temp_path, f"/{zip_file_name}"), 'rb') as f:
+        zip_file_path = os.path.join(temp_path, zip_file_name)
+        with open(zip_file_path, 'rb') as f:
             order.equipment_submittal.save(zip_file_name, f)
 
     @staticmethod
