@@ -1040,7 +1040,7 @@ class OrderEquipmentSubmittalView(APIView):
 
         except Exception as e:
             return Response(
-                {"detail": "An error occurred."},
+                {"detail": f"An error occurred. {e}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

@@ -30,7 +30,11 @@ from .views import (
 
 
 urlpatterns = [
-    path("", OrderListAPIView.as_view(), name="order-list"),
+    path(
+        "",
+        OrderListAPIView.as_view(),
+        name="order-list"
+    ),
     path(
         "proposals/",
         OrderProposalListView.as_view(),
@@ -41,20 +45,26 @@ urlpatterns = [
         OrderProposalListView.as_view(),
         name="order-proposal-by-proposal_id",
     ),
-    path("add/", OrderAddAPIView.as_view(), name="order-add"),
     path(
-        "edit/<int:order_id>/", OrderEditAPIView.as_view(), name="order-edit"
-    ),  # Edit an existing order
+        "add/",
+        OrderAddAPIView.as_view(),
+        name="order-add"
+    ),
+    path(
+        "edit/<int:order_id>/",
+        OrderEditAPIView.as_view(),
+        name="order-edit"
+    ),
     path(
         "delete/<int:order_id>/",
         OrderDeleteAPIView.as_view(),
         name="order-delete",
-    ),  # Delete an order
+    ),
     path(
         "archive/<int:order_id>/",
         OrderArchiveAPIView.as_view(),
         name="order-archive",
-    ),  # Archive an order
+    ),
     path(
         "change-orders/<int:order_id>/",
         ChangeOrderList.as_view(),
@@ -84,7 +94,7 @@ urlpatterns = [
         "<int:order_id>/control-system/",
         ControlSystemAPIView.as_view(),
         name="control-system",
-    ),  # Handle control system for an order
+    ),
     path(
         "<int:order_id>/equipment-submittal/",
         OrderEquipmentSubmittalView.as_view(),
