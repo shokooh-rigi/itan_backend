@@ -38,11 +38,11 @@ urlpatterns = [
         InvoiceOrderListView.as_view(),
         name="invoice-order-by-order_id",
     ),
-    path(
-        "invoice/order/",
-        InvoiceOrderListView.as_view(),
-        name="invoice-order",
-    ),
+    # path(
+    #     "invoice/order/",
+    #     InvoiceOrderListView.as_view(),
+    #     name="invoice-order",
+    # ),
     path(
         "invoice/update/<int:invoice_id>/",
         InvoiceUpdateView.as_view(),
