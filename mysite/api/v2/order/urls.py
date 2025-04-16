@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    ChangeOrderUnapproveView,
     OrderListAPIView,
     OrderAddAPIView,
     OrderEditAPIView,
@@ -73,6 +74,11 @@ urlpatterns = [
         "change-order/<int:change_order_id>/approve/",
         ChangeOrderApproveView.as_view(),
         name="change-order-approve",
+    ),
+    path(
+        "change-order/<int:change_order_id>/unapprove/",
+        ChangeOrderUnapproveView.as_view(),
+        name="change-order-unapprove",
     ),
     path(
         "<int:order_id>/control-system/",

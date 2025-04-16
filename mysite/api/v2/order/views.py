@@ -772,6 +772,30 @@ class ChangeOrderApproveView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ChangeOrderUnapproveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, change_order_id):
+        try:
+            # Call the service to approve the change order and generate the invoice PDF
+            change_order = ChangeOrderServiceLayer.unapprove_change_order(
+                change_order_id=change_order_id,
+            )
+            return Response(
+                {
+                    "message": f"Change order unapproved and invoice generated successfully.",
+                    "change_order": change_order,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except ChangeOrder.DoesNotExist:
+            return Response(
+                {"message": "Change order not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class TechLabelDeleteView(DestroyAPIView):
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer

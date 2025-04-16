@@ -55,6 +55,34 @@ class ChangeOrderServiceLayer:
 
         return this_change_order
 
+    @staticmethod
+    def unapprove_change_order(change_order_id):
+        # Fetch the ChangeOrder and related order
+        this_change_order = ChangeOrder.objects.get(id=change_order_id)
+        this_order = this_change_order.order
+
+        # Set the confirmed status based on action
+        this_change_order.confirmed = False
+        this_change_order.save()
+
+        # Calculate totals
+        total_count = (
+            InvoiceHistory.objects.filter(invoice=this_order.invoice).count() + 1
+        )
+        new_file_name = f"Invoice-{str(this_order.project_number[3:]).zfill(3)}-{str(this_order.id).zfill(3)}-{str(total_count)}"
+        total_invoiced = calculate_total_amount_due(this_order.invoice)
+        total_paid = calculate_total_paid(this_order.invoice)
+        balance_due = calculate_remaining_invoice_due(this_order.invoice)
+        InvoiceHistory.objects.create(
+            invoice=this_order.invoice,
+            total_invoiced=total_invoiced,
+            total_paid=total_paid,
+            balance_due=balance_due,
+            pdf_filename=new_file_name,
+        )
+
+        return this_change_order
+
 
 class DeleteChangeOrderService:
     """
