@@ -6,7 +6,7 @@ from .views import (
     OrderEditAPIView,
     OrderDeleteAPIView,
     OrderArchiveAPIView,
-    ChangeOrderCreateApiView,
+    ChangeOrderApiView,
     ChangeOrderDeleteAPIView,
     ChangeOrderApproveView,
     ControlSystemAPIView,
@@ -69,20 +69,25 @@ urlpatterns = [
     #     ChangeOrderDeleteAPIView.as_view(),
     #     name="change-order-delete",
     # ),
-    # path(
-    #     "change-<int:change_order_id>/approve/<str:action>/",
-    #     ChangeOrderApproveView.as_view(),
-    #     name="change-order-approve",
-    # ),
     path(
         "change-orders/<int:order_id>/",
         ChangeOrderList.as_view(),
         name="change-orders",
     ),
     path(
-        "add-change-order/<int:order_id>/",
-        ChangeOrderCreateApiView.as_view(),
+        "change-order/<int:order_id>/",
+        ChangeOrderApiView.as_view(),
         name="change-order-create",
+    ),
+    path(
+        "change-order/<int:change_order_id>/",
+        ChangeOrderDeleteAPIView.as_view(),
+        name="change-order-remove",
+    ),
+    path(
+        "change-order/<int:change_order_id>/approve/",
+        ChangeOrderApproveView.as_view(),
+        name="change-order-approve",
     ),
     path(
         "<int:order_id>/control-system/",

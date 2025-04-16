@@ -277,6 +277,7 @@ class OrderEditAPIView(APIView):
     Path Parameters:
         - order_id (int): The ID of the order to edit.
     """
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -451,22 +452,20 @@ class OrderArchiveAPIView(APIView):
     def post(self, request, order_id):
         this_order = OrderService.get_order(order_id)
         if order.proposal.estimate.created_by != user:
-            return  Response(
-                {"message":"You are not authorized to modify this record."},
-                status=status.HTTP_403_FORBIDDEN
-                )
+            return Response(
+                {"message": "You are not authorized to modify this record."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         OrderService.archive_order(this_order)
         return Response(
-            {"message": "Order archived successfully!"},
-            status=status.HTTP_200_OK
+            {"message": "Order archived successfully!"}, status=status.HTTP_200_OK
         )
 
 
-
-class ChangeOrderCreateApiView(APIView):
+class ChangeOrderApiView(APIView):
     """
-    API endpoint for creating a change order.
+    API endpoint for creating and deleting a change order.
 
     This view handles:
     - Validating incoming data using a serializer.
@@ -474,9 +473,150 @@ class ChangeOrderCreateApiView(APIView):
 
     Methods:
         - post: Creates a new change order along with associated services and generates a PDF.
+        - delete: Deletes a specific change order associated with an order.
 
     Parameters:
         - order_id (int): The ID of the order to associate with the change order.
+        - change_order_id (int): The ID of the change order to delete.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Create a change-order instance.",
+        request_body=ChangeOrderSerializer,
+        responses={
+            201: openapi.Response(
+                "Successfully created the change-order instance", ChangeOrderSerializer
+            ),
+            400: "Validation error in input data",
+            404: "Order not found",
+        },
+    )
+    def post(self, request, order_id):
+        """
+        Handles the creation of a change order.
+
+        Args:
+            request: The HTTP request containing the data for the change order.
+            order_id (int): The ID of the order to associate with the change order.
+
+        Returns:
+            Response: Success or error response based on the validation and execution.
+        """
+        # Retrieve the order from the URL parameter (order_id)
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+
+        # Don't include order_id in the request body; it should be in the URL
+        request_data = request.data.copy()
+        request_data["order"] = this_order.id
+
+        # Initialize the serializer with the request data
+        serializer = ChangeOrderSerializer(data=request_data)
+        if serializer.is_valid():
+            # Save the change order and return a success response
+            change_order = serializer.save(order=this_order)
+            return Response(
+                {
+                    "status": "Change order created successfully",
+                    "change_order_id": change_order.id,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Delete a specific change-order instance.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The ID of the order associated with the change order.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "change_order_id",
+                openapi.IN_PATH,
+                description="The ID of the change order to delete.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Change order deleted successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "status": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+            404: openapi.Response(
+                description="Order or change order not found.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "detail": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+        },
+    )
+    def delete(self, request, order_id, change_order_id):
+        """
+        Handles the deletion of a change order.
+
+        Args:
+            request: The HTTP request.
+            order_id (int): The ID of the order associated with the change order.
+            change_order_id (int): The ID of the change order to delete.
+
+        Returns:
+            Response: Success or error response based on the validation and execution.
+        """
+        # Retrieve the order and change order
+        this_order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False,
+        )
+        change_order = get_object_or_404(
+            ChangeOrder,
+            id=change_order_id,
+            order=this_order,
+            is_deleted=False,
+        )
+
+        # Perform the deletion
+        change_order.delete()
+        return Response(
+            {"status": "Change order deleted successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ChangeOrderApiView(APIView):
+    """
+    API endpoint for creating and deleting a change order.
+
+    This view handles:
+    - Validating incoming data using a serializer.
+    - Delegating business logic to the ChangeOrderServiceLayer.
+
+    Methods:
+        - post: Creates a new change order along with associated services and generates a PDF.
+        - delete: Deletes a specific change order associated with an order.
+
+    Parameters:
+        - order_id (int): The ID of the order to associate with the change order.
+        - change_order_id (int): The ID of the change order to delete.
     """
 
     permission_classes = [IsAuthenticated]
@@ -566,6 +706,7 @@ class ChangeOrderDeleteAPIView(APIView):
 
 class ChangeOrderList(APIView):
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_description="Retrieve all change orders for a specific order.",
         manual_parameters=[
@@ -610,18 +751,16 @@ class ChangeOrderList(APIView):
 class ChangeOrderApproveView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, change_order_id, action):
+    def post(self, request, change_order_id):
         try:
             # Call the service to approve the change order and generate the invoice PDF
-            new_file_name = ChangeOrderServiceLayer.approve_change_order(
+            change_order = ChangeOrderServiceLayer.approve_change_order(
                 change_order_id=change_order_id,
-                action=action,
-                user=request.user,
             )
             return Response(
                 {
                     "message": f"Change order approved and invoice generated successfully.",
-                    "file_name": new_file_name,
+                    "change_order": change_order,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -666,6 +805,7 @@ class TechLabelListView(ListAPIView):
     """
     API to list TechLabel instances.
     """
+
     queryset = TechLabel.objects.all()
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
@@ -676,6 +816,7 @@ class TechLabelCreateUpdateView(CreateAPIView):
     API to create or update TechLabel based on order_id.
     If a TechLabel already exists for the given order_id, it will be updated.
     """
+
     serializer_class = TechLabelSerializer
     permission_classes = [IsAuthenticated]
 
@@ -943,8 +1084,7 @@ class OrderFieldDrawingView(APIView):
 
             if not files:
                 return Response(
-                    {"detail": "No files provided."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST
                 )
 
             OrderFieldDrawingService.process_field_drawing_files(order, files)
@@ -986,7 +1126,11 @@ class OrderGeneralNotesView(APIView):
                 required=True,
             ),
         ],
-        responses={200: openapi.Response("General notes retrieved successfully.", GeneralNotesSerializer)},
+        responses={
+            200: openapi.Response(
+                "General notes retrieved successfully.", GeneralNotesSerializer
+            )
+        },
     )
     def get(self, request, order_id):
         """Retrieve the general notes and comments for an order."""
@@ -1028,7 +1172,7 @@ class OrderGeneralNotesView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        general_notes_and_comments = data.get("general_notes_and_comments","")
+        general_notes_and_comments = data.get("general_notes_and_comments", "")
 
         if data.get("finalize", False):
             order.general_notes_and_comments = general_notes_and_comments
@@ -1051,6 +1195,7 @@ class OrderGeneralNotesView(APIView):
             {"detail": "Invalid action or missing data."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
 
 class OrderSitePicturesView(APIView):
     """
