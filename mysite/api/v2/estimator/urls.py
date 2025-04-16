@@ -17,18 +17,46 @@ from .views import (
 )
 
 urlpatterns = [
-    path("get/", EstimateListView.as_view(), name="estimate-list"),
-    path("create/", EstimateCreateView.as_view(), name="estimate-create"),
-    path("update/<int:id>/", EstimateUpdateView.as_view(), name="estimate-update"),
-    path("delete/<int:id>/", EstimateDeleteView.as_view(), name="estimate-delete"),
-    path("archive/<int:id>/", EstimateArchiveView.as_view(), name="estimate-archive"),
+    path(
+        "get/",
+        EstimateListView.as_view(),
+        name="estimate-list"
+    ),
+    path(
+        "create/",
+        EstimateCreateView.as_view(),
+        name="estimate-create"
+    ),
+    path(
+        "update/<int:id>/",
+        EstimateUpdateView.as_view(),
+        name="estimate-update"
+    ),
+    path(
+        "delete/<int:id>/",
+        EstimateDeleteView.as_view(),
+        name="estimate-delete"
+    ),
+    path(
+        "archive/<int:id>/",
+        EstimateArchiveView.as_view(),
+        name="estimate-archive"
+    ),
     path(
         "duplicate/<int:id>/",
         EstimateDuplicateView.as_view(),
         name="estimate-duplicate",
     ),
-    path("details/<int:id>/", EstimateDetailsView.as_view(), name="estimate-details"),
-    path("fullId/<int:id>/", EstimateGetIDView.as_view(), name="estimate-details"),
+    path(
+        "details/<int:id>/",
+        EstimateDetailsView.as_view(),
+        name="estimate-details"
+    ),
+    path(
+        "fullId/<int:id>/",
+        EstimateGetIDView.as_view(),
+        name="estimate-details"
+    ),
     path(
         "bid/",
         EstimateBidListView.as_view(),

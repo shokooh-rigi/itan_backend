@@ -18,13 +18,21 @@ from .views import (
 
 
 urlpatterns = [
-    path("invoice/get/", InvoiceListView.as_view(), name="invoice-list"),
+    path(
+        "invoice/get/",
+        InvoiceListView.as_view(),
+        name="invoice-list"
+    ),
     path(
         "invoice/detail/<int:invoice_id>/",
         InvoiceDetailView.as_view(),
         name="invoice-detail",
     ),
-    path("invoice/create/", InvoiceCreateView.as_view(), name="invoice-create"),
+    path(
+        "invoice/create/",
+        InvoiceCreateView.as_view(),
+        name="invoice-create"
+    ),
     path(
         "invoice/order/<int:order_id>/",
         InvoiceOrderListView.as_view(),
@@ -41,7 +49,9 @@ urlpatterns = [
         name="invoice-update",
     ),
     path(
-        "invoice/delete/<int:id>/", InvoiceDeleteView.as_view(), name="invoice-delete"
+        "invoice/delete/<int:id>/",
+        InvoiceDeleteView.as_view(),
+        name="invoice-delete"
     ),
     path(
         "invoice/archive/<int:id>/",
