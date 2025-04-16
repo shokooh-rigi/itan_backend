@@ -448,21 +448,19 @@ class OrderArchiveAPIView(APIView):
         },
     )
     def post(self, request, order_id):
-        # Fetch the order
         this_order = OrderService.get_order(order_id)
+        if order.proposal.estimate.created_by != user:
+            return  Response(
+                {"message":"You are not authorized to modify this record."},
+                status=status.HTTP_403_FORBIDDEN
+                )
 
-        try:
-            # Check user permissions
-            # OrderService.validate_user_permission(this_order, request.user)
+        OrderService.archive_order(this_order)
+        return Response(
+            {"message": "Order archived successfully!"},
+            status=status.HTTP_200_OK
+        )
 
-            OrderService.archive_order(this_order)
-            return Response(
-                {"message": "Order archived successfully!"}, status=status.HTTP_200_OK
-            )
-
-        except PermissionDenied as e:
-            # Return error if the user is unauthorized
-            return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ChangeOrderCreateApiView(APIView):
