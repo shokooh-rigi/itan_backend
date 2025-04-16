@@ -93,34 +93,11 @@ class OrderSerializer(serializers.ModelSerializer):
     dalt_total = serializers.SerializerMethodField(read_only=True)
     final_total = serializers.SerializerMethodField(read_only=True)
     total = serializers.SerializerMethodField(read_only=True)
+    has_invoice = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Order
-        fields = [
-            "proposal",
-            "proposal_id",
-            "architect_name",
-            "id",
-            "project_number",
-            "po_number",
-            "date_po_received",
-            "final_offset",
-            "note",
-            "estimated_date_of_project",
-            "completion_percentage",
-            "fully_settled",
-            "archive",
-            "state",
-            "start_date",
-            "end_date",
-            "created_on",
-            "control_system",
-            "change_orders_total",
-            "predemo_total",
-            "dalt_total",
-            "final_total",
-            "total",
-        ]
+        fields = "__all__"
 
     def create(self, validated_data):
         """Override create method to link proposal using proposal_id"""
@@ -169,6 +146,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_total(self, obj):
         return obj.total
+
+    def get_has_invoice(self, obj):
+        """
+        Check if the order has an associated invoice.
+        """
+        return obj.has_invoice
 
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):

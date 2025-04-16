@@ -144,6 +144,13 @@ class Order(BaseModel):
         )
         return round(order_total, 2)
 
+    @property
+    def has_invoice(self):
+        """
+        Check if the order has an invoice associated with it.
+        """
+        return hasattr(self, "invoice")
+
     class Meta:
         ordering = ["-proposal"]
         verbose_name = "Order List"
@@ -151,6 +158,7 @@ class Order(BaseModel):
 
     def __str__(self):
         return self.project_number
+
 
 @receiver(post_save, sender=Order)
 def update_project_number(sender, instance, created, **kwargs):
