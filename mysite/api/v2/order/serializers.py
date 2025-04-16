@@ -170,6 +170,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
     """
 
     services = ChangeOrderServiceSerializer(many=True, required=False)
+    total = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ChangeOrder
@@ -177,6 +178,7 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
             "co_number",
             "confirmed",
             "date",
+            "total",
             "services",
         ]
 
@@ -205,6 +207,12 @@ class ChangeOrderSerializer(serializers.ModelSerializer):
             ChangeOrderService.objects.create(change_order=instance, **service_data)
 
         return instance
+    def get_total(self, obj):
+        """
+        Calculate the total amount for the ChangeOrder.
+        """
+        total = obj.changeorderservice_set.aggregate(Sum("amount"))["amount__sum"]
+        return total if total else 0.0
 
 
 class TechLabelExtraFieldsSerializer(serializers.ModelSerializer):
