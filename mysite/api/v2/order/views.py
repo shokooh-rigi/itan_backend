@@ -677,12 +677,7 @@ class ChangeOrderDeleteAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, order_id, change_order_id):
-        order = get_object_or_404(
-            Order,
-            id=order_id,
-            is_deleted=False,
-        )
+    def delete(self, request, change_order_id):
         change_order = get_object_or_404(
             ChangeOrder,
             id=change_order_id,
@@ -690,7 +685,7 @@ class ChangeOrderDeleteAPIView(APIView):
         )
 
         # Service layer handling change order deletion
-        service = DeleteChangeOrderService(order, request.user)
+        service = DeleteChangeOrderService(change_order.order, request.user)
         success = service.delete_change_order(change_order)
 
         if success:
@@ -760,7 +755,7 @@ class ChangeOrderApproveView(APIView):
             return Response(
                 {
                     "message": f"Change order approved and invoice generated successfully.",
-                    "change_order": change_order,
+                    "change_order": ChangeOrderSerializer(change_order).data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -784,7 +779,7 @@ class ChangeOrderUnapproveView(APIView):
             return Response(
                 {
                     "message": f"Change order unapproved and invoice generated successfully.",
-                    "change_order": change_order,
+                    "change_order": ChangeOrderSerializer(change_order).data,
                 },
                 status=status.HTTP_200_OK,
             )
