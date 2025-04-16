@@ -306,6 +306,7 @@ class OrderEditAPIView(APIView):
             Order,
             id=order_id,
             is_deleted=False,
+            archive=False,
         )
 
         order_data = OrderSerializer(this_order).data

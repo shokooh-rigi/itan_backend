@@ -29,16 +29,30 @@ from .views import (
 
 
 urlpatterns = [
-    path("", OrderListAPIView.as_view(), name="order-list"),
-    path("proposals/", OrderProposalListView.as_view(), name="order-proposal-list"),
+    path(
+        "",
+        OrderListAPIView.as_view(),
+        name="order-list"
+    ),
+    path(
+        "proposals/",
+        OrderProposalListView.as_view(),
+        name="order-proposal-list",
+    ),
     path(
         "proposals/<int:proposal_id>/",
         OrderProposalListView.as_view(),
         name="order-proposal-by-proposal_id",
     ),
-    path("add/", OrderAddAPIView.as_view(), name="order-add"),
     path(
-        "edit/<int:order_id>/", OrderEditAPIView.as_view(), name="order-edit"
+        "add/",
+        OrderAddAPIView.as_view(),
+        name="order-add"
+    ),
+    path(
+        "edit/<int:order_id>/",
+        OrderEditAPIView.as_view(),
+        name="order-edit"
     ),  # Edit an existing order
     path(
         "delete/<int:order_id>/",
