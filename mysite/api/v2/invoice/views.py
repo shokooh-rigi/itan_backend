@@ -246,7 +246,6 @@ class InvoiceListView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
 class InvoiceOrderListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -256,13 +255,6 @@ class InvoiceOrderListView(APIView):
             "This endpoint retrieves orders that are not archived and not associated with any invoice."
         ),
         manual_parameters=[
-            openapi.Parameter(
-                "order_id",
-                openapi.IN_QUERY,
-                description="Filter order by ID (optional)",
-                type=openapi.TYPE_INTEGER,
-                required=False,
-            ),
             openapi.Parameter(
                 "page",
                 openapi.IN_QUERY,
@@ -289,41 +281,25 @@ class InvoiceOrderListView(APIView):
     def get(self, request, order_id=None):
         """
         Retrieves available orders that are not archived or associated with an invoice.
-
-        Returns:
-            - Response: Serialized data of orders.
         """
         try:
-            # Fetch IDs of orders associated with invoices
-            invoice_order_ids = list(Invoice.objects.values_list("order_id", flat=True))
+            orders = (
+                Order.objects.filter(archive=False)
+                .exclude(id__in=Invoice.objects.values_list("order_id", flat=True))
+                .order_by("-created_on")
+            )
 
-            # Base query for non-archived orders
-            orders = Order.objects.filter(archive=False).exclude(id__in=invoice_order_ids)
-
-            # Filter by order_id if provided
             if order_id:
                 orders = orders.filter(id=order_id)
 
-            # Paginate results
-            page = int(request.GET.get("page", 1))
-            page_size = int(request.GET.get("page_size", 10))
-            paginator = Paginator(orders.order_by("-created_on"), page_size)
-            paginated_orders = paginator.get_page(page)
+            if not orders.exists():
+                return Response(
+                    {"detail": "No orders available."},
+                    status=status.HTTP_200_OK,
+                )
 
-            # Serialize and return paginated data
-            serializer = OrderSerializer(paginated_orders, many=True)
-            return Response(
-                {
-                    "orders": serializer.data,
-                    "pagination": {
-                        "total_rows": paginator.count,
-                        "total_pages": paginator.num_pages,
-                        "current_page": paginated_orders.number,
-                        "page_size": page_size,
-                    },
-                },
-                status=status.HTTP_200_OK,
-            )
+            serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(
@@ -333,6 +309,7 @@ class InvoiceOrderListView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 class InvoiceCreateView(APIView):
     """
