@@ -924,6 +924,7 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = ControlSystemSerializer
 
     @swagger_auto_schema(
+        operation_description="Update a control system with a file or URL for documentation.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -933,31 +934,33 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
                 "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
                 "documentation": openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    format=openapi.FORMAT_BINARY,
-                    description="Upload a file for documentation."
+                    format="binary",
+                    description="Upload a file or provide a URL for documentation."
                 ),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
-        )
+        ),
+        consumes=["multipart/form-data"],
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
     @swagger_auto_schema(
+        operation_description="Partially update a control system with a file or URL for documentation.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
                 "documentation": openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    format=openapi.FORMAT_BINARY,
-                    description="Upload a file for documentation."
+                    format="binary",
+                    description="Upload a file or provide a URL for documentation."
                 ),
             },
-        )
+        ),
+        consumes=["multipart/form-data"],
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
-
 
 class ControlSystemManufacturerListCreateView(ListCreateAPIView):
     """
