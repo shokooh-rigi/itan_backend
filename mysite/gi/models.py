@@ -127,12 +127,8 @@ class Invoice(BaseModelWithCreatedByUser):
         return self.sub_total * self.percent_of_performance_completed / 100
 
     @property
-    def remaining_due(self):
-        return self.total_invoiced - self.total_paid
-
-    @property
     def amount_due(self):
-        return self.remaining_due
+        return self.total_invoiced - self.total_paid
 
 
 class InvoiceTransaction(BaseModelWithCreatedByUser):

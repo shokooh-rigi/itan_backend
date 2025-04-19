@@ -24,16 +24,15 @@ class InvoiceSerializer(serializers.ModelSerializer):
     """
 
     order = OrderSerializer(read_only=True)
+    order_id = serializers.IntegerField(write_only=True)
     invoice_number = serializers.SerializerMethodField(read_only=True)
     revision_date = serializers.SerializerMethodField(read_only=True)
     amount = serializers.SerializerMethodField(read_only=True)
     sub_total = serializers.SerializerMethodField(read_only=True)
     total_paid = serializers.SerializerMethodField(read_only=True)
     total_invoiced = serializers.SerializerMethodField(read_only=True)
-    remaining_due = serializers.SerializerMethodField(read_only=True)
     amount_due = serializers.SerializerMethodField(read_only=True)
     balance_due = serializers.SerializerMethodField(read_only=True)
-    order_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Invoice
@@ -71,17 +70,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
     def get_total_invoiced(self, obj):
         return obj.total_invoiced
 
-    def get_remaining_due(self, obj):
-        """
-        Safely calculate the remaining due amount by ensuring type compatibility
-        and handling potential None values.
-        """
-        total_invoiced = Decimal(obj.total_invoiced or 0)
-        total_paid = Decimal(obj.total_paid or 0)
-        return total_invoiced - total_paid
-
     def get_amount_due(self, obj):
-        return obj.remaining_due
+        return obj.amount_due
 
     def get_balance_due(self, obj):
         balance_due = calculate_remaining_invoice_due(obj)
@@ -240,7 +230,7 @@ class MassPaymentSerializer(serializers.ModelSerializer):
 
         invoice_list = []
         for invoice in invoices:
-            if invoice.remaining_due > 0:
+            if invoice.amount_due > 0:
                 invoice_dict = {
                     "id": invoice.id,
                     "order_id": invoice.order_id,

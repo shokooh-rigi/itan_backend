@@ -63,51 +63,6 @@ class InvoiceListView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        """
-        Sends an invoice email to the specified recipient.
-
-        Parameters:
-            request (Request): HTTP request containing the email details in the following format:
-                - `email_id` (int): ID of the invoice to be sent.
-                - `to_email` (str): Recipient's email address.
-                - `cc` (str, optional): CC email address(es). Default is an empty string.
-                - `subject` (str): Email subject.
-
-        Returns:
-            Response:
-                - HTTP 200: On successful email dispatch.
-                - HTTP 400: If email sending fails or data is invalid.
-
-        Example Request Body:
-            {
-                "email_id": 123,
-                "to_email": "example@domain.com",
-                "cc": "cc@domain.com",
-                "subject": "Invoice #123"
-            }
-        """
-        serializer = EmailSerializer(data=request.data)
-        if serializer.is_valid():
-            invoice_id = serializer.validated_data["email_id"]
-            to_email = serializer.validated_data["to_email"]
-            cc = serializer.validated_data.get("cc", "")
-            subject = serializer.validated_data["subject"]
-
-            success = InvoiceEmailService.send_invoice_email(
-                invoice_id, to_email, cc, subject
-            )
-            if success:
-                return Response(
-                    {"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK
-                )
-
-            return Response(
-                {"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     @swagger_auto_schema(
         operation_description="Retrieve a filtered and paginated list of invoices.",
         manual_parameters=[
@@ -230,6 +185,7 @@ class InvoiceListView(APIView):
 
         # Serialize and return response
         serializer = InvoiceSerializer(paginated_invoices, many=True)
+        print(serializer.data)
         overdue_days = ListInvoiceService.get_overdue_days()
 
         return Response(
@@ -246,6 +202,51 @@ class InvoiceListView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+    def post(self, request):
+        """
+        Sends an invoice email to the specified recipient.
+
+        Parameters:
+            request (Request): HTTP request containing the email details in the following format:
+                - `email_id` (int): ID of the invoice to be sent.
+                - `to_email` (str): Recipient's email address.
+                - `cc` (str, optional): CC email address(es). Default is an empty string.
+                - `subject` (str): Email subject.
+
+        Returns:
+            Response:
+                - HTTP 200: On successful email dispatch.
+                - HTTP 400: If email sending fails or data is invalid.
+
+        Example Request Body:
+            {
+                "email_id": 123,
+                "to_email": "example@domain.com",
+                "cc": "cc@domain.com",
+                "subject": "Invoice #123"
+            }
+        """
+        serializer = EmailSerializer(data=request.data)
+        if serializer.is_valid():
+            invoice_id = serializer.validated_data["email_id"]
+            to_email = serializer.validated_data["to_email"]
+            cc = serializer.validated_data.get("cc", "")
+            subject = serializer.validated_data["subject"]
+
+            success = InvoiceEmailService.send_invoice_email(
+                invoice_id, to_email, cc, subject
+            )
+            if success:
+                return Response(
+                    {"message": "Invoice sent successfully!"}, status=status.HTTP_200_OK
+                )
+
+            return Response(
+                {"error": "Failed to send invoice."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InvoiceOrderListView(APIView):

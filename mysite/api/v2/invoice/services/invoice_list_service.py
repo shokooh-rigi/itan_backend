@@ -18,12 +18,12 @@ class ListInvoiceService:
 
     @staticmethod
     def filter_invoices(
-            search=None,
-            from_date=None,
-            to_date=None,
-            ordering=None,
-            invoice_type=None,
-            overdue=False,
+        search=None,
+        from_date=None,
+        to_date=None,
+        ordering=None,
+        invoice_type=None,
+        overdue=False,
     ):
         """
         Filters invoices based on search query, date range, ordering, type, and overdue status.
@@ -43,17 +43,19 @@ class ListInvoiceService:
 
         # Add search filter
         if search:
-            filters &= (
-                    Q(order__project_number__icontains=search) |
-                    Q(order__proposal__estimate__project__name__icontains=search)
+            filters &= Q(order__project_number__icontains=search) | Q(
+                order__proposal__estimate__project__name__icontains=search
             )
 
         # Add date range filter
         if from_date and to_date:
             try:
-                from_date_obj = datetime.datetime.strptime(from_date, '%m/%d/%Y')
-                to_date_obj = datetime.datetime.strptime(to_date, '%m/%d/%Y') + datetime.timedelta(
-                    days=1) - datetime.timedelta(seconds=1)
+                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = (
+                    datetime.datetime.strptime(to_date, "%m/%d/%Y")
+                    + datetime.timedelta(days=1)
+                    - datetime.timedelta(seconds=1)
+                )
                 filters &= Q(created_on__range=(from_date_obj, to_date_obj))
             except ValueError:
                 raise ValueError("Invalid date format. Please use 'MM/DD/YYYY'.")
@@ -65,13 +67,17 @@ class ListInvoiceService:
         # Add overdue filter
         if overdue:
             overdue_days = ListInvoiceService.get_overdue_days()
-            overdue_date = datetime.datetime.now() - datetime.timedelta(days=int(overdue_days))
+            overdue_date = datetime.datetime.now() - datetime.timedelta(
+                days=int(overdue_days)
+            )
             filters &= Q(created_on__lte=overdue_date)
 
         # Handle ordering safely
-        ordering = ordering or 'id'
+        result = Invoice.objects.filter(filters)
+        if ordering:
+            result = result.order_by(ordering)
 
-        return Invoice.objects.filter(filters).order_by(ordering)
+        return result
 
     @staticmethod
     def filter_by_type(invoice_type):
@@ -87,27 +93,29 @@ class ListInvoiceService:
         """
         to_be_deleted = []
 
-        if invoice_type == 'fully-paid':
+        if invoice_type == "fully-paid":
             for invoice in Invoice.objects.all():
                 if calculate_remaining_invoice_due(invoice) == 0:
                     to_be_deleted.append(invoice.id)
             return Q(id__in=to_be_deleted)
 
-        elif invoice_type == 'partial-paid':
+        elif invoice_type == "partial-paid":
             for invoice in Invoice.objects.all():
                 if calculate_remaining_invoice_due(invoice) != 0:
                     to_be_deleted.append(invoice.id)
             return Q(id__in=to_be_deleted) & Q(invoicetransaction__isnull=False)
 
-        elif invoice_type == 'not-paid':
+        elif invoice_type == "not-paid":
             return Q(invoicetransaction__isnull=True)
 
-        elif invoice_type == 'old-estimate':
-            old_due_date = datetime.datetime.strptime('04/01/2020', '%m/%d/%Y')
+        elif invoice_type == "old-estimate":
+            old_due_date = datetime.datetime.strptime("04/01/2020", "%m/%d/%Y")
             for invoice in Invoice.objects.all():
                 if calculate_remaining_invoice_due(invoice) != 0:
                     to_be_deleted.append(invoice.id)
-            return Q(order__proposal__estimate__due_date__lte=old_due_date) & Q(id__in=to_be_deleted)
+            return Q(order__proposal__estimate__due_date__lte=old_due_date) & Q(
+                id__in=to_be_deleted
+            )
 
         return Q()
 
@@ -121,6 +129,6 @@ class ListInvoiceService:
                  Returns 0 if the setting is not found.
         """
         try:
-            return Setting.objects.get(key='Overdue Days').value
+            return Setting.objects.get(key="Overdue Days").value
         except Setting.DoesNotExist:
             return 0
