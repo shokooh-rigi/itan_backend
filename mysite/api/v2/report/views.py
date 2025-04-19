@@ -101,7 +101,6 @@ class PerformanceListView(APIView):
             "from_date": from_date,
             "to_date": to_date,
             "bid_count": bids.count(),
-            "bid_total": bids.aggregate(total=Sum("amount"))["total"] or 0,
             "estimate_count": estimates.count(),
             "estimate_total": estimates.aggregate(total=Sum("amount"))["total"] or 0,
             "proposal_count": proposals.count(),
