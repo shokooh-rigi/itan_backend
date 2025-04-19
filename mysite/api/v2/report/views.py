@@ -96,13 +96,14 @@ class PerformanceListView(APIView):
             created_on__range=(from_date, to_date),
             order__proposal__estimate__customer__in=customers
         )
+        estimate_total = sum(estimate.sub_total for estimate in estimates)
         response_data = {
             "customer_type": customer_type,
             "from_date": from_date,
             "to_date": to_date,
             "bid_count": bids.count(),
             "estimate_count": estimates.count(),
-            "estimate_total": estimates.aggregate(total=Sum("amount"))["total"] or 0,
+            "estimate_total": estimate_total,
             "proposal_count": proposals.count(),
             "proposal_total": proposals.aggregate(total=Sum("amount"))["total"] or 0,
             "order_count": orders.count(),

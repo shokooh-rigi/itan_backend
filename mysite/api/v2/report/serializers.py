@@ -17,7 +17,6 @@ class PerformanceReportSerializer(serializers.Serializer):
     to_date = serializers.DateField()
 
     bid_count = serializers.IntegerField()
-    bid_total = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     estimate_count = serializers.IntegerField()
     estimate_total = serializers.DecimalField(max_digits=12, decimal_places=2)
