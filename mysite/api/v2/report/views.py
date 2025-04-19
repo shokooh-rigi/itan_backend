@@ -64,17 +64,18 @@ class PerformanceListView(APIView):
 
         if customer_type == "company":
             customers = Company.objects.all()
+            customer_filter = {"customer__company__in": customers}
         elif customer_type == "person":
             customers = Person.objects.all()
+            customer_filter = {"customer__person__in": customers}
         else:
             return Response(
                 {"error": "Invalid customer type. Valid types are company/person."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
-        bids = BidFile.objects.filter(created_on__range=(from_date, to_date), customer__in=customers)
-        estimates = Estimate.objects.filter(created_on__range=(from_date, to_date), customer__in=customers)
+        bids = BidFile.objects.filter(created_on__range=(from_date, to_date), **customer_filter)
+        estimates = Estimate.objects.filter(created_on__range=(from_date, to_date), **customer_filter)
         proposals = Proposal.objects.filter(created_on__range=(from_date, to_date), estimate__customer__in=customers)
         orders = Order.objects.filter(created_on__range=(from_date, to_date), proposal__estimate__customer__in=customers)
         invoices = Invoice.objects.filter(created_on__range=(from_date, to_date), order__proposal__estimate__customer__in=customers)
@@ -97,7 +98,6 @@ class PerformanceListView(APIView):
 
         serializer = PerformanceReportSerializer(response_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 
 class JobCostingListView(APIView):
