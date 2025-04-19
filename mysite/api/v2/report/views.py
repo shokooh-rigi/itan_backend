@@ -64,13 +64,12 @@ class PerformanceListView(APIView):
                 {"error": "Invalid date format. Use YYYY-MM-DD."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         if customer_type == "company":
             customers = Person.objects.filter(company__in=Company.objects.all())
-            customer_filter = {"estimate__customer__in": customers}
+            customer_filter = {"customer__in": customers}
         elif customer_type == "person":
             customers = Person.objects.all()
-            customer_filter = {"estimate__customer__in": customers}
+            customer_filter = {"customer__in": customers}
         else:
             return Response(
                 {"error": "Invalid customer type. Valid types are company/person."},
@@ -87,7 +86,7 @@ class PerformanceListView(APIView):
         )
         proposals = Proposal.objects.filter(
             created_on__range=(from_date, to_date),
-            **customer_filter
+            estimate__customer__in=customers
         )
         orders = Order.objects.filter(
             created_on__range=(from_date, to_date),
