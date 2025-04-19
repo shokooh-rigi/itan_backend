@@ -1068,6 +1068,12 @@ class OrderFieldDrawingView(APIView):
                 required=True,
             ),
             openapi.Parameter(
+                "colored_drawing_finalize",
+                openapi.IN_PATH,
+                description="The finalized colored drawing ",
+                type=openapi.TYPE_BOOLEAN,
+            ),
+            openapi.Parameter(
                 "colored_drawing",
                 openapi.IN_FORM,
                 description="Field drawing files to be uploaded",
@@ -1094,6 +1100,10 @@ class OrderFieldDrawingView(APIView):
 
             colored_drawing = request.FILES.get("colored_drawing")
             report_colored_drawing = request.FILES.get("report_colored_drawing")
+            finalize = serializer.validated_data.get("colored_drawing_finalize", False)
+            if finalize:
+                order.colored_drawing_finalize = True
+                order.save()
 
             uploaded_files = []
 
@@ -1108,10 +1118,6 @@ class OrderFieldDrawingView(APIView):
                     order.report_colored_drawing.delete(save=False)
                 order.report_colored_drawing.save(report_colored_drawing.name, report_colored_drawing)
                 uploaded_files.append(report_colored_drawing)
-
-            # Only call service if there's at least one file
-            if uploaded_files:
-                OrderFieldDrawingService.process_field_drawing_files(order, uploaded_files)
 
             return Response(
                 {"detail": "Field drawing updated successfully."},

@@ -313,3 +313,4 @@ class GeneralNotesSerializer(Serializer):
 class FieldDrawingUploadSerializer(Serializer):
     colored_drawing = FileField(required=False, allow_null=True)
     report_colored_drawing = FileField(required=False, allow_null=True)
+    colored_drawing_finalize = BooleanField()
