@@ -914,8 +914,6 @@ class ControlSystemListCreateView(ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 
 class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     """
@@ -940,7 +938,6 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
                 ),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
-            required=["version_number", "os", "release_date", "manufacturer_id"],
         )
     )
     def put(self, request, *args, **kwargs):
