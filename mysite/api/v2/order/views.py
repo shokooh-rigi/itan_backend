@@ -1203,7 +1203,7 @@ class OrderGeneralNotesView(APIView):
                 required=True,
             ),
         ],
-        request=GeneralNotesSerializer,
+        request_body=GeneralNotesSerializer,
         responses={
             200: openapi.Response("General notes updated successfully."),
             400: openapi.Response("Invalid input"),
