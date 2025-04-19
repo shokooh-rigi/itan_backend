@@ -14,6 +14,7 @@ from .views import (
     OrderEquipmentSubmittalView,
     OrderFieldDrawingView,
     OrderGeneralNotesView,
+    OrderGeneralNotesFinalizeView,
     OrderSitePicturesView,
     OrderFullUpdateAPIView,
     OrderProposalListView,
@@ -92,6 +93,11 @@ urlpatterns = [
         "<int:order_id>/general-notes/",
         OrderGeneralNotesView.as_view(),
         name="order-general-notes",
+    ),
+    path(
+        "<int:order_id>/general-notes-finalize/",
+        OrderGeneralNotesFinalizeView.as_view(),
+        name="order-general-notes-finalize",
     ),
     path(
         "<int:order_id>/site-pictures/",

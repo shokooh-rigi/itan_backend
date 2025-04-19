@@ -291,13 +291,17 @@ class GeneralNotesSerializer(Serializer):
     """Serializer for saving and finalizing general notes"""
 
     general_notes_and_comments = CharField(
-        required=True, help_text="The general notes and comments for the order."
+        required=True,
+        help_text="The general notes and comments for the order."
     )
-    finalize = BooleanField(
-        required=False, default=False, help_text="If true, finalize the notes."
-    )
-    save = BooleanField(
-        required=False, default=False, help_text="If true, save the notes."
+
+
+class OrderFinalizeSerializer(Serializer):
+    """Serializer for finalizing an order"""
+
+    general_notes_and_comments_finalize = BooleanField(
+        required=True,
+        help_text="If true, finalize the order."
     )
 
 
