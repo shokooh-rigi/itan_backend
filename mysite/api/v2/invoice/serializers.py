@@ -72,7 +72,13 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return obj.total_invoiced
 
     def get_remaining_due(self, obj):
-        return Decimal(str(obj.total_invoiced)) - Decimal(str(obj.total_paid))
+        """
+        Safely calculate the remaining due amount by ensuring type compatibility
+        and handling potential None values.
+        """
+        total_invoiced = Decimal(obj.total_invoiced or 0)
+        total_paid = Decimal(obj.total_paid or 0)
+        return total_invoiced - total_paid
 
     def get_amount_due(self, obj):
         return obj.amount_due
