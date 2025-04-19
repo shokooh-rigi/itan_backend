@@ -914,6 +914,9 @@ class ControlSystemListCreateView(ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     """
     API for retrieving, updating, and deleting a specific Control System.
@@ -921,6 +924,42 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "version_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "os": openapi.Schema(type=openapi.TYPE_STRING),
+                "release_date": openapi.Schema(type=openapi.FORMAT_DATE),
+                "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
+                "documentation": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_BINARY,
+                    description="Upload a file for documentation."
+                ),
+                "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+            required=["version_number", "os", "release_date", "manufacturer_id"],
+        )
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "documentation": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_BINARY,
+                    description="Upload a file for documentation."
+                ),
+            },
+        )
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
 
 class ControlSystemManufacturerListCreateView(ListCreateAPIView):
