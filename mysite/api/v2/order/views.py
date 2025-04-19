@@ -902,7 +902,8 @@ class ControlSystemListCreateView(ListCreateAPIView):
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
                 "control_file_url": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="url",
+                    type=openapi.TYPE_STRING,
+                    format="url",
                 ),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
@@ -913,7 +914,6 @@ class ControlSystemListCreateView(ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
-
 
 
 class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
@@ -932,7 +932,9 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
                 "version_number": openapi.Schema(type=openapi.TYPE_STRING),
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.FORMAT_DATE),
-                "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
+                "control_file_url": openapi.Schema(
+                    type=openapi.TYPE_STRING, format="url"
+                ),
                 "documentation": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
@@ -1134,7 +1136,9 @@ class OrderFieldDrawingView(APIView):
             if report_colored_drawing:
                 if order.report_colored_drawing:
                     order.report_colored_drawing.delete(save=False)
-                order.report_colored_drawing.save(report_colored_drawing.name, report_colored_drawing)
+                order.report_colored_drawing.save(
+                    report_colored_drawing.name, report_colored_drawing
+                )
                 uploaded_files.append(report_colored_drawing)
 
             return Response(
@@ -1185,7 +1189,10 @@ class OrderGeneralNotesView(APIView):
         order = get_object_or_404(Order, id=order_id, is_deleted=False)
 
         return Response(
-            {"general_notes_and_comments": order.general_notes_and_comments},
+            {
+                "general_notes_and_comments": order.general_notes_and_comments,
+                "general_notes_and_comments_finalize": order.general_notes_and_comments_finalize,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -1205,7 +1212,9 @@ class OrderGeneralNotesView(APIView):
         serializer = GeneralNotesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        order.general_notes_and_comments = serializer.validated_data["general_notes_and_comments"]
+        order.general_notes_and_comments = serializer.validated_data[
+            "general_notes_and_comments"
+        ]
         order.save()
 
         return Response(
