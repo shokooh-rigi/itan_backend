@@ -945,22 +945,6 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Partially update a control system with a file or URL for documentation.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "documentation": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    format="binary",
-                    description="Upload a file or provide a URL for documentation."
-                ),
-            },
-        ),
-        consumes=["multipart/form-data"],
-    )
-    def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
 
 class ControlSystemManufacturerListCreateView(ListCreateAPIView):
     """
