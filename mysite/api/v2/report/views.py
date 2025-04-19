@@ -98,6 +98,8 @@ class PerformanceListView(APIView):
         )
         estimate_total = sum(estimate.sub_total for estimate in estimates)
         proposal_total = sum(proposal.estimate.sub_total for proposal in proposals if proposal.estimate)
+        order_total = orders.aggregate(total=Sum("order_settled_value"))["total"] or 0
+        invoice_total = sum(invoice.total_invoiced for invoice in invoices)
         response_data = {
             "customer_type": customer_type,
             "from_date": from_date,
@@ -108,9 +110,9 @@ class PerformanceListView(APIView):
             "proposal_count": proposals.count(),
             "proposal_total": proposal_total,
             "order_count": orders.count(),
-            "order_total": orders.aggregate(total=Sum("amount"))["total"] or 0,
+            "order_total": order_total,
             "invoice_count": invoices.count(),
-            "invoice_total": invoices.aggregate(total=Sum("total_invoiced"))["total"] or 0,
+            "invoice_total": invoice_total,
         }
 
         serializer = PerformanceReportSerializer(response_data)
