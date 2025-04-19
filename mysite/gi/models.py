@@ -128,7 +128,7 @@ class Invoice(BaseModelWithCreatedByUser):
 
     @property
     def amount_due(self):
-        return self.total_invoiced - self.total_paid
+        return float(self.total_invoiced) - float(self.total_paid)
 
 
 class InvoiceTransaction(BaseModelWithCreatedByUser):
