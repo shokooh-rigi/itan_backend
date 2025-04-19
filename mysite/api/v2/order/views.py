@@ -901,7 +901,7 @@ class ControlSystemListCreateView(ListCreateAPIView):
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.TYPE_STRING, format="date"),
                 "control_file_url": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="url"
+                    type=openapi.TYPE_STRING, format="url", required=False,
                 ),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
