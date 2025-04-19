@@ -7,6 +7,8 @@ from rest_framework.serializers import (
     FileField,
     CharField,
 )
+import requests
+from django.core.files.base import ContentFile
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
@@ -39,7 +41,7 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
     )
-    documentation = serializers.FileField()
+    documentation = serializers.FileField(required=False)
 
     class Meta:
         model = ControlSystem
@@ -74,6 +76,20 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         if request and request.method in ["POST", "PUT", "PATCH"]:
             data.pop("manufacturer", None)
         return data
+
+    def validate_documentation(self, value):
+        """
+        Validate the documentation field to accept either a file or a URL.
+        """
+        if isinstance(value, str):  # If it's a URL
+            try:
+                response = requests.get(value)
+                response.raise_for_status()
+                file_name = value.split("/")[-1]
+                return ContentFile(response.content, name=file_name)
+            except requests.RequestException:
+                raise serializers.ValidationError("Invalid URL or unable to fetch the file.")
+        return value
 
 
 class OrderSerializer(serializers.ModelSerializer):
