@@ -61,22 +61,20 @@ class ControlSystemSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        manufacturer = validated_data.pop("manufacturer_id")
-        control_system = ControlSystem.objects.create(
-            manufacturer=manufacturer, **validated_data
-        )
-        return control_system
+        # Pop the manufacturer_id and fetch the related object
+        manufacturer_id = validated_data.pop("manufacturer_id")
+        manufacturer = ControlSystemManufacturer.objects.get(id=manufacturer_id)
+        # Assign the manufacturer object to the validated data
+        validated_data["manufacturer"] = manufacturer
+        return super().create(validated_data)
 
-    def to_representation(self, instance):
-        """
-        Ensures 'manufacturer' is only included in the response, not in requests.
-        """
-        data = super().to_representation(instance)
-        request = self.context.get("request")
-        if request and request.method in ["POST", "PUT", "PATCH"]:
-            data.pop("manufacturer", None)
-        return data
-
+    def update(self, instance, validated_data):
+        # Pop the manufacturer_id and fetch the related object if provided
+        manufacturer_id = validated_data.pop("manufacturer_id", None)
+        if manufacturer_id:
+            manufacturer = ControlSystemManufacturer.objects.get(id=manufacturer_id)
+            validated_data["manufacturer"] = manufacturer
+        return super().update(instance, validated_data)
 
 class OrderSerializer(serializers.ModelSerializer):
     """
