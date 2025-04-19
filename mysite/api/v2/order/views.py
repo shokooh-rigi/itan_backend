@@ -1187,14 +1187,9 @@ class OrderGeneralNotesView(APIView):
     def get(self, request, order_id):
         """Retrieve the general notes and comments for an order."""
         order = get_object_or_404(Order, id=order_id, is_deleted=False)
+        serializer = GeneralNotesSerializer(order)
 
-        return Response(
-            {
-                "general_notes_and_comments": order.general_notes_and_comments,
-                "general_notes_and_comments_finalize": order.general_notes_and_comments_finalize,
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="Save general notes for an order",
@@ -1212,50 +1207,18 @@ class OrderGeneralNotesView(APIView):
         serializer = GeneralNotesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        order.general_notes_and_comments = serializer.validated_data[
-            "general_notes_and_comments"
-        ]
+        if "general_notes_and_comments" in serializer.validated_data:
+            order.general_notes_and_comments = serializer.validated_data[
+                "general_notes_and_comments"
+            ]
+        if "general_notes_and_comments_finalize" in serializer.validated_data:
+            order.general_notes_and_comments_finalize = serializer.validated_data[
+                "general_notes_and_comments_finalize"
+            ]
         order.save()
 
         return Response(
             {"detail": "General notes updated successfully."},
-            status=status.HTTP_200_OK,
-        )
-
-
-class OrderGeneralNotesFinalizeView(APIView):
-    """
-    API View to finalize an order.
-
-    - `POST`: Finalize the order and generate
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_summary="Finalize an order",
-        operation_description="Finalizes the order and generates a ZIP file with all relevant documents.",
-        request_body=OrderFinalizeSerializer,
-        responses={
-            200: openapi.Response("Order finalized successfully."),
-            400: openapi.Response("Invalid input"),
-        },
-    )
-    def post(self, request, order_id):
-        """
-        Finalize an order and generate a ZIP file with all relevant documents.
-        """
-        order = get_object_or_404(Order, id=order_id, is_deleted=False)
-
-        serializer = OrderFinalizeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        finalize = serializer.validated_data["general_notes_and_comments_finalize"]
-        order.general_notes_and_comments_finalize = finalize
-        order.save()
-
-        return Response(
-            {"detail": f"Order finalized successfully."},
             status=status.HTTP_200_OK,
         )
 

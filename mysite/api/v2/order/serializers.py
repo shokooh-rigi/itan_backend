@@ -56,14 +56,18 @@ class ControlSystemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Pop the manufacturer_id and fetch the related object
         manufacturer_id = validated_data.pop("manufacturer_id")
-        validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(id=manufacturer_id)
+        validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(
+            id=manufacturer_id
+        )
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         # Pop the manufacturer_id and fetch the related object if provided
         manufacturer_id = validated_data.pop("manufacturer_id", None)
         if manufacturer_id:
-            validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(id=manufacturer_id)
+            validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(
+                id=manufacturer_id
+            )
         return super().update(instance, validated_data)
 
 
@@ -287,21 +291,19 @@ class EquipmentSubmittalSerializer(Serializer):
     )
 
 
-class GeneralNotesSerializer(Serializer):
+class GeneralNotesSerializer(serializers.ModelSerializer):
     """Serializer for saving and finalizing general notes"""
 
-    general_notes_and_comments = CharField(
-        required=True,
-        help_text="The general notes and comments for the order."
-    )
+    class Meta:
+        model = Order
+        fields = ["general_notes_and_comments", "general_notes_and_comments_finalize"]
 
 
 class OrderFinalizeSerializer(Serializer):
     """Serializer for finalizing an order"""
 
     general_notes_and_comments_finalize = BooleanField(
-        required=True,
-        help_text="If true, finalize the order."
+        required=True, help_text="If true, finalize the order."
     )
 
 
