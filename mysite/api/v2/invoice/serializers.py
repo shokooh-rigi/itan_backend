@@ -81,7 +81,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return total_invoiced - total_paid
 
     def get_amount_due(self, obj):
-        return obj.amount_due
+        return obj.remaining_due
 
     def get_balance_due(self, obj):
         balance_due = calculate_remaining_invoice_due(obj)
