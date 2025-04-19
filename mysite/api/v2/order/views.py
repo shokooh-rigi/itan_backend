@@ -45,7 +45,6 @@ from .serializers import (
     ControlSystemSerializer,
     ControlSystemManufacturerSerializer,
     GeneralNotesSerializer,
-    OrderFinalizeSerializer,
     EquipmentSubmittalSerializer,
     FieldDrawingUploadSerializer,
 )

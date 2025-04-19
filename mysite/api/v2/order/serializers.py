@@ -296,15 +296,11 @@ class GeneralNotesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["general_notes_and_comments", "general_notes_and_comments_finalize"]
+        fields = [
+            "general_notes_and_comments",
+            "general_notes_and_comments_finalize"
+        ]
 
-
-class OrderFinalizeSerializer(Serializer):
-    """Serializer for finalizing an order"""
-
-    general_notes_and_comments_finalize = BooleanField(
-        required=True, help_text="If true, finalize the order."
-    )
 
 
 class FieldDrawingUploadSerializer(Serializer):
