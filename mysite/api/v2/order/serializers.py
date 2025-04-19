@@ -311,10 +311,5 @@ class GeneralNotesSerializer(Serializer):
 
 
 class FieldDrawingUploadSerializer(Serializer):
-    """Serializer for handling field drawing file uploads."""
-
-    field_drawing = ListField(
-        child=FileField(),
-        required=True,
-        help_text="List of field drawing files to upload.",
-    )
+    colored_drawing = FileField(required=False, allow_null=True)
+    report_colored_drawing = FileField(required=False, allow_null=True)

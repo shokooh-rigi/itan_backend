@@ -9,33 +9,28 @@ from mysite import settings
 class OrderFieldDrawingService:
     @staticmethod
     def process_field_drawing_files(order, files):
-        """Process the field drawing files: validate, save, and create a zip file."""
-        # Set the directory for saving files
-        temp_path = os.path.join(os.path.abspath(os.path.dirname("__file__")), "media/uploads/field_draw")
-        if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
+        if not files:
+            return
 
-        # Validate file sizes
+        temp_path = os.path.join(settings.MEDIA_ROOT, "uploads/field_draw")
+        os.makedirs(temp_path, exist_ok=True)
+
         size_sum = sum([file.size for file in files])
         if size_sum > settings.MAX_UPLOAD_SIZE:
             raise ValidationError("Selected files exceeded maximum upload size!")
 
-        # Save the files
         saved_files = []
         for file in files:
             file_path = os.path.join(temp_path, file.name)
             OrderFieldDrawingService.save_uploaded_file(file, file_path)
             saved_files.append(file_path)
 
-        # Create zip file
-        project_clean_name = order.project_number.replace(' ', '_').replace('!', '') \
-            .replace('@', '').replace('#', '').replace('$', '').replace('%', '') \
-            .replace('^', '').replace('&', '').replace('*', '').replace("/", '')
+        project_clean_name = "".join(c for c in order.project_number if c.isalnum() or c == "_")
         zip_file_name = f"{project_clean_name}-Field-Drawing.zip"
-        OrderFieldDrawingService.create_zip_file(saved_files, temp_path, zip_file_name)
 
-        # Save zip file to the order
-        with open(os.path.join(temp_path, zip_file_name), 'rb') as f:
+        zip_path = OrderFieldDrawingService.create_zip_file(saved_files, temp_path, zip_file_name)
+
+        with open(zip_path, 'rb') as f:
             order.field_draw.save(zip_file_name, f)
 
     @staticmethod

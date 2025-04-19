@@ -1068,11 +1068,16 @@ class OrderFieldDrawingView(APIView):
                 required=True,
             ),
             openapi.Parameter(
-                "field_drawing",
+                "colored_drawing",
                 openapi.IN_FORM,
                 description="Field drawing files to be uploaded",
                 type=openapi.TYPE_FILE,
-                required=True,
+            ),
+            openapi.Parameter(
+                "report_colored_drawing",
+                openapi.IN_FORM,
+                description="Field drawing files to be uploaded",
+                type=openapi.TYPE_FILE,
             ),
         ],
         responses={
@@ -1082,31 +1087,31 @@ class OrderFieldDrawingView(APIView):
         },
     )
     def post(self, request, order_id):
-        """
-        Handle the POST request to upload and process field drawing files for an order.
-
-        - If the field drawings are provided, the files are validated and processed.
-        - Valid files are saved, and a ZIP archive is created for the order.
-        """
         try:
-            # Fetch the order instance
-            order = get_object_or_404(
-                Order,
-                id=order_id,
-                is_deleted=False,
-            )
-
-            # Validate request data using serializer
+            order = get_object_or_404(Order, id=order_id, is_deleted=False)
             serializer = FieldDrawingUploadSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            files = request.FILES.getlist("field_drawing")
 
-            if not files:
-                return Response(
-                    {"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST
-                )
+            colored_drawing = request.FILES.get("colored_drawing")
+            report_colored_drawing = request.FILES.get("report_colored_drawing")
 
-            OrderFieldDrawingService.process_field_drawing_files(order, files)
+            uploaded_files = []
+
+            if colored_drawing:
+                if order.colored_drawing:
+                    order.colored_drawing.delete(save=False)
+                order.colored_drawing.save(colored_drawing.name, colored_drawing)
+                uploaded_files.append(colored_drawing)
+
+            if report_colored_drawing:
+                if order.report_colored_drawing:
+                    order.report_colored_drawing.delete(save=False)
+                order.report_colored_drawing.save(report_colored_drawing.name, report_colored_drawing)
+                uploaded_files.append(report_colored_drawing)
+
+            # Only call service if there's at least one file
+            if uploaded_files:
+                OrderFieldDrawingService.process_field_drawing_files(order, uploaded_files)
 
             return Response(
                 {"detail": "Field drawing updated successfully."},
@@ -1118,7 +1123,7 @@ class OrderFieldDrawingView(APIView):
 
         except Exception as e:
             return Response(
-                {"detail": "An error occurred."},
+                {"detail": f"An error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
