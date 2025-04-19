@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db.models import Sum
 from rest_framework.serializers import (
     Serializer,
     BooleanField,
@@ -7,8 +6,6 @@ from rest_framework.serializers import (
     FileField,
     CharField,
 )
-import requests
-from django.core.files.base import ContentFile
 
 from mysite.api.v2.core.serializers import PersonSerializer
 from mysite.api.v2.proposal.serializers import ProposalSerializer
