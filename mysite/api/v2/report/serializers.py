@@ -34,7 +34,7 @@ class PerformanceReportSerializer(serializers.Serializer):
 
 
 class JobCostingSerializer(serializers.ModelSerializer):
-    project_number = serializers.CharField(source="project_number")
+    project_number = serializers.CharField()
     project_name = serializers.CharField(source="proposal.estimate.project")
     estimated_hours = serializers.SerializerMethodField()
     actual_hours = serializers.SerializerMethodField()
