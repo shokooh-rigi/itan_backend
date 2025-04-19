@@ -1,5 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
+from decimal import Decimal
 
 from mysite.api.v2.order.serializers import OrderSerializer
 from mysite.core.models import Company
@@ -71,7 +72,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return obj.total_invoiced
 
     def get_remaining_due(self, obj):
-        return obj.remaining_due
+        return Decimal(obj.remaining_due)
 
     def get_amount_due(self, obj):
         return obj.amount_due

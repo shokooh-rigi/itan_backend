@@ -246,6 +246,8 @@ class InvoiceListView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
 class InvoiceOrderListView(APIView):
     permission_classes = [IsAuthenticated]
 
