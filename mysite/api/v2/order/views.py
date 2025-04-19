@@ -932,15 +932,10 @@ class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
                 "os": openapi.Schema(type=openapi.TYPE_STRING),
                 "release_date": openapi.Schema(type=openapi.FORMAT_DATE),
                 "control_file_url": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
-                "documentation": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    format="binary",
-                    description="Upload a file or provide a URL for documentation."
-                ),
+                "documentation": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
                 "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
         ),
-        consumes=["multipart/form-data"],
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)

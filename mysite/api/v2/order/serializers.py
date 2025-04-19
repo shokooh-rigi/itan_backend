@@ -77,20 +77,6 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             data.pop("manufacturer", None)
         return data
 
-    def validate_documentation(self, value):
-        """
-        Validate the documentation field to accept either a file or a URL.
-        """
-        if isinstance(value, str):  # If it's a URL
-            try:
-                response = requests.get(value)
-                response.raise_for_status()
-                file_name = value.split("/")[-1]
-                return ContentFile(response.content, name=file_name)
-            except requests.RequestException:
-                raise serializers.ValidationError("Invalid URL or unable to fetch the file.")
-        return value
-
 
 class OrderSerializer(serializers.ModelSerializer):
     """
