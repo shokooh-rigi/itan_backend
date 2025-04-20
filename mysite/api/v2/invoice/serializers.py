@@ -85,14 +85,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
         """
         if not isinstance(obj, Invoice):
             # Attempt to fetch the Invoice instance if obj is not an Invoice
-            if isinstance(obj, dict) and "id" in obj:
-                obj = Invoice.objects.filter(id=obj["id"]).first()
-            elif hasattr(obj, "id"):
+            if hasattr(obj, "id"):
                 obj = Invoice.objects.filter(id=obj.id).first()
             if not obj:
                 raise TypeError("Expected an Invoice instance or a valid ID.")
 
         return calculate_remaining_invoice_due(obj)
+
+
 class InvoiceHistorySerializer(serializers.ModelSerializer):
     """
     Serializer for Invoice History.
