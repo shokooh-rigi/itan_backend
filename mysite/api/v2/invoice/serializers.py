@@ -78,15 +78,21 @@ class InvoiceSerializer(serializers.ModelSerializer):
         Calculate the remaining balance due for the invoice.
 
         Args:
-            obj: The object being serialized (expected to be an Invoice instance).
+            obj: The object being serialized (expected to be an Invoice instance or contain an ID).
 
         Returns:
             float: The remaining balance due.
         """
         if not isinstance(obj, Invoice):
-            raise TypeError("Expected an Invoice instance.")
-        return calculate_remaining_invoice_due(obj)
+            # Attempt to fetch the Invoice instance if obj is not an Invoice
+            if isinstance(obj, dict) and "id" in obj:
+                obj = Invoice.objects.filter(id=obj["id"]).first()
+            elif hasattr(obj, "id"):
+                obj = Invoice.objects.filter(id=obj.id).first()
+            if not obj:
+                raise TypeError("Expected an Invoice instance or a valid ID.")
 
+        return calculate_remaining_invoice_due(obj)
 class InvoiceHistorySerializer(serializers.ModelSerializer):
     """
     Serializer for Invoice History.
