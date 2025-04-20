@@ -82,6 +82,8 @@ class Invoice(BaseModelWithCreatedByUser):
         Returns:
             str: Formatted invoice number (e.g., "ABC-001").
         """
+        if not self.order or not self.id:
+            return None  # Handle cases where order or id is not set
         return f"{self.order.project_number[:3]}-{self.id:03d}"
 
     @property
