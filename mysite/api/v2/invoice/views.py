@@ -580,7 +580,7 @@ class InvoiceDeleteView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, invoice_id):
+    def delete(self, request, id):
         """
         Handle the DELETE request to remove an invoice by its ID.
 
@@ -594,7 +594,7 @@ class InvoiceDeleteView(APIView):
         # Retrieve the invoice object
         this_invoice = get_object_or_404(
             Invoice,
-            id=invoice_id,
+            id=id,
             is_deleted=False,
         )
 
