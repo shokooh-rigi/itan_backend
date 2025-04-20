@@ -36,7 +36,31 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Invoice
-        fields = "__all__"
+        fields = [
+            "id",
+            "order",
+            "order_id",
+            "date_started",
+            "date_completed",
+            "terms",
+            "description",
+            "percent_of_performance_completed",
+            "invoice_type",
+            "attention",
+            "edited_on",
+            "mark_as_paid",
+            "times_estimate_changed",
+            "created_on",
+            "created_by",
+            "invoice_number",
+            "revision_date",
+            "amount",
+            "sub_total",
+            "total_paid",
+            "total_invoiced",
+            "amount_due",
+            "balance_due",
+        ]
 
     def create(self, validated_data):
         """Override create method to link order using order_id"""
