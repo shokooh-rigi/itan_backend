@@ -441,18 +441,18 @@ class InvoiceUpdateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Fully Update an Invoice",
-        description="Updates an invoice by replacing all fields with new data.",
-        request=InvoiceSerializer,
+    @swagger_auto_schema(
+        operation_summary="Fully Update an Invoice",
+        operation_description="Updates an invoice by replacing all fields with new data.",
+        request_body=InvoiceSerializer,
         responses={200: InvoiceSerializer},
-        parameters=[
-            OpenApiParameter(
+        manual_parameters=[
+            openapi.Parameter(
                 name="invoice_id",
+                in_=openapi.IN_PATH,
                 description="The ID of the invoice to update.",
                 required=True,
-                type=int,
-                location=OpenApiParameter.PATH,
+                type=openapi.TYPE_INTEGER,
             )
         ],
     )
@@ -482,18 +482,18 @@ class InvoiceUpdateView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(
-        summary="Partially Update an Invoice",
-        description="Updates an invoice by modifying only the provided fields.",
-        request=InvoiceSerializer,
+    @swagger_auto_schema(
+        operation_summary="Partially Update an Invoice",
+        operation_description="Updates an invoice by modifying only the provided fields.",
+        request_body=InvoiceSerializer,
         responses={200: InvoiceSerializer},
-        parameters=[
-            OpenApiParameter(
+        manual_parameters=[
+            openapi.Parameter(
                 name="invoice_id",
+                in_=openapi.IN_PATH,
                 description="The ID of the invoice to update.",
                 required=True,
-                type=int,
-                location=OpenApiParameter.PATH,
+                type=openapi.TYPE_INTEGER,
             )
         ],
     )
