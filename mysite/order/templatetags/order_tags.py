@@ -108,15 +108,29 @@ def calculate_total_paid(invoice):
 
 @register.simple_tag
 def calculate_remaining_invoice_due(invoice):
-    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
-    total_paid = 0
-    for transaction in transactions:
-        total_paid += transaction.amount
+    """
+    Calculate the remaining balance due for an invoice.
 
+    Args:
+        invoice (Invoice): The invoice instance.
+
+    Returns:
+        float: The remaining balance due.
+    """
+    # Ensure the invoice is an instance of the Invoice model
+    if not isinstance(invoice, Invoice):
+        raise TypeError("Expected an Invoice instance.")
+
+    # Calculate total paid
+    transactions = InvoiceTransaction.objects.filter(invoice=invoice)
+    total_paid = sum(transaction.amount for transaction in transactions)
+
+    # Calculate total amount due
     total = calculate_total_amount_due(invoice)
+
+    # Calculate remaining balance
     remaining = float(total) - float(total_paid)
     return remaining
-
 
 @register.simple_tag
 def get_last_invoice_history(invoice):
