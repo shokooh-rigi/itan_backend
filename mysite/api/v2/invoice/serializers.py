@@ -74,8 +74,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return getattr(obj, "amount_due", None)
 
     def get_balance_due(self, obj):
-        return calculate_remaining_invoice_due(obj)
+        """
+        Calculate the remaining balance due for the invoice.
 
+        Args:
+            obj: The object being serialized (expected to be an Invoice instance).
+
+        Returns:
+            float: The remaining balance due.
+        """
+        if not isinstance(obj, Invoice):
+            raise TypeError("Expected an Invoice instance.")
+        return calculate_remaining_invoice_due(obj)
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
     """
