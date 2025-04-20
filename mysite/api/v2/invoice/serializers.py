@@ -53,29 +53,28 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def get_revision_date(self, obj):
-        return obj.revision_date
+        return getattr(obj, "revision_date", None)
 
     def get_invoice_number(self, obj):
-        return obj.invoice_number
+        return getattr(obj, "invoice_number", None)
 
     def get_amount(self, obj):
-        return obj.amount
+        return getattr(obj, "amount", None)
 
     def get_sub_total(self, obj):
-        return obj.sub_total
+        return getattr(obj, "sub_total", None)
 
     def get_total_paid(self, obj):
-        return obj.total_paid
+        return getattr(obj, "total_paid", None)
 
     def get_total_invoiced(self, obj):
-        return obj.total_invoiced
+        return getattr(obj, "total_invoiced", None)
 
     def get_amount_due(self, obj):
-        return obj.amount_due
+        return getattr(obj, "amount_due", None)
 
     def get_balance_due(self, obj):
-        balance_due = calculate_remaining_invoice_due(obj)
-        return balance_due
+        return calculate_remaining_invoice_due(obj)
 
 
 class InvoiceHistorySerializer(serializers.ModelSerializer):
