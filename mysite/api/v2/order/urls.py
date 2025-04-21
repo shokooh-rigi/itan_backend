@@ -124,7 +124,7 @@ urlpatterns = [
         name="control-system-list",
     ),
     path(
-        "control-systems/<int:id>/",
+        "control-systems/<int:pk>/",
         ControlSystemDeleteRetriveView.as_view(),
         name="control-system-delete-retrieve",
     ),
