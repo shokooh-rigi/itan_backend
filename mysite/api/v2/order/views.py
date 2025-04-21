@@ -1267,9 +1267,40 @@ class OrderSitePicturesView(APIView):
     """
     API View to handle uploading and saving site pictures for an order.
     """
-
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Upload site pictures for an order",
+        operation_description="Handles the upload of site pictures for a specific order. The uploaded files are processed and saved as a ZIP archive.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="order_id",
+                in_=openapi.IN_PATH,
+                description="The ID of the order to upload site pictures for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "site_pictures": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_FILE),
+                    description="List of site pictures to upload.",
+                )
+            },
+            required=["site_pictures"],
+        ),
+        responses={
+            200: openapi.Response(
+                description="Site pictures uploaded successfully.",
+                examples={"application/json": {"detail": "Site pictures uploaded and saved as <zip_file_name>."}},
+            ),
+            400: openapi.Response(description="Validation error."),
+            500: openapi.Response(description="Server error."),
+        },
+    )
     def post(self, request, order_id):
         """
         Handle POST request to save site pictures
@@ -1300,6 +1331,26 @@ class OrderSitePicturesView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @swagger_auto_schema(
+        operation_summary="Retrieve site pictures for an order",
+        operation_description="Fetches the URL of the site pictures for a specific order, if available.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="order_id",
+                in_=openapi.IN_PATH,
+                description="The ID of the order to retrieve site pictures for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Site pictures retrieved successfully.",
+                examples={"application/json": {"site_pictures": "<site_pictures_url>"}},
+            ),
+            404: openapi.Response(description="No site pictures available for this order."),
+        },
+    )
     def get(self, request, order_id):
         """
         Handle GET request to retrieve the site pictures for a specific order.
@@ -1319,7 +1370,6 @@ class OrderSitePicturesView(APIView):
             {"message": "No site pictures available for this order."},
             status=status.HTTP_404_NOT_FOUND,
         )
-
 
 class OrderFullUpdateAPIView(APIView):
     """
