@@ -639,7 +639,34 @@ class InvoiceTransactionCreateView(CreateAPIView):
     @extend_schema(
         summary="Create an Invoice Transaction and Log Invoice History",
         description="Takes `invoice_id` from request input, validates the invoice, saves the transaction, and logs the history.",
-        request=InvoiceTransactionSerializer,
+        request={
+            "type": "object",
+            "properties": {
+                "invoice_id": {
+                    "type": "integer",
+                    "description": "The ID of the invoice to create a transaction for.",
+                    "example": 123,
+                },
+                "payment_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The date of the payment.",
+                    "example": "2023-10-01",
+                },
+                "amount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The amount of the payment.",
+                    "example": 100.50,
+                },
+                "payment_no": {
+                    "type": "string",
+                    "description": "The payment number or reference.",
+                    "example": "PAY12345",
+                },
+            },
+            "required": ["invoice_id", "payment_date", "amount", "payment_no"],
+        },
         responses={
             201: {
                 "transaction": InvoiceTransactionSerializer,
@@ -713,7 +740,6 @@ class InvoiceTransactionCreateView(CreateAPIView):
         return Response(
             transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
-
 
 class InvoiceTransactionUpdateView(APIView):
     """
