@@ -272,7 +272,8 @@ class TechLabelSerializer(serializers.ModelSerializer):
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem
     control_system = serializers.PrimaryKeyRelatedField(
-        queryset=ControlSystem.objects.all(), required=True
+        queryset=ControlSystem.objects.all(),
+        required=False
     )
 
     class Meta:
