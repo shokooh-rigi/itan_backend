@@ -18,14 +18,13 @@ from .views import (
     OrderFullUpdateAPIView,
     OrderProposalListView,
     ControlSystemListCreateView,
-    ControlSystemDetailView,
     ControlSystemManufacturerListCreateView,
     ControlSystemManufacturerDetailView,
     TechLabelDeleteView,
     TechLabelListView,
     TechLabelCreateUpdateView,
     TechLabelByOrderView,
-    ChangeOrderList,
+    ChangeOrderList, ControlSystemDeleteRetriveView, ControlSystemUpdateAPIView,
 )
 
 
@@ -125,9 +124,14 @@ urlpatterns = [
         name="control-system-list",
     ),
     path(
-        "control-systems/<int:pk>/",
-        ControlSystemDetailView.as_view(),
-        name="control-system-detail",
+        "control-systems/<int:id>/",
+        ControlSystemDeleteRetriveView.as_view(),
+        name="control-system-delete-retrieve",
+    ),
+    path(
+        "control-systems/<int:control_system_id>/update/",
+        ControlSystemUpdateAPIView.as_view(),
+        name="control-system-update",
     ),
     path(
         "control-systems/manufacturer/",

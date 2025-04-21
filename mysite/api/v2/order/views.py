@@ -930,32 +930,62 @@ class ControlSystemListCreateView(ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-class ControlSystemDetailView(RetrieveUpdateDestroyAPIView):
+
+class ControlSystemDeleteRetriveView(RetrieveDestroyAPIView):
     """
-    API for retrieving, updating, and deleting a specific Control System.
+    API for retrieving and deleting a specific Control System.
     """
 
     queryset = ControlSystem.objects.all()
     serializer_class = ControlSystemSerializer
 
     @swagger_auto_schema(
-        operation_description="Update a control system with a file or URL for documentation.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "version_number": openapi.Schema(type=openapi.TYPE_STRING),
-                "os": openapi.Schema(type=openapi.TYPE_STRING),
-                "release_date": openapi.Schema(type=openapi.FORMAT_DATE),
-                "control_file_url": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="url"
-                ),
-                "documentation": openapi.Schema(type=openapi.TYPE_STRING, format="url"),
-                "manufacturer_id": openapi.Schema(type=openapi.TYPE_INTEGER),
-            },
-        ),
+        operation_description="Retrieve a specific Control System by its ID.",
+        responses={
+            200: ControlSystemSerializer,
+            404: openapi.Response(description="Control System not found."),
+        },
     )
-    def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete a specific Control System by its ID.",
+        responses={
+            204: openapi.Response(description="Control System deleted successfully."),
+            404: openapi.Response(description="Control System not found."),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
+
+
+class ControlSystemUpdateAPIView(APIView):
+    """
+    API for updating a specific Control System.
+    """
+
+    @swagger_auto_schema(
+        operation_description="Update a specific Control System by its ID.",
+        request_body=ControlSystemSerializer,
+        responses={
+            200: ControlSystemSerializer,
+            400: openapi.Response(description="Validation error."),
+            404: openapi.Response(description="Control System not found."),
+        },
+    )
+    def put(self, request, control_system_id):
+        """
+        Update a control system with the provided data.
+        """
+        control_system = get_object_or_404(ControlSystem, id=control_system_id)
+        serializer = ControlSystemSerializer(control_system, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ControlSystemManufacturerListCreateView(ListCreateAPIView):
