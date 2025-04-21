@@ -20,7 +20,7 @@ from mysite.api.v2.invoice.serializers import (
     InvoiceSerializer,
     InvoiceHistorySerializer,
     InvoiceTransactionSerializer,
-    MassPaymentSerializer,
+    MassPaymentSerializer, InvoiceUpdateSerializer,
 )
 from mysite.core.models import Company
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
@@ -426,13 +426,6 @@ class InvoiceCreateView(APIView):
 class InvoiceUpdateView(APIView):
     """
     API View for updating an Invoice.
-
-    Methods:
-        - PUT: Fully update an invoice with new data.
-        - PATCH: Partially update an invoice with new data.
-
-    Permissions:
-        - Requires authentication (`IsAuthenticated`).
     """
 
     permission_classes = [IsAuthenticated]
@@ -440,8 +433,13 @@ class InvoiceUpdateView(APIView):
     @swagger_auto_schema(
         operation_summary="Fully Update an Invoice",
         operation_description="Updates an invoice by replacing all fields with new data.",
-        request_body=InvoiceSerializer,
-        responses={200: InvoiceSerializer},
+        request_body=InvoiceUpdateSerializer,
+        responses={
+            200: openapi.Response(
+                description="Successful update",
+                schema=InvoiceUpdateSerializer()
+            )
+        },
         manual_parameters=[
             openapi.Parameter(
                 name="invoice_id",
@@ -455,34 +453,28 @@ class InvoiceUpdateView(APIView):
     def put(self, request, invoice_id):
         """
         Fully update an invoice.
-
-        Args:
-            request (Request): The incoming HTTP request with invoice data.
-            invoice_id (int): The ID of the invoice to update.
-
-        Returns:
-            Response: Updated invoice data or validation errors.
         """
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
-        serializer = InvoiceSerializer(
+        serializer = InvoiceUpdateSerializer(
             invoice, data=request.data, context={"request": request}
         )
         if serializer.is_valid():
-            updated_invoice = InvoiceService.update_invoice(
-                invoice, serializer.validated_data, request
-            )
-            return Response(
-                InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK
-            )
+            updated_invoice = serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary="Partially Update an Invoice",
         operation_description="Updates an invoice by modifying only the provided fields.",
-        request_body=InvoiceSerializer,
-        responses={200: InvoiceSerializer},
+        request_body=InvoiceUpdateSerializer,
+        responses={
+            200: openapi.Response(
+                description="Successful update",
+                schema=InvoiceUpdateSerializer()
+            )
+        },
         manual_parameters=[
             openapi.Parameter(
                 name="invoice_id",
@@ -496,29 +488,17 @@ class InvoiceUpdateView(APIView):
     def patch(self, request, invoice_id):
         """
         Partially update an invoice.
-
-        Args:
-            request (Request): The incoming HTTP request with partial invoice data.
-            invoice_id (int): The ID of the invoice to update.
-
-        Returns:
-            Response: Updated invoice data or validation errors.
         """
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
-        serializer = InvoiceSerializer(
+        serializer = InvoiceUpdateSerializer(
             invoice, data=request.data, partial=True, context={"request": request}
         )
         if serializer.is_valid():
-            updated_invoice = InvoiceService.update_invoice(
-                invoice, serializer.validated_data, request
-            )
-            return Response(
-                InvoiceSerializer(updated_invoice).data, status=status.HTTP_200_OK
-            )
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class InvoiceDetailView(APIView):
     """

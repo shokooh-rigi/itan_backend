@@ -117,6 +117,58 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return calculate_remaining_invoice_due(obj)
 
 
+class InvoiceUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating Invoice data.
+    Only allows specific fields to be updated.
+    """
+
+    order_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = [
+            "order_id",
+            "date_started",
+            "date_completed",
+            "terms",
+            "description",
+            "percent_of_performance_completed",
+            "invoice_type",
+            "attention",
+            "edited_on",
+            "mark_as_paid",
+        ]
+
+    def validate_order_id(self, value):
+        """
+        Validate that the order exists.
+        """
+        from mysite.order.models import Order
+
+        try:
+            order = Order.objects.get(id=value)
+        except Order.DoesNotExist:
+            raise serializers.ValidationError("Invalid order_id.")
+        return value
+
+    def update(self, instance, validated_data):
+        """
+        Update the invoice instance.
+        """
+        order_id = validated_data.pop("order_id", None)
+        if order_id:
+            from mysite.order.models import Order
+
+            instance.order = Order.objects.get(id=order_id)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
+
 class InvoiceHistorySerializer(serializers.ModelSerializer):
     """
     Serializer for Invoice History.
