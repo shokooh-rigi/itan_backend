@@ -860,12 +860,9 @@ class ControlSystemAPIView(APIView):
         )
 
         if not order.control_system:
-            return Response(
-                {"error": "Control system not found for related order."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = OrderControlSystemSerializer(order)
+            return Response({}, status=status.HTTP_200_OK)
 
+        serializer = OrderControlSystemSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, order_id):
@@ -877,11 +874,10 @@ class ControlSystemAPIView(APIView):
             id=order_id,
             is_deleted=False,
         )
+
         if not order.control_system:
-            return Response(
-                {"error": "Control system not found for related order."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({}, status=status.HTTP_200_OK)
+
         serializer = OrderControlSystemSerializer(
             order,
             data=request.data,
