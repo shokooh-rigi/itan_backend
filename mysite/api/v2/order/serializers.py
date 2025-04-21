@@ -68,7 +68,14 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(
                 id=manufacturer_id
             )
-        return super().update(instance, validated_data)
+            return super().update(instance, validated_data)
+        else:
+            # If manufacturer_id is not provided, just update the instance
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+            return instance
+
 
 class OrderSerializer(serializers.ModelSerializer):
     """
