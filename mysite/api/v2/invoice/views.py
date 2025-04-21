@@ -8,17 +8,13 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
-    OpenApiExample,
-    OpenApiResponse,
 )
-from datetime import datetime, timedelta
 
 from mysite.api.v2.invoice.serializers import (
     InvoiceSerializer,
@@ -26,7 +22,7 @@ from mysite.api.v2.invoice.serializers import (
     InvoiceTransactionSerializer,
     MassPaymentSerializer,
 )
-from mysite.core.models import ContactInfo, Company
+from mysite.core.models import Company
 from mysite.gi.models import Invoice, InvoiceHistory, InvoiceTransaction
 from mysite.order.models import Order
 from .services.email_service import InvoiceEmailService
@@ -287,7 +283,7 @@ class InvoiceOrderListView(APIView):
         """
         try:
             orders = (
-                Order.objects.filter(archive=False)
+                Order.objects.filter(archive=False, is_deleted=False)
                 .exclude(id__in=Invoice.objects.values_list("order_id", flat=True))
                 .order_by("-created_on")
             )

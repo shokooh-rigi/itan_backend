@@ -2,10 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import *
-
-
-# Register your models here.
+from mysite.order.models import Order, ControlSystem, ControlSystemManufacturer, TechLabel, ChangeOrder
 
 
 class OrderResource(resources.ModelResource):

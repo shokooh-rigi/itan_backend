@@ -73,7 +73,7 @@ class ListInvoiceService:
             filters &= Q(created_on__lte=overdue_date)
 
         # Handle ordering safely
-        result = Invoice.objects.filter(filters)
+        result = Invoice.objects.filter(filters, is_deleted=False)
         if ordering:
             result = result.order_by(ordering)
 
