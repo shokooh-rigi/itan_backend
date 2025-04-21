@@ -68,8 +68,6 @@ class ControlSystemSerializer(serializers.ModelSerializer):
             validated_data["manufacturer"] = ControlSystemManufacturer.objects.get(
                 id=manufacturer_id
             )
-        else:
-            validated_data.pop("manufacturer", None)  # Remove if not provided
         return super().update(instance, validated_data)
 
 class OrderSerializer(serializers.ModelSerializer):
