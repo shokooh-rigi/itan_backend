@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from decimal import Decimal
+from rest_framework.exceptions import ValidationError
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -754,6 +755,10 @@ class InvoiceTransactionCreateView(CreateAPIView):
                 },
                 status=status.HTTP_201_CREATED,
             )
+
+        # Handle invalid history_serializer
+        logger.debug(f"History serializer errors: {history_serializer.errors}")
+        return Response(history_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InvoiceTransactionUpdateView(APIView):
