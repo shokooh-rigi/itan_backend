@@ -25,6 +25,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "mark_as_paid",
         "created_on",
         "updated_at",
+        "is_deleted",
     ]
     search_fields = ["id", "order__project_number"]
     list_filter = ["invoice_type", "mark_as_paid", "created_on"]

@@ -4,6 +4,8 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
+from decimal import Decimal
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
@@ -706,44 +708,52 @@ class InvoiceTransactionCreateView(CreateAPIView):
         # Validate that the invoice exists and is not deleted
         invoice = get_object_or_404(Invoice, id=invoice_id, is_deleted=False)
 
+        # Convert amount to Decimal
+        try:
+            request.data["amount"] = Decimal(request.data.get("amount"))
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "Invalid amount. Please provide a valid decimal number."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Serialize and save transaction
         transaction_serializer = InvoiceTransactionSerializer(
             data=request.data, context={"request": request}
         )
-        if transaction_serializer.is_valid():
-            transaction_serializer.save()
+        if not transaction_serializer.is_valid():
+            logger.debug(f"Serializer errors: {transaction_serializer.errors}")
+            return Response(transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            # Calculate updated invoice amounts
-            total_invoiced = calculate_total_amount_due(invoice)
-            total_paid = calculate_total_paid(invoice)
-            balance_due = calculate_remaining_invoice_due(invoice)
+        transaction_serializer.save()
 
-            # Generate a unique PDF filename for history
-            total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
-            new_file_name = f"Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}"
+        # Calculate updated invoice amounts
+        total_invoiced = calculate_total_amount_due(invoice)
+        total_paid = calculate_total_paid(invoice)
+        balance_due = calculate_remaining_invoice_due(invoice)
 
-            # Create invoice history log
-            history_data = {
-                "invoice_id": invoice.id,
-                "total_invoiced": total_invoiced,
-                "total_paid": total_paid,
-                "balance_due": balance_due,
-                "pdf_filename": new_file_name,
-            }
-            history_serializer = InvoiceHistorySerializer(data=history_data)
-            if history_serializer.is_valid():
-                history_serializer.save()
-                return Response(
-                    {
-                        "transaction": transaction_serializer.data,
-                        "invoice_history": history_serializer.data,
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
+        # Generate a unique PDF filename for history
+        total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
+        new_file_name = f"Invoice-{invoice.order.project_number[:3]}-{invoice.id:03d}-{total_count}"
 
-        return Response(
-            transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-        )
+        # Create invoice history log
+        history_data = {
+            "invoice_id": invoice.id,
+            "total_invoiced": total_invoiced,
+            "total_paid": total_paid,
+            "balance_due": balance_due,
+            "pdf_filename": new_file_name,
+        }
+        history_serializer = InvoiceHistorySerializer(data=history_data)
+        if history_serializer.is_valid():
+            history_serializer.save()
+            return Response(
+                {
+                    "transaction": transaction_serializer.data,
+                    "invoice_history": history_serializer.data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
 
 class InvoiceTransactionUpdateView(APIView):
