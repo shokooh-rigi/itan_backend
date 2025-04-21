@@ -636,52 +636,56 @@ class InvoiceTransactionCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = InvoiceTransactionSerializer
 
-    @extend_schema(
-        summary="Create an Invoice Transaction and Log Invoice History",
-        description="Takes `invoice_id` from request input, validates the invoice, saves the transaction, and logs the history.",
-        request={
-            "type": "object",
-            "properties": {
-                "invoice_id": {
-                    "type": "integer",
-                    "description": "The ID of the invoice to create a transaction for.",
-                    "example": 123,
-                },
-                "payment_date": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "The date of the payment.",
-                    "example": "2023-10-01",
-                },
-                "amount": {
-                    "type": "number",
-                    "format": "float",
-                    "description": "The amount of the payment.",
-                    "example": 100.50,
-                },
-                "payment_no": {
-                    "type": "string",
-                    "description": "The payment number or reference.",
-                    "example": "PAY12345",
-                },
+    @swagger_auto_schema(
+        operation_summary="Create an Invoice Transaction and Log Invoice History",
+        operation_description="Takes `invoice_id` from request input, validates the invoice, saves the transaction, and logs the history.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "invoice_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="The ID of the invoice to create a transaction for.",
+                    example=123,
+                ),
+                "payment_date": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format="date",
+                    description="The date of the payment.",
+                    example="2023-10-01",
+                ),
+                "amount": openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    format="float",
+                    description="The amount of the payment.",
+                    example=100.50,
+                ),
+                "payment_no": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The payment number or reference.",
+                    example="PAY12345",
+                ),
             },
-            "required": ["invoice_id", "payment_date", "amount", "payment_no"],
-        },
+            required=["invoice_id", "payment_date", "amount", "payment_no"],
+        ),
         responses={
-            201: {
-                "transaction": InvoiceTransactionSerializer,
-                "invoice_history": InvoiceHistorySerializer,
-            }
+            201: openapi.Response(
+                description="Transaction and Invoice History created successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "transaction": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            description="Details of the created transaction.",
+                        ),
+                        "invoice_history": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            description="Details of the created invoice history.",
+                        ),
+                    },
+                ),
+            ),
+            400: "Bad Request - Validation failed",
         },
-        parameters=[
-            OpenApiParameter(
-                name="invoice_id",
-                description="The ID of the invoice to create a transaction for.",
-                required=True,
-                type=int,
-                location=OpenApiParameter.QUERY,
-            )
-        ],
     )
     def post(self, request):
         """
@@ -740,6 +744,7 @@ class InvoiceTransactionCreateView(CreateAPIView):
         return Response(
             transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
+
 
 class InvoiceTransactionUpdateView(APIView):
     """
