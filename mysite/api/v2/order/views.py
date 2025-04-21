@@ -26,7 +26,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.generics import RetrieveDestroyAPIView
 from django.db import transaction
 
 from mysite.order.models import (
