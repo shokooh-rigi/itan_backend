@@ -467,6 +467,7 @@ class BidCreateView(APIView):
         project = form_data.get("project")
         due_date = form_data.get("due_date")
         type = form_data.get("type")
+        note = form_data.get("note")
 
         # Validate required fields
         missing_fields = [
@@ -510,6 +511,7 @@ class BidCreateView(APIView):
             customer_id=customer,
             project_id=project,
             due_date=due_date,
+            note=note,
             created_by=request.user,
         )
 
@@ -545,40 +547,6 @@ class BidCreateView(APIView):
             if file_extension not in allowed_extensions:
                 return False
         return True
-
-    # @staticmethod
-    # def _get_temp_path():
-    #     """
-    #     Generate or retrieve the temporary path for storing uploaded files.
-    #     """
-    #     temp_path = os.path.join(
-    #         os.path.abspath(os.path.dirname("__file__")), "media/uploads/bidfiles"
-    #     )
-    #     os.makedirs(temp_path, exist_ok=True)
-    #     return temp_path
-
-    # @staticmethod
-    # def _create_project_zip(project_id, file_paths, temp_path):
-    #     """
-    #     Clean the project name and create a zip file from the uploaded files.
-    #     """
-    #     project_clean_name = BidService.clean_project_name(
-    #         Project.objects.get(id=project_id).name
-    #     )
-    #     return BidService.create_zip_file(file_paths, temp_path, project_clean_name)
-
-    # def _save_bid_to_db(self, customer_id, project_id, due_date, zip_file_path):
-    #     """
-    #     Save the bid file entry to the database and upload the zip to S3.
-    #     """
-    #     bid = BidFile.objects.create(
-    #         customer_id=customer_id,
-    #         project_id=project_id,
-    #         due_date=due_date,
-    #         created_by=self.request.user,
-    #     )
-    #     BidService.update_bid_with_zip(bid, zip_file_path)
-    #     return bid
 
 
 class BidAddFileView(APIView):
