@@ -37,3 +37,18 @@ class EquipmentDeleteView(DestroyAPIView):
 
     def perform_destroy(self, instance):
         instance.soft_delete()
+
+
+class EquipmentDetailView(ListAPIView):
+    """
+    API endpoint to retrieve a single Equipment object.
+    """
+    serializer_class = EquipmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        equipment_id = self.kwargs['pk']
+        return Equipment.objects.filter(
+            id=equipment_id,
+            is_deleted=False,
+        )
