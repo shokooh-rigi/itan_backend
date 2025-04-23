@@ -5,6 +5,7 @@ from mysite.api.v2.equipment.views import (
     EquipmentCreateView,
     EquipmentUpdateView,
     EquipmentDeleteView,
+    EquipmentDetailView,
 )
 
 
@@ -28,5 +29,10 @@ urlpatterns = [
         'equipment/<int:pk>/delete/',
         EquipmentDeleteView.as_view(),
         name='equipment-delete'
+    ),
+    path(
+        'equipment/<int:pk>/detail/',
+        EquipmentDetailView.as_view(),
+        name='equipment-detail'
     ),
 ]
