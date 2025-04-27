@@ -1157,8 +1157,8 @@ class OrderColorDrawingView(APIView):
             ),
             openapi.Parameter(
                 "colored_drawing_finalize",
-                openapi.IN_PATH,
-                description="The finalized colored drawing ",
+                openapi.IN_QUERY,
+                description="Set to true to finalize the colored drawing",
                 type=openapi.TYPE_BOOLEAN,
             ),
             openapi.Parameter(
@@ -1180,14 +1180,14 @@ class OrderColorDrawingView(APIView):
             500: openapi.Response("Server error"),
         },
     )
-    def post(self, request, order_id):
+    def put(self, request, order_id):
         try:
             order = get_object_or_404(
                 Order,
                 id=order_id,
                 is_deleted=False
             )
-            serializer = ColorDrawingUploadSerializer(data=request.data)
+            serializer = ColorDrawingUploadSerializer(data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
 
             colored_drawing = request.FILES.get("colored_drawing")
@@ -1214,7 +1214,7 @@ class OrderColorDrawingView(APIView):
                 uploaded_files.append(report_colored_drawing)
 
             return Response(
-                {"detail": "color drawing updated successfully."},
+                {"detail": "Color drawing updated successfully."},
                 status=status.HTTP_200_OK,
             )
 
