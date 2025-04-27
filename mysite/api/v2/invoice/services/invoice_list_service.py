@@ -1,6 +1,5 @@
-import datetime
+from datetime import datetime, timedelta
 import logging
-from datetime import datetime
 
 from django.db.models import Q
 
@@ -50,12 +49,8 @@ class ListInvoiceService:
         # Add date range filter
         if from_date and to_date:
             try:
-                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
-                to_date_obj = (
-                    datetime.datetime.strptime(to_date, "%m/%d/%Y")
-                    + datetime.timedelta(days=1)
-                    - datetime.timedelta(seconds=1)
-                )
+                from_date_obj = datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = datetime.strptime(to_date, "%m/%d/%Y") + timedelta(days=1) - timedelta(seconds=1)
                 filters &= Q(created_on__range=(from_date_obj, to_date_obj))
             except ValueError:
                 raise ValueError("Invalid date format. Please use 'MM/DD/YYYY'.")
@@ -67,9 +62,7 @@ class ListInvoiceService:
         # Add overdue filter
         if overdue:
             overdue_days = ListInvoiceService.get_overdue_days()
-            overdue_date = datetime.datetime.now() - datetime.timedelta(
-                days=int(overdue_days)
-            )
+            overdue_date = datetime.now() - timedelta(days=int(overdue_days))
             filters &= Q(created_on__lte=overdue_date)
 
         # Handle ordering safely
