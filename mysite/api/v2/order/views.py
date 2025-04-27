@@ -47,7 +47,7 @@ from .serializers import (
     ControlSystemManufacturerSerializer,
     GeneralNotesSerializer,
     EquipmentSubmittalSerializer,
-    ColoreDrawingUploadSerializer,
+    ColorDrawingUploadSerializer,
 )
 from .serializers import TechLabelSerializer
 from .services.change_order_service import (
@@ -1109,7 +1109,7 @@ class OrderColorDrawingView(APIView):
 
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # Supports file uploads
-    serializer_class = ColoreDrawingUploadSerializer
+    serializer_class = ColorDrawingUploadSerializer
 
     @swagger_auto_schema(
         operation_summary="Retrieve color drawings for an order",
@@ -1131,15 +1131,19 @@ class OrderColorDrawingView(APIView):
     )
 
     def get(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id, is_deleted=False)
-        serializer = ColoreDrawingUploadSerializer(order)
+        order = get_object_or_404(
+            Order,
+            id=order_id,
+            is_deleted=False
+        )
+        serializer = ColorDrawingUploadSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_summary="Upload colore drawings for an order",
+        operation_summary="Upload color drawings for an order",
         operation_description="""
-            - Accepts multiple files as colore drawings.
+            - Accepts multiple files as color drawings.
             - Validates and processes uploaded files.
             - Creates a ZIP archive for the uploaded files.
         """,
@@ -1178,8 +1182,12 @@ class OrderColorDrawingView(APIView):
     )
     def post(self, request, order_id):
         try:
-            order = get_object_or_404(Order, id=order_id, is_deleted=False)
-            serializer = ColoreDrawingUploadSerializer(data=request.data)
+            order = get_object_or_404(
+                Order,
+                id=order_id,
+                is_deleted=False
+            )
+            serializer = ColorDrawingUploadSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             colored_drawing = request.FILES.get("colored_drawing")
@@ -1206,7 +1214,7 @@ class OrderColorDrawingView(APIView):
                 uploaded_files.append(report_colored_drawing)
 
             return Response(
-                {"detail": "Field drawing updated successfully."},
+                {"detail": "color drawing updated successfully."},
                 status=status.HTTP_200_OK,
             )
 

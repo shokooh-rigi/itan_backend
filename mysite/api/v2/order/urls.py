@@ -94,9 +94,9 @@ urlpatterns = [
         name="order_equipment_submittal",
     ),
     path(
-        "<int:order_id>/colore-drawing/",
+        "<int:order_id>/color-drawing/",
         OrderColorDrawingView.as_view(),
-        name="order-colore-drawing",
+        name="order-color-drawing",
     ),
     path(
         "<int:order_id>/general-notes/",

@@ -310,7 +310,7 @@ class GeneralNotesSerializer(serializers.ModelSerializer):
 
 
 
-class ColoreDrawingUploadSerializer(Serializer):
+class ColorDrawingUploadSerializer(Serializer):
     class Meta:
         model = Order
         fields = [
