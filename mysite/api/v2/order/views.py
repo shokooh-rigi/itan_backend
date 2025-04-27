@@ -47,7 +47,7 @@ from .serializers import (
     ControlSystemManufacturerSerializer,
     GeneralNotesSerializer,
     EquipmentSubmittalSerializer,
-    FieldDrawingUploadSerializer,
+    ColoreDrawingUploadSerializer,
 )
 from .serializers import TechLabelSerializer
 from .services.change_order_service import (
@@ -1100,22 +1100,46 @@ class OrderEquipmentSubmittalView(APIView):
             )
 
 
-class OrderFieldDrawingView(APIView):
+class OrderColorDrawingView(APIView):
     """
-    API View to handle the field drawing upload process for an order.
-
-    - Upload field drawings as files.
-    - Validate uploaded files for size and format.
-    - Save processed files and create a ZIP archive.
+    API View to handle color drawings for an order.
+    - `GET`: Retrieve color drawings for an order.
+    - `POST`: Upload color drawings for an order.
     """
 
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # Supports file uploads
+    serializer_class = ColoreDrawingUploadSerializer
 
     @swagger_auto_schema(
-        operation_summary="Upload field drawings for an order",
+        operation_summary="Retrieve color drawings for an order",
+        operation_description="Returns the color drawings associated with the order.",
+        manual_parameters=[
+            openapi.Parameter(
+                "order_id",
+                openapi.IN_PATH,
+                description="The unique identifier for the order",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                "Color drawings retrieved successfully.", ColoreDrawingUploadSerializer
+            )
+        },
+    )
+
+    def get(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id, is_deleted=False)
+        serializer = ColoreDrawingUploadSerializer(order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Upload colore drawings for an order",
         operation_description="""
-            - Accepts multiple files as field drawings.
+            - Accepts multiple files as colore drawings.
             - Validates and processes uploaded files.
             - Creates a ZIP archive for the uploaded files.
         """,
@@ -1155,7 +1179,7 @@ class OrderFieldDrawingView(APIView):
     def post(self, request, order_id):
         try:
             order = get_object_or_404(Order, id=order_id, is_deleted=False)
-            serializer = FieldDrawingUploadSerializer(data=request.data)
+            serializer = ColoreDrawingUploadSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             colored_drawing = request.FILES.get("colored_drawing")

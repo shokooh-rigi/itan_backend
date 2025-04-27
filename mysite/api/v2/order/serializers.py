@@ -310,7 +310,16 @@ class GeneralNotesSerializer(serializers.ModelSerializer):
 
 
 
-class FieldDrawingUploadSerializer(Serializer):
-    colored_drawing = FileField(required=False, allow_null=True)
-    report_colored_drawing = FileField(required=False, allow_null=True)
-    colored_drawing_finalize = BooleanField()
+class ColoreDrawingUploadSerializer(Serializer):
+    class Meta:
+        model = Order
+        fields = [
+            "colored_drawing",
+            "report_colored_drawing",
+            "colored_drawing_finalize"
+        ]
+        extra_kwargs = {
+            "colored_drawing": {"required": False},
+            "report_colored_drawing": {"required": False},
+            "colored_drawing_finalize": {"required": False},
+        }

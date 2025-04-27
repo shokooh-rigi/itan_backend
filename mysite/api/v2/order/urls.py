@@ -12,7 +12,7 @@ from .views import (
     ChangeOrderApproveView,
     ControlSystemAPIView,
     OrderEquipmentSubmittalView,
-    OrderFieldDrawingView,
+    OrderColorDrawingView,
     OrderGeneralNotesView,
     OrderSitePicturesView,
     OrderFullUpdateAPIView,
@@ -95,8 +95,8 @@ urlpatterns = [
     ),
     path(
         "<int:order_id>/field-drawing/",
-        OrderFieldDrawingView.as_view(),
-        name="order-field-drawing",
+        OrderColorDrawingView.as_view(),
+        name="order-colore-drawing",
     ),
     path(
         "<int:order_id>/general-notes/",
