@@ -1125,7 +1125,7 @@ class OrderColorDrawingView(APIView):
         ],
         responses={
             200: openapi.Response(
-                "Color drawings retrieved successfully.", ColoreDrawingUploadSerializer
+                "Color drawings retrieved successfully.", ColorDrawingUploadSerializer
             )
         },
     )
