@@ -250,14 +250,24 @@ class BidDuplicateView(APIView):
             this_bid = BidFile.objects.get(id=bid_id)
         except BidFile.DoesNotExist:
             return Response(
-                {"error": "Bid not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Bid not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Ensure request.data is a dictionary-like object
+        if not isinstance(request.data, dict):
+            return Response(
+                {"error": "Invalid input format. Expected a JSON object."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         customer_id = request.data.get("customer_id")
         if not customer_id:
             return Response(
-                {"error": "Customer is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Customer is required"},
+                status=status.HTTP_400_BAD_REQUEST
             )
+
         # Call internal helper method to handle the duplication process
         duplicated_bid = self._duplicate_bid(
             this_bid=this_bid,
@@ -267,7 +277,10 @@ class BidDuplicateView(APIView):
 
         # Return the new duplicated Bid instance
         serializer = BidSerializer(duplicated_bid)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+            )
 
     @staticmethod
     def _duplicate_bid(

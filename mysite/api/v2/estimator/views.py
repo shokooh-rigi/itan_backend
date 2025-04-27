@@ -827,7 +827,7 @@ class EstimateDuplicateView(APIView):
         duplicated_obj.save()
 
         # Duplicate services associated with the estimate
-        duplicated_obj.service.set(this_estimate.service.all())
+        duplicated_obj.services.set(this_estimate.services.all())
 
         # Duplicate EstimateEquipment records
         all_equipments = EstimateEquipment.objects.filter(
