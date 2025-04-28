@@ -603,13 +603,13 @@ class EstimateHistoryView(APIView):
             404: "Estimate not found",
         },
     )
-    def get(self, request, id):
+    def get(self, request, estimate_id):
         """
         Get the history of an estimate by ID.
         """
         estimate = get_object_or_404(
             Estimate,
-            id=id,
+            id=estimate_id,
             is_deleted=False,
         )
         estimate_histories = EstimateHistory.objects.filter(
