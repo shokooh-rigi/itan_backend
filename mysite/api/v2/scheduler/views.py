@@ -162,6 +162,44 @@ class ScheduleUpdateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Update a Schedule instance",
+        operation_description="Update an existing Schedule instance with the provided data.",
+        manual_parameters=[
+            openapi.Parameter(
+                "schedule_id",
+                openapi.IN_PATH,
+                description="The ID of the Schedule to update.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        request_body=ScheduleSerializer,
+        responses={
+            200: openapi.Response(
+                description="Schedule updated successfully.",
+                examples={
+                    "application/json": {
+                        "message": "Schedule updated successfully.",
+                        "data": {
+                            "id": 1,
+                            "order": 1,
+                            "schedule_start": "2023-10-01T10:00:00Z",
+                            "created_by": 1,
+                        },
+                    }
+                },
+            ),
+            400: openapi.Response(
+                description="Invalid input data.",
+                examples={"application/json": {"error": "Invalid data."}},
+            ),
+            404: openapi.Response(
+                description="Schedule not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
     def put(self, request, schedule_id):
         """
         Update the Schedule instance with the provided data.
@@ -171,7 +209,6 @@ class ScheduleUpdateView(APIView):
             Schedule,
             id=schedule_id,
             is_deleted=False,
-
         )
 
         # Handle cancellation logic
