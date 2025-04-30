@@ -244,8 +244,8 @@ class ScheduleCreateView(APIView):
                 description="List of available orders.",
                 examples={
                     "application/json": [
-                        {"id": 1, "name": "Order 1"},
-                        {"id": 2, "name": "Order 2"},
+                        {"id": 1, "project_number": "1245 "},
+                        {"id": 2, "project_number": "12567"},
                     ]
                 },
             ),
@@ -259,8 +259,7 @@ class ScheduleCreateView(APIView):
             id__in=Schedule.objects.all().values_list('order_id', flat=True)
         ).order_by('-created_on')
 
-        # You may serialize the data if required, e.g., for a React frontend
-        serialized_orders = [{"id": order.id, "name": order.name} for order in orders]
+        serialized_orders = [{"id": order.id, "project_number": order.project_number} for order in orders]
         return Response(serialized_orders, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
