@@ -1,5 +1,7 @@
 import datetime
 import logging
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from django.conf import settings
 from django.db.models import Q
@@ -24,6 +26,80 @@ class ScheduleListView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve a list of schedules",
+        operation_description="Retrieve a paginated list of schedules with optional filters such as search, date range, and ordering.",
+        manual_parameters=[
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search term to filter schedules by project number, contractor name, or company name.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Field to order the schedules by. Default is '-created_on'.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering schedules (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering schedules (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of schedules to display per page. Default is set in settings.PAGE_SIZE.",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number to retrieve. Default is 1.",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Paginated list of schedules.",
+                examples={
+                    "application/json": {
+                        "results": [
+                            {
+                                "id": 1,
+                                "order": "Project 123",
+                                "schedule_start": "2023-10-01T10:00:00Z",
+                                "assigned_to_contractor": "Contractor A",
+                            }
+                        ],
+                        "pagination": {
+                            "total_rows": 100,
+                            "total_pages": 10,
+                            "current_page": 1,
+                            "page_size": 10,
+                        },
+                    }
+                },
+            ),
+            400: openapi.Response(
+                description="Invalid input parameters.",
+                examples={"application/json": {"error": "Invalid date format. Use mm/dd/yyyy"}},
+            ),
+            500: openapi.Response(
+                description="Server error.",
+                examples={"application/json": {"error": "An error occurred while processing the request."}},
+            ),
+        },
+    )
 
     def get(self, request):
         """
@@ -123,6 +199,21 @@ class ScheduleCreateView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Retrieve available orders",
+        operation_description="Retrieve a list of orders that are not yet scheduled.",
+        responses={
+            200: openapi.Response(
+                description="List of available orders.",
+                examples={
+                    "application/json": [
+                        {"id": 1, "name": "Order 1"},
+                        {"id": 2, "name": "Order 2"},
+                    ]
+                },
+            ),
+        },
+    )
     def get(self, request):
         """
         Retrieve available orders that are not yet scheduled.
@@ -135,6 +226,31 @@ class ScheduleCreateView(APIView):
         serialized_orders = [{"id": order.id, "name": order.name} for order in orders]
         return Response(serialized_orders, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary="Create a new Schedule",
+        operation_description="Create a new Schedule entry with the provided data.",
+        request_body=ScheduleSerializer,
+        responses={
+            201: openapi.Response(
+                description="Schedule created successfully.",
+                examples={
+                    "application/json": {
+                        "message": "Schedule created successfully.",
+                        "schedule": {
+                            "id": 1,
+                            "order": 1,
+                            "schedule_start": "2023-10-01T10:00:00Z",
+                            "created_by": 1,
+                        },
+                    }
+                },
+            ),
+            400: openapi.Response(
+                description="Invalid input data.",
+                examples={"application/json": {"error": "Invalid data."}},
+            ),
+        },
+    )
     def post(self, request):
         """
         Create a new Schedule entry.
@@ -160,6 +276,33 @@ class ScheduleArchiveView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="Archive a Schedule instance",
+        operation_description="Archives a Schedule instance by ID if the user is authorized.",
+        manual_parameters=[
+            openapi.Parameter(
+                "id",
+                openapi.IN_PATH,
+                description="The ID of the Schedule to archive.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Schedule successfully archived.",
+                examples={"application/json": {"message": "schedule archived successfully"}},
+            ),
+            403: openapi.Response(
+                description="Unauthorized to archive the schedule.",
+                examples={"application/json": {"error": "You are not authorized to archive this record."}},
+            ),
+            404: openapi.Response(
+                description="Schedule not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
     def post(self, request, id):
         """
         Archive the schedule if authorized.
@@ -168,7 +311,6 @@ class ScheduleArchiveView(APIView):
             Schedule,
             id=id,
             is_deleted=False,
-
         )
 
         # Check if the requesting user is the creator of the schedule
@@ -193,6 +335,34 @@ class ScheduleDeleteView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a Schedule instance",
+        operation_description="Deletes a Schedule instance by ID if the user is authorized.",
+        manual_parameters=[
+            openapi.Parameter(
+                "schedule_id",
+                openapi.IN_PATH,
+                description="The ID of the Schedule to delete.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            204: openapi.Response(
+                description="Schedule successfully deleted.",
+                examples={"application/json": {"message": "Schedule successfully deleted."}},
+            ),
+            403: openapi.Response(
+                description="Unauthorized to delete the schedule.",
+                examples={"application/json": {"error": "You are not authorized to delete this record."}},
+            ),
+            404: openapi.Response(
+                description="Schedule not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
 
     def delete(self, request, schedule_id):
         """
