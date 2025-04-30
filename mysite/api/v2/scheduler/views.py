@@ -48,12 +48,14 @@ class ScheduleListView(APIView):
                 openapi.IN_QUERY,
                 description="Start date for filtering schedules (format: MM/DD/YYYY).",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
             openapi.Parameter(
                 "toDate",
                 openapi.IN_QUERY,
                 description="End date for filtering schedules (format: MM/DD/YYYY).",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
             openapi.Parameter(
                 "page_size",
@@ -112,6 +114,11 @@ class ScheduleListView(APIView):
         page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
 
         try:
+            if not from_date or to_date:
+                return Response(
+                    {"error": "Both from_date and to_date are required."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             # Get filtered queryset
             object_list = self.get_filtered_query(search, from_date, to_date, ordering)
 
