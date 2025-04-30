@@ -116,7 +116,7 @@ class ScheduleListView(APIView):
         try:
             if not from_date or to_date:
                 return Response(
-                    {"error": "Both from_date and to_date are required."},
+                    {"error": "Both fromDate and toDate are required."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # Get filtered queryset
