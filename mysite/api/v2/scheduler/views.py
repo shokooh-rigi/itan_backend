@@ -114,11 +114,7 @@ class ScheduleListView(APIView):
         page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
 
         try:
-            if not from_date or to_date:
-                return Response(
-                    {"error": "Both fromDate and toDate are required."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
             # Get filtered queryset
             object_list = self.get_filtered_query(search, from_date, to_date, ordering)
 
