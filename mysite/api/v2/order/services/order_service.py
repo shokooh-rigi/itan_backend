@@ -30,12 +30,14 @@ class OrderService:
             | Q(proposal__estimate__customer__company__name__icontains=project_name),
             is_deleted=False,
             archive=False,
+        ).select_related(
+            "proposal__estimate__project", "proposal__estimate__customer__company"
         ).order_by(ordering)
 
         if order_type == "all" or order_type is None:
             return object_list
         if order_type == "inprogress":
-            return object_list.filter(invoice__isnull=True).filter(report__isnull=True)
+            return object_list.filter(invoice__isnull=True, report__isnull=True)
         if order_type == "invoiced":
             return object_list.filter(invoice__isnull=False)
         if order_type == "notinvoiced":
@@ -62,23 +64,20 @@ class OrderService:
         """
         if proposal_id:
             return Proposal.objects.filter(id=proposal_id)
-        return (
-            Proposal.objects.filter(archive=False)
-            .exclude(id__in=Order.objects.values_list("proposal_id", flat=True))
-            .order_by("-created_on")
-        )
+        return Proposal.objects.filter(archive=False).exclude(
+            id__in=Order.objects.values("proposal_id")
+        ).order_by("-created_on")
 
     @staticmethod
     def get_order(order_id):
         """
         Retrieve a specific order by ID.
         """
-        order = get_object_or_404(
-            Order,
+        return get_object_or_404(
+            Order.objects.select_related("proposal__estimate"),
             id=order_id,
             is_deleted=False,
         )
-        return order
 
     @staticmethod
     def validate_user_permission(order, user):
@@ -114,12 +113,11 @@ class OrderEditService:
         """
         Retrieve a specific order by ID.
         """
-        order = get_object_or_404(
-            Order,
+        return get_object_or_404(
+            Order.objects.select_related("proposal__estimate"),
             id=order_id,
             is_deleted=False,
         )
-        return order
 
     @staticmethod
     def get_proposals():
@@ -127,7 +125,7 @@ class OrderEditService:
         Retrieve active proposals not linked to existing orders.
         """
         return Proposal.objects.filter(archive=False).exclude(
-            id__in=Order.objects.values_list("proposal_id", flat=True)
+            id__in=Order.objects.values("proposal_id")
         )
 
     @staticmethod
@@ -135,4 +133,4 @@ class OrderEditService:
         """
         Retrieve all change orders related to a specific order.
         """
-        return ChangeOrder.objects.filter(order=order_id)
+        return ChangeOrder.objects.filter(order=order_id).select_related("order")
