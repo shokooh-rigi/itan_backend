@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from mysite.core.models import Setting
 from mysite.gi.models import Invoice
+from mysite.order.templatetags.order_tags import calculate_remaining_invoice_due
 
 logger = logging.getLogger(__name__)
 
@@ -83,22 +84,31 @@ class ListInvoiceService:
         Returns:
             Q: Django Q object with the applied type filters.
         """
+        to_be_deleted = []
+
         if invoice_type == "fully-paid":
-            # Filter invoices with balance_due = 0 in the latest InvoiceHistory
-            return Q(invoicehistory__balance_due=0)
+            for invoice in Invoice.objects.all():
+                if calculate_remaining_invoice_due(invoice) == 0:
+                    to_be_deleted.append(invoice.id)
+            return Q(id__in=to_be_deleted)
 
         elif invoice_type == "partial-paid":
-            # Filter invoices with balance_due > 0 and at least one transaction
-            return Q(invoicehistory__balance_due__gt=0) & Q(invoicetransaction__isnull=False)
+            for invoice in Invoice.objects.all():
+                if calculate_remaining_invoice_due(invoice) != 0:
+                    to_be_deleted.append(invoice.id)
+            return Q(id__in=to_be_deleted) & Q(invoicetransaction__isnull=False)
 
         elif invoice_type == "not-paid":
-            # Filter invoices with no transactions
             return Q(invoicetransaction__isnull=True)
 
         elif invoice_type == "old-estimate":
-            # Filter invoices with old due dates and balance_due > 0
-            old_due_date = datetime.strptime("04/01/2020", "%m/%d/%Y")
-            return Q(order__proposal__estimate__due_date__lte=old_due_date) & Q(invoicehistory__balance_due__gt=0)
+            old_due_date = datetime.datetime.strptime("04/01/2020", "%m/%d/%Y")
+            for invoice in Invoice.objects.all():
+                if calculate_remaining_invoice_due(invoice) != 0:
+                    to_be_deleted.append(invoice.id)
+            return Q(order__proposal__estimate__due_date__lte=old_due_date) & Q(
+                id__in=to_be_deleted
+            )
 
         return Q()
 
@@ -112,6 +122,6 @@ class ListInvoiceService:
                  Returns 0 if the setting is not found.
         """
         try:
-            return int(Setting.objects.get(key="Overdue Days").value)
+            return Setting.objects.get(key="Overdue Days").value
         except Setting.DoesNotExist:
             return 0
