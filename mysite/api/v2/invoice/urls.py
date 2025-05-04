@@ -74,7 +74,7 @@ urlpatterns = [
         name="invoice-transaction-list",
     ),
     path(
-        "invoice/transaction/delete/<int:invoice_id>/",
+        "invoice/transaction/delete/<int:transaction_id>/",
         InvoiceTransactionDeleteView.as_view(),
         name="invoice-payment-delete",
     ),
