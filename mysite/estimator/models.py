@@ -139,6 +139,13 @@ class Estimate(BaseModelWithCreatedByUser):
     def estimate_id(self):
         return estimate_number_generator(self.id)
 
+    @property
+    def has_proposal(self):
+        """
+        Check if the estimate has a proposal.
+        """
+        return hasattr(self, "proposal")
+
     class Meta:
         ordering = ["-due_date"]
         verbose_name = "Estimate List"
