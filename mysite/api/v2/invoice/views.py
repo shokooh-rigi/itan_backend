@@ -912,26 +912,30 @@ class InvoiceTransactionDeleteView(APIView):
         # Check if the current user is the one who created the transaction
         if this_transaction.created_by != request.user:
             raise PermissionDenied("You are not authorized to delete this transaction.")
+
         invoice = this_transaction.invoice
+
         # Calculate totals for the invoice to potentially delete the InvoiceHistory
         total_invoiced = calculate_total_amount_due(invoice)
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
-        try:
-            this_invoice_history = get_object_or_404(
-                InvoiceHistory,
-                invoice=this_transaction.invoice,
-                total_invoiced=total_invoiced,
-                total_paid=total_paid,
-                balance_due=balance_due,
-                is_deleted=False,
-            )
-            this_invoice_history.soft_delete()
-        except InvoiceHistory.DoesNotExist:
-            pass
+
+        invoice_histories = InvoiceHistory.objects.filter(
+            invoice=this_transaction.invoice,
+            total_invoiced=total_invoiced,
+            total_paid=total_paid,
+            balance_due=balance_due,
+            is_deleted=False,
+        )
+
+        for history in invoice_histories:
+            history.soft_delete()
+
+        # Soft delete the transaction
         this_transaction.soft_delete()
+
         return Response(
-            {"detail": "Transaction deleted successfully."},
+            {"detail": "Transaction and associated history deleted successfully."},
             status=status.HTTP_200_OK,
         )
 
