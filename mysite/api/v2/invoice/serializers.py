@@ -252,6 +252,11 @@ class InvoiceTransactionSerializer(serializers.ModelSerializer):
             if invoice_id
             else None
         )
+        balance_due = calculate_remaining_invoice_due(invoice)
+        if balance_due < 0:
+            raise serializers.ValidationError(
+                {"invoice": "Payment exceeds the invoice amount."}
+            )
 
         validated_data["invoice"] = invoice
         validated_data["created_by"] = self.context["request"].user
