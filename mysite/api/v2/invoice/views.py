@@ -731,7 +731,7 @@ class InvoiceTransactionCreateView(CreateAPIView):
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
 
-        if balance_due < 0:
+        if balance_due < 0 or total_paid + transaction_serializer.validated_data["amount"] > total_invoiced:
             return Response(
                 {"error": "Payment exceeds the invoice amount."},
                 status=status.HTTP_400_BAD_REQUEST,
