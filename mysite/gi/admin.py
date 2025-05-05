@@ -27,9 +27,21 @@ class InvoiceAdmin(admin.ModelAdmin):
         "updated_at",
         "is_deleted",
     ]
-    search_fields = ["id", "order__project_number"]
-    list_filter = ["invoice_type", "mark_as_paid", "created_on"]
-    readonly_fields = ["invoice_number", "created_on", "updated_at"]
+    search_fields = [
+        "id",
+        "order__project_number",
+    ]
+    list_filter = [
+        "invoice_type",
+        "mark_as_paid",
+        "created_on",
+    ]
+    readonly_fields = [
+        "invoice_number",
+        "created_on",
+        "updated_at",
+        "is_deleted",
+    ]
     fieldsets = [
         ("Invoice Details", {
             "fields": [
@@ -54,30 +66,84 @@ class InvoiceTransactionAdmin(admin.ModelAdmin):
     """
     Admin page for managing Invoice Transactions.
     """
-    list_display = ["id", "invoice", "amount", "payment_date", "payment_no", "payment_desc", "created_on"]
-    search_fields = ["id", "payment_no"]
-    list_filter = ["payment_date", "created_on"]
-    readonly_fields = ["created_on", "updated_at"]
+    list_display = [
+        "id",
+        "invoice",
+        "amount",
+        "payment_date",
+        "payment_no",
+        "payment_desc",
+        "created_on",
+        "updated_at",
+        "is_deleted",
+    ]
+    search_fields = [
+        "id",
+        "payment_no"
+    ]
+    list_filter = [
+        "payment_date",
+        "created_on"
+    ]
+    readonly_fields = [
+        "created_on",
+        "updated_at",
+        "is_deleted",
+    ]
 
 
 class AccountSummaryAdmin(admin.ModelAdmin):
     """
     Admin page for managing Account Summaries.
     """
-    list_display = ["id", "customer", "statement_no", "total", "attention", "created_by", "created_on"]
-    search_fields = ["id", "statement_no"]
-    list_filter = ["created_on"]
-    readonly_fields = ["created_on", "updated_at"]
+    list_display = [
+        "id",
+        "customer",
+        "statement_no",
+        "total",
+        "attention",
+        "created_by",
+        "created_on",
+        "updated_at",
+    ]
+    search_fields = [
+        "id",
+        "statement_no"
+    ]
+    list_filter = [
+        "created_on",
+    ]
+    readonly_fields = [
+        "created_on",
+        "updated_at",
+    ]
 
 
 class InvoiceHistoryAdmin(admin.ModelAdmin):
     """
     Admin page for managing Invoice Histories.
     """
-    list_display = ["id", "invoice", "total_invoiced", "total_paid", "balance_due", "pdf_filename", "created_on"]
-    search_fields = ["id", "invoice__invoice_number", "pdf_filename"]
+    list_display = [
+        "id",
+        "invoice",
+        "total_invoiced",
+        "total_paid",
+        "balance_due",
+        "pdf_filename",
+        "created_on",
+        "is_deleted",
+    ]
+    search_fields = [
+        "id",
+        "invoice__invoice_number",
+        "pdf_filename"
+    ]
     list_filter = ["created_on"]
-    readonly_fields = ["created_on", "updated_at"]
+    readonly_fields = [
+        "created_on",
+        "updated_at",
+        "is_deleted",
+    ]
 
 
 admin.site.register(Invoice, InvoiceAdmin)
