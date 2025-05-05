@@ -726,12 +726,18 @@ class InvoiceTransactionCreateView(CreateAPIView):
             logger.debug(f"Serializer errors: {transaction_serializer.errors}")
             return Response(transaction_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        transaction_serializer.save()
-
         # Calculate updated invoice amounts
         total_invoiced = calculate_total_amount_due(invoice)
         total_paid = calculate_total_paid(invoice)
         balance_due = calculate_remaining_invoice_due(invoice)
+
+        if balance_due < 0:
+            return Response(
+                {"error": "Payment exceeds the invoice amount."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        transaction_serializer.save()
 
         # Generate a unique PDF filename for history
         total_count = InvoiceHistory.objects.filter(invoice=invoice).count() + 1
