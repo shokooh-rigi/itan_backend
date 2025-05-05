@@ -95,6 +95,8 @@ class OrderSerializer(serializers.ModelSerializer):
     final_total = serializers.SerializerMethodField(read_only=True)
     total = serializers.SerializerMethodField(read_only=True)
     has_invoice = serializers.BooleanField(read_only=True)
+    has_tec_label = serializers.SerializerMethodField(read_only=True)
+
 
     class Meta:
         model = Order
@@ -154,6 +156,11 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         return obj.has_invoice
 
+    def get_has_tec_label(self, obj):
+        """
+        Check if the order has an associated technical label.
+        """
+        return TechLabel.objects.filter(order=obj).exists()
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):
     """
