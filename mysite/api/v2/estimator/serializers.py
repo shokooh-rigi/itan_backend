@@ -73,7 +73,10 @@ class EstimateSerializer(serializers.ModelSerializer):
     estimate_id = serializers.SerializerMethodField()
     bfm = BidSerializer(read_only=True)
     bid_id = serializers.PrimaryKeyRelatedField(
-        queryset=BidSerializer.Meta.model.objects.all(), write_only=True, source="bfm"
+        queryset=BidSerializer.Meta.model.objects.all(),
+        write_only=True,
+        source="bfm",
+        required=False,
     )
     customer = PersonSerializer(read_only=True)
     customer_id = serializers.PrimaryKeyRelatedField(
