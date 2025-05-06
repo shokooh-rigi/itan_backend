@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import *
+from mysite.estimator.models import EstimateEquipment, Estimate, EstimateDetails, EstimateHistory
 
 
 class EstimateAdmin(ImportExportModelAdmin):
@@ -45,3 +45,18 @@ class EstimateDetailsAdmin(ImportExportModelAdmin):
 
 admin.site.register(EstimateDetails, EstimateDetailsAdmin)
 
+
+class EstimateHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'estimate',
+        'total',
+        'version',
+        'created_on',
+        'updated_at'
+    )
+    list_filter = ('estimate', 'created_on')
+    search_fields = ('estimate__id', 'version')
+    ordering = ('-created_on',)
+    readonly_fields = ('created_on', 'updated_at')
+
+admin.site.register(EstimateHistory, EstimateHistoryAdmin)
