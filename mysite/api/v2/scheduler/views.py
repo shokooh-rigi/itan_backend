@@ -48,14 +48,12 @@ class ScheduleListView(APIView):
                 openapi.IN_QUERY,
                 description="Start date for filtering schedules (format: MM/DD/YYYY).",
                 type=openapi.TYPE_STRING,
-                required=True,
             ),
             openapi.Parameter(
                 "toDate",
                 openapi.IN_QUERY,
                 description="End date for filtering schedules (format: MM/DD/YYYY).",
                 type=openapi.TYPE_STRING,
-                required=True,
             ),
             openapi.Parameter(
                 "page_size",
