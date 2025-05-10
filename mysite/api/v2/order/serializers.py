@@ -19,6 +19,7 @@ from mysite.order.models import (
     ControlSystemManufacturer,
 )
 from mysite.proposal.models import Proposal
+from mysite.scheduler.models import Schedule
 
 
 class ControlSystemManufacturerSerializer(serializers.ModelSerializer):
@@ -96,7 +97,7 @@ class OrderSerializer(serializers.ModelSerializer):
     total = serializers.SerializerMethodField(read_only=True)
     has_invoice = serializers.BooleanField(read_only=True)
     has_tec_label = serializers.SerializerMethodField(read_only=True)
-
+    has_schedule = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Order
@@ -161,6 +162,13 @@ class OrderSerializer(serializers.ModelSerializer):
         Check if the order has an associated technical label.
         """
         return TechLabel.objects.filter(order=obj).exists()
+
+    def get_has_schedule(self, obj):
+        """
+        Check if the order has an associated schedule.
+        """
+        return Schedule.objects.filter(order=obj).exists()
+
 
 class ChangeOrderServiceSerializer(serializers.ModelSerializer):
     """
