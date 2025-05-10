@@ -66,7 +66,7 @@ class OrderListAPIView(APIView):
     API view to handle listing and filtering of orders.
 
     Query Parameters:
-        - project_name (str): Search orders by project name or related fields.
+        - search (str): Search orders by project name or project number or company name.
         - type (str): Type of orders to filter (all, inprogress, invoiced, notinvoiced, reported).
         - ordering (str): Field to order the results by (default: '-created_on').
         - paginate_by (int): Number of orders per page (default: 20).
@@ -82,9 +82,9 @@ class OrderListAPIView(APIView):
         operation_description="Retrieve a paginated list of orders with optional filters and ordering.",
         manual_parameters=[
             openapi.Parameter(
-                "project_name",
+                "search",
                 openapi.IN_QUERY,
-                description="Search orders by project name or related fields.",
+                description="Search term to filter orders by project number or  project name  or company name.",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
@@ -126,12 +126,12 @@ class OrderListAPIView(APIView):
         },
     )
     def get(self, request):
-        project_name = request.query_params.get("project_name", "")
+        search = request.GET.get("search", "")
         order_type = request.query_params.get("type", "all")
         ordering = request.query_params.get("ordering", "-created_on")
         page_size = int(request.query_params.get("page_size", settings.PAGE_SIZE))
         orders_queryset = OrderService.get_filtered_orders(
-            project_name=project_name,
+            search=search,
             order_type=order_type,
             ordering=ordering,
         )

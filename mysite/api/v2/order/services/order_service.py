@@ -12,12 +12,12 @@ class OrderService:
     """
 
     @staticmethod
-    def get_filtered_orders(project_name: str, order_type: str, ordering: str):
+    def get_filtered_orders(search: str, order_type: str, ordering: str):
         """
         Fetches filtered and ordered orders based on query parameters.
 
         Args:
-            project_name (str): Project name or part of it to search for.
+            search (str): Project name or part of it to search for or Project number or part of it to search for.
             order_type (str): Type of orders to filter by.
             ordering (str): Field for ordering the results.
 
@@ -25,9 +25,9 @@ class OrderService:
             QuerySet: A filtered and ordered queryset of orders.
         """
         object_list = Order.objects.filter(
-            Q(proposal__estimate__project__name__icontains=project_name)
-            | Q(project_number__icontains=project_name)
-            | Q(proposal__estimate__customer__company__name__icontains=project_name),
+            Q(proposal__estimate__project__name__icontains=search)
+            | Q(project_number__icontains=search)
+            | Q(proposal__estimate__customer__company__name__icontains=search),
             is_deleted=False,
             archive=False,
         ).order_by(ordering)
