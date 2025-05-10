@@ -118,6 +118,7 @@ class EstimateSerializer(serializers.ModelSerializer):
         source="services",
     )
     has_proposal = serializers.SerializerMethodField()
+    total_work = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Estimate
@@ -183,6 +184,9 @@ class EstimateSerializer(serializers.ModelSerializer):
     def get_has_proposal(self, obj):
         """Check if the estimate has a proposal."""
         return obj.has_proposal
+
+    def get_total_work(self, obj):
+        return obj.total_work
 
     # def to_representation(self, instance):
     #     """Customize the serialized output."""

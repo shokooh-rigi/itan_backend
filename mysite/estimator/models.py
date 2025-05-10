@@ -146,6 +146,22 @@ class Estimate(BaseModelWithCreatedByUser):
         """
         return hasattr(self, "proposal")
 
+    @property
+    def total_work(self):
+        """
+        Calculate the total work based on estimate equipment.
+        """
+        estimate_equipments = self.estimateequipment_set.filter(
+            flag=True,
+            is_deleted=False,
+        )
+        estimate_work = sum(
+            int(estimate_equipment.quantity)
+            * int(estimate_equipment.equipment.estimate_work)
+            for estimate_equipment in estimate_equipments
+        )
+        return estimate_work
+
     class Meta:
         ordering = ["-due_date"]
         verbose_name = "Estimate List"

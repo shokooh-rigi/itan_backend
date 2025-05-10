@@ -1174,23 +1174,6 @@ class EstimateBidView(APIView):
         return license_info, license_files
 
     @staticmethod
-    def _estimate_total_work(estimate_id: int):
-        """
-        Calculate the total work based on estimate equipment.
-        """
-        estimate_equipments = EstimateEquipment.objects.filter(
-            estimate=estimate_id,
-            flag=True,
-            is_deleted=False,
-        )
-        estimate_work = sum(
-            int(each_estimate_equipment.quantity)
-            * int(each_estimate_equipment.equipment.estimate_work)
-            for each_estimate_equipment in estimate_equipments
-        )
-        return estimate_work
-
-    @staticmethod
     def _estimate_equipments(estimate_id: int):
         estimate_equipments = EstimateEquipment.objects.filter(
             estimate=estimate_id,
@@ -1306,7 +1289,9 @@ class EstimateBidView(APIView):
                     is_deleted=False,
                 )
             )
-            estimate_work = self._estimate_total_work(estimate_id=estimate_id)
+            # Retrieve total work from the serializer
+            serializer = EstimateSerializer(estimate)
+            estimate_work = serializer.data.get("total_work", 0)
             estimate_totals = self._calculate_estimate_totals(estimate, estimate_sub)
             estimate_equipments = self._estimate_equipments(estimate_id=estimate_id)
 
