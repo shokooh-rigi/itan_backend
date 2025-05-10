@@ -97,7 +97,7 @@ class OrderSerializer(serializers.ModelSerializer):
     total = serializers.SerializerMethodField(read_only=True)
     has_invoice = serializers.BooleanField(read_only=True)
     has_tec_label = serializers.SerializerMethodField(read_only=True)
-    has_schedule = serializers.BooleanField(read_only=True)
+    has_schedule = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Order
