@@ -14,8 +14,8 @@ from rest_framework.views import APIView
 
 from mysite import settings
 from mysite.order.models import Order
-from mysite.scheduler.models import Schedule
-from .serializers import ScheduleSerializer
+from mysite.scheduler.models import Schedule, ScheduleTech
+from .serializers import ScheduleSerializer, ScheduleTechSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -424,4 +424,242 @@ class ScheduleDeleteView(APIView):
         return Response(
             {"message": "Schedule successfully deleted."},
             status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class ScheduleTecListView(APIView):
+    """
+    API view to retrieve a list of technicians associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve technicians for a schedule",
+        operation_description="Retrieve a list of technicians associated with a specific schedule.",
+        manual_parameters=[
+            openapi.Parameter(
+                "schedule_id",
+                openapi.IN_QUERY,
+                description="The ID of the Schedule to retrieve technicians for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of technicians.",
+            ),
+            404: openapi.Response(
+                description="Schedule not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
+    def get(self, request):
+        """
+        Retrieve technicians associated with the specified schedule.
+        """
+        schedule_id = request.GET.get("schedule_id")
+        if not schedule_id:
+            return Response(
+                {"error": "schedule_id is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        schedule = get_object_or_404(Schedule, id=schedule_id)
+        technicians = schedule.scheduletech_set.all()
+        serializer = ScheduleTechSerializer(technicians, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ScheduleTecDetailView(APIView):
+    """
+    API view to retrieve details of a specific technician associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve technician details for a schedule",
+        operation_description="Retrieve details of a specific technician associated with a specific schedule.",
+        manual_parameters=[
+            openapi.Parameter(
+                "tech_id",
+                openapi.IN_PATH,
+                description="The ID of the technician to retrieve details for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Technician details.",
+            ),
+            404: openapi.Response(
+                description="Technician not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
+    def get(self, request, tech_id):
+        """
+        Retrieve details of a specific technician.
+        """
+        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        serializer = ScheduleTechSerializer(technician)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ScheduleTecCreateView(APIView):
+    """
+    API view to create a new technician associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Create a new technician for a schedule",
+        operation_description="Create a new technician associated with a specific schedule.",
+        request_body=ScheduleTechSerializer,
+        responses={
+            201: openapi.Response(
+                description="Technician created successfully.",
+            ),
+            400: openapi.Response(
+                description="Invalid input data.",
+            ),
+        },
+    )
+    def post(self, request):
+        """
+        Create a new technician associated with the specified schedule.
+        """
+        serializer = ScheduleTechSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Technician created successfully.", "technician": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ScheduleTecUpdateView(APIView):
+    """
+    API view to update a technician associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Update a technician for a schedule",
+        operation_description="Update an existing technician associated with a specific schedule.",
+        request_body=ScheduleTechSerializer,
+        responses={
+            200: openapi.Response(
+                description="Technician updated successfully.",
+            ),
+            400: openapi.Response(
+                description="Invalid input data.",
+            ),
+            404: openapi.Response(
+                description="Technician not found.",
+            ),
+        },
+    )
+    def put(self, request, tech_id):
+        """
+        Update the technician associated with the specified schedule.
+        """
+        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        serializer = ScheduleTechSerializer(technician, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Technician updated successfully.", "technician": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ScheduleTecDeleteView(APIView):
+    """
+    API view to delete a technician associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a technician for a schedule",
+        operation_description="Delete a technician associated with a specific schedule.",
+        manual_parameters=[
+            openapi.Parameter(
+                "tech_id",
+                openapi.IN_PATH,
+                description="The ID of the technician to delete.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            204: openapi.Response(
+                description="Technician deleted successfully.",
+            ),
+            404: openapi.Response(
+                description="Technician not found.",
+            ),
+        },
+    )
+    def delete(self, request, tech_id):
+        """
+        Delete the technician associated with the specified schedule.
+        """
+        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        technician.delete()
+        return Response(
+            {"message": "Technician deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class UserTecListView(APIView):
+    """
+    API view to retrieve a list of users and tec associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve users and technicians for a schedule",
+        operation_description="Retrieve a list of users and technicians associated with a specific schedule.",
+        manual_parameters=[
+            openapi.Parameter(
+                "schedule_id",
+                openapi.IN_PATH,
+                description="The ID of the Schedule to retrieve users and tec for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of users and tec.",
+
+            ),
+            404: openapi.Response(
+                description="Schedule not found.",
+                examples={"application/json": {"error": "Not found."}},
+            ),
+        },
+    )
+    def get(self, request, schedule_id):
+        """
+        Retrieve users and tec associated with the specified schedule.
+        """
+        schedule = get_object_or_404(Schedule, id=schedule_id)
+        users_and_technicians = schedule.get_users_and_tec()
+        return Response(
+            users_and_technicians,
+            status=status.HTTP_200_OK
         )

@@ -48,6 +48,8 @@ class Schedule(BaseModelWithCreatedByUser):
         """
         return self.order.project_number
 
+    def get_users_and_tec(self):
+        pass
 
 class Maintenance(BaseModelWithCreatedByUser):
     """
