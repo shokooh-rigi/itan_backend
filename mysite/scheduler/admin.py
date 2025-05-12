@@ -8,6 +8,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     Admin configuration for the Schedule model.
     """
     list_display = (
+        "id",
         "order",
         "schedule_start",
         "schedule_end",
@@ -24,6 +25,11 @@ class ScheduleAdmin(admin.ModelAdmin):
         "created_on"
     )
     ordering = ("-created_on",)
+    readonly_fields = (
+        "created_on",
+        "updated_at",
+        "id",
+    )
 
 
 @admin.register(Maintenance)
@@ -32,6 +38,7 @@ class MaintenanceAdmin(admin.ModelAdmin):
     Admin configuration for the Maintenance model.
     """
     list_display = (
+        "id",
         "order",
         "assigned_to_employee",
         "assigned_to_contractor",
@@ -53,6 +60,11 @@ class MaintenanceAdmin(admin.ModelAdmin):
         "created_on"
     )
     ordering = ("-created_on",)
+    readonly_fields = (
+        "created_on",
+        "updated_at",
+        "id",
+    )
 
 
 @admin.register(ScheduleTech)
@@ -61,6 +73,7 @@ class ScheduleTechAdmin(admin.ModelAdmin):
     Admin configuration for the ScheduleTech model.
     """
     list_display = (
+        "id",
         "schedule",
         "assigned_to_employee",
         "assigned_to_contractor",
@@ -78,3 +91,8 @@ class ScheduleTechAdmin(admin.ModelAdmin):
         "created_on"
     )
     ordering = ("-created_on",)
+    readonly_fields = (
+        "created_on",
+        "updated_at",
+        "id",
+    )
