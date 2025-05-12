@@ -475,32 +475,135 @@ class ScheduleDeleteView(APIView):
             status=status.HTTP_204_NO_CONTENT,
         )
 
+
 class ScheduleTecListView(APIView):
     """
-    API view to retrieve a list of all technicians.
+    API view to retrieve a list of all technicians with filtering and pagination options.
     """
 
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Retrieve all technicians",
-        operation_description="Retrieve a list of all technicians.",
+        operation_description="Retrieve a paginated list of technicians with optional filters such as search, date range, and ordering.",
+        manual_parameters=[
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search term to filter technicians by employee or contractor name.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="Field to order the technicians by. Default is '-created_on'.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "fromDate",
+                openapi.IN_QUERY,
+                description="Start date for filtering technicians (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "toDate",
+                openapi.IN_QUERY,
+                description="End date for filtering technicians (format: MM/DD/YYYY).",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of technicians to display per page. Default is set in settings.PAGE_SIZE.",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number to retrieve. Default is 1.",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
         responses={
             200: openapi.Response(
-                description="List of all technicians.",
+                description="Paginated list of technicians.",
+            ),
+            400: openapi.Response(
+                description="Invalid input parameters.",
+                examples={
+                    "application/json": {"error": "Invalid date format. Use mm/dd/yyyy"}
+                },
+            ),
+            500: openapi.Response(
+                description="Server error.",
+                examples={
+                    "application/json": {
+                        "error": "An error occurred while processing the request."
+                    }
+                },
             ),
         },
     )
     def get(self, request):
         """
-        Retrieve all technicians.
+        Retrieve all technicians with filtering and pagination options.
         """
-        technicians = ScheduleTech.objects.filter(
-            is_deleted=False,
-            archive=False,
-        )
-        serializer = ScheduleTechSerializer(technicians, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        search = request.GET.get("search", "")
+        ordering = request.GET.get("ordering", "-created_on")
+        from_date = request.GET.get("fromDate")
+        to_date = request.GET.get("toDate")
+        page_size = int(request.GET.get("page_size", settings.PAGE_SIZE))
+
+        try:
+            # Get filtered queryset
+            object_list = self.get_filtered_query(search, from_date, to_date, ordering)
+
+            # Paginate results
+            paginator = PageNumberPagination()
+            paginator.page_size = page_size
+            result_page = paginator.paginate_queryset(object_list, request)
+
+            # Serialize results
+            serializer = ScheduleTechSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        except ValueError as ve:
+            logger.error(f"Date parsing error: {ve}")
+            return Response(
+                {"error": "Invalid date format. Use mm/dd/yyyy"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return Response(
+                {"error": "An error occurred while processing the request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @staticmethod
+    def get_filtered_query(search, from_date, to_date, ordering):
+        """
+        Helper method to filter technicians based on search, date range, and ordering.
+        """
+        query = Q(is_deleted=False, archive=False)
+        if search:
+            query &= (
+                Q(assigned_to_employee__name__icontains=search)
+                | Q(assigned_to_contractor__name__icontains=search)
+            )
+
+        if from_date and to_date:
+            try:
+                from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
+                to_date_obj = datetime.datetime.strptime(
+                    to_date, "%m/%d/%Y"
+                ) + datetime.timedelta(days=1)
+                query &= Q(schedule__schedule_start__range=(from_date_obj, to_date_obj))
+            except ValueError as ve:
+                raise ValueError("Invalid date format.")
+
+        queryset = ScheduleTech.objects.filter(query).order_by(ordering)
+        return queryset
 
 
 class ScheduleTecDetailView(APIView):
