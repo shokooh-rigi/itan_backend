@@ -822,12 +822,20 @@ class UserTechListView(APIView):
         """
         Retrieve users and technicians associated with the specified schedule.
         """
-        schedule_tech = get_object_or_404(
-            ScheduleTech,
+        schedule_techs = ScheduleTech.objects.filter(
             schedule_id=schedule_id,
             is_deleted=False,
             archive=False,
         )
-        users_and_technicians = schedule_tech.get_users_and_tech()
+        if not schedule_techs.exists():
+            return Response(
+                {"error": "Schedule not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        users_and_technicians = []
+        for schedule_tech in schedule_techs:
+            users_and_technicians.extend(schedule_tech.get_users_and_tech())
+
         serializer = ProfileSerializer(users_and_technicians, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
