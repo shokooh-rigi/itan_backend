@@ -3,6 +3,7 @@ from django.core.validators import (
     MinValueValidator,
 )
 from django.db import models
+from django.db.models import Q
 
 from custom_user.models import User
 from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
