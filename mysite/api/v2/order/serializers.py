@@ -137,6 +137,14 @@ class OrderSerializer(serializers.ModelSerializer):
                 "proposal_id": instance.proposal.id if instance.proposal else None,
             }
 
+        fields = self.context.get("fields")
+        if fields:
+            return {
+                field: representation[field]
+                for field in fields
+                if field in representation
+            }
+
         return representation
 
     def get_predemo_total(self, obj):
@@ -293,8 +301,7 @@ class TechLabelSerializer(serializers.ModelSerializer):
 class OrderControlSystemSerializer(serializers.ModelSerializer):
     # Use this field to handle ForeignKey to ControlSystem
     control_system = serializers.PrimaryKeyRelatedField(
-        queryset=ControlSystem.objects.all(),
-        required=False
+        queryset=ControlSystem.objects.all(), required=False
     )
 
     class Meta:
@@ -318,11 +325,7 @@ class GeneralNotesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = [
-            "general_notes_and_comments",
-            "general_notes_and_comments_finalize"
-        ]
-
+        fields = ["general_notes_and_comments", "general_notes_and_comments_finalize"]
 
 
 class ColorDrawingUploadSerializer(Serializer):
@@ -331,7 +334,7 @@ class ColorDrawingUploadSerializer(Serializer):
         fields = [
             "colored_drawing",
             "report_colored_drawing",
-            "colored_drawing_finalize"
+            "colored_drawing_finalize",
         ]
         extra_kwargs = {
             "colored_drawing": {"required": False},

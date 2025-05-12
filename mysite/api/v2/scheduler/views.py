@@ -92,15 +92,20 @@ class ScheduleListView(APIView):
             ),
             400: openapi.Response(
                 description="Invalid input parameters.",
-                examples={"application/json": {"error": "Invalid date format. Use mm/dd/yyyy"}},
+                examples={
+                    "application/json": {"error": "Invalid date format. Use mm/dd/yyyy"}
+                },
             ),
             500: openapi.Response(
                 description="Server error.",
-                examples={"application/json": {"error": "An error occurred while processing the request."}},
+                examples={
+                    "application/json": {
+                        "error": "An error occurred while processing the request."
+                    }
+                },
             ),
         },
     )
-
     def get(self, request):
         """
         Handles GET requests to retrieve schedules based on the provided filters and pagination options.
@@ -127,10 +132,16 @@ class ScheduleListView(APIView):
 
         except ValueError as ve:
             logger.error(f"Date parsing error: {ve}")
-            return Response({"error": "Invalid date format. Use mm/dd/yyyy"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid date format. Use mm/dd/yyyy"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
-            return Response({"error": "An error occurred while processing the request."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "An error occurred while processing the request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     @staticmethod
     def get_filtered_query(search, from_date, to_date, ordering):
@@ -139,14 +150,18 @@ class ScheduleListView(APIView):
         """
         query = Q()
         if search:
-            query = Q(order__project_number__icontains=search) | \
-                    Q(assigned_to_contractor__name__icontains=search) | \
-                    Q(assigned_to_contractor__company__name__icontains=search)
+            query = (
+                Q(order__project_number__icontains=search)
+                | Q(assigned_to_contractor__name__icontains=search)
+                | Q(assigned_to_contractor__company__name__icontains=search)
+            )
 
         if from_date and to_date:
             try:
                 from_date_obj = datetime.datetime.strptime(from_date, "%m/%d/%Y")
-                to_date_obj = datetime.datetime.strptime(to_date, "%m/%d/%Y") + datetime.timedelta(days=1)
+                to_date_obj = datetime.datetime.strptime(
+                    to_date, "%m/%d/%Y"
+                ) + datetime.timedelta(days=1)
                 query &= Q(schedule_start__range=(from_date_obj, to_date_obj))
             except ValueError as ve:
                 raise ValueError("Invalid date format.")
@@ -214,9 +229,7 @@ class ScheduleUpdateView(APIView):
 
         # Handle cancellation logic
         if request.data.get("cancel"):
-            return Response(
-                {"message": "Update canceled."}, status=status.HTTP_200_OK
-            )
+            return Response({"message": "Update canceled."}, status=status.HTTP_200_OK)
 
         # Validate and update the Schedule instance
         serializer = ScheduleSerializer(schedule, data=request.data, partial=True)
@@ -256,17 +269,40 @@ class ScheduleCreateView(APIView):
         """
         Retrieve available orders that are not yet scheduled.
         """
-        orders = Order.objects.filter(archive=False).exclude(
-            id__in=Schedule.objects.all().values_list('order_id', flat=True)
-        ).order_by('-created_on')
+        orders = (
+            Order.objects.filter(archive=False)
+            .exclude(id__in=Schedule.objects.all().values_list("order_id", flat=True))
+            .order_by("-created_on")
+        )
 
-        serialized_orders = [{"id": order.id, "project_number": order.project_number} for order in orders]
+        serialized_orders = [
+            {"id": order.id, "project_number": order.project_number} for order in orders
+        ]
         return Response(serialized_orders, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="Create a new Schedule",
         operation_description="Create a new Schedule entry with the provided data.",
-        request_body=ScheduleSerializer,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["order_id"],
+            properties={
+                "order_id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="The ID of the order to associate with the schedule.",
+                ),
+                "schedule_start": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_DATETIME,
+                    description="The start date and time of the schedule.",
+                ),
+                "schedule_end": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_DATETIME,
+                    description="The end date and time of the schedule.",
+                ),
+            },
+        ),
         responses={
             201: openapi.Response(
                 description="Schedule created successfully.",
@@ -299,7 +335,10 @@ class ScheduleCreateView(APIView):
         if serializer.is_valid():
             serializer.save(created_by=request.user)
             return Response(
-                {"message": "Schedule created successfully.", "schedule": serializer.data},
+                {
+                    "message": "Schedule created successfully.",
+                    "schedule": serializer.data,
+                },
                 status=status.HTTP_201_CREATED,
             )
 
@@ -328,11 +367,17 @@ class ScheduleArchiveView(APIView):
         responses={
             200: openapi.Response(
                 description="Schedule successfully archived.",
-                examples={"application/json": {"message": "schedule archived successfully"}},
+                examples={
+                    "application/json": {"message": "schedule archived successfully"}
+                },
             ),
             403: openapi.Response(
                 description="Unauthorized to archive the schedule.",
-                examples={"application/json": {"error": "You are not authorized to archive this record."}},
+                examples={
+                    "application/json": {
+                        "error": "You are not authorized to archive this record."
+                    }
+                },
             ),
             404: openapi.Response(
                 description="Schedule not found.",
@@ -388,11 +433,17 @@ class ScheduleDeleteView(APIView):
         responses={
             204: openapi.Response(
                 description="Schedule successfully deleted.",
-                examples={"application/json": {"message": "Schedule successfully deleted."}},
+                examples={
+                    "application/json": {"message": "Schedule successfully deleted."}
+                },
             ),
             403: openapi.Response(
                 description="Unauthorized to delete the schedule.",
-                examples={"application/json": {"error": "You are not authorized to delete this record."}},
+                examples={
+                    "application/json": {
+                        "error": "You are not authorized to delete this record."
+                    }
+                },
             ),
             404: openapi.Response(
                 description="Schedule not found.",
@@ -400,7 +451,6 @@ class ScheduleDeleteView(APIView):
             ),
         },
     )
-
     def delete(self, request, schedule_id):
         """
         Delete a Schedule instance if the user is authorized.
@@ -409,7 +459,6 @@ class ScheduleDeleteView(APIView):
             Schedule,
             id=schedule_id,
             is_deleted=False,
-
         )
 
         # Check if the user is authorized to delete the schedule
@@ -539,7 +588,10 @@ class ScheduleTecCreateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"message": "Technician created successfully.", "technician": serializer.data},
+                {
+                    "message": "Technician created successfully.",
+                    "technician": serializer.data,
+                },
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -577,7 +629,10 @@ class ScheduleTecUpdateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"message": "Technician updated successfully.", "technician": serializer.data},
+                {
+                    "message": "Technician updated successfully.",
+                    "technician": serializer.data,
+                },
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -645,7 +700,6 @@ class UserTecListView(APIView):
         responses={
             200: openapi.Response(
                 description="List of users and tec.",
-
             ),
             404: openapi.Response(
                 description="Schedule not found.",
@@ -659,7 +713,4 @@ class UserTecListView(APIView):
         """
         schedule = get_object_or_404(Schedule, id=schedule_id)
         users_and_technicians = schedule.get_users_and_tec()
-        return Response(
-            users_and_technicians,
-            status=status.HTTP_200_OK
-        )
+        return Response(users_and_technicians, status=status.HTTP_200_OK)
