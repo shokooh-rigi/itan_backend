@@ -1,5 +1,80 @@
 from django.contrib import admin
+from .models import Schedule, Maintenance, ScheduleTech
 
-from .models import *
 
-admin.site.register(Schedule)
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Schedule model.
+    """
+    list_display = (
+        "order",
+        "schedule_start",
+        "schedule_end",
+        "pre_demo",
+        "created_by",
+        "created_on"
+    )
+    search_fields = (
+        "order__project_number",
+        "created_by__username"
+    )
+    list_filter = (
+        "pre_demo",
+        "created_on"
+    )
+    ordering = ("-created_on",)
+
+
+@admin.register(Maintenance)
+class MaintenanceAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Maintenance model.
+    """
+    list_display = (
+        "order",
+        "assigned_to_employee",
+        "assigned_to_contractor",
+        "schedule_start",
+        "schedule_end",
+        "maintenance_type",
+        "settlement",
+        "created_by",
+        "created_on",
+    )
+    search_fields = (
+        "order__project_number",
+        "assigned_to_employee__username",
+        "assigned_to_contractor__username"
+    )
+    list_filter = (
+        "maintenance_type",
+        "settlement",
+        "created_on"
+    )
+    ordering = ("-created_on",)
+
+
+@admin.register(ScheduleTech)
+class ScheduleTechAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the ScheduleTech model.
+    """
+    list_display = (
+        "schedule",
+        "assigned_to_employee",
+        "assigned_to_contractor",
+        "involvement_percentage",
+        "settlement",
+        "created_on",
+    )
+    search_fields = (
+        "schedule__order__project_number",
+        "assigned_to_employee__username",
+        "assigned_to_contractor__username"
+    )
+    list_filter = (
+        "settlement",
+        "created_on"
+    )
+    ordering = ("-created_on",)
