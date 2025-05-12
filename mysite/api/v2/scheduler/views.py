@@ -477,7 +477,7 @@ class ScheduleDeleteView(APIView):
         )
 
 
-class ScheduleTecListView(APIView):
+class ScheduleTechListView(APIView):
     """
     API view to retrieve a list of all technicians with filtering and pagination options.
     """
@@ -607,7 +607,7 @@ class ScheduleTecListView(APIView):
         return queryset
 
 
-class ScheduleTecDetailView(APIView):
+class ScheduleTechDetailView(APIView):
     """
     API view to retrieve details of technicians associated with a schedule.
     """
@@ -654,7 +654,7 @@ class ScheduleTecDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ScheduleTecCreateView(APIView):
+class ScheduleTechCreateView(APIView):
     """
     API view to create a new technician associated with a schedule.
     """
@@ -707,7 +707,7 @@ class ScheduleTecCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ScheduleTecUpdateView(APIView):
+class ScheduleTechUpdateView(APIView):
     """
     API view to update a technician associated with a schedule.
     """
@@ -748,7 +748,7 @@ class ScheduleTecUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ScheduleTecDeleteView(APIView):
+class ScheduleTechDeleteView(APIView):
     """
     API view to delete a technician associated with a schedule.
     """
@@ -788,9 +788,9 @@ class ScheduleTecDeleteView(APIView):
         )
 
 
-class UserTecListView(APIView):
+class UserTechListView(APIView):
     """
-    API view to retrieve a list of users and tec associated with a schedule.
+    API view to retrieve a list of users and technicians associated with a schedule.
     """
 
     permission_classes = [IsAuthenticated]
@@ -802,14 +802,15 @@ class UserTecListView(APIView):
             openapi.Parameter(
                 "schedule_id",
                 openapi.IN_PATH,
-                description="The ID of the Schedule to retrieve users and tec for.",
+                description="The ID of the Schedule to retrieve users and technicians for.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
             )
         ],
         responses={
             200: openapi.Response(
-                description="List of users and tec.",
+                description="List of users and technicians.",
+                schema=ProfileSerializer(many=True),
             ),
             404: openapi.Response(
                 description="Schedule not found.",
@@ -819,12 +820,14 @@ class UserTecListView(APIView):
     )
     def get(self, request, schedule_id):
         """
-        Retrieve users and tec associated with the specified schedule.
+        Retrieve users and technicians associated with the specified schedule.
         """
-        schedule_tech = get_object_or_404(ScheduleTech, id=schedule_id)
-        users_and_technicians = schedule_tech.get_users_and_tec()
+        schedule_tech = get_object_or_404(
+            ScheduleTech,
+            schedule_id=schedule_id,
+            is_deleted=False,
+            archive=False,
+        )
+        users_and_technicians = schedule_tech.get_users_and_tech()
         serializer = ProfileSerializer(users_and_technicians, many=True)
-        if serializer.is_valid():
-            users_and_technicians = serializer.data
-            return Response(users_and_technicians, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)

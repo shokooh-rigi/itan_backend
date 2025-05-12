@@ -6,6 +6,7 @@ from django.db import models
 
 from custom_user.models import User
 from mysite.core.base_model import BaseModelWithCreatedByUser, BaseModel
+from mysite.core.models import UserTypeChoices, Profile
 from mysite.order.models import Order
 
 
@@ -197,5 +198,11 @@ class ScheduleTech(BaseModel):
             + str(self.schedule.order.project_number)
         )
 
-    def get_users_and_tec(self):
-        pass
+    def get_users_and_tech(self):
+        """
+        Retrieve profiles of users with user_type as TECH or SUPER_TECH.
+        """
+
+        return Profile.objects.filter(
+            Q(user_type=UserTypeChoices.TECH) | Q(user_type=UserTypeChoices.SUPER_TECH)
+        )

@@ -6,12 +6,12 @@ from .views import (
     ScheduleArchiveView,
     ScheduleDeleteView,
     ScheduleCreateView,
-    UserTecListView,
-    ScheduleTecListView,
-    ScheduleTecDetailView,
-    ScheduleTecCreateView,
-    ScheduleTecUpdateView,
-    ScheduleTecDeleteView,
+    UserTechListView,
+    ScheduleTechListView,
+    ScheduleTechDetailView,
+    ScheduleTechCreateView,
+    ScheduleTechUpdateView,
+    ScheduleTechDeleteView,
 )
 
 urlpatterns = [
@@ -41,33 +41,33 @@ urlpatterns = [
         name='schedule-delete'
     ),
     path(
-        'schedule/user-tec/<int:schedule_id>/',
-        UserTecListView.as_view(),
-        name='user-tec-list'
+        'schedule/user-tech/<int:schedule_id>/',
+        UserTechListView.as_view(),
+        name='user-tech-list'
     ),
     path(
         'schedule/techs/',
-        ScheduleTecListView.as_view(),
+        ScheduleTechListView.as_view(),
         name='schedule-tech-list'
     ),
     path(
         'schedule/tech/<int:schedule_id>/',
-        ScheduleTecDetailView.as_view(),
-        name='schedule-tec-detail'
+        ScheduleTechDetailView.as_view(),
+        name='schedule-tech-detail'
     ),
     path(
         'schedule/tech/create/<int:schedule_id>/',
-        ScheduleTecCreateView.as_view(),
-        name='schedule-create'
+        ScheduleTechCreateView.as_view(),
+        name='schedule-tech-create'
     ),
     path(
         'schedule/tech/update/<int:tech_id>/',
-        ScheduleTecUpdateView.as_view(),
-        name='schedule-update'
+        ScheduleTechUpdateView.as_view(),
+        name='schedule-tech-update'
     ),
     path(
         'schedule/tech/delete/<int:tech_id>/',
-        ScheduleTecDeleteView.as_view(),
+        ScheduleTechDeleteView.as_view(),
         name='schedule-tech-delete'
     ),
 
