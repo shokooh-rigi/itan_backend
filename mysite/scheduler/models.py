@@ -207,3 +207,23 @@ class ScheduleTech(BaseModel):
         return Profile.objects.filter(
             Q(user_type=UserTypeChoices.TECH) | Q(user_type=UserTypeChoices.SUPER_TECH)
         )
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to calculate the involvement percentage
+        based on the number of technicians assigned to the same schedule.
+        """
+        # Count the number of technicians already assigned to this schedule
+        total_technicians = ScheduleTech.objects.filter(
+            schedule=self.schedule).count() + 1  # Include the current instance
+
+        # Calculate the involvement percentage
+        self.involvement_percentage = 100 // total_technicians
+
+        # Save the instance
+        super().save(*args, **kwargs)
+
+        # Update involvement percentage for other technicians
+        ScheduleTech.objects.filter(schedule=self.schedule).exclude(id=self.id).update(
+            involvement_percentage=100 // total_technicians
+        )
