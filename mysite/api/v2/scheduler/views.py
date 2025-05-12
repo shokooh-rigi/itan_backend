@@ -475,67 +475,44 @@ class ScheduleDeleteView(APIView):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-
 class ScheduleTecListView(APIView):
     """
-    API view to retrieve a list of technicians associated with a schedule.
+    API view to retrieve a list of all technicians.
     """
 
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="Retrieve technicians for a schedule",
-        operation_description="Retrieve a list of technicians associated with a specific schedule.",
-        manual_parameters=[
-            openapi.Parameter(
-                "schedule_id",
-                openapi.IN_QUERY,
-                description="The ID of the Schedule to retrieve technicians for.",
-                type=openapi.TYPE_INTEGER,
-                required=True,
-            )
-        ],
+        operation_summary="Retrieve all technicians",
+        operation_description="Retrieve a list of all technicians.",
         responses={
             200: openapi.Response(
-                description="List of technicians.",
-            ),
-            404: openapi.Response(
-                description="Schedule not found.",
-                examples={"application/json": {"error": "Not found."}},
+                description="List of all technicians.",
             ),
         },
     )
     def get(self, request):
         """
-        Retrieve technicians associated with the specified schedule.
+        Retrieve all technicians.
         """
-        schedule_id = request.GET.get("schedule_id")
-        if not schedule_id:
-            return Response(
-                {"error": "schedule_id is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        schedule = get_object_or_404(
-            Schedule,
-            id=schedule_id,
-            archive=False,
+        technicians = ScheduleTech.objects.filter(
             is_deleted=False,
+            archive=False,
         )
-        technicians = schedule.scheduletech_set.all()
         serializer = ScheduleTechSerializer(technicians, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class ScheduleTecDetailView(APIView):
     """
-    API view to retrieve details of a specific technician associated with a schedule.
+    API view to retrieve details of technicians associated with a schedule.
     """
 
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Retrieve technician details for a schedule",
-        operation_description="Retrieve details of a specific technician associated with a specific schedule.",
+        operation_description="Retrieve details of technicians associated with a specific schedule.",
         manual_parameters=[
             openapi.Parameter(
                 "schedule_id",
@@ -557,15 +534,19 @@ class ScheduleTecDetailView(APIView):
     )
     def get(self, request, schedule_id):
         """
-        Retrieve details of a specific technician.
+        Retrieve details of technicians associated with the specified schedule.
         """
-        technician = get_object_or_404(
-            ScheduleTech,
+        technicians = ScheduleTech.objects.filter(
             schedule_id=schedule_id,
             is_deleted=False,
             archive=False,
         )
-        serializer = ScheduleTechSerializer(technician)
+        if not technicians.exists():
+            return Response(
+                {"error": "Technicians not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = ScheduleTechSerializer(technicians, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
