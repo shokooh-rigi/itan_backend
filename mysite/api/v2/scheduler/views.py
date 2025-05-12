@@ -16,6 +16,7 @@ from mysite import settings
 from mysite.order.models import Order
 from mysite.scheduler.models import Schedule, ScheduleTech
 from .serializers import ScheduleSerializer, ScheduleTechSerializer
+from ..core.serializers import ProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -673,11 +674,27 @@ class ScheduleTecCreateView(APIView):
             ),
         },
     )
-    def post(self, request):
+    def post(self, request, schedule_id):
         """
         Create a new technician associated with the specified schedule.
         """
-        serializer = ScheduleTechSerializer(data=request.data)
+        try:
+            schedule = Schedule.objects.get(
+                id=schedule_id,
+                is_deleted=False,
+                archive=False,
+            )
+        except Schedule.DoesNotExist:
+            return Response(
+                {"error": "Schedule not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Add the schedule to the request data
+        data = request.data.copy()
+        data["schedule"] = schedule.id
+
+        serializer = ScheduleTechSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -804,6 +821,10 @@ class UserTecListView(APIView):
         """
         Retrieve users and tec associated with the specified schedule.
         """
-        schedule = get_object_or_404(Schedule, id=schedule_id)
-        users_and_technicians = schedule.get_users_and_tec()
-        return Response(users_and_technicians, status=status.HTTP_200_OK)
+        schedule_tech = get_object_or_404(ScheduleTech, id=schedule_id)
+        users_and_technicians = schedule_tech.get_users_and_tec()
+        serializer = ProfileSerializer(users_and_technicians, many=True)
+        if serializer.is_valid():
+            users_and_technicians = serializer.data
+            return Response(users_and_technicians, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

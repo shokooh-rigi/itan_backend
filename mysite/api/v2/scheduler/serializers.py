@@ -12,7 +12,10 @@ class ScheduleTechSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduleTech
         fields = "__all__"
-        read_only_fields = ["created_on"]
+        read_only_fields = [
+            "created_on",
+            "updated_at",
+        ]
 
 
 class ScheduleOrderSerializer(serializers.ModelSerializer):

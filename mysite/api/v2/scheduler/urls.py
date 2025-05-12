@@ -61,14 +61,14 @@ urlpatterns = [
         name='schedule-create'
     ),
     path(
-        'schedule/tech/update/<int:schedule_id>/',
+        'schedule/tech/update/<int:tech_id>/',
         ScheduleTecUpdateView.as_view(),
         name='schedule-update'
     ),
     path(
-        'schedule/tech/delete/<int:schedule_id>/',
+        'schedule/tech/delete/<int:tech_id>/',
         ScheduleTecDeleteView.as_view(),
-        name='schedule-delete'
+        name='schedule-tech-delete'
     ),
 
 ]
