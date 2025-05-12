@@ -516,11 +516,15 @@ class ScheduleTecListView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        schedule = get_object_or_404(Schedule, id=schedule_id)
+        schedule = get_object_or_404(
+            Schedule,
+            id=schedule_id,
+            archive=False,
+            is_deleted=False,
+        )
         technicians = schedule.scheduletech_set.all()
         serializer = ScheduleTechSerializer(technicians, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class ScheduleTecDetailView(APIView):
     """
@@ -534,9 +538,9 @@ class ScheduleTecDetailView(APIView):
         operation_description="Retrieve details of a specific technician associated with a specific schedule.",
         manual_parameters=[
             openapi.Parameter(
-                "tech_id",
+                "schedule_id",
                 openapi.IN_PATH,
-                description="The ID of the technician to retrieve details for.",
+                description="The ID of the schedule to retrieve technician details for.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
             )
@@ -551,11 +555,16 @@ class ScheduleTecDetailView(APIView):
             ),
         },
     )
-    def get(self, request, tech_id):
+    def get(self, request, schedule_id):
         """
         Retrieve details of a specific technician.
         """
-        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        technician = get_object_or_404(
+            ScheduleTech,
+            schedule_id=schedule_id,
+            is_deleted=False,
+            archive=False,
+        )
         serializer = ScheduleTechSerializer(technician)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
