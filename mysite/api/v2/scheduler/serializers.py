@@ -23,9 +23,13 @@ class ScheduleOrderSerializer(serializers.ModelSerializer):
     Serializer for the ScheduleOrder model.
     """
 
+    project_name = serializers.CharField(
+        source="proposal.estimate.project.name", read_only=True
+    )
+
     class Meta:
         model = Order
-        fields = ["id", "project_number"]
+        fields = ["id", "project_number", "project_name"]
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
