@@ -75,6 +75,7 @@ class ScheduleTechAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "schedule",
+        "schedule_id",
         "assigned_to_employee",
         "assigned_to_contractor",
         "involvement_percentage",

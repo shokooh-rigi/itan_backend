@@ -211,14 +211,25 @@ class ScheduleTech(BaseModel):
     def save(self, *args, **kwargs):
         """
         Override the save method to calculate the involvement percentage
-        based on the number of technicians assigned to the same schedule.
+        based on the number of unique technicians (employees or contractors)
+        assigned to the same schedule.
         """
-        # Count the number of technicians already assigned to this schedule
+        # Count the number of unique technicians (employees or contractors) for the schedule
         total_technicians = ScheduleTech.objects.filter(
-            schedule=self.schedule).count() + 1  # Include the current instance
+            schedule=self.schedule
+        ).exclude(
+            assigned_to_employee=None, assigned_to_contractor=None
+        ).distinct().count()
 
-        # Calculate the involvement percentage
-        self.involvement_percentage = 100 // total_technicians
+        # Include the current instance if it has a technician assigned
+        if self.assigned_to_employee or self.assigned_to_contractor:
+            total_technicians += 1
+
+        # Avoid division by zero
+        if total_technicians > 0:
+            self.involvement_percentage = 100 // total_technicians
+        else:
+            self.involvement_percentage = 0
 
         # Save the instance
         super().save(*args, **kwargs)
