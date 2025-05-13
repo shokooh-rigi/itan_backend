@@ -654,62 +654,9 @@ class ScheduleTechDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ScheduleTechCreateView(APIView):
-    """
-    API view to create a new technician associated with a schedule.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_summary="Create a new technician for a schedule",
-        operation_description="Create a new technician associated with a specific schedule.",
-        request_body=ScheduleTechSerializer,
-        responses={
-            201: openapi.Response(
-                description="Technician created successfully.",
-            ),
-            400: openapi.Response(
-                description="Invalid input data.",
-            ),
-        },
-    )
-    def post(self, request, schedule_id):
-        """
-        Create a new technician associated with the specified schedule.
-        """
-        try:
-            schedule = Schedule.objects.get(
-                id=schedule_id,
-                is_deleted=False,
-                archive=False,
-            )
-        except Schedule.DoesNotExist:
-            return Response(
-                {"error": "Schedule not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Add the schedule to the request data
-        data = request.data.copy()
-        data["schedule"] = schedule.id
-
-        serializer = ScheduleTechSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {
-                    "message": "Technician created successfully.",
-                    "technician": serializer.data,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ScheduleTechUpdateView(APIView):
     """
-    API view to update a technician associated with a schedule.
+    API view to update a specific technician associated with a schedule.
     """
 
     permission_classes = [IsAuthenticated]
@@ -730,11 +677,18 @@ class ScheduleTechUpdateView(APIView):
             ),
         },
     )
-    def put(self, request, tech_id):
+    def put(self, request, schedule_id):
         """
         Update the technician associated with the specified schedule.
         """
-        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        tech_id = request.data.get("tech_id")
+        if not tech_id:
+            return Response(
+                {"error": "tech_id is required in the request body."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        technician = get_object_or_404(ScheduleTech, id=tech_id, schedule_id=schedule_id)
         serializer = ScheduleTechSerializer(technician, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -760,12 +714,19 @@ class ScheduleTechDeleteView(APIView):
         operation_description="Delete a technician associated with a specific schedule.",
         manual_parameters=[
             openapi.Parameter(
+                "schedule_id",
+                openapi.IN_PATH,
+                description="The ID of the schedule.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
                 "tech_id",
                 openapi.IN_PATH,
                 description="The ID of the technician to delete.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
-            )
+            ),
         ],
         responses={
             204: openapi.Response(
@@ -776,11 +737,12 @@ class ScheduleTechDeleteView(APIView):
             ),
         },
     )
-    def delete(self, request, tech_id):
+    def delete(self, request, schedule_id, tech_id):
         """
         Delete the technician associated with the specified schedule.
         """
-        technician = get_object_or_404(ScheduleTech, id=tech_id)
+        technician = get_object_or_404(ScheduleTech, id=tech_id, schedule_id=schedule_id)
+
         technician.delete()
         return Response(
             {"message": "Technician deleted successfully."},

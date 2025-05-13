@@ -9,7 +9,6 @@ from .views import (
     UserTechListView,
     ScheduleTechListView,
     ScheduleTechDetailView,
-    ScheduleTechCreateView,
     ScheduleTechUpdateView,
     ScheduleTechDeleteView,
 )
@@ -56,19 +55,11 @@ urlpatterns = [
         name='schedule-tech-detail'
     ),
     path(
-        'schedule/tech/create/<int:schedule_id>/',
-        ScheduleTechCreateView.as_view(),
-        name='schedule-tech-create'
-    ),
-    path(
-        'schedule/tech/update/<int:tech_id>/',
+        'schedule/tech/update/<int:schedule_id>/',
         ScheduleTechUpdateView.as_view(),
         name='schedule-tech-update'
     ),
-    path(
-        'schedule/tech/delete/<int:tech_id>/',
-        ScheduleTechDeleteView.as_view(),
-        name='schedule-tech-delete'
-    ),
-
+    path('schedule/tech/delete/<int:schedule_id>/<int:tech_id>/',
+         ScheduleTechDeleteView.as_view(),
+         name='schedule-tech-delete'),
 ]
