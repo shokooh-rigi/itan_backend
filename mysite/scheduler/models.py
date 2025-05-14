@@ -129,6 +129,7 @@ class ScheduleTech(BaseModel):
         blank=False,
         null=False,
         help_text="The schedule associated with this technician.",
+        related_name="schedule_tech",
     )
     assigned_to = models.ForeignKey(
         User,
