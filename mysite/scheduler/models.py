@@ -22,21 +22,17 @@ class Schedule(BaseModelWithCreatedByUser):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        help_text="The order associated with this schedule."
+        help_text="The order associated with this schedule.",
     )
     schedule_start = models.DateTimeField(
-        blank=False,
-        null=False,
-        help_text="The start time of the schedule."
+        blank=False, null=False, help_text="The start time of the schedule."
     )
     schedule_end = models.DateTimeField(
-        blank=False,
-        null=False,
-        help_text="The end time of the schedule."
+        blank=False, null=False, help_text="The end time of the schedule."
     )
     pre_demo = models.BooleanField(
         default=False,
-        help_text="Indicates whether the schedule is for a pre-demonstration."
+        help_text="Indicates whether the schedule is for a pre-demonstration.",
     )
 
     class Meta:
@@ -50,6 +46,7 @@ class Schedule(BaseModelWithCreatedByUser):
         """
         return self.order.project_number
 
+
 class Maintenance(BaseModelWithCreatedByUser):
     """
     Represents a maintenance activity related to an order.
@@ -61,38 +58,26 @@ class Maintenance(BaseModelWithCreatedByUser):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        help_text="The order associated with this maintenance activity."
+        help_text="The order associated with this maintenance activity.",
     )
-    assigned_to_employee = models.ForeignKey(
+    assigned_to = models.ForeignKey(
         User,
         blank=True,
         null=True,
-        related_name="maintenance_assigned_to_employee",
+        related_name="maintenance_assigned_to",
         on_delete=models.CASCADE,
-        help_text="The employee assigned to this maintenance task."
-    )
-    assigned_to_contractor = models.ForeignKey(
-        User,
-        blank=True,
-        null=True,
-        related_name="maintenance_assigned_to_contractor",
-        on_delete=models.CASCADE,
-        help_text="The contractor assigned to this maintenance task."
+        help_text="The user assigned to this maintenance task.",
     )
     schedule_start = models.DateTimeField(
-        blank=False,
-        null=False,
-        help_text="The start time of the maintenance schedule."
+        blank=False, null=False, help_text="The start time of the maintenance schedule."
     )
     schedule_end = models.DateTimeField(
-        blank=False,
-        null=False,
-        help_text="The end time of the maintenance schedule."
+        blank=False, null=False, help_text="The end time of the maintenance schedule."
     )
     description = models.TextField(
         max_length=500,
         blank=True,
-        help_text="A brief description of the maintenance task."
+        help_text="A brief description of the maintenance task.",
     )
     MAINTENANCE_TYPE_CHOICES = (
         (1, "Maintenance"),
@@ -102,23 +87,22 @@ class Maintenance(BaseModelWithCreatedByUser):
     maintenance_type = models.PositiveSmallIntegerField(
         choices=MAINTENANCE_TYPE_CHOICES,
         default=1,
-        help_text="The type of maintenance task."
+        help_text="The type of maintenance task.",
     )
     settlement = models.BooleanField(
-        default=False,
-        help_text="Indicates whether the task has been settled."
+        default=False, help_text="Indicates whether the task has been settled."
     )
     tech_upload = models.FileField(
         upload_to="uploads/techfiles",
         blank=True,
         null=True,
-        help_text="File upload related to the maintenance task."
+        help_text="File upload related to the maintenance task.",
     )
     note = models.TextField(
         max_length=1000,
         blank=True,
         null=True,
-        help_text="Additional notes related to the maintenance task."
+        help_text="Additional notes related to the maintenance task.",
     )
 
     class Meta:
@@ -144,43 +128,35 @@ class ScheduleTech(BaseModel):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        help_text="The schedule associated with this technician."
+        help_text="The schedule associated with this technician.",
     )
-    assigned_to_employee = models.ForeignKey(
+    assigned_to = models.ForeignKey(
         User,
-        blank=True,
-        null=True,
-        related_name="assigned_to_employee",
+        blank=False,
+        null=False,
+        related_name="assigned_to",
         on_delete=models.CASCADE,
-        help_text="The employee assigned to this schedule."
-    )
-    assigned_to_contractor = models.ForeignKey(
-        User,
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        help_text="The contractor assigned to this schedule."
+        help_text="User assigned to this schedule.",
     )
     involvement_percentage = models.PositiveIntegerField(
         default=0,
         validators=[MaxValueValidator(100), MinValueValidator(0)],
-        help_text="The percentage of involvement of the technician."
+        help_text="The percentage of involvement of the technician.",
     )
     settlement = models.BooleanField(
-        default=False,
-        help_text="Indicates whether the task has been settled."
+        default=False, help_text="Indicates whether the task has been settled."
     )
     tech_upload = models.FileField(
         upload_to="uploads/techfiles",
         blank=True,
         null=True,
-        help_text="File upload related to the technician's task."
+        help_text="File upload related to the technician's task.",
     )
     note = models.TextField(
         max_length=1000,
         blank=True,
         null=True,
-        help_text="Additional notes related to the technician's task."
+        help_text="Additional notes related to the technician's task.",
     )
 
     class Meta:
@@ -193,9 +169,8 @@ class ScheduleTech(BaseModel):
         Returns a string representation of the assigned technician and the associated schedule order.
         """
         return (
-            str(self.assigned_to_employee)
-            + str(self.assigned_to_contractor)
-            + " "
+            str(self.assigned_to)
+            + " assigned to #"
             + str(self.schedule.order.project_number)
         )
 
@@ -214,27 +189,27 @@ class ScheduleTech(BaseModel):
         based on the number of unique technicians (employees or contractors)
         assigned to the same schedule.
         """
-        # Count the number of unique technicians (employees or contractors) for the schedule
-        total_technicians = ScheduleTech.objects.filter(
-            schedule=self.schedule
-        ).exclude(
-            assigned_to_employee=None, assigned_to_contractor=None
-        ).distinct().count()
+        # get users assigned_to this schedule
+        all_technicians = (
+            ScheduleTech.objects.filter(schedule=self.schedule)
+            .values("assigned_to")
+            .distinct()
+        )
 
-        # Include the current instance if it has a technician assigned
-        if self.assigned_to_employee or self.assigned_to_contractor:
-            total_technicians += 1
+        # Include the current instance's assigned_to if it's not already in the list
+        all_technicians = list(all_technicians)
+        all_technicians.append({"assigned_to": self.assigned_to.id})
 
         # Avoid division by zero
-        if total_technicians > 0:
-            self.involvement_percentage = 100 // total_technicians
+        if len(all_technicians) > 0:
+            self.involvement_percentage = 100 // len(all_technicians)
         else:
             self.involvement_percentage = 0
 
         # Save the instance
         super().save(*args, **kwargs)
 
-        # Update involvement percentage for other technicians
+        # Update involvement percentage for technicians
         ScheduleTech.objects.filter(schedule=self.schedule).exclude(id=self.id).update(
-            involvement_percentage=100 // total_technicians
+            involvement_percentage=100 // len(all_technicians)
         )

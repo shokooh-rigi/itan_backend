@@ -7,6 +7,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     """
     Admin configuration for the Schedule model.
     """
+
     list_display = (
         "id",
         "order",
@@ -14,16 +15,10 @@ class ScheduleAdmin(admin.ModelAdmin):
         "schedule_end",
         "pre_demo",
         "created_by",
-        "created_on"
+        "created_on",
     )
-    search_fields = (
-        "order__project_number",
-        "created_by__username"
-    )
-    list_filter = (
-        "pre_demo",
-        "created_on"
-    )
+    search_fields = ("order__project_number", "created_by__username")
+    list_filter = ("pre_demo", "created_on")
     ordering = ("-created_on",)
     readonly_fields = (
         "created_on",
@@ -37,11 +32,11 @@ class MaintenanceAdmin(admin.ModelAdmin):
     """
     Admin configuration for the Maintenance model.
     """
+
     list_display = (
         "id",
         "order",
-        "assigned_to_employee",
-        "assigned_to_contractor",
+        "assigned_to",
         "schedule_start",
         "schedule_end",
         "maintenance_type",
@@ -49,16 +44,8 @@ class MaintenanceAdmin(admin.ModelAdmin):
         "created_by",
         "created_on",
     )
-    search_fields = (
-        "order__project_number",
-        "assigned_to_employee__username",
-        "assigned_to_contractor__username"
-    )
-    list_filter = (
-        "maintenance_type",
-        "settlement",
-        "created_on"
-    )
+    search_fields = ("order__project_number", "assigned_to__username")
+    list_filter = ("maintenance_type", "settlement", "created_on")
     ordering = ("-created_on",)
     readonly_fields = (
         "created_on",
@@ -72,25 +59,18 @@ class ScheduleTechAdmin(admin.ModelAdmin):
     """
     Admin configuration for the ScheduleTech model.
     """
+
     list_display = (
         "id",
         "schedule",
         "schedule_id",
-        "assigned_to_employee",
-        "assigned_to_contractor",
+        "assigned_to",
         "involvement_percentage",
         "settlement",
         "created_on",
     )
-    search_fields = (
-        "schedule__order__project_number",
-        "assigned_to_employee__username",
-        "assigned_to_contractor__username"
-    )
-    list_filter = (
-        "settlement",
-        "created_on"
-    )
+    search_fields = ("schedule__order__project_number", "assigned_to__username")
+    list_filter = ("settlement", "created_on")
     ordering = ("-created_on",)
     readonly_fields = (
         "created_on",
