@@ -1,4 +1,9 @@
-from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 
@@ -12,7 +17,7 @@ class EquipmentListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        ordering = self.request.query_params.get('ordering', 'created_on')
+        ordering = self.request.query_params.get("ordering", "created_on")
         return Equipment.objects.filter(is_deleted=False).order_by(ordering)
 
 
@@ -26,6 +31,7 @@ class EquipmentUpdateView(UpdateAPIView):
     """
     API endpoint to update a Equipment object.
     """
+
     serializer_class = EquipmentSerializer
     queryset = Equipment.objects.filter(is_deleted=False)
     permission_classes = [IsAuthenticated]
@@ -39,16 +45,14 @@ class EquipmentDeleteView(DestroyAPIView):
         instance.soft_delete()
 
 
-class EquipmentDetailView(ListAPIView):
+from rest_framework.generics import RetrieveAPIView
+
+
+class EquipmentDetailView(RetrieveAPIView):
     """
     API endpoint to retrieve a single Equipment object.
     """
+
     serializer_class = EquipmentSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        equipment_id = self.kwargs['pk']
-        return Equipment.objects.filter(
-            id=equipment_id,
-            is_deleted=False,
-        )
+    queryset = Equipment.objects.filter(is_deleted=False)
