@@ -235,7 +235,7 @@ class UserSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password", "first_name", "last_name"]
+        fields = ["email", "password", "first_name", "last_name"]
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
@@ -251,6 +251,7 @@ class ProfileSerializer(BaseSerializer):
     """
 
     user = UserSerializer()
+    id = serializers.IntegerField(source="user_id")
     customer = serializers.PrimaryKeyRelatedField(
         queryset=Person.objects.all(), required=False
     )
@@ -276,6 +277,7 @@ class ProfileSerializer(BaseSerializer):
     wallpaper_url = serializers.SerializerMethodField()
 
     user_type_title = serializers.SerializerMethodField()
+    worker_status_title = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -301,6 +303,7 @@ class ProfileSerializer(BaseSerializer):
             "user_type",
             "user_type_title",
             "worker_status",
+            "worker_status_title",
             "id_number",
             "physical_address",
             "billing_address",
@@ -311,8 +314,10 @@ class ProfileSerializer(BaseSerializer):
         ]
 
     def get_user_type_title(self, obj):
-        # Use Django's `get_FOO_display` to retrieve the title
         return obj.get_user_type_display()
+
+    def get_worker_status_title(self, obj):
+        return obj.get_worker_status_display()
 
     # File validation
     def validate_file_size(self, value):

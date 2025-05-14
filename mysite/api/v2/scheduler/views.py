@@ -13,10 +13,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mysite import settings
+from mysite.core.models import Profile
 from mysite.order.models import Order
 from mysite.scheduler.models import Schedule, ScheduleTech
 from .serializers import ScheduleSerializer, ScheduleTechSerializer
 from ..core.serializers import ProfileSerializer
+from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 
@@ -475,7 +477,7 @@ class ScheduleDeleteView(APIView):
 
 class ScheduleTechListView(APIView):
     """
-    API view to retrieve a list of all technicians with filtering and pagination options.
+    API view to retrieve a list of all technicians.
     """
 
     permission_classes = [IsAuthenticated]
@@ -510,21 +512,13 @@ class ScheduleTechListView(APIView):
 
         try:
             # Serialize results
-            results = ScheduleTech.objects.filter(
-                is_deleted=False,
-                archive=False,
-            ).order_by("-created_on")
-            serializer = ScheduleTechSerializer(results, many=True)
+            results = Profile.objects.filter(Q(user_type=1) | Q(user_type=3)).order_by(
+                "-created_on"
+            )
+            serializer = ProfileSerializer(results, many=True)
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK,
-            )
-
-        except ValueError as ve:
-            logger.error(f"Date parsing error: {ve}")
-            return Response(
-                {"error": "Invalid date format. Use mm/dd/yyyy"},
-                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
@@ -536,7 +530,7 @@ class ScheduleTechListView(APIView):
 
 class ScheduleTechDetailView(APIView):
     """
-    API view to retrieve details of technicians associated with a schedule.
+    API view to retrieve details of technician associated with a schedule.
     """
 
     permission_classes = [IsAuthenticated]
@@ -615,10 +609,12 @@ class ScheduleTechUpdateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        technician = get_object_or_404(
-            ScheduleTech, id=tech_id, schedule_id=schedule_id
+        schedule_tech = get_object_or_404(
+            ScheduleTech, assigned_to=tech_id, schedule_id=schedule_id
         )
-        serializer = ScheduleTechSerializer(technician, data=request.data, partial=True)
+        serializer = ScheduleTechSerializer(
+            schedule_tech, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -670,65 +666,12 @@ class ScheduleTechDeleteView(APIView):
         """
         Delete the technician associated with the specified schedule.
         """
-        technician = get_object_or_404(
-            ScheduleTech, id=tech_id, schedule_id=schedule_id
+        schedule_tech = get_object_or_404(
+            ScheduleTech, assigned_to=tech_id, schedule_id=schedule_id
         )
 
-        technician.delete()
+        schedule_tech.delete()
         return Response(
             {"message": "Technician deleted successfully."},
             status=status.HTTP_204_NO_CONTENT,
         )
-
-
-class UserTechListView(APIView):
-    """
-    API view to retrieve a list of users and technicians associated with a schedule.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        operation_summary="Retrieve users and technicians for a schedule",
-        operation_description="Retrieve a list of users and technicians associated with a specific schedule.",
-        manual_parameters=[
-            openapi.Parameter(
-                "schedule_id",
-                openapi.IN_PATH,
-                description="The ID of the Schedule to retrieve users and technicians for.",
-                type=openapi.TYPE_INTEGER,
-                required=True,
-            )
-        ],
-        responses={
-            200: openapi.Response(
-                description="List of users and technicians.",
-                schema=ProfileSerializer(many=True),
-            ),
-            404: openapi.Response(
-                description="Schedule not found.",
-                examples={"application/json": {"error": "Not found."}},
-            ),
-        },
-    )
-    def get(self, request, schedule_id):
-        """
-        Retrieve users and technicians associated with the specified schedule.
-        """
-        schedule_techs = ScheduleTech.objects.filter(
-            schedule_id=schedule_id,
-            is_deleted=False,
-            archive=False,
-        )
-        if not schedule_techs.exists():
-            return Response(
-                {"error": "Schedule not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        users_and_technicians = []
-        for schedule_tech in schedule_techs:
-            users_and_technicians.extend(schedule_tech.get_users_and_tech())
-
-        serializer = ProfileSerializer(users_and_technicians, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
