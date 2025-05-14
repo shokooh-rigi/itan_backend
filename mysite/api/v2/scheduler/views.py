@@ -561,17 +561,17 @@ class ScheduleTechDetailView(APIView):
         """
         Retrieve details of technicians associated with the specified schedule.
         """
-        technicians = ScheduleTech.objects.filter(
+        schedule_techs = ScheduleTech.objects.filter(
             schedule_id=schedule_id,
             is_deleted=False,
             archive=False,
         )
-        if not technicians.exists():
+        if not schedule_techs.exists():
             return Response(
-                {"error": "Technicians not found."},
+                {"error": "Schedule Techs not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        serializer = ScheduleTechSerializer(technicians, many=True)
+        serializer = ScheduleTechSerializer(schedule_techs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -598,16 +598,10 @@ class ScheduleTechUpdateView(APIView):
             ),
         },
     )
-    def put(self, request, schedule_id):
+    def put(self, request, schedule_id, tech_id):
         """
         Update the technician associated with the specified schedule.
         """
-        tech_id = request.data.get("tech_id")
-        if not tech_id:
-            return Response(
-                {"error": "tech_id is required in the request body."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         schedule_tech = get_object_or_404(
             ScheduleTech, assigned_to=tech_id, schedule_id=schedule_id
@@ -619,8 +613,8 @@ class ScheduleTechUpdateView(APIView):
             serializer.save()
             return Response(
                 {
-                    "message": "Technician updated successfully.",
-                    "technician": serializer.data,
+                    "message": "Schedule Tech updated successfully.",
+                    "schedule_tech": serializer.data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -655,7 +649,7 @@ class ScheduleTechDeleteView(APIView):
         ],
         responses={
             204: openapi.Response(
-                description="Technician deleted successfully.",
+                description="Technician deleted from schedule successfully.",
             ),
             404: openapi.Response(
                 description="Technician not found.",
@@ -672,6 +666,6 @@ class ScheduleTechDeleteView(APIView):
 
         schedule_tech.delete()
         return Response(
-            {"message": "Technician deleted successfully."},
+            {"message": "Technician deleted from schedule successfully."},
             status=status.HTTP_204_NO_CONTENT,
         )

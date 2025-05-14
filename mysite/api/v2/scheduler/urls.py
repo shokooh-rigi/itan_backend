@@ -32,7 +32,7 @@ urlpatterns = [
     ),
     path("schedule/techs/", ScheduleTechListView.as_view(), name="schedule-tech-list"),
     path(
-        "schedule/tech/<int:schedule_id>/<int:tech_id>/",
+        "schedule/tech/<int:schedule_id>/",
         ScheduleTechDetailView.as_view(),
         name="schedule-tech-detail",
     ),
