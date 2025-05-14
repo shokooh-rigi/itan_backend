@@ -621,6 +621,50 @@ class ScheduleTechUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ScheduleTechCreateView(APIView):
+    """
+    API view to create a schedule tech associated with a schedule.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="create a schedule tech for a schedule",
+        operation_description="create a schedule tech for a schedule.",
+        request_body=ScheduleTechSerializer,
+        responses={
+            200: openapi.Response(
+                description="Schedule Tech created successfully.",
+            ),
+            400: openapi.Response(
+                description="Invalid input data.",
+            ),
+            404: openapi.Response(
+                description="Technician not found.",
+            ),
+        },
+    )
+    def post(self, request, schedule_id, tech_id):
+        """
+        Update the technician associated with the specified schedule.
+        """
+
+        schedule_tech = ScheduleTech.objects.create(
+            assigned_to=tech_id, schedule_id=schedule_id
+        )
+        serializer = ScheduleTechSerializer(schedule_tech)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "message": "Schedule Tech created successfully.",
+                    "schedule_tech": serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ScheduleTechDeleteView(APIView):
     """
     API view to delete a technician associated with a schedule.

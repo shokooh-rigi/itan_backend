@@ -161,20 +161,18 @@ class ScheduleTech(BaseModel):
 
     class Meta:
         ordering = ["-created_on"]
-        verbose_name = "Schedule Technicians"
+        verbose_name = "Schedule Technician"
         verbose_name_plural = "Schedule Technicians"
+        unique_together = ["schedule", "assigned_to"]
 
     def __str__(self):
-        """
-        Returns a string representation of the assigned technician and the associated schedule order.
-        """
         return (
             str(self.assigned_to)
             + " assigned to #"
             + str(self.schedule.order.project_number)
         )
 
-    def get_users_and_tech(self):
+    def get_techs(self):
         """
         Retrieve profiles of users with user_type as TECH or SUPER_TECH.
         """

@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     ScheduleListView,
+    ScheduleTechCreateView,
     ScheduleUpdateView,
     ScheduleArchiveView,
     ScheduleDeleteView,
@@ -35,6 +36,11 @@ urlpatterns = [
         "schedule/tech/<int:schedule_id>/",
         ScheduleTechDetailView.as_view(),
         name="schedule-tech-detail",
+    ),
+    path(
+        "schedule/tech/create/<int:schedule_id>/<int:tech_id>/",
+        ScheduleTechCreateView.as_view(),
+        name="schedule-tech-update",
     ),
     path(
         "schedule/tech/update/<int:schedule_id>/<int:tech_id>/",
