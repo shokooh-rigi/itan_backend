@@ -18,6 +18,7 @@ from mysite.core.models import Profile
 from mysite.order.models import Order
 from mysite.scheduler.models import Schedule, ScheduleTech
 from .serializers import ScheduleSerializer, ScheduleTechSerializer
+from ..core.serializers import ProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -645,25 +646,21 @@ class ScheduleTechCreateView(APIView):
     )
     def post(self, request, schedule_id, tech_id):
         """
-        Update the technician associated with the specified schedule.
+        Create the technician associated with the specified schedule.
         """
         user_tec = get_object_or_404(User, id=tech_id)
-
         schedule_tech = ScheduleTech.objects.create(
             assigned_to=user_tec,
             schedule_id=schedule_id,
         )
         serializer = ScheduleTechSerializer(schedule_tech)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {
-                    "message": "Schedule Tech created successfully.",
-                    "schedule_tech": serializer.data,
-                },
-                status=status.HTTP_200_OK,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "message": "Schedule Tech created successfully.",
+                "schedule_tech": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class ScheduleTechDeleteView(APIView):
