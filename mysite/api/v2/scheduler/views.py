@@ -12,12 +12,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from custom_user.models import User
 from mysite import settings
 from mysite.core.models import Profile
 from mysite.order.models import Order
 from mysite.scheduler.models import Schedule, ScheduleTech
 from .serializers import ScheduleSerializer, ScheduleTechSerializer
-from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 
