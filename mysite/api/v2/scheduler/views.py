@@ -17,7 +17,6 @@ from mysite.core.models import Profile
 from mysite.order.models import Order
 from mysite.scheduler.models import Schedule, ScheduleTech
 from .serializers import ScheduleSerializer, ScheduleTechSerializer
-from ..core.serializers import ProfileSerializer
 from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
@@ -648,7 +647,7 @@ class ScheduleTechCreateView(APIView):
         """
         Update the technician associated with the specified schedule.
         """
-        user_tec = get_object_or_404(Profile, tech=tech_id)
+        user_tec = get_object_or_404(User, id=tech_id)
 
         schedule_tech = ScheduleTech.objects.create(
             assigned_to=user_tec,
