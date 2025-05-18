@@ -14,8 +14,16 @@ from .views import (
 )
 
 urlpatterns = [
-    path("schedule/get/", ScheduleListView.as_view(), name="schedule-list"),
-    path("schedule/create/", ScheduleCreateView.as_view(), name="schedule-create"),
+    path(""
+         "schedule/get/",
+         ScheduleListView.as_view(),
+         name="schedule-list"
+         ),
+    path(
+        "schedule/create/",
+        ScheduleCreateView.as_view(),
+        name="schedule-create"
+    ),
     path(
         "schedule/update/<int:schedule_id>/",
         ScheduleUpdateView.as_view(),
@@ -31,7 +39,11 @@ urlpatterns = [
         ScheduleDeleteView.as_view(),
         name="schedule-delete",
     ),
-    path("schedule/techs/", ScheduleTechListView.as_view(), name="schedule-tech-list"),
+    path(
+        "schedule/techs/",
+        ScheduleTechListView.as_view(),
+        name="schedule-tech-list"
+    ),
     path(
         "schedule/tech/<int:schedule_id>/",
         ScheduleTechDetailView.as_view(),

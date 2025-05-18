@@ -648,9 +648,11 @@ class ScheduleTechCreateView(APIView):
         """
         Update the technician associated with the specified schedule.
         """
+        user_tec = get_object_or_404(Profile, tech=tech_id)
 
         schedule_tech = ScheduleTech.objects.create(
-            assigned_to=tech_id, schedule_id=schedule_id
+            assigned_to=user_tec,
+            schedule_id=schedule_id,
         )
         serializer = ScheduleTechSerializer(schedule_tech)
         if serializer.is_valid():
